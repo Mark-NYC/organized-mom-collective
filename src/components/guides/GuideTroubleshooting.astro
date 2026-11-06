@@ -1,0 +1,23 @@
+---
+/** One data set for a scannable desktop table and accessible mobile cards. */
+interface Problem { symptom:string; cause:string; fix:string; icon:string }
+interface Props { problems:Problem[] }
+const {problems}=Astro.props;
+---
+<div class="mt-8 grid gap-4 md:hidden">
+ {problems.map(problem=><article class="border-t-[4px] border-[#E8D2D6] bg-white p-5">
+  <div class="flex items-center gap-3"><img src={problem.icon} alt="" width="54" height="54" loading="lazy" class="size-14 shrink-0 object-contain"/><h3 class="font-serif text-xl">{problem.symptom}</h3></div>
+  <dl class="mt-4 space-y-3 text-sm leading-relaxed">
+   <div><dt class="label text-[#6f6a65]">Why it happens</dt><dd class="mt-1">{problem.cause}</dd></div>
+   <div><dt class="label text-[#6f6a65]">What to change</dt><dd class="mt-1">{problem.fix}</dd></div>
+  </dl>
+ </article>)}
+</div>
+<div class="mt-9 hidden md:block">
+ <table class="w-full border-collapse text-left"><thead class="bg-[#D4DFC4] text-xs uppercase tracking-wider">
+ <tr><th scope="col" class="p-4">What keeps happening</th><th scope="col" class="p-4">Why it might happen</th><th scope="col" class="p-4">What to change</th></tr></thead>
+ <tbody>{problems.map(problem=><tr class="border-b border-[#ded8d2] align-top">
+ <th scope="row" class="p-4 text-sm font-semibold"><span class="flex items-center gap-3"><img src={problem.icon} alt="" width="46" height="46" loading="lazy" class="size-11 shrink-0 object-contain"/><span>{problem.symptom}</span></span></th>
+ <td class="p-4 text-sm leading-relaxed">{problem.cause}</td><td class="p-4 text-sm leading-relaxed">{problem.fix}</td>
+ </tr>)}</tbody></table>
+</div>
