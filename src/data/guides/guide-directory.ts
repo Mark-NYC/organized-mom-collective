@@ -3,7 +3,9 @@
  * Add entries only when the guide is live, and use actual guide photography.
  * Guides teach a complete system; articles and interactive tools keep their own pages.
  */
+export type GuideBrowseCategory = 'room-resets' | 'family-systems' | 'meals';
 export type Guide = {
+  browseCategory: GuideBrowseCategory;
   slug: string;
   title: string;
   teaser: string;
@@ -17,6 +19,7 @@ export type Guide = {
 export const guides: Guide[] = [
   {
     slug: 'family-morning-routine',
+    browseCategory: 'family-systems',
     title: 'The Family Morning Routine',
     teaser: 'A calmer school morning with night-before preparation, seven pictured steps, shared family jobs and fewer reminders.',
     area: 'Routines',
@@ -28,6 +31,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-dinner-system',
+    browseCategory: 'meals',
     title: 'The Family Dinner System',
     teaser: 'Plan dinners around the real week, collect go-to family meals and share the work with a simple Dinner Team.',
     area: 'Meal planning',
@@ -39,6 +43,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-paper-clutter-reset',
+    browseCategory: 'family-systems',
     title: 'The Family Paper Clutter Reset',
     teaser: 'A ten-minute paper reset, a place for school papers and mail, and a weekly family routine so piles stay gone.',
     area: 'Home organization',
@@ -50,6 +55,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-living-room-reset',
+    browseCategory: 'room-resets',
     title: 'The Family Living Room Reset',
     teaser: 'A five-minute evening reset, six weekly jobs, and a simple family ownership plan for shared spaces.',
     area: 'Home organization',
@@ -61,6 +67,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-bedroom-reset',
+    browseCategory: 'room-resets',
     title: 'The Kids’ Bedroom Reset',
     teaser: 'A five-minute bedroom reset kids can actually learn, with weekly care, simple storage and family responsibility.',
     area: 'Home organization',
@@ -72,6 +79,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-entryway-reset',
+    browseCategory: 'room-resets',
     title: 'The Family Entryway Reset',
     teaser: 'A home for shoes, backpacks, coats, lunch gear and school papers, with five easy arrival habits and clear family jobs.',
     area: 'Home organization',
@@ -83,6 +91,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-laundry-system',
+    browseCategory: 'family-systems',
     title: 'A Laundry System the Whole Family Can Help Keep Up With',
     teaser: 'Five steps from hamper to drawer, a realistic weekly rhythm, and a simple way to share the work.',
     area: 'Family responsibilities',
@@ -94,6 +103,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-kitchen-reset',
+    browseCategory: 'room-resets',
     title: 'The Family Kitchen Reset',
     teaser: 'Five easy after-meal habits, shared cleanup jobs, and an illustrated family plan for keeping the kitchen ready.',
     area: 'Cleaning & resets',
@@ -105,6 +115,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'family-bathroom-reset',
+    browseCategory: 'room-resets',
     title: 'The Family Bathroom Reset',
     teaser: 'Daily habits, six weekly jobs, and a simple way to share bathroom care with the whole family.',
     area: 'Cleaning & resets',
