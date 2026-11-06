@@ -1,7 +1,7 @@
 ---
 /**
  * OMC guide PDF preview using the real exported page image, never an iframe.
- * images are WebPs exported from the same PDF linked by pdf.
+ * images are matching WebP page previews of the PDF linked by pdf.
  * compact is for the lower-page reminder; full is the hero preview.
  */
 interface Props {
@@ -22,5 +22,5 @@ const first=images[0];
       <img src={first} width="1100" height="1424" loading={compact?'lazy':'eager'} decoding="async" alt={`Actual first page of ${title}`} class="block aspect-[8.5/11] h-auto w-full object-contain"/>
     </a>
   </div>
-  <p class="mt-1 text-center text-[11px] font-medium text-[#6f6a65]">Page 1 of {images.length} · Actual printable</p>
+  <p class="mt-1 text-center text-[11px] font-medium text-[#6f6a65]">Page 1 of {images.length} · Printable preview</p>
 </div>

@@ -1,0 +1,160 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
+import GuideTaskGrid from '../../../components/guides/GuideTaskGrid.astro';
+import GuideTroubleshooting from '../../../components/guides/GuideTroubleshooting.astro';
+import { kitchenIcons as icons } from '../../../data/guides/kitchen-icons';
+
+const printable='/downloads/family-kitchen-reset.pdf';
+const pageImages=[1,2,3,4].map(n=>`/images/guides/kitchen-guide-page-${n}.webp`);
+const daily=[
+ {title:'Carry your dishes to the sink',detail:'Everyone who eats brings their own plate, cup and utensils to the agreed spot. Start with unbreakable dishes for little kids.',icon:icons.clear},
+ {title:'Put food away safely',detail:'An adult checks leftovers, closes containers and puts perishables in the refrigerator promptly.',icon:icons.fridge},
+ {title:'Wipe your place',detail:'Use a cloth that is easy to find. Wipe crumbs and spills from your place at the table.',icon:icons.wipe},
+ {title:'Put dishes in their home',detail:'Trained family members load safe dishes; others place them in the designated bin or counter spot.',icon:icons.dishwasher},
+ {title:'Look back before leaving',detail:'Check the table, counter and floor. Leave the kitchen usable for the next person.',icon:icons.check},
+];
+const reset=[
+ {job:'Clear and sort dishes',supplies:'Dish bin or tray.',what:'Collect used dishes from the table and eating spots. Empty scraps into the right bin and stack safely.',done:'No dirty dishes left where people ate.',icon:icons.clear},
+ {job:'Load or wash dishes',supplies:'Dishwasher or soapy water.',what:'Load safe dishes, or wash and dry the items your family can manage. Adults handle sharp knives and hot pans.',done:'Dishes are washed or organized for the next cycle.',icon:icons.dishwasher},
+ {job:'Wipe table and counters',supplies:'Clean cloth and an approved surface-safe method.',what:'Move small items, wipe crumbs and food spills, then return only what belongs.',done:'Eating and prep surfaces are visibly clean.',icon:icons.wipe},
+ {job:'Sweep visible crumbs',supplies:'Broom and dustpan.',what:'Check under the table and around chairs. Sweep food into the dustpan; ask an adult about sticky spills.',done:'No obvious food debris remains on the floor.',icon:icons.floor},
+ {job:'Trash and food away',supplies:'Trash or compost bin and food containers.',what:'Remove scraps, replace a full liner when appropriate and refrigerate food that needs to be kept.',done:'Scraps are gone and leftovers are stored safely.',icon:icons.trash},
+];
+const weekly=[
+ {when:'Once a week',icon:icons.fridge,tasks:['Check fridge leftovers and expiration dates together; an adult decides what is safe to keep.','Wipe appliance fronts, handles and cabinet touch points with a suitable product.','Sweep floor edges and mop sticky areas safely.']},
+ {when:'When it builds up',icon:icons.sink,tasks:['Clean the sink and drain strainer, checking for odor or food debris.','Wash reusable dishcloths and kitchen towels and let them dry fully.','Reset the lunchbox and water-bottle landing spot.']},
+ {when:'Adult maintenance',icon:icons.kitchen,tasks:['Review spills, leaks and appliance problems before they grow.','Keep raw-meat prep areas and cleaning tools separate from ready-to-eat food areas.','Keep hot cookware, sharp tools and cleaning chemicals safely controlled.']},
+];
+const problems=[
+ {symptom:'Dirty dishes pile up',cause:'No one knows where dishes should land, or the dishwasher is always full.',fix:'Place a dish bin by the sink. Assign one person to unload safe items before the busy meal.',icon:icons.clear},
+ {symptom:'Counters collect clutter',cause:'Mail, lunch bags and everyday objects have no landing spot.',fix:'Set a permanent home for non-kitchen items. Protect one clear preparation area.',icon:icons.wipe},
+ {symptom:'Lunch gear ends up everywhere',cause:'No after-school unpacking habit.',fix:'Give lunchboxes and bottles one landing spot and connect unpacking to arriving home.',icon:icons.lunch},
+ {symptom:'Crumbs appear right after cleaning',cause:'Sweeping happens before the eating area is clear.',fix:'Clear the table first. Then sweep once the chairs are moved back.',icon:icons.floor},
+ {symptom:'Food gets left on the counter',cause:'The last food-safety check has no adult owner.',fix:'Assign an adult to close, label as needed and store leftovers promptly.',icon:icons.fridge},
+ {symptom:'One person does every job',cause:'The family hears “clean the kitchen” instead of specific responsibilities.',fix:'Divide the five jobs by name. Teach a finish line and rotate once jobs are learned.',icon:icons.hands},
+];
+const ages=[
+ {age:'3–5',title:'One small habit',tasks:'Carry safe unbreakable dishes, wipe a place with water or help collect napkins.',icon:icons.table},
+ {age:'6–8',title:'Own a clear task',tasks:'Clear their own spot, wipe a table, sort safe dishes, or sweep with help.',icon:icons.clear},
+ {age:'9–12',title:'Learn a complete job',tasks:'Load safe dishes, sweep the eating area, wipe surfaces using approved methods.',icon:icons.dishwasher},
+ {age:'Teens + adults',title:'Handle higher-risk work',tasks:'Manage hot pans, knives, food-storage decisions, cleaners and appliance maintenance.',icon:icons.kitchen},
+];
+---
+<PublicLayout
+ title="Family Kitchen Reset Guide: After-Meal Habits, Shared Jobs and Weekly Care"
+ description="An easy kitchen reset the whole family can help with: five after-meal habits, a shared 10-minute reset, weekly care, troubleshooting and a free four-page printable."
+ width="full"
+ ogType="article"
+>
+ <div class="omc-guide text-[#545454]">
+  <section class="px-5 py-8 sm:px-8 sm:py-14">
+   <div class="mx-auto max-w-5xl">
+    <nav aria-label="Breadcrumb" class="text-sm font-medium"><a href="/guides" class="underline underline-offset-4">Guides</a><span aria-hidden="true" class="mx-2 text-[#888]">/</span>Family Kitchen Reset</nav>
+    <div class="mx-auto mt-9 max-w-[52rem] text-center">
+     <p class="eyebrow">KITCHEN CLEANUP · SHARED FAMILY RESPONSIBILITY</p>
+     <h1 class="mt-3 font-serif text-[clamp(2.5rem,6.8vw,4.4rem)] leading-[1.09] tracking-tight">A kitchen everyone helps keep ready.</h1>
+     <p class="mx-auto mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">Everyone uses the kitchen. So why does the cleanup keep landing on one person? Here is a realistic after-meal routine, five jobs to share, and a way to make the handoff stick.</p>
+     <div class="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-[#777]"><span>Practical family guide</span><span>Four-page free PDF</span><span>No signup required</span></div>
+    </div>
+    <div class="mt-10 grid items-center gap-8 border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] px-6 py-8 sm:px-10 md:grid-cols-[1.15fr_.85fr] md:py-11">
+     <div>
+      <p class="eyebrow">FREE PRINTABLE · FOUR-PAGE FAMILY GUIDE</p>
+      <h2 class="mt-3 font-serif text-3xl leading-tight sm:text-4xl">The Family Kitchen Reset</h2>
+      <p class="mt-4 max-w-md text-sm leading-[1.8] sm:text-base">After-meal habits, five illustrated cleanup jobs, a write-in family assignment page and practical fixes when the kitchen gets messy again.</p>
+      <ul class="mt-5 space-y-2 text-sm"><li>✓ A reset the family can learn together</li><li>✓ Each job has a clear finish line</li><li>✓ Name an owner without tracking another complicated chart</li></ul>
+      <a href={printable} download="OMC-Family-Kitchen-Reset.pdf" class="btn-primary mt-7">Download the free PDF</a>
+      <p class="mt-2 text-xs">US Letter · Four pages · No email required</p>
+     </div>
+     <div class="py-5"><GuidePdfPreview pdf={printable} images={pageImages} title="The Family Kitchen Reset"/></div>
+    </div>
+    <nav aria-label="On this page" class="mt-8 border-t border-[#ded8d2] pt-5">
+     <p class="label mb-3 text-[#6f6a65]">IN THIS GUIDE</p>
+     <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+      <a href="#daily" class="guide-anchor">After every meal</a>
+      <a href="#reset" class="guide-anchor">10-minute reset</a>
+      <a href="#weekly" class="guide-anchor">Weekly care</a>
+      <a href="#troubleshooting" class="guide-anchor">Troubleshooting</a>
+      <a href="#family" class="guide-anchor max-sm:col-span-2">Share the jobs</a>
+     </div>
+    </nav>
+   </div>
+  </section>
+  <section id="daily" class="px-5 py-16 sm:px-8 sm:py-20">
+   <div class="mx-auto max-w-5xl">
+    <p class="eyebrow">01 · AFTER EVERY MEAL</p>
+    <h2 class="section-heading">Not a spotless kitchen. A kitchen ready to use.</h2>
+    <p class="section-lede">You do not need to deep-clean everything after breakfast. Teach five small actions that happen before anyone considers the meal finished.</p>
+    <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{daily.map(r=><article class="border-t-[4px] border-[#CDDDE1] bg-white p-5"><img src={r.icon} alt="" loading="lazy" width="68" height="68" class="mb-4 size-[68px] object-contain"/><h3 class="font-serif text-xl leading-tight">{r.title}</h3><p class="mt-3 text-sm leading-relaxed">{r.detail}</p></article>)}</div>
+    <div class="mt-9 bg-[#CDDDE1]/35 px-6 py-5 text-sm leading-relaxed"><strong>What done looks like:</strong> Food is safely stored, everyone has moved their own dishes, eating surfaces are wiped, and the kitchen is ready for the next meal.</div>
+    <div class="mt-10 grid gap-8 border-t border-[#ddd] pt-8 md:grid-cols-2">
+     <div><h3 class="font-serif text-2xl">Start with the next meal</h3><p class="mt-3 leading-relaxed">Pick one habit everyone can do today, such as bringing their own dishes to the sink. Make it visible and practice together for a week before adding more steps.</p></div>
+     <div><h3 class="font-serif text-2xl">Make the easy thing the right thing</h3><p class="mt-3 leading-relaxed">Keep a safe dish landing spot, a cloth within reach and a small broom nearby. Give lunch gear, water bottles and groceries homes that are easy to use.</p></div>
+    </div>
+   </div>
+  </section>
+  <div class="mx-auto max-w-5xl border-y border-[#c8c8c8] px-5 py-7 text-center font-serif text-xl sm:text-2xl">The meal is not finished until the kitchen is shared.</div>
+  <section id="reset" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20">
+   <div class="mx-auto max-w-5xl">
+    <p class="eyebrow">02 · TEN MINUTES TOGETHER</p>
+    <h2 class="section-heading">Five jobs. One shared reset.</h2>
+    <p class="section-lede">Rather than telling everyone to “clean the kitchen,” divide the work into jobs with supplies, specific steps and an agreed finish line. Ten minutes is a useful target, not a reason to rush.</p>
+    <GuideTaskGrid tasks={reset} />
+    <aside class="mt-7 bg-[#F1D8A8]/35 px-6 py-5 text-sm leading-relaxed"><strong>Evening minimum:</strong> Put perishable food away safely, clear dishes to the sink and wipe the table. Finish the rest when the family has time. Adults stay responsible for hot pans, sharp knives, strong cleaners and food-storage decisions.</aside>
+   </div>
+  </section>
+  <section id="weekly" class="px-5 py-16 sm:px-8 sm:py-20">
+   <div class="mx-auto max-w-5xl">
+    <p class="eyebrow">03 · A LITTLE DEEPER CARE</p>
+    <h2 class="section-heading">Stay ahead of the kitchen buildup.</h2>
+    <p class="section-lede">A daily reset keeps the kitchen usable. These occasional checks prevent lingering spills, overflowing leftovers and mystery smells.</p>
+    <div class="mt-9 space-y-4">{weekly.map(group=><article class="grid gap-4 border-t-[4px] border-[#CDDDE1] bg-[#FBF7F1] p-6 md:grid-cols-[180px_1fr]"><div class="flex items-center gap-4 md:block"><img src={group.icon} alt="" width="60" height="60" loading="lazy" class="size-[60px] object-contain"/><h3 class="font-serif text-2xl">{group.when}</h3></div><ul class="list-disc space-y-2 pl-5 text-sm leading-[1.8]">{group.tasks.map(task=><li>{task}</li>)}</ul></article>)}</div>
+    <p class="mt-6 bg-[#CDDDE1]/35 px-6 py-5 text-sm leading-relaxed"><strong>Keep food safety with an adult:</strong> Wash hands when handling food, prevent cross-contamination, follow product labels and refrigerate perishables promptly. Kids can help with appropriate safe jobs, but safety decisions do not become their responsibility.</p>
+   </div>
+  </section>
+  <section id="troubleshooting" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20">
+   <div class="mx-auto max-w-5xl">
+    <p class="eyebrow">04 · WHEN THE MESS RETURNS</p>
+    <h2 class="section-heading">Fix the setup, not just the mess.</h2>
+    <p class="section-lede">Most repeat problems point to a missing place, an unclear routine or a job without an owner. Change one thing at a time.</p>
+    <GuideTroubleshooting problems={problems}/>
+    <div class="mt-9 border-l-4 border-[#D8B79F] bg-white px-6 py-5"><h3 class="font-serif text-xl">Kitchen safety stays with the grown-ups.</h3><p class="mt-3 text-sm leading-relaxed">Avoid mixing household cleaners, keep chemicals and sharp tools away from younger children, supervise hot surfaces, and follow food-storage and food-preparation guidance. Children can learn real responsibility without taking on dangerous jobs.</p></div>
+   </div>
+  </section>
+  <section id="family" class="px-5 py-16 sm:px-8 sm:py-20">
+   <div class="mx-auto max-w-5xl">
+    <p class="eyebrow">05 · MAKE IT A FAMILY JOB</p>
+    <h2 class="section-heading">Written down once. Practiced together.</h2>
+    <p class="section-lede">The goal is not a chore chart Mom has to manage. It is a routine each person understands and can gradually own.</p>
+    <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ages.map(g=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={g.icon} alt="" loading="lazy" width="66" height="66" class="mb-3 size-16 object-contain"/><span class="eyebrow">{g.age}</span><h3 class="mt-2 font-serif text-xl">{g.title}</h3><p class="mt-3 text-sm leading-relaxed">{g.tasks}</p></article>)}</div>
+    <p class="mt-5 text-sm leading-relaxed">Age ranges are examples, not rigid rules. Match jobs to skills and supervision. Cooking heat, knives and chemical cleaners remain appropriately controlled by adults.</p>
+    <div class="mt-10 grid items-start gap-6 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-[1fr_1.2fr]">
+     <div><p class="eyebrow">AT THE NEXT FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Decide who owns what.</h3><p class="mt-3 text-sm leading-relaxed">Name who will do each reset job and when. Use page three of the printable to write it down, then practice jobs that are still unfamiliar.</p></div>
+     <ol class="space-y-4 text-sm leading-relaxed"><li><strong>1. Notice:</strong> What part of cleanup gets left for one person?</li><li><strong>2. Assign:</strong> Who owns each of the five jobs after dinner?</li><li><strong>3. Practice:</strong> What does finished look like for each job?</li><li><strong>4. Review:</strong> What one change would help next week?</li></ol>
+    </div>
+    <div class="mt-12 border border-[#ded8d2] bg-white p-7 sm:p-9">
+     <p class="eyebrow">PREVIEW THE FOUR-PAGE GUIDE</p><h3 class="mt-3 font-serif text-3xl">Four pages the family can use.</h3>
+     <p class="mt-3 mb-7 text-sm leading-relaxed">Daily habits, step-by-step reset jobs, your family assignment sheet and fixes for the problems that come back.</p>
+     <GuidePageGallery images={pageImages} title="The Family Kitchen Reset"/>
+     <div class="mt-8 text-center"><a href={printable} download="OMC-Family-Kitchen-Reset.pdf" class="btn-primary">Download the free PDF</a><p class="mt-2 text-xs">Four US Letter pages · No signup required</p></div>
+    </div>
+    <div class="mt-12 grid gap-5 border-t border-[#ded8d2] pt-8 sm:grid-cols-2">
+     <div><h3 class="font-serif text-2xl">Want jobs personalized to your kids?</h3><p class="mt-3 text-sm leading-relaxed">Use the free Family Responsibility Builder to give each person a visible job they can own.</p><a href="/family-responsibility-builder" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Try the Responsibility Builder</a></div>
+     <div><h3 class="font-serif text-2xl">More than one room needs a reset?</h3><p class="mt-3 text-sm leading-relaxed">Start with the Family Bathroom Reset, another simple system the whole family can practice.</p><a href="/guides/family-bathroom-reset/" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Read the Bathroom Reset</a></div>
+    </div>
+   </div>
+  </section>
+ </div>
+ <style>
+  .omc-guide{font-family:Montserrat,Arial,sans-serif}
+  .omc-guide section[id]{scroll-margin-top:110px}
+  .omc-guide .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+  .omc-guide .section-heading{max-width:800px;margin-top:14px;font-family:Georgia,serif;font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.025em}
+  .omc-guide .section-lede{max-width:700px;margin-top:16px;font-size:1.06rem;line-height:1.8}
+  .omc-guide .guide-anchor{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 13px;background:#fff;border:1px solid #d8d1cb;border-radius:3px;color:#545454;font-size:14px;font-weight:650;line-height:1.25;text-align:center;text-decoration:none}
+  .omc-guide .guide-anchor:hover{background:#CDDDE1}
+  .omc-guide .guide-anchor:focus-visible{outline:2px solid #545454;outline-offset:2px}
+  @media(min-width:640px){.omc-guide .guide-anchor{min-height:44px;padding:9px 14px;font-size:13px}}
+ </style>
+</PublicLayout>
