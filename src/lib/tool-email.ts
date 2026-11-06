@@ -107,7 +107,7 @@ export function downloadModalCopy(tool: string) {
     'guide-family-laundry-system': 'Laundry System Guide',
   };
   const isGuide = tool.startsWith('guide-');
-  const raw = (titles[tool] ?? (isGuide ? tool.slice(6) : tool)
+  const raw = (titles[tool] ?? (isGuide ? tool.slice(6) : tool).replace(/[^a-z0-9-]/gi, '')
     .split('-').filter(Boolean).slice(0, 10)
     .map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')).slice(0, 70);
   const label = isGuide && !/Guide$/.test(raw) ? raw + ' Guide' : raw;
