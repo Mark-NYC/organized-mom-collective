@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-dinner-system',
+    title: 'The Family Dinner System',
+    teaser: 'Plan dinners around the real week, collect go-to family meals and share the work with a simple Dinner Team.',
+    area: 'Meal planning',
+    kicker: 'Full, Short, Zero · Go-to dinners · Family Dinner Team',
+    image: '/images/guides/dinner-guide-page-1.webp',
+    imageAlt: 'Illustrated first page of The Family Dinner System printable',
+    pdf: '/downloads/family-dinner-system.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-paper-clutter-reset',
     title: 'The Family Paper Clutter Reset',
     teaser: 'A ten-minute paper reset, a place for school papers and mail, and a weekly family routine so piles stay gone.',
