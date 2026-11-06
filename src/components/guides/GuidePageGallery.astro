@@ -1,0 +1,11 @@
+---
+/** Actual page images for an OMC downloadable guide. Reusable across guide topics. */
+interface Props { images:string[]; title:string }
+const {images,title}=Astro.props;
+---
+<div class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+  {images.map((src,i)=><a href={src} target="_blank" rel="noopener" class="group block min-w-0 rounded-[3px] border border-[#ded8d2] bg-[#FBF7F1] p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#545454]" aria-label={`View page ${i+1} of ${title} at full size`}>
+    <img src={src} width="1100" height="1424" loading="lazy" decoding="async" alt={`Page ${i+1} of ${title}`} class="aspect-[8.5/11] w-full bg-white object-contain shadow-[0_3px_10px_rgba(55,50,48,.08)]"/>
+    <span class="mt-2 block text-center text-[12px] font-semibold text-[#545454] group-hover:underline">Page {i+1} of {images.length}</span>
+  </a>)}
+</div>
