@@ -3,6 +3,7 @@
  * The generated transparent PNGs are only for the PDF builder's PNG-compatible icon API.
  */
 import sharp from 'sharp';
+import {normalizeGuideCollection} from './lib/normalize-guide-ink.mjs';
 import { mkdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 const sources=resolve('assets/icons/ofc/february');
@@ -34,3 +35,6 @@ for(const [name,file] of Object.entries(artwork)){
   if(visible<75)throw new Error('Empty February artwork: '+file);
   console.log('Reused February hand-drawn art '+file+' as '+name+'.png');
 }
+
+// Website, PDF and page previews all use the exact same single-ink PNGs.
+await normalizeGuideCollection(dest,Object.keys(artwork));
