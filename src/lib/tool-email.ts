@@ -41,7 +41,7 @@ export function publicDownloadId(pathname: string): string | null {
 function publicDownloadTool(): string | null { return publicDownloadId(window.location.pathname); }
 
 function attribution() {
-  const qs = new URLSearchParams(window.location.search);
+  const qs = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
   const safe = (key: string) => (qs.get(key) || '').slice(0, 160);
   return { p_source: safe('utm_source'), p_medium: safe('utm_medium'), p_campaign: safe('utm_campaign'), p_content: safe('utm_content') };
 }
