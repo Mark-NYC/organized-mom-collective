@@ -1,57 +1,57 @@
 ---
 import PublicLayout from '../../../layouts/PublicLayout.astro';
-const base = '/assets/icons/ofc';
+import { bathroomIcons as icons } from '../../../data/guides/bathroom-icons';
 const printable = '/guides/family-bathroom-reset/print';
 const routines = [
-  {title:'Hang towels to dry', detail:'Spread towels out rather than leaving them bunched on the floor or a hook. Pull the shower curtain flat to dry.',icon:base+'/routines/bath-or-shower.jpg'},
-  {title:'Put clothes in the hamper',detail:'Make the hamper easy to reach. Clothes go in as soon as they come off.',icon:base+'/february/laundry-hamper.webp'},
-  {title:'Wipe up toothpaste and splashes',detail:'A designated cloth by the sink makes this a 20-second habit. Use water or a child-safe method.',icon:base+'/march/wipe-sink.webp'},
-  {title:'Put personal items away',detail:'Toothbrushes, hairbrushes, and other daily supplies return to their own spots.',icon:base+'/supporting/toothbrush.png'},
+  {title:'Hang towels to dry', detail:'Spread towels out rather than leaving them bunched on the floor or a hook. Pull the shower curtain flat to dry.',icon:icons.towel},
+  {title:'Put clothes in the hamper',detail:'Make the hamper easy to reach. Clothes go in as soon as they come off.',icon:icons.hamper},
+  {title:'Wipe up toothpaste and splashes',detail:'A designated cloth by the sink makes this a 20-second habit. Use water or a child-safe method.',icon:icons.sink},
+  {title:'Put personal items away',detail:'Toothbrushes, hairbrushes, and other daily supplies return to their own spots.',icon:icons.toothbrush},
 ];
 const weekly = [
-  {job:'Sink + counter',what:'Clear items, wipe the basin, faucet and counter, then dry as needed.',done:'No toothpaste, visible grime or clutter.',icon:base+'/march/wipe-sink.webp'},
-  {job:'Mirror',what:'Wipe spots and fingerprints with a suitable cloth and approved product.',done:'No obvious splashes or streaks.',icon:base+'/march/wipe-surface.webp'},
-  {job:'Toilet',what:'A trained teen or adult cleans the bowl and all exterior touch points using a dedicated tool.',done:'Clean seat, rim, bowl and outside.',icon:base+'/march/clean-bathroom.webp'},
-  {job:'Shower or tub',what:'Clean visible buildup using a surface-safe product; rinse as its label directs.',done:'No obvious soap film or pooled water.',icon:base+'/march/clean-bathroom.webp'},
-  {job:'Floor',what:'Pick up, sweep or vacuum corners, then mop appropriately.',done:'Clear and dry, including around the toilet.',icon:base+'/march/clean-floor.webp'},
-  {job:'Trash + towels',what:'Empty the bin, replace the liner, swap used towels and launder mats when needed.',done:'Fresh towels ready and trash out.',icon:base+'/march/bathroom-trash.webp'}
+  {job:'Sink + counter',what:'Clear items, wipe the basin, faucet and counter, then dry as needed.',done:'No toothpaste, visible grime or clutter.',icon:icons.sink},
+  {job:'Mirror',what:'Wipe spots and fingerprints with a suitable cloth and approved product.',done:'No obvious splashes or streaks.',icon:icons.counter},
+  {job:'Toilet',what:'A trained teen or adult cleans the bowl and all exterior touch points using a dedicated tool.',done:'Clean seat, rim, bowl and outside.',icon:icons.bathroom},
+  {job:'Shower or tub',what:'Clean visible buildup using a surface-safe product; rinse as its label directs.',done:'No obvious soap film or pooled water.',icon:icons.bathroom},
+  {job:'Floor',what:'Pick up, sweep or vacuum corners, then mop appropriately.',done:'Clear and dry, including around the toilet.',icon:icons.floor},
+  {job:'Trash + towels',what:'Empty the bin, replace the liner, swap used towels and launder mats when needed.',done:'Fresh towels ready and trash out.',icon:icons.trash}
 ];
 const upkeep = [
- {when:'Monthly',tasks:['Check sink stoppers and drain covers for trapped hair.','Look under the sink for drips, stains or dampness.','Check shower corners, the curtain liner and door track for buildup.']},
- {when:'A few times a year',tasks:['Vacuum dust from the exhaust fan grille after turning the fan off.','Check caulk and grout for gaps, damage or recurring dampness.','Inspect frequently used fixtures for leaks or reduced water flow.']},
- {when:'When you notice it',tasks:['A slow drain: remove accessible hair safely; avoid combining drain products.','Musty odor or repeat mold: look for the moisture source and address it.','Loose caulk, ongoing leaks or hidden water damage: have an adult arrange repair.']}
+ {when:'Monthly',icon:icons.sink,tasks:['Check sink stoppers and drain covers for trapped hair.','Look under the sink for drips, stains or dampness.','Check shower corners, the curtain liner and door track for buildup.']},
+ {when:'A few times a year',icon:icons.bathroom,tasks:['Vacuum dust from the exhaust fan grille after turning the fan off.','Check caulk and grout for gaps, damage or recurring dampness.','Inspect frequently used fixtures for leaks or reduced water flow.']},
+ {when:'When you notice it',icon:icons.counter,tasks:['A slow drain: remove accessible hair safely; avoid combining drain products.','Musty odor or repeat mold: look for the moisture source and address it.','Loose caulk, ongoing leaks or hidden water damage: have an adult arrange repair.']}
 ];
 const problems=[
- {symptom:'Towels on the floor',cause:'The towel has no easy home.',fix:'Put a reachable, labeled hook or bar where the towel is used.'},
- {symptom:'Toothpaste all over the sink',cause:'Nobody owns the last wipe.',fix:'Keep a cloth nearby; add a quick wipe after brushing.'},
- {symptom:'Clothes beside the hamper',cause:'The hamper is too far away or inconvenient.',fix:'Move it to the place clothes are actually removed.'},
- {symptom:'The same adult cleans everything',cause:'Jobs are unnamed or not taught.',fix:'Give every weekly job an owner and practice the steps together.'},
- {symptom:'“Done” means something different to everyone',cause:'The finish line is vague.',fix:'Use the page-two checklist to agree what finished looks like.'},
- {symptom:'Damp smell or mold keeps returning',cause:'A surface stays wet, ventilation is weak, or a leak persists.',fix:'Improve drying and airflow; investigate water problems rather than just scrubbing.'}
+ {symptom:'Towels on the floor',icon:icons.towel,cause:'The towel has no easy home.',fix:'Put a reachable, labeled hook or bar where the towel is used.'},
+ {symptom:'Toothpaste all over the sink',icon:icons.sink,cause:'Nobody owns the last wipe.',fix:'Keep a cloth nearby; add a quick wipe after brushing.'},
+ {symptom:'Clothes beside the hamper',icon:icons.hamper,cause:'The hamper is too far away or inconvenient.',fix:'Move it to the place clothes are actually removed.'},
+ {symptom:'The same adult cleans everything',icon:icons.bathroom,cause:'Jobs are unnamed or not taught.',fix:'Give every weekly job an owner and practice the steps together.'},
+ {symptom:'“Done” means something different to everyone',icon:icons.counter,cause:'The finish line is vague.',fix:'Use the page-two checklist to agree what finished looks like.'},
+ {symptom:'Damp smell or mold keeps returning',icon:icons.bathroom,cause:'A surface stays wet, ventilation is weak, or a leak persists.',fix:'Improve drying and airflow; investigate water problems rather than just scrubbing.'}
 ];
 const ageGroups=[
- {age:'3–5',title:'Help with the reset',tasks:'Hang a towel, put clothes in a hamper, return personal items with help.'},
- {age:'6–8',title:'Own a simple job',tasks:'Replace towels, empty light trash with supervision, wipe water from the counter.'},
- {age:'9–12',title:'Learn a full routine',tasks:'Clean mirrors with guidance, sweep, or complete a sink routine with approved supplies.'},
- {age:'Teens + adults',title:'Take on deeper work',tasks:'Manage toilet and shower cleaning, product labels, and maintenance as appropriate.'}
+ {age:'3–5',icon:icons.towel,title:'Help with the reset',tasks:'Hang a towel, put clothes in a hamper, return personal items with help.'},
+ {age:'6–8',icon:icons.trash,title:'Own a simple job',tasks:'Replace towels, empty light trash with supervision, wipe water from the counter.'},
+ {age:'9–12',icon:icons.sink,title:'Learn a full routine',tasks:'Clean mirrors with guidance, sweep, or complete a sink routine with approved supplies.'},
+ {age:'Teens + adults',icon:icons.bathroom,title:'Take on deeper work',tasks:'Manage toilet and shower cleaning, product labels, and maintenance as appropriate.'}
 ];
-const docPages=[{n:'01',title:'Daily reset',color:'#CDDDE1'},{n:'02',title:'Weekly jobs',color:'#D4DFC4'},{n:'03',title:'Family handoff',color:'#F1D8A8'},{n:'04',title:'Troubleshooting',color:'#E8D2D6'}];
+const docPages=[{n:'01',title:'Daily reset',color:'#CDDDE1',icon:icons.towel},{n:'02',title:'Weekly jobs',color:'#D4DFC4',icon:icons.sink},{n:'03',title:'Family handoff',color:'#F1D8A8',icon:icons.trash},{n:'04',title:'Troubleshooting',color:'#E8D2D6',icon:icons.bathroom}];
 ---
 <PublicLayout title="Family Bathroom Reset Guide: Daily Habits, Weekly Cleaning and Kids' Jobs" description="A bathroom care system your family can share: daily reset habits, six weekly cleaning jobs, deeper care, troubleshooting and a free four-page printable." width="full" ogType="article">
   <div class="omc-guide text-[#545454]">
-    <section class="bg-[#FBF7F1] px-5 py-8 sm:px-8 sm:py-14">
+    <section class="px-5 py-8 sm:px-8 sm:py-14">
       <div class="mx-auto max-w-5xl">
         <nav aria-label="Breadcrumb" class="text-xs font-medium"><a class="underline underline-offset-4" href="/resources">Resources</a> <span class="mx-2 text-[#888]">/</span> Family Bathroom Reset</nav>
-        <div class="mt-9 max-w-3xl">
+        <div class="mx-auto mt-9 max-w-[52rem] text-center">
           <p class="eyebrow">BATHROOM CLEANING · FAMILY RESPONSIBILITY</p>
           <h1 class="mt-3 font-serif text-[clamp(2.5rem,6.8vw,4.4rem)] leading-[1.09] tracking-tight">A bathroom everyone helps keep clean.</h1>
-          <p class="mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">The bathroom gets messy every day. Keeping it usable shouldn’t fall on one person. Here’s a simple routine, a clear weekly clean, and a way to hand jobs over to the family.</p>
-          <div class="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#777]"><span>10-minute read</span><span>Free four-page printable</span><span>No email required</span></div>
+          <p class="mx-auto mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">The bathroom gets messy every day. Keeping it usable shouldn’t fall on one person. Here’s a simple routine, a clear weekly clean, and a way to hand jobs over to the family.</p>
+          <div class="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-[#777]"><span>10-minute read</span><span>Free four-page printable</span><span>No email required</span></div>
         </div>
-        <div class="mt-10 grid items-center gap-8 bg-[#F8EFCF] px-6 py-8 sm:px-10 md:grid-cols-[1.15fr_.85fr] md:py-11">
+        <div class="mt-10 grid items-center gap-8 border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] px-6 py-8 sm:px-10 md:grid-cols-[1.15fr_.85fr] md:py-11">
           <div><p class="eyebrow">FREE PRINTABLE · FOUR-PAGE FAMILY GUIDE</p><h2 class="mt-3 font-serif text-3xl leading-tight sm:text-4xl">The Family Bathroom Reset Card</h2><p class="mt-4 max-w-md text-sm leading-[1.8] sm:text-base">Daily habits, a six-job weekly clean, a write-in family assignment page, and the fixes to try when the mess comes back.</p>
           <ul class="mt-5 space-y-2 text-sm"><li>✓ Works straight off the printer</li><li>✓ Includes clear “done looks like” standards</li><li>✓ Assign jobs without a complicated tracking system</li></ul>
-          <a href={printable} class="mt-7 inline-flex min-h-12 items-center bg-[#315B4F] px-6 py-3 text-sm font-bold text-white hover:bg-[#24483F]">Open printable · Print / Save as PDF</a><p class="mt-2 text-xs">US Letter · Four pages · Free</p></div>
+          <a href={printable} class="btn-primary mt-7">Open printable · Print / Save as PDF</a><p class="mt-2 text-xs">US Letter · Four pages · Free</p></div>
           <div class="relative mx-auto w-full max-w-[360px] py-7" aria-label="Preview of the four-page guide">
             <div class="absolute left-[14%] top-[9%] h-[89%] w-[76%] rotate-[8deg] border border-[#ddd] bg-white shadow-lg"></div>
             <div class="absolute left-[9%] top-[7%] h-[89%] w-[76%] -rotate-[5deg] border border-[#ddd] bg-white shadow-lg"></div>
@@ -70,43 +70,43 @@ const docPages=[{n:'01',title:'Daily reset',color:'#CDDDE1'},{n:'02',title:'Week
       <div class="mx-auto max-w-5xl">
         <p class="eyebrow">01 · THE EVERYDAY HABIT</p><h2 class="section-heading">Not spotless. Ready for the next person.</h2>
         <p class="section-lede">The goal of the daily reset is not to deep-clean a bathroom five times a day. It’s to stop small messes from turning into bigger ones.</p>
-        <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{routines.map(r=><div class="border border-[#e6e1dc] p-5"><img src={r.icon} alt="" loading="lazy" width="76" height="76" class="mb-4 size-[76px] object-contain"/><h3 class="font-serif text-xl leading-tight">{r.title}</h3><p class="mt-3 text-sm leading-relaxed">{r.detail}</p></div>)}</div>
-        <div class="mt-9 bg-[#E6EFEC] px-6 py-5 text-sm leading-relaxed"><strong>What done looks like:</strong> The counter is clear, the sink has no toothpaste, clothes are in the hamper, wet things can dry, and the next person can use the room comfortably.</div>
+        <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{routines.map(r=><div class="border-t-[4px] border-[#CDDDE1] bg-white p-5"><img src={r.icon} alt="" loading="lazy" width="76" height="76" class="mb-4 size-[76px] object-contain"/><h3 class="font-serif text-xl leading-tight">{r.title}</h3><p class="mt-3 text-sm leading-relaxed">{r.detail}</p></div>)}</div>
+        <div class="mt-9 bg-[#CDDDE1]/35 px-6 py-5 text-sm leading-relaxed"><strong>What done looks like:</strong> The counter is clear, the sink has no toothpaste, clothes are in the hamper, wet things can dry, and the next person can use the room comfortably.</div>
         <div class="mt-10 grid gap-8 border-t border-[#ddd] pt-8 md:grid-cols-2"><div><h3 class="font-serif text-2xl">A small habit after every shower</h3><p class="mt-3 leading-relaxed">Run an exhaust fan during the shower and afterward, or use appropriate ventilation. Spread towels and the curtain out to dry. If you have a squeegee and the shower surfaces allow it, make a quick pass over wet walls and glass.</p></div><div><h3 class="font-serif text-2xl">Make it easier than leaving a mess</h3><p class="mt-3 leading-relaxed">A towel hook where kids can reach it, a hamper where clothes come off, and a designated cloth near the sink do more than another reminder from Mom.</p></div></div>
       </div>
     </section>
-    <div class="bg-[#315B4F] px-5 py-6 text-center font-serif text-xl text-white sm:text-2xl">A good system makes the right thing easy to do.</div>
+    <div class="mx-auto max-w-5xl border-y border-[#c8c8c8] px-5 py-7 text-center font-serif text-xl text-[#545454] sm:text-2xl">A good system makes the right thing easy to do.</div>
 
-    <section id="weekly" class="bg-[#FBF7F1] px-5 py-16 sm:px-8 sm:py-20">
+    <section id="weekly" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-5xl">
         <p class="eyebrow">02 · ONCE A WEEK</p><h2 class="section-heading">The weekly clean, without the guessing.</h2><p class="section-lede">Six jobs are easier to share than one vague instruction to “clean the bathroom.” Give each job a clear owner and an equally clear finish line.</p>
-        <div class="mt-9 grid gap-3 md:grid-cols-2">{weekly.map((job,i)=><div class="flex gap-4 border border-[#e2ddd6] bg-white p-5"><img src={job.icon} alt="" width="64" height="64" loading="lazy" class="size-16 shrink-0 object-contain"/><div><span class="eyebrow">JOB {String(i+1).padStart(2,'0')}</span><h3 class="mt-1 font-serif text-xl">{job.job}</h3><p class="mt-2 text-sm leading-relaxed">{job.what}</p><p class="mt-3 border-t border-[#eae6e1] pt-2 text-xs leading-relaxed"><strong>DONE:</strong> {job.done}</p></div></div>)}</div>
-        <aside class="mt-7 bg-[#F1D8A8]/50 px-6 py-5 text-sm leading-relaxed"><strong>Teach first, then hand it over.</strong> The first time a child takes on a job, do it together. Once they know the steps and the finish line, let them practice responsibility rather than waiting for directions every time.</aside>
+        <div class="mt-9 grid gap-3 md:grid-cols-2">{weekly.map((job,i)=><div class="flex gap-4 border-t-[4px] border-[#D4DFC4] bg-white p-5"><img src={job.icon} alt="" width="64" height="64" loading="lazy" class="size-16 shrink-0 object-contain"/><div><span class="eyebrow">JOB {String(i+1).padStart(2,'0')}</span><h3 class="mt-1 font-serif text-xl">{job.job}</h3><p class="mt-2 text-sm leading-relaxed">{job.what}</p><p class="mt-3 border-t border-[#eae6e1] pt-2 text-xs leading-relaxed"><strong>DONE:</strong> {job.done}</p></div></div>)}</div>
+        <aside class="mt-7 bg-[#F1D8A8]/35 px-6 py-5 text-sm leading-relaxed"><strong>Teach first, then hand it over.</strong> The first time a child takes on a job, do it together. Once they know the steps and the finish line, let them practice responsibility rather than waiting for directions every time.</aside>
       </div>
     </section>
 
     <section id="deeper" class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-5xl"><p class="eyebrow">03 · KEEP THE ROOM WORKING</p><h2 class="section-heading">The deeper care that prevents bigger problems.</h2><p class="section-lede">Not everything needs to be done every Saturday. Some things need a monthly look, others only when a warning sign appears.</p>
-        <div class="mt-9 space-y-4">{upkeep.map((group)=><div class="grid gap-4 border border-[#e2ddd6] p-6 md:grid-cols-[180px_1fr]"><h3 class="font-serif text-2xl">{group.when}</h3><ul class="space-y-3">{group.tasks.map(t=><li class="flex gap-3 text-sm leading-relaxed"><span aria-hidden="true" class="mt-1.5 size-2 shrink-0 border border-[#545454]"></span><span>{t}</span></li>)}</ul></div>)}</div>
-        <div class="mt-7 bg-[#E6EFEC] px-6 py-5 text-sm leading-relaxed"><strong>Water is the first thing to watch.</strong> If a spot stays wet, drying and better ventilation often help. But a recurring leak, peeling caulk or water damage needs an actual repair, not another round of cleaning.</div>
+        <div class="mt-9 space-y-4">{upkeep.map((group)=><div class="grid gap-4 border-t-[4px] border-[#CDDDE1] bg-[#FBF7F1] p-6 md:grid-cols-[180px_1fr]"><div class="flex items-center gap-4"><img src={group.icon} alt="" width="64" height="64" loading="lazy" class="size-16 shrink-0 object-contain"/><h3 class="font-serif text-2xl">{group.when}</h3></div><ul class="space-y-3">{group.tasks.map(t=><li class="flex gap-3 text-sm leading-relaxed"><span aria-hidden="true" class="mt-1.5 size-2 shrink-0 border border-[#545454]"></span><span>{t}</span></li>)}</ul></div>)}</div>
+        <div class="mt-7 bg-[#CDDDE1]/35 px-6 py-5 text-sm leading-relaxed"><strong>Water is the first thing to watch.</strong> If a spot stays wet, drying and better ventilation often help. But a recurring leak, peeling caulk or water damage needs an actual repair, not another round of cleaning.</div>
       </div>
     </section>
 
-    <section id="troubleshooting" class="bg-[#FBF7F1] px-5 py-16 sm:px-8 sm:py-20">
+    <section id="troubleshooting" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-5xl"><p class="eyebrow">04 · WHEN IT KEEPS HAPPENING</p><h2 class="section-heading">Fix the source, not just the symptom.</h2><p class="section-lede">When the same problem comes back, ask what in the setup or routine needs to change.</p>
-        <div class="mt-9 overflow-x-auto"><table class="w-full min-w-[540px] border-collapse text-left"><thead class="bg-[#D4DFC4] text-xs uppercase tracking-wider"><tr><th class="p-4">What keeps happening</th><th class="p-4">Why it might happen</th><th class="p-4">What to change</th></tr></thead><tbody>{problems.map(p=><tr class="border-b border-[#e2ddd6] align-top"><th scope="row" class="p-4 text-sm font-semibold">{p.symptom}</th><td class="p-4 text-sm leading-relaxed">{p.cause}</td><td class="p-4 text-sm leading-relaxed">{p.fix}</td></tr>)}</tbody></table></div>
+        <div class="mt-9 overflow-x-auto"><table class="w-full min-w-[540px] border-collapse text-left"><thead class="bg-[#D4DFC4] text-xs uppercase tracking-wider"><tr><th class="p-4">What keeps happening</th><th class="p-4">Why it might happen</th><th class="p-4">What to change</th></tr></thead><tbody>{problems.map(p=><tr class="border-b border-[#ded8d2] align-top"><th scope="row" class="p-4 text-sm font-semibold"><span class="flex items-center gap-3"><img src={p.icon} alt="" width="46" height="46" loading="lazy" class="size-11 shrink-0 object-contain"/><span>{p.symptom}</span></span></th><td class="p-4 text-sm leading-relaxed">{p.cause}</td><td class="p-4 text-sm leading-relaxed">{p.fix}</td></tr>)}</tbody></table></div>
         <div class="mt-9 border-l-4 border-[#D8B79F] bg-white px-6 py-5"><h3 class="font-serif text-xl">Cleaning products are an adult responsibility.</h3><p class="mt-3 text-sm leading-relaxed">Never mix cleaning products, particularly bleach with ammonia or acids. Follow the product label, ventilate appropriately, and store chemicals out of children’s reach. For persistent mold, leaks, or damage inside walls and ceilings, seek qualified help.</p></div>
       </div>
     </section>
 
     <section id="family" class="px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-5xl"><p class="eyebrow">05 · MAKE IT A FAMILY JOB</p><h2 class="section-heading">Written down once. Shared from then on.</h2><p class="section-lede">Mom shouldn’t have to remember every job, assign it again each week, and check it without a shared standard. Start with one clear handoff.</p>
-        <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ageGroups.map((g)=><div class="border-t-[7px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><span class="eyebrow">AGES {g.age}</span><h3 class="mt-2 font-serif text-xl">{g.title}</h3><p class="mt-3 text-sm leading-relaxed">{g.tasks}</p></div>)}</div>
+        <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ageGroups.map((g)=><div class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={g.icon} alt="" width="66" height="66" loading="lazy" class="mb-3 size-16 object-contain"/><span class="eyebrow">AGES {g.age}</span><h3 class="mt-2 font-serif text-xl">{g.title}</h3><p class="mt-3 text-sm leading-relaxed">{g.tasks}</p></div>)}</div>
         <p class="mt-5 text-sm leading-relaxed">Ages are examples, not hard rules. Match the task to the child’s abilities, supervise where needed, and keep chemicals in adult hands.</p>
-        <div class="mt-10 grid items-start gap-6 bg-[#E6EFEC] p-7 sm:p-9 md:grid-cols-[1fr_1.2fr]"><div><p class="eyebrow">AT THE NEXT FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Decide who owns what.</h3><p class="mt-3 text-sm leading-relaxed">Have each person choose or receive a job. Show them once, practice together, then look at the finish line on the printable. Check back next week.</p></div><ol class="space-y-4 text-sm leading-relaxed"><li><strong>1. Notice:</strong> What part of the bathroom gets messy fastest?</li><li><strong>2. Choose:</strong> Which habit or cleaning job will each person own?</li><li><strong>3. Practice:</strong> Can everyone show what done looks like?</li><li><strong>4. Review:</strong> What should we change next week?</li></ol></div>
-        <div class="mt-12 grid items-center gap-8 border border-[#e2ddd6] bg-white p-7 sm:p-9 md:grid-cols-[1fr_1.1fr]">
-          <div class="grid grid-cols-2 gap-3">{docPages.map(p=><div class="min-h-32 border border-[#dedbd5] bg-white p-3 shadow-sm"><div class="h-2" style={`background-color:${p.color}`}></div><p class="mt-4 text-[9px] font-bold tracking-wider">ORGANIZED MOM COLLECTIVE</p><p class="mt-3 font-serif text-lg">{p.n}. {p.title}</p><div class="mt-3 h-[2px] w-4/5 bg-[#ddd]"></div><div class="mt-2 h-[2px] w-3/5 bg-[#ddd]"></div><div class="mt-2 h-[2px] w-4/5 bg-[#ddd]"></div></div>)}</div>
-          <div><p class="eyebrow">TAKE THE SYSTEM HOME</p><h3 class="mt-3 font-serif text-3xl">Your four-page family bathroom guide.</h3><p class="mt-4 text-sm leading-relaxed">Print the routine, weekly job instructions, assignment sheet and troubleshooting reference. Keep the pages together or post the ones your family needs most.</p><a href={printable} class="mt-6 inline-flex min-h-12 items-center bg-[#315B4F] px-6 py-3 text-sm font-bold text-white hover:bg-[#24483F]">Open the free printable</a><p class="mt-2 text-xs">Print / Save as PDF · No signup required</p></div>
+        <div class="mt-10 grid items-start gap-6 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-[1fr_1.2fr]"><div><p class="eyebrow">AT THE NEXT FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Decide who owns what.</h3><p class="mt-3 text-sm leading-relaxed">Have each person choose or receive a job. Show them once, practice together, then look at the finish line on the printable. Check back next week.</p></div><ol class="space-y-4 text-sm leading-relaxed"><li><strong>1. Notice:</strong> What part of the bathroom gets messy fastest?</li><li><strong>2. Choose:</strong> Which habit or cleaning job will each person own?</li><li><strong>3. Practice:</strong> Can everyone show what done looks like?</li><li><strong>4. Review:</strong> What should we change next week?</li></ol></div>
+        <div class="mt-12 grid items-center gap-8 border border-[#ded8d2] bg-white p-7 sm:p-9 md:grid-cols-[1fr_1.1fr]">
+          <div class="grid grid-cols-2 gap-3">{docPages.map(p=><div class="min-h-32 border border-[#dedbd5] bg-white p-3 shadow-sm"><div class="h-2" style={`background-color:${p.color}`}></div><p class="mt-4 text-[9px] font-bold tracking-wider">ORGANIZED MOM COLLECTIVE</p><img src={p.icon} alt="" width="46" height="46" loading="lazy" class="mt-2 size-11 object-contain"/><p class="mt-2 font-serif text-lg">{p.n}. {p.title}</p><div class="mt-3 h-[2px] w-4/5 bg-[#ddd]"></div><div class="mt-2 h-[2px] w-3/5 bg-[#ddd]"></div><div class="mt-2 h-[2px] w-4/5 bg-[#ddd]"></div></div>)}</div>
+          <div><p class="eyebrow">TAKE THE SYSTEM HOME</p><h3 class="mt-3 font-serif text-3xl">Your four-page family bathroom guide.</h3><p class="mt-4 text-sm leading-relaxed">Print the routine, weekly job instructions, assignment sheet and troubleshooting reference. Keep the pages together or post the ones your family needs most.</p><a href={printable} class="btn-primary mt-6">Open the free printable</a><p class="mt-2 text-xs">Print / Save as PDF · No signup required</p></div>
         </div>
         <div class="mt-12 border-t border-[#ddd] pt-9"><h3 class="font-serif text-2xl">Want clearer jobs for your kids?</h3><p class="mt-3 max-w-2xl leading-relaxed">Use the free Family Responsibility Builder to make household expectations visible and personal. It pairs naturally with this guide.</p><a class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4" href="/family-responsibility-builder">Try the Family Responsibility Builder</a></div>
       </div>
@@ -114,7 +114,7 @@ const docPages=[{n:'01',title:'Daily reset',color:'#CDDDE1'},{n:'02',title:'Week
   </div>
   <style>
     .omc-guide{font-family:Montserrat,Arial,sans-serif}
-    .omc-guide .eyebrow{font-size:.72rem;font-weight:750;letter-spacing:.13em;text-transform:uppercase}
+    .omc-guide .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
     .omc-guide .section-heading{max-width:800px;margin-top:14px;font-family:Georgia,serif;font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.025em}
     .omc-guide .section-lede{max-width:700px;margin-top:16px;font-size:1.06rem;line-height:1.8}
     .omc-guide a:focus-visible{outline:3px solid #545454;outline-offset:3px}
