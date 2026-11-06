@@ -10,8 +10,8 @@ for(let i=0;i<cycle.length;i++){const [a,title,desc]=cycle[i],x=42+i*134;rect(p,
 text(p,'WHAT DOES OWNERSHIP LOOK LIKE?',42,502,10.5,'bold');
 for(let i=0;i<examples.length;i++){const [a,title,detail]=examples[i],y=465-i*62;await icon(p,art(a),51,y-26,34);text(p,title,102,y,10,'bold');paragraph(p,detail,102,y-17,448,{size:9.1,leading:12});rule(p,48,y-40,515);}
 rect(p,42,172,528,28,c.blue);text(p,'THREE JOBS I AM STILL MANAGING',55,181,9,'bold');
-for(let i=0;i<3;i++){const y=146-i*31;text(p,(i+1)+'.',56,y,9,'bold');rule(p,76,y-4,476);}
-rect(p,42,72,528,37,c.ivory);paragraph(p,'Choose one job to teach first. Do not hand over three new things at once.',55,91,488,{size:9,leading:12});
+for(let i=0;i<3;i++){const y=155-i*30;text(p,(i+1)+'.',56,y,9,'bold');rule(p,76,y-4,476);}
+rect(p,42,59,528,28,c.ivory);paragraph(p,'Choose one job to teach first. Do not hand over three new things at once.',55,69,488,{size:9,leading:12});
 // 2. The pivotal handover instructions and write-in agreement.
 p=newPage('02 / Practice the handoff','Hand Over the Whole Job','Six steps from a spoken request to actual shared responsibility.',c.green,2);
 for(let i=0;i<handover.length;i++){const [a,title,detail]=handover[i],y=604-i*57;await icon(p,art(a),53,y-24,34);text(p,(i+1)+'. '+title,102,y,9.9,'bold');paragraph(p,detail,102,y-17,447,{size:8.9,leading:11});rule(p,48,y-39,515);}
