@@ -1,20 +1,26 @@
 ---
-/** A reusable real-PDF preview for every OMC practical guide.
- * It renders page one from the actual downloadable PDF in browsers with inline PDF support.
- * On devices without support, visitors still get the direct PDF link.
+/**
+ * OMC guide PDF preview using the real exported page image, never an iframe.
+ * images are WebPs exported from the same PDF linked by pdf.
+ * compact is for the lower-page reminder; full is the hero preview.
  */
-interface Props { pdf: string; title: string; compact?: boolean }
-const {pdf,title,compact=false}=Astro.props;
-const previewUrl=pdf+'#page=1&toolbar=0&navpanes=0&scrollbar=0&view=FitH';
+interface Props {
+  pdf: string;
+  title: string;
+  images: string[];
+  compact?: boolean;
+}
+const {pdf,title,images,compact=false}=Astro.props;
+if (!images?.length) throw new Error('GuidePdfPreview requires at least one page image.');
+const first=images[0];
 ---
-<div class:list={['guide-pdf-preview relative mx-auto w-full bg-white',compact?'max-w-[250px]':'max-w-[330px]']} aria-label={`Preview of ${title}`}>
-  <div class="absolute inset-0 translate-x-3 translate-y-3 rotate-[4deg] border border-[#d8d1cb] bg-white" aria-hidden="true"></div>
-  <div class="relative overflow-hidden border border-[#d8d1cb] bg-white shadow-[0_8px_20px_rgba(55,50,48,.12)]">
-    <div class="pdf-paper relative aspect-[8.5/11] overflow-hidden">
-      <iframe loading="lazy" title={`Actual first page of ${title}`} src={previewUrl} class="pointer-events-none absolute inset-0 size-full border-0" tabindex="-1"></iframe>
-      <a href={pdf} target="_blank" rel="noopener" class="absolute inset-0 z-10 flex items-end justify-center p-3" aria-label={`Open the full four-page PDF: ${title}`}>
-        <span class="bg-white/95 px-3 py-1.5 text-center text-[10px] font-bold tracking-wide text-[#545454] shadow-sm">View full 4-page PDF</span>
-      </a>
-    </div>
+<div class:list={['guide-print-preview relative mx-auto w-full',compact?'max-w-[245px]':'max-w-[350px]']} aria-label={`Preview of ${title}`}>
+  <div class="relative mx-auto w-[88%] pb-5 pr-5">
+    <div class="pointer-events-none absolute inset-x-2 top-3 bottom-5 translate-x-[9px] rotate-[6deg] border border-[#d8d1cb] bg-white shadow-[0_5px_16px_rgba(55,50,48,.08)]" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute inset-x-2 top-3 bottom-5 -translate-x-[7px] -rotate-[4deg] border border-[#d8d1cb] bg-white shadow-[0_4px_12px_rgba(55,50,48,.08)]" aria-hidden="true"></div>
+    <a href={pdf} download class="relative block overflow-hidden border border-[#d8d1cb] bg-white shadow-[0_9px_22px_rgba(55,50,48,.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#545454]" aria-label={`Download all ${images.length} pages of ${title} as a PDF`}>
+      <img src={first} width="1100" height="1424" loading={compact?'lazy':'eager'} decoding="async" alt={`Actual first page of ${title}`} class="block aspect-[8.5/11] h-auto w-full object-contain"/>
+    </a>
   </div>
+  <p class="mt-1 text-center text-[11px] font-medium text-[#6f6a65]">Page 1 of {images.length} · Actual printable</p>
 </div>
