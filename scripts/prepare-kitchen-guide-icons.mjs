@@ -4,6 +4,7 @@
  * leaving interior white details and all non-white hand-drawn strokes intact.
  */
 import sharp from 'sharp';
+import {normalizeGuideCollection} from './lib/normalize-guide-ink.mjs';
 import { mkdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
@@ -102,3 +103,6 @@ for(const [name,path] of Object.entries(sources)){
   console.log('Cleaned kitchen icon '+name+' (edge matte pixels removed: '+removed+', transparent border: 100%)');
 }
 console.log('Prepared '+Object.keys(sources).length+' transparent OMC kitchen icons.');
+
+// Website, PDF and page previews all use the exact same single-ink PNGs.
+await normalizeGuideCollection(dest,Object.keys(sources));
