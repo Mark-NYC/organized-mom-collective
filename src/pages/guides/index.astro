@@ -1,15 +1,20 @@
 ---
 /**
- * Dedicated guide library. Guides are complete, repeatable home systems,
- * separate from personalized free generators (/tools) and editorial articles (/resources).
+ * Mobile-first guide library. The guide registry remains the source of truth.
+ * Content is visible without JavaScript; filters enhance browsing in place.
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import GuideDirectoryCard from '../../components/guides/GuideDirectoryCard.astro';
 import { guides, guideUrl } from '../../data/guides/guide-directory';
 import { routes } from '../../routes';
 
-const featured = guides[0];
-const more = guides.slice(1);
+const browseCategories = [
+  { value: 'all', label: 'All guides' },
+  { value: 'room-resets', label: 'Room resets' },
+  { value: 'family-systems', label: 'Family systems' },
+  { value: 'meals', label: 'Meals' },
+] as const;
+
 const jsonLd = [{
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
@@ -24,17 +29,26 @@ const jsonLd = [{
 ---
 <PublicLayout
   title="Practical Guides for a More Organized Home"
-  description="Free step-by-step family guides with realistic routines, clear responsibilities and ready-to-use printable PDFs. Start with the Family Morning Routine, Dinner System, Paper Clutter Reset and other free practical guides."
+  description="Free step-by-step family guides for room resets, family routines and meal planning. Find the right illustrated printable guide in seconds."
   width="full"
   jsonLd={jsonLd}
 >
   <div class="text-[#545454]">
-    <header class="border-b border-[#e7ddd4] bg-[#FBF7F1] px-5 py-14 sm:px-8 sm:py-20">
+    <header class="border-b border-[#e7ddd4] bg-[#FBF7F1] px-5 pb-7 pt-8 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-5xl">
-        <p class="label text-[#6f6a65]">ORGANIZED MOM COLLECTIVE · PRACTICAL GUIDES</p>
-        <h1 class="mt-5 max-w-[780px] font-serif text-[clamp(2.4rem,6vw,4.25rem)] leading-[1.1] tracking-tight">A home that works better for everyone.</h1>
-        <p class="mt-6 max-w-[660px] text-[1rem] leading-[1.85] text-[#5c5550] sm:text-[1.12rem]">Realistic systems for the everyday things that keep falling on Mom. Each guide walks through what to do, how to share the work, and how to keep it going.</p>
-        <div class="mt-7 flex flex-wrap gap-3 text-[0.82rem] font-semibold text-[#5c5550]">
+        <p class="label text-[#6f6a65]">ORGANIZED MOM COLLECTIVE</p>
+        <h1 class="mt-3 font-serif text-[2.65rem] leading-[1.08] tracking-tight sm:mt-5 sm:max-w-[780px] sm:text-[clamp(2.4rem,6vw,4.25rem)]">
+          <span class="sm:hidden">Practical Guides</span>
+          <span class="hidden sm:inline">A home that works better for everyone.</span>
+        </h1>
+        <p class="mt-3 max-w-[660px] text-[0.95rem] leading-[1.7] text-[#5c5550] sm:mt-6 sm:text-[1.12rem] sm:leading-[1.85]">
+          Free, step-by-step systems to help everyone share the work at home. Choose a guide, try the routine, and print what you need.
+        </p>
+        <p class="mt-3 flex items-center gap-2 text-[0.8rem] font-semibold text-[#6f6a65] sm:hidden">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 19.5V4.5A2.5 2.5 0 0 1 6.5 2H20v19H6.5A2.5 2.5 0 0 1 4 18.5V4.5zm0-1A2.5 2.5 0 0 1 6.5 16H20" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {guides.length} free {guides.length===1?'guide':'guides'} · Printable PDFs included
+        </p>
+        <div class="mt-7 hidden flex-wrap gap-3 text-[0.82rem] font-semibold text-[#5c5550] sm:flex">
           <span class="border-l-[3px] border-[#CDDDE1] bg-white px-3 py-2">Step-by-step directions</span>
           <span class="border-l-[3px] border-[#D4DFC4] bg-white px-3 py-2">Clear jobs for the family</span>
           <span class="border-l-[3px] border-[#F1D8A8] bg-white px-3 py-2">Free printable resources</span>
@@ -42,46 +56,58 @@ const jsonLd = [{
       </div>
     </header>
 
-    <section class="px-5 py-14 sm:px-8 sm:py-20" aria-labelledby="featured-guide">
-      <div class="mx-auto max-w-5xl">
-        <div class="mb-7 flex flex-wrap items-end justify-between gap-3 border-b border-[#ded8d2] pb-4">
+    <section class="px-5 pb-11 pt-7 sm:px-8 sm:py-16" aria-labelledby="all-guides">
+      <div class="mx-auto max-w-5xl" id="guide-library">
+        <div class="border-b border-[#ded8d2] pb-4 sm:flex sm:items-end sm:justify-between">
           <div>
-            <p class="label text-[#6f6a65]">START HERE</p>
-            <h2 id="featured-guide" class="mt-3 font-serif text-3xl sm:text-[2.2rem]">The latest practical guide</h2>
+            <p class="label hidden text-[#6f6a65] sm:block">BROWSE BY NEED</p>
+            <h2 id="all-guides" class="font-serif text-[1.45rem] leading-tight sm:mt-3 sm:text-3xl">Find the guide you need</h2>
           </div>
-          <span class="text-[0.8rem] text-[#6f6a65]">{guides.length} {guides.length===1?'guide':'guides'} available</span>
+          <p class="mt-2 text-[0.80rem] text-[#6f6a65] sm:mt-0" id="guide-match-count" aria-live="polite" aria-atomic="true">{guides.length} {guides.length===1?'guide':'guides'}</p>
         </div>
-        {featured && <GuideDirectoryCard guide={featured} featured />}
+
+        <div class="mt-4 hidden flex-wrap gap-2 sm:mt-6" id="guide-filter-controls" role="group" aria-label="Filter guides by topic">
+          {browseCategories.map(category => (
+            <button
+              type="button"
+              data-guide-filter={category.value}
+              aria-pressed={category.value === 'all' ? 'true' : 'false'}
+              class:list={[
+                'min-h-11 rounded-full border px-4 py-2 text-[0.82rem] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#545454]',
+                category.value === 'all'
+                  ? 'border-[#545454] bg-[#545454] text-white'
+                  : 'border-[#d8d1cb] bg-white text-[#545454] hover:bg-[#FBF7F1]',
+              ]}
+            >{category.label}</button>
+          ))}
+        </div>
+
+        <ul class="mt-5 grid grid-cols-1 gap-0 md:mt-8 md:grid-cols-2 md:gap-6" id="guide-list">
+          {guides.map(guide => (
+            <li data-guide-item data-guide-category={guide.browseCategory}>
+              <GuideDirectoryCard guide={guide} />
+            </li>
+          ))}
+        </ul>
+        <p class="mt-6 hidden text-sm text-[#6f6a65]" id="guide-empty-state" role="status">No guides in this category yet. Choose another category to keep browsing.</p>
       </div>
     </section>
 
-    {more.length > 0 && (
-      <section aria-labelledby="all-guides" class="bg-[#FBF7F1] px-5 py-14 sm:px-8 sm:py-20">
-        <div class="mx-auto max-w-5xl">
-          <p class="label text-[#6f6a65]">BROWSE BY NEED</p>
-          <h2 id="all-guides" class="mt-3 font-serif text-3xl">More ways to share the work.</h2>
-          <ul class="mt-8 grid gap-6 md:grid-cols-2">
-            {more.map(guide=><li><GuideDirectoryCard guide={guide}/></li>)}
-          </ul>
-        </div>
-      </section>
-    )}
-
-    <section aria-labelledby="choose-h" class="px-5 py-14 sm:px-8 sm:py-20">
-      <div class="mx-auto max-w-5xl border-t border-[#ded8d2] pt-10">
+    <section aria-labelledby="choose-h" class="bg-[#FBF7F1] px-5 py-12 sm:bg-white sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-5xl border-t border-[#ded8d2] pt-8 sm:pt-10">
         <p class="label text-[#6f6a65]">LOOKING FOR SOMETHING ELSE?</p>
-        <h2 id="choose-h" class="mt-3 font-serif text-3xl sm:text-[2.2rem]">The right kind of help for today.</h2>
-        <div class="mt-8 grid gap-4 sm:grid-cols-2">
-          <a href={routes.freeTools} class="group block border-t-[5px] border-[#D4DFC4] bg-[#FBF7F1] p-6 transition-colors hover:bg-[#f1f4ec] sm:p-7">
+        <h2 id="choose-h" class="mt-3 font-serif text-[1.7rem] leading-tight sm:text-[2.2rem]">The right kind of help for today.</h2>
+        <div class="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2">
+          <a href={routes.freeTools} class="group block border-t-[5px] border-[#D4DFC4] bg-white p-5 transition-colors hover:bg-[#f1f4ec] sm:bg-[#FBF7F1] sm:p-7">
             <p class="label text-[#6f6a65]">PERSONALIZE IT</p>
             <h3 class="mt-3 font-serif text-2xl">Free Tools</h3>
-            <p class="mt-3 max-w-md text-sm leading-[1.8]">Build routine charts, responsibility charts and planners for your own family, then print them.</p>
+            <p class="mt-3 max-w-md text-sm leading-[1.8]">Build routine charts, responsibility charts and planners for your family, then print them.</p>
             <span class="mt-5 inline-flex min-h-11 items-center text-[0.8rem] font-bold underline underline-offset-4">Explore free tools <span aria-hidden="true" class="ml-2">→</span></span>
           </a>
-          <a href={routes.resources} class="group block border-t-[5px] border-[#E8D2D6] bg-[#FBF7F1] p-6 transition-colors hover:bg-[#f9f0ef] sm:p-7">
+          <a href={routes.resources} class="group block border-t-[5px] border-[#E8D2D6] bg-white p-5 transition-colors hover:bg-[#f9f0ef] sm:bg-[#FBF7F1] sm:p-7">
             <p class="label text-[#6f6a65]">GET IDEAS</p>
             <h3 class="mt-3 font-serif text-2xl">Articles & Ideas</h3>
-            <p class="mt-3 max-w-md text-sm leading-[1.8]">Find everyday organizing advice, practical solutions and home inspiration.</p>
+            <p class="mt-3 max-w-md text-sm leading-[1.8]">Find organizing advice, practical solutions and home inspiration.</p>
             <span class="mt-5 inline-flex min-h-11 items-center text-[0.8rem] font-bold underline underline-offset-4">Browse articles <span aria-hidden="true" class="ml-2">→</span></span>
           </a>
         </div>
@@ -89,3 +115,48 @@ const jsonLd = [{
     </section>
   </div>
 </PublicLayout>
+
+<script>
+  // Progressive enhancement: when JavaScript is unavailable, every guide remains visible.
+  const library = document.getElementById('guide-library');
+  const controls = library?.querySelector<HTMLElement>('#guide-filter-controls');
+  const buttons = Array.from(controls?.querySelectorAll<HTMLButtonElement>('[data-guide-filter]') ?? []);
+  const cards = Array.from(library?.querySelectorAll<HTMLLIElement>('[data-guide-item]') ?? []);
+  const count = library?.querySelector<HTMLElement>('#guide-match-count');
+  const empty = library?.querySelector<HTMLElement>('#guide-empty-state');
+
+  if (controls && buttons.length && cards.length) {
+    controls.classList.remove('hidden');
+    controls.classList.add('flex');
+
+    const selectCategory = (category: string) => {
+      let visible = 0;
+      for (const card of cards) {
+        const show = category === 'all' || card.dataset.guideCategory === category;
+        card.hidden = !show;
+        if (show) visible++;
+      }
+      for (const button of buttons) {
+        const active = button.dataset.guideFilter === category;
+        button.setAttribute('aria-pressed', String(active));
+        button.classList.toggle('border-[#545454]', active);
+        button.classList.toggle('bg-[#545454]', active);
+        button.classList.toggle('text-white', active);
+        button.classList.toggle('border-[#d8d1cb]', !active);
+        button.classList.toggle('bg-white', !active);
+        button.classList.toggle('text-[#545454]', !active);
+      }
+      if (count) count.textContent = `${visible} ${visible === 1 ? 'guide' : 'guides'}`;
+      if (empty) empty.classList.toggle('hidden', visible !== 0);
+    };
+
+    for (const button of buttons) {
+      button.addEventListener('click', () => selectCategory(button.dataset.guideFilter ?? 'all'));
+    }
+  }
+</script>
+
+<style>
+  /* A filtered card must never take up a grid slot. */
+  #guide-list [hidden] { display: none !important; }
+</style>
