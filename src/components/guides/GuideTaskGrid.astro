@@ -1,0 +1,18 @@
+---
+/** Reusable OMC action + supplies + finish line cards. */
+interface Task { job:string; supplies:string; what:string; done:string; icon:string }
+interface Props { tasks:Task[]; accent?:string }
+const {tasks,accent='#D4DFC4'}=Astro.props;
+---
+<div class="mt-9 grid gap-3 md:grid-cols-2">
+ {tasks.map((task,i)=><article class="flex min-w-0 gap-4 border-t-[4px] bg-white p-5" style={`border-color:${accent}`}>
+  <img src={task.icon} alt="" width="64" height="64" loading="lazy" class="size-16 shrink-0 object-contain"/>
+  <div class="min-w-0">
+   <p class="label text-[#6f6a65]">JOB {String(i+1).padStart(2,'0')}</p>
+   <h3 class="mt-1 font-serif text-xl">{task.job}</h3>
+   <p class="mt-3 text-xs leading-relaxed"><strong>SUPPLIES:</strong> {task.supplies}</p>
+   <p class="mt-2 text-sm leading-relaxed">{task.what}</p>
+   <p class="mt-3 border-t border-[#eae6e1] pt-2 text-xs leading-relaxed"><strong>DONE:</strong> {task.done}</p>
+  </div>
+ </article>)}
+</div>
