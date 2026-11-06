@@ -26,6 +26,8 @@ A real problem gets a repeatable, usable household system. The article teaches t
 
 ## Icon rules
 - Use OMC's hand-drawn illustrations, never emoji or mixed generic outline packs in place of a task drawing.
+- Use background-free exports for every icon. Run `scripts/prepare-bathroom-guide-icons.mjs` before both page build and PDF generation; preserve intentional white enclosed inside the drawing. Reuse cleaned `/public/assets/icons/ofc/guides/bathroom/*.png` in BOTH outputs, rather than the original source JPG/PNG/WebP.
+- Prefer a canonical transparent OMC SVG for problematic icons, such as the toothbrush, rather than filtering out white from the entire image.
 - Reuse the same illustration for the same task on website, printed instructions, and assignment areas.
 - Keep the original aspect ratio, background transparency if present, and `object-fit:contain`. No stretch, cropping, shadows, or colored circles baked into the artwork.
 - Images communicate actions; don't put icons on every sentence or heading.

@@ -36,6 +36,21 @@ function eraseOutsideWhite(data,width,height){
   }
   for(let x=0;x<width;x++){add(x);add((height-1)*width+x);}
   for(let y=0;y<height;y++){add(y*width);add(y*width+width-1);}
+  // Some old files have a white rectangular tile *inside* an alpha-padded
+  // canvas. Treat the visible artwork bbox as another possible matte border,
+  // but only if its perimeter is predominantly near-white.
+  let left=width,top=height,right=-1,bottom=-1;
+  for(let p=0;p<total;p++)if(data[p*4+3]>10){
+    const x=p%width,y=Math.floor(p/width);
+    if(x<left)left=x;if(x>right)right=x;if(y<top)top=y;if(y>bottom)bottom=y;
+  }
+  if(right>=left&&bottom>=top){
+    const edge=[];
+    for(let x=left;x<=right;x++){edge.push(top*width+x,bottom*width+x);}
+    for(let y=top+1;y<bottom;y++){edge.push(y*width+left,y*width+right);}
+    const fraction=edge.filter(p=>nearWhite(data,p)).length/Math.max(1,edge.length);
+    if(fraction>0.58)for(const p of edge)add(p);
+  }
   let removed=0;
   while(stack.length){
     const p=stack.pop(),i=p*4;
