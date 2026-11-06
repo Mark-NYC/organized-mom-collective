@@ -18,6 +18,18 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-responsibility-system',
+    browseCategory: 'family-systems',
+    title: 'The Family Responsibility System',
+    teaser: 'Stop carrying every household reminder. Teach a whole job, give it an owner and build shared responsibility.',
+    area: 'Family responsibilities',
+    kicker: 'Helping vs. owning · Six-step handover · Family team',
+    image: '/images/guides/responsibility-guide-page-1.webp',
+    imageAlt: 'Illustrated first page of The Family Responsibility System printable',
+    pdf: '/downloads/family-responsibility-system.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-morning-routine',
     browseCategory: 'family-systems',
     title: 'The Family Morning Routine',
