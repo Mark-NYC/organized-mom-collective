@@ -22,7 +22,7 @@ export const guides: Guide[] = [
     area: 'Cleaning & resets',
     kicker: 'After-meal habits · Ten-minute reset · Weekly care',
     image: '/images/guides/kitchen-guide-page-1.webp',
-    imageAlt: 'First page of the Family Kitchen Reset illustrated four-page printable',
+    imageAlt: 'Illustrated preview of page one of the Family Kitchen Reset printable',
     pdf: '/downloads/family-kitchen-reset.pdf',
     pages: 4,
   },
