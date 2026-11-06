@@ -2,7 +2,7 @@
 import PublicLayout from '../../../layouts/PublicLayout.astro';
 import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
 import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
-import { habits, rhythm, roles, issues } from '../../../../scripts/lib/entryway-guide-content.mjs';
+import { habits, rhythm, roles } from '../../../../scripts/lib/entryway-guide-content.mjs';
 const pdf='/downloads/family-entryway-reset.pdf';
 const images=[1,2,3,4].map(n=>`/images/guides/entryway-guide-page-${n}.webp`);
 const art=(name:string)=>`/assets/icons/ofc/guides/entryway/${name}.png`;
