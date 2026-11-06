@@ -525,6 +525,53 @@ const cta = 'min-h-14 w-full px-8 sm:w-auto';
     </div>
   </section>
 
+
+  <!-- Distinct paths to guides, interactive generators, and editorial ideas. -->
+  <section aria-labelledby="free-help-h" class="bg-paper px-5 py-14 sm:px-8 sm:py-20">
+    <div class="mx-auto max-w-6xl">
+      <div class="mx-auto max-w-[760px] text-center">
+        <p class="label text-warm-soft">A LITTLE FREE HELP</p>
+        <h2 id="free-help-h" class="mt-3 font-serif text-[clamp(2rem,4.5vw,3rem)] leading-[1.15] text-warm-ink">Good systems start small.</h2>
+        <p class="mt-4 text-[1rem] leading-[1.8] text-warm-soft">Start with one household challenge. Learn the steps, make a plan, or find a fresh idea.</p>
+      </div>
+      <div class="mt-9 grid gap-5 md:grid-cols-3">
+        <article class="flex flex-col border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1]">
+          <div class="flex h-60 items-center justify-center overflow-hidden px-8 py-5 sm:h-64">
+            <img src="/images/guides/bathroom-guide-page-1.webp" alt="The illustrated Family Bathroom Reset printable" loading="lazy" decoding="async" width="850" height="1100" class="h-full w-auto max-w-full object-contain shadow-[0_5px_16px_rgba(55,50,48,.11)]" />
+          </div>
+          <div class="flex flex-1 flex-col p-6">
+            <p class="label text-warm-soft">STEP-BY-STEP SYSTEMS</p>
+            <h3 class="mt-2 font-serif text-2xl text-warm-ink">Practical Guides</h3>
+            <p class="mt-3 text-[0.94rem] leading-[1.75]">Learn a household system your family can use. Free printable references included.</p>
+            <a href={routes.guides} class="btn-secondary mt-6">Browse guides</a>
+          </div>
+        </article>
+        <article class="flex flex-col border-t-[5px] border-[#D4DFC4] bg-[#FBF7F1]">
+          <div class="flex h-60 items-center justify-center overflow-hidden bg-[#f1f4ec] px-5 py-5 sm:h-64">
+            <img src="/images/pinterest/omc-family-responsibility-builder.jpeg" alt="Illustrated family responsibility chart showing kids household jobs" loading="lazy" decoding="async" width="1000" height="1500" class="h-full w-auto max-w-full object-contain"/>
+          </div>
+          <div class="flex flex-1 flex-col p-6">
+            <p class="label text-warm-soft">MAKE IT YOURS</p>
+            <h3 class="mt-2 font-serif text-2xl text-warm-ink">Free Tools</h3>
+            <p class="mt-3 text-[0.94rem] leading-[1.75]">Create personalized routine charts, responsibility charts and planners for your family.</p>
+            <a href={routes.freeTools} class="btn-secondary mt-6">Explore tools</a>
+          </div>
+        </article>
+        <article class="flex flex-col border-t-[5px] border-[#E8D2D6] bg-[#FBF7F1]">
+          <div class="h-60 overflow-hidden bg-[#f9f0ef] sm:h-64">
+            <img src="/images/inspiration/pantry-organization-ideas/pantry-01-olive-green-brass-lantern-pantry.jpeg" alt="Pantry shelves with neatly arranged jars and baskets" loading="lazy" decoding="async" width="900" height="1200" class="h-full w-full object-cover"/>
+          </div>
+          <div class="flex flex-1 flex-col p-6">
+            <p class="label text-warm-soft">IDEAS FOR REAL LIFE</p>
+            <h3 class="mt-2 font-serif text-2xl text-warm-ink">Articles &amp; Ideas</h3>
+            <p class="mt-3 text-[0.94rem] leading-[1.75]">Helpful advice, realistic solutions and inspiration for a more organized home.</p>
+            <a href={routes.resources} class="btn-secondary mt-6">Read articles</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <!-- 8. Final CTA, with the product beside it: the flat 2027 page and the companion's Today screen -->
   <section aria-labelledby="close-h" class="home-inset">
     <div class="home-close-surface">
