@@ -18,6 +18,18 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-weekly-reset',
+    browseCategory: 'family-systems',
+    title: 'The Family Weekly Reset',
+    teaser: 'A 15-minute weekly check-in to settle schedules, rides, dinner decisions and shared responsibilities.',
+    area: 'Routines',
+    kicker: 'Five steps · Calendar handoffs · Shared ownership',
+    image: '/images/guides/weekly-guide-page-1.webp',
+    imageAlt: 'Illustrated first page of The Family Weekly Reset printable',
+    pdf: '/downloads/family-weekly-reset.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-morning-routine',
     browseCategory: 'family-systems',
     title: 'The Family Morning Routine',
