@@ -1,31 +1,35 @@
 ---
 import PublicLayout from '../../../layouts/PublicLayout.astro';
+import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
 const pdf='/downloads/family-laundry-system-guide.pdf';
+const pageImages=[1,2,3,4].map(n=>`/images/guides/laundry-guide-page-${n}.webp`);
+const icon=(name:string)=>`/assets/icons/ofc/guides/laundry/${name}.png`;
 const steps=[
- {n:'01',title:'Collect',detail:'Everyone puts worn clothes into the right hamper. Keep one where clothes actually come off.',done:'No loose dirty clothes on bedroom floors.'},
- {n:'02',title:'Sort + prepare',detail:'Check care labels, empty pockets and separate delicate or special-care pieces. An adult checks stains.',done:'The load is ready without surprises.'},
- {n:'03',title:'Wash + move',detail:'A trained person starts the washer; set a reminder to move items to the dryer or drying rack when the cycle ends.',done:'Nothing is forgotten wet in the washer.'},
- {n:'04',title:'Fold + sort',detail:'Sort clean laundry by person. Fold what needs folding; hanging and simple bins count too.',done:'Each person has one clear pile or basket.'},
- {n:'05',title:'Put away',detail:'Each person takes their own clean clothes to their drawers or closet. The load is not finished until it has a home.',done:'No permanent clean-clothes pile.'},
+ {icon:icon('hamper'),n:'01',title:'Collect',detail:'Everyone puts worn clothes into the right hamper. Keep one where clothes actually come off.',done:'No loose dirty clothes on bedroom floors.'},
+ {icon:icon('sort'),n:'02',title:'Sort + prepare',detail:'Check care labels, empty pockets and separate delicate or special-care pieces. An adult checks stains.',done:'The load is ready without surprises.'},
+ {icon:icon('washer'),n:'03',title:'Wash + move',detail:'A trained person starts the washer; set a reminder to move items to the dryer or drying rack when the cycle ends.',done:'Nothing is forgotten wet in the washer.'},
+ {icon:icon('fold'),n:'04',title:'Fold + sort',detail:'Sort clean laundry by person. Fold what needs folding; hanging and simple bins count too.',done:'Each person has one clear pile or basket.'},
+ {icon:icon('drawer'),n:'05',title:'Put away',detail:'Each person takes their own clean clothes to their drawers or closet. The load is not finished until it has a home.',done:'No permanent clean-clothes pile.'},
 ];
 const rhythm=[
- {title:'Daily: a two-minute pickup',detail:'Clothes in the hamper. Rewearable clothes back on hooks or shelves. Wet towels spread to dry.'},
- {title:'Laundry days: choose your cadence',detail:'Choose a repeatable rhythm such as two family load days plus one towel/sheet day, or smaller loads more often. Match the plan to your actual household.'},
- {title:'After every load: finish the loop',detail:'The person running the load owns moving it along. Everyone owns putting away their own clean clothes, with age-appropriate help.'},
+ {icon:icon('hamper'),title:'Daily: a two-minute pickup',detail:'Clothes in the hamper. Rewearable clothes back on hooks or shelves. Wet towels spread to dry.'},
+ {icon:icon('clock'),title:'Laundry days: choose your cadence',detail:'Choose a repeatable rhythm such as two family load days plus one towel/sheet day, or smaller loads more often. Match the plan to your actual household.'},
+ {icon:icon('drawer'),title:'After every load: finish the loop',detail:'The person running the load owns moving it along. Everyone owns putting away their own clean clothes, with age-appropriate help.'},
 ];
 const roles=[
- {age:'Ages 3–5',title:'Help put things in place',detail:'Carry light clothes to a hamper, pair socks, match colors and put simple items in a low drawer with help.'},
- {age:'Ages 6–8',title:'Own one repeatable part',detail:'Collect their laundry, sort simple items, fold washcloths or put away clean clothes with a clear picture or label.'},
- {age:'Ages 9–12',title:'Learn a whole safe sequence',detail:'Sort laundry, follow a posted checklist, fold and put away. Practice appliance use only with adult instruction and supervision.'},
- {age:'Teens + adults',title:'Own complete loads',detail:'Plan load timing, read garment labels, choose settings, transfer, fold and put away. Adults remain responsible for chemical and appliance safety.'},
+ {icon:icon('hamper'),age:'Ages 3–5',title:'Help put things in place',detail:'Carry light clothes to a hamper, pair socks, match colors and put simple items in a low drawer with help.'},
+ {icon:icon('towel'),age:'Ages 6–8',title:'Own one repeatable part',detail:'Collect their laundry, sort simple items, fold washcloths or put away clean clothes with a clear picture or label.'},
+ {icon:icon('fold'),age:'Ages 9–12',title:'Learn a whole safe sequence',detail:'Sort laundry, follow a posted checklist, fold and put away. Practice appliance use only with adult instruction and supervision.'},
+ {icon:icon('washer'),age:'Teens + adults',title:'Own complete loads',detail:'Plan load timing, read garment labels, choose settings, transfer, fold and put away. Adults remain responsible for chemical and appliance safety.'},
 ];
 const issues=[
- ['Clean clothes never get put away','The handoff ends at folding.','Give everyone a labeled clean basket, then agree on an actual put-away time.'],
- ['The washer becomes a holding tank','No one owns the transfer.','The washer starter sets a timer and is responsible for moving that load.'],
- ['Mom has to remind everyone','Jobs are vague or depend on her memory.','Post the finish line and pick one owner per step. Check together at a weekly family meeting.'],
- ['Sorting is too complicated','Too many piles and special instructions.','Start with a simple plan; adults handle care-label exceptions and delicate fabrics.'],
- ['Laundry piles up all week','There is no steady point to start.','Choose two reliable load windows, not an unrealistic daily schedule.'],
- ['Kids say they do not know where clothes go','Drawers are crowded or unlabeled.','Make room, use simple drawer labels or open bins, and practice putting a load away together.'],
+{icon:icon('drawer'),symptom:'Clean clothes never get put away',cause:'The handoff ends at folding.',fix:'Give everyone a labeled clean basket, then agree on an actual put-away time.'},
+{icon:icon('clock'),symptom:'The washer becomes a holding tank',cause:'No one owns the transfer.',fix:'The washer starter sets a timer and is responsible for moving that load.'},
+{icon:icon('hands'),symptom:'Mom has to remind everyone',cause:'Jobs are vague or depend on her memory.',fix:'Post the finish line and pick one owner per step. Check together at a weekly family meeting.'},
+{icon:icon('sort'),symptom:'Sorting is too complicated',cause:'Too many piles and special instructions.',fix:'Start with a simple plan; adults handle care-label exceptions and delicate fabrics.'},
+{icon:icon('washer'),symptom:'Laundry piles up all week',cause:'There is no steady point to start.',fix:'Choose two reliable load windows, not an unrealistic daily schedule.'},
+{icon:icon('shelf'),symptom:'Kids say they do not know where clothes go',cause:'Drawers are crowded or unlabeled.',fix:'Make room, use simple drawer labels or open bins, and practice putting a load away together.'},
 ];
 ---
 <PublicLayout title="A Laundry System the Whole Family Can Help Keep Up With" description="A free, practical family laundry guide: five clear steps, a weekly rhythm, age-appropriate responsibilities, fixes for laundry pileups and a four-page printable." width="full" ogType="article">
@@ -48,10 +52,7 @@ const issues=[
       <a href={pdf} download="OMC-Family-Laundry-System-Guide.pdf" class="btn-primary mt-7">Download the free PDF</a>
       <p class="mt-2 text-xs text-[#6f6a65]">US Letter · Four pages · Free download</p>
      </div>
-     <div class="mx-auto w-full max-w-[290px] border border-[#d8d1cb] bg-white p-4 shadow-[0_9px_25px_rgba(55,50,48,.09)]">
-       <img src="/images/guides/family-laundry-system-cover.svg" alt="Editorial cover illustration for the four-page Family Laundry System printable" width="612" height="792" class="block aspect-[8.5/11] w-full object-contain"/>
-       <p class="mt-3 text-center text-xs text-[#6f6a65]">Four-page family printable</p>
-     </div>
+     <div class="py-5"><GuidePdfPreview pdf={pdf} images={pageImages} title="The Family Laundry System"/></div>
     </div>
     <nav aria-label="On this page" class="mt-8 border-t border-[#ded8d2] pt-5">
      <p class="label mb-3 text-[#6f6a65]">IN THIS GUIDE</p>
@@ -67,7 +68,7 @@ const issues=[
     <p class="eyebrow">01 · THE WHOLE LOOP</p><h2 class="section-heading">Five steps. One finished load.</h2>
     <p class="section-lede">Laundry feels endless when nobody owns the transition between steps. Agree on the sequence once and make every handoff obvious.</p>
     <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-     {steps.map(step=><article class="border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6"><span class="font-serif text-3xl text-[#6f6a65]">{step.n}</span><h3 class="mt-2 font-serif text-2xl">{step.title}</h3><p class="mt-3 text-sm leading-[1.8]">{step.detail}</p><p class="mt-4 border-t border-[#d8d1cb] pt-3 text-sm"><strong>Done:</strong> {step.done}</p></article>)}
+     {steps.map(step=><article class="border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6"><div class="flex items-center gap-4"><img src={step.icon} alt="" loading="lazy" width="72" height="72" class="size-[72px] shrink-0 object-contain"/><span class="font-serif text-3xl text-[#6f6a65]">{step.n}</span></div><h3 class="mt-2 font-serif text-2xl">{step.title}</h3><p class="mt-3 text-sm leading-[1.8]">{step.detail}</p><p class="mt-4 border-t border-[#d8d1cb] pt-3 text-sm"><strong>Done:</strong> {step.done}</p></article>)}
     </div>
     <div class="mt-8 bg-[#CDDDE1]/35 p-6 text-sm leading-[1.8]"><strong>The one rule:</strong> Don't count a load as finished until clean clothes are put away. That last handoff belongs to the family, not automatically to Mom.</div>
    </div>
@@ -77,7 +78,7 @@ const issues=[
    <div class="mx-auto max-w-5xl">
     <p class="eyebrow">02 · PICK A RHYTHM</p><h2 class="section-heading">A schedule you'll actually follow.</h2>
     <p class="section-lede">There isn't one perfect number of loads per week. The right system is one that fits your household and has a clear stopping point.</p>
-    <div class="mt-9 grid gap-4 md:grid-cols-3">{rhythm.map((r,i)=><article class="bg-white p-6 border-t-[5px] border-[#D4DFC4]"><p class="eyebrow">0{i+1}</p><h3 class="mt-3 font-serif text-2xl">{r.title}</h3><p class="mt-3 text-sm leading-[1.8]">{r.detail}</p></article>)}</div>
+    <div class="mt-9 grid gap-4 md:grid-cols-3">{rhythm.map((r,i)=><article class="bg-white p-6 border-t-[5px] border-[#D4DFC4]"><div class="flex items-center gap-3"><img src={r.icon} alt="" loading="lazy" width="62" height="62" class="size-[62px] object-contain"/><p class="eyebrow">0{i+1}</p></div><h3 class="mt-3 font-serif text-2xl">{r.title}</h3><p class="mt-3 text-sm leading-[1.8]">{r.detail}</p></article>)}</div>
     <div class="mt-8 grid gap-5 border-l-4 border-[#F1D8A8] bg-white p-6 sm:grid-cols-2"><div><h3 class="font-serif text-2xl">Try the two-window plan.</h3><p class="mt-3 text-sm leading-[1.8]">Pick two regular windows to start and finish clothes. Add a third for towels or sheets if needed. If your family produces more laundry, add windows without changing the five steps.</p></div><div><h3 class="font-serif text-2xl">Make it visible.</h3><p class="mt-3 text-sm leading-[1.8]">Post your planned laundry days near the hampers or washer. Write down who starts, who moves, and who puts away. No one should have to guess.</p></div></div>
    </div>
   </section>
@@ -85,15 +86,15 @@ const issues=[
   <section id="family" class="px-5 py-16 sm:px-8 sm:py-20">
    <div class="mx-auto max-w-5xl"><p class="eyebrow">03 · SHARE THE WORK</p><h2 class="section-heading">Everyone can own a piece.</h2>
     <p class="section-lede">Don't assign an entire laundry day to a child who is still learning. Start with one repeatable task, practice together and increase ownership as the skill grows.</p>
-    <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{roles.map(r=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><span class="eyebrow">{r.age}</span><h3 class="mt-3 font-serif text-xl">{r.title}</h3><p class="mt-3 text-sm leading-[1.8]">{r.detail}</p></article>)}</div>
-    <p class="mt-6 text-sm leading-[1.8]">These ages are starting points, not rules. Match responsibility to ability. Adults control detergent, pods, bleach, stain treatments, hot appliances and any higher-risk appliance tasks. Keep laundry products secured and children out of machines.</p>
+    <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{roles.map(r=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={r.icon} alt="" loading="lazy" width="66" height="66" class="mb-3 size-16 object-contain"/><span class="eyebrow">{r.age}</span><h3 class="mt-3 font-serif text-xl">{r.title}</h3><p class="mt-3 text-sm leading-[1.8]">{r.detail}</p></article>)}</div>
+    <p class="mt-6 text-sm leading-[1.8]">These ages are starting points, not rules. Match responsibility to ability. Adults control detergent, pods, bleach, stain treatments, hot appliances and any higher-risk appliance tasks. Keep laundry products secured, never mix laundry chemicals, follow appliance instructions, and keep children out of machines.</p>
     <div class="mt-10 grid gap-7 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-2"><div><p class="eyebrow">AT THE FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Choose owners, not helpers.</h3><p class="mt-3 text-sm leading-[1.8]">A helper waits for instructions. An owner knows what is expected, when it happens, and what finished looks like.</p></div><ol class="space-y-3 text-sm leading-[1.8]"><li><strong>1. Notice:</strong> Where does laundry get stuck?</li><li><strong>2. Choose:</strong> Who owns starting, moving and putting away?</li><li><strong>3. Practice:</strong> Walk through one complete load together.</li><li><strong>4. Review:</strong> What needs to change next week?</li></ol></div>
    </div>
   </section>
 
   <section id="problems" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20">
    <div class="mx-auto max-w-5xl"><p class="eyebrow">04 · WHEN LAUNDRY PILES UP</p><h2 class="section-heading">Fix the handoff, not just the pile.</h2><p class="section-lede">When a laundry problem keeps returning, it usually points to a place, time, or responsibility that still isn't clear.</p>
-    <div class="mt-8 space-y-3">{issues.map(([symptom,cause,fix])=><article class="grid gap-4 border-l-4 border-[#E8D2D6] bg-white p-5 md:grid-cols-[1fr_1fr_1.3fr]"><h3 class="font-serif text-xl">{symptom}</h3><div><p class="eyebrow">WHY IT HAPPENS</p><p class="mt-2 text-sm leading-[1.7]">{cause}</p></div><div><p class="eyebrow">WHAT TO CHANGE</p><p class="mt-2 text-sm leading-[1.7]">{fix}</p></div></article>)}</div>
+    <div class="mt-8 space-y-3">{issues.map(({icon:issueIcon,symptom,cause,fix})=><article class="grid gap-4 border-l-4 border-[#E8D2D6] bg-white p-5 md:grid-cols-[1fr_1fr_1.3fr]"><div class="flex items-center gap-3"><img src={issueIcon} alt="" width="50" height="50" loading="lazy" class="size-[50px] shrink-0 object-contain"/><h3 class="font-serif text-xl">{symptom}</h3></div><div><p class="eyebrow">WHY IT HAPPENS</p><p class="mt-2 text-sm leading-[1.7]">{cause}</p></div><div><p class="eyebrow">WHAT TO CHANGE</p><p class="mt-2 text-sm leading-[1.7]">{fix}</p></div></article>)}</div>
    </div>
   </section>
 
@@ -104,11 +105,13 @@ const issues=[
      <article class="border-t-[5px] border-[#D4DFC4] bg-[#FBF7F1] p-6"><p class="eyebrow">NEXT LOAD</p><h3 class="mt-2 font-serif text-2xl">Practice one whole loop.</h3><p class="mt-3 text-sm leading-[1.8]">Walk through every step, including putting clothes away. See which handoff still needs help.</p></article>
      <article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-6"><p class="eyebrow">NEXT FAMILY MEETING</p><h3 class="mt-2 font-serif text-2xl">Put names on the plan.</h3><p class="mt-3 text-sm leading-[1.8]">Choose the next week's laundry windows and write one realistic job beside each family member.</p></article>
     </div>
+    <div class="mt-12 border border-[#ded8d2] bg-white p-7 sm:p-9"><p class="eyebrow">PREVIEW ALL FOUR PAGES</p><h3 class="mt-3 font-serif text-3xl">A family plan you can actually use.</h3><p class="mt-3 mb-7 text-sm leading-relaxed">Five steps, a weekly rhythm, a write-in family job chart and troubleshooting tips. Print the pages you need.</p><GuidePageGallery images={pageImages} title="The Family Laundry System"/></div>
     <div class="mt-10 grid gap-6 border border-[#ded8d2] bg-white p-7 sm:p-9 md:grid-cols-[1.1fr_.9fr]">
      <div><p class="eyebrow">TAKE THE SYSTEM HOME</p><h3 class="mt-3 font-serif text-3xl">Your free family laundry guide.</h3><p class="mt-3 text-sm leading-[1.8]">Print the five steps, weekly rhythm, write-in family responsibility plan, and troubleshooting page. Post only the pages your family needs.</p><a href={pdf} download="OMC-Family-Laundry-System-Guide.pdf" class="btn-primary mt-6">Download the four-page PDF</a><p class="mt-2 text-xs">Four US Letter pages · Free</p></div>
      <div class="bg-[#FBF7F1] p-6"><p class="eyebrow">WANT TO CUSTOMIZE IT?</p><h3 class="mt-3 font-serif text-2xl">Use our editable Laundry System checklist.</h3><p class="mt-3 text-sm leading-[1.8]">Already have a laundry routine? Change the five steps, write your own schedule, then print the version that works for your home.</p><a href="/laundry-system" class="mt-5 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Open the free laundry tool</a></div>
     </div>
-    <div class="mt-10 border-t border-[#ded8d2] pt-8"><h3 class="font-serif text-2xl">Want the whole family taking more responsibility?</h3><p class="mt-3 max-w-2xl text-sm leading-[1.8]">Organized Family Club mails personalized, ready-to-use tools to your home each month, with simple guidance to help the whole family follow through.</p><a href="/club" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">See how the Club works</a></div>
+    <div class="mt-10 grid gap-5 border-t border-[#ded8d2] pt-8 sm:grid-cols-2"><div><h3 class="font-serif text-2xl">Want to give each child clear ownership?</h3><p class="mt-3 max-w-2xl text-sm leading-[1.8]">Personalize a free family responsibility chart with names and jobs your family chooses.</p><a href="/family-responsibility-builder" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Try the Responsibility Builder</a></div><div><h3 class="font-serif text-2xl">More rooms need a shared routine?</h3><p class="mt-3 text-sm leading-[1.8]">Start with our Kitchen Reset for another simple system the family can practice.</p><a href="/guides/family-kitchen-reset/" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Read the Kitchen Reset</a></div></div>
+    <div class="mt-9 bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Want the whole family taking more responsibility?</h3><p class="mt-3 max-w-2xl text-sm leading-[1.8]">Organized Family Club mails personalized, ready-to-use tools to your home each month, with simple guidance to help the whole family follow through.</p><a href="/club" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">See how the Club works</a></div>
    </div>
   </section>
  </div>
