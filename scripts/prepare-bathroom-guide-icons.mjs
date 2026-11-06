@@ -1,0 +1,88 @@
+/**
+ * Bathroom guide: create transparent PNGs for both the website and generated PDF.
+ * Never modify source artwork. Remove only edge-connected near-white matte pixels,
+ * leaving interior white details and all non-white hand-drawn strokes intact.
+ */
+import sharp from 'sharp';
+import { mkdir, readFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+
+const root = process.cwd();
+const dest = join(root, 'public/assets/icons/ofc/guides/bathroom');
+const sources = {
+  towel: 'assets/icons/ofc/routines/bath-or-shower.jpg',
+  hamper: 'assets/icons/ofc/february/laundry-hamper.webp',
+  sink: 'assets/icons/ofc/march/wipe-sink.webp',
+  counter: 'assets/icons/ofc/march/wipe-surface.webp',
+  // This true-background-free OMC vector replaces the white-tile supporting PNG.
+  toothbrush: 'assets/icons/ofc/updatedicons/svg/toothbrush.svg',
+  bathroom: 'assets/icons/ofc/march/clean-bathroom.webp',
+  floor: 'assets/icons/ofc/march/clean-floor.webp',
+  trash: 'assets/icons/ofc/march/bathroom-trash.webp',
+  clothes: 'assets/icons/ofc/march/clothes-away.webp',
+  vacuum: 'assets/icons/ofc/march/vacuum.webp',
+};
+const minWhite = 221;
+function nearWhite(buf, pixel) {
+  const i=pixel*4, r=buf[i], g=buf[i+1], b=buf[i+2];
+  return Math.min(r,g,b)>=minWhite && Math.max(r,g,b)-Math.min(r,g,b)<=34 && buf[i+3]>0;
+}
+function eraseOutsideWhite(data,width,height){
+  const total=width*height, seen=new Uint8Array(total), stack=[];
+  function add(p){
+    if(seen[p])return;
+    seen[p]=1;
+    if(nearWhite(data,p))stack.push(p);
+  }
+  for(let x=0;x<width;x++){add(x);add((height-1)*width+x);}
+  for(let y=0;y<height;y++){add(y*width);add(y*width+width-1);}
+  let removed=0;
+  while(stack.length){
+    const p=stack.pop(),i=p*4;
+    if(data[i+3]!==0){data[i+3]=0;removed++;}
+    const x=p%width,y=Math.floor(p/width);
+    if(x>0)add(p-1);
+    if(x<width-1)add(p+1);
+    if(y>0)add(p-width);
+    if(y<height-1)add(p+width);
+  }
+  // The boundary can contain JPEG antialiasing. Feather ONLY matte-adjacent
+  // nearly-white pixels; no blanket removal of white (which damages the drawing).
+  const snapshot=new Uint8Array(data);
+  for(let y=1;y<height-1;y++)for(let x=1;x<width-1;x++){
+    const p=y*width+x, i=p*4;
+    if(data[i+3]<1)continue;
+    const r=data[i],g=data[i+1],b=data[i+2];
+    if(Math.min(r,g,b)<194 || Math.max(r,g,b)-Math.min(r,g,b)>38)continue;
+    if(snapshot[(p-1)*4+3]||snapshot[(p+1)*4+3]||snapshot[(p-width)*4+3]||snapshot[(p+width)*4+3])continue;
+    data[i+3]=Math.round(data[i+3]*(255-Math.min(r,g,b))/61);
+  }
+  return removed;
+}
+await mkdir(dest,{recursive:true});
+for(const [name,path] of Object.entries(sources)){
+  const source=resolve(root,path);
+  const {data,info}=await sharp(source,{density:256})
+    .resize({width:480,height:480,fit:'inside',withoutEnlargement:true})
+    .ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  const removed=eraseOutsideWhite(data,info.width,info.height);
+  let visible=0;
+  for(let i=3;i<data.length;i+=4)if(data[i]>50)visible++;
+  if(visible<75)throw new Error(name+' has no remaining visible artwork');
+  // Transparent padding means the art never touches the tile edges in the guide.
+  const destination=join(dest,name+'.png');
+  await sharp(data,{raw:{width:info.width,height:info.height,channels:4}})
+    .extend({top:12,bottom:12,left:12,right:12,background:{r:255,g:255,b:255,alpha:0}})
+    .png({compressionLevel:9}).toFile(destination);
+  const {data:verify,info:verified}=await sharp(destination).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  let clear=0,total=0;
+  for(let x=0;x<verified.width;x++)for(const y of [0,verified.height-1]){
+    total++;if(verify[(y*verified.width+x)*4+3]===0)clear++;
+  }
+  for(let y=1;y<verified.height-1;y++)for(const x of [0,verified.width-1]){
+    total++;if(verify[(y*verified.width+x)*4+3]===0)clear++;
+  }
+  if(clear!==total)throw new Error(name+' has opaque output borders');
+  console.log('Cleaned bathroom icon '+name+' (edge matte pixels removed: '+removed+', transparent border: 100%)');
+}
+console.log('Prepared '+Object.keys(sources).length+' transparent OMC bathroom icons.');
