@@ -1,6 +1,8 @@
 ---
 import PublicLayout from '../../../layouts/PublicLayout.astro';
 import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuideTaskGrid from '../../../components/guides/GuideTaskGrid.astro';
+import GuideTroubleshooting from '../../../components/guides/GuideTroubleshooting.astro';
 import { bathroomIcons as icons } from '../../../data/guides/bathroom-icons';
 const printable = '/downloads/family-bathroom-reset.pdf';
 const routines = [
@@ -72,7 +74,7 @@ const ageGroups=[
     <section id="weekly" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-5xl">
         <p class="eyebrow">02 · ONCE A WEEK</p><h2 class="section-heading">The weekly clean, without the guessing.</h2><p class="section-lede">Six jobs are easier to share than one vague instruction to “clean the bathroom.” Give each job a clear owner and an equally clear finish line.</p>
-        <div class="mt-9 grid gap-3 md:grid-cols-2">{weekly.map((job,i)=><div class="flex gap-4 border-t-[4px] border-[#D4DFC4] bg-white p-5"><img src={job.icon} alt="" width="64" height="64" loading="lazy" class="size-16 shrink-0 object-contain"/><div><span class="eyebrow">JOB {String(i+1).padStart(2,'0')}</span><h3 class="mt-1 font-serif text-xl">{job.job}</h3><p class="mt-2 text-xs leading-relaxed"><strong>SUPPLIES:</strong> {job.supplies}</p><p class="mt-2 text-sm leading-relaxed">{job.what}</p><p class="mt-3 border-t border-[#eae6e1] pt-2 text-xs leading-relaxed"><strong>DONE:</strong> {job.done}</p></div></div>)}</div>
+        <GuideTaskGrid tasks={weekly} />
         <aside class="mt-7 bg-[#F1D8A8]/35 px-6 py-5 text-sm leading-relaxed"><strong>Teach first, then hand it over.</strong> The first time a child takes on a job, do it together. Once they know the steps and the finish line, let them practice responsibility rather than waiting for directions every time.</aside>
       </div>
     </section>
@@ -86,8 +88,7 @@ const ageGroups=[
 
     <section id="troubleshooting" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-5xl"><p class="eyebrow">04 · WHEN IT KEEPS HAPPENING</p><h2 class="section-heading">Fix the source, not just the symptom.</h2><p class="section-lede">When the same problem comes back, ask what in the setup or routine needs to change.</p>
-        <div class="mt-8 grid gap-4 md:hidden">{problems.map(p=><article class="border-t-[4px] border-[#E8D2D6] bg-white p-5"><div class="flex items-center gap-3"><img src={p.icon} alt="" loading="lazy" width="54" height="54" class="size-14 shrink-0 object-contain"/><h3 class="font-serif text-xl">{p.symptom}</h3></div><dl class="mt-4 space-y-3 text-sm leading-relaxed"><div><dt class="label text-[#6f6a65]">Why it happens</dt><dd class="mt-1">{p.cause}</dd></div><div><dt class="label text-[#6f6a65]">What to change</dt><dd class="mt-1">{p.fix}</dd></div></dl></article>)}</div>
-        <div class="mt-9 hidden overflow-x-auto md:block"><table class="w-full min-w-[540px] border-collapse text-left"><thead class="bg-[#D4DFC4] text-xs uppercase tracking-wider"><tr><th class="p-4">What keeps happening</th><th class="p-4">Why it might happen</th><th class="p-4">What to change</th></tr></thead><tbody>{problems.map(p=><tr class="border-b border-[#ded8d2] align-top"><th scope="row" class="p-4 text-sm font-semibold"><span class="flex items-center gap-3"><img src={p.icon} alt="" width="46" height="46" loading="lazy" class="size-11 shrink-0 object-contain"/><span>{p.symptom}</span></span></th><td class="p-4 text-sm leading-relaxed">{p.cause}</td><td class="p-4 text-sm leading-relaxed">{p.fix}</td></tr>)}</tbody></table></div>
+        <GuideTroubleshooting problems={problems} />
         <div class="mt-9 border-l-4 border-[#D8B79F] bg-white px-6 py-5"><h3 class="font-serif text-xl">Cleaning products are an adult responsibility.</h3><p class="mt-3 text-sm leading-relaxed">Never mix cleaning products, particularly bleach with ammonia or acids. Follow the product label, ventilate appropriately, and store chemicals out of children’s reach. For persistent mold, leaks, or damage inside walls and ceilings, seek qualified help.</p></div>
       </div>
     </section>
