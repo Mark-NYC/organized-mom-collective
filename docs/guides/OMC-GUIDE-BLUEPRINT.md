@@ -6,9 +6,9 @@ A real problem gets a repeatable, usable household system. The article teaches t
 
 ## Required deliverables
 1. An indexable public editorial guide page in `src/pages/guides/<slug>/index.astro` using `PublicLayout`. Mobile-first, keyboard accessible, with natural jump navigation.
-2. A printer-first four-page US Letter reference in `src/pages/guides/<slug>/print.astro`. White base paper, 100% scale, page numbering, safe margins, and a print / Save as PDF action. No automatic signup wall.
+2. A real, generated US Letter PDF in `public/downloads/<slug>.pdf` built with a dedicated `scripts/generate-<slug>-pdf.mjs` script and reusable `scripts/lib/omc-guide-pdf.mjs` helpers. White paper, four pages, safe margins, writable owner fields, page numbering. Never require signup.
 3. A small canonical artwork map in `src/data/guides/<topic>-icons.ts`, importing **real** source assets via Vite `?url`, then referenced by BOTH guide and printable. Do **not** hardcode `/assets/icons/ofc/...` when the artwork only exists under the repository's top-level `assets/` folder: those paths do not exist in `public/`.
-4. A visual guide preview; use actual print pages when screenshots are available, otherwise label the preview clearly as representative. Never claim a CSS mockup is a screenshot of rendered PDF.
+4. Show the actual downloadable PDF using `src/components/guides/GuidePdfPreview.astro`, with a direct-download fallback. For marketing images, render real PDF pages; never fake a screenshot or label a CSS composition as a rendered PDF.
 5. At least one useful related free resource (for this guide: Family Responsibility Builder); promotion is secondary to utility.
 
 ## Guide layout system
@@ -18,9 +18,9 @@ A real problem gets a repeatable, usable household system. The article teaches t
 - `Daily`: habits small enough to do after each use. Hand-drawn icons for each habit.
 - `Weekly`: a task, specific steps, and a clear **definition of done** for each task. One correct icon per action.
 - `Periodic / condition-based`: only what needs occasional attention, with safety caveats.
-- `Troubleshooting`: recurring symptom, probable friction/source, and specific change. Pair icons with real objects/actions, not decorative clipart.
+- `Troubleshooting`: recurring symptom, probable friction/source, and specific change. Pair icons with real objects/actions. Use an accessible table on desktop and stacked problem cards on small screens; never force sideways scrolling to read instructions.
 - `Family handoff`: age/ability-based examples, teaching loop (show / practice / own), and a short family meeting prompt.
-- Repeated, non-intrusive printable CTA and one connected free tool.
+- Repeated, non-intrusive PDF download CTA and one connected free tool. Use the existing `btn-primary` design, not a one-off style.
 - Match OMC's existing public editorial system first: Georgia headlines, Montserrat text, centered editorial intro, charcoal primary buttons, restrained rules and whitespace. Never imitate a reference site's visual identity. Alternate white, #FBF7F1 and restrained pastel surfaces. Use #545454 body, Georgia headlines, Montserrat body/supporting text. Use #CDDDE1, #D4DFC4, #F1D8A8, #E8D2D6 as color accents and meaningful hierarchy.
 - Use existing OMC charcoal `btn-primary` and shared editorial classes, not a separate guide-specific button or competitor-inspired dark-green CTA. Avoid large heavy ink areas in print.
 
@@ -35,7 +35,7 @@ A real problem gets a repeatable, usable household system. The article teaches t
 
 ## Printable page logic
 - 1 Daily habits + `what done looks like`.
-- 2 Weekly jobs with steps and individual finish lines.
+- 2 Weekly jobs with the necessary safe supplies, steps and individual finish lines.
 - 3 Family age/ability examples + fill-in owner and schedule. Leave generous handwriting space.
 - 4 Troubleshooting, safety, and one small next action.
 These four page purposes may be adapted by topic, but each must offer a clear job rather than serve as filler.
@@ -51,9 +51,13 @@ These four page purposes may be adapted by topic, but each must offer a clear jo
 - `astro check` / build / CI succeeds.
 - Audit referenced assets (all source paths and built URLs); check both web and print routes.
 - Render page at ~390px and desktop; confirm no clipping, unreadably small text, broken images or horizontal overflow.
-- Print 4 actual US Letter pages at 100%, backgrounds on/off; inspect page count, safety margins, icon clarity and handwriting room. Do not declare print QA passed without rendering it.
+- Generate and render the actual 4-page US Letter PDF at 100%; inspect page count, safety margins, icon clarity and handwriting room. A build-time check of page count alone is not visual print QA.
 - Verify buttons, download route, relevant tool links, semantic heading order, color contrast and keyboard focus.
 - Don't merge a guide as the new template until the checks pass.
 
-## Pilot limitations to address before declaring final
-The bathroom printable is presently an HTML print-to-PDF route; it does not serve a pre-generated PDF file. The featured paper-stack graphic is a representative page preview, not a screenshot of the actual PDF. Both are acceptable as interim implementations but should be labeled accurately.
+## Build and rollout
+- Add the new PDF generator to both dev/build commands in `package.json` so `public/downloads` always holds the current PDF before Astro copies static assets.
+- PDFs use actual OMC art from the source icon folders. Use PNG/JPG for `pdf-lib` embedding, and retain the exact task meaning when selecting artwork.
+- Keep the article’s table and its mobile card view in sync using the same data array.
+- The GuidePdfPreview component embeds the actual PDF rather than a fake static graphic. Browsers without inline PDF support still offer direct download.
+- Do not merge or call the guide a validated master template without build, responsive, and visual PDF checks.
