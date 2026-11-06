@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-living-room-reset',
+    title: 'The Family Living Room Reset',
+    teaser: 'A five-minute evening reset, six weekly jobs, and a simple family ownership plan for shared spaces.',
+    area: 'Home organization',
+    kicker: 'Five-minute reset · Shared spaces · Family ownership',
+    image: '/images/guides/living-room-guide-page-1.webp',
+    imageAlt: 'Illustrated first-page preview of the Family Living Room Reset printable',
+    pdf: '/downloads/family-living-room-reset.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-bedroom-reset',
     title: 'The Kids’ Bedroom Reset',
     teaser: 'A five-minute bedroom reset kids can actually learn, with weekly care, simple storage and family responsibility.',
