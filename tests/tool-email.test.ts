@@ -1,7 +1,16 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { normalizeEmail, validEmail, collectToolEmail, publicDownloadId } from '../src/lib/tool-email';
+import { normalizeEmail, validEmail, collectToolEmail, publicDownloadId, downloadModalCopy } from '../src/lib/tool-email';
 afterEach(() => vi.unstubAllGlobals());
 describe('download signup', () => {
+  it('uses OMC-friendly resource-specific headings and calls to action', () => {
+    expect(downloadModalCopy('guide-family-kitchen-reset').title).toBe('Your Kitchen Reset Guide is ready.');
+    expect(downloadModalCopy('guide-family-laundry-system').button).toBe('Get My Free Guide');
+    expect(downloadModalCopy('routine-chart').title).toBe('Your Routine Chart is ready.');
+    expect(downloadModalCopy('family-responsibility-builder').title).toBe('Your Family Responsibility Chart is ready.');
+    expect(downloadModalCopy('guide-custom-topic').title).toBe('Your Custom Topic Guide is ready.');
+    expect(downloadModalCopy('guide-<img src=x onerror=alert(1)>').title).not.toContain('<img');
+  });
+
   it('covers published public generators and guide/article downloads, but never paid or member paths', () => {
     expect(publicDownloadId('/family-responsibility-builder')).toBe('family-responsibility-builder');
     expect(publicDownloadId('/family-meeting-agenda')).toBe('family-meeting-agenda');

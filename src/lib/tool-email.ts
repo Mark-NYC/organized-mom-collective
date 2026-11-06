@@ -88,27 +88,60 @@ export function requireToolEmail(tool?: string): Promise<boolean> {
   active = showDialog(publicTool).finally(() => { active = undefined; });
   return active;
 }
+/** Describe the printable without trusting route segments as HTML. */
+export function downloadModalCopy(tool: string) {
+  const titles: Record<string, string> = {
+    'chore-chart': 'Chore Chart',
+    'responsibility-chart': 'Responsibility Chart',
+    'family-responsibility-builder': 'Family Responsibility Chart',
+    'family-meeting-agenda': 'Family Meeting Agenda',
+    'routine-chart': 'Routine Chart',
+    'planner': 'Weekly Planner',
+    'try-the-calendar': 'Family Calendar',
+    'pantry': 'Pantry Inventory',
+    'mental-load-worksheet': 'Mental Load Worksheet',
+    'meal-planner': 'Dinner Planner',
+    'laundry-system': 'Laundry Checklist',
+    'guide-family-kitchen-reset': 'Kitchen Reset Guide',
+    'guide-family-bathroom-reset': 'Bathroom Reset Guide',
+    'guide-family-laundry-system': 'Laundry System Guide',
+  };
+  const isGuide = tool.startsWith('guide-');
+  const raw = (titles[tool] ?? (isGuide ? tool.slice(6) : tool).replace(/[^a-z0-9-]/gi, '')
+    .split('-').filter(Boolean).slice(0, 10)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')).slice(0, 70);
+  const label = isGuide && !/Guide$/.test(raw) ? raw + ' Guide' : raw;
+  return {
+    title: 'Your ' + label + ' is ready.',
+    button: isGuide ? 'Get My Free Guide' : 'Get My Free Printable',
+    lead: isGuide ? 'Free guide download' : 'Free printable download',
+  };
+}
 function showDialog(tool: string): Promise<boolean> {
-  const copy = Object.prototype.hasOwnProperty.call(gatedTools, tool)
-    ? gatedTools[tool as GatedTool]
-    : { title: 'Your free printable is ready.', button: 'Download my printable', lead: 'Free printable download' };
+  const copy = downloadModalCopy(tool);
   return new Promise(resolve => {
     const previous = document.activeElement as HTMLElement | null;
     const dialog = document.createElement('dialog');
     dialog.className = 'tool-email-dialog';
     dialog.setAttribute('aria-labelledby', 'tool-email-title');
+    dialog.setAttribute('aria-describedby', 'tool-email-intro');
     dialog.innerHTML = `<form class="tool-email-form">
+      <div class="tool-email-brand">ORGANIZED MOM COLLECTIVE</div>
       <button type="button" class="tool-email-close" aria-label="Close signup">×</button>
-      <h2 id="tool-email-title">${copy.title}</h2>
-      <p>Enter your email to download it. No account or password needed.</p>
+      <div class="tool-email-accent" aria-hidden="true"></div>
+      <h2 id="tool-email-title"></h2>
+      <p id="tool-email-intro" class="tool-email-intro">Enter your email to take it home. You’ll only need to do this once.</p>
       <label class="tool-email-label" for="tool-email-address">Email address</label>
       <input id="tool-email-address" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com" />
       <div class="tool-email-trap" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off" /></label></div>
-      <label class="tool-email-consent"><input name="marketing" type="checkbox" /> <span>Send me free family tools and occasional product updates. I can unsubscribe anytime.</span></label>
-      <p class="tool-email-note">The checkbox is optional. Your printable downloads here after you submit. We don’t collect your child’s name or chart contents.</p>
+      <label class="tool-email-consent"><input name="marketing" type="checkbox" /> <span>Yes, send me helpful family organization ideas and occasional OMC updates. I can unsubscribe anytime. <strong>Optional.</strong></span></label>
       <p class="tool-email-error" role="alert"></p>
-      <button class="tool-email-submit" type="submit">${copy.button}</button>
+      <button class="tool-email-submit" type="submit"></button>
+      <p class="tool-email-note">Free download · No account needed</p>
     </form>`;
+    // Use textContent so even newly added resource slugs can never inject markup.
+    dialog.querySelector<HTMLElement>('#tool-email-title')!.textContent = copy.title;
+    dialog.querySelector<HTMLButtonElement>('.tool-email-submit')!.textContent = copy.button;
     document.body.append(dialog);
     const form = dialog.querySelector<HTMLFormElement>('form')!;
     const submit = dialog.querySelector<HTMLButtonElement>('[type="submit"]')!;
