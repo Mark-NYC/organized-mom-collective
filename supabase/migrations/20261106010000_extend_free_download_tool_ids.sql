@@ -1,6 +1,7 @@
 -- Extend unified free-download capture to every published free tool that can export or print.
 -- Apply after 20261106000000_unified_free_download_capture.sql.
 -- Preserves consent, attribution, rate limiting, and existing records.
+begin;
 create or replace function public.tool_email_signup_v2(
   p_email text, p_marketing boolean, p_tool text, p_website text default '',
   p_source text default '', p_medium text default '', p_campaign text default '', p_content text default ''
