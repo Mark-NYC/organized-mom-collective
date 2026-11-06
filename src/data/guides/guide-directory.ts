@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-entryway-reset',
+    title: 'The Family Entryway Reset',
+    teaser: 'A home for shoes, backpacks, coats, lunch gear and school papers, with five easy arrival habits and clear family jobs.',
+    area: 'Home organization',
+    kicker: 'Arrival habits · Easy drop zones · Family handoff',
+    image: '/images/guides/entryway-guide-page-1.webp',
+    imageAlt: 'Illustrated first page preview of the Family Entryway Reset guide',
+    pdf: '/downloads/family-entryway-reset.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-laundry-system',
     title: 'A Laundry System the Whole Family Can Help Keep Up With',
     teaser: 'Five steps from hamper to drawer, a realistic weekly rhythm, and a simple way to share the work.',
