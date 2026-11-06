@@ -19,7 +19,7 @@ const artwork={
 await mkdir(dest,{recursive:true});
 for(const [name,path] of Object.entries(artwork)){
  const file=join(dest,name+'.png');
- await sharp(resolve(path),{density:256}).ensureAlpha().resize(480,480,{fit:'contain',background:{r:255,g:255,b:255,alpha:0},withoutEnlargement:true}).png().toFile(file);
+ await sharp(resolve(path),{density:720}).ensureAlpha().resize(480,480,{fit:'contain',background:{r:255,g:255,b:255,alpha:0},withoutEnlargement:true}).png().toFile(file);
  const {data,info}=await sharp(file).ensureAlpha().raw().toBuffer({resolveWithObject:true});
  let visible=0;for(let i=3;i<data.length;i+=4)if(data[i]>10)visible++;
  if(info.width<40||visible<70)throw Error('Missing or blank OMC icon '+name+': '+path);
