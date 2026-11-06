@@ -1,0 +1,74 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
+import {night,steps,jobs,problems,familyPrompt} from '../../../../scripts/lib/morning-guide-content.mjs';
+const pdf='/downloads/family-morning-routine.pdf';
+const images=[1,2,3,4].map(n=>`/images/guides/morning-guide-page-${n}.webp`);
+const art=(name:string)=>`/assets/icons/ofc/guides/morning/${name}.png`;
+---
+<PublicLayout title="The Family Morning Routine: School Mornings Without Constant Reminders" description="Free Family Morning Routine guide and illustrated four-page printable with night-before preparation, seven before-school steps, family responsibilities and practical solutions." width="full" ogType="article">
+<div class="omc-guide text-[#545454]">
+<section class="px-5 py-9 sm:px-8 sm:py-14"><div class="mx-auto max-w-5xl">
+<nav aria-label="Breadcrumb" class="text-sm font-medium"><a href="/guides" class="underline underline-offset-4">Guides</a><span aria-hidden="true" class="mx-2">/</span>The Family Morning Routine</nav>
+<header class="mx-auto mt-9 max-w-[52rem] text-center">
+<p class="eyebrow">BEFORE SCHOOL · FAMILY RESPONSIBILITY</p>
+<h1 class="mt-3 font-serif text-[clamp(2.4rem,6vw,4.25rem)] leading-[1.09] tracking-tight">School mornings without a hundred reminders.</h1>
+<p class="mx-auto mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">“Shoes on. Brush your teeth. Where's your backpack?” If you're the one calling out every next step, your family needs a routine everyone can see and practice, not another set of reminders.</p>
+<p class="mt-5 text-xs text-[#777]">Free practical guide · Four-page illustrated printable · Matches the August Club school routine</p>
+</header>
+<div class="mt-10 grid items-center gap-8 border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6 sm:p-10 md:grid-cols-[1.15fr_.85fr]">
+<div><p class="eyebrow">FREE PRINTABLE · FOUR US LETTER PAGES</p><h2 class="mt-3 font-serif text-3xl leading-tight">The Family Morning Routine</h2>
+<p class="mt-4 max-w-lg text-sm leading-[1.8] sm:text-base">A short night-before setup, seven illustrated school-morning steps, a write-in family ownership chart and fixes for mornings that go sideways.</p>
+<ul class="mt-5 space-y-2 text-sm leading-relaxed"><li>✓ Prepare the important things the night before</li><li>✓ Teach a routine kids can follow visually</li><li>✓ Give each family member an age-appropriate responsibility</li></ul>
+<a href={pdf} download="OMC-Family-Morning-Routine.pdf" class="btn-primary mt-7">Download the free PDF</a>
+<p class="mt-2 text-xs text-[#6f6a65]">Four pages · Email requested on first download · Marketing optional</p></div>
+<div class="py-5"><GuidePdfPreview pdf={pdf} images={images} title="The Family Morning Routine"/></div>
+</div>
+<nav aria-label="On this page" class="mt-8 border-t border-[#ded8d2] pt-5"><p class="label mb-3 text-[#6f6a65]">IN THIS GUIDE</p>
+<div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+<a class="guide-anchor" href="#night-before">Night-before setup</a><a class="guide-anchor" href="#morning-steps">Morning steps</a><a class="guide-anchor" href="#ownership">Family ownership</a><a class="guide-anchor" href="#problems">Troubleshooting</a><a class="guide-anchor max-sm:col-span-2" href="#printable">Free printable</a></div></nav>
+</div></section>
+<section id="night-before" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">01 · SET UP TOMORROW</p><h2 class="section-heading">The calmest school mornings start the night before.</h2>
+<p class="section-lede">Move the decisions out of the busiest part of the day. Pick one consistent evening cue and practice these preparations together. Adults take care of changes, transportation and food safety.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{night.map(([icon,title,detail],i)=><article class="border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6"><div class="flex items-center gap-4"><img src={art(icon)} alt="" loading="lazy" width="68" height="68" class="size-[68px] object-contain"/><span class="font-serif text-3xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div><h3 class="mt-3 font-serif text-2xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-8 bg-[#CDDDE1]/35 p-6 text-sm leading-[1.8]"><strong>The simple finish line:</strong> Clothes are chosen, school gear is at its home, and an adult knows about any schedule changes. Tomorrow starts with following a routine, not searching the house.</div>
+<a href="/guides/family-entryway-reset/" class="mt-5 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Set up the free Family Entryway Reset</a>
+</div></section>
+<section id="morning-steps" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">02 · FOLLOW THE PICTURES</p><h2 class="section-heading">Seven before-school steps, in a predictable order.</h2>
+<p class="section-lede">These match the prepared August Organized Family Club routine. There isn't a universal right wake-up time, so keep the order but adjust the timing and number of steps to fit your family.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{steps.map(([icon,title,detail],i)=><article class="border-t-[5px] border-[#D4DFC4] bg-white p-6"><div class="flex items-center gap-4"><img src={art(icon)} alt="" width="65" height="65" loading="lazy" class="size-[65px] object-contain"/><span class="font-serif text-2xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div><h3 class="mt-3 font-serif text-xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-8 border-l-4 border-[#D4DFC4] bg-white p-6"><h3 class="font-serif text-2xl">Make the steps personal with the free Routine Chart Builder.</h3><p class="mt-3 text-sm leading-[1.8]">Select the pictures your child needs, put them in order, adjust times, and download a chart with their own routine. Don't make another competing morning chart by hand.</p><a href="/routine-chart" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Build a free morning routine chart</a></div>
+</div></section>
+<section id="ownership" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">03 · GIVE KIDS A REAL PART</p><h2 class="section-heading">A chart helps most when everyone knows what belongs to them.</h2>
+<p class="section-lede">A child can learn a job in stages: watch, do it together, practice with a prompt, then do it independently when ready. Ages are suggestions, not deadlines. Adults remain responsible for departure safety and logistics.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{jobs.map(([icon,age,detail])=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={art(icon)} alt="" width="64" height="64" loading="lazy" class="mb-3 size-16 object-contain"/><span class="eyebrow">{age}</span><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-10 grid gap-6 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-2"><div><p class="eyebrow">AT THE FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Start with one job the child can own.</h3><p class="mt-3 text-sm leading-[1.8]">Use page three of the printable to agree who does what, when they do it and what finished looks like. Practice together before stepping back.</p></div><div><p class="font-serif text-xl leading-[1.5]">“{familyPrompt}”</p><ol class="mt-4 space-y-3 text-sm leading-[1.8]"><li>1. Show the step and its picture.</li><li>2. Practice it at a relaxed time.</li><li>3. Ask “What's next on your chart?”</li><li>4. Review what needs simplifying next week.</li></ol></div></div>
+<a href="/resources/morning-routine-chart-generator" class="mt-5 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Read how to teach the chart step by step</a>
+</div></section>
+<section id="problems" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">04 · WHEN MORNINGS GO WRONG</p><h2 class="section-heading">Less nagging. Smaller, clearer next steps.</h2>
+<p class="section-lede">If the same thing goes wrong every day, change the setup or the sequence. The job is to make mornings easier, not create a perfect-looking chart.</p>
+<div class="mt-8 space-y-3">{problems.map(([icon,title,fix])=><article class="grid gap-4 border-l-4 border-[#E8D2D6] bg-white p-5 md:grid-cols-[1fr_1.3fr]"><div class="flex items-center gap-3"><img src={art(icon)} alt="" width="50" height="50" loading="lazy" class="size-[50px] shrink-0 object-contain"/><h3 class="font-serif text-xl">{title}</h3></div><p class="text-sm leading-[1.8]">{fix}</p></article>)}</div>
+<div class="mt-8 border-l-4 border-[#F1D8A8] bg-white p-6 text-sm leading-[1.8]"><strong>A note about safety:</strong> Adults confirm transportation, school instructions, medication needs and food safety. Perishable lunches belong in appropriate cold storage until it's time to go. A picture chart helps with independence; it doesn't replace supervision.</div>
+</div></section>
+<section id="printable" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">PRINT AND PRACTICE</p><h2 class="section-heading">A simple system your whole family can use.</h2>
+<p class="section-lede">Four illustrated pages to teach the morning rhythm and choose family responsibilities. Then use our free Routine Chart Builder for the personalized version each child follows every day.</p>
+<div class="mt-9 border border-[#ded8d2] bg-white p-7 sm:p-9"><GuidePageGallery images={images} title="The Family Morning Routine"/><div class="mt-8 text-center"><a href={pdf} download="OMC-Family-Morning-Routine.pdf" class="btn-primary">Download the free PDF</a><p class="mt-2 text-xs">Four US Letter pages · Email requested for first download</p></div></div>
+<div class="mt-10 grid gap-5 sm:grid-cols-2"><div class="border-t-4 border-[#CDDDE1] bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Personalize the pictures.</h3><p class="mt-3 text-sm leading-[1.8]">Make a short chart with your child's steps and timing.</p><a href="/routine-chart" class="mt-4 inline-flex min-h-11 font-semibold underline underline-offset-4">Free Routine Chart Builder</a></div><div class="border-t-4 border-[#D4DFC4] bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Make the handoff work.</h3><p class="mt-3 text-sm leading-[1.8]">Give backpacks, shoes, coats and school papers predictable homes.</p><a href="/guides/family-entryway-reset/" class="mt-4 inline-flex min-h-11 font-semibold underline underline-offset-4">Family Entryway Reset</a></div></div>
+<div class="mt-10 bg-[#FBF7F1] p-7"><p class="eyebrow">WANT THE ROUTINE PREPARED FOR YOUR CHILD?</p><h3 class="mt-3 font-serif text-3xl">Prepared school-day routines, personalized to your family.</h3><p class="mt-3 max-w-2xl text-sm leading-[1.8]">August's Organized Family Club resource brings together personalized picture routines for before and after school. Members can adjust the steps and use the prepared printable as part of their monthly family resources.</p><a href="/club" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Explore Organized Family Club</a></div>
+</div></section></div>
+<style>
+.omc-guide{font-family:Montserrat,Arial,sans-serif}.omc-guide section[id]{scroll-margin-top:110px}
+.omc-guide .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.omc-guide .section-heading{max-width:800px;margin-top:14px;font-family:Georgia,serif;font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.025em}
+.omc-guide .section-lede{max-width:700px;margin-top:16px;font-size:1.06rem;line-height:1.8}
+.omc-guide .guide-anchor{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 13px;background:#fff;border:1px solid #d8d1cb;border-radius:3px;color:#545454;font-size:14px;font-weight:650;line-height:1.25;text-align:center;text-decoration:none}
+.omc-guide .guide-anchor:hover{background:#CDDDE1}.omc-guide .guide-anchor:focus-visible{outline:2px solid #545454;outline-offset:2px}
+@media(min-width:640px){.omc-guide .guide-anchor{min-height:44px;padding:9px 14px;font-size:13px}}
+</style>
+</PublicLayout>

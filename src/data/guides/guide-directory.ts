@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-morning-routine',
+    title: 'The Family Morning Routine',
+    teaser: 'A calmer school morning with night-before preparation, seven pictured steps, shared family jobs and fewer reminders.',
+    area: 'Routines',
+    kicker: 'Night-before prep · Morning pictures · Family handoff',
+    image: '/images/guides/morning-guide-page-1.webp',
+    imageAlt: 'Illustrated preview of the Family Morning Routine guide',
+    pdf: '/downloads/family-morning-routine.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-dinner-system',
     title: 'The Family Dinner System',
     teaser: 'Plan dinners around the real week, collect go-to family meals and share the work with a simple Dinner Team.',

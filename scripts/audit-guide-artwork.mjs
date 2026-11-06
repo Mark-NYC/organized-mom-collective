@@ -14,7 +14,8 @@ const guides=[
  {slug:'bedroom',pdf:'family-bedroom-reset.pdf',preview:'bedroom'},
  {slug:'living-room',pdf:'family-living-room-reset.pdf',preview:'living-room'},
  {slug:'paper',pdf:'family-paper-clutter-reset.pdf',preview:'paper'},
- {slug:'dinner',pdf:'family-dinner-system.pdf',preview:'dinner'}
+ {slug:'dinner',pdf:'family-dinner-system.pdf',preview:'dinner'},
+ {slug:'morning',pdf:'family-morning-routine.pdf',preview:'morning'}
 ];
 let errors=[],images=0;
 for(const {slug,pdf,preview} of guides){
@@ -64,4 +65,4 @@ for(const {slug,pdf,preview} of guides){
  console.log('Audited '+slug+': '+names.length+' illustrations, four-page letter PDF, four previews');
 }
 if(errors.length){console.error(errors.map(x=>'FAIL '+x).join('\n'));process.exitCode=1;}
-else console.log('Guide artwork QA passed: '+images+' fitted, transparent, monochrome drawings; eight PDFs; thirty-two previews.');
+else console.log('Guide artwork QA passed: '+images+' fitted, transparent, monochrome drawings; nine PDFs; thirty-six previews.');
