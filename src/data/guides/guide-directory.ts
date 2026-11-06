@@ -18,6 +18,18 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-bedtime-routine',
+    browseCategory: 'family-systems',
+    title: 'The Family Bedtime Routine',
+    teaser: 'A simple evening wind-down, six illustrated bedtime steps, shared family jobs and fewer nightly reminders.',
+    area: 'Routines',
+    kicker: 'Evening wind-down · Bedtime pictures · Family ownership',
+    image: '/images/guides/bedtime-guide-page-1.webp',
+    imageAlt: 'Illustrated first-page preview of the Family Bedtime Routine printable',
+    pdf: '/downloads/family-bedtime-routine.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-morning-routine',
     browseCategory: 'family-systems',
     title: 'The Family Morning Routine',
