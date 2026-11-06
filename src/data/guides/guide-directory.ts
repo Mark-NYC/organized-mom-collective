@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-laundry-system',
+    title: 'A Laundry System the Whole Family Can Help Keep Up With',
+    teaser: 'Five steps from hamper to drawer, a realistic weekly rhythm, and a simple way to share the work.',
+    area: 'Family responsibilities',
+    kicker: 'Full laundry loop · Weekly rhythm · Family ownership',
+    image: '/images/guides/family-laundry-system-cover.svg',
+    imageAlt: 'Editorial preview of the Family Laundry System printable',
+    pdf: '/downloads/family-laundry-system-guide.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-kitchen-reset',
     title: 'The Family Kitchen Reset',
     teaser: 'Five easy after-meal habits, shared cleanup jobs, and an illustrated family plan for keeping the kitchen ready.',
