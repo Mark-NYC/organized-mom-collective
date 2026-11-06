@@ -1,0 +1,20 @@
+---
+/** A reusable real-PDF preview for every OMC practical guide.
+ * It renders page one from the actual downloadable PDF in browsers with inline PDF support.
+ * On devices without support, visitors still get the direct PDF link.
+ */
+interface Props { pdf: string; title: string; compact?: boolean }
+const {pdf,title,compact=false}=Astro.props;
+const previewUrl=pdf+'#page=1&toolbar=0&navpanes=0&scrollbar=0&view=FitH';
+---
+<div class:list={['guide-pdf-preview relative mx-auto w-full bg-white',compact?'max-w-[250px]':'max-w-[330px]']} aria-label={`Preview of ${title}`}>
+  <div class="absolute inset-0 translate-x-3 translate-y-3 rotate-[4deg] border border-[#d8d1cb] bg-white" aria-hidden="true"></div>
+  <div class="relative overflow-hidden border border-[#d8d1cb] bg-white shadow-[0_8px_20px_rgba(55,50,48,.12)]">
+    <div class="pdf-paper relative aspect-[8.5/11] overflow-hidden">
+      <iframe loading="lazy" title={`Actual first page of ${title}`} src={previewUrl} class="pointer-events-none absolute inset-0 size-full border-0" tabindex="-1"></iframe>
+      <a href={pdf} target="_blank" rel="noopener" class="absolute inset-0 z-10 flex items-end justify-center p-3" aria-label={`Open the full four-page PDF: ${title}`}>
+        <span class="bg-white/95 px-3 py-1.5 text-center text-[10px] font-bold tracking-wide text-[#545454] shadow-sm">View full 4-page PDF</span>
+      </a>
+    </div>
+  </div>
+</div>
