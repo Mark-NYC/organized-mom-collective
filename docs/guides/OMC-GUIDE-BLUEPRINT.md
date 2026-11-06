@@ -21,8 +21,8 @@ A real problem gets a repeatable, usable household system. The article teaches t
 - `Troubleshooting`: recurring symptom, probable friction/source, and specific change. Pair icons with real objects/actions, not decorative clipart.
 - `Family handoff`: age/ability-based examples, teaching loop (show / practice / own), and a short family meeting prompt.
 - Repeated, non-intrusive printable CTA and one connected free tool.
-- Alternate white, #FBF7F1 and restrained pastel surfaces. Use #545454 body, Georgia headlines, Montserrat body/supporting text. Use #CDDDE1, #D4DFC4, #F1D8A8, #E8D2D6 as color accents and meaningful hierarchy.
-- Green #315B4F on web CTAs may be used sparingly if consistent with the site's existing editorial palette. Avoid large heavy ink areas in print.
+- Match OMC's existing public editorial system first: Georgia headlines, Montserrat text, centered editorial intro, charcoal primary buttons, restrained rules and whitespace. Never imitate a reference site's visual identity. Alternate white, #FBF7F1 and restrained pastel surfaces. Use #545454 body, Georgia headlines, Montserrat body/supporting text. Use #CDDDE1, #D4DFC4, #F1D8A8, #E8D2D6 as color accents and meaningful hierarchy.
+- Use existing OMC charcoal `btn-primary` and shared editorial classes, not a separate guide-specific button or competitor-inspired dark-green CTA. Avoid large heavy ink areas in print.
 
 ## Icon rules
 - Use OMC's hand-drawn illustrations, never emoji or mixed generic outline packs in place of a task drawing.
