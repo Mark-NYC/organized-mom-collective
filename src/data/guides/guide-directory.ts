@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-bedroom-reset',
+    title: 'The Kids’ Bedroom Reset',
+    teaser: 'A five-minute bedroom reset kids can actually learn, with weekly care, simple storage and family responsibility.',
+    area: 'Home organization',
+    kicker: 'Five-minute reset · Weekly bedroom jobs · Family ownership',
+    image: '/images/guides/bedroom-guide-page-1.webp',
+    imageAlt: 'Illustrated preview of the Kids Bedroom Reset printable',
+    pdf: '/downloads/family-bedroom-reset.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-entryway-reset',
     title: 'The Family Entryway Reset',
     teaser: 'A home for shoes, backpacks, coats, lunch gear and school papers, with five easy arrival habits and clear family jobs.',
