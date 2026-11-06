@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-kitchen-reset',
+    title: 'The Family Kitchen Reset',
+    teaser: 'Five easy after-meal habits, shared cleanup jobs, and an illustrated family plan for keeping the kitchen ready.',
+    area: 'Cleaning & resets',
+    kicker: 'After-meal habits · Ten-minute reset · Weekly care',
+    image: '/images/guides/kitchen-guide-page-1.webp',
+    imageAlt: 'First page of the Family Kitchen Reset illustrated four-page printable',
+    pdf: '/downloads/family-kitchen-reset.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-bathroom-reset',
     title: 'The Family Bathroom Reset',
     teaser: 'Daily habits, six weekly jobs, and a simple way to share bathroom care with the whole family.',
