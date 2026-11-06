@@ -22,7 +22,7 @@ function base(i,kicker,title,sub){
  return rect(0,0,612,792,'white')+text(42,31,'ORGANIZED MOM COLLECTIVE',8.5,true)+text(407,31,'KIDS BEDROOM RESET / '+i+' OF 4',7.4)+rect(42,42,528,6,accents[i-1])+text(42,72,kicker,9,true)+text(42,108,title,26,true,true)+lines(42,133,sub,85,10,14)+rect(42,756,528,1,rule)+text(42,775,'SMALL HABITS. SHARED RESPONSIBILITY.',7.6,true)+text(425,775,'organizedmomcollective.com',7.4);
 }
 async function p1(){
- let s=base(1,'01 / COMING HOME','My Five-Minute Bedroom Reset','Five small habits kids can learn and repeat each day.');
+ let s=base(1,'01 / DAILY RESET','My Five-Minute Bedroom Reset','Five small habits kids can learn and repeat each day.');
  s+=rect(42,162,528,53,ivory)+text(55,182,'WHAT FINISHED LOOKS LIKE',9,true)+lines(55,200,'Bed made, clothes sorted, toys home, and floor mostly clear.',87,9.2);
  for(let i=0;i<habits.length;i++){const [art,title,what,done]=habits[i],y=237+i*84;
  s+=await icon(art,52,y,44)+text(104,y+18,String(i+1).padStart(2,'0'),15,false,true)+text(141,y+15,title,11.8,true)+lines(141,y+34,what,69,9.1)+text(141,y+61,'DONE: '+done,8.5)+rect(48,y+69,515,1,rule);}
