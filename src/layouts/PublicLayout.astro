@@ -122,3 +122,8 @@ const mainClass =
   <CtaTracking />
   {accountsEnabled() && <SaveNudge />}
 </BaseLayout>
+
+<script>
+  import { installGuideDownloadGate } from '../lib/guide-downloads';
+  installGuideDownloadGate();
+</script>
