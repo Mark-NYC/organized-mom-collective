@@ -144,6 +144,9 @@ export const routes = {
   mentalLoad: '/mental-load-worksheet',
   familyMeetingAgenda: '/family-meeting-agenda',
   resources: '/resources',
+  /** Practical household systems with printable reference guides. */
+  guides: '/guides',
+  guide: (slug: string) => `/guides/${slug}/`,
   /** The Free tools section of the resource hub. */
   freeTools: '/tools',
   article: (slug: string) => `/resources/${slug}`,
