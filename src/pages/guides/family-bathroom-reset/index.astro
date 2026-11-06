@@ -1,0 +1,46 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+const steps=[
+  {title:'Start with the daily reset',text:'After brushing teeth, bathing, or getting dressed, everyone leaves the bathroom ready for the next person.'},
+  {title:'Give every weekly job an owner',text:'Choose who will clean the sink, mirror, toilet, shower, floor, and trash. Keep chemicals in adult hands.'},
+  {title:'Teach what done looks like',text:'Demonstrate a job, practice together, and give the child a specific finish line rather than just saying “clean the bathroom.”'},
+  {title:'Fix what keeps breaking down',text:'When towels stay on the floor or toothpaste builds up, change the setup and practice one easier habit.'}
+];
+---
+<PublicLayout title="Family Bathroom Reset Guide: Daily Habits, Weekly Cleaning and Kids' Jobs" description="A realistic family bathroom cleaning system with simple daily habits, weekly jobs, age-appropriate responsibilities and a free four-page printable." width="wide">
+  <article class="mx-auto max-w-4xl pb-14 text-[#545454]">
+    <nav class="pt-3 text-sm"><a class="underline underline-offset-4" href="/resources">All resources</a> <span aria-hidden="true">/</span> Family Bathroom Reset</nav>
+    <header class="mt-9 border-t-[7px] border-[#CDDDE1] pt-8">
+      <p class="text-xs font-bold tracking-[.18em] uppercase">A practical family guide · Free printable</p>
+      <h1 class="mt-4 font-serif text-[clamp(2.3rem,6vw,4rem)] leading-[1.12]">A Bathroom Everyone Helps Keep Clean</h1>
+      <p class="mt-5 max-w-2xl text-lg leading-relaxed">Less reminding. Fewer mystery messes. A simple daily reset and six weekly jobs your family can learn to share.</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/guides/family-bathroom-reset/print" class="inline-flex min-h-12 items-center bg-[#545454] px-6 py-3 font-semibold text-white hover:opacity-90">Get the free 4-page printable</a>
+        <a href="#how-it-works" class="inline-flex min-h-12 items-center border border-[#545454] px-6 py-3 font-semibold">See the system</a>
+      </div>
+      <p class="mt-3 text-sm">US Letter. No email required. On the printable page, choose Print or Save as PDF.</p>
+    </header>
+    <div class="mt-10 grid gap-4 md:grid-cols-3">
+      <div class="bg-[#EDF3F4] p-6"><p class="text-xs font-bold uppercase tracking-widest">Daily</p><h2 class="mt-2 font-serif text-2xl">2-minute reset</h2><p class="mt-3 text-sm leading-relaxed">Hang towels, put clothes away, wipe spills, and reset the counter.</p></div>
+      <div class="bg-[#EEF3E8] p-6"><p class="text-xs font-bold uppercase tracking-widest">Weekly</p><h2 class="mt-2 font-serif text-2xl">6 clear jobs</h2><p class="mt-3 text-sm leading-relaxed">A cleaner bathroom without one person managing every task.</p></div>
+      <div class="bg-[#FCF3E4] p-6"><p class="text-xs font-bold uppercase tracking-widest">As a family</p><h2 class="mt-2 font-serif text-2xl">Real ownership</h2><p class="mt-3 text-sm leading-relaxed">Help each person learn what to do and what finished looks like.</p></div>
+    </div>
+    <section id="how-it-works" class="mt-16">
+      <p class="text-xs font-bold tracking-[.18em] uppercase">The system</p><h2 class="mt-3 font-serif text-4xl">Start small. Make it repeatable.</h2>
+      <div class="mt-8 space-y-7">{steps.map((s,i)=><div class="flex gap-5 border-b border-[#ddd] pb-6"><span class="font-serif text-3xl text-[#9BAAA1]">{String(i+1).padStart(2,'0')}</span><div><h3 class="font-serif text-2xl">{s.title}</h3><p class="mt-2 max-w-2xl leading-relaxed">{s.text}</p></div></div>)}</div>
+    </section>
+    <section class="mt-16">
+      <div class="flex flex-wrap items-start gap-5"><img src="/assets/icons/ofc/v2/routines/wipe-counter.png" alt="OMC illustration of wiping a counter" width="110" height="110" class="size-24 object-contain" /><div class="flex-1"><h2 class="font-serif text-3xl">What should a child actually do?</h2><p class="mt-3 leading-relaxed">Toddlers and preschoolers can help hang towels and put clothes in a hamper. Elementary-age kids can practice wiping surfaces with a child-safe method. Older kids can take on the mirror and floor. Teens and adults handle cleaning chemicals, toilet cleaning, and deeper maintenance as appropriate.</p></div></div>
+      <p class="mt-5 leading-relaxed">These are starting points, not strict age rules. Teach the task, supervise until it is safe, and then hand it over.</p>
+    </section>
+    <section class="mt-16 bg-[#FBF7F1] p-6 sm:p-10">
+      <p class="text-xs font-bold tracking-[.18em] uppercase">From reminders to ownership</p><h2 class="mt-3 font-serif text-3xl">Use your next family meeting.</h2><p class="mt-4 leading-relaxed">Ask which bathroom habit is hardest to keep. Pick one improvement. Assign the weekly jobs by name, practice anything new, and review how it went next week. The goal is not a perfect bathroom. It's a family that learns to take responsibility together.</p>
+    </section>
+    <section class="mt-12 border-l-4 border-[#D8B79F] px-5 py-2"><h2 class="font-serif text-2xl">Safety matters.</h2><p class="mt-2 leading-relaxed">Never mix cleaning chemicals. Follow product labels, ventilate appropriately, and store cleaning supplies out of children's reach. Adults should handle persistent mold, water leaks, damaged caulk and other maintenance concerns.</p></section>
+    <section class="mt-16 border-t border-[#ccc] pt-10 text-center">
+      <p class="text-xs font-bold tracking-[.18em] uppercase">Free download</p><h2 class="mt-3 font-serif text-4xl">Print the Family Bathroom Reset.</h2><p class="mx-auto mt-4 max-w-xl leading-relaxed">Four easy-to-reference pages: daily habits, weekly jobs, family assignments, and what to do when things don't stick.</p>
+      <a href="/guides/family-bathroom-reset/print" class="mt-7 inline-flex min-h-12 items-center bg-[#545454] px-7 py-3 font-semibold text-white hover:opacity-90">Open the printable</a>
+      <div class="mt-9 border-t border-[#ddd] pt-8"><p class="font-serif text-2xl">Make each responsibility clear.</p><p class="mt-2">Try the free Family Responsibility Builder to help your kids learn their jobs.</p><a class="mt-4 inline-block font-semibold underline underline-offset-4" href="/family-responsibility-builder">Create your family's responsibility cards</a></div>
+    </section>
+  </article>
+</PublicLayout>
