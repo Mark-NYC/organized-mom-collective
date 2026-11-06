@@ -3,6 +3,8 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 const url = SUPABASE_URL;
 const key = SUPABASE_ANON_KEY;
 export const toolEmailGateEnabled = import.meta.env.PUBLIC_TOOL_EMAIL_GATE_ENABLED === 'true' && Boolean(url && key);
+/** Expand after the SQL migration and preview smoke test. Existing chore gate stays independent. */
+export const unifiedDownloadGateEnabled = toolEmailGateEnabled && import.meta.env.PUBLIC_UNIFIED_DOWNLOAD_EMAIL_ENABLED === 'true';
 /** Its own switch: the database accepts this tool id only after 20261021000000_tool_email_responsibility_chart.sql. */
 export const responsibilityChartGateEnabled = toolEmailGateEnabled && import.meta.env.PUBLIC_RESPONSIBILITY_CHART_GATE_ENABLED === 'true';
 
@@ -44,7 +46,18 @@ export async function collectToolEmail(email: string, consent: boolean, website:
     body: JSON.stringify({ p_email: clean, p_marketing: consent, p_tool: tool, p_website: website, ...attribution() }),
     signal: AbortSignal.timeout(15000),
   });
-  if (!response.ok) return 'error';
+  if (!response.ok) {
+    // Keep existing first-download gating working while the new migration is rolling out.
+    if (response.status === 404 && (tool === 'chore-chart' || tool === 'responsibility-chart')) {
+      const fallback = await fetch(`${url}/rest/v1/rpc/tool_email_signup`, {
+        method: 'POST', headers: { apikey: key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_email: clean, p_marketing: consent, p_tool: tool, p_website: website }),
+        signal: AbortSignal.timeout(15000),
+      });
+      return fallback.ok ? await fallback.json() as string : 'error';
+    }
+    return 'error';
+  }
   const result: unknown = await response.json();
   return result === 'ok' || result === 'invalid' || result === 'rate_limited' ? result : 'error';
 }
@@ -55,7 +68,8 @@ function remembered() {
 /** A single successful signup per browser; the modal never opens for paid/member routes. */
 export function requireToolEmail(tool?: 'responsibility-chart' | `guide-${string}`): Promise<boolean> {
   const publicTool = tool ?? publicDownloadTool();
-  const enabled = tool === 'responsibility-chart' ? responsibilityChartGateEnabled : toolEmailGateEnabled;
+  const enabled = tool === 'responsibility-chart' ? responsibilityChartGateEnabled :
+    publicTool === 'chore-chart' ? toolEmailGateEnabled : unifiedDownloadGateEnabled;
   if (!enabled || !publicTool || remembered()) return Promise.resolve(true);
   if (active) return active;
   active = showDialog(publicTool).finally(() => { active = undefined; });
