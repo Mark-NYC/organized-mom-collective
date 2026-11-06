@@ -1,0 +1,91 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
+import {habits,rhythm,roles,issues} from '../../../../scripts/lib/bedroom-guide-content.mjs';
+const pdf='/downloads/family-bedroom-reset.pdf';
+const images=[1,2,3,4].map(n=>`/images/guides/bedroom-guide-page-${n}.webp`);
+const art=(name:string)=>`/assets/icons/ofc/guides/bedroom/${name}.png`;
+const homes=[
+ ['bed','Bed and favorite things','Leave pillows, blankets and a few favorite stuffed animals near the bed. Give extras one basket.'],
+ ['hamper','Clothes','Put an easy-to-reach hamper where kids actually change. Keep drawers and bins simple enough to close.'],
+ ['toys','Toys','Use a few open, low bins grouped by what kids recognize. Fewer available toys means faster cleanup.'],
+ ['books','Books','Give books one visible shelf or book basket close to where kids read.'],
+ ['trash','Trash and odd items','Provide a small trash can. Return cups and things belonging elsewhere during the weekly reset.']
+];
+const frictions=[
+ ['toys','Toys cover the floor','More toys are out than the storage can hold.','Keep fewer toys available and use simple, reachable bins.'],
+ ['hamper','Clothes pile on chairs','The hamper or drawer is inconvenient.','Move the hamper close to where clothes come off; simplify drawers.'],
+ ['books','Books pile on the bed','The book shelf is out of reach or too full.','Use one low book basket and swap books as needed.'],
+ ['basket','The room feels overwhelming','Too many instructions are given at once.','Ask for one zone at a time: bed, clothes, then floor.'],
+ ['dresser','Nothing has a home','Storage has too many categories or too many items.','Reduce categories, use a picture label and sort overflow together.'],
+ ['floor','Mess returns the next morning','The system depends on occasional big cleanups.','Practice a short reset at the same time each day.']
+];
+---
+<PublicLayout title="The Kids’ Bedroom Reset: A Bedroom Kids Can Actually Keep Up With" description="A free practical guide to help kids maintain their bedrooms with five illustrated habits, storage zones, weekly jobs, age-appropriate ownership and a four-page printable." width="full" ogType="article">
+<div class="omc-guide text-[#545454]">
+<section class="px-5 py-9 sm:px-8 sm:py-14"><div class="mx-auto max-w-5xl">
+<nav aria-label="Breadcrumb" class="text-sm font-medium"><a href="/guides" class="underline underline-offset-4">Guides</a><span class="mx-2" aria-hidden="true">/</span>Kids’ Bedroom Reset</nav>
+<header class="mx-auto mt-9 max-w-[52rem] text-center"><p class="eyebrow">KIDS’ ROOMS · SIMPLE ROUTINES · FAMILY OWNERSHIP</p>
+<h1 class="mt-3 font-serif text-[clamp(2.35rem,6vw,4.25rem)] leading-[1.09] tracking-tight">A bedroom your kids can actually keep up with.</h1>
+<p class="mx-auto mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">Clothes on the floor, toys everywhere, and “clean your room” becoming a daily argument? Give your kids a few small habits, reachable homes for their things, and a clear finish line.</p>
+<p class="mt-5 text-xs font-medium text-[#777]">Practical family guide · Free four-page printable · No new storage system required</p></header>
+<div class="mt-10 grid items-center gap-8 border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6 sm:p-10 md:grid-cols-[1.15fr_.85fr]">
+<div><p class="eyebrow">FREE PRINTABLE · FOUR US LETTER PAGES</p><h2 class="mt-3 font-serif text-3xl leading-tight">My Five-Minute Bedroom Reset</h2>
+<p class="mt-4 max-w-lg text-sm leading-[1.8] sm:text-base">Five illustrated daily steps, weekly bedroom care, a write-in responsibility plan and troubleshooting when the same mess comes back.</p>
+<ul class="mt-5 space-y-2 text-sm leading-relaxed"><li>✓ Kids know what to do next</li><li>✓ Clear definitions of “done”</li><li>✓ A small job each child can own</li></ul>
+<a href={pdf} download="OMC-Kids-Bedroom-Reset.pdf" class="btn-primary mt-7">Download the free PDF</a>
+<p class="mt-2 text-xs text-[#6f6a65]">Four pages · Free download · Email requested on first download</p></div>
+<div class="py-5"><GuidePdfPreview pdf={pdf} images={images} title="The Kids’ Bedroom Reset"/></div></div>
+<nav aria-label="On this page" class="mt-8 border-t border-[#ded8d2] pt-5"><p class="label mb-3 text-[#6f6a65]">IN THIS GUIDE</p>
+<div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3"><a class="guide-anchor" href="#daily">Five-minute reset</a><a class="guide-anchor" href="#homes">Storage zones</a><a class="guide-anchor" href="#weekly">Weekly care</a><a class="guide-anchor" href="#problems">Troubleshooting</a><a class="guide-anchor max-sm:col-span-2" href="#family">Family handoff</a></div></nav>
+</div></section>
+<section id="daily" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">01 · DAILY RESET</p><h2 class="section-heading">Five habits instead of “clean your room.”</h2>
+<p class="section-lede">A vague command leaves kids guessing. Model the sequence once, practice it together, then point to the pictures when they need a reminder. Five minutes is a starting goal, not a deadline.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+{habits.map(([name,title,detail,done],i)=><article class="border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6">
+<div class="flex items-center gap-4"><img src={art(name)} alt="" loading="lazy" width="70" height="70" class="size-[70px] object-contain"/><span class="font-serif text-3xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div>
+<h3 class="mt-3 font-serif text-2xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p><p class="mt-4 border-t border-[#d8d1cb] pt-3 text-sm"><strong>Done:</strong> {done}</p></article>)}</div>
+<div class="mt-8 bg-[#CDDDE1]/35 p-6 text-sm leading-[1.8]"><strong>Start with three:</strong> Bed, hamper, floor. When that works, add clean clothes and toys. Kids learn faster from a manageable routine than a long cleanup lecture.</div>
+</div></section>
+<section id="homes" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">02 · MAKE THE ROOM RESETTABLE</p><h2 class="section-heading">Everything needs a home kids can reach.</h2>
+<p class="section-lede">Storage should make putting things away easier, not add more sorting. A few low bins, a usable hamper, and one book basket often beat a room full of tiny organizing categories.</p>
+<div class="mt-9 grid gap-4 md:grid-cols-2">{homes.map(([icon,title,detail])=><article class="grid gap-4 border-t-[5px] border-[#D4DFC4] bg-white p-6 sm:grid-cols-[72px_1fr]"><img src={art(icon)} alt="" width="70" height="70" loading="lazy" class="size-[70px] object-contain"/><div><h3 class="font-serif text-2xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></div></article>)}</div>
+<aside class="mt-8 border-l-4 border-[#F1D8A8] bg-white p-6 text-sm leading-[1.8]"><strong>Make safety part of the setup:</strong> Anchor dressers and bookshelves, keep heavy items low, and keep exits clear. Adults handle high shelves, chemicals, heavy furniture and decisions about donating belongings.</aside>
+</div></section>
+<section id="weekly" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">03 · WEEKLY BEDROOM CARE</p><h2 class="section-heading">A little deeper, without starting over.</h2>
+<p class="section-lede">The daily routine makes the room usable. Pick one weekly time for bedding, surfaces, floors and anything that's wandered in from another room.</p>
+<div class="mt-8 grid gap-4 md:grid-cols-2">{rhythm.map(([icon,title,detail])=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-6"><img src={art(icon)} alt="" width="62" height="62" loading="lazy" class="size-[62px] object-contain"/><h3 class="mt-3 font-serif text-xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<p class="mt-7 text-sm leading-[1.8]">Younger children can gather bedding, return things and dust safe, reachable surfaces. Adults should supervise vacuum use and handle chemicals, outlets, difficult cleaning and heavy bedding when needed.</p>
+</div></section>
+<section id="problems" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">04 · WHEN THE MESS COMES BACK</p><h2 class="section-heading">Fix the system, not just the room.</h2>
+<p class="section-lede">A repeating pile usually means a job is unclear or storage is too hard to use. Change the setup before adding another reminder.</p>
+<div class="mt-8 space-y-3">{frictions.map(([icon,symptom,cause,fix])=><article class="grid gap-4 border-l-4 border-[#E8D2D6] bg-white p-5 md:grid-cols-[1fr_1fr_1.3fr]"><div class="flex items-center gap-3"><img src={art(icon)} alt="" loading="lazy" width="50" height="50" class="size-[50px] shrink-0 object-contain"/><h3 class="font-serif text-xl">{symptom}</h3></div><div><p class="eyebrow">WHY IT HAPPENS</p><p class="mt-2 text-sm leading-[1.7]">{cause}</p></div><div><p class="eyebrow">WHAT TO CHANGE</p><p class="mt-2 text-sm leading-[1.7]">{fix}</p></div></article>)}</div>
+</div></section>
+<section id="family" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">05 · FAMILY HANDOFF</p><h2 class="section-heading">A room kids can take responsibility for.</h2>
+<p class="section-lede">Start with one repeatable responsibility, show them how, practice together and slowly hand it over. Ages are examples, not requirements. Match each job to ability.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{roles.map(([icon,age,detail])=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={art(icon)} alt="" width="65" height="65" loading="lazy" class="mb-3 size-16 object-contain"/><span class="eyebrow">{age}</span><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-10 grid gap-6 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-2"><div><p class="eyebrow">AT THE FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Make “done” something they can see.</h3><p class="mt-3 text-sm leading-[1.8]">Use page three of the printable to decide what belongs to the child, what still needs help and when the reset happens.</p></div><ol class="space-y-4 text-sm leading-[1.8]"><li><strong>1. Notice:</strong> Which part of the room gets messy first?</li><li><strong>2. Choose:</strong> What's one small job they can own?</li><li><strong>3. Practice:</strong> Show the finished result together.</li><li><strong>4. Review:</strong> What made it easier this week?</li></ol></div>
+<div class="mt-12 border border-[#ded8d2] bg-white p-7 sm:p-9"><p class="eyebrow">PREVIEW THE FOUR-PAGE GUIDE</p><h3 class="mt-3 font-serif text-3xl">A printable they can follow themselves.</h3><p class="mt-3 mb-7 text-sm leading-[1.8]">Daily bedroom steps, weekly jobs, an ownership plan and practical fixes for recurring clutter.</p><GuidePageGallery images={images} title="The Kids’ Bedroom Reset"/>
+<div class="mt-8 text-center"><a href={pdf} download="OMC-Kids-Bedroom-Reset.pdf" class="btn-primary">Download the free PDF</a><p class="mt-2 text-xs">Four US Letter pages · Email requested for first download</p></div></div>
+<div class="mt-10 grid gap-6 border-t border-[#ded8d2] pt-8 sm:grid-cols-2">
+<div><h3 class="font-serif text-2xl">Turn the reset into a daily routine.</h3><p class="mt-3 text-sm leading-[1.8]">Make a personalized picture routine using your child's preferred jobs.</p><a href="/routine-chart/" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Open the free Routine Chart Generator</a></div>
+<div><h3 class="font-serif text-2xl">Give each child clear ownership.</h3><p class="mt-3 text-sm leading-[1.8]">Build a chart with names and responsibilities that actually fit your family.</p><a href="/family-responsibility-builder" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Try the Responsibility Builder</a></div></div>
+<div class="mt-7 grid gap-5 sm:grid-cols-2"><a href="/guides/family-laundry-system/" class="font-semibold underline underline-offset-4">More help: Family Laundry System</a><a href="/guides/family-entryway-reset/" class="font-semibold underline underline-offset-4">More help: Family Entryway Reset</a></div>
+<div class="mt-10 bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Want personalized tools mailed to your family?</h3><p class="mt-3 text-sm leading-[1.8]">Organized Family Club sends printed resources and simple guidance to help your whole family take ownership.</p><a href="/club" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Explore the Organized Family Club</a></div>
+</div></section></div>
+<style>
+.omc-guide{font-family:Montserrat,Arial,sans-serif}.omc-guide section[id]{scroll-margin-top:110px}
+.omc-guide .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.omc-guide .section-heading{max-width:800px;margin-top:14px;font-family:Georgia,serif;font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.025em}
+.omc-guide .section-lede{max-width:700px;margin-top:16px;font-size:1.06rem;line-height:1.8}
+.omc-guide .guide-anchor{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 13px;background:#fff;border:1px solid #d8d1cb;border-radius:3px;color:#545454;font-size:14px;font-weight:650;line-height:1.25;text-align:center;text-decoration:none}
+.omc-guide .guide-anchor:hover{background:#CDDDE1}.omc-guide .guide-anchor:focus-visible{outline:2px solid #545454;outline-offset:2px}
+@media(min-width:640px){.omc-guide .guide-anchor{min-height:44px;padding:9px 14px;font-size:13px}}
+</style>
+</PublicLayout>
