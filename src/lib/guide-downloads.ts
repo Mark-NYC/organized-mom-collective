@@ -1,25 +1,35 @@
-import { requireToolEmail } from './tool-email';
+import { publicDownloadId, requireToolEmail } from './tool-email';
 
-/** Gate only PDF links inside public practical guides. Never affect paid downloads or app/Club pages. */
-export function installGuideDownloadGate() {
-  const pieces = window.location.pathname.split('/').filter(Boolean);
-  if (pieces[0] !== 'guides' || pieces.length < 2) return;
-  const slug = pieces[1].toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 60);
-  if (!slug) return;
+/**
+ * Intercept actual free PDF/download links on public Guides, Articles and Tools.
+ * Previews, article reading, editor controls, paid orders, Club and /app stay untouched.
+ * The gate is intentionally a signup UX, not file access control: direct /downloads URLs
+ * are public static assets and can be opened without this dialog.
+ */
+export function installPublicResourceDownloadGate() {
+  const tool = publicDownloadId(window.location.pathname);
+  if (!tool) return;
+  const unlockedLinks = new WeakSet<HTMLAnchorElement>();
   document.addEventListener('click', async event => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-    const origin = event.target;
-    if (!(origin instanceof Element)) return;
-    const anchor = origin.closest<HTMLAnchorElement>('a[href]');
-    if (!anchor || anchor.dataset.downloadUnlocked === 'true') return;
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const anchor = target.closest<HTMLAnchorElement>('a[href]');
+    if (!anchor || unlockedLinks.has(anchor)) return;
     let file: URL;
     try { file = new URL(anchor.href, location.href); } catch { return; }
-    if (file.origin !== location.origin || !file.pathname.toLowerCase().endsWith('.pdf')) return;
+    if (file.origin !== location.origin) return;
+    const downloadPath = file.pathname.toLowerCase();
+    const isPdf = downloadPath.endsWith('.pdf');
+    const explicitFreeDownload = anchor.hasAttribute('download') && downloadPath.startsWith('/downloads/');
+    if (!isPdf && !explicitFreeDownload) return;
+    // Never capture unrelated files or links outside the project's free downloads area.
+    if (!downloadPath.startsWith('/downloads/')) return;
     event.preventDefault();
-    const allowed = await requireToolEmail(`guide-${slug}`);
+    const allowed = await requireToolEmail(tool);
     if (!allowed) return;
-    anchor.dataset.downloadUnlocked = 'true';
+    unlockedLinks.add(anchor);
     try { anchor.click(); }
-    finally { delete anchor.dataset.downloadUnlocked; }
+    finally { unlockedLinks.delete(anchor); }
   }, { capture: true });
 }
