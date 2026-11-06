@@ -28,7 +28,7 @@ const prompts = [
       <h1>One family meeting. Ten minutes.</h1>
       <p>Use the same four parts every week. Hear each person, agree on one next step, and practice it together. This printable follows the Family Meeting format used in Organized Family Club.</p>
       <div class="fm-public-actions">
-        <button type="button" onclick="window.print()">Print this agenda</button>
+        <button type="button" data-meeting-print>Print this agenda</button>
         <a href="/resources/family-meeting-agenda">Read the simple guide</a>
       </div>
     </div>
@@ -68,3 +68,10 @@ const prompts = [
 @page{size:letter portrait;margin:.45in}
 @media print{body{background:white!important}.fm-public{padding:0;max-width:none}.fm-public-intro,.fm-public-note{display:none!important}.fm-public-paper{border:none;box-shadow:none;padding:0;margin:0;max-width:none;width:100%;break-inside:avoid}.fm-public-step{padding:14px 0 12px}.fm-public-icon{width:32px;height:32px;print-color-adjust:exact;-webkit-print-color-adjust:exact}.fm-public-step p{font-size:11px}.fm-public-write{font-size:10px}.fm-public-paper h2{font-size:36px}body > header,body > footer,body > nav, .site-header, .site-footer{display:none!important}}
 </style>
+
+<script>
+  import { requireToolEmail } from '../lib/tool-email';
+  document.querySelector<HTMLButtonElement>('[data-meeting-print]')?.addEventListener('click', async () => {
+    if (await requireToolEmail('family-meeting-agenda')) window.print();
+  });
+</script>
