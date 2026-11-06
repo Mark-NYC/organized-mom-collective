@@ -16,19 +16,32 @@ export const gatedTools = {
 export type GatedTool = keyof typeof gatedTools;
 /** Only public/free pages. Paid downloads, Club and app routes must never ask again. */
 const publicPrintablePaths = new Set([
-  'chore-chart', 'routine-chart', 'planner', 'pantry', 'try-the-calendar',
+  'chore-chart', 'family-responsibility-builder', 'family-meeting-agenda',
+  'routine-chart', 'planner', 'pantry', 'try-the-calendar',
   'back-to-school-checklist', 'screen-time-contract', 'homeschool-rhythm',
   'laundry-system', 'closet-reset', 'lunch-and-snack-station', 'command-center-setup',
   'travel-checklist', 'fall-pantry-stock-up', 'gratitude-tracker', 'holiday-gift-planner',
   'mental-load-worksheet', 'meal-planner', 'december-countdown', 'thanksgiving-plan',
+  'paper-clutter-blitz', 'new-year-declutter', 'fall-cleaning-checklist', 'spring-cleaning-checklist',
 ]);
-function publicDownloadTool(): string | null {
-  const segments = window.location.pathname.split('/').filter(Boolean);
-  if (segments.length !== 1 || !publicPrintablePaths.has(segments[0])) return null;
-  return segments[0];
+/** Identify a public free download page; exclude checkout, paid, member and app routes. */
+export function publicDownloadId(pathname: string): string | null {
+  const segments = pathname.split('/').filter(Boolean).map(x => x.toLowerCase());
+  if (segments.length === 1 && publicPrintablePaths.has(segments[0])) return segments[0];
+  if (segments.length === 2 && segments[0] === 'guides') {
+    const slug = segments[1];
+    return /^[a-z0-9-]+$/.test(slug) ? `guide-${slug.slice(0, 60)}` : null;
+  }
+  if (segments.length === 2 && segments[0] === 'resources') {
+    const slug = segments[1];
+    return /^[a-z0-9-]+$/.test(slug) ? `guide-${slug.slice(0, 60)}` : null;
+  }
+  return null;
 }
+function publicDownloadTool(): string | null { return publicDownloadId(window.location.pathname); }
+
 function attribution() {
-  const qs = new URLSearchParams(window.location.search);
+  const qs = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
   const safe = (key: string) => (qs.get(key) || '').slice(0, 160);
   return { p_source: safe('utm_source'), p_medium: safe('utm_medium'), p_campaign: safe('utm_campaign'), p_content: safe('utm_content') };
 }
@@ -66,7 +79,7 @@ function remembered() {
   try { return localStorage.getItem(DONE) === 'yes'; } catch { return false; }
 }
 /** A single successful signup per browser; the modal never opens for paid/member routes. */
-export function requireToolEmail(tool?: 'responsibility-chart' | `guide-${string}`): Promise<boolean> {
+export function requireToolEmail(tool?: string): Promise<boolean> {
   const publicTool = tool ?? publicDownloadTool();
   const enabled = tool === 'responsibility-chart' ? responsibilityChartGateEnabled :
     publicTool === 'chore-chart' ? toolEmailGateEnabled : unifiedDownloadGateEnabled;

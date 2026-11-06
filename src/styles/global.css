@@ -579,8 +579,26 @@
 }
 
 /* Download signup dialog, outside the printable/export surface. */
-.tool-email-dialog { width: min(92vw, 480px); max-height: 90dvh; overflow-y: auto; border: 0; border-radius: 16px; padding: 28px; color: #4a3f3e; background: #fffdf9; box-shadow: 0 20px 80px #0003; }
-.tool-email-dialog::backdrop { background: #28211dcc; }
+.tool-email-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(calc(100vw - 32px), 480px);
+  max-width: 480px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 16px;
+  padding: 28px;
+  color: #545454;
+  background: #FBF7F1;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .25);
+}
+.tool-email-dialog::backdrop { background: rgba(17, 19, 18, .68); }
+@media (max-width: 480px) {
+  .tool-email-dialog { padding: 24px 20px; }
+}
 .tool-email-form { position: relative; }
 .tool-email-form h2 { font-family: Georgia, serif; font-size: 28px; line-height: 1.15; padding-right: 24px; margin-bottom: 12px; }
 .tool-email-form p { font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
