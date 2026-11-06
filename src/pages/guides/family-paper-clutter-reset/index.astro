@@ -1,0 +1,87 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
+import {habits,weekly,roles,issues} from '../../../../scripts/lib/paper-guide-content.mjs';
+const pdf='/downloads/family-paper-clutter-reset.pdf';
+const images=[1,2,3,4].map(n=>`/images/guides/paper-guide-page-${n}.webp`);
+const art=(name:string)=>`/assets/icons/ofc/guides/paper/${name}.png`;
+const categories=[
+ {label:'ACTION',icon:'calendar',what:'Needs a decision, signature, payment or deadline.',rule:'Add dates to the family calendar and put active papers in Needs Attention.'},
+ {label:'KEEP',icon:'folder',what:'Important records and a limited selection of meaningful artwork.',rule:'File records in one labeled location instead of leaving them on a counter.'},
+ {label:'RECYCLE',icon:'shred',what:'Outdated flyers, envelopes and ordinary unwanted paper.',rule:'Recycle only after an adult checks that no sensitive details are exposed.'},
+ {label:'SHRED',icon:'papers',what:'Unneeded papers with personal, financial or account information.',rule:'An adult checks retention requirements and securely destroys sensitive documents.'}
+];
+---
+<PublicLayout title="Family Paper Clutter Reset: School Forms, Mail and Daily Paper Piles" description="Stop school papers, mail, artwork and forms taking over the kitchen counter. A free four-page paper clutter reset with a sorting system, family paper station, weekly responsibilities and troubleshooting." width="full" ogType="article">
+<div class="omc-guide text-[#545454]">
+<section class="px-5 py-9 sm:px-8 sm:py-14"><div class="mx-auto max-w-5xl">
+<nav aria-label="Breadcrumb" class="text-sm font-medium"><a href="/guides" class="underline underline-offset-4">Guides</a><span aria-hidden="true" class="mx-2">/</span>Family Paper Clutter Reset</nav>
+<header class="mx-auto mt-9 max-w-[52rem] text-center">
+<p class="eyebrow">SCHOOL PAPERS · MAIL · FAMILY RESPONSIBILITY</p>
+<h1 class="mt-3 font-serif text-[clamp(2.4rem,6vw,4.25rem)] leading-[1.09] tracking-tight">Your kitchen counter shouldn't be the family's filing cabinet.</h1>
+<p class="mx-auto mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">Permission slips, unopened mail, artwork, flyers. Paper piles up when nobody knows where it goes next. Here's a simple system your family can follow, without buying a filing cabinet.</p>
+<p class="mt-5 text-xs text-[#777]">Free practical guide · Four-page illustrated printable · Five-minute weekly rhythm</p>
+</header>
+<div class="mt-10 grid items-center gap-8 border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6 sm:p-10 md:grid-cols-[1.15fr_.85fr]">
+<div><p class="eyebrow">FREE PRINTABLE · FOUR US LETTER PAGES</p><h2 class="mt-3 font-serif text-3xl leading-tight">The Family Paper Clutter Reset</h2>
+<p class="mt-4 max-w-lg text-sm leading-[1.8] sm:text-base">A ten-minute paper reset, a clear paper station, a fill-in family responsibility chart and practical fixes when the piles come back.</p>
+<ul class="mt-5 space-y-2 text-sm leading-relaxed"><li>✓ Sort papers into four clear decisions</li><li>✓ Keep important forms and deadlines visible</li><li>✓ Hand off appropriate jobs to the whole family</li></ul>
+<a href={pdf} download="OMC-Family-Paper-Clutter-Reset.pdf" class="btn-primary mt-7">Download the free PDF</a>
+<p class="mt-2 text-xs text-[#6f6a65]">Four US Letter pages · Email requested on first download · Marketing optional</p></div>
+<div class="py-5"><GuidePdfPreview pdf={pdf} images={images} title="The Family Paper Clutter Reset"/></div>
+</div>
+<nav aria-label="On this page" class="mt-8 border-t border-[#ded8d2] pt-5"><p class="label mb-3 text-[#6f6a65]">IN THIS GUIDE</p>
+<div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+<a class="guide-anchor" href="#reset">Ten-minute reset</a><a class="guide-anchor" href="#station">Paper station</a><a class="guide-anchor" href="#weekly">Weekly routine</a><a class="guide-anchor" href="#problems">Troubleshooting</a><a class="guide-anchor max-sm:col-span-2" href="#family">Family handoff</a></div></nav>
+</div></section>
+<section id="reset" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">01 · GET THE COUNTER BACK</p><h2 class="section-heading">Ten minutes to start, four places for every paper.</h2>
+<p class="section-lede">You don't need to process months of paper in one sitting. Set a timer, gather one manageable pile, and decide what each item needs next. An adult handles confidential documents and anything with a deadline.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+{habits.map(([icon,title,detail,done],i)=><article class="border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6"><div class="flex items-center gap-4"><img src={art(icon)} alt="" loading="lazy" width="70" height="70" class="size-[70px] object-contain"/><span class="font-serif text-3xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div><h3 class="mt-3 font-serif text-2xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p><p class="mt-4 border-t border-[#d8d1cb] pt-3 text-sm"><strong>Done:</strong> {done}</p></article>)}
+</div>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{categories.map(item=><article class="border-t-[5px] border-[#CDDDE1] bg-white p-5"><img src={art(item.icon)} alt="" width="62" height="62" loading="lazy" class="size-[62px] object-contain"/><h3 class="mt-3 font-serif text-2xl">{item.label}</h3><p class="mt-2 text-sm leading-[1.7]">{item.what}</p><p class="mt-3 text-xs leading-[1.7]"><strong>Next:</strong> {item.rule}</p></article>)}</div>
+<p class="mt-8 bg-[#CDDDE1]/35 p-6 text-sm leading-[1.8]"><strong>Keep the momentum:</strong> If the timer ends and you still have papers, set aside the remaining stack for a specific next session. Don't quietly move it back to the kitchen counter.</p>
+</div></section>
+<section id="station" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">02 · ONE SIMPLE PAPER STATION</p><h2 class="section-heading">One inbox. Two pockets. No mystery piles.</h2>
+<p class="section-lede">Start with a basket or tray you already own and two clearly labeled pockets. It should take seconds to use, not another complicated home-management project.</p>
+<div class="mt-9 grid gap-4 md:grid-cols-3">
+<article class="border-t-[5px] border-[#D4DFC4] bg-white p-6"><img src={art('basket')} alt="" width="66" height="66" class="size-16 object-contain"/><h3 class="mt-3 font-serif text-2xl">Inbox</h3><p class="mt-3 text-sm leading-[1.8]">New school papers and mail land here. Children put papers in; an adult checks and sorts the contents on a predictable schedule.</p></article>
+<article class="border-t-[5px] border-[#D4DFC4] bg-white p-6"><img src={art('papers')} alt="" width="66" height="66" class="size-16 object-contain"/><h3 class="mt-3 font-serif text-2xl">Needs Attention</h3><p class="mt-3 text-sm leading-[1.8]">Only work still requiring a signature, reply or decision stays here. Each paper needs an owner and next action.</p></article>
+<article class="border-t-[5px] border-[#D4DFC4] bg-white p-6"><img src={art('folder')} alt="" width="66" height="66" class="size-16 object-contain"/><h3 class="mt-3 font-serif text-2xl">Ready to Go</h3><p class="mt-3 text-sm leading-[1.8]">Signed forms, permission slips and papers headed back to school go here until they are placed in the correct bag.</p></article>
+</div>
+<aside class="mt-8 border-l-4 border-[#F1D8A8] bg-white p-6 text-sm leading-[1.8]"><strong>Records are different from action papers:</strong> Important documents belong in secure, labeled storage. Bills, medical information and identity records do not belong in a publicly accessible family inbox. Check what must be retained before discarding it.</aside>
+</div></section>
+<section id="weekly" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">03 · KEEP IT FROM RETURNING</p><h2 class="section-heading">A small weekly review beats another paper mountain.</h2>
+<p class="section-lede">The routine is simple: kids deliver papers, an adult processes decisions, and everything going back out gets a visible place. Match these jobs to actual moments in your week.</p>
+<div class="mt-9 grid gap-4 md:grid-cols-2">{weekly.map(([icon,title,detail])=><article class="grid gap-4 border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-6 sm:grid-cols-[72px_1fr]"><img src={art(icon)} alt="" width="62" height="62" loading="lazy" class="size-[62px] object-contain"/><div><h3 class="font-serif text-xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></div></article>)}</div>
+<p class="mt-7 text-sm leading-[1.8]"><strong>The five-minute weekly check:</strong> Empty the inbox, look at upcoming dates, move finished forms to Ready to Go, file essential records and clear scraps. Longer paperwork can be scheduled separately.</p>
+</div></section>
+<section id="problems" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">04 · WHEN PAPER PILES COME BACK</p><h2 class="section-heading">Fix the handoff, not just the stack.</h2><p class="section-lede">The same paper pile returning is information: the landing spot is wrong, the next decision isn't clear or nobody owns the follow-through.</p>
+<div class="mt-8 space-y-3">{issues.map(([icon,symptom,fix])=><article class="grid gap-4 border-l-4 border-[#E8D2D6] bg-white p-5 md:grid-cols-[1fr_1.3fr]"><div class="flex items-center gap-3"><img src={art(icon)} alt="" width="50" height="50" loading="lazy" class="size-[50px] shrink-0 object-contain"/><h3 class="font-serif text-xl">{symptom}</h3></div><div><p class="eyebrow">WHAT TO CHANGE</p><p class="mt-2 text-sm leading-[1.7]">{fix}</p></div></article>)}</div>
+</div></section>
+<section id="family" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">05 · FAMILY HANDOFF</p><h2 class="section-heading">The kids can deliver. The grown-ups decide.</h2>
+<p class="section-lede">Sharing responsibility doesn't mean children manage adult paperwork. Teach a repeatable handoff, with clear ownership of signatures, deadlines and sensitive information.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{roles.map(([icon,age,detail])=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={art(icon)} alt="" width="65" height="65" loading="lazy" class="mb-3 size-16 object-contain"/><span class="eyebrow">{age}</span><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-10 grid gap-6 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-2"><div><p class="eyebrow">AT THE NEXT FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Agree on the paper path.</h3><p class="mt-3 text-sm leading-[1.8]">Use page three of the printable to choose who checks the inbox, when it happens, and who is responsible for return forms.</p></div><ol class="space-y-4 text-sm leading-[1.8]"><li><strong>1. Notice:</strong> Where does paper actually pile up?</li><li><strong>2. Choose:</strong> Where is the inbox? Who checks it?</li><li><strong>3. Practice:</strong> Follow one school form from backpack to Ready to Go.</li><li><strong>4. Review:</strong> What got lost or delayed this week?</li></ol></div>
+<div class="mt-12 border border-[#ded8d2] bg-white p-7 sm:p-9"><p class="eyebrow">PREVIEW ALL FOUR PAGES</p><h3 class="mt-3 font-serif text-3xl">A printable paper system everyone can see.</h3><p class="mt-3 mb-7 text-sm leading-[1.8]">The ten-minute paper reset, family paper station, write-in ownership chart and practical fixes for clutter.</p><GuidePageGallery images={images} title="The Family Paper Clutter Reset"/>
+<div class="mt-8 text-center"><a href={pdf} download="OMC-Family-Paper-Clutter-Reset.pdf" class="btn-primary">Download the free PDF</a><p class="mt-2 text-xs">Four US Letter pages · Email requested for first download</p></div></div>
+<div class="mt-10 grid gap-6 border-t border-[#ded8d2] pt-8 sm:grid-cols-2"><div><h3 class="font-serif text-2xl">Need to clear the existing pile first?</h3><p class="mt-3 text-sm leading-[1.8]">Our free Paper Clutter Blitz uses short timed sessions to get the counter clear before you set up the ongoing routine.</p><a href="/paper-clutter-blitz" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Try the free Paper Clutter Blitz</a></div><div><h3 class="font-serif text-2xl">Want a simple home command center?</h3><p class="mt-3 text-sm leading-[1.8]">Start with the free printable to give paperwork and your family calendar a place to live.</p><a href="/command-center-setup" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Open the free Command Center Setup</a></div></div>
+<div class="mt-7 grid gap-5 sm:grid-cols-2"><a href="/guides/family-entryway-reset/" class="font-semibold underline underline-offset-4">More help: Family Entryway Reset</a><a href="/guides/family-living-room-reset/" class="font-semibold underline underline-offset-4">More help: Family Living Room Reset</a></div>
+<div class="mt-10 bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Want personalized tools mailed to your family?</h3><p class="mt-3 text-sm leading-[1.8]">Organized Family Club sends personalized printed resources and simple guidance to help the whole family take responsibility.</p><a href="/club" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">See how the Club works</a></div>
+</div></section></div>
+<style>
+.omc-guide{font-family:Montserrat,Arial,sans-serif}.omc-guide section[id]{scroll-margin-top:110px}
+.omc-guide .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.omc-guide .section-heading{max-width:800px;margin-top:14px;font-family:Georgia,serif;font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.025em}
+.omc-guide .section-lede{max-width:700px;margin-top:16px;font-size:1.06rem;line-height:1.8}
+.omc-guide .guide-anchor{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 13px;background:#fff;border:1px solid #d8d1cb;border-radius:3px;color:#545454;font-size:14px;font-weight:650;line-height:1.25;text-align:center;text-decoration:none}
+.omc-guide .guide-anchor:hover{background:#CDDDE1}.omc-guide .guide-anchor:focus-visible{outline:2px solid #545454;outline-offset:2px}
+@media(min-width:640px){.omc-guide .guide-anchor{min-height:44px;padding:9px 14px;font-size:13px}}
+</style>
+</PublicLayout>
