@@ -109,8 +109,8 @@ function showDialog(tool: GatedTool): Promise<boolean> {
           } catch { /* tracking must never block the download */ }
           finish(true); return;
         }
-        error.textContent = result === 'rate_limited' ? 'Too many attempts. Please try again later. Your printable is still here.' : result === 'invalid' ? 'Please check your email address.' : 'We couldn’t save your email. Please try again. Your chart is still here.';
-      } catch { error.textContent = 'We couldn’t connect. Please try again. Your chart is still here.'; }
+        error.textContent = result === 'rate_limited' ? 'Too many attempts. Please try again later. Your printable is still here.' : result === 'invalid' ? 'Please check your email address.' : 'We couldn’t save your email. Please try again. Your printable is still here.';
+      } catch { error.textContent = 'We couldn’t connect. Please try again. Your printable is still here.'; }
       busy = false; submit.disabled = false; submit.textContent = copy.button;
     });
     dialog.showModal();
