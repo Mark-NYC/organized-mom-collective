@@ -1,0 +1,102 @@
+---
+/** Four-page print-ready family handoff card. Use browser Print > Save as PDF; letter-size at 100%. */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+const iconBase = '/assets/icons/ofc/v2/routines';
+const daily = [
+ { title:'Hang your towel to dry', detail:'Spread it on a towel bar or hook so it can dry between uses.' },
+ { title:'Clothes into the hamper', detail:'Nothing stays on the floor after getting dressed or bathing.' },
+ { title:'Wipe toothpaste and splashes', detail:'Use the family-approved cloth; leave the counter and sink dry.', icon:'wipe-counter.png' },
+ { title:'Put everything back', detail:'Brush, paste, hairbrush and personal items return to their homes.' },
+ { title:'Leave it ready for the next person', detail:'Check the floor, counter and sink before walking away.' }
+];
+const jobs = [
+ {title:'Sink + countertop',steps:'Move items aside. Wipe sink, faucet and counter with the approved product. Rinse or dry as directed. Put items back.',done:'No toothpaste or visible grime. Counter clear and dry.',icon:'wipe-counter.png'},
+ {title:'Mirror',steps:'Adult-approved glass cleaner on a cloth, not sprayed toward anyone. Wipe from top to bottom.',done:'No obvious spots or streaks.'},
+ {title:'Toilet',steps:'Adult or trained teen only. Use a designated toilet cloth/brush and product exactly as labeled. Wash hands.',done:'Seat, rim, bowl and outside are clean.'},
+ {title:'Tub or shower',steps:'Adult or trained teen only. Clean visible buildup using the surface-safe product and follow the label.',done:'No obvious soap film or standing water.'},
+ {title:'Floor',steps:'Pick up loose items, sweep or vacuum edges, then damp mop with an appropriate method.',done:'Floor clear, clean and dry before using.'},
+ {title:'Trash + towels',steps:'Empty the small bin, replace the liner, set out clean towels and wash used mats as needed.',done:'Fresh towels ready and trash removed.',icon:'take-out-trash.png'}
+];
+const troubleshooting=[
+ ['Towels land on the floor','Put a labeled hook within easy reach of each person. Practice hanging the towel before leaving.'],
+ ['Toothpaste keeps drying in the sink','Place a safe wiping cloth nearby. Make the final wipe part of brushing teeth.'],
+ ['Dirty clothes pile up','Move the hamper closer to where clothes come off.'],
+ ['The same person does all the cleaning','Choose named owners for weekly jobs at your family meeting. Rotate only after someone learns the job.'],
+ ['Someone says “I did it” but it is not clean','Point to the “done looks like” line, demonstrate together, and try again without a lecture.'],
+ ['A damp or musty smell returns','Dry towels and mats, improve ventilation, and check for leaks. Persistent mold or water damage needs adult attention.']
+];
+---
+<BaseLayout title="Family Bathroom Reset | Printable | Organized Mom Collective" description="A four-page family bathroom reset reference card." robots="noindex" tracking={false}>
+  <div class="screen-tools"><a href="/guides/family-bathroom-reset/">← Back to the guide</a><span>4-page US Letter printable</span><button type="button" onclick="window.print()">Print or save PDF</button></div>
+  <main>
+    <section class="sheet" aria-labelledby="p1">
+      <header class="sheet-head"><span class="brand">ORGANIZED MOM COLLECTIVE</span><span>FREE FAMILY GUIDE · 01 / 04</span></header>
+      <div class="top-rule blue"></div>
+      <p class="eyebrow">01 · THE DAILY RHYTHM</p><h1 id="p1">The 2-Minute Bathroom Reset</h1>
+      <p class="deck">A few small habits after each use make the bathroom easier for everyone to share.</p>
+      <div class="definition"><strong>WHAT DONE LOOKS LIKE</strong><p>Dry towels. Clothes in the hamper. No toothpaste left in the sink. Personal items put away. The bathroom is ready for the next person.</p></div>
+      <h2>After you use the bathroom</h2>
+      <div class="task-list">{daily.map((item,i)=><div class="task"><span class="number">{String(i+1).padStart(2,'0')}</span><div class="task-copy"><strong>{item.title}</strong><p>{item.detail}</p></div>{item.icon && <img src={iconBase+'/'+item.icon} alt="" />}</div>)}</div>
+      <div class="split-note"><div><strong>After every shower</strong><p>Run the fan during and after showering, or ventilate appropriately. Spread wet towels out and leave the shower curtain open flat to dry.</p></div><div><strong>For little kids</strong><p>Grown-ups demonstrate each step first. Give a child just one or two habits until they stick.</p></div></div>
+      <footer><span>Small habits. Shared responsibility.</span><span>organizedmomcollective.com · p. 1 of 4</span></footer>
+    </section>
+    <section class="sheet" aria-labelledby="p2">
+      <header class="sheet-head"><span class="brand">ORGANIZED MOM COLLECTIVE</span><span>FREE FAMILY GUIDE · 02 / 04</span></header>
+      <div class="top-rule green"></div>
+      <p class="eyebrow">02 · THE WEEKLY CLEAN</p><h1 id="p2">Six Jobs. One Shared Bathroom.</h1>
+      <p class="deck">Assign the job. Teach the steps. Show what finished looks like. Keep toilet cleaners and other chemicals in adult hands.</p>
+      <div class="jobs">{jobs.map((job,i)=><div class="job"><div class="job-mark"><span>{i+1}</span>{job.icon && <img src={iconBase+'/'+job.icon} alt="" />}</div><div><strong>{job.title}</strong><p>{job.steps}</p><small><b>DONE:</b> {job.done}</small></div></div>)}</div>
+      <div class="banner green-bg"><strong>The weekly finish line</strong><p>All six jobs are complete, supplies are stored safely, towels can dry, and the room is ready to use.</p></div>
+      <footer><span>Show it once. Practice together. Hand it over.</span><span>organizedmomcollective.com · p. 2 of 4</span></footer>
+    </section>
+    <section class="sheet" aria-labelledby="p3">
+      <header class="sheet-head"><span class="brand">ORGANIZED MOM COLLECTIVE</span><span>FREE FAMILY GUIDE · 03 / 04</span></header>
+      <div class="top-rule apricot"></div>
+      <p class="eyebrow">03 · THE FAMILY HANDOFF</p><h1 id="p3">Everyone Can Own a Part.</h1>
+      <p class="deck">Start with a job your child can complete safely. Ability and practice matter more than age.</p>
+      <div class="age-grid"><div><span class="age">AGES 3–5</span><strong>Help with the reset</strong><p>Hang a towel, place clothes in the hamper, return personal items with help.</p></div><div><span class="age">AGES 6–8</span><strong>Own simple jobs</strong><p>Replace clean towels, empty small trash with supervision, wipe a counter using water or a child-safe method.</p></div><div><span class="age">AGES 9–12</span><strong>Learn whole tasks</strong><p>Clean a mirror with guidance, sweep the floor, complete the sink routine with approved supplies.</p></div><div><span class="age">TEENS + ADULTS</span><strong>Handle deeper cleaning</strong><p>Manage toilet and shower cleaning, product labels, sanitizing and repairs as appropriate.</p></div></div>
+      <h2>Our family bathroom jobs</h2><p class="hint">Fill in at your next family meeting. Write a name and the day each job gets done.</p>
+      <div class="assignment"><div class="assign-head"><span>JOB</span><span>OWNER</span><span>WHEN</span></div>{['Sink + counter','Mirror','Toilet','Tub or shower','Floor','Trash + towels'].map(item=><div class="assign-row"><span>{item}</span><span></span><span></span></div>)}</div>
+      <div class="banner apricot-bg"><strong>Three steps to hand off a job</strong><p><b>1.</b> Show them. &nbsp; <b>2.</b> Do it together. &nbsp; <b>3.</b> Let them own it, using the finish line on page 2.</p></div>
+      <footer><span>Ownership grows through practice.</span><span>organizedmomcollective.com · p. 3 of 4</span></footer>
+    </section>
+    <section class="sheet" aria-labelledby="p4">
+      <header class="sheet-head"><span class="brand">ORGANIZED MOM COLLECTIVE</span><span>FREE FAMILY GUIDE · 04 / 04</span></header>
+      <div class="top-rule blush"></div>
+      <p class="eyebrow">04 · WHEN IT DOESN'T STICK</p><h1 id="p4">Fix the System, Not Just the Mess.</h1>
+      <p class="deck">A repeating mess usually points to a missing home for something, a habit that is too hard, or a job without a clear owner.</p>
+      <div class="trouble-head"><span>WHAT KEEPS HAPPENING</span><span>WHAT TO CHANGE</span></div>
+      <div class="troubles">{troubleshooting.map(([problem,fix])=><div class="trouble"><strong>{problem}</strong><p>{fix}</p></div>)}</div>
+      <div class="safety"><strong>ADULT SAFETY NOTE</strong><p>Never mix cleaners, especially bleach with ammonia or acids. Follow every product label, keep chemicals out of children's reach, and use ventilation. Adults handle mold, leaks, damaged caulk, and persistent moisture problems. If there is substantial mold or hidden water damage, seek qualified help.</p></div>
+      <div class="banner blush-bg"><strong>Make it part of the family meeting</strong><p>Ask: What is working? What keeps getting missed? Who needs help learning their job? Agree on one small change for the week.</p></div>
+      <div class="next-step"><strong>Want kids to see exactly how to help?</strong><p>Use our free Family Responsibility Builder to make the handoff even clearer.</p><span>organizedmomcollective.com/family-responsibility-builder</span></div>
+      <footer><span>Real homes. Real routines. Everyone contributes.</span><span>organizedmomcollective.com · p. 4 of 4</span></footer>
+    </section>
+  </main>
+  <style is:global>
+    @page {size:letter; margin:0}
+    *{box-sizing:border-box}
+    body{margin:0;background:#eceae7;color:#545454;font-family:Montserrat,Arial,sans-serif}
+    .screen-tools{margin:18px auto;max-width:816px;display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 13px Montserrat,Arial,sans-serif}
+    .screen-tools a{color:#545454}.screen-tools button{background:#545454;color:white;padding:12px 18px;border:0;cursor:pointer;border-radius:5px}
+    .sheet{position:relative;background:#fff;width:8.5in;height:11in;margin:20px auto;padding:.48in .58in .52in;overflow:hidden;box-shadow:0 4px 18px #0001;break-after:page;page-break-after:always}
+    .sheet-head{display:flex;justify-content:space-between;align-items:center;font-size:8px;letter-spacing:1.2px;color:#777}
+    .brand{font-weight:800;letter-spacing:1.7px;color:#545454}.top-rule{height:7px;margin-top:13px}
+    .blue{background:#CDDDE1}.green{background:#D4DFC4}.apricot{background:#F1D8A8}.blush{background:#E8D2D6}
+    .eyebrow{margin:23px 0 7px;font-size:10px;font-weight:800;letter-spacing:2px}
+    h1,h2{font-family:Georgia,serif;font-weight:normal;letter-spacing:-.5px}h1{font-size:30px;line-height:1.14;margin:0 0 8px}h2{font-size:19px;margin:20px 0 10px}
+    p{margin:0}.deck{font-size:11.5px;line-height:1.55;max-width:580px;margin-bottom:16px;color:#666}
+    .definition{background:#EDF3F4;padding:16px 19px;margin:14px 0 15px}.definition strong,.banner strong,.safety strong{font-size:10px;letter-spacing:1.1px}.definition p{font-size:12px;line-height:1.55;margin-top:7px}
+    .task-list{border-top:1px solid #ddd}.task{display:flex;align-items:center;gap:15px;padding:12px 0;border-bottom:1px solid #e5e2de;min-height:64px}.number{font-family:Georgia,serif;font-size:20px;color:#8e9a9d;width:27px}.task-copy{flex:1}.task-copy strong,.job strong{font-size:12.2px}.task-copy p{font-size:10.5px;line-height:1.55;margin-top:4px}.task img,.job img{height:47px;width:47px;object-fit:contain}
+    .split-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.split-note>div{background:#FBF7F1;padding:14px}.split-note strong{font-size:11px}.split-note p{font-size:10px;line-height:1.55;margin-top:5px}
+    .jobs{display:grid;grid-template-columns:1fr 1fr;gap:10px}.job{border:1px solid #e4e0db;padding:12px 11px;display:flex;gap:10px;min-height:138px;align-items:flex-start}.job-mark{width:44px;flex-shrink:0;text-align:center}.job-mark>span{display:grid;place-items:center;width:26px;height:26px;background:#D4DFC4;border-radius:50%;font-family:Georgia,serif;font-size:16px;margin:0 auto 5px}.job-mark img{width:39px;height:39px}.job p{font-size:9.7px;line-height:1.46;margin-top:6px}.job small{display:block;font-size:9px;line-height:1.45;margin-top:8px;color:#555}
+    .banner{padding:14px 17px;margin-top:17px}.banner p{font-size:10.5px;line-height:1.5;margin-top:5px}.green-bg{background:#EEF3E8}.apricot-bg{background:#FCF3E4}.blush-bg{background:#F8EEF0}
+    .age-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.age-grid>div{border-top:6px solid #F1D8A8;background:#FBF7F1;padding:14px 15px;min-height:115px}.age{display:block;font-size:9px;letter-spacing:1px;font-weight:800;margin-bottom:8px}.age-grid strong{font-size:12px}.age-grid p{margin-top:7px;font-size:10px;line-height:1.5}.hint{font-size:10px;margin:-3px 0 10px}
+    .assign-head,.assign-row{display:grid;grid-template-columns:2fr 2fr 1.3fr;align-items:center}.assign-head{background:#F1D8A8;font-size:9px;font-weight:800;letter-spacing:1px;padding:9px 13px}.assign-row{min-height:34px;padding:8px 13px;border-bottom:1px solid #ddd;font-size:10px}.assign-row span+span{border-left:1px solid #eee;min-height:16px;padding-left:8px}
+    .trouble-head,.trouble{display:grid;grid-template-columns:1fr 1.65fr;gap:20px}.trouble-head{padding:10px 12px;background:#E8D2D6;font-size:9px;font-weight:800;letter-spacing:1px}.trouble{padding:12px;border-bottom:1px solid #e6e1df;align-items:start;min-height:54px}.trouble strong{font-size:10.5px;line-height:1.45}.trouble p{font-size:10px;line-height:1.5}
+    .safety{border-left:5px solid #D8B79F;background:#FBF7F1;padding:12px 15px;margin-top:17px}.safety p{font-size:9.6px;line-height:1.5;margin-top:6px}.next-step{text-align:center;padding:17px 10px 0}.next-step strong{font-size:12px}.next-step p{margin:5px 0;font-size:10px}.next-step span{font-size:9px;font-weight:700}
+    footer{position:absolute;bottom:.32in;left:.58in;right:.58in;border-top:1px solid #ddd;padding-top:8px;display:flex;justify-content:space-between;font-size:8px;color:#777}
+    @media print {body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.screen-tools{display:none!important}.sheet{box-shadow:none;margin:0;width:8.5in;height:11in}}
+    @media screen and (max-width:840px){.screen-tools{margin:12px;flex-wrap:wrap}.sheet{transform-origin:top left;margin:14px auto}body{overflow-x:auto}}
+  </style>
+</BaseLayout>
