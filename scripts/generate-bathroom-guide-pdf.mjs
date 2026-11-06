@@ -8,15 +8,16 @@ import { makeGuide } from './lib/omc-guide-pdf.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 process.chdir(root);
 const destination=resolve('public/downloads/family-bathroom-reset.pdf');
+const transparentFolder='public/assets/icons/ofc/guides/bathroom';
 const art={
- towel:'assets/icons/ofc/routines/bath-or-shower.jpg',
- hamper:'assets/icons/ofc/february/laundry-hamper.png',
- sink:'assets/icons/ofc/march/png/wipe-sink.png',
- toothbrush:'assets/icons/ofc/supporting/toothbrush.png',
- counter:'assets/icons/ofc/march/png/wipe-surface.png',
- bathroom:'assets/icons/ofc/march/png/clean-bathroom.png',
- floor:'assets/icons/ofc/march/png/clean-floor.png',
- trash:'assets/icons/ofc/march/png/bathroom-trash.png',
+ towel:transparentFolder+'/towel.png',
+ hamper:transparentFolder+'/hamper.png',
+ sink:transparentFolder+'/sink.png',
+ toothbrush:transparentFolder+'/toothbrush.png',
+ counter:transparentFolder+'/counter.png',
+ bathroom:transparentFolder+'/bathroom.png',
+ floor:transparentFolder+'/floor.png',
+ trash:transparentFolder+'/trash.png',
 };
 const {pdf,palette:c,text,paragraph,rect,rule,icon,newPage}=await makeGuide('The Family Bathroom Reset | Organized Mom Collective');
 const daily=[
