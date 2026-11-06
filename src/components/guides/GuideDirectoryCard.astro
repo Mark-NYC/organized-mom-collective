@@ -1,24 +1,58 @@
 ---
-/** Reusable editorial card for a *published* practical guide. */
+/** Compact, scannable mobile rows with the existing editorial presentation on desktop. */
 import type { Guide } from '../../data/guides/guide-directory';
 import { guideUrl } from '../../data/guides/guide-directory';
-interface Props { guide:Guide; featured?:boolean }
-const {guide,featured=false}=Astro.props;
+interface Props { guide: Guide; featured?: boolean }
+const { guide, featured = false } = Astro.props;
 ---
-<article class:list={['group flex h-full flex-col overflow-hidden border border-[#e2dbd4] bg-white', featured && 'md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] md:items-center']}>
-  <a href={guideUrl(guide)} class:list={['block overflow-hidden bg-[#FBF7F1]',featured?'md:order-2':'']} aria-label={`Read ${guide.title}`}>
-    <div class:list={['flex items-center justify-center bg-[#FBF7F1] p-6',featured?'min-h-[310px] sm:p-10':'min-h-[245px]']}>
-      <img src={guide.image} alt={guide.imageAlt} loading={featured?'eager':'lazy'} decoding="async" width="850" height="1100" class:list={['block h-auto max-h-[370px] w-auto max-w-full object-contain shadow-[0_5px_20px_rgba(55,50,48,.12)] transition-transform duration-300 group-hover:scale-[1.015]',featured?'max-h-[440px]':'']} />
+<article class="h-full">
+  <a
+    href={guideUrl(guide)}
+    aria-label={`Read ${guide.title}`}
+    class:list={[
+      'group flex h-full min-h-[116px] items-center overflow-hidden border-b border-[#e2dbd4] bg-white py-3 transition-colors hover:bg-[#FBF7F1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#545454]',
+      'md:flex-col md:items-stretch md:border md:py-0',
+      featured && 'md:col-span-2 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] md:items-center',
+    ]}
+  >
+    <div class:list={[
+      'flex h-[96px] w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-sm bg-[#FBF7F1] p-1.5',
+      'md:h-auto md:w-full md:rounded-none md:p-6',
+      featured ? 'md:order-2 md:min-h-[310px] md:p-10' : 'md:min-h-[245px]',
+    ]}>
+      <img
+        src={guide.image}
+        alt=""
+        loading={featured ? 'eager' : 'lazy'}
+        decoding="async"
+        width="850"
+        height="1100"
+        class:list={[
+          'block h-full w-full object-contain shadow-[0_2px_9px_rgba(55,50,48,.10)]',
+          'md:h-auto md:w-auto md:max-h-[370px] md:max-w-full md:shadow-[0_5px_20px_rgba(55,50,48,.12)] md:transition-transform md:duration-300 md:group-hover:scale-[1.015]',
+          featured && 'md:max-h-[440px]',
+        ]}
+      />
     </div>
+    <div class:list={['flex min-w-0 flex-1 flex-col py-1 pl-4 pr-2 md:p-8', featured && 'md:p-10']}>
+      <p class="hidden text-[0.73rem] font-bold uppercase tracking-[.12em] text-[#6f6a65] md:block">{guide.area}</p>
+      <h3 class:list={[
+        'font-serif text-[1.12rem] leading-[1.22] tracking-[-.012em] group-hover:underline group-hover:underline-offset-4',
+        featured ? 'md:mt-3 md:text-[2.2rem]' : 'md:mt-3 md:text-[1.45rem]',
+      ]}>{guide.title}</h3>
+      <p class="guide-row-teaser mt-1 text-[0.80rem] leading-[1.5] text-[#5c5550] md:mt-3 md:text-[0.97rem] md:leading-[1.75]">{guide.teaser}</p>
+      <p class="mt-4 hidden text-[0.77rem] font-semibold leading-relaxed text-[#6f6a65] md:block">{guide.kicker}</p>
+      <div class="mt-2 flex items-center justify-between text-[0.78rem] font-semibold text-[#545454] md:mt-auto md:justify-start md:gap-5 md:pt-6">
+        <span class="md:hidden">View guide <span aria-hidden="true">→</span></span>
+        <span class="hidden min-h-11 items-center rounded-sm bg-[#545454] px-5 text-sm font-bold text-white md:inline-flex">Read the guide <span aria-hidden="true" class="ml-2">→</span></span>
+        {guide.pdf && <span class="hidden text-xs font-medium text-[#6f6a65] md:inline">{`Free ${guide.pages}-page PDF included`}</span>}
+      </div>
+    </div>
+    <svg class="mr-1 h-4 w-4 shrink-0 text-[#817973] md:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
-  <div class:list={['flex flex-1 flex-col p-6 sm:p-8',featured&&'sm:p-10']}>
-    <p class="label text-[#6f6a65]">{guide.area}</p>
-    {featured ? <h3 class="mt-3 font-serif text-[2rem] leading-tight sm:text-[2.35rem]"><a class="hover:underline hover:underline-offset-4" href={guideUrl(guide)}>{guide.title}</a></h3> : <h3 class="mt-3 font-serif text-[1.45rem] leading-tight"><a class="hover:underline hover:underline-offset-4" href={guideUrl(guide)}>{guide.title}</a></h3>}
-    <p class="mt-3 text-[0.97rem] leading-[1.75] text-[#5c5550]">{guide.teaser}</p>
-    <p class="mt-4 text-[0.77rem] font-semibold leading-relaxed text-[#6f6a65]">{guide.kicker}</p>
-    <div class="mt-auto flex flex-wrap items-center gap-x-5 gap-y-3 pt-6">
-      <a href={guideUrl(guide)} class="btn-primary">Read the guide</a>
-      {guide.pdf && <span class="text-xs font-medium text-[#6f6a65]">Free {guide.pages}-page PDF included</span>}
-    </div>
-  </div>
 </article>
+<style>
+@media(max-width:767px){
+  .guide-row-teaser{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+}
+</style>
