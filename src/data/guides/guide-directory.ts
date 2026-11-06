@@ -18,6 +18,18 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-after-school-routine',
+    browseCategory: 'family-systems',
+    title: 'The Family After-School Routine',
+    teaser: 'A ten-minute arrival reset, five illustrated after-school steps, simple family handoffs and fewer reminders.',
+    area: 'Routines',
+    kicker: 'First ten minutes · Picture routine · Family handoff',
+    image: '/images/guides/after-school-guide-page-1.webp',
+    imageAlt: 'Illustrated first page of the Family After-School Routine printable',
+    pdf: '/downloads/family-after-school-routine.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-morning-routine',
     browseCategory: 'family-systems',
     title: 'The Family Morning Routine',
