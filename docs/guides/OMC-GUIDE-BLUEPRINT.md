@@ -25,6 +25,10 @@ A real problem gets a repeatable, usable household system. The article teaches t
 - Use existing OMC charcoal `btn-primary` and shared editorial classes, not a separate guide-specific button or competitor-inspired dark-green CTA. Avoid large heavy ink areas in print.
 
 ## Icon rules
+- **All practical guides use monochrome hand-drawn artwork only.** No pastel-colored illustration fills, colored discs, stock icons, emoji, or mixed line-art styles. The pastel brand palette is for page accents and guide panels, not the illustrations.
+- Prefer existing charcoal traced hand-drawn sources in `assets/icons/ofc/updatedicons/svg/*.svg` first. Use the task-accurate drawing, rather than a vaguely related vector just to fill a slot. When that artwork is missing, reuse an appropriate existing hand-drawn master and convert it to charcoal-only PNG, or commission/create a matching drawing before publishing.
+- Every guide icon preparation script must run `normalizeGuideCollection` from `scripts/lib/normalize-guide-ink.mjs` **before** its PDF and page-preview generators. This makes web, PDF and preview artwork use exactly the same dark-ink pixels and transparent background.
+- Do not change the original master images in place. Keep black/charcoal illustrated marks on white print paper; only the surrounding page sections get gentle OMC color.
 - Use OMC's hand-drawn illustrations, never emoji or mixed generic outline packs in place of a task drawing.
 - Use background-free exports for every icon. Run `scripts/prepare-bathroom-guide-icons.mjs` before both page build and PDF generation; preserve intentional white enclosed inside the drawing. Reuse cleaned `/public/assets/icons/ofc/guides/bathroom/*.png` in BOTH outputs, rather than the original source JPG/PNG/WebP.
 - Prefer a canonical transparent OMC SVG for problematic icons, such as the toothbrush, rather than filtering out white from the entire image.
