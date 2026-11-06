@@ -6,7 +6,12 @@ import { makeGuide } from './lib/omc-guide-pdf.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 process.chdir(root);
 const dest=resolve('public/downloads/family-laundry-system-guide.pdf');
-const {pdf,palette:c,text,paragraph,rect,rule,newPage}=await makeGuide('The Family Laundry System | Organized Mom Collective',{runningTitle:'FAMILY LAUNDRY SYSTEM'});
+const {pdf,palette:c,text,paragraph,rect,rule,icon,newPage}=await makeGuide('The Family Laundry System | Organized Mom Collective',{runningTitle:'FAMILY LAUNDRY SYSTEM'});
+const art=(name)=>'public/assets/icons/ofc/guides/laundry/'+name+'.png';
+const stepArt=['hamper','sort','washer','fold','drawer'];
+const issueArt=['drawer','clock','hands','sort','washer','shelf'];
+const roleArt=['hamper','towel','fold','washer'];
+const rhythmArt=['hamper','clock','towel','drawer'];
 const steps=[
  ['Collect','Put dirty clothes in a reachable hamper. Wet items dry before going into a basket.','No dirty clothes left on bedroom floors.'],
  ['Sort + prepare','Check pockets and care labels. Adults check stains and delicate or special-care fabrics.','The load is ready for the correct wash.'],
@@ -19,10 +24,11 @@ rect(p,42,575,528,48,c.ivory);text(p,'WHAT FINISHED LOOKS LIKE',55,605,9,'bold')
 paragraph(p,'Clothes are clean, dry, sorted and put away. The job is not done when the dryer stops.',55,587,500,{size:9.2,leading:12});
 for(let i=0;i<steps.length;i++){
  const y=547-i*86;
- text(p,String(i+1).padStart(2,'0'),54,y,19,'serifBold',c.muted);
- text(p,steps[i][0],117,y+3,12.3,'bold');
- paragraph(p,steps[i][1],117,y-15,425,{size:9.4,leading:12});
- text(p,'DONE:',117,y-43,8.3,'bold');paragraph(p,steps[i][2],158,y-43,385,{size:8.5,leading:10.6});
+ await icon(p,art(stepArt[i]),52,y-30,41);
+ text(p,String(i+1).padStart(2,'0'),100,y,14,'serifBold',c.muted);
+ text(p,steps[i][0],142,y+3,12.3,'bold');
+ paragraph(p,steps[i][1],142,y-15,400,{size:9.4,leading:12});
+ text(p,'DONE:',142,y-43,8.3,'bold');paragraph(p,steps[i][2],183,y-43,360,{size:8.5,leading:10.6});
  rule(p,48,y-58,514);
 }
 rect(p,42,75,528,46,c.blue);text(p,'ONE RULE',55,103,9,'bold');
@@ -38,8 +44,9 @@ const rhythm=[
 for(let i=0;i<rhythm.length;i++){
  const y=550-i*107;
  rect(p,42,y-31,528,86,c.ivory);rect(p,42,y+49,528,5,c.green);
- text(p,rhythm[i][0],57,y+25,10,'bold');
- paragraph(p,rhythm[i][1],57,y+2,493,{size:10,leading:14});
+ await icon(p,art(rhythmArt[i]),55,y-17,38);
+ text(p,rhythm[i][0],105,y+25,10,'bold');
+ paragraph(p,rhythm[i][1],105,y+2,441,{size:10,leading:14});
 }
 rect(p,42,76,528,80,c.green);
 text(p,'OUR LAUNDRY WINDOWS',55,134,10,'bold');
@@ -56,7 +63,8 @@ const roles=[
 for(let i=0;i<4;i++){
  const x=42+(i%2)*269,y=547-Math.floor(i/2)*113;
  rect(p,x,y,259,100,c.ivory);rect(p,x,y+94,259,6,c.apricot);
- text(p,roles[i][0],x+13,y+70,9,'bold');paragraph(p,roles[i][1],x+13,y+49,229,{size:9.2,leading:12.5});
+ await icon(p,art(roleArt[i]),x+12,y+39,38);
+ text(p,roles[i][0],x+63,y+70,9,'bold');paragraph(p,roles[i][1],x+63,y+49,181,{size:8.6,leading:11.5});
 }
 text(p,'ASSIGN THE FIVE STEPS',42,398,10,'bold');
 paragraph(p,'Choose a realistic owner for each task. One person may own more than one step.',42,380,515,{size:9.1,leading:12});
@@ -82,8 +90,9 @@ const issues=[
 ];
 for(let i=0;i<issues.length;i++){
  const y=596-i*70;
- text(p,issues[i][0],54,y,11,'bold');
- paragraph(p,issues[i][1],54,y-19,495,{size:9.4,leading:12});
+ await icon(p,art(issueArt[i]),52,y-32,40);
+ text(p,issues[i][0],107,y,10.5,'bold');
+ paragraph(p,issues[i][1],107,y-19,440,{size:9.4,leading:12});
  rule(p,48,y-48,516);
 }
 rect(p,42,86,528,76,c.ivory);
