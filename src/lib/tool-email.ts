@@ -75,8 +75,10 @@ export function requireToolEmail(tool?: 'responsibility-chart' | `guide-${string
   active = showDialog(publicTool).finally(() => { active = undefined; });
   return active;
 }
-function showDialog(tool: GatedTool): Promise<boolean> {
-  const copy = gatedTools[tool];
+function showDialog(tool: string): Promise<boolean> {
+  const copy = Object.prototype.hasOwnProperty.call(gatedTools, tool)
+    ? gatedTools[tool as GatedTool]
+    : { title: 'Your free printable is ready.', button: 'Download my printable', lead: 'Free printable download' };
   return new Promise(resolve => {
     const previous = document.activeElement as HTMLElement | null;
     const dialog = document.createElement('dialog');
