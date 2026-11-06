@@ -19,6 +19,7 @@ const used = new Set((await getArticles()).map((a) => a.data.pillar));
 const live = pillars.filter((p) => used.has(p.id));
 
 const site = [
+  { href: '/club', label: 'Organized Family Club' },
   { href: routes.calendar, label: 'Family Wall Calendar' },
   { href: routes.resources, label: 'Articles & Ideas' },
   { href: routes.guides, label: 'Practical Guides' },
