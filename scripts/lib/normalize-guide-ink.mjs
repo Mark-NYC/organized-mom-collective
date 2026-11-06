@@ -45,13 +45,20 @@ export async function normalizeGuideInk(path) {
   const meta=await sharp(cropped).metadata();
   const outerLeft=Math.floor((GUIDE_ICON_SIZE-meta.width)/2);
   const outerTop=Math.floor((GUIDE_ICON_SIZE-meta.height)/2);
-  await sharp(cropped).extend({
+  const framed=await sharp(cropped).extend({
     left:outerLeft,
     right:GUIDE_ICON_SIZE-meta.width-outerLeft,
     top:outerTop,
     bottom:GUIDE_ICON_SIZE-meta.height-outerTop,
-    background:{r:255,g:255,b:255,alpha:0}
-  }).png({compressionLevel:9}).toFile(path);
+    background:{r:50,g:50,b:50,alpha:0}
+  }).ensureAlpha().raw().toBuffer();
+  // Resamplers can mix matte RGB into partially transparent edge pixels.
+  // Force all RGB to one ink color after resizing while keeping exact alpha.
+  for(let i=0;i<framed.length;i+=4) {
+    framed[i]=INK;framed[i+1]=INK;framed[i+2]=INK;
+  }
+  await sharp(framed,{raw:{width:GUIDE_ICON_SIZE,height:GUIDE_ICON_SIZE,channels:4}})
+    .png({compressionLevel:9}).toFile(path);
   return {visible,sourceBounds:[cropWidth,cropHeight],finalBounds:[meta.width,meta.height]};
 }
 
