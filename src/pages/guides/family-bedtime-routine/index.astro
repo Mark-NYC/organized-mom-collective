@@ -1,0 +1,82 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
+import {windDown,bedtime,ownership,issues,familyPrompt} from '../../../../scripts/lib/bedtime-guide-content.mjs';
+const pdf='/downloads/family-bedtime-routine.pdf';
+const images=[1,2,3,4].map(n=>`/images/guides/bedtime-guide-page-${n}.webp`);
+const art=(name:string)=>`/assets/icons/ofc/guides/bedtime/${name}.png`;
+---
+<PublicLayout title="The Family Bedtime Routine: A Calmer End to the Day" description="An illustrated family bedtime routine with a night-before reset, six simple bedtime steps, shared responsibilities and a free four-page printable." width="full" ogType="article">
+<div class="omc-guide text-[#545454]">
+<section class="px-5 py-9 sm:px-8 sm:py-14"><div class="mx-auto max-w-5xl">
+<nav aria-label="Breadcrumb" class="text-sm font-medium"><a href="/guides" class="underline underline-offset-4">Guides</a><span aria-hidden="true" class="mx-2">/</span>The Family Bedtime Routine</nav>
+<header class="mx-auto mt-9 max-w-[52rem] text-center">
+<p class="eyebrow">EVENING RHYTHMS · FAMILY RESPONSIBILITY</p>
+<h1 class="mt-3 font-serif text-[clamp(2.4rem,6vw,4.25rem)] leading-[1.09] tracking-tight">Less negotiating. A bedtime routine kids can follow.</h1>
+<p class="mx-auto mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">One more story. One more toy. One forgotten school form. When everyone knows the next step, evenings can feel less like a string of reminders and more like a familiar family rhythm.</p>
+<p class="mt-5 text-xs text-[#777]">Free practical guide · Four illustrated printable pages · Works with our Routine Chart Builder</p>
+</header>
+<div class="mt-10 grid items-center gap-8 border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6 sm:p-10 md:grid-cols-[1.15fr_.85fr]">
+<div><p class="eyebrow">FREE PRINTABLE · FOUR US LETTER PAGES</p><h2 class="mt-3 font-serif text-3xl leading-tight">The Family Bedtime Routine</h2>
+<p class="mt-4 max-w-lg text-sm leading-[1.8] sm:text-base">A short evening wind-down, six picture-based bedtime steps, a family ownership chart and practical fixes for nights that don't go as planned.</p>
+<ul class="mt-5 space-y-2 text-sm leading-relaxed"><li>✓ Prepare tomorrow before the bedtime rush</li><li>✓ Teach a calm, repeatable evening sequence</li><li>✓ Share jobs instead of repeating reminders</li></ul>
+<a href={pdf} download="OMC-Family-Bedtime-Routine.pdf" class="btn-primary mt-7">Download the free PDF</a>
+<p class="mt-2 text-xs text-[#6f6a65]">Four pages · Email requested on first download · Marketing optional</p></div>
+<div class="py-5"><GuidePdfPreview pdf={pdf} images={images} title="The Family Bedtime Routine"/></div>
+</div>
+<nav aria-label="On this page" class="mt-8 border-t border-[#ded8d2] pt-5"><p class="label mb-3 text-[#6f6a65]">IN THIS GUIDE</p>
+<div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3"><a class="guide-anchor" href="#wind-down">Evening wind-down</a><a class="guide-anchor" href="#bedtime-steps">Bedtime pictures</a><a class="guide-anchor" href="#ownership">Family ownership</a><a class="guide-anchor" href="#problems">Troubleshooting</a><a class="guide-anchor max-sm:col-span-2" href="#printable">Free printable</a></div>
+</nav>
+</div></section>
+
+<section id="wind-down" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">01 · CHANGE GEARS</p><h2 class="section-heading">The bedtime routine begins before pajamas.</h2>
+<p class="section-lede">Finish the day's loose ends before the quiet part starts. Choose a repeatable cue your family can recognize, like the end of dinner cleanup. You do not need an elaborate schedule or a perfectly tidy house.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+{windDown.map(([icon,title,detail],i)=><article class="border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6"><div class="flex items-center gap-4"><img src={art(icon)} width="68" height="68" alt="" loading="lazy" class="size-[68px] object-contain"/><span class="font-serif text-3xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div><h3 class="mt-3 font-serif text-2xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}
+</div>
+<div class="mt-8 bg-[#CDDDE1]/35 p-6 text-sm leading-[1.8]"><strong>The finish line:</strong> Tomorrow's clothes and school bag are ready, the main mess is handled, and the family has shifted to a quiet activity. It doesn't need to be perfect.</div>
+<div class="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold"><a class="underline underline-offset-4" href="/guides/family-morning-routine/">Pair this with the Morning Routine</a><a class="underline underline-offset-4" href="/guides/family-bedroom-reset/">See the Kids' Bedroom Reset</a></div>
+</div></section>
+
+<section id="bedtime-steps" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">02 · FOLLOW THE PICTURES</p><h2 class="section-heading">Six familiar bedtime steps.</h2>
+<p class="section-lede">Start with the essentials, put them in an order that works for your family, and practice together before expecting a child to do the whole sequence alone. You can remove steps or adjust the order in the existing free Routine Chart Builder.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+{bedtime.map(([icon,title,detail],i)=><article class="border-t-[5px] border-[#D4DFC4] bg-white p-6"><div class="flex items-center gap-4"><img src={art(icon)} width="65" height="65" alt="" loading="lazy" class="size-[65px] object-contain"/><span class="font-serif text-2xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div><h3 class="mt-3 font-serif text-xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}
+</div>
+<div class="mt-9 border-l-4 border-[#D4DFC4] bg-white p-6"><h3 class="font-serif text-2xl">Give each child a picture routine they can follow.</h3><p class="mt-3 text-sm leading-[1.8]">Choose the right steps, adjust the sequence and times, and print a personalized chart with our existing free Routine Chart Builder. This guide teaches the system, not a competing chart.</p><a href="/routine-chart" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Build a free bedtime chart</a></div>
+</div></section>
+
+<section id="ownership" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">03 · SHARE THE ROUTINE</p><h2 class="section-heading">Everyone owns a little piece of the evening.</h2>
+<p class="section-lede">Children can learn the routine gradually. Adults are responsible for supervision, medications, the right bedtime, and other safety decisions. Match jobs to readiness, not just a birthday.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ownership.map(([icon,age,detail])=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={art(icon)} width="64" height="64" alt="" loading="lazy" class="mb-3 size-16 object-contain"/><p class="eyebrow">{age}</p><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-10 grid gap-6 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-2"><div><p class="eyebrow">AT A FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Choose one job to hand over first.</h3><p class="mt-3 text-sm leading-[1.8]">Page three has a write-in chart for five evening jobs, each person's name and your family cue. Demonstrate a step, do it together, then gradually use fewer reminders.</p></div><div><p class="font-serif text-xl leading-[1.5]">“{familyPrompt}”</p><ol class="mt-4 space-y-3 text-sm leading-[1.8]"><li>1. Choose one step the child can practice.</li><li>2. Show exactly what finished looks like.</li><li>3. Point to the chart instead of calling out every instruction.</li><li>4. Review which part still needs adult help.</li></ol></div></div>
+</div></section>
+
+<section id="problems" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">04 · WHEN THE EVENING CHANGES</p><h2 class="section-heading">When bedtime doesn't go as planned.</h2><p class="section-lede">A late evening doesn't mean the whole system is broken. Make a small adjustment, keep the essential steps and try the same cue tomorrow.</p>
+<div class="mt-8 space-y-3">{issues.map(([icon,title,fix])=><article class="grid gap-4 border-l-4 border-[#E8D2D6] bg-white p-5 md:grid-cols-[1fr_1.3fr]"><div class="flex items-center gap-3"><img src={art(icon)} width="50" height="50" alt="" loading="lazy" class="size-[50px] shrink-0 object-contain"/><h3 class="font-serif text-xl">{title}</h3></div><p class="text-sm leading-[1.8]">{fix}</p></article>)}</div>
+<aside class="mt-8 border-l-4 border-[#F1D8A8] bg-white p-6 text-sm leading-[1.8]"><strong>A note about sleep:</strong> This guide helps families create predictable household routines. It isn't medical advice or a sleep-training plan. Adults choose age-appropriate supervision and safe sleep arrangements, and discuss ongoing sleep concerns with a clinician.</aside>
+</div></section>
+
+<section id="printable" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">PRINT AND PRACTICE</p><h2 class="section-heading">Four pages for a calmer end to the day.</h2>
+<p class="section-lede">Use the wind-down checklist, learn the picture sequence, choose the family handoffs and keep the troubleshooting page nearby. Use our free builder to create a separate personalized chart for daily reference.</p>
+<div class="mt-9 border border-[#ded8d2] bg-white p-7 sm:p-9"><GuidePageGallery images={images} title="The Family Bedtime Routine"/><div class="mt-8 text-center"><a href={pdf} download="OMC-Family-Bedtime-Routine.pdf" class="btn-primary">Download the free PDF</a><p class="mt-2 text-xs">Four US Letter pages · Email requested for first download</p></div></div>
+<div class="mt-10 grid gap-5 sm:grid-cols-2"><div class="border-t-4 border-[#CDDDE1] bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Make the chart your child's own.</h3><p class="mt-3 text-sm leading-[1.8]">Use the free Routine Chart Builder to choose steps and print a chart for your family.</p><a href="/routine-chart" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Free Routine Chart Builder</a></div><div class="border-t-4 border-[#D4DFC4] bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Get tomorrow ready tonight.</h3><p class="mt-3 text-sm leading-[1.8]">Our Family Morning Routine and Entryway Reset make backpacks, shoes and clothes easy to find.</p><a href="/guides/family-morning-routine/" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Family Morning Routine</a></div></div>
+<div class="mt-10 bg-[#FBF7F1] p-7"><p class="eyebrow">MORE HELP FOR EVERYDAY FAMILY ROUTINES</p><h3 class="mt-3 font-serif text-3xl">Personalized printed resources, mailed to your family.</h3><p class="mt-3 max-w-2xl text-sm leading-[1.8]">Organized Family Club helps families practice shared responsibility with personalized printed tools, guidance and routines. The free guide gets you started; the Club helps you keep going with new family resources.</p><a href="/club" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Explore Organized Family Club</a></div>
+</div></section>
+</div>
+<style>
+.omc-guide{font-family:Montserrat,Arial,sans-serif}.omc-guide section[id]{scroll-margin-top:110px}
+.omc-guide .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.omc-guide .section-heading{max-width:800px;margin-top:14px;font-family:Georgia,serif;font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.025em}
+.omc-guide .section-lede{max-width:700px;margin-top:16px;font-size:1.06rem;line-height:1.8}
+.omc-guide .guide-anchor{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 13px;background:#fff;border:1px solid #d8d1cb;border-radius:3px;color:#545454;font-size:14px;font-weight:650;line-height:1.25;text-align:center;text-decoration:none}
+.omc-guide .guide-anchor:hover{background:#CDDDE1}.omc-guide .guide-anchor:focus-visible{outline:2px solid #545454;outline-offset:2px}
+@media(min-width:640px){.omc-guide .guide-anchor{min-height:44px;padding:9px 14px;font-size:13px}}
+</style>
+</PublicLayout>
