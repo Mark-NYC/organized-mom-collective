@@ -16,6 +16,17 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'family-paper-clutter-reset',
+    title: 'The Family Paper Clutter Reset',
+    teaser: 'A ten-minute paper reset, a place for school papers and mail, and a weekly family routine so piles stay gone.',
+    area: 'Home organization',
+    kicker: 'Paper decisions · Simple station · Family handoff',
+    image: '/images/guides/paper-guide-page-1.webp',
+    imageAlt: 'Illustrated first-page preview of the Family Paper Clutter Reset printable',
+    pdf: '/downloads/family-paper-clutter-reset.pdf',
+    pages: 4,
+  },
+  {
     slug: 'family-living-room-reset',
     title: 'The Family Living Room Reset',
     teaser: 'A five-minute evening reset, six weekly jobs, and a simple family ownership plan for shared spaces.',
