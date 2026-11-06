@@ -1,6 +1,6 @@
 ---
 /**
- * OMC guide PDF preview using the real exported page image, never an iframe.
+ * OMC guide PDF preview using a matching illustrated page image, never an iframe.
  * images are matching WebP page previews of the PDF linked by pdf.
  * compact is for the lower-page reminder; full is the hero preview.
  */
@@ -19,7 +19,7 @@ const first=images[0];
     <div class="pointer-events-none absolute inset-x-2 top-3 bottom-5 translate-x-[9px] rotate-[6deg] border border-[#d8d1cb] bg-white shadow-[0_5px_16px_rgba(55,50,48,.08)]" aria-hidden="true"></div>
     <div class="pointer-events-none absolute inset-x-2 top-3 bottom-5 -translate-x-[7px] -rotate-[4deg] border border-[#d8d1cb] bg-white shadow-[0_4px_12px_rgba(55,50,48,.08)]" aria-hidden="true"></div>
     <a href={pdf} download class="relative block overflow-hidden border border-[#d8d1cb] bg-white shadow-[0_9px_22px_rgba(55,50,48,.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#545454]" aria-label={`Download all ${images.length} pages of ${title} as a PDF`}>
-      <img src={first} width="1100" height="1424" loading={compact?'lazy':'eager'} decoding="async" alt={`Actual first page of ${title}`} class="block aspect-[8.5/11] h-auto w-full object-contain"/>
+      <img src={first} width="1100" height="1424" loading={compact?'lazy':'eager'} decoding="async" alt={`Illustrated preview of the first page of ${title}`} class="block aspect-[8.5/11] h-auto w-full object-contain"/>
     </a>
   </div>
   <p class="mt-1 text-center text-[11px] font-medium text-[#6f6a65]">Page 1 of {images.length} · Printable preview</p>
