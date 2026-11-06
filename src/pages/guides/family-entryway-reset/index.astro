@@ -1,0 +1,85 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import GuidePdfPreview from '../../../components/guides/GuidePdfPreview.astro';
+import GuidePageGallery from '../../../components/guides/GuidePageGallery.astro';
+import { habits, rhythm, roles } from '../../../../scripts/lib/entryway-guide-content.mjs';
+const pdf='/downloads/family-entryway-reset.pdf';
+const images=[1,2,3,4].map(n=>`/images/guides/entryway-guide-page-${n}.webp`);
+const art=(name:string)=>`/assets/icons/ofc/guides/entryway/${name}.png`;
+const setups=[
+ {name:'Shoes',icon:'shoes',place:'A low tray, cubby or shelf where shoes come off.',tip:'Keep only everyday pairs by the door. Store the rest elsewhere.'},
+ {name:'Coats and bags',icon:'coat',place:'Hooks low enough to reach without climbing.',tip:'Give each person one clearly assigned hook or landing spot.'},
+ {name:'Backpacks',icon:'backpack',place:'One hook, basket or stable shelf for each school bag.',tip:'Unpack before hanging, so tomorrow does not begin with yesterday\'s mess.'},
+ {name:'Paper and lunch gear',icon:'papers',place:'One visible adult-action pocket; lunch gear goes directly to the kitchen.',tip:'Do not make children responsible for interpreting school forms or deadlines.'}
+];
+const frictions=[
+ ['shoes','Shoes spread across the floor','The tray is too far away or full.','Move it to the true drop point and keep only the everyday pairs.'],
+ ['backpack','Backpacks land in the hallway','The hook is too high or the bag is too heavy to hang.','Use lower hooks or a stable open shelf that fits the bag.'],
+ ['papers','Important school papers vanish','Papers have no one place to land.','Use one action pocket; an adult checks and clears it daily.'],
+ ['lunch','Lunch boxes are still full tomorrow','Unpacking is not part of the after-school habit.','Move lunch boxes to the kitchen as the bag is opened.'],
+ ['basket','The catch-all basket overflows','Every item has become an exception.','Empty it together weekly and give repeat items permanent homes.'],
+ ['floor','The entryway looks messy again','Too many seldom-used things live by the door.','Move seasonal extras elsewhere and sweep after clearing the floor.']
+];
+---
+<PublicLayout title="The Family Entryway Reset: Shoes, Backpacks and School Papers" description="A practical, free family entryway system for shoes, coats, backpacks, lunch gear and school papers, with a four-page printable, family jobs and troubleshooting." width="full" ogType="article">
+<div class="omc-guide text-[#545454]">
+<section class="px-5 py-9 sm:px-8 sm:py-14"><div class="mx-auto max-w-5xl">
+<nav aria-label="Breadcrumb" class="text-sm font-medium"><a href="/guides" class="underline underline-offset-4">Guides</a><span aria-hidden="true" class="mx-2">/</span>Family Entryway Reset</nav>
+<header class="mx-auto mt-9 max-w-[52rem] text-center">
+ <p class="eyebrow">HOME ORGANIZATION · SHARED FAMILY RESPONSIBILITY</p>
+ <h1 class="mt-3 font-serif text-[clamp(2.4rem,6vw,4.25rem)] leading-[1.09] tracking-tight">An entryway that works when everyone comes home.</h1>
+ <p class="mx-auto mt-5 max-w-[42rem] text-[1.05rem] leading-[1.8] sm:text-lg">Shoes in the walkway. Backpacks dropped by the door. School papers nobody can find. Here's how to give every item a home and every family member a small job, without a bigger house or another complicated chart.</p>
+ <p class="mt-5 text-xs text-[#777]">Free practical guide · Four-page family printable · Easy to start today</p>
+</header>
+<div class="mt-10 grid items-center gap-8 border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6 sm:p-10 md:grid-cols-[1.15fr_.85fr]">
+ <div><p class="eyebrow">FREE PRINTABLE · FOUR US LETTER PAGES</p><h2 class="mt-3 font-serif text-3xl leading-tight">The Family Entryway Reset</h2>
+ <p class="mt-4 max-w-lg text-sm leading-[1.8] sm:text-base">Five illustrated arrival habits, two quick resets, a fill-in family assignment sheet and specific fixes for the things that keep piling up.</p>
+ <ul class="mt-5 space-y-2 text-sm leading-relaxed"><li>✓ One home for each everyday item</li><li>✓ A five-minute arrival habit</li><li>✓ Clear jobs each family member can learn</li></ul>
+ <a href={pdf} download="OMC-Family-Entryway-Reset.pdf" class="btn-primary mt-7">Download the free PDF</a>
+ <p class="mt-2 text-xs text-[#6f6a65]">Four pages · Email requested for first download · Marketing optional</p></div>
+ <div class="py-5"><GuidePdfPreview pdf={pdf} images={images} title="The Family Entryway Reset"/></div>
+</div>
+<nav aria-label="On this page" class="mt-8 border-t border-[#ded8d2] pt-5"><p class="label mb-3 text-[#6f6a65]">IN THIS GUIDE</p>
+<div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+<a class="guide-anchor" href="#arrival">Arrival habits</a><a class="guide-anchor" href="#homes">Give items a home</a><a class="guide-anchor" href="#rhythm">Daily and weekly</a><a class="guide-anchor" href="#problems">Troubleshooting</a><a class="guide-anchor max-sm:col-span-2" href="#family">Family handoff</a></div></nav>
+</div></section>
+<section id="arrival" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">01 · AFTER SCHOOL OR WORK</p><h2 class="section-heading">Five small habits before anyone settles in.</h2>
+<p class="section-lede">Don't ask everyone to “clean the entryway.” Teach one short arrival routine, starting with shoes and bags. You can add the next steps once those feel normal.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+{habits.map(([name,title,detail,done],i)=><article class="border-t-[5px] border-[#CDDDE1] bg-[#FBF7F1] p-6"><div class="flex items-center gap-4"><img src={art(name)} alt="" loading="lazy" width="70" height="70" class="size-[70px] object-contain"/><span class="font-serif text-3xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div><h3 class="mt-3 font-serif text-2xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p><p class="mt-4 border-t border-[#d8d1cb] pt-3 text-sm"><strong>Done:</strong> {done}</p></article>)}
+</div><div class="mt-8 bg-[#CDDDE1]/35 p-6 text-sm leading-[1.8]"><strong>The first week:</strong> Pick just two habits, shoes away and backpacks unpacked. Practice alongside the kids. Consistency beats a list everyone ignores.</div>
+</div></section>
+<section id="homes" class="bg-[#D4DFC4]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">02 · DESIGN THE DROP ZONE</p><h2 class="section-heading">Put the storage where life happens.</h2>
+<p class="section-lede">A beautiful entryway that nobody uses is not an organized one. Start by observing where shoes, bags and papers already land. Build from there using baskets, a tray and accessible hooks you may already own.</p>
+<div class="mt-9 grid gap-4 md:grid-cols-2">{setups.map(item=><article class="grid gap-4 border-t-[5px] border-[#D4DFC4] bg-white p-6 sm:grid-cols-[80px_1fr]"><img src={art(item.icon)} alt="" width="72" height="72" loading="lazy" class="size-[72px] object-contain"/><div><h3 class="font-serif text-2xl">{item.name}</h3><p class="mt-3 text-sm leading-[1.8]"><strong>Home:</strong> {item.place}</p><p class="mt-2 text-sm leading-[1.8]"><strong>Make it work:</strong> {item.tip}</p></div></article>)}</div>
+<aside class="mt-8 border-l-4 border-[#F1D8A8] bg-white p-6 text-sm leading-[1.8]"><strong>Safety in small spaces:</strong> Keep doors, exits and walkways clear. Mount hooks and shelves securely, and avoid stacking heavy items above children. Adults handle keys, sharp items and urgent school forms.</aside>
+</div></section>
+<section id="rhythm" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl"><p class="eyebrow">03 · KEEP IT WORKING</p><h2 class="section-heading">Two minutes today beats a big weekend rescue.</h2><p class="section-lede">The system needs a predictable reset, not constant reminders. Choose two small moments that already happen in your family's day.</p>
+<div class="mt-8 grid gap-4 md:grid-cols-2">{rhythm.map(([name,title,detail])=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-6"><img src={art(name)} alt="" width="62" height="62" loading="lazy" class="size-[62px] object-contain"/><h3 class="mt-3 font-serif text-xl">{title}</h3><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-8 bg-[#D4DFC4]/30 p-6 text-sm leading-[1.8]"><strong>Weekly check:</strong> One adult reviews papers and deadlines, everyone clears their own clutter, and the family looks ahead for sports bags or special school needs. Keep the door and walkway clear.</div>
+</div></section>
+<section id="problems" class="bg-[#E8D2D6]/20 px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl"><p class="eyebrow">04 · WHEN IT GETS MESSY AGAIN</p><h2 class="section-heading">Fix the landing spot, not the family.</h2><p class="section-lede">If the same pile keeps returning, treat it as feedback about the setup. Make the next right step easier to see and do.</p>
+<div class="mt-8 space-y-3">{frictions.map(([image,symptom,cause,fix])=><article class="grid gap-4 border-l-4 border-[#E8D2D6] bg-white p-5 md:grid-cols-[1fr_1fr_1.3fr]"><div class="flex items-center gap-3"><img src={art(image)} alt="" loading="lazy" width="50" height="50" class="size-[50px] shrink-0 object-contain"/><h3 class="font-serif text-xl">{symptom}</h3></div><div><p class="eyebrow">WHY IT HAPPENS</p><p class="mt-2 text-sm leading-[1.7]">{cause}</p></div><div><p class="eyebrow">WHAT TO CHANGE</p><p class="mt-2 text-sm leading-[1.7]">{fix}</p></div></article>)}</div>
+</div></section>
+<section id="family" class="px-5 py-16 sm:px-8 sm:py-20"><div class="mx-auto max-w-5xl">
+<p class="eyebrow">05 · SHARE THE RESPONSIBILITY</p><h2 class="section-heading">Give each person a job they can actually own.</h2><p class="section-lede">Young kids can put shoes away. Older kids can manage backpacks and gear. Adults still handle forms, deadlines, mounting hardware and safety. Ages are examples, not requirements.</p>
+<div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{roles.map(([image,age,detail])=><article class="border-t-[5px] border-[#F1D8A8] bg-[#FBF7F1] p-5"><img src={art(image)} alt="" width="65" height="65" loading="lazy" class="mb-3 size-16 object-contain"/><span class="eyebrow">{age}</span><p class="mt-3 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<div class="mt-10 grid gap-6 bg-[#CDDDE1]/35 p-7 sm:p-9 md:grid-cols-2"><div><p class="eyebrow">AT YOUR NEXT FAMILY MEETING</p><h3 class="mt-3 font-serif text-3xl">Choose the first two habits.</h3><p class="mt-3 text-sm leading-[1.8]">Page three of the printable lets you assign names and times, then review the plan next week.</p></div><ol class="space-y-4 text-sm leading-[1.8]"><li><strong>1. Notice:</strong> Where does each item actually land?</li><li><strong>2. Choose:</strong> What one home will each item have?</li><li><strong>3. Practice:</strong> Walk through one arrival together.</li><li><strong>4. Review:</strong> What needs to move or simplify next week?</li></ol></div>
+<div class="mt-12 border border-[#ded8d2] bg-white p-7 sm:p-9"><p class="eyebrow">PREVIEW THE FOUR-PAGE PRINTABLE</p><h3 class="mt-3 font-serif text-3xl">A plan the whole family can see.</h3><p class="mt-3 mb-7 text-sm leading-[1.8]">Five arrival habits, short resets, a write-in family job sheet and troubleshooting. Print only the pages you need.</p><GuidePageGallery images={images} title="The Family Entryway Reset"/>
+<div class="mt-8 text-center"><a href={pdf} download="OMC-Family-Entryway-Reset.pdf" class="btn-primary">Download the free PDF</a><p class="mt-2 text-xs">Four US Letter pages · Email requested on first download</p></div></div>
+<div class="mt-10 grid gap-6 border-t border-[#ded8d2] pt-8 sm:grid-cols-2"><div><h3 class="font-serif text-2xl">Want a responsibility chart that fits your family?</h3><p class="mt-3 text-sm leading-[1.8]">Give each child ownership of a daily arrival job, using their name and tasks.</p><a href="/family-responsibility-builder" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Open the free Responsibility Builder</a></div><div><h3 class="font-serif text-2xl">The next room to reset?</h3><p class="mt-3 text-sm leading-[1.8]">Try the Family Kitchen Reset, where each person gets a clear after-meal responsibility.</p><a href="/guides/family-kitchen-reset/" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Read the Kitchen Reset guide</a></div></div>
+<div class="mt-10 bg-[#FBF7F1] p-6"><h3 class="font-serif text-2xl">Want personalized tools mailed to your family?</h3><p class="mt-3 text-sm leading-[1.8]">Organized Family Club provides personalized printed resources and guidance to help the whole family take ownership.</p><a href="/club" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">See the Organized Family Club</a></div>
+</div></section>
+</div>
+<style>
+.omc-guide{font-family:Montserrat,Arial,sans-serif}.omc-guide section[id]{scroll-margin-top:110px}
+.omc-guide .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.omc-guide .section-heading{max-width:800px;margin-top:14px;font-family:Georgia,serif;font-size:clamp(2rem,4.6vw,3.15rem);line-height:1.16;letter-spacing:-.025em}
+.omc-guide .section-lede{max-width:700px;margin-top:16px;font-size:1.06rem;line-height:1.8}
+.omc-guide .guide-anchor{display:flex;align-items:center;justify-content:center;min-height:48px;padding:10px 13px;background:#fff;border:1px solid #d8d1cb;border-radius:3px;color:#545454;font-size:14px;font-weight:650;line-height:1.25;text-align:center;text-decoration:none}
+.omc-guide .guide-anchor:hover{background:#CDDDE1}.omc-guide .guide-anchor:focus-visible{outline:2px solid #545454;outline-offset:2px}
+@media(min-width:640px){.omc-guide .guide-anchor{min-height:44px;padding:9px 14px;font-size:13px}}
+</style>
+</PublicLayout>
