@@ -128,6 +128,15 @@ const faqs = [
   : ['Can I subscribe or cancel right now?', 'Enrollment is not open yet. We are testing print fulfillment and billing. Pricing and cancellation terms will be confirmed before sign-up. You can ask about early access.']
 ];
 const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
+// The early product introduction: five real monthly tools (from kitPreviews), each with a short benefit label.
+const introLabels: Record<string, string> = {
+ March: 'Share the chores without chasing',
+ April: 'Make dinner a team job',
+ May: 'Give summer days a rhythm',
+ August: 'Get ready for school together',
+ October: 'A daily reset everyone does',
+};
+const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ...k, label: introLabels[k.month] }));
 ---
 <PublicLayout fullTitle={`Organized Family Club · ${BRAND_NAME}`} description="A personalized family plan for one real challenge each month, built around your kids, their ages and your routines, printed and mailed to your door." indexable={false} chrome={false} width="full" tracking={false}>
 <div class="club">
@@ -137,8 +146,9 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  <div class="hero-copy">
   <p class="eyebrow">ORGANIZED FAMILY CLUB · PRINTED &amp; MAILED MONTHLY</p>
   <h1>Your family shouldn't depend on you <em>for everything.</em></h1>
-  <p class="product-definition"><strong>A personalized family plan for one real challenge each month,</strong> built around your kids, their ages and your routines. We prepare it, print it and mail it to your door. Less planning for you. More ownership for everyone.</p>
-  <div class="hero-actions"><a class="primary cta-lime" href="#offer">{ctaLabel} <span aria-hidden="true">→</span></a><a class="text-cta" href="#families">See a sample family plan ↓</a></div>
+  <p class="product-definition"><strong>Every month, we prepare a personalized family plan</strong> around your kids, your routines and what’s hard right now. Then we print and mail a practical tool to your door, so your family shares the planning, not just the chores.</p>
+  <ul class="hero-includes" aria-label="What the membership includes"><li>A new challenge each month</li><li>Planned for your family</li><li>Printed and mailed to you</li></ul>
+  <div class="hero-actions"><a class="primary cta-lime" href="#offer">{ctaLabel} <span aria-hidden="true">→</span></a><a class="text-cta" href="#what-arrives">See what arrives ↓</a></div>
   <div class="hero-rating"><img src="data:image/png;base64,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" alt="4.9 out of 5 stars, 113 Organized Mom Collective reviews" width="350" height="35" loading="eager" /><span>Organized Mom Collective reviews</span></div>
  </div>
  <figure class="hero-photo"><img src={clubHeroUrl} alt="Family gathered around a kitchen table looking together at a printed family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
@@ -156,28 +166,29 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  </div>
 </section>
 
-<section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-layout="layered" data-view="plan">
- {/* TEMPORARY review control (desktop only): compare two demo layouts; links: ?demo=layered, ?demo=side-by-side. */}
- <div class="compare-bar" role="group" aria-labelledby="compare-label">
-  <span id="compare-label">Design comparison · Demo layout</span>
-  <div class="compare-options">
-   <button type="button" aria-pressed="true" data-demo-layout="layered">A · Layered mockup</button>
-   <button type="button" aria-pressed="false" data-demo-layout="side-by-side">B · Side by side</button>
-  </div>
+<section class="product-intro" id="what-arrives" aria-labelledby="intro-title">
+ <div class="container intro-head">
+  <p class="eyebrow">WHAT ARRIVES EACH MONTH</p>
+  <h2 id="intro-title">A little less for you to figure out. <em>Every month.</em></h2>
+  <p>One month it’s sharing the chores. Another, it’s dinner, summer days, getting ready for school or a daily reset. Each one arrives printed and ready for the fridge.</p>
  </div>
- <script is:inline>
-  (function () {
-   var v = new URLSearchParams(location.search).get('demo');
-   if (v !== 'side-by-side' && v !== 'layered') return;
-   var s = document.currentScript.closest('.demo-surface');
-   s.dataset.layout = v;
-   s.querySelectorAll('[data-demo-layout]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.demoLayout === v)); });
-  })();
- </script>
+ <ul class="intro-spread" role="list" aria-label="Examples of monthly printed tools" tabindex="0">
+  {introKits.map(kit => <li class="intro-item">
+   <img src={kit.image} alt={`${kit.month}: ${kit.description}, a printed Organized Family Club tool`} width="1080" height="1080" loading="lazy" decoding="async" />
+   <p class="intro-month"><span style={{ backgroundColor: kit.color }}>{kit.month}</span></p>
+   <p class="intro-label">{kit.label}</p>
+  </li>)}
+ </ul>
+ <p class="intro-swipe" aria-hidden="true">Swipe to see more →</p>
+ <p class="intro-bridge">And every one is prepared for your actual family, <em>not handed to you as a blank template.</em></p>
+</section>
+
+<section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-view="plan">
  <div class="demo-head">
-  <p class="eyebrow">SEE WHAT ARRIVES · MAY: OUR SUMMER DAY</p>
-  <h2 id="demo-title">When the season changes, <em>it all lands back on Mom.</em></h2>
-  <p>School ends, schedules shift, and you’re figuring out everyone’s day again. Pick a family to see what we prepare: their Family Meeting plan on the phone, and the printed page that comes in the mail.</p>
+  <p class="eyebrow">ONE MONTH · THREE FAMILIES · MAY: OUR SUMMER DAY</p>
+  <h2 id="demo-title">See what <em>personalized</em> actually means.</h2>
+  <p>Here’s one example. When school ends and summer routines disappear, Mom is often left creating a new plan for everyone. For May, we help the family agree on a summer rhythm, then prepare the printed tool to help everyone follow it.</p>
+  <p class="demo-prompt">Choose a family to see how their ages, schedules and challenges change both pieces.</p>
  </div>
  <div class="family-tabs" role="tablist" aria-label="Choose a sample family">
   {families.map((f, i) => <button type="button" role="tab" id={`family-tab-${f.id}`} aria-controls={`family-panel-${f.id}`} aria-selected={i === 1 ? 'true' : 'false'} tabindex={i === 1 ? 0 : -1} data-family-tab>
@@ -191,8 +202,8 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  </div>
  {families.map((f, i) => <div class="family-panel" id={`family-panel-${f.id}`} role="tabpanel" aria-labelledby={`family-tab-${f.id}`} hidden={i !== 1}>
   <div class="stage" aria-label={`Illustrative ${f.family} Family Meeting plan on a phone, and their printed Our Summer Day page`}>
-   <p class="stage-label stage-label-plan"><b>1</b> Talk through your family plan</p>
-   <p class="stage-label stage-label-print"><b>2</b> Use your printed family rhythm</p>
+   <div class="stage-label stage-label-plan"><p class="stage-label-title"><b>1</b> Your prepared family plan</p><p>A digital meeting plan to discuss priorities, agree on goals and share responsibilities.</p></div>
+   <div class="stage-label stage-label-print"><p class="stage-label-title"><b>2</b> Your printed monthly tool</p><p>A finished, personalized resource mailed to your door to put the plan into practice.</p></div>
    <article class="sheet" id={`sheet-${f.id}`} aria-label={`${f.family}: printed Our Summer Day page`}>
     <div class="sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h3>Our <em>Summer Day</em></h3><p>A little structure. Plenty of freedom.</p></div>
     <div class="sheet-family"><span>{f.family.replace('The ', '').toUpperCase()}’S SUMMER RHYTHM</span><span class="sheet-people">{f.kids.map((k, n) => <span><i style={`background:${MARKER_COLORS[n].hex}`}></i>{k.name}</span>)}</span></div>
@@ -225,13 +236,10 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
     </div>
    </div>
   </div>
+  <p class="demo-included"><i class="lime-check" aria-hidden="true">✓</i> Both are included in the same monthly membership.</p>
   <aside class="why" aria-label={`Why the ${f.family} plan looks like this`}>
    <p class="eyebrow">WHY THEIR PLAN LOOKS LIKE THIS</p>
    <ul>{f.why.map(([fact, result]) => <li><b>{fact}</b><span>{result}</span></li>)}</ul>
-   <ol class="why-key">
-    <li><b>On the phone:</b> the Family Meeting plan. Mom reviews it and changes anything that doesn’t fit.</li>
-    <li><b>On paper:</b> the same plan, printed and mailed, ready for the fridge.</li>
-   </ol>
   </aside>
  </div>)}
  <p class="demo-disclaimer">Sample families and illustrative mockups, not customer results or screenshots of production output. The printed page follows the real May resource’s design.</p>
@@ -242,14 +250,10 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  <h2 id="how-title">We do the thinking ahead. <em>Your family does the rest.</em></h2>
  <ol class="steps">
   <li><b>1</b><h3>Tell us about your family.</h3><p>Names, ages, activities, and what’s hardest right now. Update it whenever life changes.</p></li>
-  <li><b>2</b><h3>We prepare this month’s plan.</h3><p>One real family challenge, with a shared goal, age-fitting parts and Family Meeting prompts. Review it on your phone and change anything.</p></li>
-  <li><b>3</b><h3>It arrives printed.</h3><p>Put it on the fridge and talk it through at your Family Meeting: about ten minutes, once a week.</p></li>
+  <li><b>2</b><h3>Review your prepared plan.</h3><p>We prepare one real family challenge with a shared goal, age-fitting parts and Family Meeting prompts. Change anything that doesn’t fit.</p></li>
+  <li><b>3</b><h3>Receive and use the printed tool.</h3><p>It arrives in your mailbox. Put it on the fridge and talk it through at your Family Meeting: about ten minutes, once a week.</p></li>
  </ol>
-</section>
-
-<section class="change container" aria-labelledby="change-title">
- <p class="eyebrow">WHAT CHANGES, ONE MONTH AT A TIME</p>
- <h2 id="change-title">Less managing for Mom. <em>More ownership for everyone.</em></h2>
+ <h3 class="change-title" id="change-title">What changes, <em>one month at a time</em></h3>
  <div class="change-table" role="table" aria-label="How family responsibility shifts">
   <div role="row" class="change-head"><span role="columnheader"></span><span role="columnheader">Today</span><span role="columnheader">With a shared plan</span></div>
   <div role="row"><b role="rowheader">Planning</b><span role="cell">Mom figures it out alone.</span><span role="cell">The grown-ups agree on the goal together.</span></div>
@@ -260,9 +264,9 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 </section>
 
 <section class="kit-gallery container" aria-labelledby="kit-gallery-title">
- <p class="eyebrow">A NEW CHALLENGE EACH MONTH</p>
- <h2 id="kit-gallery-title">The moments that land on Mom. <em>One at a time.</em></h2>
- <p class="kit-gallery-intro">Laundry, dinner, summer days, back to school. Tap any month to see the actual printable.</p>
+ <p class="eyebrow">EXPLORE THE MEMBERSHIP</p>
+ <h2 id="kit-gallery-title">A year of family challenges, <em>one month at a time.</em></h2>
+ <p class="kit-gallery-intro">Tap any month to see the printable and how it’s personalized.</p>
  <div class="kit-gallery-grid">{kitPreviews.map(kit => <figure class="kit-gallery-item">
   <button class="kit-gallery-open" type="button" data-kit-open={kit.month} aria-label={`View ${kit.month}: ${kit.title}`} aria-haspopup="dialog"><span class="kit-gallery-zoom" aria-hidden="true">View +</span></button>
   <img src={kit.image} alt={`${kit.month}: ${kit.description}, Organized Family Club printed tool preview`} width="1080" height="1080" loading="lazy" decoding="async" />
@@ -350,17 +354,6 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
   });
  });
 
- // TEMPORARY desktop design comparison: switch layouts in place and keep ?demo= in the URL for sharing.
- document.querySelectorAll<HTMLButtonElement>('[data-demo-layout]').forEach(button => {
-  button.addEventListener('click', () => {
-   const layout = button.dataset.demoLayout!;
-   surface.dataset.layout = layout;
-   document.querySelectorAll('[data-demo-layout]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
-   const url = new URL(location.href);
-   url.searchParams.set('demo', layout);
-   history.replaceState(history.state, '', url);
-  });
- });
  const select = (tab: HTMLButtonElement, focus = false) => {
   tabs.forEach(t => {
    const on = t === tab;
@@ -488,12 +481,39 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 .problem-big em{color:var(--rose-ink)}
 .problem-turn>p:last-child{line-height:1.75;color:var(--muted)}
 
-/* The demo: three families, a phone Family Meeting plan over the real May page. */
+/* Product introduction: real monthly tools laid out like prints on a table. */
+.product-intro{padding-bottom:clamp(48px,6vw,88px)}
+.intro-head{max-width:860px;text-align:center}
+.intro-head h2{margin-bottom:16px}
+.intro-head>p:last-child{font-size:1.02rem;line-height:1.7;color:var(--muted);max-width:720px;margin-inline:auto}
+.intro-spread{list-style:none;display:flex;justify-content:center;max-width:1360px;margin:36px auto 0;padding:clamp(28px,3vw,44px) clamp(16px,3vw,48px) clamp(20px,2.4vw,32px);background:#f6f3ee}
+.intro-item{flex:1 1 0;min-width:0;margin:0 -1.4%;text-align:center;position:relative}
+.intro-item img{display:block;width:100%;height:auto;aspect-ratio:1;mix-blend-mode:multiply}
+.intro-item:nth-child(1) img{transform:rotate(-2.5deg) translateY(14px)}
+.intro-item:nth-child(2) img{transform:rotate(1.5deg)}
+.intro-item:nth-child(3) img{transform:rotate(-1deg) translateY(20px)}
+.intro-item:nth-child(4) img{transform:rotate(2deg) translateY(4px)}
+.intro-item:nth-child(5) img{transform:rotate(-1.8deg) translateY(12px)}
+.intro-month{margin-top:10px!important}
+.intro-month span{display:inline-block;padding:4px 10px;font-size:.6rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:#354f42}
+.intro-label{font:400 clamp(1rem,1.25vw,1.2rem)/1.3 Georgia,serif;color:var(--ink);margin:8px auto 0!important;max-width:15ch}
+.intro-swipe{display:none}
+.intro-bridge{text-wrap:balance;max-width:760px;margin:30px auto 0!important;padding-inline:24px;text-align:center;font:400 clamp(1.25rem,1.8vw,1.6rem)/1.35 Georgia,serif;color:var(--ink)}
+.intro-bridge em{color:var(--rose-ink)}
+.intro-spread:focus-visible{outline:3px solid #6f8f6a;outline-offset:-3px}
+
+/* Hero: what the membership includes, in one compact line. */
+.hero-includes{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.76rem;font-weight:700;color:#526b54}
+.hero-includes li{display:flex;align-items:center;gap:7px}
+.hero-includes li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--rose)}
+
+/* The demo: three families, the phone Family Meeting plan beside the real May page (side by side, locked in). */
 .demo{padding-top:0}
-.demo-surface{padding:clamp(40px,5vw,80px) clamp(18px,4vw,64px) clamp(32px,4vw,56px)}
+.demo-surface{position:relative;padding:clamp(40px,5vw,80px) clamp(18px,4vw,64px) clamp(32px,4vw,56px)}
 .demo-head{max-width:820px;margin:0 auto;text-align:center}
 .demo-head h2{margin-bottom:16px}
-.demo-head>p:last-child{font-size:1.02rem;line-height:1.7;color:var(--muted)}
+.demo-head>p:not(.eyebrow){font-size:1.02rem;line-height:1.7;color:var(--muted)}
+.demo-head>.demo-prompt{margin-top:12px!important;font-weight:700;color:var(--ink)}
 .family-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:820px;margin:32px auto 36px}
 .family-tabs button{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;min-height:64px;padding:12px 16px;border:1px solid #d9d9d4;border-radius:2px;background:#fff;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s}
 .family-tabs button:hover{border-color:#9aab8f}
@@ -503,10 +523,17 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 .tab-dots i:first-child{margin-left:0}
 .family-tabs strong{font-size:.88rem}
 .family-tabs small{font-size:.72rem;color:var(--muted)}
-.family-panel{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(28px,4vw,56px);align-items:center;max-width:1180px;margin:0 auto}
+.family-panel{display:grid;grid-template-columns:1fr;gap:44px;max-width:1180px;margin:0 auto}
 
-.stage{position:relative;padding-left:250px;min-width:0}
-.sheet{container-type:inline-size;width:100%;max-width:580px;background:#fff;border:1px solid #e2e7df;box-shadow:0 2px 4px #0000000a,0 24px 50px -20px #3c463540;padding:clamp(14px,4.4%,38px) clamp(14px,5.6%,48px) clamp(10px,2.8%,23px);color:#464e44;display:flex;flex-direction:column}
+.stage{min-width:0;display:grid;grid-template-columns:minmax(250px,320px) minmax(0,640px);grid-template-areas:"plabel slabel" "phone sheet";justify-content:center;align-items:center;column-gap:clamp(36px,5.5vw,96px);row-gap:20px}
+.stage-label{align-self:end;text-align:center;max-width:320px;justify-self:center}
+.stage-label-plan{grid-area:plabel}
+.stage-label-print{grid-area:slabel}
+.stage-label-title{display:flex;align-items:center;justify-content:center;gap:10px;font-size:.86rem;font-weight:750;color:var(--ink)}
+.stage-label-title b{display:inline-grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:#dfe7d8;color:#3f5a40;font-size:.72rem}
+.stage-label>p:last-child{margin-top:5px!important;font-size:.78rem;line-height:1.5;color:var(--muted)}
+.demo-included{display:flex;align-items:center;justify-content:center;margin:-16px auto 0!important;font-size:.92rem;font-weight:700;color:var(--ink)}
+.sheet{grid-area:sheet;container-type:inline-size;width:100%;max-width:640px;background:#fff;border:1px solid #e2e7df;box-shadow:0 2px 4px #0000000a,0 24px 50px -20px #3c463540;padding:clamp(14px,4.4%,38px) clamp(14px,5.6%,48px) clamp(10px,2.8%,23px);color:#464e44;display:flex;flex-direction:column}
 .sheet-head{background:#e4eddc;border-top:max(5px,1.1cqw) solid #cbdcbf;padding:2.4cqw 3.4cqw 2.6cqw}
 .sheet-head>span{font-size:clamp(7px,1.25cqw,10px);letter-spacing:.15em;font-weight:700;color:#526849}
 .sheet-head h3{font:400 clamp(26px,6.1cqw,50px)/1.1 Georgia,serif;color:#3f5a40;margin:1.2cqw 0 .8cqw;letter-spacing:-.01em}
@@ -531,7 +558,7 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 .sheet-rule p{font-size:clamp(9px,1.35cqw,11px);color:#647960}
 .sheet-foot{display:flex;justify-content:space-between;border-top:1px solid #dfe6dc;margin-top:2.4cqw;padding-top:1.1cqw;font-size:clamp(7px,1.1cqw,9px);letter-spacing:.1em;font-weight:700;color:#687964}
 
-.phone{position:absolute;left:0;top:50%;transform:translateY(-46%);z-index:2;width:270px;height:560px;padding:10px;border-radius:44px;background:linear-gradient(145deg,#3a3a3c,#1c1c1e 40%,#2c2c2e);box-shadow:0 0 0 1.5px #545456,0 30px 60px -18px #1f2a2080,0 12px 24px -12px #00000059}
+.phone{grid-area:phone;position:relative;justify-self:center;width:100%;max-width:320px;height:clamp(600px,50vw,730px);padding:10px;border-radius:44px;background:linear-gradient(145deg,#3a3a3c,#1c1c1e 40%,#2c2c2e);box-shadow:0 0 0 1.5px #545456,0 30px 60px -18px #1f2a2080,0 12px 24px -12px #00000059}
 .phone::before,.phone::after{content:"";position:absolute;width:3px;border-radius:2px;background:#2c2c2e}
 .phone::before{left:-3px;top:110px;height:54px;box-shadow:0 70px 0 #2c2c2e}
 .phone::after{right:-3px;top:150px;height:80px}
@@ -543,20 +570,20 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 .phone-icons i{width:3px;background:#433c3b;border-radius:1px}
 .phone-icons i:nth-child(1){height:5px}.phone-icons i:nth-child(2){height:8px}.phone-icons i:nth-child(3){width:16px;height:8px;border-radius:2px;margin-left:3px}
 .phone-kicker{font-size:8.5px;font-weight:800;letter-spacing:.14em;color:var(--rose-ink)}
-.phone-screen h3{font-size:21px;margin:4px 0 9px;color:#3e3736}
+.phone-screen h3{font-size:23px;margin:4px 0 9px;color:#3e3736}
 .phone-people{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:5px}
 .phone-people li{display:inline-flex;align-items:center;gap:5px;padding:3px 8px 3px 6px;border:1px solid #e4e0da;border-radius:20px;background:#fff;font-size:10.5px;font-weight:650}
 .phone-people i,.phone-parts i{width:9px;height:9px;border-radius:50%;flex:none}
 .phone-adults i{background:#fff;border:1.5px solid #8a8580}
 .phone-card{background:#fff;border:1px solid #ece8e2;border-radius:10px;padding:9px 11px;margin-bottom:7px}
 .phone-card>span{display:block;font-size:8px;font-weight:800;letter-spacing:.13em;color:#7a8d74;margin-bottom:4px}
-.phone-card p{font-size:11px;line-height:1.45}
+.phone-card p{font-size:11.5px;line-height:1.45}
 .phone-goal{background:#eef4ea;border-color:#dce7d6}
 .phone-goal strong{display:block;font:400 15px/1.25 Georgia,serif;color:#3f5a40;margin-bottom:2px}
 .phone-parts{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .phone-parts li{display:grid;grid-template-columns:9px 1fr;gap:7px;align-items:start}
 .phone-parts i{margin-top:4px}
-.phone-parts p{font-size:10.5px;line-height:1.42}
+.phone-parts p{font-size:11px;line-height:1.42}
 .phone-parts b{font-weight:750;margin-right:2px}
 .phone-talk p{font:italic 12.5px/1.4 Georgia,serif;color:#4d4544}
 .phone-review{display:flex;gap:6px;margin-top:9px}
@@ -564,17 +591,17 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 .phone-review .phone-approve{background:var(--lime);border-color:var(--lime);color:#2f4630}
 
 .why .eyebrow{color:var(--sage-ink)}
-.why ul{list-style:none;margin:0;padding:0;border-top:1px solid #d6d6d0}
-.why ul li{display:grid;gap:3px;padding:14px 0;border-bottom:1px solid #d6d6d0}
+.why{max-width:1040px;width:100%;margin:0 auto}
+.why .eyebrow{text-align:center}
+.why ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px}
+.why ul li{display:grid;gap:3px;align-content:start;padding:14px 0;border-top:1px solid #d6d6d0}
 .why ul li b{font:400 1.2rem/1.25 Georgia,serif;color:var(--ink)}
 .why ul li span{font-size:.88rem;line-height:1.55;color:var(--muted)}
 .why ul li span::before{content:"→ ";color:var(--rose)}
-.why-key{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:8px;font-size:.78rem;line-height:1.5;color:var(--muted)}
-.why-key b{color:var(--ink)}
 .demo-disclaimer{max-width:760px;margin:32px auto 0!important;text-align:center;font-size:.72rem;line-height:1.5;color:var(--muted)}
 
 /* How it works */
-.how{padding-top:clamp(56px,7vw,100px);padding-bottom:clamp(40px,5vw,64px)}
+.how{padding-top:clamp(56px,7vw,100px);padding-bottom:clamp(56px,7vw,96px)}
 .how h2{max-width:820px}
 .steps{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px}
 .steps li{border-top:1px solid var(--rose);padding-top:22px}
@@ -582,9 +609,10 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 .steps h3{margin:12px 0}
 .steps p{line-height:1.75;color:var(--muted)}
 
-/* What changes */
-.change{padding-top:clamp(40px,5vw,64px);padding-bottom:clamp(56px,7vw,96px)}
-.change-table{margin-top:34px;border-top:1px solid var(--line)}
+/* What changes (inside How it works) */
+.change-title{margin-top:clamp(48px,6vw,72px)!important;font-size:clamp(1.6rem,2.2vw,2.1rem)}
+.change-title em{font-style:italic;color:var(--sage-ink)}
+.change-table{margin-top:22px;border-top:1px solid var(--line)}
 .change-table>div{display:grid;grid-template-columns:180px minmax(0,1fr) minmax(0,1fr);gap:24px;padding:18px 0;border-bottom:1px solid var(--line);align-items:baseline}
 .change-head{font-size:.68rem;letter-spacing:.11em;font-weight:750;text-transform:uppercase;color:var(--muted)}
 .change-head span:last-child{color:var(--sage-ink)}
@@ -698,13 +726,6 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 .footer{background:var(--dark);color:#fff;padding:24px;display:flex;justify-content:space-between;gap:20px;font-size:.78rem}
 .footer a{color:#fff}
 
-/* Tablet: the demo explanation moves under the composition. */
-@media(max-width:1100px){
- .family-panel{grid-template-columns:1fr;max-width:820px}
- .why{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:0 32px}
- .why .eyebrow{grid-column:1/-1}
- .why-key{margin-top:0;align-self:start}
-}
 @media(max-width:1000px){.kit-gallery-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:850px){
  .hero-inner{display:flex;flex-direction:column;min-height:0}
@@ -735,8 +756,7 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  .tab-dots{grid-row:auto}
  .family-tabs strong{font-size:.76rem;line-height:1.2}
  .family-tabs small{font-size:.62rem;line-height:1.25}
- .why{display:block;padding-inline:6px}
- .why-key{margin-top:18px}
+ .why{padding-inline:6px}
  .change-table>div{grid-template-columns:1fr 1fr;gap:6px 16px}
  .change-table b{grid-column:1/-1}
  .change-head{display:none!important}
@@ -747,49 +767,24 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  .footer{flex-direction:column;align-items:center;text-align:center}
 }
 
-/* TEMPORARY design comparison control (desktop only). */
-.demo-surface{position:relative}
-.compare-bar{position:absolute;z-index:3;top:10px;right:clamp(18px,4vw,64px);display:flex;align-items:center;gap:10px;font-size:.62rem;color:var(--muted)}
-.compare-bar>span{font-weight:750;letter-spacing:.1em;text-transform:uppercase}
-.compare-options{display:inline-flex;gap:3px;padding:3px;border:1px dashed #aeaea7;background:#fff}
-.compare-options button{border:0;border-radius:1px;background:transparent;padding:7px 12px;font:inherit;font-size:.74rem;font-weight:650;color:var(--ink);cursor:pointer}
-.compare-options button:hover{background:#f1f2f2}
-.compare-options button[aria-pressed=true]{background:var(--dark);color:#fff}
-.compare-options button:focus-visible,.view-tabs button:focus-visible{outline:3px solid #6f8f6a;outline-offset:2px}
-.stage-label{display:none}
 .view-tabs{display:none}
-
-/* Option B: phone and printed page side by side, both at a legible size. */
-@media(min-width:961px){
- .demo-surface[data-layout=side-by-side] .family-panel{grid-template-columns:1fr;max-width:1180px;gap:44px}
- .demo-surface[data-layout=side-by-side] .stage{padding-left:0;display:grid;grid-template-columns:minmax(250px,320px) minmax(0,640px);grid-template-areas:"plabel slabel" "phone sheet";justify-content:center;align-items:center;column-gap:clamp(36px,5.5vw,96px);row-gap:20px}
- .demo-surface[data-layout=side-by-side] .stage-label{display:flex;align-items:center;justify-content:center;gap:10px;align-self:end;font-size:.8rem;font-weight:700;color:var(--ink)}
- .demo-surface[data-layout=side-by-side] .stage-label b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#dfe7d8;color:#3f5a40;font-size:.72rem}
- .demo-surface[data-layout=side-by-side] .stage-label-plan{grid-area:plabel}
- .demo-surface[data-layout=side-by-side] .stage-label-print{grid-area:slabel}
- .demo-surface[data-layout=side-by-side] .phone{grid-area:phone;position:relative;left:auto;top:auto;transform:none;justify-self:center;width:100%;max-width:320px;height:clamp(600px,50vw,730px)}
- .demo-surface[data-layout=side-by-side] .phone-screen h3{font-size:23px}
- .demo-surface[data-layout=side-by-side] .phone-card p{font-size:11.5px}
- .demo-surface[data-layout=side-by-side] .phone-parts p{font-size:11px}
- .demo-surface[data-layout=side-by-side] .sheet{grid-area:sheet;max-width:640px}
- .demo-surface[data-layout=side-by-side] .why{display:block;max-width:1040px;width:100%;margin:0 auto}
- .demo-surface[data-layout=side-by-side] .why .eyebrow{text-align:center}
- .demo-surface[data-layout=side-by-side] .why ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;border-top:0}
- .demo-surface[data-layout=side-by-side] .why ul li{border-top:1px solid #d6d6d0;border-bottom:0;align-content:start}
- .demo-surface[data-layout=side-by-side] .why-key{display:none}
-}
+.view-tabs button:focus-visible{outline:3px solid #6f8f6a;outline-offset:2px}
 
 /* Mobile and tablet: one preview at a time behind two tabs; never overlapping. */
 @media(max-width:960px){
- .compare-bar{display:none}
  .view-tabs{display:grid;grid-template-columns:1fr 1fr;max-width:640px;margin:0 auto 20px;border-bottom:1px solid #cfcfc9}
  .view-tabs button{min-height:48px;margin-bottom:-1px;padding:12px 6px;border:0;border-bottom:3px solid transparent;background:none;font:inherit;font-size:.84rem;font-weight:750;line-height:1.25;color:var(--muted);cursor:pointer}
  .view-tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--dark)}
  .family-panel{max-width:640px}
- .stage{padding-left:0;display:block}
- .demo-surface[data-view=plan] .sheet,.demo-surface[data-view=print] .phone{display:none}
+ .stage{display:block}
+ .stage-label{max-width:none;text-align:left;margin:0 0 16px}
+ .stage-label-title{justify-content:flex-start}
+ .demo-surface[data-view=plan] :is(.sheet,.stage-label-print),.demo-surface[data-view=print] :is(.phone,.stage-label-plan){display:none}
+ .why ul{grid-template-columns:1fr}
+ .why .eyebrow{text-align:left}
+ .demo-included{justify-content:flex-start;font-size:.85rem;margin:0!important;padding-inline:6px}
  .sheet{max-width:none}
- .phone{position:relative;left:auto;top:auto;transform:none;width:min(100%,390px);height:auto;margin:0 auto}
+ .phone{width:min(100%,390px);max-width:none;height:auto;margin:0 auto}
  .phone-screen{height:auto;min-height:600px;overflow:visible;-webkit-mask-image:none;mask-image:none;padding-bottom:22px}
  .phone-status{position:static}
  .phone-kicker{font-size:9.5px}
@@ -801,6 +796,15 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  .phone-goal strong{font-size:17px}
  .phone-talk p{font-size:14.5px}
  .phone-review span{font-size:12px;padding:10px 4px}
+}
+@media(max-width:700px){
+ .intro-head{text-align:left}
+ .intro-spread{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;margin:26px 12px 0;padding:22px 16px 18px;scrollbar-width:thin}
+ .intro-item{flex:0 0 68%;margin:0;scroll-snap-align:center}
+ .intro-item img{transform:none!important}
+ .intro-swipe{display:block;margin:10px 24px 0!important;font-size:.72rem;color:var(--muted);text-align:right}
+ .intro-bridge{text-align:left;margin-top:24px!important}
+ .hero-includes{font-size:.76rem;gap:6px 14px}
 }
 @media(max-width:400px){
  .phone{padding:7px;border-radius:38px}
