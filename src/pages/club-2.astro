@@ -47,50 +47,10 @@ const kitDetails: Record<string, { relief: string; example: string }> = {
 };
 
 const families = [
-  {
-    id: 'parkers', button: '2 young kids', family: 'The Parker Family', summary: '2 kids · ages 4 & 7',
-    context: 'Preschool drop-off, first grade, and Saturday soccer',
-    challenge: 'Busy school mornings when everyone needs a reminder',
-    insight: 'For this family, the plan uses one small shared morning habit and easy, age-appropriate steps.',
-    items: [
-      { person: 'Emma · 4', heading: 'Shoes in their spot', detail: 'After breakfast, with Dad helping as needed' },
-      { person: 'Noah · 7', heading: 'Backpack ready', detail: 'Put the folder and water bottle in the bag after breakfast' },
-      { person: 'Dad', heading: 'Own the door check', detail: 'Help Emma with shoes and check the bags before leaving' },
-    ],
-    question: 'What could we prepare tonight to make tomorrow morning easier?',
-    word: 'READY'
-  },
-  {
-    id: 'riveras', button: '3 busy kids', family: 'The Rivera Family', summary: '3 kids · ages 6, 9 & 12',
-    context: 'Soccer, dance, homework, and different afternoon schedules',
-    challenge: 'Everyone is willing to help, but Mom still assigns and checks every job',
-    insight: 'For this family, the plan gives each child a distinct part and makes adult ownership visible too.',
-    items: [
-      { person: 'Mia · 6', heading: 'Set out napkins', detail: 'Before dinner, using the picture cue on the fridge' },
-      { person: 'Lucas · 9', heading: 'Clear the table', detail: 'After dinner, take dishes to the kitchen' },
-      { person: 'Sofia · 12', heading: 'Own dishwasher unloading', detail: 'After school on the agreed weekdays' },
-      { person: 'Dad', heading: 'Own Thursday dinner', detail: 'From planning through cleanup, not just cooking' },
-    ],
-    question: 'Which responsibility can someone take over from start to finish?',
-    word: 'OWNERSHIP'
-  },
-  {
-    id: 'johnsons', button: '5 kids, mixed ages', family: 'The Johnson Family', summary: '5 kids · ages 3–16',
-    context: 'Teen sports, elementary homework, and younger-kid bedtimes',
-    challenge: 'Too many individual schedules to manage with one generic checklist',
-    insight: 'For this family, the plan groups shared routines and gives older kids independent ownership.',
-    items: [
-      { person: 'Ava · 3 + Ben · 6', heading: 'Shared toy reset', detail: 'Put toys into baskets before evening reading' },
-      { person: 'Chloe · 9', heading: 'Backpack station', detail: 'After school, put bags and shoes in their places' },
-      { person: 'Eli · 13', heading: 'Lunchbox cleanup', detail: 'Empty and rinse after arriving home' },
-      { person: 'Grace · 16', heading: 'Own a laundry load', detail: 'Wash, dry, fold, and put away on Saturday' },
-      { person: 'Dad', heading: 'Lead the weekly check-in', detail: 'Guide the family meeting and help agree on adjustments' },
-    ],
-    question: 'What could we simplify or combine so this works for everyone?',
-    word: 'TEAMWORK'
-  }
+ {id:'parkers',button:'2 young kids',family:'The Parker Family',summary:'2 kids · ages 4 & 7',kids:[{name:'Emma',age:4,color:'#E8D2D6'},{name:'Noah',age:7,color:'#CDDDE1'}],challenge:'School is ending, and both kids ask Mom what to do every hour.',goal:'Give the kids a summer rhythm they recognize and help both parents share mornings.',adults:'Dad owns breakfast and the first outdoor block on work-from-home days.',question:'Which part of the morning could someone else lead?',focus:'Easy mornings, more independent play',rows:[['8:00','Morning Start','Breakfast · clothes · shoes'],['9:00','Move & Play','Emma: backyard games · Noah: bike'],['10:30','Create & Explore','Emma: blocks · Noah: Lego project'],['12:00','Lunch & Reset','Clear dishes together'],['1:00','Quiet Time','Emma: books · Noah: reading'],['2:00','Free Afternoon','Park, friends or free play'],['4:00','Snack & Reset','Pick one snack · reset toys']]},
+ {id:'riveras',button:'3 busy kids',family:'The Rivera Family',summary:'3 kids · ages 6, 9 & 12',kids:[{name:'Mia',age:6,color:'#E8D2D6'},{name:'Lucas',age:9,color:'#F1D8A8'},{name:'Sofia',age:12,color:'#CDDDE1'}],challenge:'Summer camps, soccer and dance leave Mom coordinating three schedules.',goal:'Make the home days flexible without Mom narrating every transition.',adults:'Dad owns Tuesday activity pickup and the afternoon reset.',question:'What should the kids check before asking Mom what is next?',focus:'One shared rhythm around busy days',rows:[['7:30','Morning Start','Breakfast · gear check'],['9:00','Move & Play','Camp or outside play'],['10:30','Create & Explore','Mia: art · Lucas: build · Sofia: read'],['12:00','Lunch & Reset','Lucas clears · Sofia checks gear'],['1:00','Quiet Time','Read, draw or rest'],['2:00','Free Afternoon','Camp, friends or practice'],['4:30','Snack & Reset','Mia: toys · Lucas: table · Sofia: bags']]},
+ {id:'johnsons',button:'5 kids, mixed ages',family:'The Johnson Family',summary:'5 kids · ages 3–16',kids:[{name:'Ava',age:3,color:'#E8D2D6'},{name:'Ben',age:6,color:'#F1D8A8'},{name:'Chloe',age:9,color:'#CDDDE1'},{name:'Eli',age:13,color:'#D4DFC4'},{name:'Grace',age:16,color:'#D5C5B8'}],challenge:'Summer starts with little-kid naps, teen activities, and too many separate reminders.',goal:'Group the younger kids into one shared rhythm while older kids own their choices.',adults:'Dad leads the Sunday planning talk. Grace and Eli plan their own afternoon blocks.',question:'What can we simplify so this rhythm works for everyone?',focus:'Shared anchors, flexible summer days',rows:[['8:00','Morning Start','Breakfast together · older kids self-start'],['9:30','Move & Play','Ava + Ben: outside · teens: chosen activity'],['11:00','Create & Explore','Chloe: art · Eli: build · Grace: project'],['12:00','Lunch & Reset','Older kids take turns on cleanup'],['1:00','Quiet Time','Ava rests · Ben reads · others choose'],['2:00','Free Afternoon','Sports, friends or family outing'],['4:00','Snack & Reset','Shared ten-minute tidy']]}
 ];
-
 const faqs = [
  ['Will this work with young kids?', 'We suggest jobs based on each child’s age. Younger children may need help at first. That’s okay: the goal is to build independence over time.'],
  ['What if our family has a different schedule?', 'Your plan begins with recommendations informed by your household. You can review and adjust before printing.'],
@@ -127,22 +87,47 @@ const faqs = [
 <ul class="tangible-benefits"><li>A finished plan, not a blank worksheet.</li><li>Personalized with your family’s names and ages.</li><li>Printed and mailed to your door.</li><li>A note from Megan and a digital copy included.</li></ul><a class="primary" href="#offer">{joinOpen ? "Get My First Month Free →" : "See Membership Details →"}</a></div>
 <div class="print-showcase"><img class="summer-day-example" src={summerDayExampleUrl} alt="Our Summer Day, an example of the printed family summer rhythm plan" loading="lazy" decoding="async" /><p class="showcase-caption">Example of May’s Summer Day Rhythm. Your family’s mailed plan is personalized.</p></div>
 </div></div></section>
-      <section class="family-demo container" id="families" aria-labelledby="family-title">
-        <div class="section-wrap">
-          <p class="eyebrow">SEE HOW PERSONALIZATION CHANGES THE PLAN</p>
-          <h2 id="family-title">Every family is different. <em>Your plan should be, too.</em></h2>
-          <p class="intro">Choose a family below. No forms, no email, no setup. See how different ages, activities, and daily challenges lead to different recommendations.</p>
-          <div class="family-tabs" role="tablist" aria-label="Choose a sample family">
-            {families.map((f, i) => <button type="button" role="tab" id={`family-tab-${f.id}`} aria-controls={`family-panel-${f.id}`} aria-selected={i === 1 ? 'true' : 'false'} tabindex={i === 1 ? 0 : -1} data-family={f.id} class={i === 1 ? 'active' : ''}><strong>{f.button}</strong><small>{f.summary}</small></button>)}
-          </div>
-          {families.map((f, i) => <div class="family-panel" id={`family-panel-${f.id}`} role="tabpanel" aria-labelledby={`family-tab-${f.id}`} hidden={i !== 1}>
-            <div class="family-details"><p class="eyebrow">EXAMPLE HOUSEHOLD</p><h3>{f.family}</h3><p class="family-summary">{f.summary}</p><dl><dt>What their week looks like</dt><dd>{f.context}</dd><dt>Where they need help</dt><dd>{f.challenge}</dd><dt>How the plan adapts</dt><dd>{f.insight}</dd></dl><p class="sample-disclaimer">These are illustrative examples showing our approach to personalization. They aren't real customer results or exports from the live generator.</p></div>
-            <div class="plan-stage"><div class="sample-sheet"><div class="sheet-header"><p>ORGANIZED FAMILY CLUB · FAMILY MEETING</p><h3>{f.family}</h3><span>A little planning. More shared ownership.</span></div><div class="sheet-label">OUR FAMILY'S SMALL STARTS</div><div class="assignment-list">{f.items.map(item => <div class="assignment"><strong>{item.person}</strong><div><b>{item.heading}</b><span>{item.detail}</span></div></div>)}</div><div class="sheet-question"><strong>Try asking together</strong><p>{f.question}</p></div><div class="sheet-footer"><span>WORD OF THE WEEK</span><strong>{f.word}</strong></div></div><p class="sample-caption">Illustrative January-style plan, not the production PDF. Your actual Club printable uses the approved monthly design.</p></div>
-          </div>)}
-          <p class="demo-bottom">The point isn't just seeing your child's name on a page. It's having the recommendations and ownership already thought through.</p>
+<section class="family-demo container" id="families" aria-labelledby="family-title">
+  <p class="eyebrow">ONE SEASONAL CHALLENGE · THREE PERSONALIZED FAMILY PLANS</p>
+  <h2 id="family-title">Summer's coming. <em>Your family needs its own rhythm.</em></h2>
+  <p class="intro">May's Club resource is <strong>Our Summer Day</strong>. Choose a family and see how the personalized Family Meeting plan on the phone connects to the printed summer rhythm underneath. No forms or email required.</p>
+  <div class="family-tabs" role="tablist" aria-label="Choose a sample family">
+    {families.map((f,i)=><button type="button" role="tab" id={`family-tab-${f.id}`} aria-controls={`family-panel-${f.id}`} aria-selected={i===1?'true':'false'} tabindex={i===1?0:-1} data-family={f.id} class={i===1?'active':''}><strong>{f.button}</strong><small>{f.summary}</small></button>)}
+  </div>
+  {families.map((f,i)=><div class="family-panel summer-demo-panel" id={`family-panel-${f.id}`} role="tabpanel" aria-labelledby={`family-tab-${f.id}`} hidden={i!==1}>
+    <div class="summer-context"><p class="eyebrow">MAY · GETTING READY FOR SUMMER</p><h3>{f.family}</h3><p><strong>Their challenge:</strong> {f.challenge}</p><p><strong>What the parents want:</strong> {f.goal}</p></div>
+    <div class="summer-product-stage" aria-label={`Illustrative personalized summer plan and phone meeting guide for ${f.family}`}>
+      <div class="summer-print-sheet">
+        <p class="print-brand">ORGANIZED FAMILY CLUB · MAY</p>
+        <h3>Our Summer Day</h3>
+        <p class="summer-print-family">{f.family}</p>
+        <p class="summer-print-note">A flexible rhythm for our actual family</p>
+        <div class="summer-print-head"><span>TIME</span><span>OUR FAMILY RHYTHM</span></div>
+        {f.rows.map((row,i)=><div class="summer-print-row" style={`--summer-row-color:${['#F8E8B5','#F4DEA3','#F0D493','#DDEBDB','#D1E5D6','#C3DDCF','#E4E9D5'][i]}`}><img src={['/images/club/icon-library/morning-start.png','/images/club/icon-library/move-play.png','/images/club/icon-library/create-explore.png','/images/club/icon-library/lunch-reset.png','/images/club/icon-library/quiet-time.png','/images/club/icon-library/free-afternoon.png','/images/club/icon-library/lunch-reset.png'][i]} alt="" loading="lazy"/><span class="print-time">{row[0]}</span><div><strong>{row[1]}</strong><span>{row[2]}</span></div></div>)}
+        <p class="print-end">One simple rhythm. Everyone knows what's next.</p>
+      </div>
+      <div class="demo-phone">
+        <div class="demo-phone-speaker"></div>
+        <div class="demo-phone-screen">
+          <p class="phone-brand">ORGANIZED FAMILY CLUB</p>
+          <p class="phone-month">MAY · OUR FAMILY MEETING</p>
+          <h3>{f.family}</h3>
+          <p class="phone-small-heading">The people we're planning for</p>
+          <div class="phone-kids">{f.kids.map(k=><span class="phone-kid"><span class="phone-dot" style={`background:${k.color}`}></span>{k.name} · {k.age}</span>)}</div>
+          <div class="phone-meeting-block"><span>01 · CONNECT</span><p>What are you looking forward to this summer?</p></div>
+          <div class="phone-meeting-block"><span>02 · OUR CURRENT CHALLENGE</span><p>{f.challenge}</p></div>
+          <div class="phone-meeting-block"><span>03 · CHOOSE A FAMILY GOAL</span><strong>{f.focus}</strong><p>{f.goal}</p></div>
+          <div class="phone-meeting-block"><span>04 · SHARE THE OWNERSHIP</span><p>{f.adults}</p><p class="phone-italic">{f.question}</p></div>
+          <div class="phone-bottom">This month's printed tool: Our Summer Day ✓</div>
         </div>
-      </section>
-
+        <div class="demo-phone-home"></div>
+      </div>
+    </div>
+    <p class="summer-demo-note"><strong>Phone:</strong> A meeting plan shaped around the ages, challenges, and goals of this family. <strong>Underneath:</strong> Their personalized May summer rhythm, printed and mailed, with their actual day built in.</p>
+  </div>)}
+  <p class="demo-bottom">The conversation and the printable belong together. Your family talks through what matters, then uses a finished plan everyone can see.</p>
+  <p class="summer-disclaimer">Illustrative interactive mockups, not screenshots or exports of the production generator. The printed sheet follows the actual May resource's rhythm and color approach.</p>
+</section>
 
 <section class="comparison container" id="what-changes"><p class="eyebrow">THE DIFFERENCE IS WHO CARRIES THE PLAN</p><h2>Less directing from Mom. <em>More doing from everyone else.</em></h2><p class="ownership-intro">Think of a typical school morning. The goal isn't another checklist for Mom to manage. It's a clear plan the family can use without asking her what comes next.</p><div class="compare-grid ownership-grid"><article><p class="ownership-label">WITHOUT A SHARED PLAN</p><h3>Mom is the reminder system.</h3><ul><li>Mom notices the backpack isn't ready.</li><li>Mom tells someone to get dressed.</li><li>Mom remembers what still needs to be packed.</li><li>Mom checks whether everything got done.</li></ul><p class="ownership-foot">The work isn't just doing things. It's keeping track of everything.</p></article><article class="compare-good"><p class="ownership-label">WITH A CLUB ROUTINE TO FOLLOW</p><h3>The plan does more of the reminding.</h3><ul><li>Each person sees their own next step.</li><li>Kids can check the routine before asking.</li><li>Responsibilities are named in advance.</li><li>The family has one shared reference point.</li></ul><p class="ownership-foot">The aim: Mom can support the routine instead of narrating every step.</p></article></div><p class="ownership-caption">An illustration of how the tools are designed to work, not a measured customer result. <a href="/preview/january-habit-cards">See a sample of the family habit cards →</a></p></section>
 <section class="how container" id="how"><p class="eyebrow">THREE SIMPLE STEPS</p><h2>We do the preparation. <em>Your family gets started.</em></h2><div class="step-grid"><article><b>1</b><h3>Tell us about your family.</h3><p>A few household details help us make practical recommendations.</p></article><article><b>2</b><h3>We prepare your plan.</h3><p>Each month focuses on one everyday challenge. Review and adjust it if you want.</p></article><article><b>3</b><h3>Find it in your mailbox.</h3><p>It's printed and ready to put on the fridge and talk through together.</p></article></div><p class="how-note">No elaborate setup. No new app everyone has to learn.</p></section>
@@ -991,4 +976,45 @@ const faqs = [
 .club .demo-bottom{text-align:center;font-family:Georgia,serif;font-size:1.35rem;max-width:800px;margin:34px auto 0!important;line-height:1.45}
 @media(max-width:850px){.club .family-panel{grid-template-columns:1fr}.club .family-demo{padding-top:60px;padding-bottom:60px}}
 @media(max-width:600px){.club .family-tabs{gap:7px}.club .family-tabs button{padding:10px 8px;text-align:center;font-size:.8rem}.club .family-tabs small{font-size:.62rem}.club .family-details{padding:22px}.club .sample-sheet{padding:17px 14px;min-height:0}.club .sheet-header h3{font-size:1.7rem}.club .assignment{grid-template-columns:90px minmax(0,1fr);gap:7px;font-size:.72rem}.club .assignment div span{font-size:.68rem}.club .club2-problem{padding-top:50px;padding-bottom:50px}}
+</style><style is:global>
+.club .summer-demo-panel{display:block}
+.club .summer-demo-panel[hidden]{display:none}
+.club .summer-context{background:var(--cream);border:1px solid var(--line);padding:22px 28px;max-width:950px;margin:0 auto 22px}
+.club .summer-context h3{margin:4px 0 12px}
+.club .summer-context p:not(.eyebrow){font-size:.9rem;line-height:1.5;margin:5px 0}
+.club .summer-product-stage{position:relative;max-width:930px;margin:0 auto;min-height:790px;display:flex;align-items:flex-start;justify-content:center;padding:25px 35px 40px;background:#f2f1ee;overflow:hidden;border:1px solid #e7e5e1}
+.club .summer-print-sheet{background:#fff;width:min(100%,610px);min-height:750px;margin-left:140px;padding:33px 36px 25px;box-shadow:0 14px 38px #00000020;transform:rotate(1.5deg);border:1px solid #e3e1dc;color:#545454}
+.club .summer-print-sheet .print-brand{font-size:.62rem;letter-spacing:.13em;font-weight:750;color:#657466}
+.club .summer-print-sheet h3{font-size:2.3rem;text-align:center;margin:9px 0}
+.club .summer-print-family{text-align:center;font-family:Georgia,serif;font-size:1.2rem;margin:5px 0!important}
+.club .summer-print-note{text-align:center;font-size:.8rem;margin:0 0 19px!important}
+.club .summer-print-head{display:grid;grid-template-columns:74px 1fr;margin:12px 0 2px;padding:6px;background:#D4DFC4;font-size:.68rem;letter-spacing:.1em;font-weight:750}
+.club .summer-print-row{display:grid;grid-template-columns:38px 58px 1fr;align-items:center;gap:10px;border-bottom:1px solid #dedbd7;background:var(--summer-row-color);padding:8px 9px;min-height:65px}
+.club .summer-print-row img{width:34px;height:37px;object-fit:contain}
+.club .summer-print-row .print-time{font-size:.73rem;font-weight:700}
+.club .summer-print-row strong,.club .summer-print-row div span{display:block;font-size:.79rem;line-height:1.35}
+.club .summer-print-row div span{font-size:.69rem;margin-top:2px}
+.club .print-end{text-align:center;font-size:.7rem;margin-top:17px!important}
+.club .demo-phone{position:absolute;z-index:2;left:7%;top:19%;width:268px;height:555px;background:#202223;border:6px solid #202223;border-radius:35px;padding:12px 8px 20px;box-shadow:16px 24px 30px #00000038;transform:rotate(-7deg)}
+.club .demo-phone-speaker{position:absolute;top:8px;left:50%;transform:translateX(-50%);height:12px;width:75px;background:#202223;border-radius:0 0 10px 10px;z-index:2}
+.club .demo-phone-screen{height:100%;overflow:auto;scrollbar-width:none;background:#fff;border-radius:24px;padding:30px 15px 15px;color:#545454}
+.club .demo-phone-screen::-webkit-scrollbar{display:none}
+.club .phone-brand{font-size:.5rem;font-weight:800;letter-spacing:.11em;color:#547964}
+.club .phone-month{font-size:.54rem;font-weight:750;letter-spacing:.05em;margin-top:9px!important}
+.club .demo-phone-screen h3{font-size:1.35rem;margin:5px 0 10px}
+.club .phone-small-heading{font-size:.56rem;font-weight:750;margin-bottom:7px!important}
+.club .phone-kids{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.club .phone-kid{display:inline-flex;align-items:center;gap:4px;border:1px solid #e3e2df;padding:4px 5px;font-size:.58rem}
+.club .phone-dot{display:inline-block;flex-shrink:0;width:8px;height:8px;border-radius:50%;border:1px solid #54545420}
+.club .phone-meeting-block{padding:9px 0;border-top:1px solid #dedbd6}
+.club .phone-meeting-block>span{display:block;font-size:.55rem;font-weight:800;letter-spacing:.07em;color:#3D6671}
+.club .phone-meeting-block p,.club .phone-meeting-block strong{font-size:.69rem;line-height:1.43;margin-top:5px!important}
+.club .phone-meeting-block strong{display:block;font-weight:750}
+.club .phone-meeting-block .phone-italic{font-family:Georgia,serif;font-style:italic}
+.club .phone-bottom{margin-top:10px;padding:9px;background:#D4DFC4;font-size:.59rem;font-weight:750}
+.club .demo-phone-home{position:absolute;width:67px;height:4px;background:#bababa;bottom:9px;left:50%;transform:translateX(-50%);border-radius:3px}
+.club .summer-demo-note{font-size:.83rem;line-height:1.6;max-width:850px;margin:18px auto 0!important;text-align:center}
+.club .summer-disclaimer{font-size:.72rem;color:var(--muted);margin-top:12px!important;text-align:center}
+@media(max-width:800px){.club .summer-product-stage{min-height:690px;padding:20px}.club .summer-print-sheet{width:76%;margin-left:20%;min-height:650px;padding:24px 22px}.club .summer-print-row{min-height:55px}.club .demo-phone{left:4%;width:224px;height:485px;top:23%}}
+@media(max-width:580px){.club .summer-product-stage{min-height:570px;padding:14px 8px}.club .summer-print-sheet{width:87%;margin-left:13%;min-height:540px;padding:14px 10px;transform:rotate(1deg)}.club .summer-print-sheet h3{font-size:1.7rem}.club .summer-print-family{font-size:.9rem}.club .summer-print-row{grid-template-columns:22px 36px 1fr;gap:4px;padding:5px 4px;min-height:49px}.club .summer-print-row img{width:22px;height:25px}.club .summer-print-row .print-time{font-size:.54rem}.club .summer-print-row strong{font-size:.58rem}.club .summer-print-row div span{font-size:.49rem}.club .summer-print-head{font-size:.55rem}.club .demo-phone{width:170px;height:390px;left:2%;top:25%;border-width:4px;padding:8px 5px 13px;border-radius:27px;transform:rotate(-6deg)}.club .demo-phone-screen{border-radius:19px;padding:23px 9px 8px}.club .demo-phone-screen h3{font-size:1rem}.club .phone-meeting-block{padding:5px 0}.club .phone-meeting-block p,.club .phone-meeting-block strong{font-size:.53rem}.club .phone-meeting-block>span{font-size:.45rem}.club .phone-kid{font-size:.47rem}.club .demo-phone-speaker{height:9px;width:52px}.club .summer-context{padding:18px}}
 </style>
