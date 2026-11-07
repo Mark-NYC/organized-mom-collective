@@ -1,15 +1,51 @@
 ---
-import PublicLayout from '../layouts/PublicLayout.astro';
-import { BRAND_NAME } from '../config';
-import clubHeroUrl from '../../assets/icons/ofc/hero-family-pointing.jpeg?url';
-import summerDayExampleUrl from '../../assets/icons/ofc/our-summer-day.webp?url';
-import routineExampleUrl from '../../assets/icons/ofc/routine-club-example.jpg?url';
-const kits = import.meta.glob('../../assets/icons/ofc/monthly-kits/*.webp', { eager: true, query: '?url', import: 'default' });
-const months = [
-  { name: 'January', headline: 'Stop holding the whole week in your head', detail: 'A weekly family meeting plan that gets everyone looking ahead.', image: kits['../../assets/icons/ofc/monthly-kits/September.webp'] },
-  { name: 'March', headline: 'Chores without chasing everyone', detail: 'Clear jobs that make it easier for each person to contribute.', image: kits['../../assets/icons/ofc/monthly-kits/March.webp'] },
-  { name: 'May', headline: 'Summer days without constant questions', detail: 'A rhythm your kids can learn to check before asking what comes next.', image: kits['../../assets/icons/ofc/monthly-kits/May.webp'] },
-];
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { BRAND_NAME } from '../../config';
+import { monthColors } from '../../theme';
+import { clubEnabled, CLUB_OFFER, CLUB_OFFER_LINE, CLUB_PROGRAM_START, clubFoundingOpen } from '../../data/club/config';
+import { clubCheckoutEnabled } from '../../lib/club/membership';
+import { routes } from '../../routes';
+import clubHeroUrl from '../../../assets/icons/ofc/hero-family-pointing.jpeg?url';
+import clubBadgeUrl from '../../../assets/icons/ofc/OFC-logo.webp?url';
+import summerDayExampleUrl from '../../../assets/icons/ofc/our-summer-day.webp?url';
+import routineClubExampleUrl from '../../../assets/icons/ofc/routine-club-example.jpg?url';
+const monthIcons = import.meta.glob('../../../assets/icons/ofc/month-icons/*-OFC-icon.png', { eager: true, query: '?url', import: 'default' });
+// Enrollment shows only with PUBLIC_CLUB_ENABLED and PUBLIC_CLUB_CHECKOUT_ENABLED: the offer button opens Stripe
+// Checkout directly (club-billing); the server still decides whether anyone can pay. Off, it asks about early access.
+const joinOpen = clubEnabled() && (clubCheckoutEnabled() || Boolean(import.meta.env.DEV));
+// Built before the 2027 program starts: the founding member's free January and her February 1 first charge.
+const founding = clubFoundingOpen();
+const months = [{"month":"January","title":"Stop Being the Family's Calendar","responsibility":"Planning together","how":"A personalized weekly family meeting helps everyone look ahead, prepare, and own their part.","url":"/app/club/january/?sample=rivera"},{"month":"February","title":"Laundry That Isn't All on You","responsibility":"Caring for their own things","how":"A picture laundry guide for each child, matched to their age: My Clothes, My Job or I Can Do My Own Laundry.","url":"/app/club/february/"},{"month":"March","title":"Chores Without Chasing Everyone","responsibility":"Finishing a job","how":"Each person gets a clear cleaning job, supplies, steps, and a definition of done.","url":"/club/march-preview/"},{"month":"April","title":"Dinner Isn't All on You","responsibility":"Sharing meal ownership","how":"A prepared dinner plan gives family members roles from gathering ingredients through cleanup.","url":"/club/april-preview/"},{"month":"May","title":"Summer Days Without Constant Questions","responsibility":"Managing their day","how":"A flexible daily rhythm and activity menu help kids choose what comes next.","url":"/club/may-preview/"},{"month":"June","title":"Snack Time Without Calling Mom","responsibility":"Respecting shared boundaries","how":"Clear expectations for screens, responsibilities, and free time help everyone follow the same plan.","url":"/club/june-preview/"},{"month":"July","title":"Less ‘I’m Bored.’ More Independent Play.","responsibility":"Preparing independently","how":"Personal packing lists show each person what to pack, check, and put away.","url":"/club/july-preview/"},{"month":"August","title":"Back to School Without the Scramble","responsibility":"Taking initiative","how":"A personalized countdown gives everyone their own school-ready responsibilities.","url":"/club/august-preview/"},{"month":"September","title":"School Routines Without the Nagging","responsibility":"Building independent routines","how":"Personalized habit reminder cards help kids practice one small school-day responsibility without constant reminders.","url":"/app/club/september/?sample=rivera"},{"month":"October","title":"Less Asking. More Doing.","responsibility":"Caring for shared spaces","how":"A daily reset with one familiar cue, picture jobs and a clear finish line kids can recognize.","url":"/club/october-preview/"},{"month":"November","title":"Stop Being Everyone's Reminder","responsibility":"Owning a whole responsibility","how":"Each ready family member gets a job with a clear owner, timing, and finish line.","url":"/club/worksheet-generator/"},{"month":"December","title":"Raise Kids Who Love to Give","responsibility":"Being a blessing to others","how":"Two cards give kids space to draw a picture, write a poem, or share a letter, then send it to someone like a grandparent or teacher.","url":"/club/december-preview/"}].map(m => ({...m, icon: monthIcons[`../../../assets/icons/ofc/month-icons/${m.month === 'January' ? 'September' : m.month === 'September' ? 'January' : m.month}-OFC-icon.png`]}));
+
+const kitImages = import.meta.glob('../../../assets/icons/ofc/monthly-kits/*.webp', { eager: true, query: '?url', import: 'default' });
+const kitPreviews = [
+ ['January', 'September', 'Weekly family meeting'],
+ ['February', 'February', 'Family laundry guides'],
+ ['March', 'March', 'Family chore charts'],
+ ['April', 'April', 'Dinner responsibilities'],
+ ['May', 'May', 'Summer day rhythm'],
+ ['June', 'June', 'Independent snack choices'],
+ ['July', 'July', 'Ideas for independent play'],
+ ['August', 'July (2)', 'School-day rhythm'],
+ ['September', 'January', 'Personalized family habit cards'],
+ ['October', 'October', 'Daily family reset'],
+ ['December', 'December', 'Two kindness cards for drawings, poems, or letters'],
+].map(([month, file, description]) => ({ month, description, title: months.find(m => m.month === month)!.title, color: monthColors.find(m => m.name === month)!.hex, image: kitImages[`../../../assets/icons/ofc/monthly-kits/${file}.webp`] as string }));
+
+const kitDetails: Record<string, { relief: string; example: string }> = {
+ January: { relief: "You shouldn't have to keep the whole family's week in your head. A shared calendar and a weekly family meeting give everyone a place to see the plan and prepare together.", example: "For example: each child sees their own activities and what they need to get ready for the week." },
+ February: { relief: "Laundry doesn't have to begin and end with you. Picture guides give kids a clear part of the process they can learn to handle themselves.", example: "For example: your younger child sorts clothes; an older child follows the steps to run a load." },
+ March: { relief: "Spend less time chasing people through their chores. A shared chart makes assignments visible, while the cleaning plan explains the steps and what finished looks like.", example: "For example: your 5-year-old puts toys in a basket; your 10-year-old clears and wipes the table." },
+ April: { relief: "Dinner takes more than cooking. This plan shares the preparation and cleanup so you aren't the only person thinking through what needs doing.", example: "For example: one child sets out napkins; an older child prepares a simple side. Everyone sees their part." },
+ May: { relief: "When school structure disappears, you shouldn't have to invent the next activity all day. A flexible summer rhythm gives kids a familiar plan to check.", example: "For example: younger kids get a supported play block; older kids choose an activity they can start themselves." },
+ June: { relief: "Fewer calls of 'Mom, can I have a snack?' A simple picture guide helps kids choose and prepare snacks they can manage.", example: "For example: a younger child chooses a ready-to-eat snack; an older child follows simple preparation steps." },
+ July: { relief: "You don't have to come up with something every time someone says 'I'm bored.' An activity menu gives kids practical ideas to choose and start.", example: "For example: building blocks for one child, a drawing project for another. Ideas they can actually start." },
+ August: { relief: "School days run more smoothly when everyone can see what comes next. A clear school-day rhythm helps you spend less time directing every transition.", example: "For example: one child follows picture steps to get ready; another checks their bag and school supplies." },
+ September: { relief: "You shouldn't have to repeat the same reminders every morning and night. Small habit cards put one clear next step right where your family needs it.", example: "For example: one child puts their bowl by the sink after breakfast; another packs their bag after getting dressed." },
+ October: { relief: "A short daily reset gives everyone a clear way to help care for home. Familiar cues and picture jobs mean less explaining the same tasks over and over.", example: "For example: one child puts toys away; another resets the table. Each has a clear job and finish line." },
+ December: { relief: "You want your kids to experience the joy of giving, not just receiving. Two cards give them space to draw a picture, write a poem, or share a letter, then send a little encouragement to someone like a grandparent or teacher.", example: "For example: your younger child draws a picture for Grandma; your older child writes a poem for a teacher. Two simple ways to practice being a blessing." },
+};
+
 const families = [
   {
     id: 'parkers', button: '2 young kids', family: 'The Parker Family', summary: '2 kids · ages 4 & 7',
@@ -54,58 +90,44 @@ const families = [
     word: 'TEAMWORK'
   }
 ];
+
 const faqs = [
-  ['Is this just a printable with names added?', 'No. The aim is to prepare practical recommendations based on your household, ages, routines, and the specific problem that month addresses. You can review or adjust the suggested plan.'],
-  ['Do I have to make the plan myself?', 'No. You start with a prepared recommendation, not an empty worksheet. Changes are optional.'],
-  ['Do I need a printer?', 'No. The physical printed tool is the main product. A digital copy is available to review, edit, or reprint.'],
-  ['Is this another app to manage?', 'No. You use the printed plan with your family. The digital companion is there when you need it.'],
-  ['When can I join?', 'Enrollment and current billing terms are shown on our main Club page. This is a preview of a proposed landing page, not a separate checkout.'],
+ ['Will this work with young kids?', 'We suggest jobs based on each child’s age. Younger children may need help at first. That’s okay: the goal is to build independence over time.'],
+ ['What if our family has a different schedule?', 'Your plan begins with recommendations informed by your household. You can review and adjust before printing.'],
+ ['Do I need a printer?', 'No. The plan is designed to arrive printed in the mail.'],
+ ['Is this another app I need to manage?', 'No. The printed plan is the main product. The digital version is available when you want to review or adjust it.'],
+ ['Do I need your wall calendar?', 'No. The Club stands on its own. The calendar helps everyone see the schedule; the Club helps everyone share responsibility.'],
+ joinOpen
+  ? ['Can I subscribe or cancel right now?', founding
+    ? `Yes. Your first month is free: join today and nothing is charged. Your personalized Family Vision welcome print ships before January, and your ${CLUB_PROGRAM_START.label} plan is printed and mailed free. Your first charge is $5.90 on ${CLUB_PROGRAM_START.foundingFirstCharge}, then $5.90 a month, U.S. shipping included. Cancel any time from your account; cancel before ${CLUB_PROGRAM_START.foundingFirstCharge} and you pay nothing.`
+    : 'Yes. Your first month is free: join today and nothing is charged. Your first personalized plan is printed and mailed free, and your first charge is $5.90 one month after you join, then $5.90 a month, U.S. shipping included. Cancel any time from your account; cancel before your first charge and you pay nothing.']
+  : ['Can I subscribe or cancel right now?', 'Enrollment is not open yet. We are testing print fulfillment and billing. Pricing and cancellation terms will be confirmed before sign-up. You can ask about early access.']
 ];
 ---
-<PublicLayout fullTitle={`Organized Family Club Preview · ${BRAND_NAME}`} description="Personalized family plans made for your kids, ages, and routines, printed and mailed to your door." indexable={false} chrome={false} width="full" tracking={false}>
-  <div class="club2">
-    <div class="preview-banner">LANDING PAGE PREVIEW · The existing /club page is unchanged</div>
-    <main>
-      <section class="hero section-wrap">
-        <div class="hero-copy">
-          <p class="eyebrow">FOR MOMS WITH SCHOOL-AGED KIDS</p>
-          <h1>Your family shouldn't depend on you <em>for everything.</em></h1>
-          <p class="hero-problem">Stop being the one who remembers, plans, and reminds everyone.</p>
-          <p class="hero-definition">Get <strong>personalized family plans</strong> built around your kids, their ages, and your real routines. We prepare them, print them, and mail them to your door every month, ready to use.</p>
-          <div class="hero-cta"><a class="button button-primary" href="/club/#offer">Explore Club Membership <span aria-hidden="true">→</span></a><a class="text-link" href="#families">See family examples ↓</a></div>
-          <p class="micro">Made for your family. Ready to use. Nothing to print.</p>
-        </div>
-        <figure class="hero-image"><img src={clubHeroUrl} alt="Family gathered at the kitchen table with a printed family plan" loading="eager" /><figcaption>Plans for your family, not just another blank worksheet.</figcaption></figure>
-      </section>
+<PublicLayout fullTitle={`Organized Family Club · ${BRAND_NAME}`} description="Personalized family plans built around your kids, ages and routines, printed and mailed to your door each month." indexable={false} chrome={false} width="full" tracking={false}>
+<div class="club">
 
-      <section class="problem section-wrap" aria-labelledby="problem-title">
-        <p class="eyebrow">SOUND FAMILIAR?</p>
-        <h2 id="problem-title">Even when everyone helps, <em>you're still managing everything.</em></h2>
-        <p class="intro">You remember what needs doing. You figure out who should do it. You remind everyone when it's time. The work isn't just doing things. It's keeping track of everything.</p>
-        <div class="three-up">
-          <article><span class="hand-icon" aria-hidden="true">☀</span><h3>Mornings</h3><p>Who's dressed? Where's the backpack? What did someone forget?</p></article>
-          <article><span class="hand-icon" aria-hidden="true">⌂</span><h3>Home</h3><p>Everyone can help, but you're still assigning and checking every chore.</p></article>
-          <article><span class="hand-icon" aria-hidden="true">♧</span><h3>Daily life</h3><p>It's always “Mom, what do I do next?”</p></article>
-        </div>
-      </section>
-
-      <section class="difference shade">
-        <div class="section-wrap">
-          <p class="eyebrow">WHY THIS IS DIFFERENT</p>
-          <h2>Another printable shouldn't mean <em>another job for you.</em></h2>
-          <div class="compare">
-            <article><p class="eyebrow">THE USUAL PRINTABLE</p><h3>Mom has to build the plan.</h3><ul><li>Choose the routine</li><li>Decide what's age-appropriate</li><li>Assign every job</li><li>Fill out the chart</li><li>Keep reminding everyone</li></ul></article>
-            <article class="compare-good"><p class="eyebrow">YOUR CLUB PLAN</p><h3>We prepare it around your family.</h3><ul><li>Recommendations based on your kids' ages</li><li>Real names and responsibilities</li><li>Routines shaped around your household</li><li>A finished plan you can review</li><li>Printed and mailed, ready to use</li></ul></article>
-          </div>
-        </div>
-      </section>
-
-      <section class="personal section-wrap">
-        <div class="personal-copy"><p class="eyebrow">PERSONALIZED MEANS MORE THAN NAMES</p><h2>Not just your family's names. <em>A plan made for your actual family.</em></h2><p>We learn a little about your household once: your kids' ages, your routines, and where you could use some help.</p><p>Then we prepare useful ideas and responsibilities around those details. No starting with a blank page or figuring out everything yourself.</p><a class="text-link" href="#families">See three different families ↓</a></div>
-        <figure class="real-product"><img src={summerDayExampleUrl} alt="Example of an actual Organized Family Club summer rhythm printed resource" loading="lazy"/><figcaption>Real Club resource design. Each mailed plan is prepared around the member household.</figcaption></figure>
-      </section>
-
-      <section class="family-demo shade" id="families" aria-labelledby="family-title">
+<main>
+<section class="hero home-style-inset" id="start"><div class="club-float-surface"><div class="hero-inner">
+ <div class="hero-copy"><p class="eyebrow">MOMS WITH SCHOOL-AGED KIDS</p>
+ <h1>Your family shouldn't depend<span class="mobile-headline-break"></span> on you <em>for everything.</em></h1>
+ <p class="product-definition"><strong>Personalized family plans built around your kids, their ages, and your real routines.</strong> We prepare them, print them, and mail them to your door every month, ready to use. Less planning for you. More ownership for everyone.</p>
+ 
+ 
+ <div class="hero-actions"><a class="primary" href="#offer">{joinOpen ? "Get My First Month Free" : "See Club Membership"} <span class="lime-arrow" aria-hidden="true">→</span></a><a class="hero-secondary" href="#families">See family examples</a></div>
+ 
+ <div class="hero-rating"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAAAjBAMAAAAuzn+CAAAAJFBMVEUtLS0uLi5mZmYvLy8AAAAyMjIyMjIyMjIxMTEyMjI1NTUxMTFZaBJSAAAADHRSTlMiUwOIAP3Qjk+xDW7dc1grAAAHC0lEQVR42rWYcWwbVx3HP7avlyztWtMEsyC2pisCBEMNuKJKl0yX5lohNVSuoGOItA0d8oRUNR0ZiD8QCog/uqrTIhGoIsJwWQUa2daSlg46tzGQWt1WVI9VMKGxWGi0pUvng61e7V1s/jjf3bv3LlUjsd8/fv74+e533/e73+/3XsTEsbNbnzGQ7I/bwtgXMiq7hsK2/5v3waLuYE/tmPLjUG1ERvpQrSgz+/Ga8lj649Xc++mvXeRpxY8ir8msXGSZcpGcymo5frJoZ/KDYVRP51R/m+CGPHEBdk5mt4WwCJxcrLvaQDyUzx1U/Z2Gmvx0ZyASxuSFzobMy8Jti/V3Zyk1nEwmc3Yymfw0DCeTyWQyaVRXveTPid3tfKYsaJYic5tFTWL6VovaA0Fmf9Gitr8jyIaL1H7XsTh/jb986MrlUumBS+VS6e139X9dLpVKpVLzlQMfe65D0tcughysdhFIKOEL8qoVgVElpGFfuFs14fGzaeF+xyqCjtDpjnvr/h0jTj6LLQdic4HrLoq9906ALVmmMsep9VRfcb+c/lYpsvRHbm7Rbu+ZyrIktTab47dH3iQL8OOZScP+4NI3JH13Nd5p0aZBCcwzoATwGYCmQTl8oSlE3KbXX5/1fB+btUpveC9TnbsxzV7QTLMAmKZpbsk1GbTELfl9WwFQD2bbIS8ofNsHYKMy6WUdDXl+AO6DGXe8KQdw1vD0SQHB67zICajGlwb81U8POSXrspn1Imtm2PH0ck/e08NlD3WHMe+/9ulXHE8P+fPcnwpEO/0xEeC8q29EjZ6U3gnE/ZCPGOeOzk77X3tXf97EPnf0aElhD19T2Et7Faa/vFNhvp3tZ9Ov/RiPPtW8w9ImHYV7L74J7D66NueOOdu/qgD8YdtWtweIpZdfEJd89sI9z3X0rbhwQ2VvKWz4usTW3l/Ye01lfj7ot3jMzU27XmXn1bt+8wk3P267eB34zKt3FGH11TKg97/zRAfwg7956TI6K69Bfa+ulJn6PruoMl3pOOy4HcKEVFZEN/w0GEnBRi9n5uaVIlm8oQM8ifdmedHk28awVI46L15WWaFF/a8vL6ehPXhZNHeCrVaXM2j9e4IZO/qIUsVT1YeVriilqawjjFUPK8zPEvYoEbGw1AehBpcAaFGblQzUfxVMMtH1ciu42sCUA6LdYIPM1mRUdmcI2yEk3xzVzdlsw4MR+Cv6eSdJhNrhLccNp831VjKqtUlyHIDqEYmNgSYJF/1kCCuoTB8NJN+vl7dvH/Di7rVHhgxoUeKmYdUj3d9kAjSxPzscFHiNAUiitxsgi96eAVnMB1HZVwINiZbyv1bi1H824bcmnWES98WbAwUqSrVNlg2CokcvAlRNlQXF1A+EMEHeFyw+IAihrW4M5m/WtHVW5P1FQOB2JzEfEtmaRjQZqmwB0RtsQzxcXp6GRH4QGHAi+JQB9Pmzmxf2uiD4WxVSRHRd49lF9mIjmgTR9bEGM1UpRYFFebUMXBrIQznvJGltcvddX91vNfKCJmf48wDlXBNE/XY1Cqz3H7HLrXsicweHuDW2QVguAi0tpVIJ6qVGhtAee3nsU/DhRjKOBevM5m8DL9AM81jK/tixv9/iVkC/RbagDbhp9Xk/PwT7vqb6xJfN4X4+CtORYD/pt5dlrxRaauwIeTIfEnMeW4p6PblIlx8qNs4CvL3JSFC7ilE/9ecn0HNAzBD9Fe75H3cg1FXrZiwWwgSdLgkOXM+n0+n0Z0FPj35j+uoosT35/OYc0YYzETtQyrQ9BqA9BRyrBfZDseV+jM2Jm5yFmf22uPFxzNv+hDHfjdtZUaS3wIpib6HNtsDd7CxZtjYHmvGRDMx8Zwb03s75fgP0LX+aE/X9p1DR3cHu4Hsisxahg1HCQKjAoSnK0V/X48xZEDni3dsC7GwG6J4Bqr9/9KABlAvNgfj9R0hzskO+/AKMELYr5Fkl+z60lJ17bXBj88ZC0R6xVgb8/bn/03xGFtrpomQW5SZsJHTvHrBNREZbvgbQ1+Y3d2+FTz5H0N9BgNb746JvIwCtJ1XW3R8HbJfFAbpPAsznxM3mvVMB5t9wctKEyvF1RnXsePrByWXeaWd0tBZ+RPhdbSTg7zEgMTH+S7GOdgKJ7i6FtQ4/+QuEbewg0NfaNSVKPQj0tfVMhd68apoZoPsUVLsfPWgKh7Mb6yOhuT7+rhE4j6pYJMYN7jz+cdjfOLmrWCS6Mg5zz58qFomfGqx6XmBdRVp/aAWY/jmBXbnj1mvIe/d9L+wEq/JsoSOgr0GiywB6pvziYJAYzzSYb/68EW8TlpiQWFlk1mLOJ7NGKL7HCL4k/1057qxKz9RK148vrRx3ZvWcSLhsXcKddyLhLuNYwp/XYJrH7l2XyPyfz6v/B2HXhSm0q/uCAAAAAElFTkSuQmCC" alt="4.9 out of 5 stars, 113 Organized Mom Collective reviews" width="350" height="35" loading="eager" /><span>Organized Mom Collective reviews</span></div>
+ </div>
+ <figure class="hero-photo"><img src={clubHeroUrl} alt="Family gathered around a kitchen table looking together at a printed family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
+ <div class="hero-seam-badge" aria-hidden="true"><img src={clubBadgeUrl} alt="" width="120" height="120" loading="eager" /></div>
+</div></div></section>
+<section class="club2-problem container"><p class="eyebrow">SOUND FAMILIAR?</p><h2>Even when everyone helps, <em>you're still managing everything.</em></h2><p>You remember what needs doing. You figure out who should do it. You remind everyone when it's time. And if something is forgotten, you're the one who notices.</p><p><strong>It's not just the tasks. It's carrying the whole plan in your head.</strong></p></section>
+<section class="what-arrives home-style-inset" id="what-arrives"><div class="club-offer-surface"><div class="container tangible"><div><p class="eyebrow">MEET ORGANIZED FAMILY CLUB</p><h2>One beautiful tool. <em>Ready to use.</em></h2>
+<p>Each month tackles one everyday family challenge, from hectic mornings and dinners to summer routines and getting ready for school.</p><p>We prepare the plan around your family, put names and responsibilities right on the page, and mail the finished tool to your door.</p>
+<ul class="tangible-benefits"><li>A finished plan, not a blank worksheet.</li><li>Personalized with your family’s names and ages.</li><li>Printed and mailed to your door.</li><li>A note from Megan and a digital copy included.</li></ul><a class="primary" href="#offer">{joinOpen ? "Get My First Month Free →" : "See Membership Details →"}</a></div>
+<div class="print-showcase"><img class="summer-day-example" src={summerDayExampleUrl} alt="Our Summer Day, an example of the printed family summer rhythm plan" loading="lazy" decoding="async" /><p class="showcase-caption">Example of May’s Summer Day Rhythm. Your family’s mailed plan is personalized.</p></div>
+</div></div></section>
+      <section class="family-demo container" id="families" aria-labelledby="family-title">
         <div class="section-wrap">
           <p class="eyebrow">SEE HOW PERSONALIZATION CHANGES THE PLAN</p>
           <h2 id="family-title">Every family is different. <em>Your plan should be, too.</em></h2>
@@ -121,23 +143,690 @@ const faqs = [
         </div>
       </section>
 
-      <section class="how section-wrap" id="how">
-        <p class="eyebrow">THREE SIMPLE STEPS</p><h2>We do the preparation. <em>Your family gets started.</em></h2>
-        <div class="three-up steps"><article><b class="step-num">1</b><h3>Tell us about your family once.</h3><p>Your kids, their ages, routines, and where you want help.</p></article><article><b class="step-num">2</b><h3>We prepare your plan.</h3><p>Each month, a practical plan with ready-made recommendations. Review or adjust it if you'd like.</p></article><article><b class="step-num">3</b><h3>Find it in your mailbox.</h3><p>A printed resource ready to put on your fridge or bring to your family meeting.</p></article></div><p class="center-note">No elaborate setup. No new family app everyone has to learn.</p>
-      </section>
 
-      <section class="month-section shade" id="months"><div class="section-wrap"><p class="eyebrow">ONE FAMILY PROBLEM AT A TIME</p><h2>A little less on your shoulders, <em>every month.</em></h2><p class="intro">Every month addresses one practical part of family life. Each tool stands on its own. You don't have to catch up or keep a complicated system running.</p><div class="month-cards">{months.map(m => <article><img src={m.image} alt={`${m.name} example of an Organized Family Club printed resource`} loading="lazy"/><div class="month-copy"><span>{m.name}</span><h3>{m.headline}</h3><p>{m.detail}</p></div></article>)}</div><a class="text-link" href="/club/#kit-gallery-title">Explore the full year of Club resources →</a></div></section>
-
-      <section class="outcome section-wrap"><p class="eyebrow">THE GOAL IS MORE OWNERSHIP</p><h2>Imagine not being the answer <em>to every question.</em></h2><div class="compare"><article><h3>Before</h3><p>“Mom, what do I do next?”</p><p>“Who's cleaning this?”</p><p>“What's the plan?”</p></article><article class="compare-good"><h3>What we're working toward</h3><p>Kids know their routines.</p><p>Adults share meaningful responsibility.</p><p>The plan isn't all in Mom's head.</p></article></div><p class="center-note">It won't transform a family overnight. But small, prepared plans make it easier to practice sharing responsibility.</p></section>
-
-      <section class="founder shade"><div class="section-wrap founder-grid"><img src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" loading="lazy"/><div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2>Created by a family <em>who gets it.</em></h2><p>Hi, I'm Megan. I know how easy it is to become the person everyone depends on for the next reminder, answer, or instruction.</p><p>We believe an organized family isn't built by one person doing everything. It's built as everyone learns to participate, build routines, and take responsibility.</p><p>That's why we prepare practical plans around real families, rather than handing Mom another blank worksheet.</p></div></div></section>
-
-      <section class="offer section-wrap" id="offer"><p class="eyebrow">ORGANIZED FAMILY CLUB MEMBERSHIP</p><h2>One useful personalized plan. <em>Printed and mailed every month.</em></h2><div class="offer-card"><p class="price"><strong>$5.90</strong> / month after the introductory offer</p><ul><li>One prepared, personalized family plan every month</li><li>Age-appropriate recommendations and clear ownership</li><li>Printed and mailed to your door, US shipping included</li><li>A digital copy to review, change, or reprint</li><li>Simple month-by-month resources, not another program to manage</li></ul><a class="button button-primary" href="/club/#offer">See Current Enrollment Offer →</a><p class="micro">This preview doesn't process signups. Current availability, introductory offers, billing dates, and cancellation terms are confirmed on the main Club page before checkout.</p></div></section>
-      <section class="faq section-wrap"><p class="eyebrow">GOOD QUESTIONS</p><h2>Questions before you join?</h2><div class="faq-list">{faqs.map(([q,a]) => <details><summary>{q}</summary><p>{a}</p></details>)}</div></section>
-    </main>
+<section class="comparison container" id="what-changes"><p class="eyebrow">THE DIFFERENCE IS WHO CARRIES THE PLAN</p><h2>Less directing from Mom. <em>More doing from everyone else.</em></h2><p class="ownership-intro">Think of a typical school morning. The goal isn't another checklist for Mom to manage. It's a clear plan the family can use without asking her what comes next.</p><div class="compare-grid ownership-grid"><article><p class="ownership-label">WITHOUT A SHARED PLAN</p><h3>Mom is the reminder system.</h3><ul><li>Mom notices the backpack isn't ready.</li><li>Mom tells someone to get dressed.</li><li>Mom remembers what still needs to be packed.</li><li>Mom checks whether everything got done.</li></ul><p class="ownership-foot">The work isn't just doing things. It's keeping track of everything.</p></article><article class="compare-good"><p class="ownership-label">WITH A CLUB ROUTINE TO FOLLOW</p><h3>The plan does more of the reminding.</h3><ul><li>Each person sees their own next step.</li><li>Kids can check the routine before asking.</li><li>Responsibilities are named in advance.</li><li>The family has one shared reference point.</li></ul><p class="ownership-foot">The aim: Mom can support the routine instead of narrating every step.</p></article></div><p class="ownership-caption">An illustration of how the tools are designed to work, not a measured customer result. <a href="/preview/january-habit-cards">See a sample of the family habit cards →</a></p></section>
+<section class="how container" id="how"><p class="eyebrow">THREE SIMPLE STEPS</p><h2>We do the preparation. <em>Your family gets started.</em></h2><div class="step-grid"><article><b>1</b><h3>Tell us about your family.</h3><p>A few household details help us make practical recommendations.</p></article><article><b>2</b><h3>We prepare your plan.</h3><p>Each month focuses on one everyday challenge. Review and adjust it if you want.</p></article><article><b>3</b><h3>Find it in your mailbox.</h3><p>It's printed and ready to put on the fridge and talk through together.</p></article></div><p class="how-note">No elaborate setup. No new app everyone has to learn.</p></section>
+<section class="kit-gallery container" aria-labelledby="kit-gallery-title">
+ <p class="eyebrow">A LOOK INSIDE THE CLUB</p>
+ <h2 id="kit-gallery-title">Less for you to manage. <em>One month at a time.</em></h2>
+ <p class="kit-gallery-intro">Tap any month to see the actual printable. From laundry to summer days, every month brings one practical family tool.</p>
+ <div class="kit-gallery-grid">{kitPreviews.map(kit => <figure class="kit-gallery-item">
+  <button class="kit-gallery-open" type="button" data-kit-open={kit.month} aria-label={`View ${kit.month}: ${kit.title}`} aria-haspopup="dialog"><span class="kit-gallery-zoom" aria-hidden="true">View preview +</span></button>
+  <figcaption><span class="kit-gallery-month" style={{ backgroundColor: kit.color }}>{kit.month}</span><h3>{kit.title}</h3></figcaption>
+  <img src={kit.image} alt={`${kit.month}: ${kit.description}, Organized Family Club printed tool preview`} width="1080" height="1080" loading="lazy" decoding="async" />
+ </figure>)}</div>
+ <p class="kit-gallery-note">Examples of the monthly tools. Your family receives one personalized plan each month.</p>
+</section>
+{kitPreviews.map(kit => <dialog class="kit-fullscreen" id={`kit-preview-${kit.month}`} aria-labelledby={`kit-title-${kit.month}`}>
+ <button class="kit-fullscreen-close" type="button" aria-label="Close resource preview">×</button>
+ <div class="kit-fullscreen-content">
+  <p class="kit-fullscreen-month" style={{ backgroundColor: kit.color }}>{kit.month}</p>
+  <h2 id={`kit-title-${kit.month}`}>{kit.title}</h2>
+  <div class="kit-image-stage"><img class="kit-fullscreen-image" src={kit.image} alt={`${kit.month}: ${kit.description}`} width="1080" height="1080" loading="lazy" decoding="async" /><span class="kit-zoom-hint" aria-hidden="true">Hover to magnify</span></div>
+  <div class="kit-fullscreen-copy"><p>{kitDetails[kit.month].relief}</p>
+   <section class="kit-personal" style={{ '--kit-tint': `${kit.color}40`, '--kit-accent': kit.color }} aria-labelledby={`kit-personal-title-${kit.month}`}>
+    <p class="kit-personal-example">{kitDetails[kit.month].example}</p>
+    <h3 id={`kit-personal-title-${kit.month}`}>Made for your family.<br/><span>Less planning for you.</span></h3>
+    <dl class="kit-personal-benefits">
+     <div><dt>Their names</dt><dd>{kit.month === 'December' ? "Cards personalized with your children’s names make giving feel like their own project." : "Everyone sees their own part."}</dd></div>
+     <div><dt>Their abilities</dt><dd>{kit.month === 'December' ? "Draw, write a poem, or share a letter, according to their ages and abilities." : "Steps fit their ages and what they can handle."}</dd></div>
+     <div><dt>{kit.month === 'December' ? 'Your values' : 'Your needs'}</dt><dd>{kit.month === 'December' ? "A ready-to-use way to help your kids notice and encourage others." : "The plan fits the routine you need help with."}</dd></div>
+    </dl>
+    <p class="kit-personal-caption">Illustrative example. Your plan is prepared for your household.</p>
+   </section>
   </div>
-</PublicLayout>
+ </div>
+</dialog>)}
+<script>
+ document.querySelectorAll<HTMLElement>('.kit-image-stage').forEach(stage => {
+  stage.addEventListener('pointermove', event => {
+   if (event.pointerType !== 'mouse') return;
+   const bounds = stage.getBoundingClientRect();
+   stage.style.setProperty('--zoom-x', ((event.clientX - bounds.left) / bounds.width * 100) + '%');
+   stage.style.setProperty('--zoom-y', ((event.clientY - bounds.top) / bounds.height * 100) + '%');
+  });
+ });
+ const previews = document.querySelectorAll<HTMLDialogElement>('.kit-fullscreen');
+ let previousOverflow = '';
+ document.querySelectorAll<HTMLButtonElement>('[data-kit-open]').forEach(button => {
+  button.addEventListener('click', () => {
+   const dialog = document.getElementById(`kit-preview-${button.dataset.kitOpen}`) as HTMLDialogElement | null;
+   if (!dialog) return;
+   previousOverflow = document.body.style.overflow;
+   document.body.style.overflow = 'hidden';
+   dialog.showModal();
+   dialog.scrollTop = 0;
+  });
+ });
+ previews.forEach(dialog => {
+  dialog.querySelector('button')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => { document.body.style.overflow = previousOverflow; });
+ });
+</script>
 
+
+<section class="founder home-style-inset"><div class="club-offer-surface"><div class="container founder-layout"><img src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" loading="lazy" width="460" height="460"/><div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2>Created by a family <em>who gets it.</em></h2><p>Hi, I'm Megan. I know how much it takes to keep a family running, and how easy it is to become the person everyone depends on for the next reminder, answer, or instruction.</p><p>We created Organized Family Club to help put simple, practical tools in your family's hands, not to give you more to do.</p><p>One month. One small change. One more thing you don't have to carry alone.</p><strong>Megan</strong><div class="founder-review"><p class="eyebrow">A NOTE FROM AN ORGANIZED MOM COLLECTIVE CUSTOMER</p><blockquote>“This calendar is life changing. Quite literally!”</blockquote><p>Raquel · 5-star Etsy review of our wall calendar, not Club membership.</p></div></div></div></div></section>
+<section class="offer-band home-style-inset" id="offer"><div class="club-offer-surface"><div class="container offer-layout"><div class="offer-copy"><p class="eyebrow">ONE FAMILY. ONE MONTHLY PROBLEM. ONE READY-TO-USE PLAN.</p><h2>The whole family gets involved. <em>Mom gets some breathing room.</em></h2><p>One personalized family tool, printed and mailed every month.</p><div class="offer-details"><span><i class="lime-check" aria-hidden="true">✓</i> Personalized responsibilities</span><span><i class="lime-check" aria-hidden="true">✓</i> One printed tool delivered monthly</span><span><i class="lime-check" aria-hidden="true">✓</i> Digital access to review and reuse</span></div></div><div class="price-card"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h3>{joinOpen ? CLUB_OFFER : 'One simple monthly delivery.'}</h3>{joinOpen && <p class="offer-free-summary">{founding ? "January’s plan and your Family Vision welcome print are free." : "Your first personalized printed plan is free."}</p>}<div class="founding-price-label">FOUNDING FAMILY PRICE</div><div class="price"><span class="founding-price-was"><del>$7.90</del></span>$5.90 <span>/ month</span></div><p class="founding-price-lock">✓ Keep your $5.90 rate while subscribed.</p>{joinOpen ? <><p class="fineprint">{founding ? `First charge: ${CLUB_PROGRAM_START.foundingFirstCharge}. Cancel before then and pay nothing.` : 'First charge one month after joining. Cancel anytime.'}</p><button type="button" class="primary" id="club-checkout" hidden>Get My First Month Free →</button><div data-checkout-closed><p class="fineprint" data-checkout-checking>Checking enrollment…</p><a class="primary" href="/support" hidden>Ask About Early Access →</a></div><p class="checkout-error" id="club-checkout-error" role="alert" hidden></p><small>Secure checkout with Stripe.</small><small class="block mt-1" data-household-disclosure>{founding ? 'One free first month per household. A household that already had one starts January 1, 2027, with $5.90 charged that day.' : 'One free first month per household. A household that already had one is charged $5.90 today.'}</small></> : <><p class="fineprint">Proposed pricing. Enrollment isn't open yet while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask.</small></>}</div></div></div></section>
+<script>
+ // The offer button opens Stripe Checkout directly: Stripe collects her email, card and mailing address.
+ import { billingErrorText, checkoutOffered, startCheckout } from '../../lib/club/membership';
+ // Shown only when checkout is really open (live; or test mode for the owner's /club/?test-checkout=1): a visitor
+ // never starts a Stripe test-mode checkout. Otherwise the early-access link, as before enrollment opened.
+ const closed = document.querySelector<HTMLElement>('[data-checkout-closed]');
+ checkoutOffered().then((open) => {
+  const button = document.getElementById('club-checkout');
+  if (open) { button?.removeAttribute('hidden'); closed?.remove(); return; }
+  closed?.querySelector('[data-checkout-checking]')?.replaceChildren('Enrollment opens soon. We’re finishing printing and billing tests.');
+  closed?.querySelector('a')?.removeAttribute('hidden');
+ });
+ const checkout = document.getElementById('club-checkout') as HTMLButtonElement | null;
+ const checkoutError = document.getElementById('club-checkout-error') as HTMLParagraphElement;
+ const checkoutLabel = checkout?.textContent ?? '';
+ const resetCheckout = () => { if (checkout) { checkout.disabled = false; checkout.textContent = checkoutLabel; } };
+ checkout?.addEventListener('click', async () => {
+  if (checkout.disabled) return;
+  checkout.disabled = true;
+  checkout.textContent = 'Opening secure checkout…';
+  checkoutError.hidden = true;
+  try {
+   location.assign((await startCheckout('monthly')).url);
+  } catch (err) {
+   resetCheckout();
+   checkoutError.textContent = billingErrorText((err as Error).message);
+   checkoutError.hidden = false;
+  }
+ });
+ // Back from Stripe (the page restored from the back/forward cache): the button works again.
+ addEventListener('pageshow', (e) => { if (e.persisted) resetCheckout(); });
+</script>
+<section class="faq" id="faq"><div class="container faq-layout"><div><p class="eyebrow">GOOD QUESTIONS</p><h2>A few things you might be wondering.</h2></div><div class="faq-items">{faqs.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></div></section>
+<section class="closing home-style-inset"><div class="club-close-surface"><div class="container"><p class="eyebrow">ORGANIZED FAMILY CLUB</p><h2>You don't have to <em>do it all yourself.</em></h2><p>We'll make the plan. We'll print it. We'll send it. Your family gets to take it from there.</p><a href="#offer" class="primary">{joinOpen ? "Get My First Month Free →" : "See Membership Details →"}</a><p class="closing-caption">One family. One monthly problem. One ready-to-use plan.</p></div></div></section>
+</main><footer class="footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer></div>
+<style>
+.club{--forest:#254d3c;--sage:#547964;--cream:#fbf8f1;--ink:#303831;--muted:#66716a;--line:#d9dfd7;color:var(--ink);font-family:'Montserrat Variable',Montserrat,sans-serif;line-height:1.55;background:#fff}
+.club *{box-sizing:border-box}.club h1,.club h2,.club h3,.club blockquote{font-family:Georgia,serif;line-height:1.12;letter-spacing:-.025em;font-weight:400;margin:0}.club h1{font-size:clamp(2.5rem,4.1vw,4.9rem)}.club h2{font-size:clamp(2rem,3vw,3.5rem)}.club h3{font-size:1.55rem}.club h1 em,.club h2 em{font-weight:600;color:var(--sage)}.club p{margin:0}.club a{color:inherit}.container{max-width:1200px;margin:0 auto;padding-left:24px;padding-right:24px}.eyebrow{font-size:.72rem;letter-spacing:.16em;font-weight:750;color:var(--sage);margin-bottom:14px!important}.topbar{max-width:1360px;margin:auto;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;font-weight:800;text-decoration:none;color:var(--forest)!important}.brand img{object-fit:contain}.topbar nav{display:flex;align-items:center;gap:24px}.topbar nav a{font-size:.8rem;font-weight:650;text-decoration:none}.topbar nav a:hover{text-decoration:underline}.topbar nav .member{color:var(--forest)}.hero{background:linear-gradient(125deg,#fff 30%,#f6f6ee 100%);padding:65px 24px 75px}.hero-inner{max-width:1260px;margin:auto;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:start;gap:clamp(32px,6vw,90px)}.hero-copy{max-width:610px}.promise{font-family:Georgia,serif;font-size:clamp(1.2rem,2vw,1.65rem);font-weight:600;margin:20px 0 8px!important;color:var(--forest)}.supporting{font-size:1.02rem;color:var(--muted);max-width:540px}.form{margin-top:27px;background:#fff;border:1px solid #dde4dc;border-radius:18px;padding:25px;box-shadow:0 14px 35px rgba(44,68,51,.08)}.form h2{font-family:Georgia,serif;font-size:1.7rem}.form>p{color:var(--muted);font-size:.89rem;margin:7px 0 17px!important}.name-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form label{font-size:.79rem;font-weight:700;display:block}.form input,.form select{margin-top:6px;display:block;width:100%;min-width:0;background:#fff;border:1px solid #cbd5cc;border-radius:9px;padding:12px 11px;font:inherit;font-size:.92rem;color:var(--ink)}.form input:focus,.form select:focus{outline:2px solid #7da88b;outline-offset:1px}.children-head{display:flex;justify-content:space-between;align-items:center;margin:17px 0 7px;font-size:.85rem}.children-head span{font-size:.74rem;color:var(--muted)}.child-row{display:grid;grid-template-columns:1fr 112px 28px;align-items:end;gap:10px;margin-bottom:8px}.child-row .remove{border:0;background:none;font-size:1.5rem;line-height:44px;cursor:pointer;color:#66736a}.add,.text-button{border:0;background:none;padding:5px 0;color:var(--forest);font-size:.83rem;font-weight:750;cursor:pointer}.add:disabled{opacity:.4}.primary{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:15px 24px;border:0;border-radius:10px;background:var(--forest);color:#fff!important;text-align:center;text-decoration:none;font-size:.93rem;font-weight:800;cursor:pointer;transition:background .15s}.primary:hover{background:#163b2c}.form-submit{width:100%;margin-top:17px}.form small,.price-card small{display:block;margin-top:10px;text-align:center;color:var(--muted);font-size:.72rem}.demo-side{padding-top:30px;position:relative}.sample-stamp{text-align:center;letter-spacing:.17em;color:var(--sage);font-size:.69rem;font-weight:750;margin-bottom:20px}.sheet-outer{background:#e5e7db;border-radius:22px;padding:27px;box-shadow:0 24px 50px rgba(51,66,49,.09);transform:rotate(1deg)}.sheet{background:#fffefa;box-shadow:0 8px 20px rgba(45,45,35,.09);border:1px solid #e8e0d1;padding:clamp(20px,3.3vw,46px);min-height:600px}.paper-top{display:flex;justify-content:space-between;color:var(--sage);font-size:.65rem;letter-spacing:.1em;font-weight:750}.paper-top span{font-size:1.5rem}.sheet h2{font-family:Georgia,serif;font-size:clamp(2.2rem,3.5vw,3.8rem);margin:35px 0 12px;color:#324e3d}.sheet h2 em{color:#7e9878}.sheet-lede{font-family:Georgia,serif;font-size:1.02rem;color:#697366}.sheet-rule{border-top:1px solid #c8d2c4;margin:28px 0 22px}.sheet-section-label{font-size:.65rem;letter-spacing:.14em;font-weight:800;color:#8a937c;margin-bottom:13px}.assignment{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #eee9df;align-items:start}.assignment .tick{flex-shrink:0;width:18px;height:18px;border:1.5px solid #a6b6a7;border-radius:3px;margin-top:3px}.assignment b{font-size:.9rem;color:#385546}.assignment p{font-size:.82rem;color:#646f62}.sheet-footer{font-size:.61rem;letter-spacing:.12em;color:#8a937c;margin-top:32px;display:flex;justify-content:space-between}.sheet-footer span{font-size:1.5rem}.sample-note{font-size:.77rem;color:var(--muted);text-align:center;margin-top:16px!important}.result{background:#eaf2eb;padding:55px 0;scroll-margin-top:20px}.result[hidden]{display:none}.result-layout{display:grid;grid-template-columns:1.3fr .7fr;align-items:center;gap:55px}.result-layout h2{max-width:600px;margin-bottom:15px}.result-layout p{font-size:1rem;color:#4e6052;max-width:640px}.result-emphasis{font-weight:800;margin-top:15px!important;color:var(--forest)!important}.result-actions{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-top:24px}.result-card{border:1px solid #bacfbd;border-radius:18px;padding:27px;background:#fff}.result-card span{font-size:.69rem;letter-spacing:.13em;color:var(--sage);font-weight:800}.result-card h3{margin:16px 0;color:var(--forest)}.benefits{padding-top:105px;padding-bottom:100px}.benefits>h2{max-width:650px}.benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:40px}.benefit-grid article{padding:28px 24px;border-top:3px solid #88a38b;background:#f7f8f3;border-radius:0 0 14px 14px}.benefit-number{font-weight:800;color:var(--sage);font-size:.72rem}.benefit-grid h3{margin:14px 0}.benefit-grid p{color:var(--muted);font-size:.94rem}.offer-band{background:#f4f0e7;padding:95px 0}.offer-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(30px,7vw,100px);align-items:center}.offer-copy h2{max-width:700px;margin-bottom:20px}.offer-copy>p:not(.eyebrow){color:var(--muted);font-size:1.04rem}.offer-details{display:grid;gap:11px;margin-top:28px;font-size:.91rem;font-weight:650;color:var(--forest)}.price-card{background:#fff;padding:35px;border:1px solid #e1dfd5;border-radius:20px;box-shadow:0 14px 40px rgba(56,64,51,.07)}.price-card h3{margin:5px 0 24px}.price{font-family:Georgia,serif;font-size:3.3rem;line-height:1;color:var(--forest)}.price span{font-family:Montserrat,Arial,sans-serif;font-size:.87rem;color:var(--muted)}.annual{font-size:.96rem;font-weight:750;margin-top:10px!important}.fineprint{font-size:.77rem;color:var(--muted);margin:22px 0!important}.offer-free-summary{font-size:.85rem;color:var(--muted);line-height:1.5;margin:0 0 20px!important}.founding-price-label{display:inline-block;margin:10px 0 14px;padding:7px 11px;background:#d4dfc4;color:#3e503a;font-size:.68rem;letter-spacing:.09em;font-weight:800;border-radius:3px}.price .founding-price-was{display:inline-flex;flex-direction:column;align-items:center;gap:1px;margin-right:12px;vertical-align:middle;font-family:Montserrat,Arial,sans-serif;color:var(--muted)}.price .founding-price-was del{font-size:1.12rem;color:#888;text-decoration-thickness:1.5px}.price .founding-price-was small{font-size:.58rem;line-height:1;color:#888}.founding-price-lock{font-size:.85rem;line-height:1.55;font-weight:700;color:#486443;margin:15px 0 0!important}.price-card .primary{width:100%}.price-card .primary:disabled{cursor:wait}.checkout-error{margin-top:12px!important;text-align:center;color:#96666b;font-size:.82rem}.months{padding-top:100px;padding-bottom:95px}.section-intro{text-align:center;max-width:790px;margin:0 auto 40px}.section-intro h2{margin-bottom:18px}.section-intro>p:last-child{color:var(--muted)}.month-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.month-feature{text-decoration:none;border:1px solid var(--line);border-radius:18px;padding:28px 25px;background:#fdfcf9;transition:transform .16s}.month-feature:hover{transform:translateY(-3px)}.month-feature img{width:82px;height:82px;object-fit:contain}.month-feature>span{display:block;color:var(--sage);font-weight:800;font-size:.73rem;letter-spacing:.12em;margin:14px 0 8px;text-transform:uppercase}.month-feature h3{font-size:1.5rem}.month-feature p{color:var(--muted);font-size:.87rem;margin:12px 0!important}.month-feature strong{font-size:.82rem;text-decoration:underline;color:var(--forest)}.all-months{margin-top:28px;border:1px solid var(--line);border-radius:14px;padding:18px 22px}.all-months>summary{cursor:pointer;font-weight:800;color:var(--forest);display:flex;justify-content:space-between;list-style:none}.all-months>summary::-webkit-details-marker{display:none}.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:23px}.month-grid a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:14px;background:#f8f8f3;border-radius:10px}.month-grid img{object-fit:contain;width:48px;height:48px}.month-grid a div{display:grid;gap:3px}.month-grid small{font-size:.68rem;color:var(--sage)}.month-grid b{font-size:.79rem}.month-grid span{font-size:.7rem;text-decoration:underline}.caption{font-size:.76rem;color:var(--muted);margin-top:18px!important}.proof{padding-top:35px;padding-bottom:105px}.proof-quote{max-width:730px;margin:0 auto 95px;text-align:center;padding:40px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.proof-quote blockquote{font-size:clamp(1.8rem,3vw,2.8rem);margin:12px 0 20px}.proof-quote>p:not(.eyebrow){font-weight:750;font-size:.86rem}.proof-quote small{color:var(--muted);font-size:.72rem}.proof-about{display:grid;grid-template-columns:240px 1fr;gap:35px;max-width:850px;margin:auto;align-items:center}.proof-about img{width:240px;height:240px;object-fit:cover;border-radius:18px}.proof-about h2{font-size:2.35rem;margin-bottom:16px}.proof-about p:not(.eyebrow){margin-bottom:15px!important;color:var(--muted)}.faq{background:#f7f8f4;padding:95px 0}.faq-layout{display:grid;grid-template-columns:.65fr 1.35fr;gap:70px}.faq-items details{border-bottom:1px solid #d5dfd5;padding:20px 0}.faq-items summary{display:flex;justify-content:space-between;gap:20px;cursor:pointer;font-weight:750;list-style:none}.faq-items summary::-webkit-details-marker{display:none}.faq-items details p{color:var(--muted);font-size:.94rem;padding-top:14px}.closing{padding:100px 0;text-align:center}.closing h2{max-width:800px;margin:auto}.closing p:not(.eyebrow){font-family:Georgia,serif;font-size:1.35rem;color:var(--forest);margin:20px auto 26px!important}.footer{background:#254d3c;color:white;padding:24px;display:flex;justify-content:space-between;gap:20px;font-size:.78rem}.footer a{color:white}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.club [hidden]{display:none!important}
+@media(max-width:900px){.hero-inner,.offer-layout{gap:30px}.hero-inner{grid-template-columns:1fr 1fr}.sheet{min-height:0}.month-grid{grid-template-columns:repeat(2,1fr)}.topbar nav{gap:12px}.topbar nav a{font-size:.73rem}}
+@media(max-width:700px){.topbar{padding:12px 18px}.topbar nav a:not(.member){display:none}.brand{font-size:.85rem}.brand img{width:38px;height:38px}.hero{padding:40px 16px 60px}.hero-inner,.result-layout,.offer-layout,.faq-layout,.proof-about{grid-template-columns:1fr}.hero h1{font-size:clamp(2.45rem,10vw,3.3rem)}.hero-copy{max-width:none}.form{padding:20px;margin-top:24px}.demo-side{padding-top:15px;max-width:480px;width:100%;margin:0 auto}.sheet-outer{padding:17px;transform:none}.sheet{padding:25px}.sheet h2{font-size:2.5rem}.benefits,.months,.proof{padding-top:65px;padding-bottom:65px}.benefit-grid,.month-feature-grid{grid-template-columns:1fr;gap:13px}.benefit-grid{margin-top:24px}.offer-band,.faq,.closing{padding:65px 0}.price-card{padding:25px}.month-grid{grid-template-columns:1fr}.proof-quote{margin-bottom:55px;padding:30px 6px}.proof-about img{width:170px;height:170px}.proof-about{gap:25px}.result-layout{gap:24px}.footer{flex-direction:column;text-align:center;align-items:center}.child-row{grid-template-columns:minmax(0,1fr) 110px 24px;gap:7px}.name-fields{gap:8px}}
+@media(prefers-reduced-motion:reduce){.club *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Editorial Club art direction, built on the existing Organized Mom Collective print palette. */
+.club{--forest:#545454;--sage:#9aab8f;--cream:#fbf7f1;--ink:#4d4544;--muted:#6e6461;--line:#e7ddd4;background:#fff;color:var(--ink)}
+.club h1,.club h2,.club h3,.club blockquote{font-family:"Georgia Pro",Georgia,serif;font-weight:400;letter-spacing:-.025em}.club h1 em,.club h2 em{color:#697d65;font-style:italic;font-weight:400}.club .eyebrow{color:#71846e;letter-spacing:.11em;font-size:.68rem}.topbar{max-width:1320px;border-bottom:1px solid #e9e5df;padding-top:22px;padding-bottom:22px}.brand{color:#545454!important}.topbar nav a{font-weight:600}.hero{background:white;padding:68px 28px 94px}.hero-inner{max-width:1320px;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(34px,5vw,90px);align-items:center}.hero-copy{max-width:575px}.hero h1{font-size:clamp(2.8rem,4.1vw,5rem);line-height:1.085}.promise{color:#4d4544;font-weight:400}.supporting{line-height:1.75}.hero-photo-wrap{min-width:0}.hero-photo{margin:0;position:relative}.hero-photo img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;box-shadow:0 12px 36px #4d45441a}.hero-photo figcaption{font-family:Georgia,serif;font-style:italic;color:#6e6461;text-align:center;font-size:1rem;padding:15px 0}.photo-caption{text-align:center;font-size:.64rem;letter-spacing:.17em;color:#7b8975;font-weight:700}.form{border:1px solid #e7ddd4;box-shadow:none;background:#fffdfa;border-radius:3px;margin-top:31px;padding:24px}.form h2{font-size:1.5rem}.form input,.form select{border-radius:2px;border-color:#d8d4cf;background:#fff;padding:13px 11px}.primary{background:#545454;border-radius:2px;text-transform:none;letter-spacing:.01em}.primary:hover{background:#3d3834}.form-submit{margin-top:18px}.club .add,.club .text-button{color:#526b54}.result{background:#f1f4ec}.result-card{border-radius:3px;box-shadow:none;border-color:#d9dfd4}.benefits{padding-top:115px;padding-bottom:115px}.benefit-grid{gap:38px}.benefit-grid article{border:0;border-top:1px solid #9aab8f;border-radius:0;padding:27px 0 0;background:none}.benefit-number{font:italic 25px Georgia,serif;color:#9aab8f}.benefit-grid h3{font-size:1.8rem}.benefit-grid p{line-height:1.8}.offer-band{background:#fbf7f1}.price-card{border:1px solid #e7ddd4;border-radius:2px;box-shadow:none}.price{color:#545454}.offer-details{color:#545454}.months{padding-top:115px}.month-feature-grid{gap:30px}.month-feature{border:0;border-top:1px solid #e7ddd4;border-radius:0;background:#fff;padding:26px 5px 10px;box-shadow:none}.month-feature:hover{transform:none}.month-feature img{width:105px;height:105px}.month-feature h3{font-size:1.75rem}.all-months{border-radius:2px}.proof-quote{max-width:830px}.proof-quote blockquote{font-style:italic;font-size:clamp(2rem,3.8vw,3.8rem)}.proof-about img{border-radius:2px}.faq{background:#fbf7f1}.closing{background:#fff}.footer{background:#545454}.club-preview-modal{width:min(850px,calc(100% - 28px));max-height:calc(100dvh - 32px);overflow:auto;position:fixed;border:1px solid #e7ddd4;padding:clamp(20px,4vw,42px);background:#fffdfa;box-shadow:0 20px 80px #24242450;color:#4d4544}.club-preview-modal::backdrop{background:#262d29a9}.modal-top{display:flex;justify-content:space-between;gap:16px;align-items:start}.modal-top .eyebrow{display:block}.modal-top h2{font:400 clamp(1.8rem,3vw,2.8rem) Georgia,serif}.modal-close{font-size:2rem;line-height:1;width:42px;height:42px;border:1px solid #e7ddd4;background:white;cursor:pointer}.modal-intro{color:#6e6461;margin:10px 0 20px!important}.modal-paper{max-width:540px;margin:24px auto;background:#fff;border:1px solid #dfdfd7;padding:clamp(24px,4vw,48px);box-shadow:0 7px 25px #00000012}.modal-paper h3{font:400 2.2rem Georgia,serif;color:#545454;margin:24px 0 10px}.modal-paper h3 em{color:#81967c}.modal-paper>p{font:italic 1rem Georgia,serif;color:#6e6461;margin-bottom:24px!important}.modal-paper .sheet-assignments{border-top:1px solid #e7ddd4}.modal-paper-end{margin-top:32px;border-top:1px solid #e7ddd4;padding-top:18px;font-size:.64rem;letter-spacing:.12em;color:#71846e;text-align:center}.modal-note{text-align:center;color:#6e6461;font-size:.78rem;max-width:580px;margin:0 auto 20px!important}.modal-actions{display:flex;gap:22px;justify-content:center;align-items:center;flex-wrap:wrap}.modal-actions .primary{min-width:240px}.club-preview-modal .assignment b{color:#545454}.club-preview-modal .assignment p{color:#6e6461}
+@media(max-width:700px){.hero{padding:40px 17px 60px}.hero-inner{grid-template-columns:1fr;gap:30px}.hero-photo-wrap{order:-1}.hero-photo figcaption{font-size:.85rem}.hero h1{font-size:clamp(2.5rem,9vw,3.4rem)}.benefit-grid{gap:22px}.club-preview-modal{padding:20px}.modal-paper{padding:20px}.modal-actions{flex-direction:column}.modal-actions .primary{width:100%}}
+.hero .product-definition{font-size:clamp(1.08rem,1.5vw,1.24rem);line-height:1.6;color:#4d4544;font-weight:550;margin:19px 0 6px!important}.hero .promise{margin:16px 0 9px!important;font-size:clamp(1.2rem,1.8vw,1.55rem)}.hero .supporting{font-size:.92rem;line-height:1.7}.what-arrives{display:flex;flex-wrap:wrap;gap:8px 17px;margin-top:17px;font-size:.72rem;font-weight:700;color:#526b54}.form-kicker{font-size:.68rem!important;font-weight:800;letter-spacing:.12em;color:#71846e!important;margin:0 0 8px!important}.hero .form{margin-top:24px}.hero .form h2{line-height:1.2}
+
+/* Homepage-inspired floating gray surfaces (#f1f2f2) and inset white framing. */
+.club .home-style-inset{background:#fff;padding:28px clamp(16px,2.4vw,36px) 46px}
+.club .club-float-surface,.club .club-offer-surface,.club .club-close-surface{max-width:1504px;margin-inline:auto;background:#f1f2f2;position:relative;isolation:isolate;overflow:hidden}
+.club .hero{background:#fff}
+.club .hero-inner{max-width:none;padding:clamp(32px,4.2vw,70px);gap:clamp(30px,4.5vw,78px)}
+.club .hero-photo img{box-shadow:none;aspect-ratio:4/3}
+.club .hero-photo figcaption{padding-bottom:8px}
+.club .form{background:#fff;border:1px solid #e0e1df;box-shadow:0 20px 45px -38px rgba(77,69,68,.45);border-radius:4px}
+.club .offer-band{background:#fff}
+.club .club-offer-surface{padding:clamp(36px,5vw,80px) clamp(22px,4vw,64px)}
+.club .offer-layout{max-width:1250px}
+.club .price-card{box-shadow:0 22px 45px -37px rgba(77,69,68,.42);background:#fff;border-color:#e2e2df;border-radius:4px}
+.club .closing{background:white}
+.club .club-close-surface{padding:clamp(40px,5vw,88px) 24px;background:#f1f2f2}
+@media(max-width:900px){.club .home-style-inset{padding:16px 16px 38px}.club .hero-inner{padding:28px 24px}.club .club-offer-surface{padding:40px 18px}.club .club-close-surface{padding:42px 24px}}
+@media(max-width:700px){.club .hero-inner{padding:24px 18px}.club .hero-photo-wrap{order:-1}.club .hero-photo figcaption{padding-inline:8px}.club .form{margin-top:24px}.club .home-style-inset{padding-inline:12px}}
+.club .hero-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center center}
+@media(max-width:700px){.club .hero-photo img{aspect-ratio:4/3;object-position:center center}}
+
+/* Conversion layout: one promise, one clear product definition, one primary CTA. */
+.club .hero-inner{display:grid;grid-template-columns:minmax(0,.91fr) minmax(0,1.09fr);align-items:center;min-height:540px;padding:clamp(30px,5vw,80px);gap:clamp(32px,5vw,86px)}
+.club .hero-copy{max-width:615px}
+.club .hero h1{font-size:clamp(2.8rem,4.45vw,5.4rem);line-height:1.065;margin:14px 0 20px}
+.club .hero .product-definition{font-size:clamp(1.1rem,1.55vw,1.38rem);line-height:1.56;max-width:560px;margin:0 0 18px!important;font-weight:450}
+.club .hero .promise{font-size:1.16rem;line-height:1.45;font-weight:650;margin:0 0 14px!important}
+.club .hero .supporting{font-size:.98rem;line-height:1.65;margin:0!important;color:#6e6461}
+.club .hero-photo-wrap{align-self:stretch;display:flex;align-items:center;min-width:0}
+.club .hero-photo{width:100%;margin:0}.club .hero-photo img{width:100%;height:auto;max-height:650px;aspect-ratio:4/3;object-fit:cover;object-position:center;display:block}
+.club .hero-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:26px}
+.club .hero-actions .primary{min-height:52px;padding:14px 24px;display:inline-flex;align-items:center;justify-content:center}
+.club .hero-secondary{font-size:.86rem;font-weight:700;color:#4d4544;text-decoration:underline;text-underline-offset:4px}
+.club .hero-pricing{font-size:.88rem;line-height:1.5;font-weight:700;margin:16px 0!important}
+.club .hero-trust{font-size:.72rem;line-height:1.5;color:#6e6461;margin:17px 0 0!important}
+.club .club-demo{padding:88px 24px;background:#fff;scroll-margin-top:24px}
+.club .club-demo-inner{max-width:1060px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(36px,7vw,110px);align-items:center}
+.club .club-demo-heading h2{font:400 clamp(2.1rem,3.4vw,3.6rem)/1.11 Georgia,serif;margin:12px 0 20px;letter-spacing:-.025em}
+.club .club-demo-heading h2 em{color:#71846e}
+.club .club-demo-heading>p{font-size:1.05rem;line-height:1.7}
+.club .club-demo-heading .demo-disclaimer{font-size:.78rem;color:#6e6461;margin-top:18px}
+.club .club-demo .form{margin:0!important;padding:clamp(24px,3vw,38px);box-shadow:0 18px 44px -33px rgba(77,69,68,.4);background:#f1f2f2;border:0;border-radius:4px}
+.club .club-demo .form input,.club .club-demo .form select{background:#fff}
+.club .club-demo .form h2{font-size:1.5rem}
+.club .club-demo .form .form-submit{min-height:50px}
+.club .benefits{padding-top:72px;padding-bottom:90px}
+.club .benefits h2{max-width:750px;font-size:clamp(2rem,3vw,3.1rem)}
+.club .benefit-grid p,.club .offer-copy>p:not(.eyebrow),.club .month-feature p{font-size:.96rem;line-height:1.72}
+.club .offer-layout{gap:60px}
+.club .offer-copy h2{font-size:clamp(2.3rem,3.5vw,4rem)}
+.club .month-feature h3{font-size:1.5rem}
+@media(max-width:850px){.club .hero-inner{grid-template-columns:1fr;gap:28px;min-height:0;padding:36px 28px}.club .hero-photo-wrap{order:-1}.club .hero-photo img{max-height:440px}.club .club-demo-inner{grid-template-columns:1fr;gap:26px;max-width:580px}.club .club-demo{padding:62px 20px}}
+@media(max-width:700px){.club .hero-inner{padding:22px 18px 34px}.club .hero h1{font-size:clamp(2.45rem,10vw,3.35rem)}.club .hero-actions{align-items:stretch;flex-direction:column;gap:15px}.club .hero-actions .primary{width:100%}.club .hero-secondary{text-align:center}.club .club-demo{padding:48px 18px}.club .club-demo .form{padding:22px}}
+
+/* Fresh conversion-first sales flow, retaining OMC's established palette and panels. */
+.club .hero-inner{min-height:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.club .hero-photo{align-self:center}
+.club .pain,.club .comparison,.club .features,.club .how,.club .proof{padding-top:95px;padding-bottom:95px}
+.club .pain h2,.club .comparison h2,.club .features h2,.club .how h2{max-width:850px}
+.club .pain-questions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 30px;margin:34px 0}
+.club .pain-questions p{border-bottom:1px solid var(--line);padding:18px 0;font-family:Georgia,serif;font-size:clamp(1.1rem,2vw,1.5rem)}
+.club .pain-finish{max-width:750px;line-height:1.8;color:var(--muted)}
+.club .tangible{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center;padding-top:70px;padding-bottom:70px}
+.club .tangible h2{margin-bottom:24px}.club .tangible p:not(.eyebrow){margin-bottom:18px;line-height:1.8}
+.club .tangible .tangible-bold{font-family:Georgia,serif;font-size:1.4rem;color:var(--ink);font-weight:600}
+.club .print-showcase{text-align:center}.club .print-paper{margin:auto;max-width:380px;background:#fffefa;text-align:left;border:1px solid #e2dbd2;box-shadow:0 18px 48px #4d45441a;padding:32px 35px;transform:rotate(1deg)}
+.club .print-paper small{font-size:.62rem;letter-spacing:.12em;color:#71846e}.club .print-paper img{display:block;margin:15px auto}
+.club .print-paper h3{font-size:2.2rem;text-align:center}.club .print-paper>p{text-align:center;font:italic 1rem Georgia,serif!important}
+.club .print-line{display:flex;gap:20px;border-bottom:1px solid #e7ddd4;padding:10px 0;font-size:.85rem}.club .print-line b{color:#71846e;width:50px}.club .print-paper footer{font-size:.77rem;margin-top:22px;text-align:center;color:#71846e}
+.club .showcase-caption{font-size:.73rem;color:var(--muted);max-width:390px;margin:20px auto 0!important}
+.club .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:36px}.club .compare-grid article{padding:34px;background:#f7f5f2;border:1px solid #e7ddd4}.club .compare-grid .compare-good{background:#eef2eb}.club .compare-grid h3{margin-bottom:22px}.club .compare-grid ul{list-style:none;margin:0;padding:0}.club .compare-grid li{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-top:1px solid #e2ded7;font-size:.91rem}
+.club .compare-grid li::before{content:"×";flex:0 0 24px;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#f3d9de;color:#955b63;font-weight:800;font-size:1.1rem;line-height:1;margin:0}
+.club .compare-grid .compare-good li::before{content:"✓";background:#c2f6aa;color:#34513d;font-size:.94rem}
+.club .comparison-end{margin-top:24px!important;font:italic 1.4rem Georgia,serif}
+.club .feature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin-top:35px}.club .feature-grid article{border-top:2px solid #9aab8f;padding-top:20px}.club .feature-grid span{color:#71846e;font-size:.78rem;font-weight:800}.club .feature-grid h3{margin:12px 0}.club .feature-grid p{line-height:1.7;font-size:.9rem}
+.club .story-shell{padding:70px 0}.club .story-shell h2{max-width:850px}.club .story-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin:38px 0}.club .story-card{background:#fff;padding:29px;border:1px solid #e3e3e0}.club .story-card img{width:75px;height:75px;object-fit:contain}.club .story-month{margin:15px 0 9px!important;color:#71846e;font-weight:800;text-transform:uppercase;letter-spacing:.11em;font-size:.7rem}.club .story-card h3{font-size:1.65rem}.club .story-card>p:not(.story-month){font-size:.88rem;line-height:1.75;margin:15px 0!important}.club .story-card a{font-size:.83rem;font-weight:750;color:#526b54}
+.club .step-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px;margin:42px 0 22px}.club .step-grid article{border-top:1px solid #9aab8f;padding-top:22px}.club .step-grid b{font:italic 2rem Georgia,serif;color:#71846e}.club .step-grid h3{margin:14px 0}.club .step-grid p{line-height:1.75}.club .how-note{font-weight:700;color:#71846e}
+.club .founder-layout{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:65px;padding-top:70px;padding-bottom:70px}.club .founder-layout img{display:block;width:100%;max-height:480px;object-fit:cover}.club .founder-layout h2{margin-bottom:23px}.club .founder-layout p:not(.eyebrow){margin-bottom:16px;line-height:1.78}.club .founder-layout strong{font-family:Georgia,serif;font-size:1.35rem}
+.club .proof blockquote{font:italic clamp(2rem,4vw,3.5rem) Georgia,serif;max-width:850px;margin:18px 0}.club .proof small{display:block;color:var(--muted);margin-top:10px}
+.club .closing-caption{font-size:.78rem!important;margin-top:24px!important}
+@media(max-width:850px){.club .tangible,.club .founder-layout{grid-template-columns:1fr}.club .feature-grid{grid-template-columns:repeat(2,1fr)}.club .story-grid{grid-template-columns:1fr}.club .story-shell{padding:45px 0}}
+@media(max-width:700px){.club .pain,.club .comparison,.club .features,.club .how,.club .proof{padding-top:60px;padding-bottom:60px}.club .pain-questions,.club .compare-grid,.club .step-grid,.club .feature-grid{grid-template-columns:1fr}.club .tangible,.club .founder-layout{padding-top:42px;padding-bottom:42px;gap:30px}.club .print-paper{transform:none;padding:24px}.club .hero-photo{order:-1}.club .compare-grid article{padding:25px}}
+
+/* Keep the desktop headline close to three lines without shrinking mobile typography. */
+@media (min-width: 851px) {
+ .club .hero h1 { font-size: clamp(2.35rem, 3.15vw, 3.8rem); line-height: 1.1; }
+}
+/* Book-spread hero: editorial copy on the left, full-bleed photo on the right. */
+@media(min-width:851px){
+ .club .hero .hero-inner{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:0;
+  padding:0;
+  align-items:stretch;
+  min-height:clamp(540px,43vw,720px);
+ }
+ .club .hero .hero-copy{
+  max-width:none;
+  align-self:center;
+  padding:clamp(38px,5.4vw,90px);
+ }
+ .club .hero .hero-photo{
+  position:relative;
+  align-self:stretch;
+  width:100%;
+  height:100%;
+  min-height:100%;
+  overflow:hidden;
+  margin:0;
+ }
+ .club .hero .hero-photo img{
+  position:absolute;
+  inset:0;
+  height:100%;
+  width:100%;
+  max-height:none;
+  aspect-ratio:auto;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+ }
+}
+@media(max-width:850px){
+ .club .hero .hero-inner{display:flex;flex-direction:column;gap:0;padding:0}
+ .club .hero .hero-copy{padding:clamp(24px,5vw,40px);order:1}
+ .club .hero .hero-photo{order:0;width:100%;margin:0}
+ .club .hero .hero-photo img{display:block;width:100%;height:auto;max-height:none;aspect-ratio:4/3;object-fit:cover}
+}
+
+/* Mobile hero: balanced editorial scale, with breathing room and a shorter image. */
+.club .mobile-headline-break{display:none}
+@media(max-width:700px){
+ .club .hero.home-style-inset{padding:12px 12px 28px}
+ .club .hero .hero-inner{display:flex;flex-direction:column;gap:0;padding:0}
+ .club .hero .hero-photo{order:0;width:100%;height:clamp(220px,30vh,270px);overflow:hidden}
+ .club .hero .hero-photo img{
+   display:block;width:100%;height:100%;max-height:none;
+   aspect-ratio:auto;object-fit:cover;object-position:center 65%;
+ }
+ .club .hero .hero-copy{
+   order:1;display:flex;flex-direction:column;
+   padding:25px 24px 27px;max-width:none;
+ }
+ .club .hero .eyebrow{font-size:.68rem;letter-spacing:.1em;margin:0 0 13px!important}
+ .club .hero h1{
+   font-size:clamp(29px,7.7vw,34px);
+   line-height:1.12;letter-spacing:-.03em;
+   margin:0 0 18px;
+ }
+ .club .hero .product-definition{
+   font-size:1rem;line-height:1.52;font-weight:450;
+   margin:0 0 20px!important;
+ }
+ .club .hero .hero-actions{order:3;display:block;margin:0}
+ .club .hero .hero-actions .primary{
+   display:flex;width:100%;min-height:50px;padding:13px 14px;font-size:.93rem;
+ }
+ .club .hero .hero-secondary{display:none}
+ .club .hero .supporting{order:4;font-size:.9rem;line-height:1.55;margin:17px 0 0!important}
+ .club .hero .hero-trust{order:5;font-size:.72rem;line-height:1.48;margin:13px 0 0!important}
+}
+@media(max-width:355px){
+ .club .hero h1{font-size:27px}
+ .club .hero .hero-photo{height:215px}
+ .club .hero .hero-copy{padding-inline:19px}
+}
+
+/* Desktop editorial seam badge, centered across the image and copy panels. */
+.club .hero-seam-badge{display:none}
+@media (min-width:851px){
+ .club .hero .hero-inner{position:relative}
+ .club .hero-seam-badge{
+  display:flex;
+  position:absolute;
+  z-index:5;
+  left:50%;
+  top:24px;
+  transform:translateX(-50%);
+  width:124px;
+  height:124px;
+  padding:7px;
+  border-radius:50%;
+  background:#f1f2f2;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+ }
+ .club .hero-seam-badge img{
+  width:66.6667%;
+  height:66.6667%;
+  object-fit:contain;
+  border-radius:50%;
+ }
+}
+
+/* Mobile book-cover composition: image, overlapping round seal, then readable copy. */
+@media (max-width:700px){
+ .club .hero .hero-inner{position:relative}
+ .club .hero .hero-photo{height:clamp(175px,45vw,215px)}
+ .club .hero .hero-photo img{object-position:center 53%}
+ .club .hero .hero-copy{padding:58px 20px 25px}
+ .club .hero .hero-seam-badge{
+   display:flex;
+   position:absolute;
+   z-index:5;
+   left:50%;
+   top:clamp(175px,45vw,215px);
+   transform:translate(-50%,-50%);
+   width:76px;
+   height:76px;
+   padding:0;
+   border-radius:50%;
+   background:#f1f2f2;
+   align-items:center;
+   justify-content:center;
+   pointer-events:none;
+ }
+ .club .hero .hero-seam-badge img{
+   width:82%;
+   height:82%;
+   object-fit:contain;
+   border-radius:50%;
+ }
+ .club .hero .eyebrow{margin-bottom:14px!important}
+ .club .hero h1{font-size:clamp(29px,7.5vw,34px);line-height:1.12;margin-bottom:17px}
+ .club .hero .product-definition{margin-bottom:19px!important}
+ .club .hero .hero-actions .primary{min-height:52px}
+}
+@media (max-width:355px){
+ .club .hero .hero-photo{height:175px}
+ .club .hero .hero-seam-badge{top:175px}
+}
+
+/* Club's single fresh-lime accent: restrained signals of progress and readiness. */
+.club{--club-lime:#c2f6aa}
+.club .lime-arrow{color:var(--club-lime);font-weight:800;margin-left:3px}
+.club .lime-check{
+ display:inline-flex;align-items:center;justify-content:center;
+ width:22px;height:22px;margin-right:7px;
+ border-radius:50%;background:var(--club-lime);
+ color:#34513d;font-style:normal;font-weight:800;line-height:1;
+ vertical-align:middle;
+}
+.club .lime-highlight{
+ background:linear-gradient(transparent 68%,var(--club-lime) 68%,var(--club-lime) 87%,transparent 87%);
+ box-decoration-break:clone;-webkit-box-decoration-break:clone;
+}
+
+/* A stronger lime focal point, with restrained product labels. */
+.club .hero-actions .primary{
+ background:var(--club-lime);
+ color:#303831!important;
+}
+.club .hero-actions .primary:hover,
+.club .hero-actions .primary:focus-visible{background:#a9e991;color:#303831!important}
+.club .hero-actions .primary .lime-arrow{color:#303831}
+.club .story-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.club .ready-label{
+ flex-shrink:0;display:inline-block;
+ padding:5px 8px;
+ background:var(--club-lime);
+ color:#34513d;
+ font-size:.59rem;
+ font-weight:800;
+ letter-spacing:.06em;
+ line-height:1.2;
+ border-radius:3px;
+}
+
+/* Dusty-rose editorial accents: warmer than forest green, without changing
+   printable artwork, primary actions, or the Club's fresh-lime signals. */
+.club{--club-rose:#b77b82;--club-rose-ink:#955b63}
+.club .eyebrow,
+.club .story-month,
+.club .feature-grid article > span,
+.club .story-card a{color:var(--club-rose-ink)}
+.club .hero h1 em,
+.club .pain h2 em,
+.club .tangible h2 em,
+.club .club-demo-heading h2 em,
+.club .offer-copy h2 em{color:var(--club-rose-ink)}
+.club .feature-grid article,
+.club .step-grid article{border-top-color:var(--club-rose)}
+.club .story-card{border-top:3px solid var(--club-rose)}
+.club .hero-rating{display:flex;flex-wrap:wrap;align-items:center;gap:8px 13px;margin-top:14px}
+.club .hero-rating img{width:clamp(130px,12.67vw,159px);height:auto;display:block}
+.club .hero-rating span{font-size:.69rem;color:#6e6461}
+@media(max-width:700px){.club .hero .hero-rating{order:3;margin:14px 0 0;justify-content:center}.club .hero .hero-rating img{width:140px}.club .hero .hero-rating span{font-size:.67rem}.club .hero .supporting{order:4}}
+.club .summer-day-example{display:block;width:100%;height:auto;max-width:500px;margin-inline:auto;object-fit:contain;filter:drop-shadow(0 14px 25px rgba(77,69,68,.12))}
+
+/* What comes in the mail: tangible product image + four benefits in a 2x2 grid. */
+.club .features{background:#fff}
+.club .features-layout{
+ display:grid;
+ grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);
+ gap:clamp(30px,4.5vw,65px);
+ align-items:center;
+ margin-top:38px;
+}
+.club .features-image{margin:0;min-width:0}
+.club .features-image img{
+ display:block;width:100%;height:auto;
+ max-height:570px;object-fit:contain;
+}
+.club .features-layout .feature-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:34px 25px;margin:0;
+}
+.club .features-layout .feature-grid article{min-width:0}
+@media(max-width:850px){
+ .club .features-layout{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:24px}
+ .club .features-layout .feature-grid{gap:23px 18px}
+ .club .features-layout .feature-grid h3{font-size:1.28rem}
+}
+@media(max-width:700px){
+ .club .features-layout{grid-template-columns:minmax(0,1fr);gap:27px;margin-top:26px}
+ .club .features-image img{max-width:480px;margin-inline:auto}
+ .club .features-layout .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 17px}
+}
+@media(max-width:390px){
+ .club .features-layout .feature-grid{grid-template-columns:1fr;gap:18px}
+}
+
+/* Clear, tappable family inputs: visible controls rather than subtle text fields. */
+.club .club-demo .form label{color:#4d4544;font-size:.8rem;font-weight:750}
+.club .club-demo .form label>span{display:block;margin-bottom:4px}
+.club .club-demo .form input,
+.club .club-demo .form select{
+ min-height:49px;
+ padding:12px 14px;
+ background:#fff;
+ border:2px solid #aaa7a2;
+ border-radius:7px;
+ box-shadow:0 2px 0 rgba(77,69,68,.06);
+ color:#303831;
+ font-size:1rem;
+ cursor:text;
+ transition:border-color .15s,box-shadow .15s;
+}
+.club .club-demo .form input::placeholder{color:#77716c;opacity:1}
+.club .club-demo .form select{
+ cursor:pointer;
+ appearance:none;
+ -webkit-appearance:none;
+ padding-right:34px;
+ background-color:#fff;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234d4544' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+ background-position:right 12px center;
+ background-repeat:no-repeat;
+}
+.club .club-demo .form input:hover,
+.club .club-demo .form select:hover{border-color:#786f6a}
+.club .club-demo .form input:focus,
+.club .club-demo .form select:focus{
+ border-color:#955b63;
+ outline:3px solid rgba(194,246,170,.7);
+ outline-offset:1px;
+ box-shadow:0 0 0 1px #955b63;
+}
+.club .club-demo .children-head{margin-bottom:11px}
+.club .club-demo .children-head span{color:#6e6461}
+@media(max-width:700px){
+ .club .club-demo .form input,.club .club-demo .form select{font-size:16px;min-height:50px}
+}
+
+/* Immersive Club preview: near-full-screen floating gray surface. */
+.club .club-preview-modal{
+ position:fixed;
+ inset:0;
+ box-sizing:border-box;
+ width:calc(100% - 32px);
+ max-width:1600px;
+ height:calc(100% - 32px);
+ max-height:calc(100dvh - 32px);
+ margin:auto;
+ padding:0;
+ overflow:auto;
+ overscroll-behavior:contain;
+ border:0;
+ border-radius:5px;
+ background:#f1f2f2;
+ color:#4d4544;
+ box-shadow:0 28px 90px rgba(30,29,27,.24);
+}
+.club .club-preview-modal::backdrop{background:rgba(31,32,30,.58)}
+.club .preview-page-shell{min-height:100%;background:#f1f2f2}
+.club .preview-page-header{
+ position:sticky;top:0;z-index:10;display:flex;align-items:center;
+ justify-content:space-between;gap:14px;
+ padding:14px clamp(20px,3vw,52px);
+ background:#f1f2f2;border-bottom:1px solid #dededb;
+ color:#955b63;font-size:.68rem;font-weight:800;letter-spacing:.1em;
+}
+.club .preview-page-header .modal-close{
+ flex:0 0 42px;display:flex;align-items:center;justify-content:center;
+ font-size:1.8rem;color:#4d4544;border:1px solid #d6d6d2;
+ background:#fff;border-radius:50%;
+}
+.club .preview-page-header .modal-close:hover{background:#fff8f7}
+.club .preview-page-content{
+ display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+ align-items:center;gap:clamp(30px,5vw,90px);
+ max-width:1380px;margin:0 auto;padding:clamp(26px,4vw,65px);
+}
+.club .preview-deliverable{min-width:0}
+.club .preview-deliverable .modal-paper{
+ width:100%;max-width:620px;margin:0 auto;
+ padding:clamp(26px,3.6vw,52px);
+ background:#fffdfa;box-shadow:0 18px 45px rgba(77,69,68,.11);
+}
+.club .preview-deliverable .modal-paper h3{font-size:clamp(2rem,3.1vw,3.4rem)}
+.club .preview-deliverable .modal-note{
+ text-align:center;margin:15px auto 0!important;max-width:460px;
+ font-size:.76rem;color:#6e6461;
+}
+.club .preview-offer{min-width:0;padding:12px 0}
+.club .preview-offer .eyebrow{display:block;margin:0 0 12px!important}
+.club .preview-offer h2{
+ font:400 clamp(2.1rem,3.4vw,3.9rem)/1.1 Georgia,serif;
+ letter-spacing:-.025em;margin:0 0 20px;
+}
+.club .preview-offer h2 em{color:#955b63;font-style:italic}
+.club .preview-offer .preview-lead{font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.65}
+.club .preview-offer-divider{height:1px;background:#d7d7d2;margin:clamp(24px,3vw,40px) 0}
+.club .preview-offer h3{
+ font:400 clamp(1.55rem,2.25vw,2.4rem)/1.18 Georgia,serif;
+ letter-spacing:-.02em;margin:0 0 16px;
+}
+.club .preview-offer>p:not(.eyebrow){line-height:1.7}
+.club .preview-offer-note{font-size:.85rem;margin:15px 0 0!important;color:#665f59}
+.club .preview-offer .modal-actions{
+ margin-top:26px;display:flex;flex-direction:column;align-items:stretch;gap:16px;
+}
+.club .preview-offer .modal-actions .primary{width:100%;max-width:470px;min-height:52px}
+.club .preview-offer .modal-actions .text-button{text-align:left;align-self:flex-start}
+.club .preview-enrollment{font-size:.74rem;color:#6e6461;margin:16px 0 0!important}
+@media(max-width:800px){
+ .club .club-preview-modal{
+  width:calc(100% - 20px);height:calc(100% - 20px);
+  max-height:calc(100dvh - 20px);border-radius:4px;
+ }
+ .club .preview-page-header{padding:12px 16px;font-size:.57rem}
+ .club .preview-page-header .modal-close{width:38px;height:38px;flex-basis:38px}
+ .club .preview-page-content{grid-template-columns:1fr;gap:29px;padding:22px 20px 40px}
+ .club .preview-deliverable .modal-paper{padding:clamp(20px,5vw,32px)}
+ .club .preview-offer{padding:0 0 12px}
+ .club .preview-offer h2{font-size:clamp(2rem,7vw,2.8rem)}
+ .club .preview-offer .modal-actions .primary{max-width:none}
+}
+@media(max-width:370px){
+ .club .preview-page-content{padding:17px 14px 32px}
+ .club .preview-page-header{padding:10px 12px}
+}
+
+/* Household outcomes and honest proof of preparation */
+.club .ownership-intro{max-width:760px;font-size:1.04rem;line-height:1.75;color:#6e6461;margin:19px 0 24px!important}
+.club .ownership-grid article{padding-top:30px;padding-bottom:25px}
+.club .ownership-grid .ownership-label{font-size:.7rem!important;letter-spacing:.11em;font-weight:800;color:#955b63;margin:0 0 13px!important}
+.club .ownership-grid .compare-good .ownership-label{color:#526d49}
+.club .ownership-grid h3{font-size:clamp(1.42rem,2vw,2rem);margin:0 0 18px}
+.club .ownership-grid .ownership-foot{font:italic 1.02rem/1.5 Georgia,serif;color:#5e5752;margin:22px 0 0!important}
+.club .ownership-caption{margin:20px 0 0!important;font-size:.78rem;line-height:1.6;color:#746d68}
+.club .ownership-caption a,.club .evidence-grid a{color:#4c684f;text-decoration:underline;text-underline-offset:4px;font-weight:750}
+.club .story-intro{max-width:750px;margin:17px 0 0!important;font-size:1rem;line-height:1.75;color:#6e6461}
+.club .story-grid .story-card h3{font-size:clamp(1.35rem,1.8vw,1.8rem);line-height:1.23}
+.club .proof h2{font-size:clamp(2rem,3vw,3.35rem);margin:12px 0 30px}
+.club .evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:25px 0}
+.club .evidence-grid article{padding:25px 20px 24px;border-top:2px solid #b77b82;background:#f5f5f4;min-width:0}
+.club .evidence-grid .evidence-number{display:block;font-size:.66rem;font-weight:800;letter-spacing:.1em;color:#805b65;margin-bottom:15px}
+.club .evidence-grid h3{font-size:1.48rem;line-height:1.25;margin-bottom:12px}
+.club .evidence-grid article p{font-size:.88rem;line-height:1.7;color:#645d58;margin:10px 0 15px!important}
+.club .evidence-grid blockquote{font-size:1.16rem;line-height:1.4;margin:13px 0!important}
+.club .evidence-grid small{display:block;font-size:.72rem;line-height:1.5;color:#746d68}
+.club .evidence-disclosure{max-width:920px;font-size:.75rem;line-height:1.6;color:#746d68;margin-top:20px!important}
+@media(max-width:800px){.club .evidence-grid{grid-template-columns:1fr;gap:14px}.club .evidence-grid article{padding:22px}.club .ownership-grid h3{font-size:1.55rem}}
+
+/* Landing-page June sample: reuse June's full interactive printable, without June's editor column. */
+.club .preview-snack-layout{grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr);align-items:start;gap:clamp(26px,3vw,56px)}
+.club .preview-snack-deliverable{min-width:0}
+.club .preview-snack-deliverable>.eyebrow{margin:0 0 14px!important}
+.club .preview-snack-deliverable .jss{max-width:none!important;margin:0!important;padding:0!important;min-width:0}
+.club .preview-snack-deliverable .jss-intro,
+.club .preview-snack-deliverable .jss-editor{display:none!important}
+.club .preview-snack-deliverable .jss-layout{display:block!important}
+.club .preview-snack-deliverable .jss-preview{width:100%;min-width:0!important;padding:0!important}
+.club .preview-snack-deliverable .jss-floating-edit{
+ position:relative!important;inset:auto!important;display:inline-flex!important;
+ margin:0 0 12px!important;max-width:100%;
+ background:#c2f6aa!important;color:#303831!important;
+ border:0!important;padding:12px 16px!important;
+ border-radius:5px!important;box-shadow:none!important;
+ font-weight:750!important;cursor:pointer;
+}
+.club .preview-snack-deliverable .jss-stage{max-width:100%}
+.club .preview-snack-safety{font-size:.75rem;line-height:1.65;color:#6b5d53;margin:13px 0 0!important}
+.club .preview-snack-deliverable .modal-note{margin:10px 0 0!important;text-align:left;max-width:none}
+.club .preview-snack-layout .preview-offer{padding-top:45px}
+@media(max-width:800px){
+ .club .preview-snack-layout{grid-template-columns:1fr;gap:30px}
+ .club .preview-snack-layout .preview-offer{padding-top:0}
+ .club .preview-snack-deliverable .jss-floating-edit{font-size:12px}
+}
+</style>
+
+<style is:global>
+/* Dynamically created child fields do not receive Astro's scoped style attribute.
+   Apply these explicitly global rules only within the Club sales demo form. */
+#family-form #children-fields{display:grid;gap:12px;margin-top:12px}
+#family-form #children-fields .child-row{
+ display:grid;grid-template-columns:minmax(0,1fr) 118px 36px;
+ align-items:end;gap:12px;min-width:0;margin:0;
+}
+#family-form #children-fields .child-row label{
+ display:flex;flex-direction:column;min-width:0;gap:7px;
+ font-size:12px;font-weight:750;line-height:1.35;color:#4d4544;
+}
+#family-form #children-fields .child-row label span{
+ display:block;margin:0;white-space:normal;
+}
+#family-form #children-fields .child-row input,
+#family-form #children-fields .child-row select{
+ display:block;box-sizing:border-box;width:100%;min-width:0;
+ height:50px;margin:0;padding:11px 12px;
+ border:2px solid #aaa7a2;border-radius:7px;
+ background:#fff;color:#303831;
+ box-shadow:0 2px 0 rgba(77,69,68,.06);
+ font:600 16px/1.2 inherit;
+ font-size:16px;
+}
+#family-form #children-fields .child-row input::placeholder{color:#827d77;font-weight:400;opacity:1}
+#family-form #children-fields .child-row select{
+ appearance:auto;-webkit-appearance:menulist;cursor:pointer;padding-right:6px;
+}
+#family-form #children-fields .child-row input:focus,
+#family-form #children-fields .child-row select:focus{
+ border-color:#955b63;outline:3px solid rgba(194,246,170,.75);outline-offset:1px;
+}
+#family-form #children-fields .child-row .remove{
+ display:flex;align-items:center;justify-content:center;
+ width:36px;height:50px;margin:0;padding:0;
+ border:0;background:transparent;color:#88616a;
+ font-size:25px;line-height:1;cursor:pointer;
+}
+#family-form #children-fields .child-row .remove:hover{color:#5c3d45}
+@media(max-width:420px){
+ #family-form #children-fields .child-row{
+  grid-template-columns:minmax(0,1fr) 100px 30px;gap:8px;
+ }
+ #family-form #children-fields .child-row .remove{width:30px}
+}
+</style>
+
+<style is:global>
+/* June demo is a separate Astro component: global scope is required for its nested nodes. */
+#club-preview-modal .preview-snack-deliverable .jss{
+ max-width:none!important;margin:0!important;padding:0!important;min-width:0!important;
+}
+#club-preview-modal .preview-snack-deliverable .jss-intro,
+#club-preview-modal .preview-snack-deliverable .jss-editor{display:none!important}
+#club-preview-modal .preview-snack-deliverable .jss-layout{display:block!important}
+#club-preview-modal .preview-snack-deliverable .jss-preview{
+ display:block!important;width:100%!important;min-width:0!important;padding:0!important;
+}
+#club-preview-modal .preview-snack-deliverable .jss-floating-edit{
+ display:inline-flex!important;position:relative!important;inset:auto!important;
+ margin:0 0 15px!important;max-width:100%!important;
+ background:#c2f6aa!important;color:#303831!important;
+ border:0!important;padding:12px 16px!important;border-radius:5px!important;
+ box-shadow:none!important;font-size:12px!important;font-weight:750!important;cursor:pointer!important;
+}
+#club-preview-modal .preview-snack-deliverable .jss-stage{max-width:100%}
+#club-preview-modal .preview-snack-deliverable .jss-sheet{background:white}
+</style>
 <script>
   const tabs = [...document.querySelectorAll<HTMLButtonElement>('.club2 [role="tab"]')];
   function activateFamily(tab: HTMLButtonElement) {
@@ -161,132 +850,145 @@ const faqs = [
     });
   });
 </script>
+</PublicLayout>
+
 <style>
-  .club2{--ink:#545454;--cream:#FBF7F1;--green:#D4DFC4;--blue:#CDDDE1;color:var(--ink);font-family:Montserrat,system-ui,sans-serif;background:#fff;overflow:hidden}
-  .club2 *{box-sizing:border-box}
-  .club2 h1,.club2 h2,.club2 h3{font-family:Georgia,serif;letter-spacing:-.035em;color:var(--ink)}
-  .club2 h1{font-size:clamp(2.7rem,5.2vw,5.1rem);line-height:1.08;margin:0 0 24px}
-  .club2 h2{font-size:clamp(2.15rem,4vw,3.6rem);line-height:1.13;margin:8px 0 20px;max-width:860px}
-  .club2 h3{font-size:1.5rem;line-height:1.2;margin:8px 0 12px}
-  .club2 h1 em,.club2 h2 em{font-weight:400}
-  .club2 p{line-height:1.65}
-  .club2 .eyebrow{font-size:.72rem;font-weight:750;letter-spacing:.15em;text-transform:uppercase;margin:0 0 12px}
-  .club2 .section-wrap{max-width:1180px;margin:0 auto;padding:95px 28px}
-  .club2 .shade{background:var(--cream)}
-  .club2 .intro{font-size:1.1rem;max-width:730px;margin:0 0 34px}
-  .club2 .preview-banner{text-align:center;padding:10px 16px;background:#D4DFC4;font-size:.72rem;letter-spacing:.07em;font-weight:700}
-  .club2 .hero{display:grid;grid-template-columns:1.08fr .92fr;align-items:center;gap:45px;padding-top:88px;padding-bottom:88px}
-  .club2 .hero-copy{max-width:650px}
-  .club2 .hero-problem{font-size:1.23rem;font-weight:650;line-height:1.5;margin:0 0 16px}
-  .club2 .hero-definition{font-size:1.08rem;max-width:580px;margin:0 0 28px}
-  .club2 .hero-image{margin:0;position:relative}
-  .club2 .hero-image img{width:100%;height:540px;object-fit:cover;border-radius:6px}
-  .club2 figcaption,.club2 .micro{font-size:.77rem;line-height:1.5;color:#686868}
-  .club2 .hero-image figcaption{margin-top:10px}
-  .club2 .hero-cta{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
-  .club2 .button{display:inline-flex;justify-content:center;align-items:center;text-align:center;gap:10px;text-decoration:none;padding:17px 25px;border-radius:5px;font-weight:750;transition:background .2s;min-height:52px}
-  .club2 .button-primary{background:var(--green);color:#333!important}
-  .club2 .button-primary:hover{background:#bdcfa9}
-  .club2 .text-link{color:var(--ink);font-weight:750;text-underline-offset:5px}
-  .club2 .micro{margin-top:15px}
-  .club2 .three-up{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px}
-  .club2 .three-up article{padding:27px;background:var(--cream);border-radius:5px}
-  .club2 .hand-icon{font-size:2rem;line-height:1}
-  .club2 .three-up p{margin-bottom:0}
-  .club2 .compare{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:34px}
-  .club2 .compare article{padding:32px;background:#fff;border:1px solid #dedbd5;border-radius:6px}
-  .club2 .compare .compare-good{background:#e7eedf;border-color:#cad9be}
-  .club2 .compare h3{margin-top:8px}
-  .club2 .compare ul{padding-left:22px;margin:0}
-  .club2 .compare li{padding:6px 0;line-height:1.55}
-  .club2 .personal{display:grid;grid-template-columns:1fr .85fr;gap:70px;align-items:center}
-  .club2 .personal-copy p{font-size:1.05rem}
-  .club2 .real-product{margin:0}
-  .club2 .real-product img{display:block;max-width:100%;max-height:600px;object-fit:contain;margin:auto;box-shadow:0 12px 32px #00000013}
-  .club2 .real-product figcaption{text-align:center;margin:12px auto}
-  .club2 .family-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:30px 0}
-  .club2 .family-tabs button{cursor:pointer;text-align:left;padding:20px;background:#fff;border:1px solid #d3cec6;border-radius:5px;color:var(--ink);font:inherit;transition:border-color .2s,background .2s}
-  .club2 .family-tabs button:hover,.club2 .family-tabs button:focus-visible{border-color:#688174}
-  .club2 .family-tabs button.active{background:var(--green);border-color:#78946d}
-  .club2 .family-tabs strong{display:block;font-weight:750}
-  .club2 .family-tabs small{display:block;margin-top:5px;font-size:.75rem}
-  .club2 .family-panel{display:grid;grid-template-columns:minmax(240px,.7fr) minmax(0,1.3fr);gap:35px;align-items:start}
-  .club2 .family-panel[hidden]{display:none}
-  .club2 .family-details{background:#fff;padding:30px;border:1px solid #e0ddd7;border-radius:5px}
-  .club2 .family-details h3{font-size:2rem;margin-bottom:4px}
-  .club2 .family-summary{margin-top:0;font-weight:650}
-  .club2 .family-details dt{font-weight:750;margin-top:18px}
-  .club2 .family-details dd{margin:5px 0 0;line-height:1.55}
-  .club2 .sample-disclaimer,.club2 .sample-caption{font-size:.75rem;color:#6b6966}
-  .club2 .sample-disclaimer{border-top:1px solid #e6e1d9;padding-top:18px;margin-top:25px}
-  .club2 .plan-stage{min-width:0}
-  .club2 .sample-sheet{background:white;max-width:650px;margin:auto;border:1px solid #dedbd6;box-shadow:0 13px 32px #00000012;padding:30px 36px;min-height:570px}
-  .club2 .sheet-header{text-align:center;border-bottom:2px solid var(--blue);padding-bottom:18px}
-  .club2 .sheet-header p{font-size:.62rem;letter-spacing:.15em;font-weight:800;margin:0}
-  .club2 .sheet-header h3{font-size:2.15rem;margin:8px 0}
-  .club2 .sheet-header span{font-family:Georgia,serif;font-style:italic}
-  .club2 .sheet-label{text-align:center;background:var(--blue);padding:9px;font-size:.67rem;letter-spacing:.12em;font-weight:800;margin-top:22px}
-  .club2 .assignment{display:grid;grid-template-columns:125px 1fr;gap:14px;padding:13px 6px;border-bottom:1px solid #e6e4e0;font-size:.82rem}
-  .club2 .assignment>strong{font-weight:800}
-  .club2 .assignment div b,.club2 .assignment div span{display:block}
-  .club2 .assignment div span{font-size:.74rem;line-height:1.4;margin-top:3px}
-  .club2 .sheet-question{background:#f2f5ef;padding:13px 17px;margin-top:18px;font-size:.84rem}
-  .club2 .sheet-question p{margin:4px 0 0}
-  .club2 .sheet-footer{margin-top:16px;display:flex;align-items:center;justify-content:space-between;font-size:.65rem;letter-spacing:.09em}
-  .club2 .sheet-footer strong{font-size:.8rem}
-  .club2 .sample-caption{text-align:center;margin:13px auto 0;max-width:520px}
-  .club2 .demo-bottom{text-align:center;font-family:Georgia,serif;font-size:1.4rem;max-width:800px;margin:38px auto 0;line-height:1.4}
-  .club2 .step-num{font-family:Georgia,serif;font-size:2.7rem;font-weight:400}
-  .club2 .steps article{background:var(--cream)}
-  .club2 .center-note{text-align:center;margin-top:32px}
-  .club2 .month-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:34px 0 26px}
-  .club2 .month-cards article{background:white;overflow:hidden;border-radius:5px}
-  .club2 .month-cards img{width:100%;height:270px;object-fit:contain;background:#fff}
-  .club2 .month-copy{padding:24px}
-  .club2 .month-copy span{font-weight:800;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
-  .club2 .month-copy h3{font-size:1.4rem}
-  .club2 .month-copy p{font-size:.9rem}
-  .club2 .founder-grid{display:grid;grid-template-columns:370px 1fr;gap:70px;align-items:center}
-  .club2 .founder-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px}
-  .club2 .offer{text-align:center}
-  .club2 .offer h2{margin-left:auto;margin-right:auto}
-  .club2 .offer-card{max-width:600px;padding:36px;margin:30px auto 0;border:1px solid #d7d7d7;border-radius:6px;text-align:left}
-  .club2 .offer-card .price{text-align:center}
-  .club2 .price strong{font-family:Georgia,serif;font-size:2.65rem}
-  .club2 .offer-card ul{padding-left:22px;line-height:1.65}
-  .club2 .offer-card li{margin:9px 0}
-  .club2 .offer-card .button{display:flex;margin-top:24px}
-  .club2 .faq{padding-top:20px}
-  .club2 .faq-list{max-width:830px;margin:auto}
-  .club2 .faq details{border-bottom:1px solid #d8d6d1;padding:18px 0}
-  .club2 .faq summary{cursor:pointer;font-weight:750}
-  .club2 .faq details p{margin:12px 0 2px}
-  @media(max-width:850px){
-    .club2 .section-wrap{padding:65px 22px}
-    .club2 .hero,.club2 .personal,.club2 .family-panel,.club2 .founder-grid{grid-template-columns:1fr;gap:30px}
-    .club2 .hero-image img{height:auto;max-height:460px}
-    .club2 .personal .real-product{max-width:520px;margin:0 auto}
-    .club2 .three-up,.club2 .month-cards{grid-template-columns:1fr 1fr}
-    .club2 .founder-grid img{max-width:420px}
-  }
-  @media(max-width:600px){
-    .club2 .section-wrap{padding:52px 18px}
-    .club2 h1{font-size:2.65rem}
-    .club2 h2{font-size:2.1rem}
-    .club2 .hero{padding-top:48px}
-    .club2 .hero-cta{align-items:stretch;flex-direction:column;gap:16px}
-    .club2 .hero-cta .text-link{text-align:center}
-    .club2 .three-up,.club2 .compare,.club2 .month-cards{grid-template-columns:1fr}
-    .club2 .family-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-    .club2 .family-tabs button{padding:10px 8px;text-align:center;font-size:.8rem}
-    .club2 .family-tabs small{font-size:.62rem}
-    .club2 .family-details{padding:22px}
-    .club2 .sample-sheet{padding:17px 14px;min-height:0}
-    .club2 .sheet-header h3{font-size:1.7rem}
-    .club2 .assignment{grid-template-columns:90px 1fr;gap:7px;font-size:.72rem}
-    .club2 .assignment div span{font-size:.68rem}
-    .club2 .offer-card{padding:24px}
-    .club2 .month-cards img{height:240px}
-  }
-  @media(prefers-reduced-motion:reduce){.club2 *{transition:none!important}}
+.kit-gallery { padding-top: clamp(48px, 6vw, 80px); padding-bottom: clamp(40px, 5vw, 72px); text-align: center; }
+.kit-gallery h2 { max-width: 850px; margin-inline: auto; }
+.kit-gallery-intro { max-width: 720px; margin: 18px auto 30px !important; color: #6e6461; line-height: 1.7; }
+.kit-gallery-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px 14px; }
+.kit-gallery-item { margin: 0; min-width: 0; display: flex; flex-direction: column; }
+.kit-gallery-item img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
+.kit-gallery-item figcaption { flex: 1; padding: 0 4px 12px; }
+.kit-gallery-month { display: inline-block; padding: 6px 11px; font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #354f42; }
+.kit-gallery-item h3 { margin: 12px 0 0; font-family: Georgia, serif; font-size: clamp(1rem, 1.3vw, 1.25rem); line-height: 1.3; font-weight: 400; color: #303030; }
+.kit-gallery-note { margin: 28px auto 0 !important; font-size: .78rem; line-height: 1.6; color: #6e6461; }
+@media (max-width: 1000px) { .kit-gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .kit-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; } .kit-gallery-intro { font-size: .88rem; } }
+</style>
+
+<style>
+.kit-gallery-item { position: relative; }
+.kit-gallery-open { position: absolute; inset: 0; z-index: 1; width: 100%; border: 0; background: transparent; cursor: zoom-in; border-radius: 4px; }
+.kit-gallery-open:focus-visible { outline: 3px solid #354f42; outline-offset: 5px; }
+.kit-gallery-zoom { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #fff; padding: 5px 8px; border: 1px solid #ddd; color: #545454; font-size: .65rem; border-radius: 3px; }
+.kit-fullscreen { position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: #fff; color: #303030; overflow-y: auto; overscroll-behavior: contain; }
+.kit-fullscreen::backdrop { background: #fff; }
+.kit-fullscreen-close { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(18px, env(safe-area-inset-right)); z-index: 2; display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid #ddd; border-radius: 50%; background: #fff; color: #303030; font: 32px/1 Arial, sans-serif; cursor: pointer; }
+.kit-fullscreen-content { max-width: 880px; margin: 0 auto; padding: 76px 24px 56px; text-align: center; }
+.kit-fullscreen-month { display: inline-block; padding: 7px 15px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #354f42; }
+.kit-fullscreen h2 { font: 400 clamp(1.65rem, 4vw, 2.5rem)/1.2 Georgia, serif; margin: 18px auto 12px; max-width: 740px; }
+.kit-fullscreen-image { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; object-fit: contain; }
+.kit-fullscreen-copy { max-width: 620px; margin: 24px auto 0; text-align: left; font-size: 1rem; line-height: 1.75; color: #545454; }
+.kit-fullscreen-copy h3 { font: 400 1.5rem/1.3 Georgia, serif; margin: 22px 0 8px; color: #303030; }
+@media(max-width:600px) { .kit-fullscreen-content { padding: 76px 16px 40px; } }
+</style>
+
+<style>
+.kit-personal { margin-top: 28px; padding: clamp(22px, 4vw, 32px); background: var(--kit-tint); border-top: 3px solid var(--kit-accent); border-radius: 3px; }
+.kit-fullscreen-copy .kit-personal h3 { margin: 0 0 22px; font-size: clamp(1.5rem, 3vw, 1.85rem); line-height: 1.2; }
+.kit-personal h3 span { color: #62665e; }
+.kit-personal-benefits { margin: 0; display: grid; gap: 14px; }
+.kit-personal-benefits div { display: grid; grid-template-columns: 112px 1fr; gap: 14px; font-size: .9rem; line-height: 1.5; }
+.kit-personal-benefits dt { font-weight: 700; color: #303030; }
+.kit-personal-benefits dd { margin: 0; }
+.kit-personal-example { margin: 0 0 26px; padding: 0 0 24px; border-bottom: 1px solid #30303020; font-family: Georgia, serif; font-size: clamp(1.35rem, 3.2vw, 1.8rem); line-height: 1.4; color: #303030; }
+.kit-personal-caption { margin: 9px 0 0; font-size: .7rem; line-height: 1.5; color: #696969; }
+@media(max-width:400px) { .kit-personal-benefits div { grid-template-columns: 1fr; gap: 2px; } }
+</style>
+
+<style>
+@media (min-width: 960px) {
+ .kit-fullscreen-content { max-width: 1440px; padding: 64px 48px 56px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: clamp(32px, 4vw, 64px); align-items: start; }
+ .kit-fullscreen-month { grid-column: 1 / -1; justify-self: center; margin: 0; }
+ .kit-fullscreen-content > h2 { grid-column: 1 / -1; margin: 18px auto 32px; }
+ .kit-fullscreen-image { grid-column: 1; grid-row: 3; min-width: 0; }
+ .kit-fullscreen-copy { grid-column: 2; grid-row: 3; min-width: 0; max-width: none; margin: 0; }
+ .kit-fullscreen-copy > p:first-child { margin-top: 0; }
+}
+</style>
+
+<style>
+.kit-image-stage { min-width: 0; position: relative; }
+.kit-zoom-hint { display: none; }
+@media (min-width: 960px) {
+ .kit-fullscreen-content { box-sizing: border-box; height: 100dvh; max-width: 1440px; padding: 20px 64px 24px 36px; grid-template-rows: auto auto minmax(0, 1fr); column-gap: 32px; }
+ .kit-fullscreen-month { padding: 5px 12px; font-size: .68rem; }
+ .kit-fullscreen-content > h2 { font-size: clamp(1.5rem, 2.5vw, 2.1rem); margin: 10px auto 18px; }
+ .kit-image-stage { grid-column: 1; grid-row: 3; height: 100%; overflow: hidden; }
+ .kit-image-stage .kit-fullscreen-image { width: 100%; height: 100%; max-height: 100%; max-width: none; object-fit: contain; }
+ .kit-fullscreen-copy { font-size: .9rem; line-height: 1.45; }
+ .kit-personal { margin-top: 16px; padding: 18px 20px; }
+ .kit-personal-example { font-size: clamp(1.1rem, 1.7vw, 1.4rem); line-height: 1.3; margin-bottom: 16px; padding-bottom: 16px; }
+ .kit-fullscreen-copy .kit-personal h3 { font-size: 1.3rem; margin-bottom: 14px; }
+ .kit-personal-benefits { gap: 10px; }
+ .kit-personal-benefits div { font-size: .82rem; line-height: 1.4; grid-template-columns: 95px 1fr; gap: 10px; }
+ .kit-personal-caption { font-size: .65rem; line-height: 1.35; margin-top: 8px; }
+}
+@media (min-width: 960px) and (hover: hover) and (pointer: fine) {
+ .kit-image-stage { cursor: zoom-in; }
+ .kit-image-stage .kit-fullscreen-image { transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%); }
+ .kit-image-stage:hover .kit-fullscreen-image { transform: scale(2); }
+ .kit-zoom-hint { display: block; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); padding: 5px 10px; border-radius: 3px; background: #ffffffed; color: #545454; font-size: .68rem; pointer-events: none; }
+ .kit-image-stage:hover .kit-zoom-hint { opacity: 0; }
+}
+</style>
+
+
+<style>
+/* Club landing page conversion polish: prominent first-month offer and tighter section rhythm. */
+@media (min-width: 701px) {
+  .club .hero .hero-actions .primary { min-height: 58px; padding: 17px 30px; font-size: 1rem; font-weight: 750; }
+  .club .comparison { padding-bottom: 44px; }
+  .club .how { padding-top: 44px; }
+}
+@media (max-width: 700px) {
+  .club .hero .hero-actions .primary { min-height: 56px; padding: 15px 18px; font-weight: 750; }
+  .club .comparison { padding-bottom: 28px; }
+  .club .how { padding-top: 28px; }
+}
+</style>
+
+<style is:global>
+/* /club-2 uses the original Club layout and style system; only new sections get new rules */
+.club .club2-problem {padding-top:75px;padding-bottom:72px;text-align:center}
+.club .club2-problem h2{max-width:850px;margin:0 auto 24px}
+.club .club2-problem p:not(.eyebrow){max-width:700px;margin:0 auto 14px;font-size:1.08rem;line-height:1.7}
+.club .family-demo{padding-top:80px;padding-bottom:80px}
+.club .family-demo>h2{max-width:870px}
+.club .family-demo>.intro{max-width:710px;margin:18px 0 28px;color:var(--muted);font-size:1.06rem;line-height:1.7}
+.club .family-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0 30px}
+.club .family-tabs button{cursor:pointer;border:1px solid var(--line);border-radius:5px;background:var(--cream);color:var(--ink);font:inherit;text-align:left;padding:20px;transition:background .2s,border-color .2s}
+.club .family-tabs button:hover,.club .family-tabs button:focus-visible{border-color:var(--sage)}
+.club .family-tabs button.active{background:#D4DFC4;border-color:var(--sage)}
+.club .family-tabs strong{display:block;font-weight:750}
+.club .family-tabs small{display:block;margin-top:5px;font-size:.75rem}
+.club .family-panel{display:grid;grid-template-columns:minmax(240px,.72fr) minmax(0,1.28fr);gap:32px;align-items:start}
+.club .family-panel[hidden]{display:none}
+.club .family-details{padding:28px;border:1px solid var(--line);border-radius:5px;background:var(--cream)}
+.club .family-details h3{font-size:1.85rem}
+.club .family-summary{font-weight:700;margin:10px 0!important}
+.club .family-details dt{font-weight:750;margin-top:16px}
+.club .family-details dd{margin:4px 0 0;line-height:1.55}
+.club .sample-disclaimer,.club .sample-caption{font-size:.75rem;color:var(--muted);line-height:1.5}
+.club .sample-disclaimer{border-top:1px solid var(--line);padding-top:15px;margin-top:24px!important}
+.club .plan-stage{min-width:0}
+.club .sample-sheet{background:#fff;max-width:650px;margin:auto;border:1px solid var(--line);box-shadow:0 12px 30px #00000012;padding:30px 36px;min-height:560px}
+.club .sheet-header{text-align:center;border-bottom:2px solid #CDDDE1;padding-bottom:18px}
+.club .sheet-header p{font-size:.62rem;letter-spacing:.15em;font-weight:800}
+.club .sheet-header h3{font-size:2rem;margin:8px 0}
+.club .sheet-header span{font-family:Georgia,serif;font-style:italic}
+.club .sheet-label{text-align:center;background:#CDDDE1;padding:9px;font-size:.68rem;letter-spacing:.1em;font-weight:800;margin-top:22px}
+.club .assignment{display:grid;grid-template-columns:125px minmax(0,1fr);gap:14px;padding:13px 6px;border-bottom:1px solid #e6e4e0;font-size:.82rem}
+.club .assignment>strong{font-weight:800}
+.club .assignment div b,.club .assignment div span{display:block}
+.club .assignment div span{font-size:.75rem;line-height:1.4;margin-top:3px}
+.club .sheet-question{background:#f2f5ef;padding:13px 17px;margin-top:18px;font-size:.84rem}
+.club .sheet-question p{margin:4px 0 0}
+.club .sheet-footer{margin-top:16px;display:flex;align-items:center;justify-content:space-between;font-size:.65rem;letter-spacing:.09em}
+.club .sheet-footer strong{font-size:.8rem}
+.club .sample-caption{text-align:center;margin:13px auto 0;max-width:520px}
+.club .demo-bottom{text-align:center;font-family:Georgia,serif;font-size:1.35rem;max-width:800px;margin:34px auto 0!important;line-height:1.45}
+@media(max-width:850px){.club .family-panel{grid-template-columns:1fr}.club .family-demo{padding-top:60px;padding-bottom:60px}}
+@media(max-width:600px){.club .family-tabs{gap:7px}.club .family-tabs button{padding:10px 8px;text-align:center;font-size:.8rem}.club .family-tabs small{font-size:.62rem}.club .family-details{padding:22px}.club .sample-sheet{padding:17px 14px;min-height:0}.club .sheet-header h3{font-size:1.7rem}.club .assignment{grid-template-columns:90px minmax(0,1fr);gap:7px;font-size:.72rem}.club .assignment div span{font-size:.68rem}.club .club2-problem{padding-top:50px;padding-bottom:50px}}
 </style>
