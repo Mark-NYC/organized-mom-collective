@@ -146,17 +146,22 @@ import {
 } from '../../lib/club/engines/march-chore-charts';
 import type { MarchIconArt } from '../../data/club/march-chore-icons';
 import { familyEditor, kidEditor } from '../../lib/club/march-chore-editor';
+import { familySnapshot, settledSnapshot, type FamilySnapshot } from '../../lib/club/personalize/family';
+import type { FamilyProfile } from '../../lib/club/family-profile';
 import { el } from '../../lib/club/plan/dom';
 import { PLAN_CHANGE } from '../../lib/club/plan/resource';
 import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
 import { toolPalettes } from '../../data/tool-palettes';
 
-type Detail = { household: { id: string; members?: ChoreMember[]; preferences?: { pets?: boolean } } | null; sample?: string | null };
+type Detail = { household: { id: string; members?: ChoreMember[]; preferences?: { pets?: boolean } } | null; sample?: string | null; profile?: FamilyProfile | null };
 const root = document.querySelector<HTMLElement & { clubPlan?: ChorePlan }>('[data-mcc]');
 if (root) {
   const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
   const key = root.dataset.mccKey ?? 'omc:club:march-chore-charts:v2';
   let current = '', members: ChoreMember[] = [], pets = false, state: ChoreState = freshState(), persist = true, locked = false;
+  // Her newest profile answers: used when the plan has none saved yet, or after "Restore the prepared charts".
+  let latest: FamilySnapshot | undefined;
+  const settle = () => { const p = settledSnapshot(state.profile, latest); if (p) state.profile = p; else delete state.profile; };
   const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
 
   const fit = () => root.querySelectorAll<HTMLElement>('.mcc-stage').forEach((stage) => {
@@ -246,15 +251,18 @@ if (root) {
   editor.addEventListener('click', (e) => { if (e.target === editor) editor.close(); });
 
   const changed = () => { save(); draw(); if (current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true })); };
-  const update = (change: (s: ChoreState) => void) => { if (locked) return; change(state); applyFamily(state, members); changed(); };
+  const update = (change: (s: ChoreState) => void) => { if (locked) return; change(state); applyFamily(state, members); settle(); changed(); };
 
   const applyHousehold = (detail: Detail) => {
     if (!detail?.household) return;
     const next = planKey(detail.sample ?? null, detail.household.id);
     members = detail.household.members ?? [];
     pets = Boolean(detail.household.preferences?.pets);
+    // The owner's print view has no profile (null): the charts come from the snapshot saved with her plan.
+    if (detail.profile !== undefined && detail.profile !== null) latest = familySnapshot(detail.profile);
     if (next !== current) { current = next; state = readScoped(tabStorage.get(key), current, isChoreState) ?? freshState(); }
     applyFamily(state, members);
+    settle();
     changed();
   };
 
@@ -262,7 +270,7 @@ if (root) {
     ready: () => Boolean(current),
     state: () => state,
     update,
-    replace: (s) => { state = structuredClone(s); applyFamily(state, members); changed(); },
+    replace: (s) => { state = structuredClone(s); applyFamily(state, members); settle(); changed(); },
     setPersist: (on) => { persist = on; if (on) save(); },
     fingerprint: () => choreFingerprint(state, members, pets),
     members: () => members,

@@ -1,4 +1,9 @@
 ---
+/** May Club printable, Our Summer Day: one Letter-size rhythm of flexible anchors, prepared from the family
+ * (rules: src/lib/club/engines/may-summer-rhythm.ts, on the shared personalization foundation,
+ * docs/club/PERSONALIZATION_FOUNDATION.md): quiet time by ages, activities from their interests, and the family's jobs
+ * on the anchors they belong to, with names. planMode: the Club plan page (/app/club/may) brings the layout and rail. */
+import '../../styles/club-personalize.css';
 interface Props {storageKey?:string; planMode?:boolean}
 const {storageKey='omc:club:may-summer-rhythm:v1', planMode=false}=Astro.props;
 const blocks=[
@@ -54,6 +59,7 @@ const blocks=[
    <label>Quiet time<select data-quiet><option value="independent">Independent play and reading</option><option value="rest">Rest or nap</option><option value="older">Independent recharge</option></select></label>
    <label class="msr-snack-choice"><input type="checkbox" data-snack checked /> Include late-afternoon Snack & Reset</label>
    <label>Favorite kind of play<select data-play><option value="outdoors">Outdoor play</option><option value="active">Sports and movement</option><option value="creative">Making and creativity</option><option value="mixed">A mix of everything</option></select></label>
+   <div class="msr-parts-editor" data-msr-parts-wrap hidden><strong>Who helps</strong><p>The family’s jobs on the day, shared out by age. Tap names to change who, or leave a job off.</p><div data-msr-parts-editor></div></div>
    <details class="msr-customize" data-customize>
     <summary>Edit activities on mobile <span>Optional</span></summary>
     <p>These seven blocks are already prepared. Change any title, activity or time, or move a block up or down. Changes appear on the printable immediately.</p>
@@ -72,12 +78,12 @@ const blocks=[
     <div class="msr-rows" data-print-rows>
      {blocks.map((b,i)=><div class="msr-row" data-rhythm-key={b.key} style={'--msr-tint:'+b.tint}>
       <div class="msr-icon-box"><img src={b.icon} alt="" width="70" height="70" loading="eager" class="msr-icon" /></div>
-      <div class="msr-row-copy"><h3 data-title contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} name`}>{b.title}</h3><p data-desc contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} activities`}>{b.desc}</p></div>
+      <div class="msr-row-copy"><h3 data-title contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} name`}>{b.title}</h3><p data-desc contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} activities`}>{b.desc}</p><p class="msr-parts" data-parts hidden></p></div>
       <span class="msr-time" data-time role="button" tabindex="0" title="Click to change this time" aria-label={`Change ${b.title} time`}>{b.time}</span>
       <div class="msr-row-actions" aria-label={`Edit ${b.title} position`}><button type="button" data-move-up aria-label={`Move ${b.title} earlier`} title="Move earlier">↑</button><button type="button" data-move-down aria-label={`Move ${b.title} later`} title="Move later">↓</button><button type="button" data-remove aria-label={`Remove ${b.title}`} title="Remove block">×</button></div>
      </div>)}
     </div>
-    <div class="msr-rule"><span>OUR SUMMER RULE</span><strong>Check the rhythm before asking Mom.</strong><p>Our plans can change. We can still find what's next.</p></div>
+    <div class="msr-rule"><span>OUR SUMMER RULE</span><strong>Check the rhythm before asking what’s next.</strong><p>Our plans can change. We can still find what's next.</p></div>
     <footer class="msr-foot"><span>ORGANIZED FAMILY CLUB</span><span>OUR SUMMER DAY · MAY</span></footer>
    </article></div>
    
@@ -286,12 +292,35 @@ const blocks=[
 @media print{.msr-time-popover{display:none!important}}
 /* Plan mode: the Club plan page places the sheet. */
 .msr-plan-view .msr-stage{margin:0 auto}
+
+/* Who helps: the family's jobs on each anchor, with names (shared personalization). One quiet line under the activities. */
+.msr-parts{display:flex;flex-wrap:wrap;gap:2px 12px;margin:5px 0 0!important;font:500 11px/1.35 Montserrat,Arial,sans-serif!important;color:#59664f!important}
+.msr-parts[hidden]{display:none!important}
+.msr-part b{font-weight:700;letter-spacing:.04em;color:#41583f;margin-right:4px}
+.msr-sheet.msr-dense .msr-rows{gap:5px}
+.msr-sheet.msr-dense .msr-row{min-height:76px}
+.msr-sheet.msr-dense .msr-row-copy h3{font-size:22px;margin-bottom:4px}
+.msr-sheet.msr-dense .msr-sheet-head{min-height:132px;padding-top:14px}
+.msr-sheet.msr-dense .msr-sheet-head h2{font-size:44px}
+.msr-sheet.msr-dense .msr-rule{margin-top:10px;padding:10px 15px}
+.msr-parts-editor{border-top:1px solid #dfe5d9;margin-top:14px;padding-top:12px}
+.msr-parts-editor>strong{display:block;font:700 12px Montserrat,Arial,sans-serif}
+.msr-parts-editor>p{font-size:12px;line-height:1.55;color:#6c7468;margin:6px 0 4px}
+.msr-parts-editor[hidden]{display:none}
 </style>
 <script>
 import { PLAN_CHANGE } from "../../lib/club/plan/resource";
-import type { MayState, MayPlan } from "../../lib/club/engines/may-summer-rhythm";
-import {ageInMonth} from '../../lib/club/profile';
-type Person={firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;archived?:boolean};
+import {
+ DESC_LIMIT, LABELS, MAY_KEYS, START_TIMES, TINTS, TITLE_LIMIT, clock as engineClock, familyDefaults, keepToFamily, mayContext,
+ mayFingerprint, mayParts, mayRows, partRules, readSaved, starter as prepared, visibleKeys as shownKeys,
+ type MayState, type MayPlan, type MayMember,
+} from "../../lib/club/engines/may-summer-rhythm";
+import type { FamilyContext, FamilySnapshot } from '../../lib/club/personalize/family';
+import { familySnapshot, settledSnapshot } from '../../lib/club/personalize/family';
+import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner, type TaskEdits } from '../../lib/club/personalize/edits';
+import { taskEditor } from '../../lib/club/personalize/editor';
+import type { FamilyProfile } from '../../lib/club/family-profile';
+type Person=MayMember;
 type Quiet='independent'|'rest'|'older';
 type Play='outdoors'|'active'|'creative'|'mixed';
 type Structure='relaxed'|'balanced'|'structured';
@@ -299,21 +328,11 @@ type Days='home'|'mixed'|'camp';
 type Key='morning'|'move'|'create'|'lunch'|'quiet'|'free'|'snack'|'evening';
 type Edit={title?:string;desc?:string;time?:string};
 type Options={start:number;quiet:Quiet;play:Play;structure:Structure;days:Days;snack:boolean};
-const keys:Key[]=['morning','move','create','lunch','quiet','free','snack','evening'];
-const labels:Record<Key,string>={morning:'Morning Start',move:'Move & Play',create:'Create & Explore',lunch:'Lunch & Reset',quiet:'Quiet Time',free:'Flexible Afternoon',snack:'Snack & Reset',evening:'Evening Reset'};
-const baseDesc:Record<Key,string>={
- morning:'Breakfast · Get dressed · Make beds',
- move:'Outside · Bikes · Park · Backyard',
- create:'Read · Build · Draw · Make',
- lunch:'Eat · Clear dishes · Tidy up',
- quiet:'Read · Puzzles · Quiet play',
- free:'Friends · Park · Outing · Home play',
- snack:'Have a snack · Put things away · Reset your space',
- evening:'Pick up · Wash up · Wind down'
-};
-const defaults:Options={start:8,quiet:'independent',play:'outdoors',structure:'balanced',days:'home',snack:true};
+type Detail={household:{id:string;displayName?:string;members:Person[];preferences?:{pets?:boolean}};sample?:string|null;profile?:FamilyProfile|null};
+const keys:Key[]=[...MAY_KEYS];
+const labels:Record<Key,string>=LABELS;
 const hhmm=(n:number)=>{const normalized=(n+24)%24;const h=Math.floor(normalized);const min=Math.round((normalized-h)*60);return String(h).padStart(2,'0')+':'+String(min).padStart(2,'0')};
-const clock=(time:string)=>{if(!time)return 'Evening';const [hour,min]=time.split(':').map(Number);return String(hour%12||12)+':'+String(min).padStart(2,'0')+(hour<12?' AM':' PM')};
+const clock=engineClock;
 for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const storageKey=root.dataset.msrKey??'omc:preview:may:v2';
  const planMode=root.dataset.msrPlan==='true';
@@ -322,11 +341,18 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const scroller=()=>root.closest<HTMLElement>('[data-plan-proof-scroll]')??root.querySelector<HTMLElement>('.msr-preview');
  let persist=true;
  let profile='';
- let options:Options={...defaults};
+ let ctx:FamilyContext|null=null;
+ let members:Person[]=[];
+ let prefs:{pets?:boolean}={};
+ let parts:TaskEdits={};
+ let snapshot:FamilySnapshot|undefined;
+ // Her newest profile answers: used before anything is saved, or when she restores the suggested rhythm.
+ let latest:FamilySnapshot|undefined;
+ const rebuild=()=>{ctx=members.length?mayContext(members,prefs,snapshot):null;if(ctx)keepToFamily(parts,ctx)};
+ let options:Options=familyDefaults(mayContext([],{}));
  let edits:Partial<Record<Key,Edit>>={};
  let order:Key[]=[...keys];
  let removed:Key[]=[];
- let children:Person[]=[];
  let familyLabel="OUR FAMILY'S SUMMER RHYTHM";
  const stage=root.querySelector<HTMLElement>('[data-stage]');
  const sheet=root.querySelector<HTMLElement>('[data-sheet]');
@@ -346,42 +372,15 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const parent=stage?.parentElement;
  if(parent&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(parent);
  window.addEventListener('resize',fit);
+ // The prepared day for this family (quiet time by ages, play by interests); her edits start empty.
  const ageDefaults=()=>{
-  const ages=children.map(p=>ageInMonth(p.birthYear??2027,p.birthMonth,'2027-05'));
-  const quiet:Quiet=ages.length&&Math.min(...ages)<5?'rest':ages.length&&Math.min(...ages)>11?'older':'independent';
-  options={...defaults,quiet};
+  options=ctx?familyDefaults(ctx):familyDefaults(mayContext([],{}));
   edits={};
   order=[...keys];
   removed=[];
+  parts={};
  };
- const starter=(key:Key):Required<Edit>=>{
-  let title=labels[key],desc=baseDesc[key];
-  const idx=keys.indexOf(key);
-  const offset=[0,1,2.5,4,5,6,8,10][idx];
-  let time=key==='evening'?'':hhmm(options.start+offset);
-  if(options.days==='camp'){
-   const names:Partial<Record<Key,[string,string]>>={
-    move:['Pack & Head Out','Pack bag · Water bottle · Shoes'],
-    create:['Camp or Program','Play · Learn · Explore · Friends'],
-    lunch:['Lunch & Reset','Lunch · Pack things · Tidy up'],
-    quiet:['Recharge','Snack · Quiet time · Rest'],
-    free:['Free Time','Friends · Outside · Home play'],
-    snack:['Home & Snack','Have a snack · Unpack · Reset your space']
-   };
-   if(names[key]){title=names[key]![0];desc=names[key]![1]}
-   const campOffsets=[0,.5,1,4,7.5,8.5,9,10];
-   time=key==='evening'?'':hhmm(options.start+campOffsets[idx]);
-  }else{
-   if(options.days==='mixed'){
-    const mixed:Partial<Record<Key,[string,string]>>={move:['Home Play or Outing','Outside · Park · Friends · Home play'],create:['Choose & Explore','Read · Build · Draw · Make'],free:['Flexible Afternoon','Friends · Park · Outing · Home play']};
-    if(mixed[key]){title=mixed[key]![0];desc=mixed[key]![1]}
-   }
-   if(key==='quiet')desc=options.quiet==='rest'?'Nap · Rest · Quiet books':options.quiet==='older'?'Read · Recharge · Independent time':'Read · Puzzles · Quiet play';
-   if(key==='move')desc=options.play==='active'?'Ball games · Movement · Outdoors':options.play==='creative'?'Explore · Move · Make something':options.play==='mixed'?'Get moving · Choose how to play':baseDesc.move;
-   if(key==='free'&&options.days==='home')desc=options.play==='creative'?'Art · Make · Friends · Home play':options.play==='active'?'Friends · Sports · Park · Home play':baseDesc.free;
-  }
-  return {title,desc,time};
- };
+ const starter=(key:Key):Required<Edit>=>prepared(key,options,ctx??undefined);
  const resolved=(key:Key):Required<Edit>=>({...starter(key),...(edits[key]??{})});
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
@@ -389,7 +388,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
  root.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
  for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
- const save=()=>{if(!persist)return;try{(planMode?sessionStorage:localStorage).setItem(storageKey,JSON.stringify({profile,options,edits,order,removed}))}catch{}};
+ const save=()=>{if(!persist)return;try{(planMode?sessionStorage:localStorage).setItem(storageKey,JSON.stringify({profile,options,edits,order,removed,...(Object.keys(parts).length?{parts}:{}),...(snapshot?{snapshot}:{})}))}catch{}};
  const renderEditor=()=>{
   if(!editor)return;
   editor.replaceChildren();
@@ -462,21 +461,49 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   if(minute<1080)return interpolate('#DEEDDB','#B9D8C7',(minute-720)/360);
   return interpolate('#DBDFF0','#B4BBD9',(minute-1080)/359);
  };
- const visibleKeys=()=>order.filter(k=>(options.snack||k!=='snack')&&(options.structure!=='relaxed'||(k!=='create'&&k!=='move'))&&(options.days==='camp'?k!=='lunch'&&k!=='quiet':k!=='create'));
+ const visibleKeys=()=>shownKeys(order,options);
+ // The family jobs on each anchor, as printed.
+ const partsByKey=()=>{const all=ctx?mayParts(ctx,parts):[];return (key:Key)=>all.filter(p=>p.block===key&&!p.skipped)};
+ const partsEditor=root.querySelector<HTMLElement>('[data-msr-parts-editor]');
+ const renderPartsEditor=()=>{
+  const wrap=root.querySelector<HTMLElement>('[data-msr-parts-wrap]');
+  if(!partsEditor||!wrap)return;
+  const all=ctx?mayParts(ctx,parts):[];
+  wrap.hidden=!ctx||!all.length;
+  if(!ctx||!all.length){partsEditor.replaceChildren();return}
+  const edit=(fn:()=>void)=>{fn();update()};
+  partsEditor.replaceChildren(taskEditor({ctx,tasks:all.map(t=>({...t,label:t.label})),rules:partRules,locked,
+   onOwners:(id,person,cur)=>edit(()=>toggleTaskOwner(parts,id,cur,person)),
+   onTitle:(id,title)=>edit(()=>setTaskTitle(parts,id,title,all.find(t=>t.id===id)?.title??title)),
+   onSkip:(id,skip)=>edit(()=>setTaskSkip(parts,id,skip)),
+   onReset:(id)=>edit(()=>resetTask(parts,id))}));
+ };
+ // A long family plan can make the rows taller: a little tighter spacing keeps it on one page, never clipped.
+ const fitSheet=()=>{
+  if(!sheet)return;
+  sheet.classList.remove('msr-dense');
+  const foot=sheet.querySelector<HTMLElement>('.msr-foot');
+  const rule=sheet.querySelector<HTMLElement>('.msr-rule');
+  if(!foot||!rule)return;
+  if(rule.offsetTop+rule.offsetHeight+foot.offsetHeight+8>1056-23)sheet.classList.add('msr-dense');
+ };
  const render=(buildEditor=false)=>{
   root.dataset.msrStructure=options.structure;
   root.dataset.msrDays=options.days;
   const family=root.querySelector<HTMLElement>('[data-family]');if(family)family.textContent=familyLabel;
   const dayLabel=root.querySelector<HTMLElement>('[data-day-label]');if(dayLabel)dayLabel.textContent=options.days==='camp'?'CAMP / PROGRAM DAY':options.days==='mixed'?'HOME OR OUTING DAY':'A DAY AT HOME';
   const visible=visibleKeys();
+  const partsOf=partsByKey();
   for(const key of order){
    const node=nodes.get(key);if(!node||!list)continue;
    list.append(node);
    node.hidden=!visible.includes(key);
    const v=resolved(key);
-   node.style.setProperty('--msr-tint',tintFor(v.time,({morning:'#F8E8B5',move:'#F4DEA3',create:'#F0D493',lunch:'#DDEBDB',quiet:'#D1E5D6',free:'#C3DDCF',snack:'#E4E9D5',evening:'#D1D7EA'} as Record<Key,string>)[key]));
+   node.style.setProperty('--msr-tint',tintFor(v.time,TINTS[key]));
    const title=node.querySelector<HTMLElement>('[data-title]');if(title)title.textContent=v.title;
    const desc=node.querySelector<HTMLElement>('[data-desc]');if(desc)desc.textContent=v.desc;
+   const who=node.querySelector<HTMLElement>('[data-parts]');
+   if(who){const list=partsOf(key);who.hidden=!list.length;who.replaceChildren(...list.map(p=>{const chip=document.createElement('span');chip.className='msr-part';const b=document.createElement('b');b.textContent=p.who;chip.append(b,document.createTextNode(p.label));return chip}))}
    const time=node.querySelector<HTMLElement>('[data-time]');if(time){const formatted=clock(v.time);const match=formatted.match(/^(.*?)( AM| PM)$/);time.replaceChildren(document.createTextNode(match?match[1]:formatted));if(match){const suffix=document.createElement('span');suffix.className='msr-meridiem';suffix.textContent=match[2];time.append(suffix)}}
    if(time)time.hidden=options.structure==='relaxed'||!v.time;
    node.querySelector<HTMLButtonElement>('[data-move-up]')?.toggleAttribute('disabled',order.indexOf(key)===0);
@@ -494,6 +521,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   for(const key of keys){const node=nodes.get(key);if(node&&!order.includes(key))node.hidden=true}
   renderRemoved();
   if(buildEditor)renderEditor();
+  if(editorDialog?.open||buildEditor)renderPartsEditor();
+  fitSheet();
   if(planMode) root.dispatchEvent(new Event(PLAN_CHANGE,{bubbles:true}));
  };
  const update=()=>{save();render(true)};
@@ -509,7 +538,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  root.querySelector<HTMLSelectElement>('[data-quiet]')?.addEventListener('change',e=>{options.quiet=(e.target as HTMLSelectElement).value as Quiet;update()});
  root.querySelector<HTMLInputElement>('[data-snack]')?.addEventListener('change',e=>{options.snack=(e.target as HTMLInputElement).checked;update()});
  root.querySelector<HTMLSelectElement>('[data-play]')?.addEventListener('change',e=>{options.play=(e.target as HTMLSelectElement).value as Play;update()});
- root.querySelector('[data-reset]')?.addEventListener('click',()=>{ageDefaults();update()});
+ root.querySelector('[data-reset]')?.addEventListener('click',()=>{snapshot=latest;rebuild();ageDefaults();update()});
  for(const key of keys){
   const node=nodes.get(key);if(!node)continue;
   node.querySelector<HTMLButtonElement>('[data-move-up]')?.addEventListener('click',()=>moveBlock(key,-1));
@@ -591,59 +620,68 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   }catch(err){console.error('Summer rhythm PNG export failed',err);alert('Sorry, the image could not be saved. You can still use Print / Save PDF.')}
   finally{root.classList.remove('msr-exporting');download.disabled=false;download.textContent=prior}
  });
- const applyHousehold=(detail:{household:{id:string;displayName?:string;members:Person[]};sample?:string})=>{
+ const applyHousehold=(detail:Detail)=>{
   if(!detail?.household)return;
   const nextProfile=(detail.sample??'account')+':'+detail.household.id;
   const changed=profile!==nextProfile;
   profile=nextProfile;
-  children=detail.household.members.filter(p=>!p.archived&&p.kind==='child');
+  members=detail.household.members.filter(p=>!p.archived);
+  prefs=detail.household.preferences??{};
+  // The owner's print view has no profile (null): the rhythm comes from the snapshot saved with her plan.
+  if(detail.profile)latest=familySnapshot(detail.profile);
   const name=(detail.household.displayName??'').trim();
   familyLabel=name?name.toUpperCase()+' · SUMMER RHYTHM':"OUR FAMILY'S SUMMER RHYTHM";
   if(changed){
+   let stored:Record<string,any>|null=null;
+   try{stored=JSON.parse((planMode?sessionStorage:localStorage).getItem(storageKey)??'null')}catch{}
+   const mine=stored?.profile===profile&&stored.options?stored:null;
+   const saved=mine?readSaved(mine):{};
+   snapshot=settledSnapshot(saved.snapshot,latest);
+   rebuild();
    ageDefaults();
-   try{
-    const stored=JSON.parse((planMode?sessionStorage:localStorage).getItem(storageKey)??'null');
-    if(stored?.profile===profile&&stored.options){
-     const o=stored.options;
-     if([7,7.5,8,8.5,9,9.5].includes(o.start))options.start=o.start;
+   if(mine){
+     const o=mine.options;
+     if((START_TIMES as readonly number[]).includes(o.start))options.start=o.start;
      if(['independent','rest','older'].includes(o.quiet))options.quiet=o.quiet;
      if(['outdoors','active','creative','mixed'].includes(o.play))options.play=o.play;
      if(['home','mixed','camp'].includes(o.days))options.days=o.days;
      if(typeof o.snack==='boolean')options.snack=o.snack;
      if(['relaxed','balanced','structured'].includes(o.structure))options.structure=o.structure;
-     const savedOrder=stored.order;
-     if(Array.isArray(savedOrder)&&savedOrder.length>=1&&savedOrder.length<=keys.length&&new Set(savedOrder).size===savedOrder.length&&savedOrder.every(k=>keys.includes(k)))order=savedOrder;
-     if(Array.isArray(stored.removed)&&new Set(stored.removed).size===stored.removed.length&&stored.removed.every((k:Key)=>keys.includes(k))&&stored.removed.length+order.length===keys.length&&stored.removed.every((k:Key)=>!order.includes(k)))removed=stored.removed;
+     const savedOrder=mine.order;
+     if(Array.isArray(savedOrder)&&savedOrder.length>=1&&savedOrder.length<=keys.length&&new Set(savedOrder).size===savedOrder.length&&savedOrder.every((k:Key)=>keys.includes(k)))order=savedOrder;
+     if(Array.isArray(mine.removed)&&new Set(mine.removed).size===mine.removed.length&&mine.removed.every((k:Key)=>keys.includes(k))&&mine.removed.length+order.length===keys.length&&mine.removed.every((k:Key)=>!order.includes(k)))removed=mine.removed;
      else if(order.length<keys.length)removed=keys.filter(k=>!order.includes(k));
-     if(stored.edits&&typeof stored.edits==='object'){
+     if(mine.edits&&typeof mine.edits==='object'){
       for(const key of keys){
-       const obj=stored.edits[key];if(!obj||typeof obj!=='object')continue;
+       const obj=mine.edits[key];if(!obj||typeof obj!=='object')continue;
        const edit:Edit={};
-       if(typeof obj.title==='string')edit.title=obj.title.slice(0,38);
-       if(typeof obj.desc==='string')edit.desc=obj.desc.slice(0,78);
+       if(typeof obj.title==='string')edit.title=obj.title.slice(0,TITLE_LIMIT);
+       if(typeof obj.desc==='string')edit.desc=obj.desc.slice(0,DESC_LIMIT);
        if(typeof obj.time==='string'&&(/^([01]\d|2[0-3]):[0-5]\d$/.test(obj.time)||obj.time===''))edit.time=obj.time;
        edits[key]=edit;
       }
      }
-    }
-   }catch{}
-  }
+     parts=saved.parts??{};
+     rebuild();
+   }
+  }else rebuild();
   update();
  };
  if(planMode){
-  const snapshot=():MayState=>({options:structuredClone(options),edits:structuredClone(edits),order:[...order],removed:[...removed],rows:visibleKeys().map(key=>({key,...resolved(key)})),familyLabel});
-  const replace=(s:MayState)=>{options=structuredClone(s.options);edits=structuredClone(s.edits);order=[...s.order];removed=[...s.removed];save();render(true)};
+  const current=():MayState=>({options:structuredClone(options),edits:structuredClone(edits),order:[...order],removed:[...removed],rows:mayRows({options,edits,order,parts},ctx??undefined),familyLabel,parts:structuredClone(parts),...(snapshot?{snapshot:structuredClone(snapshot)}:{})});
+  const replace=(s:MayState)=>{options=structuredClone(s.options);edits=structuredClone(s.edits);order=[...s.order];removed=[...s.removed];parts=structuredClone(s.parts??{});if(s.snapshot!==undefined||!snapshot)snapshot=s.snapshot??latest;rebuild();save();render(true)};
   (root as HTMLElement & {clubPlan?:MayPlan}).clubPlan={
-   ready:()=>Boolean(profile),state:snapshot,
-   update:fn=>{const s=snapshot();fn(s);replace(s)},replace,
+   ready:()=>Boolean(profile),state:current,
+   update:fn=>{const s=current();fn(s);replace(s)},replace,
    setPersist:on=>{persist=on;if(on)save()},
-   fingerprint:()=>JSON.stringify({familyLabel,days:options.days,structure:options.structure,rows:visibleKeys().map(key=>({key,...resolved(key)}))}),
+   fingerprint:()=>mayFingerprint({options,edits,order,parts,familyLabel},ctx??undefined),
+   context:()=>ctx,
    setLocked:on=>{locked=on;root.querySelectorAll<HTMLElement>('.msr-sheet [contenteditable]').forEach(el=>el.setAttribute('contenteditable',on?'false':'true'));root.querySelectorAll<HTMLElement>('.msr-sheet [data-time], .msr-sheet [data-move-up], .msr-sheet [data-move-down], .msr-sheet [data-remove]').forEach(el=>{el.style.pointerEvents=on?'none':'';el.tabIndex=on?-1:0});if(on)editorDialog?.close()},
    openEditor:()=>{if(!locked&&editorDialog&&!editorDialog.open)editorDialog.showModal()},
   };
  }
- window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<{household:{id:string;displayName?:string;members:Person[]};sample?:string}>).detail));
- const cached=(window as Window & {__ofcPreviewHousehold?:{household:{id:string;displayName?:string;members:Person[]};sample?:string}}).__ofcPreviewHousehold;
+ window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<Detail>).detail));
+ const cached=(window as Window & {__ofcPreviewHousehold?:Detail}).__ofcPreviewHousehold;
  if(cached)applyHousehold(cached);
  render(true);
 }

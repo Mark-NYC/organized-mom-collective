@@ -1,0 +1,19 @@
+/* The shared owner editor (src/lib/club/personalize/editor.ts), used in month dialogs on desktop and edit sheets on
+   phones. Warm neutrals from the family brand; 44px targets; never printed. */
+.po-list{display:grid;border-top:1px solid var(--color-warm-rule,#e7ddd4)}
+.po-task{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
+.po-task.is-off .po-task-head strong{text-decoration:line-through;color:var(--color-warm-soft,#6e6461)}
+.po-task-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;margin:0;font-size:.92rem;line-height:1.35;color:var(--color-warm-ink,#4d4544)}
+.po-task-head span{font-size:.8rem;color:var(--color-warm-soft,#6e6461)}
+.po-chips{display:flex;flex-wrap:wrap;gap:6px}
+.po-chip{min-height:44px;padding:8px 14px;border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:999px;background:#fff;color:var(--color-warm-ink,#4d4544);font:600 .85rem var(--font-sans,Montserrat,Arial,sans-serif);cursor:pointer}
+.po-chip[aria-pressed="true"]{background:var(--color-warm-button,#4a3f3e);border-color:var(--color-warm-button,#4a3f3e);color:#fff}
+.po-chip:disabled{opacity:.45;cursor:not-allowed}
+.po-input{width:100%;box-sizing:border-box;min-height:44px;padding:10px 12px;border:1px solid #d7d3cc;border-radius:3px;background:#fff;font:400 1rem var(--font-sans,Montserrat,Arial,sans-serif);color:var(--color-warm-ink,#4d4544)}
+.po-actions{display:flex;flex-wrap:wrap;gap:4px 16px}
+.po-text-btn{min-height:40px;padding:0;border:0;background:none;color:var(--color-warm-soft,#6e6461);font:600 .82rem var(--font-sans,Montserrat,Arial,sans-serif);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.po-text-btn:disabled{opacity:.45;cursor:not-allowed}
+.po-note{margin:0;font-size:.82rem;line-height:1.5;color:var(--color-warm-soft,#6e6461)}
+.po-section{margin:16px 0 4px;font:400 1.2rem/1.2 var(--font-serif,Georgia,serif);color:var(--color-warm-ink,#4d4544)}
+.po-chip:focus-visible,.po-text-btn:focus-visible,.po-input:focus-visible{outline:2px solid var(--color-warm-button,#4a3f3e);outline-offset:2px}
+@media print{.po-list{display:none!important}}
