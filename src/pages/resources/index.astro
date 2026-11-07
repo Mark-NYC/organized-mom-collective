@@ -116,7 +116,7 @@ const jsonLd = all.length
       {inspirationPages > 1 && (
         <nav id="inspiration-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-3" aria-label="Inspiration gallery pages" hidden>
           {Array.from({ length: inspirationPages }, (_, index) => (
-            <button type="button" data-inspiration-page={index + 1} aria-label={`Show inspiration page ${index + 1} of ${inspirationPages}`} aria-pressed={index === 0 ? 'true' : 'false'} class="inspiration-page-dot h-3 w-3 rounded-full border border-[#545454] bg-transparent transition-colors hover:bg-[#CDDDE1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#545454]"></button>
+            <button type="button" data-inspiration-page={index + 1} aria-label={`Show inspiration page ${index + 1} of ${inspirationPages}`} aria-pressed={index === 0 ? 'true' : 'false'} class="inspiration-page-dot inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#D5C5B8] bg-[#FBF7F1] text-sm font-semibold text-[#545454] transition-colors hover:bg-[#CDDDE1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#545454]">{index + 1}</button>
           ))}
         </nav>
       )}
@@ -217,8 +217,6 @@ const jsonLd = all.length
       pageButtons.forEach((button) => {
         const active = Number(button.dataset.inspirationPage) === page;
         button.setAttribute('aria-pressed', String(active));
-        button.classList.toggle('bg-[#545454]', active);
-        button.classList.toggle('bg-transparent', !active);
       });
     };
     pagination.hidden = false;
@@ -228,5 +226,6 @@ const jsonLd = all.length
 </script>
 <style>
   [data-inspiration-card][hidden], #inspiration-pagination[hidden] { display: none !important; }
-  .inspiration-page-dot[aria-pressed="true"] { background-color: #545454; }
+  .inspiration-page-dot[aria-pressed="true"] { background-color: #545454; color: #fff; border-color: #545454; }
+  .inspiration-page-dot[aria-pressed="true"]:hover { background-color: #545454; }
 </style>
