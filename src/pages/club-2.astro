@@ -156,7 +156,24 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  </div>
 </section>
 
-<section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface">
+<section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-layout="layered" data-view="plan">
+ {/* TEMPORARY review control (desktop only): compare two demo layouts; links: ?demo=layered, ?demo=side-by-side. */}
+ <div class="compare-bar" role="group" aria-labelledby="compare-label">
+  <span id="compare-label">Design comparison · Demo layout</span>
+  <div class="compare-options">
+   <button type="button" aria-pressed="true" data-demo-layout="layered">A · Layered mockup</button>
+   <button type="button" aria-pressed="false" data-demo-layout="side-by-side">B · Side by side</button>
+  </div>
+ </div>
+ <script is:inline>
+  (function () {
+   var v = new URLSearchParams(location.search).get('demo');
+   if (v !== 'side-by-side' && v !== 'layered') return;
+   var s = document.currentScript.closest('.demo-surface');
+   s.dataset.layout = v;
+   s.querySelectorAll('[data-demo-layout]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.demoLayout === v)); });
+  })();
+ </script>
  <div class="demo-head">
   <p class="eyebrow">SEE WHAT ARRIVES · MAY: OUR SUMMER DAY</p>
   <h2 id="demo-title">When the season changes, <em>it all lands back on Mom.</em></h2>
@@ -168,9 +185,15 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
    <strong>{f.tab}</strong><small>{f.summary}</small>
   </button>)}
  </div>
+ <div class="view-tabs" role="tablist" aria-label="Choose which part of the plan to preview">
+  <button type="button" role="tab" id="view-tab-plan" aria-selected="true" tabindex="0" aria-controls={`phone-${families[1].id}`} data-view-tab="plan">Family Meeting Plan</button>
+  <button type="button" role="tab" id="view-tab-print" aria-selected="false" tabindex="-1" aria-controls={`sheet-${families[1].id}`} data-view-tab="print">Printed Monthly Tool</button>
+ </div>
  {families.map((f, i) => <div class="family-panel" id={`family-panel-${f.id}`} role="tabpanel" aria-labelledby={`family-tab-${f.id}`} hidden={i !== 1}>
-  <div class="stage" aria-label={`Illustrative ${f.family} Family Meeting plan on a phone, overlapping their printed Our Summer Day page`}>
-   <article class="sheet" aria-label={`${f.family}: printed Our Summer Day page`}>
+  <div class="stage" aria-label={`Illustrative ${f.family} Family Meeting plan on a phone, and their printed Our Summer Day page`}>
+   <p class="stage-label stage-label-plan"><b>1</b> Talk through your family plan</p>
+   <p class="stage-label stage-label-print"><b>2</b> Use your printed family rhythm</p>
+   <article class="sheet" id={`sheet-${f.id}`} aria-label={`${f.family}: printed Our Summer Day page`}>
     <div class="sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h3>Our <em>Summer Day</em></h3><p>A little structure. Plenty of freedom.</p></div>
     <div class="sheet-family"><span>{f.family.replace('The ', '').toUpperCase()}’S SUMMER RHYTHM</span><span class="sheet-people">{f.kids.map((k, n) => <span><i style={`background:${MARKER_COLORS[n].hex}`}></i>{k.name}</span>)}</span></div>
     <div class="sheet-rows">
@@ -183,8 +206,8 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
     <div class="sheet-rule"><span>OUR SUMMER RULE</span><strong>{f.rule[0]}</strong><p>{f.rule[1]}</p></div>
     <footer class="sheet-foot"><span>ORGANIZED FAMILY CLUB</span><span>{f.dayLabel} · MAY</span></footer>
    </article>
-   <div class="phone">
-    <div class="phone-screen" role="region" tabindex="0" aria-label={`${f.family} Family Meeting plan, scrollable`}>
+   <div class="phone" id={`phone-${f.id}`}>
+    <div class="phone-screen" role="region" tabindex="0" aria-label={`${f.family} Family Meeting plan`}>
      <div class="phone-status" aria-hidden="true"><span>9:41</span><span class="phone-island"></span><span class="phone-icons"><i></i><i></i><i></i></span></div>
      <p class="phone-kicker">MAY · FAMILY MEETING PLAN</p>
      <h3>{f.family}</h3>
@@ -308,6 +331,36 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
 <script>
  // Sample-family tabs: click, or arrow keys / Home / End with roving tabindex (WAI-ARIA tabs, automatic activation).
  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-family-tab]')];
+ const surface = document.querySelector<HTMLElement>('.demo-surface')!;
+ const viewTabs = [...document.querySelectorAll<HTMLButtonElement>('[data-view-tab]')];
+
+ // Mobile: one preview at a time (Family Meeting Plan | Printed Monthly Tool); kept when the family changes.
+ const showView = (tab: HTMLButtonElement, focus = false) => {
+  viewTabs.forEach(v => { const on = v === tab; v.setAttribute('aria-selected', String(on)); v.tabIndex = on ? 0 : -1; });
+  surface.dataset.view = tab.dataset.viewTab;
+  if (focus) tab.focus();
+ };
+ viewTabs.forEach((tab, i) => {
+  tab.addEventListener('click', () => showView(tab));
+  tab.addEventListener('keydown', e => {
+   const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: viewTabs.length - 1 }[e.key];
+   if (next === undefined) return;
+   e.preventDefault();
+   showView(viewTabs[(next + viewTabs.length) % viewTabs.length], true);
+  });
+ });
+
+ // TEMPORARY desktop design comparison: switch layouts in place and keep ?demo= in the URL for sharing.
+ document.querySelectorAll<HTMLButtonElement>('[data-demo-layout]').forEach(button => {
+  button.addEventListener('click', () => {
+   const layout = button.dataset.demoLayout!;
+   surface.dataset.layout = layout;
+   document.querySelectorAll('[data-demo-layout]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+   const url = new URL(location.href);
+   url.searchParams.set('demo', layout);
+   history.replaceState(history.state, '', url);
+  });
+ });
  const select = (tab: HTMLButtonElement, focus = false) => {
   tabs.forEach(t => {
    const on = t === tab;
@@ -316,6 +369,8 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
    const panel = document.getElementById(t.getAttribute('aria-controls')!);
    if (panel) panel.hidden = !on;
   });
+  const id = tab.id.replace('family-tab-', '');
+  viewTabs.forEach(v => v.setAttribute('aria-controls', `${v.dataset.viewTab === 'plan' ? 'phone' : 'sheet'}-${id}`));
   if (focus) tab.focus();
  };
  tabs.forEach((tab, i) => {
@@ -659,7 +714,7 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  .faq-layout{gap:24px}
  .steps{grid-template-columns:1fr;gap:26px}
 }
-/* Phone: the page sits on top, the phone overlaps only its footer, and both stay readable. */
+/* Phones */
 @media(max-width:700px){
  .inset{padding:12px 12px 28px}
  .hero{padding-top:12px}
@@ -680,9 +735,6 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  .tab-dots{grid-row:auto}
  .family-tabs strong{font-size:.76rem;line-height:1.2}
  .family-tabs small{font-size:.62rem;line-height:1.25}
- .stage{padding-left:0;display:flex;flex-direction:column}
- .sheet{max-width:none}
- .phone{position:relative;top:auto;left:auto;transform:none;align-self:flex-end;margin:-22px 4px 0 0;width:min(272px,78vw);height:540px}
  .why{display:block;padding-inline:6px}
  .why-key{margin-top:18px}
  .change-table>div{grid-template-columns:1fr 1fr;gap:6px 16px}
@@ -693,6 +745,68 @@ const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
  .kit-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}
  .price-card{padding:26px 20px}
  .footer{flex-direction:column;align-items:center;text-align:center}
+}
+
+/* TEMPORARY design comparison control (desktop only). */
+.demo-surface{position:relative}
+.compare-bar{position:absolute;z-index:3;top:10px;right:clamp(18px,4vw,64px);display:flex;align-items:center;gap:10px;font-size:.62rem;color:var(--muted)}
+.compare-bar>span{font-weight:750;letter-spacing:.1em;text-transform:uppercase}
+.compare-options{display:inline-flex;gap:3px;padding:3px;border:1px dashed #aeaea7;background:#fff}
+.compare-options button{border:0;border-radius:1px;background:transparent;padding:7px 12px;font:inherit;font-size:.74rem;font-weight:650;color:var(--ink);cursor:pointer}
+.compare-options button:hover{background:#f1f2f2}
+.compare-options button[aria-pressed=true]{background:var(--dark);color:#fff}
+.compare-options button:focus-visible,.view-tabs button:focus-visible{outline:3px solid #6f8f6a;outline-offset:2px}
+.stage-label{display:none}
+.view-tabs{display:none}
+
+/* Option B: phone and printed page side by side, both at a legible size. */
+@media(min-width:961px){
+ .demo-surface[data-layout=side-by-side] .family-panel{grid-template-columns:1fr;max-width:1180px;gap:44px}
+ .demo-surface[data-layout=side-by-side] .stage{padding-left:0;display:grid;grid-template-columns:minmax(250px,320px) minmax(0,640px);grid-template-areas:"plabel slabel" "phone sheet";justify-content:center;align-items:center;column-gap:clamp(36px,5.5vw,96px);row-gap:20px}
+ .demo-surface[data-layout=side-by-side] .stage-label{display:flex;align-items:center;justify-content:center;gap:10px;align-self:end;font-size:.8rem;font-weight:700;color:var(--ink)}
+ .demo-surface[data-layout=side-by-side] .stage-label b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#dfe7d8;color:#3f5a40;font-size:.72rem}
+ .demo-surface[data-layout=side-by-side] .stage-label-plan{grid-area:plabel}
+ .demo-surface[data-layout=side-by-side] .stage-label-print{grid-area:slabel}
+ .demo-surface[data-layout=side-by-side] .phone{grid-area:phone;position:relative;left:auto;top:auto;transform:none;justify-self:center;width:100%;max-width:320px;height:clamp(600px,50vw,730px)}
+ .demo-surface[data-layout=side-by-side] .phone-screen h3{font-size:23px}
+ .demo-surface[data-layout=side-by-side] .phone-card p{font-size:11.5px}
+ .demo-surface[data-layout=side-by-side] .phone-parts p{font-size:11px}
+ .demo-surface[data-layout=side-by-side] .sheet{grid-area:sheet;max-width:640px}
+ .demo-surface[data-layout=side-by-side] .why{display:block;max-width:1040px;width:100%;margin:0 auto}
+ .demo-surface[data-layout=side-by-side] .why .eyebrow{text-align:center}
+ .demo-surface[data-layout=side-by-side] .why ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;border-top:0}
+ .demo-surface[data-layout=side-by-side] .why ul li{border-top:1px solid #d6d6d0;border-bottom:0;align-content:start}
+ .demo-surface[data-layout=side-by-side] .why-key{display:none}
+}
+
+/* Mobile and tablet: one preview at a time behind two tabs; never overlapping. */
+@media(max-width:960px){
+ .compare-bar{display:none}
+ .view-tabs{display:grid;grid-template-columns:1fr 1fr;max-width:640px;margin:0 auto 20px;border-bottom:1px solid #cfcfc9}
+ .view-tabs button{min-height:48px;margin-bottom:-1px;padding:12px 6px;border:0;border-bottom:3px solid transparent;background:none;font:inherit;font-size:.84rem;font-weight:750;line-height:1.25;color:var(--muted);cursor:pointer}
+ .view-tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--dark)}
+ .family-panel{max-width:640px}
+ .stage{padding-left:0;display:block}
+ .demo-surface[data-view=plan] .sheet,.demo-surface[data-view=print] .phone{display:none}
+ .sheet{max-width:none}
+ .phone{position:relative;left:auto;top:auto;transform:none;width:min(100%,390px);height:auto;margin:0 auto}
+ .phone-screen{height:auto;min-height:600px;overflow:visible;-webkit-mask-image:none;mask-image:none;padding-bottom:22px}
+ .phone-status{position:static}
+ .phone-kicker{font-size:9.5px}
+ .phone-screen h3{font-size:24px}
+ .phone-people li{font-size:12px;padding:4px 10px 4px 7px}
+ .phone-card{padding:11px 13px;margin-bottom:9px}
+ .phone-card>span{font-size:9px}
+ .phone-card p,.phone-parts p{font-size:13px;line-height:1.5}
+ .phone-goal strong{font-size:17px}
+ .phone-talk p{font-size:14.5px}
+ .phone-review span{font-size:12px;padding:10px 4px}
+}
+@media(max-width:400px){
+ .phone{padding:7px;border-radius:38px}
+ .phone-screen{border-radius:32px;padding-inline:13px}
+ .phone-status{margin-inline:-13px}
+ .view-tabs button{font-size:.78rem}
 }
 @media(prefers-reduced-motion:reduce){.club *,.kit-fullscreen *{transition:none!important;scroll-behavior:auto!important}.kit-image-stage:hover .kit-fullscreen-image{transform:none!important}}
 </style>
