@@ -812,7 +812,8 @@ a.kit-frame { cursor: pointer; }
 .kit-frame { --cx0: var(--x0); --cw: var(--w); --cy0: var(--y0); }
 .kit-frame img { position: absolute; max-width: none; width: calc(100cqw / var(--cw)); height: auto;
  left: clamp(calc(100cqw - 100cqw / var(--cw)), calc(-100cqw / var(--cw) * var(--cx0)), 0px);
- top: clamp(calc(100cqh - 100cqw / var(--cw) * var(--r)), calc(-100cqw / var(--cw) * var(--r) * var(--cy0)), 0px); }
+ /* A sheet shorter than its frame (a landscape month in a portrait frame) is centered instead. */
+ top: min(clamp(calc(100cqh - 100cqw / var(--cw) * var(--r)), calc(-100cqw / var(--cw) * var(--r) * var(--cy0)), 0px), max(calc((100cqh - 100cqw / var(--cw) * var(--r)) / 2), 0px)); }
 .kit-carousel-nav { display: flex; justify-content: center; gap: 10px; margin-top: 6px; }
 .kit-nav { width: 44px; height: 44px; border: 1px solid #cfcfc9; border-radius: 50%; background: #fff; color: #303030; font-size: 1.1rem; cursor: pointer; }
 .kit-nav:disabled { opacity: .35; cursor: default; }

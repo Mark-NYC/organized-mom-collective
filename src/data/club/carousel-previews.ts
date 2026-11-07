@@ -38,7 +38,7 @@ export const carouselPreviews: CarouselPreview[] = [
   { month: 'February', image: img('February'), ...portrait, shows: 'the Rivera family’s laundry guide for Mateo and Elena',
     desktop: { x0: 0.04, x1: 0.96, y0: 0.03 }, mobile: { x0: 0.04, x1: 0.52, y0: 0.06 } },
   { month: 'March', image: img('March'), width: 2112, height: 1632, shows: 'Sofia’s weekly chore chart',
-    desktop: { x0: 0.03, x1: 0.97, y0: 0 }, mobile: { x0: 0.03, x1: 0.62, y0: 0 } },
+    desktop: { x0: 0.03, x1: 0.97, y0: 0 }, mobile: { x0: 0.03, x1: 0.7, y0: 0 } },
   { month: 'April', image: img('April'), ...portrait, shows: 'the Rivera family’s dinner team: Dad, Sofia, Mateo and Mom',
     desktop: { x0: 0.04, x1: 0.96, y0: 0 }, mobile: { x0: 0.04, x1: 0.5, y0: 0.17 } },
   { month: 'May', image: img('May'), ...portrait, shows: 'the Rivera family’s summer rhythm',

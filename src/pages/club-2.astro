@@ -4,6 +4,7 @@ import { BRAND_NAME } from '../config';
 import { monthColors } from '../theme';
 import { clubEnabled, CLUB_OFFER, CLUB_PROGRAM_START, clubFoundingOpen } from '../data/club/config';
 import { MARKER_COLORS } from '../data/club/family-colors';
+import { carouselPreviews, carouselSampleChildren } from '../data/club/carousel-previews';
 import { clubCheckoutEnabled } from '../lib/club/membership';
 import clubHeroUrl from '../../assets/icons/ofc/hero-family-pointing.jpeg?url';
 import clubBadgeUrl from '../../assets/icons/ofc/OFC-logo.webp?url';
@@ -137,7 +138,14 @@ const introLabels: Record<string, string> = {
  August: 'Get ready for school together',
  October: 'A daily reset everyone does',
 };
-const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ...k, label: introLabels[k.month] }));
+// Phones show each tool as a close-up of the real printable for the Rivera sample family (src/data/club/carousel-previews.ts);
+// desktop keeps the flat lay of the product photos.
+const closeUp = (month: string) => {
+ const p = carouselPreviews.find(c => c.month === month)!;
+ return { ...p, style: `--r:${(p.height / p.width).toFixed(4)};--mx0:${p.mobile.x0};--mw:${(p.mobile.x1 - p.mobile.x0).toFixed(3)};--my0:${p.mobile.y0}` };
+};
+const sampleFamily = carouselSampleChildren();
+const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ...k, label: introLabels[k.month], close: closeUp(k.month) }));
 ---
 <PublicLayout fullTitle={`Organized Family Club · ${BRAND_NAME}`} description="A personalized family plan for one real challenge each month, built around your kids, their ages and your routines, printed and mailed to your door." indexable={false} chrome={false} width="full" tracking={false}>
 <div class="club">
@@ -175,12 +183,15 @@ const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ..
  <ul class="intro-spread" role="list" aria-label="Examples of monthly printed tools" tabindex="0">
   {introKits.map(kit => <li class="intro-item">
    <button class="intro-open" type="button" data-kit-open={kit.month} aria-label={`Look inside ${kit.month}: ${kit.title}`} aria-haspopup="dialog"></button>
-   <img src={kit.image} alt={`${kit.month}: ${kit.description}, a printed Organized Family Club tool`} width="1080" height="1080" loading="lazy" decoding="async" />
+   <picture class="intro-pic" style={kit.close.style}>
+    <source media="(max-width: 700px)" srcset={kit.close.image} width={kit.close.width} height={kit.close.height} />
+    <img src={kit.image} alt={`${kit.month}: ${kit.description}, a printed Organized Family Club tool, shown for a sample family`} width="1080" height="1080" loading="lazy" decoding="async" />
+   </picture>
    <p class="intro-month"><span style={{ backgroundColor: kit.color }}>{kit.month}</span></p>
    <p class="intro-label">{kit.label}</p>
   </li>)}
  </ul>
- <p class="intro-swipe" aria-hidden="true">Swipe for more · tap to look inside</p>
+ <p class="intro-swipe">Shown for a sample family: {sampleFamily.children.map(c => `${c.name}, ${c.age}`).join(' · ')}. <span aria-hidden="true">Swipe for more.</span></p>
  <p class="intro-bridge">Each one made for your actual family. <em>Not a blank template.</em></p>
 </section>
 
@@ -289,7 +300,7 @@ const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ..
  <div class="kit-fullscreen-content">
   <p class="kit-fullscreen-month" style={{ backgroundColor: kit.color }}>{kit.month}</p>
   <h2 id={`kit-title-${kit.month}`}>{kit.title}</h2>
-  <div class="kit-image-stage"><img class="kit-fullscreen-image" src={kit.image} alt={`${kit.month}: ${kit.description}`} width="1080" height="1080" loading="lazy" decoding="async" /><span class="kit-zoom-hint" aria-hidden="true">Hover to magnify</span></div>
+  <div class="kit-image-stage"><picture><source media="(max-width: 700px)" srcset={closeUp(kit.month).image} width={closeUp(kit.month).width} height={closeUp(kit.month).height} /><img class="kit-fullscreen-image" src={kit.image} alt={`${kit.month}: ${kit.description}`} width="1080" height="1080" loading="lazy" decoding="async" /></picture><span class="kit-zoom-hint" aria-hidden="true">Hover to magnify</span></div>
   <div class="kit-fullscreen-copy"><p>{kitDetails[kit.month].relief}</p>
    <section class="kit-personal" style={{ '--kit-tint': `${kit.color}40`, '--kit-accent': kit.color }} aria-labelledby={`kit-personal-title-${kit.month}`}>
     <p class="kit-personal-example">{kitDetails[kit.month].example}</p>
@@ -510,6 +521,7 @@ const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ..
 .intro-open{position:absolute;inset:0;z-index:2;width:100%;border:0;background:transparent;cursor:zoom-in}
 .intro-open:focus-visible{outline:3px solid #6f8f6a;outline-offset:2px}
 .intro-item:hover .intro-label{text-decoration:underline;text-underline-offset:4px}
+.intro-pic{display:block}
 .intro-item img{display:block;width:100%;height:auto;aspect-ratio:1;mix-blend-mode:multiply}
 .intro-item:nth-child(1) img{transform:rotate(-2.5deg) translateY(14px) scale(1.1)}
 .intro-item:nth-child(2) img{transform:rotate(1.5deg) scale(1.1)}
@@ -843,11 +855,17 @@ const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ..
 @media(max-width:700px){
  .intro-head{text-align:left}
  .intro-spread{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;margin:26px 12px 0;padding:22px 16px 18px;scrollbar-width:thin}
- .intro-item{flex:0 0 84%;margin:0;scroll-snap-align:center}
- .intro-item img{aspect-ratio:6/5;object-fit:cover;transform:none!important}
+ .intro-spread{margin:26px 0 0;padding:20px 16px 16px;gap:12px;scroll-padding-inline:16px}
+ .intro-item{flex:0 0 86%;margin:0;scroll-snap-align:center}
+ /* The phone crop of the real sheet: x0-x1 fills the frame width, y0 is the top of the window. */
+ .intro-pic{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;container-type:size;background:#fff;border:1px solid #e2e2dc;box-shadow:0 12px 26px -20px #30383173}
+ .intro-pic img{position:absolute;max-width:none;aspect-ratio:auto;mix-blend-mode:normal;transform:none!important;width:calc(100cqw / var(--mw));height:auto;
+  left:clamp(calc(100cqw - 100cqw / var(--mw)),calc(-100cqw / var(--mw) * var(--mx0)),0px);
+  top:min(clamp(calc(100cqh - 100cqw / var(--mw) * var(--r)),calc(-100cqw / var(--mw) * var(--r) * var(--my0)),0px),max(calc((100cqh - 100cqw / var(--mw) * var(--r)) / 2),0px))}
+ .intro-month{margin-top:14px!important}
  .intro-label{font-size:1.25rem}
  .step-visual{height:170px}
- .intro-swipe{display:block;margin:10px 24px 0!important;font-size:.72rem;color:var(--muted);text-align:right}
+ .intro-swipe{display:block;margin:10px 24px 0!important;font-size:.74rem;line-height:1.5;color:var(--muted)}
  .intro-bridge{text-align:left;margin-top:24px!important}
  .hero-includes{font-size:.76rem;gap:6px 14px}
 }
