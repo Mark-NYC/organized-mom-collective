@@ -813,7 +813,7 @@ const faqs = [
 #club-preview-modal .preview-snack-deliverable .jss-sheet{background:white}
 </style>
 <script>
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.club2 [role="tab"]')];
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.club .family-tabs [role="tab"]')];
   function activateFamily(tab: HTMLButtonElement) {
     tabs.forEach(t => {
       const active = t === tab;
