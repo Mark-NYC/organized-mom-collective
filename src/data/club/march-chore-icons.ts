@@ -47,7 +47,17 @@ export const MARCH_CHORE_ICONS: Readonly<Record<string, MarchIcon>> = {
   'sock-dust': 'sock-dusting',
   project: 'home-project',
   'catch-up': 'finish-missed-jobs',
+  // Grown-up and household jobs drawn with the same art.
+  'cook-dinner': 'make-dinner',
+  'run-dishwasher': 'empty-dishwasher',
+  'living-surfaces': 'wipe-surface',
+  'wash-sheets': 'change-sheets',
+  'mop-bath': 'clean-floor',
+  'mop-kitchen': 'clean-floor',
+  'lead-project': 'home-project',
 };
+/** Listed chores with no fitting March artwork yet: they print words only, never a stand-in that says something else. */
+export const NO_ICON_YET = ['laundry-load', 'mail-papers', 'evening-pickup', 'deep-clean', 'plan-week'] as const;
 
 /** Existing artwork shown until an icon's file is added: the responsibility-library illustration that fits. */
 const STAND_INS: Partial<Record<MarchIcon, string>> = {

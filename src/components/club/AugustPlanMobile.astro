@@ -1,22 +1,30 @@
 ---
 /**
- * August School Day Routines on phones and tablets (below 1100px): whose routine, the before- and after-school steps
- * and the words on the sheet, inside the shared ClubPlanScreen. It reads and changes the plan only through the
- * printable's controller (`.asr` root's `clubPlan`, src/lib/club/engines/august-school-routines.ts).
+ * August, Back to School Without the Scramble, on phones and tablets (below 1100px): the family plan (who does what,
+ * edited with the shared owner editor, src/lib/club/personalize/editor.ts), each child's routine (the before- and
+ * after-school steps) and the words on the sheet, inside the shared ClubPlanScreen. It reads and changes the plan
+ * only through the printable's controller (`.asr` root's `clubPlan`, src/lib/club/engines/august-school-routines.ts).
  */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+import '../../styles/club-personalize.css';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="August · Organized Family Club" sheets={['sheet']} previewNote="One school-day routine, ready to print">
-  <Fragment slot="title">Fewer reminders. <em>Smoother school days.</em></Fragment>
+<ClubPlanScreen deadline={deadline} kicker="August · Organized Family Club" sheets={['plan', 'r0', 'r1', 'r2', 'r3', 'r4', 'r5']} previewNote="Your family’s plan and a routine for each child, ready to print">
+  <Fragment slot="title">Back to School <em>Without the Scramble</em></Fragment>
+  <section class="cp-section" aria-labelledby="aum-plan-title" data-aum-plan-section>
+    <h2 id="aum-plan-title">Our back-to-school plan</h2>
+    <p class="cp-intro">Who does what, prepared from your family: every child’s own part by age, and the grown-up jobs shared between the grown-ups. Tap a part to change who does it.</p>
+    <ul class="cp-group" data-aum-plan></ul>
+    <p class="aum-restore" data-aum-plan-restore hidden><button type="button" class="cp-link"><span>Start over with the prepared plan</span></button></p>
+  </section>
   <section class="cp-section" aria-labelledby="aum-who-title">
-    <h2 id="aum-who-title">Whose routine</h2>
-    <p class="cp-intro">Each child keeps their own routine, prepared for their age. The sheet prints the one you choose.</p>
+    <h2 id="aum-who-title">Each child’s school day</h2>
+    <p class="cp-intro">Every school-aged child gets their own picture routine, prepared for their age and timed to leave on time. Tap a name to change their steps.</p>
     <ul class="cp-group" data-aum-who></ul>
   </section>
   <section class="cp-section" aria-labelledby="aum-steps-title">
-    <h2 id="aum-steps-title">The routines</h2>
+    <h2 id="aum-steps-title" data-aum-steps-title>The routines</h2>
     <p class="cp-intro">Picture steps with times, so kids can see what comes next instead of asking.</p>
     <ul class="cp-group" data-aum-groups></ul>
   </section>
@@ -46,6 +54,8 @@ const { deadline } = Astro.props;
 .aum-check input{width:20px;height:20px;margin-top:2px;flex:0 0 20px}
 .aum-step[data-removed]{background:#f6f6f3}
 .aum-step[data-removed] strong{color:var(--cp-soft);text-decoration:line-through}
+.cp-thumbs [data-cp-thumb][hidden]{display:none}
+[data-aum-plan-section][hidden]{display:none}
 }
 </style>
 
@@ -53,9 +63,11 @@ const { deadline } = Astro.props;
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
 import {
-  CHOICES, FOOTER_LIMIT, GROUPS, GROUP_INFO, ICONS, LABEL_LIMIT, addStep, clock, move, restoreRoutine, routineChanged, routineOf,
-  setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, validTime, type AugPlan, type AugState, type Group,
+  CHOICES, FOOTER_LIMIT, GROUPS, ageFor, GROUP_INFO, ICONS, LABEL_LIMIT, addStep, clock, move, planEdited, restorePlan, restoreRoutine, routineChanged, routineOf,
+  setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, type AugPlan, type AugState, type Group, type PlanSection,
 } from '../../lib/club/engines/august-school-routines';
+import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
+import { taskEditor } from '../../lib/club/personalize/editor';
 
 const APPROVAL_KEY = 'omc:preview:august-school-routines:approval';
 const root = document.querySelector<HTMLElement>('.club-plan:has(.asr)');
@@ -76,8 +88,24 @@ if (root && asr) {
 
   const render = (_ui: PlanScreen<AugState>, s: AugState, locked: boolean) => {
     const v = plan().view();
-    q('[data-aum-who]').replaceChildren(
-      row('Routine for', v.childName, `Prepared for age ${v.age}`, openChild, locked, el('span', { class: 'cp-avatar' }, v.childName.charAt(0))));
+    // The family plan: a row per part of the day, its jobs and who does them.
+    q('[data-aum-plan-section]').hidden = !v.plan.active;
+    q('[data-aum-plan]').replaceChildren(
+      row('Out the door', v.plan.leaveClock, 'From the school start on your family page', () => {}, true),
+      ...v.plan.sections.map((sec) => {
+        const on = sec.tasks.filter((t) => !t.skipped);
+        return row(sec.title, `${on.length} ${on.length === 1 ? 'job' : 'jobs'}`, on.map((t) => `${t.label}: ${t.who}`).join(' · '), () => openSection(sec.id), locked);
+      }));
+    q('[data-aum-plan-restore]').hidden = locked || !planEdited(s);
+    q('[data-aum-who]').replaceChildren(...(v.kids.length ? v.kids : [{ id: 'family', name: v.childName }]).map((k) =>
+      row(k.id === v.child ? 'Showing below' : 'Routine', k.name, k.id === 'family' ? 'For the whole family' : `Prepared for age ${ageOf(k.id)}`,
+        () => { plan().update((x) => setChild(x, k.id, plan().members())); openGroup('morning'); }, locked, el('span', { class: 'cp-avatar' }, k.name.charAt(0)))));
+    q('[data-aum-steps-title]').textContent = v.child === 'family' ? 'The routines' : `${v.childName}’s routines`;
+    // Thumbnails: only the sheets this family prints; the large preview is the plan, or the routine without one.
+    const hero = root.querySelector<HTMLElement>('.cp-thumb--hero');
+    if (hero) hero.dataset.cpThumb = v.plan.active ? 'plan' : 'r0';
+    const printed = new Set([...(v.plan.active ? ['plan'] : []), ...v.routines.map((_, i) => `r${i}`)]);
+    root.querySelectorAll<HTMLElement>('.cp-thumbs [data-cp-thumb]').forEach((t) => { t.hidden = !printed.has(t.dataset.cpThumb ?? ''); });
     q('[data-aum-groups]').replaceChildren(...GROUPS.map((g) => {
       const steps = v.groups[g];
       const span = steps.length ? `${steps[0].clock} to ${steps.at(-1)!.clock}` : 'No steps yet';
@@ -89,23 +117,23 @@ if (root && asr) {
     q('[data-aum-restore-note]').textContent = `Puts back the prepared steps, times and wording on ${v.childName === 'Our family' ? 'the family' : `${v.childName}’s`} routine. Other routines stay.`;
   };
 
-  const chips = (label: string, items: { value: string; text: string }[], current: string, pick: (v: string) => void) => {
-    const g = el('div', { class: 'cp-chips', role: 'group' });
-    g.setAttribute('aria-label', label);
-    for (const it of items) {
-      const c = el('button', { type: 'button', class: 'cp-chip' }, it.text);
-      c.setAttribute('aria-pressed', String(it.value === current));
-      c.addEventListener('click', () => pick(it.value));
-      g.append(c);
-    }
-    return el('div', { class: 'cp-field' }, el('span', {}, label), g);
-  };
-  const openChild = () => {
+  const ageOf = (id: string) => ageFor(id, plan().members());
+  // One part of the family plan, in the shared owner editor.
+  const openSection = (id: PlanSection) => {
     const p = plan();
-    const v = p.view();
-    ui.openSheet('Whose routine?',
-      chips('Routine for', [{ value: 'family', text: 'Our family' }, ...v.kids.map((k) => ({ value: k.id, text: k.name }))], v.child, (id) => { p.update((s) => setChild(s, id, p.members())); openChild(); }),
-      el('p', { class: 'cp-sheet-hint' }, 'Switching keeps each child’s routine as you left it.'),
+    const sec = p.view().plan.sections.find((x) => x.id === id);
+    if (!sec) return;
+    const again = () => { const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]'); const top = sheet?.scrollTop ?? 0; openSection(id); if (sheet) sheet.scrollTop = top; };
+    const edit = (fn: (s: AugState) => void) => { p.update((s) => { s.plan ??= {}; fn(s); }); again(); };
+    ui.openSheet(sec.title,
+      el('p', { class: 'cp-sheet-hint' }, 'Tap names to change who does each job (more than one is fine), change the wording, or leave a job off the page.'),
+      taskEditor({
+        ctx: p.view().plan.ctx, tasks: sec.tasks, rules: taskRules, locked: ui.readOnly(),
+        onOwners: (tid, person, cur) => edit((s) => toggleTaskOwner(s.plan!, tid, cur, person)),
+        onTitle: (tid, title) => edit((s) => setTaskTitle(s.plan!, tid, title, sec.tasks.find((t) => t.id === tid)?.title ?? title)),
+        onSkip: (tid, skip) => edit((s) => setTaskSkip(s.plan!, tid, skip)),
+        onReset: (tid) => edit((s) => resetTask(s.plan!, tid)),
+      }),
       el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
   };
   const openGroup = (g: Group) => {
@@ -172,6 +200,11 @@ if (root && asr) {
       el('label', { class: 'aum-check' }, shorter, ' Use a shorter routine (hides “Wake up” and “Wash hands” without deleting them)'),
       el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
   };
+  q('[data-aum-plan-restore] button').addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update((s) => restorePlan(s));
+    ui.toast('The prepared plan is back.', () => plan().replace(before));
+  });
   q('[data-aum-restore] button').addEventListener('click', () => {
     const before = structuredClone(plan().state());
     plan().update((s) => restoreRoutine(s, plan().members()));

@@ -1,9 +1,10 @@
 ---
-/** August Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
- * docs/club/PLAN_ARCHITECTURE.md). Desktop (>= 1100px): the shared October-style rail (ClubPlanDesktop) with whose
- * routine and its before- and after-school steps, beside the one-page printable. Below 1100px: the shared plan screen
- * with August's sections (AugustPlanMobile). The printable, its editor and its rules live in AugustSchoolRoutines and
- * src/lib/club/engines/august-school-routines.ts. */
+/** August Club kit in the app, Back to School Without the Scramble, on the shared Club plan shell
+ * (src/components/club/plan/, docs/club/PLAN_ARCHITECTURE.md) and the shared personalization foundation
+ * (docs/club/PERSONALIZATION_FOUNDATION.md). Desktop (>= 1100px): the shared rail (ClubPlanDesktop) with the family
+ * plan and each child's routine, beside the sheets: the family plan, then a routine per school-aged child. Below
+ * 1100px: the shared plan screen with August's sections (AugustPlanMobile). The printable, its editors and its rules
+ * live in AugustSchoolRoutines and src/lib/club/engines/august-school-routines.ts. */
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import AugustSchoolRoutines from '../../../components/club/AugustSchoolRoutines.astro';
@@ -17,15 +18,23 @@ if (!kit) throw new Error('August 2027 kit missing from the registry');
 const deadline = clubEditingDeadline(kit.month);
 const storageKey = 'omc:club:august-app:v1';
 ---
-<AppLayout title="August School Day Routines">
+<AppLayout title="Back to School Without the Scramble">
   <ClubPlanShell class="aug-plan family-brand" kitSlug={kit.slug} month="August" storageKey={storageKey}>
     <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="August · Kit preview" instructions={[
-      'School mornings and afternoons shouldn’t depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.',
+      'Your family’s back-to-school plan: who does what before the first day, the night before, on school mornings and after school, prepared from your family page with every child’s own part and the grown-up jobs shared between the grown-ups.',
+      'Then a picture routine for each child, timed to be out the door on time, so kids can see their next step instead of waiting to be told.',
     ]}>
-      <Fragment slot="title">Fewer reminders. <em>Smoother school days.</em></Fragment>
+      <Fragment slot="title">Back to School <em>Without the Scramble</em></Fragment>
       <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="aug-d-plan" data-aug-d-plan-block>
+          <p class="cpd-label" id="aug-d-plan">Our back-to-school plan</p>
+          <dl class="cpd-rows" data-aug-d-plan></dl>
+          <button type="button" class="cpd-link" data-aug-d-plan-open>Change who does what</button>
+        </section>
         <section class="cpd-block" aria-labelledby="aug-d-routine">
-          <p class="cpd-label" id="aug-d-routine">On the routine</p>
+          <p class="cpd-label" id="aug-d-routine">Each child’s routine</p>
+          <dl class="cpd-rows" data-aug-d-kids></dl>
+          <p class="cpd-label">On the routine you’re editing</p>
           <dl class="cpd-rows" data-aug-d-rows></dl>
           <button type="button" class="cpd-link" data-aug-d-open>Edit steps and whose routine</button>
           <p>Or click a time, step or the line at the bottom of the sheet to change it.</p>
@@ -45,9 +54,10 @@ const storageKey = 'omc:club:august-app:v1';
 </AppLayout>
 <style is:global>
 .aug-plan .asr-dialog{z-index:100}
+.aug-plan [data-aug-d-plan-block][hidden]{display:none}
 </style>
 <script>
-import { GROUPS, GROUP_INFO, restoreRoutine, routineChanged, type AugPlan, type AugState } from '../../../lib/club/engines/august-school-routines';
+import { GROUPS, GROUP_INFO, ageFor, restoreRoutine, routineChanged, type AugPlan, type AugState } from '../../../lib/club/engines/august-school-routines';
 import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
 import { el } from '../../../lib/club/plan/dom';
 
@@ -63,10 +73,19 @@ if (root && asr) {
     root,
     host: asr,
     approvalKey: 'omc:preview:august-school-routines:approval',
-    edit: () => plan().openEditor(),
+    edit: () => (plan().view().plan.active ? plan().openPlanEditor() : plan().openEditor()),
     lock: (on) => plan().setLocked(on),
     render: (_r, locked) => {
       const v = plan().view();
+      q('[data-aug-d-plan-block]').hidden = !v.plan.active;
+      q('[data-aug-d-plan]').replaceChildren(row('Out the door', v.plan.leaveClock),
+        ...v.plan.sections.map((sec) => { const on = sec.tasks.filter((t) => !t.skipped); return row(sec.title, `${on.length} ${on.length === 1 ? 'job' : 'jobs'}`); }));
+      q<HTMLButtonElement>('[data-aug-d-plan-open]').disabled = locked;
+      q('[data-aug-d-kids]').replaceChildren(...v.kids.map((k) => {
+        const b = el('button', { type: 'button', class: 'cpd-link', disabled: locked }, k.name);
+        b.addEventListener('click', () => plan().openEditor(k.id));
+        return el('div', {}, el('dt', {}, b), el('dd', {}, `Age ${ageFor(k.id, plan().members())}`));
+      }));
       q('[data-aug-d-rows]').replaceChildren(
         row('Routine for', v.child === 'family' ? `${v.childName}` : `${v.childName} (age ${v.age})`),
         ...GROUPS.map((g) => { const s = v.groups[g]; return row(GROUP_INFO[g].title, s.length ? `${s.length} steps, ${s[0].clock} to ${s.at(-1)!.clock}` : 'No steps'); }),
@@ -80,6 +99,7 @@ if (root && asr) {
     },
   });
   q('[data-aug-d-open]').addEventListener('click', () => plan().openEditor());
+  q('[data-aug-d-plan-open]').addEventListener('click', () => plan().openPlanEditor());
   q('[data-aug-d-restore]').addEventListener('click', () => {
     undo = structuredClone(plan().state());
     plan().update((s) => restoreRoutine(s, plan().members()));

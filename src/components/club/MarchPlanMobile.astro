@@ -9,12 +9,12 @@ import MarchTabs from './MarchTabs.astro';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['k0', 'k1', 'k2']} previewNote="A chore chart for each child, ready to print">
+<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['k0', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'k7']} previewNote="A chore chart for everyone, ready to print">
   <Fragment slot="title">Our Family <em>Chore Charts</em></Fragment>
   <MarchTabs current="charts" />
   <section class="cp-section" aria-labelledby="mpm-kids-title">
-    <h2 id="mpm-kids-title">A chart for each child</h2>
-    <p class="cp-intro">Prepared for their age, on our chore chart. Tap a name to change chores.</p>
+    <h2 id="mpm-kids-title">A chart for everyone</h2>
+    <p class="cp-intro">The family’s jobs, shared out by age: the children’s own jobs and a fair share of the household’s, and the grown-ups’ share on their charts. Tap a name to change chores.</p>
     <ul class="cp-group" data-mpm-kids></ul>
   </section>
   <section class="cp-section" aria-labelledby="mpm-family-title">
@@ -59,11 +59,13 @@ if (root && host) {
   };
   const render = (_ui: PlanScreen<ChoreState>, s: ChoreState, locked: boolean) => {
     const v = plan().view();
-    q('[data-mpm-kids]').replaceChildren(...(v.charts.length ? v.charts.map((c) => row(`Age ${c.age}`, c.name,
+    q('[data-mpm-kids]').replaceChildren(...(v.charts.length ? v.charts.map((c) => row(c.adult ? 'Grown-up' : `Age ${c.age}`, c.name,
       `${c.daily.length} daily chores · ${c.weekly.filter((w) => w.job).length} weekly`,
-      () => openKid(c.id), locked, el('span', { class: 'cp-avatar' }, c.name.charAt(0)))) : [el('li', { class: 'cp-intro' }, 'Add children to your family profile to prepare their charts.')]));
+      () => openKid(c.id), locked, el('span', { class: 'cp-avatar' }, c.name.charAt(0)))) : [el('li', { class: 'cp-intro' }, 'Add your family to your family profile to prepare their charts.')]));
+    const grownUps = v.adults.filter((a) => a.on).map((a) => a.name);
     q('[data-mpm-family]').replaceChildren(
-      row('Colors', toolPalettes[v.palette].label, '', openFamily, locked));
+      row('Colors', toolPalettes[v.palette].label, '', openFamily, locked),
+      ...(v.adults.length ? [row('Grown-ups’ charts', grownUps.length ? grownUps.join(', ') : 'None', '', openFamily, locked)] : []));
     q('[data-mpm-restore]').hidden = locked || !planChanged(s);
     // Only the charts this family has; their styles are scoped to .mcc (with this family's colors).
     const colors = toolPalettes[v.palette].colors;

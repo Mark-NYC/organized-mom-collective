@@ -19,8 +19,8 @@ const storageKey = 'omc:club:may-app:v1';
 <AppLayout title="May Summer Day Rhythm">
   <ClubPlanShell class="may-plan family-brand" kitSlug={kit.slug} month="May" storageKey={storageKey}>
     <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="May · Kit preview" instructions={[
-      'A reusable rhythm for the refrigerator, with flexible anchors your kids can check for themselves.',
-      'Review the prepared day and change the activities or times to fit your family. Plans can change; the rhythm is a guide.',
+      'A reusable rhythm for the refrigerator, with flexible anchors your kids can check for themselves, prepared for your children’s ages and the interests on your family page.',
+      'Everyone’s part is on the anchor it belongs to: each child’s own jobs and the shared ones, grown-ups included. Change the activities, times or who helps to fit your family. Plans can change; the rhythm is a guide.',
     ]}>
       <Fragment slot="title">Our <em>Summer Day</em></Fragment>
       <div class="cpd-details">
@@ -61,7 +61,7 @@ if (root && msr) {
     edit: () => plan().openEditor(),
     lock: (on) => plan().setLocked(on),
     render: (r, locked) => {
-      q('[data-may-d-rows]').replaceChildren(...r.state().rows.map((row) => el('div', {}, el('dt', {}, row.title), el('dd', {}, clock(row.time)))));
+      q('[data-may-d-rows]').replaceChildren(...r.state().rows.map((row) => el('div', {}, el('dt', {}, row.title), el('dd', {}, clock(row.time) + (row.parts.length ? ` · ${row.parts.length} ${row.parts.length === 1 ? 'job' : 'jobs'}` : '')))));
       q<HTMLButtonElement>('[data-may-d-open]').disabled = locked;
     },
   });

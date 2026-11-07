@@ -123,7 +123,8 @@ async function startFulfillment(root: HTMLElement, order: string) {
   root.dataset.planFulfillment = order;
   (root as FamilyRoot).planFamily = result;
   root.dispatchEvent(new CustomEvent<ReadyFamily>(PLAN_FAMILY_READY, { detail: result }));
-  const detail = { household, sample: null };
+  // No profile here: each migrated month prints from the profile snapshot saved with her plan (../personalize/family.ts).
+  const detail = { household, sample: null, profile: null };
   (window as Window & { __ofcPreviewHousehold?: typeof detail }).__ofcPreviewHousehold = detail;
   window.dispatchEvent(new CustomEvent('omc:club-preview-household', { detail }));
   root.dataset.planState = 'ready';
@@ -211,7 +212,8 @@ export function startPlanFamily(root: HTMLElement) {
     root.dataset.planLabel = familyLabel(result);
     (root as FamilyRoot).planFamily = result;
     root.dispatchEvent(new CustomEvent<ReadyFamily>(PLAN_FAMILY_READY, { detail: result }));
-    const detail = { household: result.household, sample: result.sample };
+    // The profile goes with the household, so a month's printable can personalize beyond names and ages.
+    const detail = { household: result.household, sample: result.sample, profile: result.profile };
     (window as Window & { __ofcPreviewHousehold?: typeof detail }).__ofcPreviewHousehold = detail;
     window.dispatchEvent(new CustomEvent('omc:club-preview-household', { detail }));
     root.dataset.planState = 'ready';

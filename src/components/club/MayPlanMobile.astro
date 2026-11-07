@@ -1,5 +1,9 @@
 ---
+/** May, Our Summer Day, on phones and tablets (below 1100px): the day's anchors with the family's jobs on each (who,
+ * by name), edited with the shared owner editor (src/lib/club/personalize/editor.ts), inside the shared ClubPlanScreen.
+ * It reads and changes the plan only through the printable's controller (`.msr` root's `clubPlan`). */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+import '../../styles/club-personalize.css';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
@@ -7,7 +11,7 @@ const { deadline } = Astro.props;
   <Fragment slot="title">Our <em>Summer Day</em></Fragment>
   <section class="cp-section">
     <h2>Your summer rhythm</h2>
-    <p class="cp-intro">A little structure, plenty of freedom. Your kids can check what comes next.</p>
+    <p class="cp-intro">A little structure, plenty of freedom, prepared for your family’s ages and interests. Everyone’s part is on the anchor it belongs to. Tap a block to change it.</p>
     <ul class="cp-group" data-may-rows></ul>
     <button type="button" class="cp-link" data-may-settings>Adjust the day <span>Change suggestions</span></button>
     <div data-may-removed></div>
@@ -16,16 +20,19 @@ const { deadline } = Astro.props;
 <script>
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
-import type { MayState, MayKey, MayOptions, MayPlan } from '../../lib/club/engines/may-summer-rhythm';
+import { LABELS, partRules, type MayState, type MayKey, type MayOptions, type MayPlan } from '../../lib/club/engines/may-summer-rhythm';
+import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
+import { taskEditor } from '../../lib/club/personalize/editor';
+import { mayParts } from '../../lib/club/engines/may-summer-rhythm';
 const root = document.querySelector<HTMLElement>('.may-plan');
 const host = root?.querySelector<HTMLElement & {clubPlan?: MayPlan}>('.msr');
 if (root && host) {
  const q = <T extends HTMLElement>(sel:string) => root.querySelector<T>(sel)!;
  let ui:PlanScreen<MayState> | null = null;
- const labels:Record<MayKey,string>={morning:'Morning Start',move:'Move & Play',create:'Create & Explore',lunch:'Lunch & Reset',quiet:'Quiet Time',free:'Free Afternoon',snack:'Snack & Reset',evening:'Evening Reset'};
+ const labels:Record<MayKey,string>=LABELS;
  const render = (_ui:PlanScreen<MayState>, s:MayState, locked:boolean) => {
   q<HTMLElement>('[data-may-rows]').replaceChildren(...s.rows.map(row=>{
-   const b=el('button',{type:'button',class:'cp-row',disabled:locked},el('span',{class:'cp-avatar'},row.time ? row.time.slice(0,2) : '•'),el('span',{class:'cp-row-text'},el('strong',{},row.title),el('span',{},row.desc),el('span',{},row.time || 'No set time')),el('span',{class:'cp-chev','aria-hidden':'true'}));
+   const b=el('button',{type:'button',class:'cp-row',disabled:locked},el('span',{class:'cp-avatar'},row.time ? row.time.slice(0,2) : '•'),el('span',{class:'cp-row-text'},el('strong',{},row.title),el('span',{},row.desc),...(row.parts.length?[el('span',{},row.parts.map(p=>`${p.who}: ${p.label}`).join(' · '))]:[]),el('span',{},row.time || 'No set time')),el('span',{class:'cp-chev','aria-hidden':'true'}));
    b.addEventListener('click',()=>openRow(row.key));
    return el('li',{},b);
   }));
@@ -46,7 +53,21 @@ if (root && host) {
   const move=(direction:number)=>{ui?.resource().update(s=>{const i=s.order.indexOf(key),j=i+direction;if(j>=0&&j<s.order.length)[s.order[i],s.order[j]]=[s.order[j],s.order[i]]});ui?.closeSheet()};
   const earlier=el('button',{type:'button',class:'cp-btn'},'Move earlier');earlier.addEventListener('click',()=>move(-1));
   const later=el('button',{type:'button',class:'cp-btn'},'Move later');later.addEventListener('click',()=>move(1));
-  const body:Node[]=[field('Block name','title',38),field('Activities','desc',78),field('Start time','time',5),el('div',{class:'cp-sheet-actions'},earlier,later),el('div',{class:'cp-sheet-actions'},ui.doneButton())];
+  const body:Node[]=[field('Block name','title',38),field('Activities','desc',78),field('Start time','time',5),el('div',{class:'cp-sheet-actions'},earlier,later)];
+  // Who helps on this anchor: the shared owner editor, same as the desktop editor.
+  const ctx=host.clubPlan?.context();
+  if(ctx){
+   const all=mayParts(ctx,ui.resource().state().parts).filter(p=>p.block===key);
+   if(all.length){
+    const edit=(fn:(s:MayState)=>void)=>{const sheet=root.querySelector<HTMLDialogElement>('[data-cp-sheet]');const top=sheet?.scrollTop??0;ui?.resource().update(s=>{s.parts??={};fn(s)});openRow(key);if(sheet)sheet.scrollTop=top};
+    body.push(el('p',{class:'cp-sheet-hint'},'Who helps here. Tap names to change who, or leave a job off.'),taskEditor({ctx,tasks:all,rules:partRules,locked:ui.readOnly(),
+     onOwners:(id,person,cur)=>edit(s=>toggleTaskOwner(s.parts!,id,cur,person)),
+     onTitle:(id,title)=>edit(s=>setTaskTitle(s.parts!,id,title,all.find(t=>t.id===id)?.title??title)),
+     onSkip:(id,skip)=>edit(s=>setTaskSkip(s.parts!,id,skip)),
+     onReset:(id)=>edit(s=>resetTask(s.parts!,id))}));
+   }
+  }
+  body.push(el('div',{class:'cp-sheet-actions'},ui.doneButton()));
   if(ui.resource().state().order.length>1){const remove=el('button',{type:'button',class:'cp-text-btn'},'Remove this block');remove.addEventListener('click',()=>{ui?.resource().update(s=>{s.order=s.order.filter(k=>k!==key);s.removed.push(key)});ui?.closeSheet()});body.push(remove)}
   ui.openSheet(row.title,...body);
  };

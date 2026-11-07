@@ -1,9 +1,14 @@
 ---
-/** August Club one-page school routine: "My School Day", a picture routine for before and after school.
+/** August Club printable: "My School Day", a picture routine for before and after school, and on the Club plan page
+ * the family's back-to-school plan.
  * Steps, choices and rules: src/lib/club/engines/august-school-routines.ts.
  * planMode: inside a Club plan page (/app/club/august) the page brings the layout, rail and mobile screen; this keeps
- * the routine editor and the sheet, marked data-plan-sheet, and publishes the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md). */
+ * the editors and the sheets, marked data-plan-sheet: "plan" (Back to School Without the Scramble: who does what,
+ * from the family profile) when anyone's in school, then "r0", "r1"… (each school-aged child's routine), and publishes
+ * the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md). Standalone (a member's copy, the kit page): the one
+ * routine sheet for the child she picks, as before. */
 import { ICONS, preparedRoutine, shown, clock } from '../../lib/club/engines/august-school-routines';
+import '../../styles/club-personalize.css';
 interface Props {storageKey?:string; planMode?:boolean}
 const {storageKey='omc:club:august-school-routines:v1',planMode=false}=Astro.props;
 const prepared=preparedRoutine(8);
@@ -35,9 +40,16 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
    <div class="asr-guide-saved">{planMode ? '✓ Each child keeps their own routine' : '✓ Changes save automatically for each child'}</div>
    <button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>
+  {planMode && <dialog class="asr-dialog asr-guided-dialog" data-asr-plan-editor aria-labelledby="asr-plan-editor-title">
+   <div class="asr-dialog-head"><div><span class="asr-guide-kicker">MAKE IT YOURS · AUGUST</span><h2 id="asr-plan-editor-title">Our back-to-school plan</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
+   <p class="asr-guide-intro">Prepared from your family: everyone’s part, by age, with the grown-up jobs shared between the grown-ups. Tap names to change who does a job, change the wording, or leave a job off the page.</p>
+   <div data-asr-plan-body></div>
+   <button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button>
+  </dialog>}
   <section class={planMode ? "asr-plan-view" : "asr-preview"}>{!planMode && <button type="button" class="asr-float" data-open-editor><Fragment set:html={pencil} /><span>MAKE CHANGES</span></button>}
+   <div class="asr-sheets" data-asr-sheets>
    <div class="asr-stage" data-asr-stage>
-    <article class="asr-sheet" data-asr-sheet data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
+    <article class="asr-sheet" data-asr-sheet data-plan-sheet={planMode ? "r0" : undefined}>
      <header class="asr-paper-head"><h2>My School Day</h2><span data-asr-name>Our morning & after-school routines</span></header>
      {panels.map((p)=><div class={'asr-panel '+p.cls}><header><span class="asr-circle">{p.num}</span><div><h3>{p.title}</h3><p>{p.line}</p></div><span class="asr-accent">{p.accent}</span></header><div class="asr-rows" data-asr-group={p.group}>
       {shown(prepared,p.group).map((item)=><div class="asr-row" data-asr-id={item.id} data-asr-section={p.group}>
@@ -49,6 +61,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
      </div></div>)}
      <footer class="asr-paper-foot"><strong data-asr-footer contenteditable="true" role="textbox" aria-label="Edit reminder">Check my routine. Do my part. Then I'm ready!</strong><span>ORGANIZED FAMILY CLUB · AUGUST</span></footer>
     </article>
+   </div>
    </div>
   </section>
  </div>
@@ -184,19 +197,55 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 .asr-plan-view .asr-stage{margin:0 auto}
 /* The phone proof is a preview: steps are edited on the plan screen. */
 @media screen and (max-width:1099px){.plan-proof .asr-remove{display:none!important}}
+/* Thumbnails are pictures of the sheet: no editing controls. */
+.cp-thumb .asr-remove{display:none!important}
 @media(max-width:600px){.asr-guided-dialog{padding:18px;max-height:calc(100dvh - 28px)}.asr-gallery-grid{grid-template-columns:1fr 1fr}}
+
+/* The family's back-to-school plan (plan mode, first sheet): four panels of who does what, the same paper, panels and
+   numbered circles as the routine. Names print with every job. */
+.asr-sheets{display:flex;flex-direction:column;align-items:center;gap:26px}
+.asr-family{padding:28px 40px 20px}
+.asr-fam-head{text-align:center;padding:0 10px 4px}
+.asr-fam-head p{margin:0;font-size:10px;letter-spacing:.15em;font-weight:700;color:#7c9085}
+.asr-fam-head h2{font:400 40px/1.1 Georgia,serif;color:#506255;margin:7px 0 6px}
+.asr-fam-head h2 em{color:#788e72}
+.asr-fam-head>span{font:italic 16px Georgia,serif;color:#7d8e81}
+.asr-fam-grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr);gap:12px;margin-top:14px}
+.asr-fam-panel{margin:0;display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:12px 14px 13px}
+.asr-fam-panel>header{gap:10px;margin-bottom:8px}
+.asr-fam-panel h3{font-size:22px}
+.asr-fam-panel .asr-circle{font-size:28px}
+.asr-fam-panel>header img{width:50px;height:50px;object-fit:contain;flex:0 0 50px;mix-blend-mode:multiply}
+.asr-fam-before{background:#f4ecd9}.asr-fam-night{background:#e5e8f0}.asr-fam-morning{background:#f7ebd0}.asr-fam-after{background:#dfeae8}
+.asr-fam-night h3{color:#4f5a72}.asr-fam-night .asr-circle{color:#7b86a3}.asr-fam-night header p{color:#69728a}
+.asr-fam-after h3{color:#4c6d65}.asr-fam-after .asr-circle{color:#6e958e}.asr-fam-after header p{color:#67817b}
+.asr-fam-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.asr-fam-rows li{display:grid;gap:3px;padding:9px 12px;border-radius:7px;background:#fff}
+.asr-fam-rows strong{font:600 14.5px/1.25 Montserrat,Arial,sans-serif;color:#4f5c50}
+.asr-fam-rows span{font:700 11px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#7a6a4b}
+.asr-fam-night .asr-fam-rows span{color:#5f6886}.asr-fam-after .asr-fam-rows span{color:#4f7068}
+.asr-fam-panel:has(li:nth-child(6)) .asr-fam-rows li{padding-top:7px;padding-bottom:7px}
+.asr-fam-panel:has(li:nth-child(6)) .asr-fam-rows strong{font-size:13.5px}
+.asr-fam-panel:has(li:nth-child(7)) .asr-fam-rows li{padding-top:5px;padding-bottom:5px}
+.asr-fam-panel:has(li:nth-child(7)) .asr-fam-rows strong{font-size:12.5px}
+.asr-family .asr-paper-foot{margin-top:14px}
+@media screen{.asr-family:not([data-asr-locked]) .asr-fam-rows li{cursor:pointer}.asr-family:not([data-asr-locked]) .asr-fam-rows li:hover{outline:1px dashed #98b19c;outline-offset:1px}}
 </style>
 <script>
 import {
   CHOICES, ICONS, LABEL_LIMIT, addCustom, addStep, applyFamily, augFingerprint, augView, clock, freshState, fromLegacy, isAugState,
-  move, restoreRoutine, routineOf, setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, validTime,
-  type AugMember, type AugPlan, type AugState, type Group,
+  move, restorePlan, routineOf, setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, restoreRoutine,
+  type AugMember, type AugPlan, type AugState, type AugView, type Group,
 } from '../../lib/club/engines/august-school-routines';
+import type { FamilyProfile } from '../../lib/club/family-profile';
+import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
+import { taskEditor } from '../../lib/club/personalize/editor';
+import { familySnapshot, settledSnapshot, type FamilySnapshot } from '../../lib/club/personalize/family';
 import { el } from '../../lib/club/plan/dom';
 import { PLAN_CHANGE } from '../../lib/club/plan/resource';
 import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
 
-type Detail = { household: { id: string; members?: AugMember[] } | null; sample?: string | null };
+type Detail = { household: { id: string; displayName?: string; members?: AugMember[] } | null; sample?: string | null; profile?: FamilyProfile | null };
 
 for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan }>('.asr')) {
   const key = root.dataset.asrKey ?? 'omc:club:august-school-routines:v1';
@@ -206,30 +255,46 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
   let state: AugState = freshState([]);
   let persist = true;
   let locked = false;
+  let familyName = '';
+  // Her newest profile answers: used when the plan has none saved yet, or after restoring the prepared plan.
+  let latest: FamilySnapshot | undefined;
+  const settle = () => { const p = settledSnapshot(state.profile, latest); if (p) state.profile = p; else delete state.profile; };
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel);
   const $$ = <T extends HTMLElement>(sel: string) => [...root.querySelectorAll<T>(sel)];
 
+  const sheetsHost = $('[data-asr-sheets]');
   const stage = $('[data-asr-stage]');
   const paper = $('[data-asr-sheet]');
+  // Plan mode prints a routine for every school-aged child: copies of the first routine sheet, made as needed.
+  const template = stage?.cloneNode(true) as HTMLElement | undefined;
   const fit = () => {
-    if (!stage || !paper) return;
-    const width = Math.max(180, (stage.parentElement?.clientWidth ?? 816) - 4);
-    const scale = Math.min(1, width / 816);
-    stage.style.width = `${816 * scale}px`;
-    stage.style.height = `${1056 * scale}px`;
-    paper.style.setProperty('--asr-scale', String(scale));
+    for (const st of $$('.asr-stage')) {
+      const sheet = st.querySelector<HTMLElement>('.asr-sheet');
+      if (!sheet) continue;
+      const width = Math.max(180, (sheetsHost?.parentElement?.clientWidth ?? st.parentElement?.clientWidth ?? 816) - 4);
+      const scale = Math.min(1, width / 816);
+      st.style.width = `${816 * scale}px`;
+      st.style.height = `${1056 * scale}px`;
+      sheet.style.setProperty('--asr-scale', String(scale));
+    }
   };
   fit();
-  if (stage?.parentElement && typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(stage.parentElement);
+  if (sheetsHost?.parentElement && typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(sheetsHost.parentElement);
   window.addEventListener('resize', fit);
 
   const visionDialog = $<HTMLDialogElement>('[data-asr-vision]');
   const editorDialog = $<HTMLDialogElement>('[data-asr-editor]');
-  const openEditor = () => { if (locked || !editorDialog) return; makeOptions(); if (!editorDialog.open) editorDialog.showModal(); };
+  const planDialog = $<HTMLDialogElement>('[data-asr-plan-editor]');
+  const openEditor = (child?: string) => {
+    if (locked || !editorDialog) return;
+    if (child) setChild(state, child, members);
+    makeOptions();
+    if (!editorDialog.open) editorDialog.showModal();
+  };
   $('[data-open-vision]')?.addEventListener('click', () => visionDialog?.showModal());
-  $$('[data-open-editor]').forEach((b) => b.addEventListener('click', openEditor));
+  $$('[data-open-editor]').forEach((b) => b.addEventListener('click', () => openEditor()));
   $$('[data-close-dialog]').forEach((b) => b.addEventListener('click', () => b.closest('dialog')?.close()));
-  for (const d of [visionDialog, editorDialog]) d?.addEventListener('click', (e) => { if (e.target === d) d.close(); });
+  for (const d of [visionDialog, editorDialog, planDialog]) d?.addEventListener('click', (e) => { if (e.target === d) d.close(); });
 
   const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
   // `options` false while typing in the editor, so its fields keep focus.
@@ -237,13 +302,15 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     save();
     draw();
     if (options && editorDialog?.open) makeOptions();
+    if (planDialog?.open) fillPlanEditor();
     if (planMode && current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true }));
   };
-  const update = (change: (s: AugState) => void, options = true) => { change(state); changed(options); };
+  const update = (change: (s: AugState) => void, options = true) => { change(state); applyFamily(state, members); settle(); changed(options); };
 
   // The time picker beside a time on the sheet.
   const scroller = root.closest<HTMLElement>('[data-plan-proof-scroll]') ?? $('.asr-preview');
-  const openTimePicker = (target: HTMLElement, id: string) => {
+  const openTimePicker = (target: HTMLElement, id: string, child = state.child) => {
+    setChild(state, child, members);
     const step = routineOf(state, members).steps.find((x) => x.id === id);
     if (locked || !step) return;
     root.querySelector('.asr-time-popover')?.remove();
@@ -267,9 +334,9 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
       document.removeEventListener('keydown', keyboard, true);
       window.removeEventListener('resize', position);
       scroller?.removeEventListener('scroll', position);
-      if (focus) $<HTMLElement>(`[data-asr-id="${CSS.escape(id)}"] [data-asr-time]`)?.focus();
+      if (focus) target.focus();
     };
-    const apply = (value: string) => { if (!validTime(value)) return; dismiss(); update((s) => setTime(s, id, value, members)); };
+    const apply = (value: string) => { if (!validTime(value)) return; dismiss(); update((s) => { setChild(s, child, members); setTime(s, id, value, members); }); };
     const base = validTime(step.time) ? Number(step.time.slice(0, 2)) * 60 + Number(step.time.slice(3)) : 450;
     const options = (interval: 5 | 10) => {
       intervals.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.value) === interval)));
@@ -314,11 +381,22 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]') ?? grid.querySelector<HTMLButtonElement>('button'))?.focus();
   };
 
-  // The sheet.
-  const draw = () => {
-    const v = augView(state, members);
+  // The sheets. A routine sheet carries its child (data-asr-child); every edit on it is that child's routine.
+  type RoutineView = AugView['routines'][number];
+  const bindPaper = (sheet: HTMLElement) => {
+    if (sheet.dataset.asrBound) return;
+    sheet.dataset.asrBound = '';
+    const foot = sheet.querySelector<HTMLElement>('[data-asr-footer]');
+    foot?.addEventListener('blur', () => { if (!locked) update((s) => { setChild(s, sheet.dataset.asrChild ?? s.child, members); setFooter(s, foot.textContent ?? '', members); }); });
+    foot?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); foot.blur(); } });
+  };
+  const fillRoutine = (sheet: HTMLElement, v: RoutineView) => {
+    const child = v.child;
+    sheet.dataset.asrChild = child;
+    sheet.setAttribute('aria-label', `${v.name}’s school day`);
+    sheet.toggleAttribute('data-asr-locked', locked);
     for (const group of ['morning', 'after'] as Group[]) {
-      const holder = $(`[data-asr-group="${group}"]`);
+      const holder = sheet.querySelector<HTMLElement>(`[data-asr-group="${group}"]`);
       if (!holder) continue;
       holder.replaceChildren(...v.groups[group].map((step) => {
         const row = el('div', { className: 'asr-row' });
@@ -331,8 +409,8 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
           time.tabIndex = 0;
           time.title = 'Choose a time';
           time.setAttribute('aria-label', `Change time for ${step.label}`);
-          time.addEventListener('click', () => openTimePicker(time, step.id));
-          time.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimePicker(time, step.id); } });
+          time.addEventListener('click', () => openTimePicker(time, step.id, child));
+          time.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimePicker(time, step.id, child); } });
         }
         const label = el('strong', { textContent: step.label });
         label.dataset.asrText = '';
@@ -341,28 +419,116 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
           label.setAttribute('role', 'textbox');
           label.setAttribute('aria-label', `Edit ${step.label}`);
           label.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); label.blur(); } });
-          label.addEventListener('blur', () => { if (!locked) update((s) => setLabel(s, step.id, label.textContent ?? '', members)); });
+          label.addEventListener('blur', () => { if (!locked) update((s) => { setChild(s, child, members); setLabel(s, step.id, label.textContent ?? '', members); }); });
         }
         row.append(time, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '', width: 76, height: 76 }), label);
         if (!locked) {
           const remove = el('button', { type: 'button', className: 'asr-remove', textContent: '×', title: 'Remove step' });
           remove.dataset.asrRemove = '';
           remove.setAttribute('aria-label', `Remove ${step.label}`);
-          remove.addEventListener('click', () => update((s) => setRemoved(s, step.id, true, members)));
+          remove.addEventListener('click', () => update((s) => { setChild(s, child, members); setRemoved(s, step.id, true, members); }));
           row.append(remove);
         }
         return row;
       }));
     }
-    const name = $('[data-asr-name]');
+    const name = sheet.querySelector<HTMLElement>('[data-asr-name]');
     if (name) name.textContent = v.title;
-    const foot = $('[data-asr-footer]');
-    if (foot && document.activeElement !== foot) foot.textContent = v.footer;
+    const foot = sheet.querySelector<HTMLElement>('[data-asr-footer]');
+    if (foot) {
+      foot.setAttribute('contenteditable', locked ? 'false' : 'true');
+      if (document.activeElement !== foot) foot.textContent = v.footer;
+    }
   };
-  const footer = $('[data-asr-footer]');
-  footer?.addEventListener('blur', () => { if (!locked) update((s) => setFooter(s, footer.textContent ?? '', members)); draw(); });
-  footer?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); footer.blur(); } });
-
+  // The family plan sheet: four panels of who does what.
+  let familyStage: HTMLElement | null = null;
+  const drawPlan = (v: AugView) => {
+    if (!sheetsHost) return;
+    if (!v.plan.active) { familyStage?.remove(); familyStage = null; return; }
+    if (!familyStage) {
+      familyStage = el('div', { className: 'asr-stage' });
+      sheetsHost.prepend(familyStage);
+    }
+    const sheet = el('article', { className: 'asr-sheet asr-family' });
+    sheet.dataset.planSheet = 'plan';
+    sheet.setAttribute('aria-label', 'Our back-to-school plan');
+    sheet.toggleAttribute('data-asr-locked', locked);
+    const who = familyName || 'Our family';
+    sheet.append(
+      el('header', { className: 'asr-paper-head asr-fam-head' },
+        el('p', { textContent: 'ORGANIZED FAMILY CLUB · AUGUST' }),
+        el('h2', {}, 'Back to School ', el('em', { textContent: 'Without the Scramble' })),
+        el('span', { textContent: `${who} · Out the door by ${v.plan.leaveClock}` })),
+      el('div', { className: 'asr-fam-grid' }, ...v.plan.sections.map((sec, i) => {
+        const rows = sec.tasks.filter((t) => !t.skipped);
+        return el('section', { className: `asr-panel asr-fam-panel asr-fam-${sec.id}` },
+          el('header', {}, el('span', { className: 'asr-circle', textContent: String(i + 1).padStart(2, '0') }),
+            el('div', {}, el('h3', { textContent: sec.title }), el('p', { textContent: sec.line })),
+            el('img', { src: sec.icon, alt: '', width: 50, height: 50 })),
+          el('ul', { className: 'asr-fam-rows' }, ...rows.map((t) => {
+            const li = el('li', {}, el('strong', { textContent: t.label }), el('span', { textContent: t.who }));
+            if (!locked) li.addEventListener('click', () => openPlanEditor());
+            return li;
+          })));
+      })),
+      el('footer', { className: 'asr-paper-foot' }, el('strong', { textContent: 'Everyone has a part. Nobody has to remember it all.' }), el('span', { textContent: 'ORGANIZED FAMILY CLUB · AUGUST' })));
+    familyStage.replaceChildren(sheet);
+  };
+  const draw = () => {
+    const v = augView(state, members);
+    if (!planMode || !sheetsHost || !template || !stage) {
+      // Standalone: the one routine sheet, for the child she picked.
+      if (paper) fillRoutine(paper, { child: v.child, name: v.childName, title: v.title, groups: v.groups, footer: v.footer });
+      if (paper) bindPaper(paper);
+      return;
+    }
+    drawPlan(v);
+    // One routine sheet per school-aged child (the family's when there's none).
+    const stages = $$('.asr-stage').filter((x) => x !== familyStage);
+    while (stages.length < v.routines.length) {
+      const copy = template.cloneNode(true) as HTMLElement;
+      sheetsHost.append(copy);
+      stages.push(copy);
+    }
+    while (stages.length > v.routines.length) stages.pop()!.remove();
+    const papers: HTMLElement[] = [];
+    if (familyStage) papers.push(familyStage.querySelector<HTMLElement>('.asr-sheet')!);
+    v.routines.forEach((r, i) => {
+      const sheet = stages[i].querySelector<HTMLElement>('.asr-sheet')!;
+      sheet.dataset.planSheet = `r${i}`;
+      bindPaper(sheet);
+      fillRoutine(sheet, r);
+      papers.push(sheet);
+    });
+    papers.forEach((sheet, i) => sheet.toggleAttribute('data-plan-sheet-end', i === papers.length - 1));
+    fit();
+  };
+  // The family plan editor (desktop dialog; the phone sheet uses the same editor).
+  const fillPlanEditor = () => {
+    const body = $('[data-asr-plan-body]');
+    if (!body || !planDialog) return;
+    const top = planDialog.scrollTop;
+    const v = augView(state, members);
+    const edit = (fn: (s: AugState) => void) => update((s) => { s.plan ??= {}; fn(s); });
+    const restore = el('button', { type: 'button', className: 'po-text-btn', textContent: 'Start over with the prepared plan', disabled: locked });
+    restore.addEventListener('click', () => update((s) => restorePlan(s)));
+    body.replaceChildren(...v.plan.sections.flatMap((sec) => [
+      el('h3', { className: 'po-section', textContent: sec.title }),
+      taskEditor({
+        ctx: v.plan.ctx, tasks: sec.tasks, rules: taskRules, locked,
+        onOwners: (id, person, cur) => edit((s) => toggleTaskOwner(s.plan!, id, cur, person)),
+        onTitle: (id, title) => edit((s) => setTaskTitle(s.plan!, id, title, sec.tasks.find((t) => t.id === id)?.title ?? title)),
+        onSkip: (id, skip) => edit((s) => setTaskSkip(s.plan!, id, skip)),
+        onReset: (id) => edit((s) => resetTask(s.plan!, id)),
+      }),
+    ]), restore);
+    planDialog.scrollTop = top;
+  };
+  const openPlanEditor = () => {
+    if (locked || !planDialog) return;
+    fillPlanEditor();
+    if (!planDialog.open) planDialog.showModal();
+  };
   // The routine editor.
   let tab: Group = 'morning';
   let expanded = '';
@@ -371,7 +537,8 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     const v = augView(state, members);
     const r = v.routine;
     const people = $('[data-asr-children]');
-    people?.replaceChildren(...[{ id: 'family', name: 'Our family' }, ...v.kids].map((k) => {
+    // On the plan page every school-aged child's routine prints, so the family routine is only for a family without one.
+    people?.replaceChildren(...[...(planMode && v.kids.length ? [] : [{ id: 'family', name: 'Our family' }]), ...v.kids].map((k) => {
       const chip = el('button', { type: 'button', textContent: k.name });
       chip.setAttribute('aria-pressed', String(state.child === k.id));
       chip.addEventListener('click', () => { if (k.id === state.child) return; expanded = ''; galleryOpen = false; update((s) => setChild(s, k.id, members)); });
@@ -464,9 +631,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
 
   const setLocked = (on: boolean) => {
     locked = on;
-    paper?.toggleAttribute('data-asr-locked', on);
-    footer?.setAttribute('contenteditable', on ? 'false' : 'true');
-    if (on) { editorDialog?.close(); root.querySelector('.asr-time-popover')?.remove(); }
+    if (on) { editorDialog?.close(); planDialog?.close(); root.querySelector('.asr-time-popover')?.remove(); }
     draw();
   };
 
@@ -474,6 +639,9 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     if (!detail?.household) return;
     const next = planKey(detail.sample ?? null, detail.household.id);
     members = detail.household.members ?? [];
+    familyName = detail.household.displayName?.trim() ?? '';
+    // The owner's print view has no profile (null): the plan comes from the snapshot saved with her plan.
+    if (detail.profile) latest = familySnapshot(detail.profile);
     if (next !== current) {
       current = next;
       expanded = '';
@@ -485,6 +653,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
       if (old) try { localStorage.removeItem(key); } catch { /* blocked */ }
       state = readScoped(tabStorage.get(key), current, isAugState) ?? old ?? freshState(members);
     }
+    settle();
     applyFamily(state, members);
     changed();
   };
@@ -493,13 +662,14 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     ready: () => Boolean(current),
     state: () => state,
     update,
-    replace: (s) => { state = structuredClone(s); changed(); },
+    replace: (s) => { state = structuredClone(s); applyFamily(state, members); settle(); changed(); },
     setPersist: (on) => { persist = on; if (on) save(); },
     fingerprint: () => augFingerprint(state, members),
     members: () => members,
     view: () => augView(state, members),
     setLocked,
     openEditor,
+    openPlanEditor,
   };
   window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
   const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;

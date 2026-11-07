@@ -21,8 +21,8 @@ const storageKey = 'omc:club:march-chore-charts:v2';
 <AppLayout title="March Family Chore Charts">
   <ClubPlanShell class="mch-plan family-brand" kitSlug={kit.slug} month="March" storageKey={storageKey}>
     <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="March · Kit preview" instructions={[
-      'One chart for each child with only their own jobs: daily chores with a box for each day, and one weekly job a day that matches your wall calendar’s cleaning zone.',
-      'Hang each chart at their height. They check off their own boxes; print a fresh one each week.',
+      'A chart for everyone with only their own jobs: daily chores with a box for each day, and one weekly job a day that matches your wall calendar’s cleaning zone.',
+      'The family’s jobs are shared out by age, so the grown-ups carry their part too and nobody does the same job twice. Hang each chart at their height and print fresh ones each week.',
     ]}>
       <Fragment slot="title">Our Family <em>Chore Charts</em></Fragment>
       <div class="cpd-details">
@@ -69,7 +69,7 @@ if (root && host) {
     render: (_r, locked) => {
       const v = plan().view();
       const rows = v.charts.map((c) => {
-        const b = el('button', { type: 'button', class: 'cpd-link', disabled: locked }, `${c.name} (${c.age})`);
+        const b = el('button', { type: 'button', class: 'cpd-link', disabled: locked }, c.adult ? c.name : `${c.name} (${c.age})`);
         b.addEventListener('click', () => plan().openEditor(c.id));
         return el('div', {}, el('dt', {}, b), el('dd', {}, `${c.daily.length} daily · ${c.weekly.filter((w) => w.job).length} weekly`));
       });
