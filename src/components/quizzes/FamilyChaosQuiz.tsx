@@ -19,7 +19,7 @@ export default function FamilyChaosQuiz() {
     {!complete&&step===-1&&<section className="overflow-hidden rounded-[28px] border border-[#e5dbd2] bg-[#FBF7F1] shadow-sm">
       <div className="relative bg-[#CDDDE1] px-6 py-9 text-center sm:px-12 sm:py-12">
         <p className="text-xs font-bold tracking-[.17em] text-[#3D6671]">A LITTLE CLARITY FOR YOUR FAMILY</p>
-        <div className="mx-auto mt-6 grid max-w-[320px] grid-cols-4 gap-3" aria-hidden="true">{['🎒','🧺','👐','💛'].map((x,i)=><div key={i} className="flex aspect-square items-center justify-center rounded-2xl border border-white/80 bg-white/75 text-3xl shadow-sm">{x}</div>)}</div>
+        <div className="mx-auto mt-6 grid max-w-[320px] grid-cols-4 gap-3" aria-hidden="true">{['/assets/icons/ofc/guides/morning/backpack.png','/assets/icons/ofc/guides/responsibility/basket.png','/assets/icons/ofc/guides/responsibility/hands.png','/assets/icons/ofc/guides/responsibility/family.png'].map((x,i)=><div key={i} className="flex aspect-square items-center justify-center rounded-2xl border border-white/80 bg-white/75 p-2 shadow-sm"><img src={x} alt="" width={48} height={48} className="h-12 w-12 object-contain" /></div>)}</div>
         <h2 className="mt-7 font-serif text-[2.2rem] leading-[1.12] sm:text-[3.5rem]">What's really causing the chaos in your home?</h2>
         <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed">Answer 7 quick questions. Discover your family's biggest friction point and get a simple, personalized 3-day action plan.</p>
       </div>
@@ -34,12 +34,12 @@ export default function FamilyChaosQuiz() {
       <p className="mt-9 text-center text-xs font-bold uppercase tracking-[.15em] text-[#3D6671]">{question.eyebrow}</p>
       <h2 tabIndex={-1} className="mx-auto mt-3 max-w-xl text-center font-serif text-[1.9rem] leading-tight sm:text-[2.7rem]">{question.prompt}</h2>
       {step===4&&<p className="mx-auto mt-4 max-w-lg rounded-xl bg-[#CDDDE1]/55 px-4 py-3 text-center text-sm leading-relaxed">You're more than halfway there. Your answers are helping narrow down a useful place to start.</p>}
-      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">{question.choices.map((choice,i)=><button key={choice.label} type="button" className={card+' flex min-h-[98px] items-center gap-4'} onClick={()=>answer(choice.focus)}><span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#f0f2eb] text-3xl">{choice.icon}</span><span className="block"><span className="block text-[0.95rem] font-bold leading-snug">{choice.label}</span>{choice.detail&&<span className="mt-1 block text-xs leading-snug text-[#77716b]">{choice.detail}</span>}</span></button>)}</div>
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">{question.choices.map((choice,i)=><button key={choice.label} type="button" className={card+' flex min-h-[98px] items-center gap-4'} onClick={()=>answer(choice.focus)}><span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-transparent"><img src={choice.icon} alt="" width={48} height={48} className="h-12 w-12 object-contain" /></span><span className="block"><span className="block text-[0.95rem] font-bold leading-snug">{choice.label}</span>{choice.detail&&<span className="mt-1 block text-xs leading-snug text-[#77716b]">{choice.detail}</span>}</span></button>)}</div>
       <div className="mt-8 flex items-center justify-between"><button type="button" onClick={()=>setStep(s=>Math.max(-1,s-1))} className="min-h-11 rounded-full px-4 text-sm font-semibold underline underline-offset-4">← Back</button><span className="text-xs text-[#77716b]">Tap what feels most true. No wrong answers.</span></div>
     </section>}
     {complete&&result&&<section className="overflow-hidden rounded-[28px] border border-[#e5dbd2] bg-[#FBF7F1] shadow-sm" aria-live="polite">
       <div className="px-6 pb-8 pt-10 text-center sm:px-12" style={{background:result.color}}>
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/85 text-3xl" aria-hidden="true">✦</div>
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/85 text-3xl" aria-hidden="true"><img src="/assets/icons/ofc/guides/responsibility/star.png" alt="" width={52} height={52} className="h-12 w-12 object-contain" /></div>
         <p className="mt-5 text-xs font-bold tracking-[.15em] text-[#545454]">YOUR FAMILY'S STARTING POINT</p>
         <h2 className="mt-3 font-serif text-[2.4rem] leading-tight sm:text-[3.3rem]">{result.title}</h2>
         <p className="mx-auto mt-3 max-w-lg text-lg font-medium leading-relaxed">{result.subtitle}</p>
