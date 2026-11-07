@@ -3,40 +3,40 @@ export type QuizChoice = { label: string; detail?: string; icon: string; focus: 
 export type QuizQuestion = { prompt: string; eyebrow: string; choices: QuizChoice[] };
 export const quizQuestions: QuizQuestion[] = [
   { eyebrow:'The everyday reality', prompt:'Which scene feels most familiar lately?', choices:[
-    {label:'The morning scramble',detail:'Shoes, bags, and everyone running late',icon:'🎒',focus:'routines'},
-    {label:'The clutter comeback',detail:'The room was clean five minutes ago',icon:'🧺',focus:'spaces'},
-    {label:'The reminder marathon',detail:'Nothing happens until I ask again',icon:'📣',focus:'ownership'},
-    {label:'The ships-passing feeling',detail:'Busy together, but rarely connecting',icon:'💬',focus:'connection'}]},
+    {label:'The morning scramble',detail:'Shoes, bags, and everyone running late',icon:'/assets/icons/ofc/guides/morning/backpack.png',focus:'routines'},
+    {label:'The clutter comeback',detail:'The room was clean five minutes ago',icon:'/assets/icons/ofc/guides/responsibility/basket.png',focus:'spaces'},
+    {label:'The reminder marathon',detail:'Nothing happens until I ask again',icon:'/assets/icons/ofc/guides/responsibility/clipboard.png',focus:'ownership'},
+    {label:'The ships-passing feeling',detail:'Busy together, but rarely connecting',icon:'/assets/icons/ofc/guides/responsibility/family.png',focus:'connection'}]},
   { eyebrow:'What wears you down', prompt:'At the end of a long day, what gets to you most?',choices:[
-    {label:'Always rushing',detail:'There never seems to be enough time',icon:'⏰',focus:'routines'},
-    {label:'Always picking up',detail:'Everything ends up out of place',icon:'🧹',focus:'spaces'},
-    {label:'Always remembering',detail:'I carry the family to-do list in my head',icon:'🧠',focus:'ownership'},
-    {label:'Always coordinating',detail:'We don’t pause to listen or plan',icon:'🗓️',focus:'connection'}]},
+    {label:'Always rushing',detail:'There never seems to be enough time',icon:'/assets/icons/ofc/guides/morning/clock.png',focus:'routines'},
+    {label:'Always picking up',detail:'Everything ends up out of place',icon:'/assets/icons/ofc/guides/responsibility/basket.png',focus:'spaces'},
+    {label:'Always remembering',detail:'I carry the family to-do list in my head',icon:'/assets/icons/ofc/guides/responsibility/eye.png',focus:'ownership'},
+    {label:'Always coordinating',detail:'We don’t pause to listen or plan',icon:'/assets/icons/ofc/guides/responsibility/calendar.png',focus:'connection'}]},
   { eyebrow:'A little daydream',prompt:'If one thing could magically get easier tomorrow, which would you choose?',choices:[
-    {label:'Everyone gets ready on time',icon:'🌅',focus:'routines'},
-    {label:'Shared spaces stay manageable',icon:'🏡',focus:'spaces'},
-    {label:'Kids follow through without nagging',icon:'🙌',focus:'ownership'},
-    {label:'We have a calm moment together',icon:'💛',focus:'connection'}]},
+    {label:'Everyone gets ready on time',icon:'/assets/icons/ofc/guides/morning/calendar.png',focus:'routines'},
+    {label:'Shared spaces stay manageable',icon:'/assets/icons/ofc/guides/responsibility/check.png',focus:'spaces'},
+    {label:'Kids follow through without nagging',icon:'/assets/icons/ofc/guides/responsibility/star.png',focus:'ownership'},
+    {label:'We have a calm moment together',icon:'/assets/icons/ofc/guides/responsibility/family.png',focus:'connection'}]},
   { eyebrow:'A pattern is forming',prompt:'When you try a new family system, what usually happens?',choices:[
-    {label:'We forget it after a few days',detail:'It never quite becomes a habit',icon:'🔁',focus:'routines'},
-    {label:'The stuff has nowhere to go',detail:'We tidy, but the mess returns',icon:'🧺',focus:'spaces'},
-    {label:'I’m still the one running it',detail:'It only works if I manage everyone',icon:'📋',focus:'ownership'},
-    {label:'We never make time to talk about it',detail:'Everyone has a different idea',icon:'🗣️',focus:'connection'}]},
+    {label:'We forget it after a few days',detail:'It never quite becomes a habit',icon:'/assets/icons/ofc/guides/morning/clock.png',focus:'routines'},
+    {label:'The stuff has nowhere to go',detail:'We tidy, but the mess returns',icon:'/assets/icons/ofc/guides/responsibility/basket.png',focus:'spaces'},
+    {label:'I’m still the one running it',detail:'It only works if I manage everyone',icon:'/assets/icons/ofc/guides/responsibility/clipboard.png',focus:'ownership'},
+    {label:'We never make time to talk about it',detail:'Everyone has a different idea',icon:'/assets/icons/ofc/guides/responsibility/family.png',focus:'connection'}]},
   { eyebrow:'Your family rhythm',prompt:'Which sentence sounds most like your house?',choices:[
-    {label:'Our mornings and evenings feel unpredictable',icon:'🌤️',focus:'routines'},
-    {label:'Our surfaces collect everything',icon:'🧸',focus:'spaces'},
-    {label:'Everyone asks me what to do next',icon:'❓',focus:'ownership'},
-    {label:'Our plans rarely get discussed together',icon:'🤝',focus:'connection'}]},
+    {label:'Our mornings and evenings feel unpredictable',icon:'/assets/icons/ofc/guides/morning/calendar.png',focus:'routines'},
+    {label:'Our surfaces collect everything',icon:'/assets/icons/ofc/guides/responsibility/basket.png',focus:'spaces'},
+    {label:'Everyone asks me what to do next',icon:'/assets/icons/ofc/guides/responsibility/clipboard.png',focus:'ownership'},
+    {label:'Our plans rarely get discussed together',icon:'/assets/icons/ofc/guides/responsibility/calendar.png',focus:'connection'}]},
   { eyebrow:'The smallest possible win',prompt:'Which small win would make this week feel lighter?',choices:[
-    {label:'A five-minute before-school checklist',icon:'✅',focus:'routines'},
-    {label:'One shared room reset',icon:'🛋️',focus:'spaces'},
-    {label:'One job somebody else fully owns',icon:'⭐',focus:'ownership'},
-    {label:'One ten-minute family check-in',icon:'☕',focus:'connection'}]},
+    {label:'A five-minute before-school checklist',icon:'/assets/icons/ofc/guides/responsibility/check.png',focus:'routines'},
+    {label:'One shared room reset',icon:'/assets/icons/ofc/guides/responsibility/basket.png',focus:'spaces'},
+    {label:'One job somebody else fully owns',icon:'/assets/icons/ofc/guides/responsibility/hands.png',focus:'ownership'},
+    {label:'One ten-minute family check-in',icon:'/assets/icons/ofc/guides/responsibility/family.png',focus:'connection'}]},
   { eyebrow:'Your starting point',prompt:'What would you most like help with first?',choices:[
-    {label:'A routine our family can remember',icon:'📅',focus:'routines'},
-    {label:'A reset we can actually keep up with',icon:'🌿',focus:'spaces'},
-    {label:'Sharing the work without constant reminders',icon:'👐',focus:'ownership'},
-    {label:'Getting everyone on the same page',icon:'❤️',focus:'connection'}]},
+    {label:'A routine our family can remember',icon:'/assets/icons/ofc/guides/morning/calendar.png',focus:'routines'},
+    {label:'A reset we can actually keep up with',icon:'/assets/icons/ofc/guides/responsibility/basket.png',focus:'spaces'},
+    {label:'Sharing the work without constant reminders',icon:'/assets/icons/ofc/guides/responsibility/hands.png',focus:'ownership'},
+    {label:'Getting everyone on the same page',icon:'/assets/icons/ofc/guides/responsibility/family.png',focus:'connection'}]},
 ];
 export type QuizResult = { title:string; subtitle:string; explanation:string; focus:Focus; color:string; guide:{label:string;href:string;description:string}; secondary:{label:string;href:string}; challenge:[string,string,string]; prompt:string };
 export const quizResults: Record<Focus,QuizResult> = {
