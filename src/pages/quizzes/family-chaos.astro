@@ -1,0 +1,28 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import FamilyChaosQuiz from '../../components/quizzes/FamilyChaosQuiz';
+const title='What’s Really Causing the Chaos in Your Home?';
+const description='Take this free 7-question family organization quiz. Find your biggest home routine bottleneck and get a personalized 3-day action plan with a free practical guide.';
+const jsonLd=[{'@context':'https://schema.org','@type':'WebPage',name:title,description,url:new URL('/quizzes/family-chaos',Astro.site!).href}];
+---
+<PublicLayout title={title} description={description} width="full" jsonLd={jsonLd}>
+  <div class="bg-white px-4 py-9 sm:px-8 sm:py-14">
+    <FamilyChaosQuiz client:load />
+    <div class="mx-auto mt-10 max-w-[760px] text-center text-[#545454]">
+      <p class="text-sm leading-relaxed">Seven simple questions. Four possible starting points. One small change to try this week.</p>
+      <p class="mt-3 text-xs text-[#77716b]">This quiz offers practical family organization ideas, not a clinical or psychological assessment.</p>
+    </div>
+  </div>
+  <style is:global>
+    @media print {
+      header, footer, nav, [data-countdown-bar] {display:none!important}
+      main {padding:0!important}
+      body {background:white!important}
+      button {display:none!important}
+      section {box-shadow:none!important}
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *, *::before, *::after {scroll-behavior:auto!important;transition-duration:0.01ms!important;animation-duration:0.01ms!important}
+    }
+  </style>
+</PublicLayout>
