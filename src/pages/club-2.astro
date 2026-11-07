@@ -89,8 +89,8 @@ const faqs = [
 </div></div></section>
 <section class="family-demo container" id="families" aria-labelledby="family-title">
   <p class="eyebrow">ONE SEASONAL CHALLENGE · THREE PERSONALIZED FAMILY PLANS</p>
-  <h2 id="family-title">Summer's coming. <em>Your family needs its own rhythm.</em></h2>
-  <p class="intro">May's Club resource is <strong>Our Summer Day</strong>. Choose a family and see how the personalized Family Meeting plan on the phone connects to the printed summer rhythm underneath. No forms or email required.</p>
+  <h2 id="family-title">When the season changes, <em>it all lands back on Mom.</em></h2>
+  <p class="intro">School ends. Schedules shift. The familiar routine disappears, and suddenly you're the one figuring out what everyone should do all day. May's <strong>Our Summer Day</strong> helps your family agree on a new rhythm. Choose a family to see how the personalized meeting plan on the phone connects to the printed plan underneath. No forms or email required.</p>
   <div class="family-tabs" role="tablist" aria-label="Choose a sample family">
     {families.map((f,i)=><button type="button" role="tab" id={`family-tab-${f.id}`} aria-controls={`family-panel-${f.id}`} aria-selected={i===1?'true':'false'} tabindex={i===1?0:-1} data-family={f.id} class={i===1?'active':''}><strong>{f.button}</strong><small>{f.summary}</small></button>)}
   </div>
