@@ -6,7 +6,7 @@ rely on chat history. Started 2026-11-08 from `main` at `9d113b9`.
 | Phase | Scope | Status | PR |
 | --- | --- | --- | --- |
 | 1 | Architecture audit and migration plan (this document) | READY FOR REVIEW | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
-| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | NOT STARTED (D1–D4 approved; phased implementation pending) | – |
+| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | IN PROGRESS (2a engine PR under review; 2b/2c not started) | – |
 | 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 COMPLETE, D5–D6) | – |
 | 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE, D7–D9) | – |
 
@@ -284,7 +284,7 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 
 ### Phase 2: Welcome Family Rhythm
 
-- [ ] 2a Engine: `month` parameter (default `'2027-03'`); priority picks the default habit; March output unchanged
+- [ ] 2a Engine (partial implementation on branch, tests not yet executed): `month` parameter (default `'2027-03'`); priority picks the default habit; March output unchanged
       for every fixture (snapshot test before/after)
 - [ ] 2a Tests: Welcome month ages; small (1 adult), large (2 adults + 5 kids), no kids, teens only; individual,
       parallel and joint rows; colors stable across reorder/add; 300 generated households still pass `validatePlan`
@@ -414,3 +414,14 @@ Recommended option first. Phase 2 needs D1–D4.
 - Tests: none needed (docs only).
 - Remaining: owner decisions D1–D9.
 - Next phase depends on: approved D1–D4; a production fingerprint before any `create or replace` of kit functions.
+
+
+### Phase 2a work log (2026-11-08)
+
+- Started a separate engine branch: `club/welcome-phase2a-rhythm-engine`.
+- Exposed `rhythmContext(..., month)` and optional month arguments for printable view, fingerprint and family application. Defaults are unchanged for March.
+- Added a bedtime-first anchor preference at the engine level, but **the onboarding choice and its database validation are not yet changed**.
+- Added draft regression tests in `tests/club-welcome-rhythm-engine.test.ts`.
+- **Not complete:** writing/edit operations still default to March's age month; full month-aware integration must be completed before a Welcome page uses this engine. The `priority → new habit` ranking has not yet been updated.
+- **Not validated:** repository checks and test scripts must run in a checkout/CI; no runnable repository checkout is available in this workspace.
+- No database migration, production function deploy or fulfillment cutover was performed.

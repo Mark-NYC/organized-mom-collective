@@ -40,6 +40,8 @@ import { stableHash } from '../hash';
 import type { MarchIcon } from '../../../data/club/march-chore-icons';
 
 export const KIT_MONTH = '2027-03';
+/** Date used for age-appropriate choices. March stays the default while Welcome supplies its own month. */
+export type RhythmMonth = `${number}-${number}`;
 export const MAX_ROWS = 5;
 export const MAX_MOMENTS = 3;
 export const TITLE_LIMIT = 40;
@@ -191,8 +193,9 @@ export interface RhythmMember extends ContextMember { kind: 'adult' | 'child'; r
 
 export const freshState = (): RhythmState => ({ v: 3 });
 
-const ctxOf = (members: readonly RhythmMember[], prefs: ContextPrefs | undefined, snapshot?: FamilySnapshot): FamilyContext =>
-  familyContext(members, prefs, KIT_MONTH, snapshot);
+export const rhythmContext = (members: readonly RhythmMember[], prefs: ContextPrefs | undefined, snapshot?: FamilySnapshot, month: RhythmMonth = KIT_MONTH): FamilyContext =>
+  familyContext(members, prefs, month, snapshot);
+const ctxOf = rhythmContext;
 
 /** A personal job (each does their own): a library `own` job, or one she typed in the first person. */
 export const isIndividual = (r: Pick<Row, 'job' | 'title'>) => {
@@ -215,6 +218,7 @@ export function suggestedAnchors(ctx: FamilyContext): [AnchorId, AnchorId, Ancho
   const p = ctx.snapshot?.priority;
   const hard = (c: string) => Boolean(ctx.snapshot?.challenges?.includes(c));
   const has = (cat: string) => Boolean(ctx.snapshot?.responsibilities.some((r) => r.category === cat));
+  if (p === 'bedtime') return ['teeth', 'dinner', 'breakfast'];
   if (p === 'evenings' || p === 'tidying') return ['dinner', 'teeth', 'breakfast'];
   if (p === 'school-stuff') return ['home', 'dinner', 'teeth'];
   if (p === 'mornings' || (!p && hard('routines'))) return ['breakfast', 'dinner', 'leave'];
@@ -434,8 +438,8 @@ export interface MomentView {
   finish: string;
 }
 
-export function rhythmView(s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) {
-  const ctx = ctxOf(members, prefs, s.profile);
+export function rhythmView(s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs, month: RhythmMonth = KIT_MONTH) {
+  const ctx = ctxOf(members, prefs, s.profile, month);
   const plan = s.plan ? cleanPlan(s.plan, ctx) : preparedPlan(ctx);
   const person = (id: string) => ctx.people.find((p) => p.id === id);
   const viewOf = (r: Row, anchor: AnchorId): RowView => {
@@ -474,8 +478,8 @@ export function rhythmView(s: RhythmState, members: readonly RhythmMember[], pre
 }
 export type RhythmView = ReturnType<typeof rhythmView>;
 
-export const rhythmFingerprint = (s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) => {
-  const v = rhythmView(s, members, prefs);
+export const rhythmFingerprint = (s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs, month: RhythmMonth = KIT_MONTH) => {
+  const v = rhythmView(s, members, prefs, month);
   return JSON.stringify(v.printed.map((m) => [m.title, m.cue, m.finish, m.rows.map((r) => [r.title, r.icon, r.habit, r.established, r.mode, r.owners.map((o) => [o.name, o.color.id])])]));
 };
 
@@ -735,8 +739,8 @@ export function cleanPlan(plan: RhythmPlan, ctx: FamilyContext): RhythmPlan {
   }
   return { moments: plan.moments, rows, habits: [...new Set(habits)].filter((h) => rows.some((r) => r.id === h && !r.established)).slice(0, MAX_HABITS) };
 }
-export const applyFamily = (s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) => {
-  if (s.plan) s.plan = cleanPlan(s.plan, ctxOf(members, prefs, s.profile));
+export const applyFamily = (s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs, month: RhythmMonth = KIT_MONTH) => {
+  if (s.plan) s.plan = cleanPlan(s.plan, ctxOf(members, prefs, s.profile, month));
   if (s.profile && !isFamilySnapshot(s.profile)) delete s.profile;
   return s;
 };
