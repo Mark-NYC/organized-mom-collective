@@ -71,6 +71,7 @@ export const CHALLENGES: Choice[] = [
 export const PRIORITIES: Choice[] = [
   { id: 'mornings', label: 'The morning rush' },
   { id: 'evenings', label: 'Dinner and evenings' },
+  { id: 'bedtime', label: 'Bedtime' },
   { id: 'activities', label: 'Keeping track of activities and rides' },
   { id: 'school-stuff', label: 'School papers, bags and homework' },
   { id: 'tidying', label: 'Keeping the house picked up' },
