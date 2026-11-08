@@ -30,6 +30,7 @@ import ClubGate, { type ClubContext } from './ClubGate';
 import AddressForm from './AddressForm';
 import { clubNav } from '../../lib/club/nav';
 import { firstMonth, kitText, nextStep, stepHref } from '../../lib/club/onboarding';
+import { welcomeIsRhythm, welcomeItemHref } from '../../lib/club/welcome-item';
 
 export default function DashboardPage() {
   return <ClubGate page="dashboard">{(ctx) => <Dashboard ctx={ctx} />}</ClubGate>;
@@ -213,14 +214,14 @@ function WelcomeKitCard({ me, href }: { me: Membership; href: (p: string) => str
       <h2 className="mt-2 font-serif text-[1.8rem] leading-[1.15] text-warm-ink sm:text-[2.2rem]">{legacy ? 'Our Family Vision' : 'Your first mailing, together'}</h2>
       {!legacy && (
         <ul className="mt-3 space-y-1 text-[0.98rem] text-warm-ink">
-          <li>Your Family Vision watercolor print, our gift</li>
+          <li>{welcomeIsRhythm(me) ? 'Your Family Rhythm, made from your family profile' : 'Your Family Vision watercolor print, our gift'}</li>
           {first && <li>{monthName(first.month).split(' ')[0]}: {clubResourceBySlug(first.slug)?.title ?? first.title ?? 'your first family resource'}</li>}
         </ul>
       )}
       <p className="mt-3 text-[0.95rem] text-warm-soft">{legacy ? welcomeText(w) : kitText(me)}</p>
-      {step === 'print' ? <a href={href(routes.clubFamilyVision)} className="btn-primary mt-5">Approve your welcome print</a>
+      {step === 'print' ? <a href={href(welcomeItemHref(me, true))} className="btn-primary mt-5">{welcomeIsRhythm(me) ? 'Approve your Family Rhythm' : 'Approve your welcome print'}</a>
         : step === 'first_resource' ? <a href={href(stepHref(me, 'first_resource'))} className="btn-primary mt-5">See your first family resource</a>
-        : <a href={href(routes.clubFamilyVision)} className="mt-5 inline-block text-[0.95rem] font-semibold underline underline-offset-4">See your print</a>}
+        : <a href={href(welcomeItemHref(me))} className="mt-5 inline-block text-[0.95rem] font-semibold underline underline-offset-4">{welcomeIsRhythm(me) ? 'See your Family Rhythm' : 'See your print'}</a>}
     </article>
   );
 }

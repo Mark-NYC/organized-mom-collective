@@ -13,9 +13,12 @@ import MarchFamilyRhythm from '../../../components/club/MarchFamilyRhythm.astro'
 import MarchPlanMobile from '../../../components/club/MarchPlanMobile.astro';
 import FamilyRhythmDesktop from '../../../components/club/FamilyRhythmDesktop.astro';
 import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+import WelcomeRhythmKit from '../../../components/club/plan/WelcomeRhythmKit';
 const storageKey = 'omc:club:welcome-family-rhythm:v1';
 ---
 <AppLayout title="Our Family Rhythm">
+  <!-- Her Welcome Kit's step bar and "Approve for printing" while her kit carries the Family Rhythm (?welcome=1). -->
+  <WelcomeRhythmKit client:only="react" />
   <ClubPlanShell class="mch-plan family-brand" context="welcome" month="Family Rhythm" storageKey={storageKey}>
     <FamilyRhythmDesktop slot="desktop" deadline="" kicker="Family Rhythm · Your Club" instructions={[
       'Two moments your family already shares each day, and everyone’s part in them. When the moment comes, each person knows their job, so nobody has to be the reminder.',

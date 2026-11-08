@@ -103,7 +103,7 @@ function Hub({ ctx }: { ctx: ClubContext }) {
   const todo = items.filter((i) => i.status === 'needs_review');
   const next = nextItem(items);
   const readyCount = items.filter((i) => i.status === 'approved' || i.status === 'ready').length;
-  const doneName = done === 'print' ? 'Family Vision Print approved for printing.' : done === 'first' ? `${monthWord} Resource approved for printing.` : done === 'guide' ? 'Family Meeting Guide: ready, nothing to change.' : null;
+  const doneName = done === 'print' ? `${items[0]?.name.replace(/^Your /, '') ?? 'Family Vision Print'} approved for printing.` : done === 'first' ? `${monthWord} Resource approved for printing.` : done === 'guide' ? 'Family Meeting Guide: ready, nothing to change.' : null;
 
   if (submitted) {
     return (
@@ -158,7 +158,7 @@ function Hub({ ctx }: { ctx: ClubContext }) {
           </button>
           <p id="wk-submit-note" className="wk-submit-note" role="status">
             {canSubmit ? 'We print all three together and aim to mail them within two business days.'
-              : todo.length ? `First, ${todo.map((i) => (i.id === 'print' ? 'approve your Family Vision Print' : `review your ${monthWord} Resource`)).join(' and ')}.`
+              : todo.length ? `First, ${todo.map((i) => (i.id === 'print' ? `approve your ${i.name.replace(/^Your /, '')}` : `review your ${monthWord} Resource`)).join(' and ')}.`
               : kitText(me)}
           </p>
           {!canSubmit && next && <a className="wk-link mt-1 inline-block" href={next.href}>{next.action}: {next.name} <span aria-hidden="true">→</span></a>}

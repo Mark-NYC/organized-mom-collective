@@ -20,6 +20,10 @@ import { planKey } from './storage';
 import { PLAN_APPROVAL, isWelcomeResource } from './resource';
 import { setApprovalStore, type Approval } from './status';
 
+/** The latest approval sent to her account (Welcome Family Rhythm), so a page can wait for it before leaving. */
+let lastApproval: Promise<void> = Promise.resolve();
+export const welcomeApprovalSettled = () => lastApproval;
+
 /** The Welcome Family Rhythm's approval key: on her account (setApprovalStore), never this tab, for a member. */
 export const WELCOME_APPROVAL_KEY = 'omc:club:welcome-family-rhythm:approval';
 const WELCOME_DENIED: [string, string, string, string] = [
@@ -87,7 +91,7 @@ export const fulfillmentOrder = (search = typeof location === 'undefined' ? '' :
 };
 
 interface Bundle {
-  order: { id: string; kit_slug: string | null; display_name: string | null; email: string; resource_month: string; status: string; readiness: string; pdf_status: string; in_welcome_kit?: boolean };
+  order: { id: string; fulfillment_type?: string; kit_slug: string | null; display_name: string | null; email: string; resource_month: string; status: string; readiness: string; pdf_status: string; in_welcome_kit?: boolean };
   household: Parameters<typeof fromDb>[0];
   state: Record<string, { s: 'l' | 's'; v: string }> | null;
 }
@@ -117,7 +121,11 @@ async function startFulfillment(root: HTMLElement, order: string) {
   } catch (e) {
     return fail('We couldn’t load this mailing', (e as Error).message);
   }
-  if (b.order.kit_slug !== root.dataset.kitSlug) return fail('This mailing is for another month', `Order ${order} is ${b.order.kit_slug ?? 'not a monthly resource'}.`);
+  // The Welcome Family Rhythm prints the plan she approved, which the order keeps (club_admin_fulfillment_bundle).
+  if (isWelcomeResource(root) ? b.order.fulfillment_type !== 'welcome_rhythm' : b.order.kit_slug !== root.dataset.kitSlug) {
+    return fail('This mailing is for another resource', `Order ${order} is ${b.order.fulfillment_type === 'welcome_rhythm' ? 'a Family Rhythm' : b.order.kit_slug ?? 'not a monthly resource'}.`);
+  }
+  if (isWelcomeResource(root) && !b.state) return fail('She hasn’t approved her Family Rhythm yet', 'The print view shows the plan she approved, once she has.');
   // Her saved plan only: nothing from this browser's own tabs or previews.
   for (const store of [sessionStorage, localStorage]) {
     for (const k of Object.keys(store)) if (k.startsWith(MEMBER_STORAGE_PREFIX) || k === root.dataset.planKey) store.removeItem(k);
@@ -267,6 +275,7 @@ async function connectWelcomeAccount(root: HTMLElement, key: string, planFor: st
       const before = approval;
       approval = a;
       const done = a ? account.approve(a.print) : account.unapprove();
+      lastApproval = done;
       done.catch((e: Error) => {
         approval = before;
         root.dataset.planSave = e.message === 'conflict' ? 'conflict' : e.message === 'read_only' ? 'read' : 'error';

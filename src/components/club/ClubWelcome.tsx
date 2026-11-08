@@ -216,7 +216,7 @@ function StartsWithPayment({ me }: { me: Membership }) {
       </p>
       <ul className="mt-4 list-disc space-y-1 pl-6 leading-relaxed text-warm-ink">
         <li>{month} opens in your Club that day, prepared with your family’s names.</li>
-        <li>Your Welcome Kit comes with it: you’ll approve your Family Vision print and {month}, and we mail them with our Family Meeting guide in one package.</li>
+        <li>Your Welcome Kit comes with it: you’ll approve your personalized welcome piece and {month}, and we mail them with our Family Meeting guide in one package.</li>
       </ul>
       <p className="mt-3 leading-relaxed text-warm-soft">Think that’s a mistake? Reply to your welcome email and we’ll look.</p>
       <a href={routes.appClub} className="btn-primary mt-6 inline-block">Go to Club Home</a>

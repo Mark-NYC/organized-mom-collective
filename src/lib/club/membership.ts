@@ -137,6 +137,11 @@ export interface MembershipMonth {
 
 /** Her Family Vision welcome print. satisfies_month: the first December it stands in for. */
 export interface WelcomePrint {
+  /**
+   * Her Welcome Kit's personalized item: the Family Vision print, or her Family Rhythm once the owner switches new
+   * kits to it (club_settings.welcome_item). Absent from an older database: the Vision print.
+   */
+  kind?: 'vision' | 'rhythm';
   status: string;
   readiness: string;
   approved: boolean;
