@@ -5,10 +5,10 @@ rely on chat history. Started 2026-11-08 from `main` at `9d113b9`.
 
 | Phase | Scope | Status | PR |
 | --- | --- | --- | --- |
-| 1 | Architecture audit and migration plan (this document) | READY FOR REVIEW | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
-| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | NOT STARTED (D1–D4 approved; phased implementation pending) | – |
-| 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 COMPLETE, D5–D6) | – |
-| 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE, D7–D9) | – |
+| 1 | Architecture audit and migration plan (this document) | COMPLETE (approved and merged 2026-11-08) | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
+| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | IN PROGRESS (2a → 2b → 2c → 2d, one PR each) | see §12 |
+| 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 tested and verified) | – |
+| 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE; D7–D9 deferred to Phase 4) | – |
 
 Statuses: NOT STARTED · IN PROGRESS · BLOCKED · READY FOR REVIEW · COMPLETE. COMPLETE means tested, merged and, where
 it touches the database or Edge Functions, applied with the owner's go-ahead.
@@ -43,6 +43,12 @@ Non-negotiables (from the brief and CLAUDE.md):
 8. Don't replace March until the Welcome resource is proven. Don't remove Family Values from the Welcome Kit until the
    Welcome Family Rhythm is proven.
 9. Separate PR per phase. Customer copy says "website" or "cleaning companion", never "app".
+10. **Permanent guardrails (owner, 2026-11-08):** no mailed Welcome Family Rhythm when the first fulfilled monthly
+    resource already gives the household a daily rhythm (May, August), and the Welcome Family Rhythm is evergreen, not
+    homework. Full wording in §11.1; implemented as 2d before any automated Welcome fulfillment.
+11. **Print assumptions are configurable (D6).** Target: premium uncoated, letter, flat. Stock, finish and sides for
+    each Welcome Kit item live in one config (2c), shown on the admin packing list and marked unvalidated until the
+    owner confirms them with the printer.
 
 ## 2. Current architecture (audited 2026-11-08)
 
@@ -244,8 +250,8 @@ Family Rhythm approval is server-side (like the Vision print, unlike today's dev
 ## 6. Printing and fulfillment implications
 
 - One Letter sheet replaces one Letter sheet, so the package's sheet count is unchanged (Rhythm 1 + guide 1 + January 2).
-- **Paper stock differs (D6):** the Vision print is a watercolor keepsake; the Rhythm is a working sheet. Confirm the
-  stock and whether it's "premium, flat" with whoever prints. No mail-house contract is documented in the repo.
+- **Paper stock (D6):** target premium uncoated, letter, flat; configurable and unvalidated until the owner confirms
+  it with the printer (§1 item 11). No mail-house contract is documented in the repo.
 - Print path is the owner's browser print view → Save as PDF → Mark PDF ready. Phase 2 must make
   `?fulfillment=<order>` work for `welcome_rhythm` and print the approved snapshot, verified one page per sheet
   (`tests/club-plan-print.test.ts`, `scripts/club-personalized-months-qa.mjs`).
@@ -269,7 +275,7 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 
 ## 8. Phase-by-phase checklist
 
-### Phase 1: audit (READY FOR REVIEW)
+### Phase 1: audit (COMPLETE)
 
 - [x] Trace signup → kit → print → fulfillment (§2.1)
 - [x] Audit March engine, page, phone view, editor, Spring Prep, kit config, builder (§2.3)
@@ -284,8 +290,9 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 
 ### Phase 2: Welcome Family Rhythm
 
-- [ ] 2a Engine: `month` parameter (default `'2027-03'`); priority picks the default habit; March output unchanged
-      for every fixture (snapshot test before/after)
+- [ ] 2a Engine: `month` parameter (default `'2027-03'`); March output unchanged for every fixture (snapshot test
+      before/after). The priority-led habit and `bedtime` (D5) ship in 2b behind the Welcome context, so March stays
+      byte-identical
 - [ ] 2a Tests: Welcome month ages; small (1 adult), large (2 adults + 5 kids), no kids, teens only; individual,
       parallel and joint rows; colors stable across reorder/add; 300 generated households still pass `validatePlan`
 - [ ] 2b Shared components (re-exports), `context="welcome"` in `ClubPlanShell` (no deadline, no meeting tab, no
@@ -297,6 +304,9 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 - [ ] 2c Tests: `supabase/tests/club-membership.sql` (new enrollment gets `welcome_rhythm`; existing `welcome_vision`
       untouched; approve → snapshot; edit after approval clears; kit approved locks; reprint identical),
       `tests/club-onboarding.test.ts`, `tests/club-billing-e2e.test.ts`, `scripts/club-onboarding-e2e.mjs`
+- [ ] 2d Welcome overlap exception (§11.1 guardrail 1): classify by the first fulfilled monthly resource; no Rhythm
+      in the mailing for May/August; no duplicate welcome orders; pairing, readiness and email copy tested; digital
+      access kept. Before any automated Welcome fulfillment or cutover
 - [ ] Rehearsal on a production replay (`scripts/rehearse-club-rollout.sh`), rollback script, verify script
 - [ ] March regression: `/app/club/march` unchanged (screens + print), `npm run test:club`, January regressions
 
@@ -362,9 +372,9 @@ those jobs on the back. No daily chart. No overlap with the Welcome Family Rhyth
 New Welcome Kits contain no Family Values print. December 2027 offers it as keep-or-give within the agreed sheet
 count, alongside the Christmas Mission. Historical Vision orders still print.
 
-## 11. Open product decisions
+## 11. Product decisions
 
-Recommended option first. Phase 2 needs D1–D4.
+Options as proposed in Phase 1. The owner's decisions (2026-11-08) are in §11.1 and override the recommendations below.
 
 | # | Decision | Options | Recommendation |
 | --- | --- | --- | --- |
@@ -405,12 +415,12 @@ Recommended option first. Phase 2 needs D1–D4.
 
 | Phase | PR | Status | Notes |
 | --- | --- | --- | --- |
-| 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) (open) | READY FOR REVIEW | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
+| 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) | COMPLETE (merged) | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
 
 ### Phase 1 log (2026-11-08)
 
 - Completed: §2–§11.
 - Changed files: this document; a pointer in `docs/club/WELCOME_KIT.md`.
 - Tests: none needed (docs only).
-- Remaining: owner decisions D1–D9.
+- Owner review 2026-11-08: architecture approved; decisions and guardrails in §11.1.
 - Next phase depends on: approved D1–D4; a production fingerprint before any `create or replace` of kit functions.
