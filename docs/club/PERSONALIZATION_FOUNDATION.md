@@ -1,7 +1,7 @@
 # Shared family personalization foundation
 
 One way for every monthly resource to use the family's saved profile, built from January's architecture
-(docs/club/PERSONALIZATION.md) and used first by **March** (Family Chore Charts), **May** (Our Summer Day) and
+(docs/club/PERSONALIZATION.md) and used first by **March** (Our Family Rhythm), **May** (Our Summer Day) and
 **August** (Back to School Without the Scramble). The other nine months still prepare from names and ages only;
 moving one over is the checklist at the end. There is one personalization engine, not one per month: each month
 keeps its own content, layout and rules (its engine in `src/lib/club/engines/`) and asks the foundation who's in the
@@ -62,11 +62,11 @@ source and are unchanged).
 
 ## The three months
 
-**March, Family Chore Charts.** Charts for every child and every participating grown-up, the same landscape layout
-and hand-drawn icons. Daily: each child's own jobs plus a fair share of the household jobs, one owner each; the
-grown-ups take what no child can do yet and the grown-up jobs. Weekly: one job per weekday from the calendar's cleaning
-zone, grown-ups taking the grown-up-sized jobs in turn, children the hardest they can do. No rewards, points, stars,
-streaks or percentages. The family editor can leave a grown-up's chart off.
+**March, Our Family Rhythm.** One sheet for the whole family: two moments it already shares (a third optional), each
+with its cue, who owns which part (January's colors as a narrow bar and the name's ink), the March icons and a finish
+line from the actual jobs. Established jobs (from step 3) stay with their owner as context; one or two new habits
+(wished jobs from step 4 first) are highlighted. Siblings can share a row; not everyone needs a part in every moment.
+No rewards, points, stars, streaks, percentages or tracking. Details: docs/club/PLAN_ARCHITECTURE.md → March.
 
 **May, Our Summer Day.** The same anchors, layout and icons. Quiet time by ages, activities from interests (by name:
 "Soccer practice", "Piano for fun"), and the family's jobs printed on the anchor they belong to with names. The summer
@@ -79,7 +79,7 @@ children (a step only some do names them), with an optional time and an optional
 
 ## Tests
 
-- Unit: `src/lib/club/personalize/personalize.test.ts` (the foundation), `src/lib/club/engines/march-chore-charts.test.ts`,
+- Unit: `src/lib/club/personalize/personalize.test.ts` (the foundation), `src/lib/club/engines/march-family-rhythm.test.ts`,
   `may-summer-rhythm.test.ts`, `august-school-routines.test.ts`. Families: one child (Okafor, a preschooler), two
   school-aged children and one grown-up with no profile (Brooks), mixed ages with a full profile (Rivera), four
   children and three grown-ups (Chen), limited intake (Goering), no children (Hughes).

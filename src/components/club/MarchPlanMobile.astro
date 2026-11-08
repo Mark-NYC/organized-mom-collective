@@ -1,8 +1,10 @@
 ---
 /**
- * March family chore charts on phones and tablets (below 1100px): a row per child and the whole-family choice
- * (colors), inside the shared ClubPlanScreen. Each row opens the shared chart editor
- * (src/lib/club/march-chore-editor.ts) in an edit sheet. Plan changes go through the printable's `clubPlan`.
+ * March Family Rhythm on phones and tablets (below 1100px), inside the shared ClubPlanScreen (approval, action bar,
+ * print). Like January's Family Focus it is a calm reference the family can glance at all month: the same saved plan
+ * as the printable (`[data-mfr]`'s `clubPlan.view()`), each moment with its cue, who owns which part and the new habits,
+ * nothing tracked and nothing saved by viewing. Three edit rows, in order (Our moments, Who owns what, New habits),
+ * open the shared editor (src/lib/club/march-rhythm-editor.ts) in an edit sheet.
  */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
 import '../../styles/club-marks.css';
@@ -10,104 +12,133 @@ import MarchTabs from './MarchTabs.astro';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['k0', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'k7']} previewNote="A chore chart for everyone, ready to print">
-  <Fragment slot="title">Our Family <em>Chore Charts</em></Fragment>
-  <MarchTabs current="charts" />
-  <section class="cp-section" aria-labelledby="mpm-kids-title">
-    <h2 id="mpm-kids-title">A chart for everyone</h2>
-    <p class="cp-intro">The family’s jobs, shared out by age: the children’s own jobs and a fair share of the household’s, and the grown-ups’ share on their charts. Tap a name to change chores.</p>
-    <ul class="cp-group" data-mpm-kids></ul>
-  </section>
-  <section class="cp-section" aria-labelledby="mpm-family-title">
-    <h2 id="mpm-family-title">For the whole family</h2>
-    <ul class="cp-group" data-mpm-family></ul>
-    <p class="mpm-restore" data-mpm-restore hidden><button type="button" class="cp-link"><span>Restore the prepared charts</span></button></p>
-  </section>
+<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['front']} previewNote="One page for the whole family, ready to print" hero={false}>
+  <Fragment slot="title">Our Family <em>Rhythm</em></Fragment>
+  <MarchTabs current="rhythm" />
+  <div class="mrm" data-mrm>
+    <p class="mrm-motto">Same moments. Everyone has a part.</p>
+    <div class="mrm-moments" data-mrm-moments></div>
+    <section class="mrm-habits" data-mrm-habits aria-labelledby="mrm-habits-title">
+      <h2 id="mrm-habits-title" class="mrm-label">Our new habits</h2>
+      <ul data-mrm-habit-list></ul>
+    </section>
+    <section class="cp-section" aria-labelledby="mrm-edit-title">
+      <h2 id="mrm-edit-title">Make it yours</h2>
+      <p class="cp-intro">It’s prepared from your family page. Change only what doesn’t fit.</p>
+      <ul class="cp-group" data-mrm-edit></ul>
+      <p class="mrm-restore" data-mrm-restore hidden><button type="button" class="cp-link"><span>Start over with the prepared plan</span></button></p>
+    </section>
+  </div>
 </ClubPlanScreen>
 
 <style is:global>
 @media screen and (max-width:1099px){
-.mpm-restore{margin:6px 0 0}
-.mpm-restore[hidden]{display:none}
-.mpm-label{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
-.cp .cp-thumb[hidden]{display:none}
-.cp .cp-thumb.mcc{width:60px;height:46px}
+.mrm{display:grid;gap:22px;margin:0 0 26px}
+.mrm-motto{margin:0;font:italic 400 1.05rem/1.4 var(--font-serif);color:var(--cp-soft)}
+.mrm-moments{display:grid;gap:18px}
+.mrm-moment{padding:16px 16px 12px;border:1px solid var(--color-warm-rule);border-radius:8px;background:#fff}
+.mrm-moment h2{margin:0;font:400 clamp(23px,6.2vw,27px)/1.15 var(--font-serif)}
+.mrm-cue{margin:4px 0 10px;font-size:.88rem;color:var(--cp-soft)}
+.mrm-cue b{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--color-warm-ink);margin-right:6px}
+.mrm-rows{list-style:none;margin:0;padding:0;display:grid}
+.mrm-row{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--color-warm-rule)}
+.mrm-row.is-habit{background:var(--mrm-wash,#EEF4F1);margin:0 -8px;padding:10px 8px}
+.mrm-bar{align-self:stretch;border-radius:2px;background:var(--mrm-member,#9A918B)}
+.mrm-text{display:grid;gap:2px;min-width:0}
+.mrm-who{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;overflow-wrap:anywhere}
+.mrm-job{font-size:1.02rem;line-height:1.35}
+.mrm-row.is-habit .mrm-job{font-weight:700}
+.mrm-tag{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mrm-accent,#3F6B5A);border:1.5px solid currentColor;border-radius:999px;padding:4px 7px;white-space:nowrap}
+.mrm-finish{margin:10px 0 0;font:italic 400 .95rem/1.4 var(--font-serif);color:var(--cp-soft)}
+.mrm-finish b{font:700 .66rem var(--font-sans);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--color-warm-ink);margin-right:6px}
+.mrm-habits{padding:14px 16px;border-radius:8px;background:var(--mrm-wash,#EEF4F1)}
+.mrm-habits[hidden]{display:none}
+.mrm-label{margin:0 0 6px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mrm-accent,#3F6B5A)}
+.mrm-habits ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.mrm-habits strong{margin-right:6px}
+.mrm-restore{margin:6px 0 0}
+.mrm-restore[hidden]{display:none}
+.mrm-step{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
 }
 </style>
 
 <script>
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
-import { planChanged, restoreAll, type ChorePlan, type ChoreState } from '../../lib/club/engines/march-chore-charts';
-import { familyEditor, kidEditor } from '../../lib/club/march-chore-editor';
-import { toolPalettes } from '../../data/tool-palettes';
+import { restorePlan, type RhythmPlanResource, type RhythmState } from '../../lib/club/engines/march-family-rhythm';
+import { habitsEditor, momentsEditor, ownersEditor, type RhythmSection } from '../../lib/club/march-rhythm-editor';
+import { monthTints } from '../../lib/club/month-tints';
 
 const APPROVAL_KEY = 'omc:preview:march-chore-charts:approval';
-const root = document.querySelector<HTMLElement>('.club-plan:has([data-mcc])');
-const host = root?.querySelector<HTMLElement & { clubPlan?: ChorePlan }>('[data-mcc]');
+const root = document.querySelector<HTMLElement>('.club-plan:has([data-mfr])');
+const host = root?.querySelector<HTMLElement & { clubPlan?: RhythmPlanResource }>('[data-mfr]');
 if (root && host) {
   const plan = () => host.clubPlan!;
   const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
-  let ui: PlanScreen<ChoreState>;
+  const t = monthTints('2027-03');
+  q('[data-mrm]').style.setProperty('--mrm-wash', t.wash);
+  q('[data-mrm]').style.setProperty('--mrm-accent', t.accent);
+  let ui: PlanScreen<RhythmState>;
+  let isLocked = false;
 
-  const row = (label: string, title: string, detail: string, open: () => void, locked: boolean, lead: Node = el('span')) => {
-    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, lead,
-      el('span', { class: 'cp-row-text' }, el('span', { class: 'mpm-label' }, label), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+  const row = (step: string, title: string, detail: string, open: () => void, locked: boolean) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, el('span'),
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'mrm-step' }, step), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
       el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
-    b.setAttribute('aria-label', `${label}: ${title}.${locked ? '' : ' Change'}`);
+    b.setAttribute('aria-label', `${step}: ${title}.${locked ? '' : ' Change'}`);
     b.addEventListener('click', open);
     return el('li', {}, b);
   };
-  // Each person's family color (January's) on their initial; the name is always beside it.
-  const avatar = (c: { name: string; color: { hex: string; ink: string } }) => {
-    const a = el('span', { class: 'cp-avatar' }, c.name.charAt(0));
-    a.style.background = c.color.ink;
-    a.style.color = '#fff';
-    return a;
-  };
-  const render = (_ui: PlanScreen<ChoreState>, s: ChoreState, locked: boolean) => {
+  const render = (_ui: PlanScreen<RhythmState>, _s: RhythmState, locked: boolean) => {
+    isLocked = locked;
     const v = plan().view();
-    q('[data-mpm-kids]').replaceChildren(...(v.charts.length ? v.charts.map((c) => row(c.adult ? 'Grown-up' : `Age ${c.age}`, c.name,
-      `${c.daily.length} daily chores · ${c.weekly.filter((w) => w.job).length} weekly`,
-      () => openKid(c.id), locked, avatar(c))) : [el('li', { class: 'cp-intro' }, 'Add your family to your family profile to prepare their charts.')]));
-    const grownUps = v.adults.filter((a) => a.on).map((a) => a.name);
-    q('[data-mpm-family]').replaceChildren(
-      row('Colors', toolPalettes[v.palette].label, '', openFamily, locked),
-      ...(v.adults.length ? [row('Grown-ups’ charts', grownUps.length ? grownUps.join(', ') : 'None', '', openFamily, locked)] : []));
-    q('[data-mpm-restore]').hidden = locked || !planChanged(s);
-    // Only the charts this family has; their styles are scoped to .mcc (with this family's colors).
-    const colors = toolPalettes[v.palette].colors;
-    root.querySelectorAll<HTMLElement>('[data-cp-thumb]').forEach((t, i) => {
-      t.hidden = i >= v.charts.length;
-      t.classList.add('mcc');
-      ['--mcc-a', '--mcc-b', '--mcc-c'].forEach((k, n) => t.style.setProperty(k, colors[n]));
-    });
+    // The reference: each moment as it prints.
+    q('[data-mrm-moments]').replaceChildren(...(v.printed.length ? v.printed.map((m) => el('section', { class: 'mrm-moment' },
+      el('h2', {}, m.title),
+      el('p', { class: 'mrm-cue' }, el('b', {}, 'Cue'), `${m.cue} → ${m.reset}`),
+      el('ul', { class: 'mrm-rows' }, ...m.rows.map((r) => {
+        const li = el('li', { class: `mrm-row${r.habit ? ' is-habit' : ''}` },
+          el('span', { class: 'mrm-bar', 'aria-hidden': 'true' }),
+          el('span', { class: 'mrm-text' },
+            el('span', { class: 'mrm-who' }, ...r.owners.flatMap((o, i) => { const s = el('span', {}, o.name); s.style.color = o.color.ink; return i ? [' & ', s] : [s]; })),
+            el('span', { class: 'mrm-job' }, r.title)),
+          r.habit ? el('span', { class: 'mrm-tag' }, 'New habit') : el('span'));
+        li.style.setProperty('--mrm-member', r.owners[0].color.hex);
+        return li;
+      })),
+      ...(m.finish ? [el('p', { class: 'mrm-finish' }, el('b', {}, 'Finished when'), m.finish)] : [])))
+      : [el('p', { class: 'cp-intro' }, 'Add your family to your family profile and your rhythm is prepared here.')]));
+    q('[data-mrm-habits]').hidden = !v.habits.length;
+    q('[data-mrm-habit-list]').replaceChildren(...v.habits.map((h) => el('li', {}, el('strong', {}, h.owners.map((o) => o.name).join(' & ')), `${h.title}, ${h.moment.toLowerCase()}`)));
+    // Editing, in the order she thinks about it.
+    const on = v.moments.filter((m) => m.enabled);
+    const jobs = on.reduce((n, m) => n + m.rows.length, 0);
+    q('[data-mrm-edit]').replaceChildren(
+      row('1 · Our moments', on.map((m) => m.title).join(' · '), v.moments[2]?.enabled ? '' : 'Add a third moment if you need one', () => open('moments'), locked),
+      row('2 · Who owns what', `${jobs} ${jobs === 1 ? 'part' : 'parts'} across ${on.length} moments`, 'Change who does what, add or remove a job', () => open('owners'), locked),
+      row('3 · New habits', v.habits.length ? v.habits.map((h) => `${h.owners.map((o) => o.name).join(' & ')}: ${h.title}`).join(' · ') : 'None chosen', 'One or two to practice first', () => open('habits'), locked));
+    q('[data-mrm-restore]').hidden = locked || !v.changed;
   };
+  const TITLES: Record<RhythmSection, string> = { moments: 'Our family moments', owners: 'Who owns what', habits: 'Our new habits' };
+  const EDITORS = { moments: momentsEditor, owners: ownersEditor, habits: habitsEditor };
   // Redrawing after each change keeps the sheet where she was, not back at the top.
-  const keepScroll = (draw: () => void) => () => {
-    const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]');
-    const top = sheet?.open ? sheet.scrollTop : 0;
-    draw();
-    if (sheet) sheet.scrollTop = top;
-  };
-  const openKid = (id: string) => {
-    const name = plan().view().charts.find((c) => c.id === id)?.name ?? 'Chart';
-    const show: () => void = keepScroll(() => ui.openSheet(`${name}’s chart`, kidEditor(plan(), id, show), el('div', { class: 'cp-sheet-actions' }, ui.doneButton())));
+  const open = (section: RhythmSection) => {
+    const show = () => {
+      const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]');
+      const top = sheet?.open ? sheet.scrollTop : 0;
+      ui.openSheet(TITLES[section], EDITORS[section](plan(), { locked: isLocked, redraw: show }), el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+      if (sheet) sheet.scrollTop = top;
+    };
     root.querySelector<HTMLDialogElement>('[data-cp-sheet]')?.close();
     show();
   };
-  const openFamily = () => {
-    const show: () => void = keepScroll(() => ui.openSheet('For the whole family', familyEditor(plan(), show), el('div', { class: 'cp-sheet-actions' }, ui.doneButton())));
-    root.querySelector<HTMLDialogElement>('[data-cp-sheet]')?.close();
-    show();
-  };
-  q('[data-mpm-restore] button').addEventListener('click', () => {
+  q('[data-mrm-restore] button').addEventListener('click', () => {
     const before = structuredClone(plan().state());
-    plan().update((s) => restoreAll(s));
-    ui.toast('The prepared charts are back.', () => plan().replace(before));
+    plan().update((s) => restorePlan(s));
+    ui.toast('The prepared plan is back.', () => plan().replace(before));
   });
 
-  const mounted = mountPlanScreen<ChoreState>({ root, host, approvalKey: APPROVAL_KEY, render });
+  const mounted = mountPlanScreen<RhythmState>({ root, host, approvalKey: APPROVAL_KEY, render });
   if (mounted) ui = mounted;
 }
 </script>

@@ -1,6 +1,6 @@
 /**
- * March chore chart icons: one place that says which illustration each March chore uses
- * (src/lib/club/engines/march-chore-charts.ts), daily and weekly alike.
+ * March chore icons: one place that says which illustration each chore uses (Our Family Rhythm,
+ * src/lib/club/engines/march-family-rhythm.ts; August's routine charts reuse some).
  *
  * Artwork: assets/icons/ofc/march/<name>.webp (transparent, square, no background circle; see the README there).
  * The owner is drawing the set; a file is picked up by name at build time, so adding one needs no code change.

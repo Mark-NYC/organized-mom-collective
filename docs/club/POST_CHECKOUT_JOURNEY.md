@@ -24,7 +24,7 @@
   - Her family, printables and Account & Billing at the end.
 - **Naming:** January 2027 is **Our Family Weekly Meeting** (what `/app/club/january` prints and fulfillment prints),
   card headline "Stop Being the Family's Calendar". Fixed in `src/data/club/resources.ts` (also September = Habit
-  Cards, February = Family Laundry Guides, March = Family Chore Charts, matching their tools), the Club Home cards, the
+  Cards, February = Family Laundry Guides, March = Our Family Rhythm, matching their tools), the Club Home cards, the
   join benefits and the public Club page's January/September copy. Admin and CSV read the registry.
 
 

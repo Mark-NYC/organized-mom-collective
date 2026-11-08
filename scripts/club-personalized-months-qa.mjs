@@ -73,7 +73,7 @@ for (const month of MONTHS) {
         clipped: sheets.flatMap((s) => {
           const box = s.getBoundingClientRect();
           const scale = box.width / (Number(s.dataset.planWidth) || 816);
-          return [...s.querySelectorAll('h2,h3,strong,span,p,li,img,time,.msr-row,.mcc-row,.asr-row')].filter((el) => {
+          return [...s.querySelectorAll('h2,h3,strong,span,p,li,img,time,.msr-row,.mfr-row,.asr-row')].filter((el) => {
             const b = el.getBoundingClientRect();
             if (!b.width || !b.height || getComputedStyle(el).visibility === 'hidden') return false;
             if (b.bottom > box.bottom + 1 * scale || b.right > box.right + 1 * scale || b.top < box.top - 1 || b.left < box.left - 1) return true;
@@ -102,7 +102,7 @@ for (const month of MONTHS) {
     if (info.clipped.length) fail(r, `clipped: ${info.clipped.join('; ')}`);
     if (info.images.length) fail(r, `broken images: ${info.images.join(', ')}`);
     if (info.mom) fail(r, 'a sheet says “Mom”');
-    if (month === 'march' && info.rewards) fail(r, 'rewards language on the chore charts');
+    if (month === 'march' && info.rewards) fail(r, 'rewards language on the family rhythm');
     await page.screenshot({ path: join(out, `${month}-${sample}-desktop.png`), fullPage: false });
     await page.emulateMedia({ media: 'print' });
     const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
@@ -123,7 +123,7 @@ for (const month of MONTHS) {
     const wide = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (wide > 1) fail(r, `phone scrolls sideways by ${wide}px`);
     await p.screenshot({ path: join(out, `${month}-${sample}-phone.png`), fullPage: true });
-    const fp = () => p.evaluate(() => document.querySelector('[data-mcc], .msr, .asr').clubPlan.fingerprint());
+    const fp = () => p.evaluate(() => document.querySelector('[data-mfr], .msr, .asr').clubPlan.fingerprint());
     const before = await fp();
     // The first row in the month's own section that opens an edit sheet with owner chips (or a chart editor).
     const rows = p.locator('[data-plan-screen] .cp-section .cp-row:not([disabled]):visible');
@@ -131,7 +131,7 @@ for (const month of MONTHS) {
     for (let i = 0; i < Math.min(await rows.count(), 6) && !edited; i++) {
       await rows.nth(i).click({ timeout: 5000 });
       await p.waitForTimeout(700);
-      const chip = p.locator('[data-cp-sheet] .po-chip[aria-pressed="false"]:not([disabled]), [data-cp-sheet] .mcc-ed-remove').first();
+      const chip = p.locator('[data-cp-sheet] .po-chip[aria-pressed="false"]:not([disabled]), [data-cp-sheet] .mre-chip[aria-pressed="false"]:not([disabled])').first();
       if (await chip.count()) { await chip.evaluate((b) => b.click()); edited = true; await p.waitForTimeout(250); }
       // Done (the sheet's own button may be below the fold): close it as Done does.
       await p.evaluate(() => document.querySelector('[data-cp-sheet]')?.close());

@@ -1,11 +1,11 @@
 ---
-/** March has two resources: the family chore charts (/app/club/march) and Spring Prep, kept as a second tab
+/** March has two resources: Our Family Rhythm (/app/club/march) and Spring Prep, kept as a second tab
  * (/app/club/march/spring-prep). Each is its own page with its own editing and printing; this switches between them. */
-interface Props { current: 'charts' | 'spring' }
+interface Props { current: 'rhythm' | 'spring' }
 const { current } = Astro.props;
 ---
 <nav class="mar-tabs" aria-label="March resources">
-  <a href="/app/club/march" aria-current={current === 'charts' ? 'page' : undefined}>Chore charts</a>
+  <a href="/app/club/march" aria-current={current === 'rhythm' ? 'page' : undefined}>Family rhythm</a>
   <a href="/app/club/march/spring-prep" aria-current={current === 'spring' ? 'page' : undefined}>Spring Prep</a>
 </nav>
 <style is:global>

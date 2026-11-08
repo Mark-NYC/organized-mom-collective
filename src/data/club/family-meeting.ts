@@ -161,8 +161,8 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   },
   {
     month: 3,
-    theme: 'Chore charts and understanding what finished looks like',
-    resourceTitle: 'Family Chore Charts',
+    theme: 'Shared family moments and what finished looks like',
+    resourceTitle: 'Our Family Rhythm',
     route: '/app/club/march',
     challenge: 'Chores that get finished, because everyone knows what finished looks like.',
     principle: 'A job isn’t done until it looks done. If we can see the finish line, nobody has to check.',
@@ -172,7 +172,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
     categories: ['cleaning'],
     activities: [],
     growth: ['tidy-room'],
-    connection: 'Each child’s chore chart lists their daily jobs and the day’s zone, with what finished looks like.',
+    connection: 'Our Family Rhythm shows the moments we already share each day, everyone’s part in them, and what finished looks like.',
     questions: {
       schedule: { withActivity: '{activity} is part of our week{days}. Which day would be easiest for a bigger chore?', generic: 'Which day of the week has the most time for a bigger chore?' },
       tool: { young: 'Can you show us what a clean floor looks like?', older: 'Pick one chore. How would someone know it’s really finished?', adults: 'Which chore do we each define differently? Let’s agree what finished looks like.' },
@@ -186,8 +186,8 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
     ],
     practice: {
       title: 'Show what finished looks like',
-      steps: ['Pick one job from {kid}’s chart.', '{kid} does it right now, in two minutes or less.', 'Everyone looks together: is it finished? Say what finished looks like out loud.'],
-      noKids: ['Pick one job from the chart.', 'One person does it now; everyone checks it against the finish line.', 'Adjust the wording until everyone agrees.'],
+      steps: ['Pick {kid}’s part from our rhythm.', '{kid} does it right now, in two minutes or less.', 'Everyone looks together: is it finished? Say what finished looks like out loud.'],
+      noKids: ['Pick one part from our rhythm.', 'One person does it now; everyone checks it against the finish line.', 'Adjust the wording until everyone agrees.'],
     },
   },
   {

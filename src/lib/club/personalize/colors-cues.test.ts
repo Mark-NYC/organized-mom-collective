@@ -3,7 +3,7 @@ import { sampleHouseholds } from '../../../data/club/samples';
 import { memberColors } from '../../../data/club/family-colors';
 import { contrast } from '../month-tints';
 import type { Household } from '../profile';
-import { choreView, freshState, type ChoreMember } from '../engines/march-chore-charts';
+import { rhythmView, freshState, type RhythmMember } from '../engines/march-family-rhythm';
 import { mayContext, mayRows, DEFAULT_OPTIONS, MAY_KEYS, type MayMember } from '../engines/may-summer-rhythm';
 import { applyFamily, augView, freshState as augFresh, type AugMember } from '../engines/august-school-routines';
 import { colorFor, familyColors, inkOf, NEUTRAL_COLOR } from './colors';
@@ -27,9 +27,10 @@ describe('family-member colors: January’s assignment, everywhere', () => {
   });
 
   it('a customized color shows in March, May and August', () => {
-    const march = choreView(freshState(), custom.members as ChoreMember[], custom.preferences).charts;
-    expect(march.find((c) => c.name === 'Sofia')!.color.id).toBe('orange');
-    expect(march.find((c) => c.name === 'Ana')!.color.id).toBe('teal');
+    const march = rhythmView(freshState(), custom.members as RhythmMember[], custom.preferences);
+    expect(march.people.find((c) => c.name === 'Sofia')!.color.id).toBe('orange');
+    expect(march.people.find((c) => c.name === 'Ana')!.color.id).toBe('teal');
+    expect(march.printed.flatMap((m) => m.rows).flatMap((r) => r.owners).find((o) => o.name === 'Sofia')!.color.id).toBe('orange');
     const may = mayRows({ options: DEFAULT_OPTIONS, edits: {}, order: [...MAY_KEYS] }, mayContext(custom.members as MayMember[], custom.preferences, familySnapshot(rivera.profile)));
     const sofia = may.flatMap((r) => r.parts).flatMap((p) => p.owners).find((o) => o.name === 'Sofia')!;
     expect(sofia.color.id).toBe('orange');
@@ -91,14 +92,9 @@ describe('habit cues: real daily events, true to her answers', () => {
     expect(sharedCue(ctx, CUE.home, ['sample-rivera-sofia', 'sample-rivera-mateo'])).toBe(CUE.home);
   });
 
-  it('March: every chore has a short cue, never a time; her cue wins; typed chores get an editable default', () => {
-    const v = choreView(freshState(), H.members as ChoreMember[], H.preferences);
-    for (const c of v.charts) {
-      for (const j of c.daily) { expect(j.cue).toBeTruthy(); expect(j.cue!.length).toBeLessThanOrEqual(36); expect(j.cue).not.toMatch(/\d/); }
-      expect(c.weeklyCue).toBeTruthy();
-    }
-    expect(v.charts.find((c) => c.name === 'Ana')!.weeklyCue).toBe(CUE.dinner);
-    expect(v.charts.find((c) => c.name === 'Sofia')!.weeklyCue).toBe(CUE.school);
+  it('March: every moment has a shared cue (an event, never a time) and a finish line', () => {
+    const v = rhythmView(freshState(), H.members as RhythmMember[], H.preferences);
+    for (const m of v.printed) { expect(m.cue).toBeTruthy(); expect(m.cue).not.toMatch(/\d/); expect(m.finish).toMatch(/\.$/); }
   });
 
   it('shared tasks carry their cue; her cue is kept, the prepared one clears it', () => {
