@@ -39,7 +39,7 @@ const storageKey = 'omc:club:march-chore-charts:v2';
           <button type="button" class="cpd-link" data-mch-d-open="owners">Change who owns what</button>
         </section>
         <section class="cpd-block" aria-labelledby="mch-d-habits">
-          <p class="cpd-label" id="mch-d-habits">Our new habits</p>
+          <p class="cpd-label" id="mch-d-habits">This week, we’re practicing</p>
           <ul class="mch-d-habits" data-mch-d-habits></ul>
           <button type="button" class="cpd-link" data-mch-d-open="habits">Choose our new habits</button>
           <button type="button" class="cpd-link" data-mch-d-restore hidden>Start over with the prepared plan</button>
@@ -92,7 +92,7 @@ if (root && host) {
         const jobs = v.printed.flatMap((m) => m.rows.filter((r) => r.owners.some((o) => o.id === p.id)));
         return el('li', {}, ownerTag(p.name, p.color), el('span', { class: 'mch-d-jobs' }, jobs.length ? jobs.map((r) => r.title).join(', ') : 'No part yet'));
       }));
-      q('[data-mch-d-habits]').replaceChildren(...(v.habits.length ? v.habits.map((h) => el('li', {}, `${h.owners.map((o) => o.name).join(' & ')}: ${h.title}`)) : [el('li', {}, 'None chosen')]));
+      q('[data-mch-d-habits]').replaceChildren(...(v.habits.length ? v.habits.map((h) => el('li', {}, h.sentence)) : [el('li', {}, 'None chosen')]));
       root.querySelectorAll<HTMLButtonElement>('[data-mch-d-open]').forEach((b) => { b.disabled = locked; });
       q('[data-mch-d-restore]').hidden = locked || !v.changed;
     },

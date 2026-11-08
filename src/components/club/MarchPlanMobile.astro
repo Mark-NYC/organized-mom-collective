@@ -19,8 +19,9 @@ const { deadline } = Astro.props;
     <p class="mrm-motto">Same moments. Everyone has a part.</p>
     <div class="mrm-moments" data-mrm-moments></div>
     <section class="mrm-habits" data-mrm-habits aria-labelledby="mrm-habits-title">
-      <h2 id="mrm-habits-title" class="mrm-label">Our new habits</h2>
+      <h2 id="mrm-habits-title" class="mrm-label">This week, we’re practicing</h2>
       <ul data-mrm-habit-list></ul>
+      <p class="mrm-habits-note">Practice together at first. Then let them take the lead.</p>
     </section>
     <section class="cp-section" aria-labelledby="mrm-edit-title">
       <h2 id="mrm-edit-title">Make it yours</h2>
@@ -55,7 +56,10 @@ const { deadline } = Astro.props;
 .mrm-habits[hidden]{display:none}
 .mrm-label{margin:0 0 6px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mrm-accent,#3F6B5A)}
 .mrm-habits ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.mrm-habits strong{margin-right:6px}
+.mrm-habits li{font:400 1.02rem/1.45 var(--font-serif)}
+.mrm-habits-note{margin:8px 0 0;font:italic 400 .9rem/1.4 var(--font-serif);color:var(--cp-soft)}
+.mrm-mode{font-size:.7rem;font-weight:600;letter-spacing:.08em;color:var(--cp-soft);margin-left:6px;text-transform:none}
+.mrm-moment-edit{margin-top:8px}
 .mrm-restore{margin:6px 0 0}
 .mrm-restore[hidden]{display:none}
 .mrm-step{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
@@ -66,7 +70,7 @@ const { deadline } = Astro.props;
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
 import { restorePlan, type RhythmPlanResource, type RhythmState } from '../../lib/club/engines/march-family-rhythm';
-import { habitsEditor, momentsEditor, ownersEditor, type RhythmSection } from '../../lib/club/march-rhythm-editor';
+import { rhythmEditor, type RhythmSection } from '../../lib/club/march-rhythm-editor';
 import { monthTints } from '../../lib/club/month-tints';
 
 const APPROVAL_KEY = 'omc:preview:march-chore-charts:approval';
@@ -80,6 +84,7 @@ if (root && host) {
   q('[data-mrm]').style.setProperty('--mrm-accent', t.accent);
   let ui: PlanScreen<RhythmState>;
   let isLocked = false;
+  let section: RhythmSection = 'owners';
 
   const row = (step: string, title: string, detail: string, open: () => void, locked: boolean) => {
     const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, el('span'),
@@ -89,10 +94,11 @@ if (root && host) {
     b.addEventListener('click', open);
     return el('li', {}, b);
   };
+  const named = (o: { name: string; color: { ink: string } }) => { const s = el('span', {}, o.name); s.style.color = o.color.ink; return s; };
   const render = (_ui: PlanScreen<RhythmState>, _s: RhythmState, locked: boolean) => {
     isLocked = locked;
     const v = plan().view();
-    // The reference: each moment as it prints.
+    // The daily reference: each moment as it prints, who does what, and what finished looks like.
     q('[data-mrm-moments]').replaceChildren(...(v.printed.length ? v.printed.map((m) => el('section', { class: 'mrm-moment' },
       el('h2', {}, m.title),
       el('p', { class: 'mrm-cue' }, el('b', {}, 'Cue'), `${m.cue} → ${m.reset}`),
@@ -100,38 +106,52 @@ if (root && host) {
         const li = el('li', { class: `mrm-row${r.habit ? ' is-habit' : ''}` },
           el('span', { class: 'mrm-bar', 'aria-hidden': 'true' }),
           el('span', { class: 'mrm-text' },
-            el('span', { class: 'mrm-who' }, ...r.owners.flatMap((o, i) => { const s = el('span', {}, o.name); s.style.color = o.color.ink; return i ? [' & ', s] : [s]; })),
+            el('span', { class: 'mrm-who' }, ...r.owners.flatMap((o, i) => (i ? [r.mode === 'together' ? ' + ' : ' · ', named(o)] : [named(o)])),
+              ...(r.mode === 'each' ? [el('span', { class: 'mrm-mode' }, 'each their own')] : r.mode === 'together' ? [el('span', { class: 'mrm-mode' }, 'together')] : [])),
             el('span', { class: 'mrm-job' }, r.title)),
           r.habit ? el('span', { class: 'mrm-tag' }, 'New habit') : el('span'));
         li.style.setProperty('--mrm-member', r.owners[0].color.hex);
+        if (r.owners.length > 1) li.querySelector<HTMLElement>('.mrm-bar')!.style.background = `linear-gradient(${r.owners.map((o, i, a) => `${o.color.hex} ${(i / a.length) * 100}% ${((i + 1) / a.length) * 100}%`).join(',')})`;
         return li;
       })),
-      ...(m.finish ? [el('p', { class: 'mrm-finish' }, el('b', {}, 'Finished when'), m.finish)] : [])))
+      ...(m.finish ? [el('p', { class: 'mrm-finish' }, el('b', {}, 'Finished when'), m.finish)] : []),
+      ...(locked ? [] : [(() => { const b = el('button', { type: 'button', class: 'cp-link mrm-moment-edit' }, el('span', {}, `Change ${m.title.toLowerCase()} jobs`)); b.addEventListener('click', () => open('owners', m.id)); return b; })()])))
       : [el('p', { class: 'cp-intro' }, 'Add your family to your family profile and your rhythm is prepared here.')]));
     q('[data-mrm-habits]').hidden = !v.habits.length;
-    q('[data-mrm-habit-list]').replaceChildren(...v.habits.map((h) => el('li', {}, el('strong', {}, h.owners.map((o) => o.name).join(' & ')), `${h.title}, ${h.moment.toLowerCase()}`)));
+    q('[data-mrm-habit-list]').replaceChildren(...v.habits.map((h) => el('li', {}, h.sentence)));
     // Editing, in the order she thinks about it.
     const on = v.moments.filter((m) => m.enabled);
     const jobs = on.reduce((n, m) => n + m.rows.length, 0);
     q('[data-mrm-edit]').replaceChildren(
-      row('1 · Our moments', on.map((m) => m.title).join(' · '), v.moments[2]?.enabled ? '' : 'Add a third moment if you need one', () => open('moments'), locked),
-      row('2 · Who owns what', `${jobs} ${jobs === 1 ? 'part' : 'parts'} across ${on.length} moments`, 'Change who does what, add or remove a job', () => open('owners'), locked),
+      row('1 · Our moments', on.map((m) => m.title).join(' · '), on.length < 3 ? 'Add a third moment if you need one' : '', () => open('moments'), locked),
+      row('2 · Who owns what', `${jobs} ${jobs === 1 ? 'job' : 'jobs'} across ${on.length} ${on.length === 1 ? 'moment' : 'moments'}`, 'Change one job at a time', () => open('owners'), locked),
       row('3 · New habits', v.habits.length ? v.habits.map((h) => `${h.owners.map((o) => o.name).join(' & ')}: ${h.title}`).join(' · ') : 'None chosen', 'One or two to practice first', () => open('habits'), locked));
     q('[data-mrm-restore]').hidden = locked || !v.changed;
   };
   const TITLES: Record<RhythmSection, string> = { moments: 'Our family moments', owners: 'Who owns what', habits: 'Our new habits' };
-  const EDITORS = { moments: momentsEditor, owners: ownersEditor, habits: habitsEditor };
-  // Redrawing after each change keeps the sheet where she was, not back at the top.
-  const open = (section: RhythmSection) => {
-    const show = () => {
-      const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]');
-      const top = sheet?.open ? sheet.scrollTop : 0;
-      ui.openSheet(TITLES[section], EDITORS[section](plan(), { locked: isLocked, redraw: show }), el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
-      if (sheet) sheet.scrollTop = top;
-    };
-    root.querySelector<HTMLDialogElement>('[data-cp-sheet]')?.close();
+  const sheetEl = () => root.querySelector<HTMLDialogElement>('[data-cp-sheet]');
+  // Redrawing after each change keeps the sheet where she was, not back at the top. While one job is open it has its
+  // own Done and Cancel, so the sheet's Done button steps aside.
+  const show = () => {
+    const sheet = sheetEl();
+    const top = sheet?.open ? sheet.scrollTop : 0;
+    const body = editor.section(section);
+    ui.openSheet(TITLES[section], body, ...(editor.editingRow() ? [] : [el('div', { class: 'cp-sheet-actions' }, ui.doneButton())]));
+    if (sheet) sheet.scrollTop = editor.editingRow() ? 0 : top;
+  };
+  const editor = rhythmEditor({ plan, locked: () => isLocked, redraw: () => { if (sheetEl()?.open) show(); } });
+  const open = (s: RhythmSection, momentId?: string) => {
+    section = s;
+    editor.focus(momentId);
+    sheetEl()?.close();
     show();
   };
+  // The sheet never closes over a job she's still editing (×, the backdrop or Escape): Done or Cancel first.
+  const guard = (e: Event) => { if (!editor.dirty()) return; e.preventDefault(); e.stopPropagation(); editor.warn(); const s = sheetEl(); if (s) s.scrollTop = 0; };
+  const sheet = sheetEl();
+  sheet?.addEventListener('cancel', guard);
+  sheet?.addEventListener('click', (e) => { const t = e.target as HTMLElement; if (t === sheet || t.closest('[data-cp-sheet-close]')) guard(e); }, true);
+  sheet?.addEventListener('close', () => { if (!editor.dirty()) editor.reset(); });
   q('[data-mrm-restore] button').addEventListener('click', () => {
     const before = structuredClone(plan().state());
     plan().update((s) => restorePlan(s));

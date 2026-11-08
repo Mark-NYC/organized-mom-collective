@@ -1132,6 +1132,7 @@ async function editPlan(page, month, marker) {
   }
   if (month === 'march') {
     await page.click('[data-cpd-edit]');
+    await page.locator('dialog[open] [role="tab"]', { hasText: 'Our moments' }).click();
     const input = page.locator('dialog[open] input[type="text"], dialog[open] input:not([type])').first();
     await input.fill(marker);
     await input.press('Tab');
