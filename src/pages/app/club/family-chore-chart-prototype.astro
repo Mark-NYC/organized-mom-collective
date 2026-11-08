@@ -25,10 +25,13 @@ for (const name of ['make-bed','clear-dishes','shoes-away','feed-pets','clothes-
       </div>
       <p class="fc-heading">Make changes</p>
       <label class="fc-field">Family name <input data-fc-family maxlength="35" value="Rivera" /></label>
+      <p class="fc-heading">1 · Choose our shared moments</p>
+      <div data-fc-anchors class="fc-anchor-edit"></div>
+      <p class="fc-heading">2 · Give each person a part</p>
       <label class="fc-field">Edit responsibilities for <select data-fc-person></select></label>
       <div class="fc-edit-person" data-fc-edit></div>
       <p class="fc-tip">Changes appear on the printable immediately and stay in this browser. This sample does not change your saved family profile or Club plans.</p>
-      <p class="fc-heading">Our shared moments</p><div data-fc-anchors class="fc-anchor-edit"></div><p class="fc-heading">The idea</p>
+      <p class="fc-heading">The idea</p>
       <p class="fc-tip">One familiar moment starts several responsibilities. Each person owns their part, without needing a separate reminder. Keep the plan small and repeatable.</p>
     </aside>
     <section class="fc-preview" aria-label="Print preview">
@@ -144,6 +147,26 @@ body:has(.fc-prototype) header,body:has(.fc-prototype) nav,body:has(.fc-prototyp
 @media(max-width:720px){.fc-rhythm-head{padding:13px 16px}.fc-rhythm-row{grid-template-columns:115px 36px minmax(0,1fr)}}
 @media print{.fc-rhythm-head,.fc-rhythm-person::before{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 
+
+/* Shared-rhythm refinement: compact clusters, unmistakable cues, no artificial tall cards. */
+.fc-charts{flex:1;justify-content:center;gap:22px}
+.fc-rhythm{flex:none;min-height:0;border-radius:8px}
+.fc-rhythm-head{padding:15px 19px;gap:13px}
+.fc-rhythm-head h3{font-size:27px}
+.fc-rhythm-head p{font-size:11px;line-height:1.4;margin-top:5px}
+.fc-rhythm-mark{width:46px;height:46px;flex:none}
+.fc-rhythm-rows{flex:none;padding:5px 20px}
+.fc-rhythm-row{min-height:0;padding:10px 0;grid-template-columns:116px 39px minmax(0,1fr)}
+.fc-rhythm-person{font-size:16px}
+.fc-rhythm-task{font-size:14px;line-height:1.4}
+.fc-rhythm-row .fc-job-icon,.fc-rhythm-row .fc-job-icon-fallback{width:37px;height:37px}
+.fc-rhythm-finish{padding:12px 20px 13px;border-top:1px solid #e8e8e2;background:#fcfcfa;font:italic 12px/1.5 Georgia,serif;color:#6c726a}
+.fc-rhythm-finish strong{font:700 9px Montserrat,Arial,sans-serif;letter-spacing:.11em;color:#556956;margin-right:5px}
+.fc-rhythm-empty{padding:20px}
+.fc-paper-foot{margin-top:0}
+.fc-anchor-edit{margin:6px 0 12px}
+.fc-heading{margin-top:14px}
+@media(max-width:720px){.fc-rhythm-head h3{font-size:27px}.fc-rhythm-row{grid-template-columns:116px 39px minmax(0,1fr)}}
 </style>
 <script>
 import { marchIconArt } from '../../../data/club/march-chore-icons';
@@ -154,15 +177,15 @@ type Chart={family:string;people:Person[];anchors:Anchor[]};
 const defaults:Chart={
  family:'Rivera',
  anchors:[
-  {id:'breakfast',title:'After Breakfast',subtitle:'Our morning reset',symbol:'☀',tint:'#CDDDE1',enabled:true},
-  {id:'dinner',title:'After Dinner',subtitle:'Our kitchen reset',symbol:'◒',tint:'#D4DFC4',enabled:true},
-  {id:'bedtime',title:'After Brushing Teeth',subtitle:'Our bedtime reset',symbol:'☾',tint:'#F1D8A8',enabled:false}
+  {id:'breakfast',title:'After Breakfast',subtitle:'We reset together before moving on',symbol:'☀',tint:'#CDDDE1',enabled:true},
+  {id:'dinner',title:'After Dinner',subtitle:'We leave the kitchen ready for tomorrow',symbol:'◒',tint:'#D4DFC4',enabled:true},
+  {id:'bedtime',title:'After Brushing Teeth',subtitle:'We finish our evening together',symbol:'☾',tint:'#F1D8A8',enabled:false}
  ],
  people:[
   {name:'Sofia',color:'#CDDDE1',jobs:[{title:'Clear breakfast dishes',anchor:'breakfast',icon:'clear-dishes'},{title:'Load the dishwasher',anchor:'dinner',icon:'empty-dishwasher'}]},
   {name:'Mateo',color:'#F1D8A8',jobs:[{title:'Feed the pets',anchor:'breakfast',icon:'feed-pets'},{title:'Clear the dinner table',anchor:'dinner',icon:'clear-dishes'}]},
   {name:'Elena',color:'#E8D2D6',jobs:[{title:'Put breakfast supplies away',anchor:'breakfast',icon:'tidy-desk'}]},
-  {name:'Ana',color:'#D4DFC4',adult:true,jobs:[{title:'Own dinner preparation',anchor:'dinner',icon:'make-dinner'}]},
+  {name:'Ana',color:'#D4DFC4',adult:true,jobs:[{title:'Put away dinner leftovers',anchor:'dinner',icon:'clear-dishes'}]},
   {name:'Luis',color:'#D5C5B8',adult:true,jobs:[{title:'Clean the kitchen counters',anchor:'dinner',icon:'wipe-surface'}]}
  ]
 };
@@ -171,6 +194,11 @@ if(root){
  const key='omc:prototype:family-chore-chart:v2-shared-rhythm';
  const load=():Chart=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v?.anchors?.length===3&&v?.people?.length===5?v:structuredClone(defaults)}catch{return structuredClone(defaults)}};
  let state=load();let selected=0;
+// Correct the old sample's impossible cue without overwriting custom assignments.
+const ana=state.people.find(p=>p.name==='Ana');
+const latePrep=ana?.jobs.find(j=>j.title==='Own dinner preparation'&&j.anchor==='dinner');
+if(latePrep){latePrep.title='Put away dinner leftovers';latePrep.icon='clear-dishes';}
+state.anchors.forEach(a=>{if(a.id==='breakfast'&&a.subtitle==='Our morning reset')a.subtitle='We reset together before moving on';if(a.id==='dinner'&&a.subtitle==='Our kitchen reset')a.subtitle='We leave the kitchen ready for tomorrow';});
  const paper=root.querySelector<HTMLElement>('[data-fc-charts]')!;
  const edit=root.querySelector<HTMLElement>('[data-fc-edit]')!;
  const anchorEdit=root.querySelector<HTMLElement>('[data-fc-anchors]')!;
@@ -197,7 +225,9 @@ if(root){
     row.append(elt('span','fc-rhythm-person',p.name),iconNode(job),elt('span','fc-rhythm-task',job.title));body.append(row);
    }));
    if(!count)body.append(elt('div','fc-rhythm-empty','Choose a responsibility for this moment.'));
-   card.append(body);paper.append(card);
+   card.append(body);
+   if(count){const finish=elt('div','fc-rhythm-finish');finish.append(elt('strong',undefined,'WE’RE DONE WHEN'),document.createTextNode(' everyone has finished their part.'));card.append(finish)}
+   paper.append(card);
   });
   localStorage.setItem(key,JSON.stringify(state));
  };
