@@ -1,5 +1,9 @@
 # The Welcome Kit (approved 2026-10-30, revised with the owner 2026-10-31)
 
+> **Planned change (2026-11-08, not built):** the Family Rhythm replaces the Family Vision print for new enrollments,
+> and Family Values moves to December 2027. Plan, status and decisions: [WELCOME_MARCH_DECEMBER_MIGRATION.md](WELCOME_MARCH_DECEMBER_MIGRATION.md).
+> Everything below describes what is live today.
+
 A new member's first mailing is **one package with three things**, mailed as soon as she has approved her
 personalized items (target: **within two business days**):
 
