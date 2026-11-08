@@ -2,14 +2,16 @@
 /**
  * March 2027, Our Family Rhythm: one Letter sheet (8.5 × 11 in) for the whole family. Two or three moments the family
  * already shares (Cue → the moment), and under each, who owns which part, with their January family color as a narrow
- * bar and their name; the one or two NEW habits the family is practicing are marked and repeated in "Our New Habits".
- * No rewards, points, tracking or checkboxes. Rules: src/lib/club/engines/march-family-rhythm.ts; editor:
- * src/lib/club/march-rhythm-editor.ts; icons: src/data/club/march-chore-icons.ts.
+ * bar and their name ("each" when several do their own, "together" when they share one); a finish line written from
+ * those jobs; "This week, we're practicing" with the one or two new habits. No rewards, points, tracking or
+ * checkboxes. Rules: src/lib/club/engines/march-family-rhythm.ts; editor: src/lib/club/march-rhythm-editor.ts; icons:
+ * src/data/club/march-chore-icons.ts.
  *
  * On the Club plan page (/app/club/march) the page brings the layout, rail and phone screen; this keeps the desktop
  * editor dialog and the sheet (data-plan-sheet="front"), and publishes the plan as `clubPlan`
- * (docs/club/PLAN_ARCHITECTURE.md). The sheet is a fixed 816 × 1056 px page; rows take the height their words need,
- * and the sizes step down only when a large family's plan needs the room (never stretched to fill).
+ * (docs/club/PLAN_ARCHITECTURE.md). The sheet is a fixed 816 × 1056 px page. Its sizes come from how much the plan
+ * holds (five steps, set by the script): a small plan prints larger, as one centered composition with the footer
+ * right after it; a large one tighter, never clipped (the script measures and steps down if the words run long).
  */
 import '../../styles/club-marks.css';
 interface Props { storageKey: string }
@@ -22,7 +24,7 @@ const { storageKey } = Astro.props;
       <button type="button" class="mfr-close" data-mfr-close aria-label="Close">×</button>
     </div>
     <div class="mfr-steps" role="tablist" aria-label="What to change" data-mfr-steps></div>
-    <div data-mfr-editor-body></div>
+    <div class="mfr-dialog-body" data-mfr-editor-body></div>
     <div class="mfr-dialog-actions"><span data-mfr-restore></span><button type="button" class="mfr-done" data-mfr-close>Done · See our rhythm</button></div>
   </dialog>
   <div class="mfr-sheets" data-mfr-pages></div>
@@ -37,48 +39,52 @@ const { storageKey } = Astro.props;
 .mfr-empty{max-width:520px;margin:40px auto;text-align:center;font-size:15px;line-height:1.7;color:#7d726c}
 .mfr-empty[hidden]{display:none}
 
-/* The sheet. Sizes (--mfr-*) come from how much the plan holds: set by the script, smaller only when needed. */
+/* The sheet. Sizes (--mfr-*) come from how much the plan holds: set by the script. Header, moments, practice and
+   footer are one composition, centered on the page: a short plan has even margins and stays together; a full one
+   fills the page edge to edge. */
 .mfr-paper{position:absolute;inset:0;box-sizing:border-box;display:flex;flex-direction:column;padding:var(--mfr-top,56px) 64px var(--mfr-bottom,44px);font-family:Montserrat,var(--font-sans),Arial,sans-serif;color:var(--mfr-ink);-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .mfr-paper *{box-sizing:border-box}
 .mfr-head{flex:none;margin-top:auto;text-align:center}
 .mfr-kicker{margin:0;font:700 12px/1 Montserrat,Arial,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:var(--mfr-accent)}
 .mfr-family{margin:12px 0 0;font:400 var(--mfr-h1,38px)/1.1 Georgia,'Georgia Pro',serif;overflow-wrap:anywhere}
-.mfr-motto{margin:8px 0 0;font:italic 400 17px/1.3 Georgia,serif;color:var(--mfr-soft)}
+.mfr-motto{margin:8px 0 0;font:italic 400 var(--mfr-motto,17px)/1.3 Georgia,serif;color:var(--mfr-soft)}
 .mfr-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin:calc(var(--mfr-gap,30px) / 2) 0 0}
 .mfr-legend .mc-owner{font-size:10.5px}
-/* Header and moments sit together, centered in the page above the footer: a short plan gets even margins, not a gap. */
-.mfr-main{flex:none;display:flex;flex-direction:column;gap:var(--mfr-gap,30px);padding:calc(var(--mfr-gap,30px) + 6px) 0 0}
+.mfr-main{flex:none;display:flex;flex-direction:column;gap:var(--mfr-gap,30px);padding:calc(var(--mfr-gap,30px) + 4px) 0 0}
 .mfr-moment{flex:none}
 .mfr-moment-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding-bottom:8px;border-bottom:2px solid var(--mfr-base,#C7DED3)}
 .mfr-moment-title{margin:0;font:400 var(--mfr-h2,26px)/1.15 Georgia,serif;overflow-wrap:anywhere}
 .mfr-cue{flex:none;margin:0;font:500 12px/1.3 Montserrat,Arial,sans-serif;color:var(--mfr-soft);text-align:right}
 .mfr-cue b{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:10px;color:var(--mfr-ink);margin-right:5px}
 .mfr-rows{list-style:none;margin:0;padding:0}
-.mfr-row{display:grid;grid-template-columns:5px var(--mfr-who,112px) var(--mfr-icon,40px) minmax(0,1fr) auto;column-gap:14px;align-items:center;padding:var(--mfr-pad,9px) 0;border-bottom:1px solid var(--mfr-rule)}
+.mfr-row{display:grid;grid-template-columns:5px var(--mfr-who,124px) var(--mfr-icon,40px) minmax(0,1fr) auto;column-gap:14px;align-items:center;padding:var(--mfr-pad,9px) 0;border-bottom:1px solid var(--mfr-rule)}
 .mfr-bar{align-self:stretch;width:5px;border-radius:3px;background:var(--mfr-member,#9A918B)}
-.mfr-who{min-width:0;font:700 12px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;overflow-wrap:anywhere}
-.mfr-who span{color:var(--mfr-member-ink,var(--mfr-ink))}
-.mfr-who span+span::before{content:" · ";color:var(--mfr-soft)}
+/* Names: one per line when they fit, wrapping inside their column (never under the job). */
+.mfr-who{min-width:0;display:flex;flex-wrap:wrap;column-gap:6px;font:700 var(--mfr-name,12px)/1.3 Montserrat,Arial,sans-serif;letter-spacing:.07em;text-transform:uppercase;overflow-wrap:anywhere}
+.mfr-who .mfr-name{color:var(--mfr-member-ink,var(--mfr-ink))}
+.mfr-who .mfr-amp{color:var(--mfr-soft)}
+.mfr-mode{flex-basis:100%;font:600 8.5px/1.4 Montserrat,Arial,sans-serif;letter-spacing:.14em;color:var(--mfr-soft)}
 .mfr-slot{width:var(--mfr-icon,40px);height:var(--mfr-icon,40px)}
 .mfr-slot img{display:block;width:100%;height:100%;object-fit:contain}
 .mfr-job{min-width:0;font:500 var(--mfr-text,17px)/1.3 Montserrat,Arial,sans-serif;overflow-wrap:break-word}
 .mfr-tag{font:700 9px/1 Montserrat,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--mfr-accent);padding:5px 8px;border:1.5px solid var(--mfr-accent);border-radius:999px;white-space:nowrap}
-/* A new habit: a pale wash and the job in bold. Everything else is context and stays plain. */
+/* A new habit: a pale wash, the job in bold and a "New habit" tag. Everything else is context and stays plain. */
 .mfr-row.is-habit{background:var(--mfr-wash)}
 .mfr-row.is-habit .mfr-job{font-weight:700}
-.mfr-row.is-habit .mfr-bar{margin-left:0}
-.mfr-finish{margin:10px 0 0 19px;font:italic 400 14px/1.4 Georgia,serif;color:var(--mfr-soft)}
+.mfr-finish{margin:8px 0 0 19px;font:italic 400 var(--mfr-fin,14px)/1.4 Georgia,serif;color:var(--mfr-soft)}
 .mfr-finish b{font:700 10px/1 Montserrat,Arial,sans-serif;font-style:normal;letter-spacing:.16em;text-transform:uppercase;color:var(--mfr-ink);margin-right:6px}
-.mfr-habits{flex:none;padding:16px 20px;border:1.5px solid var(--mfr-base,#C7DED3);border-radius:10px}
+/* This week, we're practicing: the family's focus, in sentences. */
+.mfr-habits{flex:none;padding:calc(var(--mfr-pad,9px) + 8px) 22px;border:1.5px solid var(--mfr-base,#C7DED3);border-radius:10px}
 .mfr-habits-title{margin:0 0 8px;font:700 11px/1 Montserrat,Arial,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--mfr-accent)}
-.mfr-habits ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.mfr-habits li{font:400 14px/1.4 Georgia,serif}
-.mfr-habits li strong{font-family:Montserrat,Arial,sans-serif;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mfr-member-ink,var(--mfr-ink));margin-right:6px}
-.mfr-foot{flex:none;margin:auto 0 0;padding-top:24px;font:italic 400 15px/1.4 Georgia,serif;text-align:center;color:var(--mfr-soft)}
+.mfr-habits ul{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.mfr-habits li{font:400 var(--mfr-fin-lg,16px)/1.4 Georgia,serif}
+.mfr-habits li .mfr-name{font-weight:700;color:var(--mfr-member-ink,var(--mfr-ink))}
+.mfr-habits-note{margin:8px 0 0;font:italic 400 13px/1.4 Georgia,serif;color:var(--mfr-soft)}
+.mfr-foot{flex:none;margin:calc(var(--mfr-gap,30px) + 6px) 0 auto;font:italic 400 15px/1.4 Georgia,serif;text-align:center;color:var(--mfr-soft)}
 @media print{.mfr-dialog,.mfr-empty{display:none!important}}
 
 /* The editor dialog (desktop) and the edit sheets (phones) share these. */
-.mfr-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(680px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow-y:auto;padding:24px 26px;background:var(--color-ivory,#fffdfa);border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:3px;box-shadow:0 20px 65px #0003;color:var(--color-warm-ink,#4d4544);z-index:100}
+.mfr-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow-y:auto;overscroll-behavior:contain;padding:24px 26px;background:var(--color-ivory,#fffdfa);border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:3px;box-shadow:0 20px 65px #0003;color:var(--color-warm-ink,#4d4544);z-index:100}
 .mfr-dialog::backdrop{background:rgba(33,30,29,.5)}
 .mfr-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
 .mfr-dialog-head h2{margin:6px 0 0;font:400 28px/1.15 var(--font-serif,Georgia,serif)}
@@ -88,41 +94,65 @@ const { storageKey } = Astro.props;
 .mfr-steps button{min-height:44px;margin-bottom:-1px;padding:8px 2px;border:0;border-bottom:2px solid transparent;background:none;color:var(--color-warm-soft,#6e6461);font:600 .75rem var(--font-sans);letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
 .mfr-steps button[aria-selected="true"]{color:var(--color-warm-ink,#4d4544);border-bottom-color:var(--color-warm-button,#4a3f3e)}
 .mfr-dialog-actions{display:grid;gap:10px;margin-top:20px}
+.mfr-dialog-actions[hidden]{display:none}
 .mfr-done{width:100%;min-height:48px;border:0;border-radius:3px;background:var(--color-warm-button,#4a3f3e);color:#fff;font:600 .75rem var(--font-sans);letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
 .mre-section{display:grid;gap:14px;padding-top:10px}
 .mre-intro{margin:0;font-size:.9rem;line-height:1.5;color:var(--color-warm-soft,#6e6461)}
+.mre-kicker{margin:0;font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
 .mre-card{display:grid;gap:10px;padding:14px 16px;border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:6px;background:#fff}
-.mre-card.is-off .mre-field{opacity:.55}
-.mre-card-title,.mre-moment-title{margin:0;font:400 1.2rem/1.2 var(--font-serif,Georgia,serif);color:var(--color-warm-ink,#4d4544)}
-.mre-moment-title span{font:500 .85rem var(--font-sans);color:var(--color-warm-soft,#6e6461)}
+.mre-card.is-off{background:transparent}
+.mre-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.mre-card-title{margin:0;font:400 1.2rem/1.2 var(--font-serif,Georgia,serif);color:var(--color-warm-ink,#4d4544)}
+.mre-count{font-size:.8rem;color:var(--color-warm-soft,#6e6461);white-space:nowrap}
+.mre-summary{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:.88rem}
+.mre-summary li{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr);gap:10px}
+.mre-summary-who{display:inline-flex;align-items:center;gap:4px;font-weight:600;overflow-wrap:anywhere}
 .mre-field{display:grid;gap:5px}
-.mre-label{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
-.mre-hint{font-size:.8rem;line-height:1.4;color:var(--color-warm-soft,#6e6461);margin:0}
+.mre-fieldset{display:grid;gap:8px;margin:0;padding:0;border:0;min-width:0}
+.mre-label{padding:0;font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
+.mre-hint{font-size:.8rem;line-height:1.4;color:var(--color-warm-soft,#6e6461);margin:0;font-weight:400}
 .mre-input,.mre-select{width:100%;min-height:44px;box-sizing:border-box;padding:9px 12px;border:1px solid #d7d3cc;border-radius:3px;background:#fff;font:400 1rem var(--font-sans);color:var(--color-warm-ink,#4d4544)}
-.mre-input[hidden]{display:none}
-.mre-select--small{width:auto;max-width:100%;min-height:40px;font-size:.88rem}
 .mre-check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:.95rem;cursor:pointer}
 .mre-check input{width:20px;height:20px;flex:none;accent-color:var(--color-warm-button,#4a3f3e)}
 .mre-habit{padding:4px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
-.mre-moment{display:grid;gap:10px}
 .mre-rows{list-style:none;margin:0;padding:0;display:grid;border-top:1px solid var(--color-warm-rule,#e7ddd4)}
-.mre-row{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
-.mre-row.is-habit{box-shadow:inset 3px 0 0 var(--mfr-base,#C7DED3);padding-left:10px}
-.mre-row-foot{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mre-row{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
+.mre-row.is-habit{background:var(--mfr-wash,#EEF4F1);margin:0 -8px;padding:10px 8px}
+.mre-row.mre-confirm{grid-template-columns:1fr;background:#FBF7F1;margin:0 -8px;padding:10px 8px}
+.mre-icon{width:36px;height:36px}
+.mre-icon img{display:block;width:100%;height:100%;object-fit:contain}
+.mre-row-text{display:grid;gap:3px;min-width:0}
+.mre-row-title{font-weight:600;overflow-wrap:anywhere}
+.mre-tag{margin-left:8px;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mfr-accent,#3F6B5A);border:1.5px solid currentColor;border-radius:999px;padding:2px 6px;white-space:nowrap;vertical-align:2px}
+.mre-owners{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:.82rem}
+.mre-owner{display:inline-flex;align-items:center;gap:5px}
+.mre-amp{color:var(--color-warm-soft,#6e6461)}
+.mre-mode{font-size:.72rem;color:var(--color-warm-soft,#6e6461);font-style:italic}
+.mre-row-actions{display:flex;gap:6px}
+.mre-finish{margin:0;font:italic 400 .9rem/1.45 var(--font-serif,Georgia,serif);color:var(--color-warm-soft,#6e6461)}
+.mre-finish b{font:700 .66rem var(--font-sans);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--color-warm-ink,#4d4544)}
 .mre-chips{display:flex;flex-wrap:wrap;gap:6px}
-.mre-chip{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:6px 11px;border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:999px;background:#fff;color:var(--color-warm-ink,#4d4544);font:500 .85rem var(--font-sans);cursor:pointer}
+.mre-chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:6px 12px;border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:999px;background:#fff;color:var(--color-warm-ink,#4d4544);font:500 .88rem var(--font-sans);cursor:pointer;text-align:left}
+.mre-chip--job{border-radius:6px}
 .mre-chip[aria-pressed="true"]{border-color:var(--color-warm-button,#4a3f3e);box-shadow:inset 0 0 0 1px var(--color-warm-button,#4a3f3e);font-weight:700}
-.mre-chip[aria-pressed="false"]{color:var(--color-warm-soft,#6e6461)}
-.mre-chip[aria-pressed="false"] .mre-dot{opacity:.4}
 .mre-dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
-.mre-add{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 12px;background:#FBF7F1;border-radius:6px}
-.mre-add .mre-label,.mre-add .mre-input{grid-column:1/-1}
-.mre-btn{min-height:44px;padding:0 18px;border:1px solid var(--color-warm-button,#4a3f3e);border-radius:3px;background:#fff;color:var(--color-warm-ink,#4d4544);font:600 .8rem var(--font-sans);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
-.mre-text-btn{min-height:44px;padding:0 4px;border:0;background:none;color:var(--color-warm-soft,#6e6461);font-size:.85rem;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer;justify-self:start}
+.mre-chip[aria-pressed="false"] .mre-dot{opacity:.45}
+.mre-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.mre-actions--end{padding-top:6px;border-top:1px solid var(--color-warm-rule,#e7ddd4)}
+.mre-btn{min-height:44px;padding:0 18px;border:1px solid var(--color-warm-button,#4a3f3e);border-radius:3px;background:#fff;color:var(--color-warm-ink,#4d4544);font:600 .78rem var(--font-sans);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;justify-self:start}
+.mre-btn--dark{background:var(--color-warm-button,#4a3f3e);color:#fff}
+.mre-text-btn,.mre-back{min-height:44px;padding:0 6px;border:0;background:none;color:var(--color-warm-soft,#6e6461);font-size:.85rem;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer;justify-self:start}
+.mre-back{padding:0;text-decoration:none;color:var(--color-warm-ink,#4d4544)}
+.mre-remove{margin-left:auto;color:#8c514c}
 .mre-text-btn:disabled,.mre-btn:disabled,.mre-chip:disabled{opacity:.45;cursor:not-allowed}
-.mre-warn{margin:0;padding:8px 10px;border-left:3px solid #B5654F;background:#FBF1EC;font-size:.85rem;line-height:1.4;color:#7A3B2B}
+.mre-confirm{display:grid;gap:8px;padding:12px 14px;border-radius:6px;background:#FBF7F1}
+.mre-confirm p{margin:0}
+.mre-warn{margin:0;padding:8px 10px;border-left:3px solid #B5654F;background:#FBF1EC;font-size:.88rem;line-height:1.4;color:#7A3B2B}
+.mre-warn-inline{font-size:.78rem;color:#7A3B2B}
+.mre-status{margin:0;min-height:0;font-size:.85rem;color:var(--color-warm-soft,#6e6461)}
+.mre-status:empty{display:none}
 .mfr-dialog :focus-visible,.cp-sheet .mre-section :focus-visible{outline:2px solid var(--color-warm-button,#4a3f3e);outline-offset:2px}
-@media (max-width:560px){.mre-add{grid-template-columns:1fr}}
+@media (max-width:560px){.mre-summary li{grid-template-columns:1fr;gap:0}.mre-row{grid-template-columns:30px minmax(0,1fr)}.mre-row-actions{grid-column:2}.mre-icon{width:30px;height:30px}}
 </style>
 
 <script>
@@ -131,7 +161,7 @@ import {
   type RhythmMember, type RhythmPlanResource, type RhythmState, type RhythmView,
 } from '../../lib/club/engines/march-family-rhythm';
 import { marchIconArt } from '../../data/club/march-chore-icons';
-import { habitsEditor, momentsEditor, ownersEditor, restoreButton, type RhythmSection } from '../../lib/club/march-rhythm-editor';
+import { rhythmEditor, restoreButton, type RhythmSection } from '../../lib/club/march-rhythm-editor';
 import { ownerTag } from '../../lib/club/personalize/marks';
 import { familySnapshot, settledSnapshot, type FamilySnapshot } from '../../lib/club/personalize/family';
 import type { ContextPrefs } from '../../lib/club/personalize/family';
@@ -168,18 +198,20 @@ if (root) {
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(q('[data-mfr-pages]'));
   window.addEventListener('resize', fit);
 
-  // Sizes by how much the sheet holds (rows, moments, the habits box): roomy for a small plan, tighter only when a
-  // large family needs it. Content-driven, never stretched: the moments sit together in the middle of the page.
+  // Sizes by how much the sheet holds (rows, moments, the practice box, long names): roomy and larger for a small plan,
+  // tighter only when a large family needs it. Text never goes below 13px.
   const TIERS = [
-    { gap: 34, pad: 11, icon: 44, text: 18, h2: 27, h1: 40 },
-    { gap: 26, pad: 8, icon: 38, text: 16, h2: 24, h1: 36 },
-    { gap: 18, pad: 6, icon: 32, text: 15, h2: 22, h1: 32 },
-    { gap: 12, pad: 4, icon: 28, text: 14, h2: 20, h1: 30 },
-    { gap: 8, pad: 2, icon: 24, text: 13, h2: 18, h1: 26, top: 34, bottom: 26 },
+    { gap: 44, pad: 15, icon: 54, text: 21, h2: 32, h1: 48, name: 13, fin: 16, 'fin-lg': 18, motto: 19 },
+    { gap: 32, pad: 11, icon: 44, text: 18, h2: 27, h1: 40, name: 12, fin: 14, 'fin-lg': 16, motto: 17 },
+    { gap: 24, pad: 8, icon: 38, text: 16, h2: 24, h1: 36, name: 12, fin: 13.5, 'fin-lg': 15, motto: 17 },
+    { gap: 16, pad: 6, icon: 32, text: 15, h2: 21, h1: 32, name: 11.5, fin: 13, 'fin-lg': 14, motto: 16 },
+    { gap: 10, pad: 4, icon: 26, text: 13.5, h2: 19, h1: 28, name: 11, fin: 12.5, 'fin-lg': 13.5, motto: 15, top: 36, bottom: 28 },
   ];
   const tierFor = (v: RhythmView) => {
-    const weight = v.printed.reduce((n, m) => n + m.rows.length + 2.2, 0) + (v.habits.length ? 2 : 0) + (v.people.length > 5 ? 1 : 0);
-    return weight <= 11 ? 0 : weight <= 15 ? 1 : weight <= 19 ? 2 : weight <= 23 ? 3 : 4;
+    const rows = v.printed.flatMap((m) => m.rows);
+    const weight = rows.length + v.printed.length * 2.2 + (v.habits.length ? 2.5 + v.habits.length * 0.5 : 0)
+      + rows.filter((r) => r.owners.length > 2 || r.title.length > 30).length * 0.5 + (v.people.length > 5 ? 1 : 0);
+    return weight <= 11.5 ? 0 : weight <= 15 ? 1 : weight <= 19 ? 2 : weight <= 23 ? 3 : 4;
   };
   const setTier = (paper: HTMLElement, i: number) => {
     paper.dataset.tier = String(i);
@@ -197,6 +229,7 @@ if (root) {
     }
     return slot;
   };
+  const named = (o: { name: string; color: { ink: string } }) => { const s = el('span', { class: 'mfr-name' }, o.name); s.style.color = o.color.ink; return s; };
   const sheet = (v: RhythmView) => {
     const page = el('article', { class: 'mfr-sheet' });
     page.dataset.planSheet = 'front';
@@ -207,9 +240,10 @@ if (root) {
         el('h2', { class: 'mfr-moment-title' }, m.title),
         el('p', { class: 'mfr-cue' }, el('b', {}, 'Cue'), `${m.cue} → ${m.reset}`)),
       el('ul', { class: 'mfr-rows' }, ...m.rows.map((r) => {
-        const li = el('li', { class: `mfr-row${r.habit ? ' is-habit' : ''}${r.owners.length > 1 ? ' is-shared' : ''}` },
+        const names = r.owners.flatMap((o, i) => (i ? [el('span', { class: 'mfr-amp' }, r.mode === 'together' ? '+' : '·'), named(o)] : [named(o)]));
+        const li = el('li', { class: `mfr-row${r.habit ? ' is-habit' : ''}` },
           el('span', { class: 'mfr-bar', 'aria-hidden': 'true' }),
-          el('span', { class: 'mfr-who' }, ...r.owners.map((o) => { const s = el('span', {}, o.name); s.style.color = o.color.ink; return s; })),
+          el('span', { class: 'mfr-who' }, ...names, ...(r.mode === 'one' ? [] : [el('span', { class: 'mfr-mode' }, r.mode === 'each' ? 'EACH THEIR OWN' : 'TOGETHER')])),
           icon(r.icon),
           el('span', { class: 'mfr-job' }, r.title),
           r.habit ? el('span', { class: 'mfr-tag' }, 'New habit') : el('span'));
@@ -219,13 +253,24 @@ if (root) {
         return li;
       })),
       ...(m.finish ? [el('p', { class: 'mfr-finish' }, el('b', {}, 'Finished when'), m.finish)] : [])));
+    // The family's focus for the week, in plain sentences, from the actual jobs.
     const habits = v.habits.length ? [el('section', { class: 'mfr-habits' },
-      el('p', { class: 'mfr-habits-title' }, 'Our New Habits'),
+      el('p', { class: 'mfr-habits-title' }, 'This week, we’re practicing'),
       el('ul', {}, ...v.habits.map((h) => {
-        const li = el('li', {}, el('strong', {}, h.owners.map((o) => o.name).join(' & ')), `${h.title.charAt(0).toUpperCase()}${h.title.slice(1)}, ${h.moment.toLowerCase()}.`);
-        li.style.setProperty('--mfr-member-ink', h.owners[0].color.ink);
+        const names = h.owners.map((o) => o.name);
+        const li = el('li', {});
+        let rest = h.sentence;
+        for (const o of h.owners) {
+          const at = rest.indexOf(o.name);
+          if (at < 0) continue;
+          li.append(rest.slice(0, at), named(o));
+          rest = rest.slice(at + o.name.length);
+        }
+        li.append(rest);
+        if (!names.length) li.textContent = h.sentence;
         return li;
-      })))] : [];
+      })),
+      el('p', { class: 'mfr-habits-note' }, 'Practice together at first. Then let them take the lead.'))] : [];
     const paper = el('div', { class: 'mfr-paper' },
       el('header', { class: 'mfr-head' },
         el('p', { class: 'mfr-kicker' }, 'Our Family Rhythm'),
@@ -238,6 +283,21 @@ if (root) {
     page.append(paper);
     return { stage: el('div', { class: 'mfr-stage' }, page), paper };
   };
+  // Measured on an off-screen copy at full size, so it works whether or not the sheet is showing (phones, the print
+  // view, before the page is ready): a plan whose words run long steps down a size rather than clip.
+  const measure = (paper: HTMLElement) => {
+    const probe = el('div', { 'aria-hidden': 'true' });
+    probe.style.cssText = 'position:absolute;left:-10000px;top:0;width:816px;height:1056px;visibility:hidden;overflow:hidden';
+    const copy = paper.cloneNode(true) as HTMLElement;
+    probe.append(copy);
+    document.body.append(probe);
+    const foot = copy.querySelector<HTMLElement>('.mfr-foot')!;
+    const runsOver = () => foot.offsetTop + foot.offsetHeight > copy.clientHeight - parseFloat(getComputedStyle(copy).paddingBottom) + 1;
+    let t = Number(paper.dataset.tier);
+    while (t < TIERS.length - 1 && runsOver()) setTier(copy, ++t);
+    probe.remove();
+    if (t !== Number(paper.dataset.tier)) setTier(paper, t);
+  };
   const draw = () => {
     const v = view();
     const has = v.printed.length > 0;
@@ -245,31 +305,34 @@ if (root) {
     if (!has) { q('[data-mfr-pages]').replaceChildren(); return; }
     const { stage, paper } = sheet(v);
     q('[data-mfr-pages]').replaceChildren(stage);
-    // Where the sheet is on screen, measure: a plan whose words run long steps down a size rather than clip.
-    for (let t = Number(paper.dataset.tier); t < TIERS.length - 1 && paper.clientHeight > 0 && paper.scrollHeight > paper.clientHeight + 1; t++) setTier(paper, t + 1);
+    measure(paper);
     fit();
   };
 
-  // The desktop editor: the three steps as tabs, in order.
-  const editor = q<HTMLDialogElement>('[data-mfr-editor]');
-  let section: RhythmSection = 'moments';
+  // The desktop editor: three steps as tabs; "Who owns what" opens one moment, then one job, at a time.
+  const dialog = q<HTMLDialogElement>('[data-mfr-editor]');
+  let section: RhythmSection = 'owners';
   const STEPS: [RhythmSection, string][] = [['moments', '1 · Our moments'], ['owners', '2 · Who owns what'], ['habits', '3 · New habits']];
   const drawEditor = () => {
-    if (!editor.open) return;
+    if (!dialog.open) return;
     q('[data-mfr-steps]').replaceChildren(...STEPS.map(([id, label]) => {
       const b = el('button', { type: 'button', role: 'tab' }, label);
       b.setAttribute('aria-selected', String(id === section));
-      b.addEventListener('click', () => { section = id; drawEditor(); });
+      b.addEventListener('click', () => { if (editor.dirty()) { editor.warn(); return; } section = id; editor.focus(); drawEditor(); });
       return b;
     }));
-    const opts = { locked, redraw: drawEditor };
-    const scroll = editor.scrollTop;
-    q('[data-mfr-editor-body]').replaceChildren(section === 'moments' ? momentsEditor(plan, opts) : section === 'owners' ? ownersEditor(plan, opts) : habitsEditor(plan, opts));
-    q('[data-mfr-restore]').replaceChildren(restoreButton(plan, opts));
-    editor.scrollTop = scroll;
+    const scroll = dialog.scrollTop;
+    q('[data-mfr-editor-body]').replaceChildren(editor.section(section));
+    q('[data-mfr-restore]').replaceChildren(restoreButton(plan, { locked, redraw: drawEditor }));
+    // One job open: it has its own Done and Cancel, so the dialog's own buttons step aside.
+    q('.mfr-dialog-actions').hidden = editor.editingRow();
+    dialog.scrollTop = editor.editingRow() ? 0 : scroll;
   };
-  root.querySelectorAll('[data-mfr-close]').forEach((b) => b.addEventListener('click', () => editor.close()));
-  editor.addEventListener('click', (e) => { if (e.target === editor) editor.close(); });
+  // Never closes over a job she's still editing: Done or Cancel first.
+  const close = () => { if (editor.dirty()) { editor.warn(); dialog.scrollTop = 0; return; } editor.reset(); dialog.close(); };
+  root.querySelectorAll('[data-mfr-close]').forEach((b) => b.addEventListener('click', close));
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) close(); });
+  dialog.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
 
   const changed = () => { save(); draw(); if (current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true })); };
   const update = (change: (s: RhythmState) => void) => { if (locked) return; change(state); applyFamily(state, members, prefs); settle(); changed(); };
@@ -305,15 +368,21 @@ if (root) {
     members: () => members,
     prefs: () => prefs,
     familyName: () => family,
-    setLocked: (on) => { locked = on; if (on) editor.close(); },
-    openEditor: (s) => {
+    setLocked: (on) => { locked = on; if (on) { editor.reset(); dialog.close(); } },
+    openEditor: (s, momentId) => {
       if (locked) return;
-      section = s ?? 'moments';
-      if (!editor.open) editor.showModal();
+      section = s ?? 'owners';
+      editor.focus(momentId);
+      if (!dialog.open) dialog.showModal();
       drawEditor();
     },
   };
+  const editor = rhythmEditor({ plan: () => plan, locked: () => locked, redraw: drawEditor });
   root.clubPlan = plan;
+  // Georgia and Montserrat can arrive after the first draw and make the words longer: measure again once they have,
+  // and right before printing.
+  document.fonts?.ready.then(() => { if (current) draw(); });
+  window.addEventListener('beforeprint', () => { if (current) draw(); });
   window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
   const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
   if (cached) applyHousehold(cached);

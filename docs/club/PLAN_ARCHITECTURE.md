@@ -183,21 +183,47 @@ Habits"; established jobs show plainly as context. Footer: "When the moment come
 rewards, points, streaks, percentages, checkboxes or tracking.**
 
 Rules: `src/lib/club/engines/march-family-rhythm.ts` (pure; cue → action → finish). Five shared moments (after
-breakfast, before we head out, when we get home, after dinner, after brushing teeth) with a job library per moment; a
-job never sits on a moment it can't follow (`fitsCue`: making dinner is never "after dinner"; typed jobs that break
-this are flagged in the editor). Prepared from the profile: two moments from her priority and challenges, a third
-offered but off; whoever already owns an area keeps it (established); each child gets an age-fitting job (a wished job
-first); a large family's youngest share an own-job row instead of a row each; a grown-up has a real part, the account
-holder leaning last; at most five rows a moment; one or two new habits (wished jobs first, different children and
-moments where possible; a family without children practices a grown-up one). A moment with no rows doesn't print.
+breakfast, before we head out, when we get home, after dinner, after brushing teeth), each with its own job library.
+Every job has to make sense at its moment (`fitsCue`): nothing that must happen before the cue, and no kitchen jobs at
+bedtime; her typed jobs are checked the same way and refused with the reason. Jobs are either **household** (one owner;
+several only when she chooses, printed "together") or **individual** (each does their own, several names on one row,
+printed "each their own").
 
-Sheet, desktop editor and controller: `MarchFamilyRhythm.astro` (`data-plan-sheet="front"`). Row heights follow the
-words; five size tiers step down by how much the plan holds and, on screen, until nothing overflows, so the densest
-plan (three moments of five) still prints one page. Editor sections, shared by the desktop dialog (three tabs) and the
-phone edit sheets: `src/lib/club/march-rhythm-editor.ts` (1 Our moments: choose from the shared moments, her own words,
-the optional third; 2 Who owns what: owner chips in family colors, rename, move to another moment, remove, add from the
-moment's list or her own words; 3 New habits: up to two). Phones: `MarchPlanMobile.astro`, a reference view of the same
-plan (each moment, who owns what, the new habits) with the three edit rows, preview, approve and print.
+How the plan is prepared, for any household (no family is special-cased):
+1. Two moments from her priority and challenges (no children: breakfast and dinner); a third offered, off.
+2. Whoever already takes care of an area keeps that job, as established context.
+3. Children, one part a moment: a job she wished for them first; then each household job the moment needs (essential
+   jobs first) goes to the child with the fewest parts so far, then the youngest who can do it; whoever is left does
+   their own individual job, sharing a sibling's row. At most four household jobs go to children; five rows a moment.
+4. Grown-ups: the moment's grown-up job, and an essential job no child could take. No grown-up part at bedtime, and
+   no family is evened out for its own sake; a single grown-up gets a two-job reset.
+5. One or two new habits: a wished job first, else the most meaningful new one (household over personal, harder over
+   easier), for one or two people; never an established job, one far below a child's age, or a row the whole family
+   does.
+
+`validatePlan` checks every plan: duplicates (`jobKey` normalizes words and drops trailing numbers, so "… game 0" and
+"… game 2" are one job), jobs that can't follow their moment, owners who aren't in the family, unintended sharing,
+long labels, crowded moments and habits that point nowhere or at an established job. The prepared plan for the sample
+families and 300 generated households (1–9 people, any ages, with and without pets) passes every check (unit tests).
+Saved plans are cleaned on load (`cleanPlan`): a copy of a job already in the same moment is merged into it.
+
+The finish line is written from the moment's current jobs every time it's drawn (`finishLine`; a typed job gets an
+observable phrase from its own words, `finishOf`), so an edit can never leave it stale. "This week, we're practicing"
+says each habit as a sentence (`habitSentence`: "Mateo practices sweeping under the table after dinner."; "my" becomes
+"their", never a guessed pronoun) with "Practice together at first. Then let them take the lead."
+
+Sheet, desktop editor and controller: `MarchFamilyRhythm.astro` (`data-plan-sheet="front"`). Header, moments, practice
+and footer are one composition centered on the page; five size steps follow how much the plan holds (a one-person plan
+prints large, a seven-person three-moment plan tight), and on screen it steps down further if words run long, so it
+always prints on one page. Editor (`src/lib/club/march-rhythm-editor.ts`, the same in the desktop dialog and the phone
+sheet), never a long form: **Our moments** (choose another moment, her words, turn one on or off; turning off a moment
+that holds jobs asks first and can be undone); **Who owns what** at three levels: every moment as a card (who does what,
+"Edit responsibilities"), one moment's jobs as compact rows (icon, job, owners in their colors, Edit, Remove with a
+confirmation and Undo), and one job (suggestions from that moment's list or her words, who owns it, when, new habit;
+Done, Cancel, Remove); **New habits**. A job being edited is a draft until Done: the dialog and the sheet refuse to close
+over it (×, the backdrop or Escape) and say why. Phones: `MarchPlanMobile.astro`, a reference view of the same plan (each
+moment, who owns what with "each"/"together", the finish line, this week's practice) with the three edit rows and a
+"Change … jobs" link under each moment.
 
 Saved under the earlier chore charts' keys, `omc:club:march-chore-charts:v2` with
 `omc:preview:march-chore-charts:approval`, so account saves and approvals keep their place. State is `{ v: 3, plan?,
