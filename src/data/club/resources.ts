@@ -43,7 +43,7 @@ export const clubResources: readonly ClubResource[] = [
       firstStep: 'Pick ten minutes this week when everyone’s home, and bring the companion and your Family Meeting guide.',
     } },
   { slug: '2027-02-better-together', month: '2027-02', title: 'Family Laundry Guides', problem: 'Laundry the kids can own, step by step', component: 'february', preview: '/club/february-preview' },
-  { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Family Chore Charts', problem: 'Chores without chasing everyone', component: 'march', preview: '/club/march-preview' },
+  { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Our Family Rhythm', problem: 'Chores without chasing everyone', component: 'march', preview: '/club/march-preview' },
   { slug: '2027-04-everybody-helps-at-mealtime', month: '2027-04', title: 'Our Dinner Team', problem: 'Dinner isn’t just Mom’s job', component: 'april', preview: '/club/april-preview' },
   { slug: '2027-05-finish-the-school-year', month: '2027-05', title: 'Our Summer Day Rhythm', problem: 'A rhythm kids can follow when school ends', component: 'may', preview: '/club/may-preview' },
   { slug: '2027-06-summer-with-a-plan', month: '2027-06', title: 'My Family’s Snack Station', problem: 'Snacks without a request every hour', component: 'june', preview: '/club/june-preview' },

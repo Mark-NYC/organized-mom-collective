@@ -47,7 +47,7 @@ describe('family meeting: shape, for all 12 monthly themes', () => {
     const themes = MEETING_MONTHS.map((m) => m.theme.toLowerCase());
     expect(themes[0]).toMatch(/weekly family meeting/);
     expect(themes[1]).toMatch(/laundry/);
-    expect(themes[2]).toMatch(/chore charts/);
+    expect(themes[2]).toMatch(/shared family moments/);
     expect(themes[3]).toMatch(/meal/);
     expect(themes[4]).toMatch(/summer routines/);
     expect(themes[5]).toMatch(/snack/);

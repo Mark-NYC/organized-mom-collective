@@ -33,13 +33,12 @@ tests still assert the earlier drafts' titles, steps, letters and tools:
 **Worth a look before printing anything:** May's QR code (`qrPath must point at this kit`) is the one that would end
 up on paper pointing at the wrong page.
 
-## 2. Other pages moved (3 tests)
+## 2. Other pages moved (2 tests)
 
 | File | Fails | Cause |
 | --- | --- | --- |
 | `tests/logic.test.ts` | 1 | “keeps the QR entry point and app routes stable”: the cleaning companion's day link is now `/app/cleaning?day=monday`; the test expects `/app?day=monday`. The test exists to keep printed QR entry points stable, so confirm what the printed calendar's QR code targets before deciding which side is right. |
 | `tests/shop.test.ts` | 1 | `src/data/scheduler.ts` links to the website checkout, which the test allows only for the offer pages, calendar options and mug page |
-| `src/lib/club/engines/march-chore-charts.test.ts` | 1 | The missing-art fallback for March's chore icons returns a different shape |
 
 ## 3. Slow in some environments (1 test)
 

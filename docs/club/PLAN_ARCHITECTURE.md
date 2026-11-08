@@ -3,7 +3,7 @@
 How a month's personalized printable becomes a plan page in the cleaning companion website (`/app/club/<month>`).
 September (Sunday Reset, two sheets, plus the activity calendar demo in a second tab), October (Daily Reset, two
 sheets), January (Habit Cards, one sheet), February (laundry guides: one sheet per readiness level in use, so one
-or two) March (family chore charts: one sheet per child), April (Dinner Team, two sheets), May (Summer Day Rhythm, one
+or two) March (Our Family Rhythm, one sheet), April (Dinner Team, two sheets), May (Summer Day Rhythm, one
 sheet), June (Snack Station, one sheet), July (Activity Board, one sheet), August (School Day Routines, one sheet) and
 December 2026 (Christmas Mission, two sheets drawn as SVG by the worksheet layout) use it. (Until Oct 2026 the Sunday Reset was October's and the Daily Reset September's.) Every remaining month should too, without copying page code.
 
@@ -172,40 +172,41 @@ Laundry days (one or more, or "As needed") print on every guide; a named machine
 
 ## March
 
-`/app/club/march`: family chore charts, one landscape chart per person (11 × 8.5 in): every child, then every
-participating grown-up (the family editor can leave a grown-up's chart off): the person's name, Weekly Chore Chart,
-"My jobs, start to finish.", only their own daily chores (up to eight, no blank rows) with a box per day, one weekly
-job per weekday with one box or a dashed "Day off", and one ownership line ("My jobs are finished when I've done the
-work and put everything away."). **No rewards, stars, points or thresholds**; charts saved with the old reward fields
-keep their chores and drop the rewards (`applyFamily`). Sizes follow the number of daily chores; one to three chores
-(the youngest) switch to a stacked layout with larger rows and the week as seven tiles. Icons:
-`src/data/club/march-chore-icons.ts` maps every chore to one of 24 files in `assets/icons/ofc/march/` (grown-up jobs
-reuse them where the art says the same thing; `NO_ICON_YET` lists those that print words only); renamed and typed
-chores have no icon. `MarchChoreCharts.astro` (the sheets and the desktop editor), `MarchPlanMobile.astro`, rules
-`src/lib/club/engines/march-chore-charts.ts`, editor panels shared by the desktop dialog and the phone sheets in
-`src/lib/club/march-chore-editor.ts`.
+`/app/club/march`: **Our Family Rhythm**, one portrait Letter sheet for the whole family. One family, two or three
+shared moments, everyone owns their part. Header "OUR FAMILY RHYTHM", the family name (`familyTitle`, as January),
+"Same moments. Everyone has a part." and a legend of everyone with their January color. Then each moment the family
+already shares ("After Dinner", with "Cue: Dinner finishes → Our kitchen reset"), its rows (a narrow bar in the owner's
+color, or equal bands for siblings sharing a row; the name in that color's ink; the approved March icon; the job), and
+a finish line written from the jobs actually on it ("Finished when: the table is cleared and the floor is swept.").
+The one or two NEW habits get a pale March wash, bold words and a "New habit" tag, and are repeated in "Our New
+Habits"; established jobs show plainly as context. Footer: "When the moment comes, we each know our part." **No
+rewards, points, streaks, percentages, checkboxes or tracking.**
 
-Prepared on the shared personalization foundation (docs/club/PERSONALIZATION_FOUNDATION.md), ages as of March 2027:
-each child's own daily jobs (bed, toys, clothes, desk) and a fair share of the household jobs (table, pets, trash,
-dishwasher, dinner), one owner each, so nobody has the same household job twice; who already owns an area in her
-profile keeps it and a child she wished a job for gets it first. Grown-ups get what no child can do yet and the
-grown-up jobs (dinner, dishwasher, laundry, papers, evening pick-up), split between them with the account holder
-leaning last. Weekly: each day the grown-ups take the grown-up-sized job of that day's cleaning zone (taking turns at
-the hardest), the children the hardest job they can do, distinct household jobs while there are enough; the zone
-shows in the editor, not on the chart. Three tool palettes. The profile snapshot is saved with the plan
-(`profile`), so the owner's print view prepares the same charts. The free chore chart (`/chore-chart`) is separate
-and unchanged.
+Rules: `src/lib/club/engines/march-family-rhythm.ts` (pure; cue → action → finish). Five shared moments (after
+breakfast, before we head out, when we get home, after dinner, after brushing teeth) with a job library per moment; a
+job never sits on a moment it can't follow (`fitsCue`: making dinner is never "after dinner"; typed jobs that break
+this are flagged in the editor). Prepared from the profile: two moments from her priority and challenges, a third
+offered but off; whoever already owns an area keeps it (established); each child gets an age-fitting job (a wished job
+first); a large family's youngest share an own-job row instead of a row each; a grown-up has a real part, the account
+holder leaning last; at most five rows a moment; one or two new habits (wished jobs first, different children and
+moments where possible; a family without children practices a grown-up one). A moment with no rows doesn't print.
 
-Printing: the sheets are landscape (1056 × 816, `data-plan-width="1056"` so the plan screen's thumbnails scale
-them). Where the browser supports named pages (`page`: Chrome, Edge, Firefox), the script adds
-`@page mcc-chart { size: letter landscape }` as the last stylesheet and sets `html[data-mcc-print="landscape"]`; the
-charts then print one per landscape Letter page, upright in a saved PDF. (It must be the last stylesheet: in
-Chromium a later stylesheet's plain `@page` size, the shared portrait rule, beats an earlier named page.)
-Elsewhere (Safari) each chart is turned a quarter on the shared portrait page, so the paper still comes out
-landscape. The shared print rules are unchanged. Tab-only `omc:club:march-chore-charts:v2` with
-`omc:preview:march-chore-charts:approval`. The earlier March page, Spring Prep (`MarchSpringPrep.astro`,
-unchanged), stays at `/app/club/march/spring-prep`; `MarchTabs.astro` links the two and keeps `?sample`. The kit
-page and `/club/march-preview` still describe Spring Prep.
+Sheet, desktop editor and controller: `MarchFamilyRhythm.astro` (`data-plan-sheet="front"`). Row heights follow the
+words; five size tiers step down by how much the plan holds and, on screen, until nothing overflows, so the densest
+plan (three moments of five) still prints one page. Editor sections, shared by the desktop dialog (three tabs) and the
+phone edit sheets: `src/lib/club/march-rhythm-editor.ts` (1 Our moments: choose from the shared moments, her own words,
+the optional third; 2 Who owns what: owner chips in family colors, rename, move to another moment, remove, add from the
+moment's list or her own words; 3 New habits: up to two). Phones: `MarchPlanMobile.astro`, a reference view of the same
+plan (each moment, who owns what, the new habits) with the three edit rows, preview, approve and print.
+
+Saved under the earlier chore charts' keys, `omc:club:march-chore-charts:v2` with
+`omc:preview:march-chore-charts:approval`, so account saves and approvals keep their place. State is `{ v: 3, plan?,
+profile? }` (`isRhythmState`); an earlier chore-chart state is upgraded on load (`fromLegacy`): a child who had a
+matching chore keeps it as an established part. The profile snapshot is saved with the plan, so the owner's print view
+prepares the same sheet. The earlier March page, Spring Prep (`MarchSpringPrep.astro`, unchanged), stays at
+`/app/club/march/spring-prep`; `MarchTabs.astro` links the two and keeps `?sample`. The kit page and
+`/club/march-preview` still describe Spring Prep. The prototype at `/app/club/family-chore-chart-prototype` is kept
+as the design reference.
 
 ## May
 

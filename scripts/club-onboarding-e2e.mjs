@@ -1136,7 +1136,7 @@ async function editPlan(page, month, marker) {
     await input.fill(marker);
     await input.press('Tab');
     await page.keyboard.press('Escape');
-    return 'renamed a chore in its editor';
+    return 'renamed a moment in its editor';
   }
   if (month === 'december') {
     await page.click('[data-cpd-edit]');

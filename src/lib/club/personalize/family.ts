@@ -19,6 +19,9 @@ export interface FamilySnapshot {
   v: 1;
   activities: { category: string; name?: string; memberIds: string[]; days: number[]; startsAt?: string }[];
   responsibilities: { status: 'existing' | 'desired'; category: string; item?: string; ownerIds: string[]; helperIds: string[] }[];
+  /** Her first priority and the challenges she named (steps 5–6), when she answered. Optional: older snapshots have neither. */
+  priority?: string;
+  challenges?: string[];
 }
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -40,14 +43,18 @@ export function familySnapshot(p: FamilyProfile | null | undefined): FamilySnaps
       .filter((r): r is typeof r & { status: 'existing' | 'desired' } => r.status === 'existing' || r.status === 'desired')
       .slice(0, 30)
       .map((r) => ({ status: r.status, category: r.category, ...(r.item ? { item: r.item } : {}), ownerIds: ids(r.ownerIds), helperIds: ids(r.helperIds) })),
+    ...(p.priority ? { priority: p.priority.slice(0, 40) } : {}),
+    ...(p.challenges?.length ? { challenges: p.challenges.filter((c) => typeof c === 'string').slice(0, 7) } : {}),
   };
-  return snap.activities.length || snap.responsibilities.length ? snap : undefined;
+  return snap.activities.length || snap.responsibilities.length || snap.priority || snap.challenges?.length ? snap : undefined;
 }
 
 export function isFamilySnapshot(x: unknown): x is FamilySnapshot {
   const s = x as Partial<FamilySnapshot> | null;
   if (!s || s.v !== 1 || !Array.isArray(s.activities) || !Array.isArray(s.responsibilities)) return false;
   if (s.activities.length > 20 || s.responsibilities.length > 30) return false;
+  if (s.priority !== undefined && typeof s.priority !== 'string') return false;
+  if (s.challenges !== undefined && !(Array.isArray(s.challenges) && s.challenges.every((c) => typeof c === 'string'))) return false;
   return s.activities.every((a) => a && typeof a.category === 'string' && Array.isArray(a.memberIds) && Array.isArray(a.days) && (a.startsAt === undefined || TIME.test(a.startsAt)))
     && s.responsibilities.every((r) => r && (r.status === 'existing' || r.status === 'desired') && typeof r.category === 'string' && Array.isArray(r.ownerIds) && Array.isArray(r.helperIds ?? []));
 }

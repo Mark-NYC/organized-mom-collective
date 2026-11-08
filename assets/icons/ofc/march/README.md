@@ -1,6 +1,6 @@
 # March chore chart icons
 
-Artwork for the March family chore charts (`/app/club/march`). The mapping from chores to icons is in
+Artwork for March's Our Family Rhythm (`/app/club/march`). The mapping from chores to icons is in
 `src/data/club/march-chore-icons.ts`; add a file here with one of the names below and the charts use it on the next
 build, no code change.
 
