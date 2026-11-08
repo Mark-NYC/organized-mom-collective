@@ -12,6 +12,15 @@
  *   the dishes, pets), each child's own jobs by age and the shared ones spread out, grown-ups' too; the account
  *   holder is never the default. She can change who, the wording, or leave one off.
  * Saved means settled: the profile snapshot used is kept with the plan.
+ *
+ * When it happens: every block shows ONE thing in its right-hand box, a clock time ("8:00 AM") or a familiar trigger
+ * ("After lunch"), chosen per block (August's model, ../personalize/when.ts). Defaults: Morning Start and Lunch & Reset
+ * by the clock, the rest by what comes before (a relaxed day: triggers only; a more structured day: times, with the
+ * evening still by its trigger; camp mornings by the clock). A block keeps its time while it shows a trigger, so
+ * switching back restores it and the day's colors (which follow the time of day) never move. Evening Reset is one
+ * flexible block: its time or trigger is when the evening begins, not a deadline for each job in it.
+ * Saved plans from before triggers read as they were: a time she set keeps the block on its time; her wording for the
+ * jobs' moment becomes the block's trigger.
  */
 import type { PlanResource } from '../plan/resource';
 import { activitiesOf, familyContext, isFamilySnapshot, type ContextMember, type FamilyContext, type FamilySnapshot } from '../personalize/family';
@@ -19,12 +28,24 @@ import { assignTasks, type PlanTask } from '../personalize/assign';
 import { isTaskEdits, pruneTaskEdits, withEdits, type PlannedTask, type TaskEdits } from '../personalize/edits';
 import { CUE } from '../personalize/cues';
 import { CUE_LIMIT, tidyCue } from '../personalize/marks-text';
+import { CONDITION_TRIGGER, TRIGGER_LIMIT, VAGUE_TRIGGER, clock as clockOf, minutes, overlaps, validTime, type SlotKind } from '../personalize/when';
+export { TRIGGER_LIMIT, validTime, type SlotKind };
+/** Her trigger, tidied and kept to the box: a long one ends at the last whole word, never mid-word. */
+export const tidyTrigger = (text: string) => {
+  const t = text.replace(/\s+/g, ' ').trim().replace(/[.]$/, '');
+  if (t.length <= TRIGGER_LIMIT) return t;
+  const cut = t.slice(0, TRIGGER_LIMIT + 1).replace(/\s+\S*$/, '');
+  return (cut || t.slice(0, TRIGGER_LIMIT)).trim();
+};
 
 export const KIT_MONTH = '2027-05';
 export type MayKey = 'morning' | 'move' | 'create' | 'lunch' | 'quiet' | 'free' | 'snack' | 'evening';
 export const MAY_KEYS: readonly MayKey[] = ['morning', 'move', 'create', 'lunch', 'quiet', 'free', 'snack', 'evening'];
-/** `cue`: her habit cue for the anchor's family jobs. */
-export type MayEdit = { title?: string; desc?: string; time?: string; cue?: string };
+/**
+ * Her changes to one block. `when`: time or trigger for its box (missing = the prepared choice); `trigger`: her words
+ * for it. `cue`: from before triggers (her moment for the block's jobs); read as the trigger, never written now.
+ */
+export type MayEdit = { title?: string; desc?: string; time?: string; cue?: string; when?: SlotKind; trigger?: string };
 export interface MayOptions {
   start: number;
   quiet: 'independent' | 'rest' | 'older';
@@ -52,8 +73,14 @@ export const BASE_DESC: Record<MayKey, string> = {
 export const TINTS: Record<MayKey, string> = { morning: '#F8E8B5', move: '#F4DEA3', create: '#F0D493', lunch: '#DDEBDB', quiet: '#D1E5D6', free: '#C3DDCF', snack: '#E4E9D5', evening: '#D1D7EA' };
 
 export interface MayMember extends ContextMember { kind: 'adult' | 'child' }
-/** `cue`: the existing moment the anchor's family jobs follow (shared by them, printed once), when it has jobs. */
-export interface MayRow { key: MayKey; title: string; desc: string; time: string; parts: PlannedTask[]; cue?: string }
+/**
+ * A printed block. `time` is kept even when the box shows the trigger (it sets the block's color). `slot`: what the box
+ * shows, or null (no set time).
+ */
+export interface MayRow {
+  key: MayKey; title: string; desc: string; time: string; parts: PlannedTask[];
+  when: SlotKind; trigger: string; slot: { kind: 'time'; text: string } | { kind: 'trigger'; text: string } | null;
+}
 export interface MayState {
   options: MayOptions;
   edits: Partial<Record<MayKey, MayEdit>>;
@@ -69,11 +96,7 @@ export interface MayState {
 }
 
 const hhmm = (n: number) => { const v = (n + 24) % 24; const h = Math.floor(v); const m = Math.round((v - h) * 60); return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; };
-export const clock = (time: string) => {
-  if (!time) return 'Evening';
-  const [h, m] = time.split(':').map(Number);
-  return `${h % 12 || 12}:${String(m).padStart(2, '0')}${h < 12 ? ' AM' : ' PM'}`;
-};
+export const clock = (time: string) => (time ? clockOf(time) : 'Evening');
 export const startClock = (start: number) => clock(hhmm(start));
 
 export const mayContext = (members: readonly MayMember[], prefs: { pets?: boolean } | undefined, snapshot?: FamilySnapshot): FamilyContext =>
@@ -106,7 +129,7 @@ const fit = (desc: string) => {
 };
 
 /** An anchor as prepared for the options and the family (her edits go on top). */
-export function starter(key: MayKey, o: MayOptions, ctx?: FamilyContext): Required<Omit<MayEdit, 'cue'>> {
+export function starter(key: MayKey, o: MayOptions, ctx?: FamilyContext): Required<Pick<MayEdit, 'title' | 'desc' | 'time'>> {
   let title = LABELS[key], desc = BASE_DESC[key];
   const idx = MAY_KEYS.indexOf(key);
   let time = key === 'evening' ? '' : hhmm(o.start + [0, 1, 2.5, 4, 5, 6, 8, 10][idx]);
@@ -185,20 +208,146 @@ export function mayParts(ctx: FamilyContext, edits?: TaskEdits): (PlannedTask & 
   return withEdits(prepared, edits, ctx).map((t) => ({ ...t, block: PART_BLOCK.get(t.id)! }));
 }
 
-/** What prints, in order, with each anchor's family jobs. */
+// ------------------------------------------------------------------ when it happens
+
+/** Familiar events to choose from (and her own words). */
+export const TRIGGER_CHOICES = [
+  'When we wake up', 'After breakfast', 'After getting dressed', 'After morning play', 'After lunch', 'After quiet time',
+  'After afternoon play', 'When we get home', 'After snack', 'When we’re ready for dinner',
+] as const;
+/** The prepared trigger for each block: the event that comes before it on an ordinary summer day. */
+export function defaultTrigger(key: MayKey, o: MayOptions): string {
+  if (o.days === 'camp') return ({ morning: 'When we wake up', move: 'After breakfast', create: 'When we get there', lunch: 'After lunch', quiet: 'When we get home', free: 'After a snack', snack: 'When we get home', evening: 'When we’re ready for dinner' } as Record<MayKey, string>)[key];
+  return ({ morning: 'When we wake up', move: 'After getting dressed', create: 'After morning play', lunch: 'After morning play', quiet: 'After lunch', free: 'After quiet time', snack: 'After afternoon play', evening: 'When we’re ready for dinner' } as Record<MayKey, string>)[key];
+}
+/**
+ * The prepared choice for each block's box. Balanced (the default): the morning and lunch by the clock, everything
+ * else by what comes before. Relaxed: no clock at all. More structured: the clock, with the evening still flexible.
+ * Camp days: the morning out the door is timed (programs start on time).
+ */
+export function defaultKind(key: MayKey, o: MayOptions): SlotKind {
+  if (o.structure === 'relaxed') return 'trigger';
+  if (key === 'evening') return 'trigger';
+  if (o.structure === 'structured') return 'time';
+  if (o.days === 'camp') return key === 'morning' || key === 'move' || key === 'create' ? 'time' : 'trigger';
+  return key === 'morning' || key === 'lunch' ? 'time' : 'trigger';
+}
+/** A time for the evening when she switches it to the clock (it has none prepared: it's "the evening"). */
+export const EVENING_TIME = '17:30';
+
+/**
+ * What a block's box shows, read from her edits on top of the prepared choice. Plans saved before triggers: a time she
+ * set keeps the block on its time (except on a relaxed day, which never showed times); her moment for the block's jobs
+ * becomes its trigger.
+ */
+export function whenOf(key: MayKey, edit: MayEdit | undefined, o: MayOptions): { when: SlotKind; trigger: string } {
+  const legacyTime = edit?.when === undefined && typeof edit?.time === 'string' && validTime(edit.time) && o.structure !== 'relaxed';
+  const when: SlotKind = edit?.when ?? (legacyTime ? 'time' : defaultKind(key, o));
+  const trigger = (edit?.trigger !== undefined ? tidyTrigger(edit.trigger) : '') || (edit?.cue ? tidyTrigger(edit.cue) : '') || defaultTrigger(key, o);
+  return { when, trigger };
+}
+
+/** What prints, in order, with each anchor's family jobs and its one time or trigger. */
 export function mayRows(s: Pick<MayState, 'options' | 'edits' | 'order' | 'parts'>, ctx?: FamilyContext): MayRow[] {
   const parts = ctx ? mayParts(ctx, s.parts) : [];
   return visibleKeys(s.order, s.options).map((key) => {
-    const { cue: _cue, ...edit } = s.edits[key] ?? {};
+    const { cue: _cue, when: _when, trigger: _trigger, ...edit } = s.edits[key] ?? {};
     const mine = parts.filter((p) => p.block === key && !p.skipped);
-    const cue = mine.length ? cueOf(key, s.edits) : undefined;
-    return { key, ...starter(key, s.options, ctx), ...edit, parts: mine, ...(cue ? { cue } : {}) };
+    const base = { ...starter(key, s.options, ctx), ...edit };
+    const { when, trigger } = whenOf(key, s.edits[key], s.options);
+    const slot = when === 'trigger' ? { kind: 'trigger' as const, text: trigger } : validTime(base.time) ? { kind: 'time' as const, text: clock(base.time) } : null;
+    return { key, ...base, parts: mine, when, trigger, slot };
   });
+}
+
+export interface MayIssue { key: MayKey; kind: 'order' | 'vague' | 'condition' | 'restates' | 'circular' | 'long'; text: string }
+/**
+ * What doesn't add up on the printed day (shown in the editor, never changed for her): a time earlier than the timed
+ * block before it, and a trigger that says nothing, is a deadline or condition rather than an event, repeats the
+ * block's own name, or names a block that comes later. Evening Reset is one flexible block: making dinner and cleaning
+ * up inside it are never a contradiction.
+ */
+export function mayIssues(rows: readonly MayRow[]): MayIssue[] {
+  const issues: MayIssue[] = [];
+  let last: MayRow | null = null;
+  rows.forEach((r, i) => {
+    if (r.slot?.kind === 'time') {
+      if (last && minutes(r.time) < minutes(last.time)) issues.push({ key: r.key, kind: 'order', text: `“${r.title}” at ${clock(r.time)} is earlier than “${last.title}” at ${clock(last.time)}.` });
+      last = r;
+      return;
+    }
+    if (r.slot?.kind !== 'trigger') return;
+    const t = r.slot.text;
+    const later = rows.slice(i + 1), earlier = rows.slice(0, i);
+    if (VAGUE_TRIGGER.test(t)) issues.push({ key: r.key, kind: 'vague', text: `“${t}” doesn’t name an event. Try something that happens every day, like “After lunch”.` });
+    else if (CONDITION_TRIGGER.test(t)) issues.push({ key: r.key, kind: 'condition', text: `“${t}” is a deadline or a condition, not the moment it starts. Use the event that starts it, like “After quiet time”.` });
+    else if (/^(after|once)\b/i.test(t) && later.some((l) => overlaps(t, l.title)) && !earlier.some((e) => overlaps(t, e.title))) issues.push({ key: r.key, kind: 'circular', text: `“${t}” is about a block that comes later in the day. A trigger has to happen first.` });
+    else if (/^(after|once)\b/i.test(t) && overlaps(t, r.title)) issues.push({ key: r.key, kind: 'restates', text: `“${t}” is this block itself. Use what comes just before it.` });
+  });
+  return issues;
 }
 
 /** Everything that prints, as a stable string: what approval is checked against. */
 export const mayFingerprint = (s: Pick<MayState, 'options' | 'edits' | 'order' | 'parts' | 'familyLabel'>, ctx?: FamilyContext) =>
-  JSON.stringify({ familyLabel: s.familyLabel, days: s.options.days, structure: s.options.structure, rows: mayRows(s, ctx).map((r) => ({ key: r.key, title: r.title, desc: r.desc, time: r.time, cue: r.cue ?? null, parts: r.parts.map((p) => [p.label, p.who, p.owners.map((o) => o.color.id)]) })) });
+  JSON.stringify({ familyLabel: s.familyLabel, days: s.options.days, structure: s.options.structure, rows: mayRows(s, ctx).map((r) => ({ key: r.key, title: r.title, desc: r.desc, time: r.time, slot: r.slot, parts: r.parts.map((p) => [p.label, p.who, p.owners.map((o) => o.color.id)]) })) });
+
+/** Her saved change to one block, checked; anything malformed is dropped (shared by the printable and its tests). */
+export function readEdit(obj: unknown): MayEdit | null {
+  if (!obj || typeof obj !== 'object') return null;
+  const o = obj as Record<string, unknown>;
+  const edit: MayEdit = {};
+  if (typeof o.title === 'string') edit.title = o.title.slice(0, TITLE_LIMIT);
+  if (typeof o.desc === 'string') edit.desc = o.desc.slice(0, DESC_LIMIT);
+  if (typeof o.cue === 'string' && o.cue.trim()) edit.cue = tidyCue(o.cue);
+  if (typeof o.time === 'string' && (validTime(o.time) || o.time === '')) edit.time = o.time;
+  if (o.when === 'time' || o.when === 'trigger') edit.when = o.when;
+  if (typeof o.trigger === 'string') edit.trigger = tidyTrigger(o.trigger);
+  return edit;
+}
+
+// ------------------------------------------------------------------ edits on the state (the editor's changes)
+
+/**
+ * Move a block earlier (-1) or later (+1) among the blocks this day shows. Like August, times stay in order: when the
+ * two blocks trading places both show a time, they trade times too (the times belong to the slots). Triggers belong to
+ * their block and move with it.
+ */
+export function moveBlock(s: Pick<MayState, 'edits' | 'options' | 'order'>, key: MayKey, dir: -1 | 1, ctx?: FamilyContext) {
+  const shown = visibleKeys(s.order, s.options);
+  const i = shown.indexOf(key), other = shown[i + dir];
+  if (i < 0 || !other) return;
+  const a = s.order.indexOf(key), b = s.order.indexOf(other);
+  [s.order[a], s.order[b]] = [s.order[b], s.order[a]];
+  const timeOf = (k: MayKey) => s.edits[k]?.time ?? starter(k, s.options, ctx).time;
+  const timed = (k: MayKey) => whenOf(k, s.edits[k], s.options).when === 'time' && validTime(timeOf(k));
+  if (timed(key) && timed(other)) {
+    const [t1, t2] = [timeOf(key), timeOf(other)];
+    s.edits[key] = { ...(s.edits[key] ?? {}), time: t2, when: 'time' };
+    s.edits[other] = { ...(s.edits[other] ?? {}), time: t1, when: 'time' };
+  }
+}
+
+/** Show the block's time or its trigger. Switching to the clock gives the evening a time if it has none. */
+export function setWhen(s: Pick<MayState, 'edits' | 'options'>, key: MayKey, when: SlotKind) {
+  const e = { ...(s.edits[key] ?? {}) };
+  // Keep what she sees: a plan saved before triggers carries its words over once she chooses.
+  const cur = whenOf(key, e, s.options);
+  if (e.trigger === undefined && e.cue) e.trigger = cur.trigger;
+  e.when = when;
+  if (when === 'time' && key === 'evening' && !validTime(e.time ?? '')) e.time = EVENING_TIME;
+  s.edits[key] = e;
+}
+export function setTime(s: Pick<MayState, 'edits'>, key: MayKey, time: string) {
+  if (!validTime(time) && time !== '') return;
+  s.edits[key] = { ...(s.edits[key] ?? {}), time, when: 'time' };
+}
+export function setTrigger(s: Pick<MayState, 'edits' | 'options'>, key: MayKey, text: string) {
+  const t = tidyTrigger(text);
+  const e = { ...(s.edits[key] ?? {}), when: 'trigger' as const };
+  if (t && t !== defaultTrigger(key, s.options)) e.trigger = t; else delete e.trigger;
+  delete e.cue;
+  s.edits[key] = e;
+}
 
 /** Her saved plan's parts and snapshot, checked; anything malformed is dropped. */
 export function readSaved(stored: { parts?: unknown; snapshot?: unknown }): Pick<MayState, 'parts' | 'snapshot'> {
@@ -212,8 +361,10 @@ export const keepToFamily = (parts: TaskEdits | undefined, ctx: FamilyContext) =
 export interface MayPlan extends PlanResource<MayState> {
   /** Past the editing cutoff: the sheet stops taking edits and the editor stays closed. */
   setLocked: (on: boolean) => void;
-  /** The desktop editor for the day. */
-  openEditor: () => void;
+  /** The desktop editor: an area ('day', 'when', 'jobs'), and a block to open it at. */
+  openEditor: (section?: 'day' | 'when' | 'jobs', key?: MayKey) => void;
   /** The family for the shared owner editor (names, ages). */
   context: () => FamilyContext | null;
+  /** Back to the rhythm prepared from her newest family-page answers. */
+  restore: () => void;
 }
