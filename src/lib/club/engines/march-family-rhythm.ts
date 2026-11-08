@@ -6,24 +6,31 @@
  * foundation (../personalize/), like January.
  *
  * The model is cue → action → finish:
- * - Cue: a moment the family already shares (after breakfast, after dinner, coming home…), never a clock time. One
- *   moment starts several people's parts, so Mom isn't the reminder for each of them.
- * - Action: a small, concrete, observable job. A household job has one owner (or several working together, only when
- *   she says so); an individual job ("Put my dirty clothes in the hamper") can belong to several people, each doing
- *   their own. Every job belongs to a moment it can actually follow: nothing that has to happen before the cue.
+ * - Cue: a moment the family already shares (after breakfast, after dinner, coming home…), never a clock time. Sharing
+ *   a moment is not sharing a job: everyone can act after dinner while each owns something different.
+ * - Action: a small, concrete, observable job with clear ownership (`ownershipOf`):
+ *     individual           one person owns it (one row, one owner);
+ *     parallel_individual  a personal job several people each do for themselves ("Lay out tomorrow's clothes"):
+ *                          stored as one row PER PERSON, so each is edited, removed or made a habit on its own; the
+ *                          sheet may show them on one line, marked "each their own";
+ *     joint                one shared outcome several people work on together ("Put the shared toys away together"):
+ *                          one row, several owners, `share: 'joint'`. Only when she chooses it (or the job is made for
+ *                          it); never inferred from two people having the same title or the same moment.
  * - Finish: what "done" looks like, written from the jobs actually on that moment, every time it's drawn.
  *
- * Recommendations (deterministic; ties by stable hash, never random):
+ * Recommendations: the smallest set of meaningful jobs that shares the work. Deterministic (ties by stable hash).
  * 1. Moments first: two from her priority and challenges, a third offered but off.
- * 2. Whoever already takes care of an area keeps that job, as established context (never a new habit).
- * 3. Each child gets one part a moment: a job she wished for them, else the moment's most needed household job they
- *    can do, else their own individual job. At most four household jobs go to children; the rest share an individual
- *    job's row. Nobody gets filler: a moment holds only the jobs its routine needs (MAX_ROWS at most).
- * 4. Grown-ups: the moment's grown-up job where it has one, and an essential job nobody else could take. No grown-up
- *    part is invented for a moment that doesn't need one (bedtime), and no family is evened out for its own sake.
- * 5. One or two NEW habits: a wished job first, else the most meaningful new job; never one someone already owns.
- * `validatePlan` checks every plan (prepared or edited) for duplicates, impossible or orphaned jobs, unintended
- * sharing, long labels and stale habits. No points, rewards, streaks, percentages or tracking.
+ * 2. Each moment holds only as many household jobs as the people who can take part call for (`householdBudget`: one
+ *    for a one-person home, four at most), never one per person. Order of claim: what someone already takes care of
+ *    (leaving room for the jobs the moment can't do without), jobs she wished a child would take on, the moment's
+ *    essential jobs (to the child with the fewest parts so far, then the youngest who can), grown-ups for what's left
+ *    or what only a grown-up does, and optional jobs only if room remains.
+ * 3. A personal routine job (the bedtime hamper, clearing your own breakfast plate) for children ten and under who
+ *    have no part in that moment, or anyone she wished it for. Not for teenagers as filler.
+ * 4. One new habit by default: a job she named for a particular child first, else the most meaningful new job. A
+ *    second only when she named it for a different child too. Never something already theirs.
+ * `validatePlan` checks every plan; edits that would break it are refused with the reason. No points, rewards, streaks,
+ * percentages or tracking.
  */
 import type { PlanResource } from '../plan/resource';
 import { HOLDER_LEAN, taskAge } from '../personalize/assign';
@@ -38,8 +45,8 @@ export const MAX_MOMENTS = 3;
 export const TITLE_LIMIT = 40;
 export const LABEL_LIMIT = 32;
 export const MAX_HABITS = 2;
-/** Household jobs that go to children in one moment; more children share an individual job instead. */
-const KID_HOUSEHOLD = 4;
+/** Personal routine jobs are recommended to children this age and under (older ones only when she wished it). */
+const ROUTINE_AGE = 10;
 
 // ------------------------------------------------------------------ the moments
 
@@ -79,6 +86,9 @@ export const anchorById = (id: AnchorId) => ANCHORS.find((a) => a.id === id)!;
 export interface Job {
   id: string; anchor: AnchorId; title: string; icon: MarchIcon | null; minAge: number; finish: string;
   own?: boolean; core?: boolean; adult?: boolean; pets?: boolean; areas?: string[]; wishes?: string[];
+  /** A shared outcome made for several people working together (joint ownership when more than one owns it). Offered
+   *  in the editor; never recommended without her choosing it, since the family page doesn't say what's shared. */
+  joint?: boolean;
 }
 export const JOBS: readonly Job[] = [
   // After breakfast
@@ -107,13 +117,16 @@ export const JOBS: readonly Job[] = [
   { id: 'd-pets', anchor: 'dinner', title: 'Feed the pets', icon: 'feed-pets', minAge: 4, pets: true, finish: 'the pets are fed', areas: ['pet-care'], wishes: ['pet-care'] },
   { id: 'd-trash', anchor: 'dinner', title: 'Take out the trash', icon: 'take-out-trash', minAge: 10, finish: 'the trash is out', areas: ['cleaning'] },
   { id: 'd-plate', anchor: 'dinner', title: 'Clear my own plate', icon: 'clear-dishes', minAge: 3, own: true, finish: 'plates are cleared', wishes: ['help-with-meals'] },
-  { id: 'd-leftovers', anchor: 'dinner', title: 'Put leftovers away', icon: 'clean-fridge', minAge: 12, adult: true, finish: 'leftovers are away', areas: ['meals'] },
+  { id: 'd-leftovers', anchor: 'dinner', title: 'Put leftovers away', icon: 'clean-fridge', minAge: 10, finish: 'leftovers are away', areas: ['meals'] },
   // After brushing teeth: individual wind-down jobs; the kitchen is done by now.
   { id: 't-clothes', anchor: 'teeth', title: 'Put dirty clothes in the hamper', icon: 'clothes-away', minAge: 3, own: true, core: true, finish: 'dirty clothes are in the hamper', wishes: ['put-away-laundry', 'bedtime-routine'] },
   { id: 't-bathroom', anchor: 'teeth', title: 'Put my toothbrush and cup away', icon: 'wipe-sink', minAge: 3, own: true, finish: 'the bathroom counter is clear', wishes: ['bedtime-routine'] },
   { id: 't-bag', anchor: 'teeth', title: 'Pack my backpack for tomorrow', icon: 'tidy-desk', minAge: 6, own: true, finish: 'backpacks are packed', wishes: ['pack-school-bag'] },
   { id: 't-outfit', anchor: 'teeth', title: 'Lay out tomorrow’s clothes', icon: 'clothes-away', minAge: 5, own: true, finish: 'clothes are laid out', wishes: ['morning-routine'] },
   { id: 't-toys', anchor: 'teeth', title: 'Put my toys away', icon: 'toys-away', minAge: 2, own: true, finish: 'toys are put away', wishes: ['tidy-room'] },
+  // Together jobs: one shared outcome.
+  { id: 't-shared-toys', anchor: 'teeth', title: 'Put the shared toys away together', icon: 'toys-away', minAge: 3, joint: true, finish: 'the shared toys are put away' },
+  { id: 'h-entry', anchor: 'home', title: 'Reset the entryway together', icon: 'shoes-away', minAge: 4, joint: true, finish: 'the entryway is clear' },
 ];
 export const jobById = (id: string) => JOBS.find((j) => j.id === id);
 
@@ -156,7 +169,9 @@ export interface Row {
   owners: string[];
   /** Someone already takes care of this (from her profile): context, not a habit to practice. */
   established?: boolean;
-  /** A household job she chose to give several people, done together (not each their own). */
+  /** Several owners working on one shared outcome (joint ownership). Without it a row has one owner. */
+  share?: 'joint';
+  /** Earlier saves (before `share`): the same meaning. Read on load, never written. */
   together?: boolean;
 }
 export interface RhythmPlan {
@@ -179,11 +194,19 @@ export const freshState = (): RhythmState => ({ v: 3 });
 const ctxOf = (members: readonly RhythmMember[], prefs: ContextPrefs | undefined, snapshot?: FamilySnapshot): FamilyContext =>
   familyContext(members, prefs, KIT_MONTH, snapshot);
 
-/** An individual job (each does their own): a library `own` job, or one she typed in the first person. */
+/** A personal job (each does their own): a library `own` job, or one she typed in the first person. */
 export const isIndividual = (r: Pick<Row, 'job' | 'title'>) => {
   const j = r.job ? jobById(r.job) : undefined;
   return j ? Boolean(j.own) : /\b(my|mine)\b/i.test(r.title);
 };
+export type Ownership = 'individual' | 'parallel_individual' | 'joint';
+/** How a row is owned: joint (one shared outcome), parallel (the same personal job, each their own) or individual. */
+export function ownershipOf(r: Row, plan: Pick<RhythmPlan, 'rows'>): Ownership {
+  if (r.owners.length > 1) return 'joint';
+  if (!isIndividual(r)) return 'individual';
+  const key = jobKey(r.title);
+  return plan.rows.some((x) => x !== r && x.moment === r.moment && isIndividual(x) && jobKey(x.title) === key) ? 'parallel_individual' : 'individual';
+}
 
 // ------------------------------------------------------------------ recommendations
 
@@ -214,110 +237,111 @@ export function alreadyOwns(ctx: FamilyContext, job: Job | undefined, personId: 
 const wishedOf = (ctx: FamilyContext, j: Job, id: string) => Boolean(j.wishes?.length && wishedFor(ctx, j.wishes).ids.includes(id));
 
 /**
- * The prepared rows for one moment, in four passes (see the header): established, children, grown-ups, essentials.
- * `load` counts each person's parts across the plan so far, so a busy person isn't picked first.
+ * How many household jobs a moment holds: from the people who can take part in it (grown-ups and the children old
+ * enough for one of its household jobs), not one per person. One for a one-person home, four at most.
+ */
+export function householdBudget(participants: number) {
+  return participants <= 1 ? 1 : participants <= 3 ? 2 : participants <= 6 ? 3 : 4;
+}
+
+/**
+ * The prepared rows for one moment (see the header). `load` counts each person's parts across the plan so far, so a
+ * busy person isn't picked first. Personal jobs are one row per person.
  */
 export function prepareMoment(ctx: FamilyContext, momentId: string, anchor: AnchorId, load: Map<string, number>): Row[] {
-  const jobs = JOBS.filter((j) => j.anchor === anchor && (!j.pets || ctx.pets));
+  const jobs = JOBS.filter((j) => j.anchor === anchor && (!j.pets || ctx.pets) && !j.joint);
+  const household = jobs.filter((j) => !j.own);
   const rows: Row[] = [];
   const taken = new Set<string>();
   const busy = new Set<string>();
   const give = (id: string) => { busy.add(id); load.set(id, (load.get(id) ?? 0) + 1); };
-  const add = (j: Job, owners: string[], established = false) => {
-    rows.push({ id: `${momentId}:${j.id}`, moment: momentId, job: j.id, title: j.title, owners, ...(established ? { established: true } : {}) });
+  const add = (j: Job, owner: string, established = false) => {
+    rows.push({ id: j.own ? `${momentId}:${j.id}:${owner}` : `${momentId}:${j.id}`, moment: momentId, job: j.id, title: j.title, owners: [owner], ...(established ? { established: true } : {}) });
     taken.add(j.id);
-    owners.forEach(give);
+    give(owner);
   };
   const others = ctx.adults.some((a) => !a.holder);
   const score = (p: Person, salt: string) => (load.get(p.id) ?? 0) + (p.holder && others ? HOLDER_LEAN : 0) + stableHash(`march:${salt}:${p.id}`) / 2 ** 32 / 100;
   const pick = (people: Person[], salt: string) => [...people].sort((a, b) => score(a, salt) - score(b, salt))[0];
+  const kids = ctx.children.filter((c) => ageOf(c) >= 2);
+  const able = kids.filter((k) => household.some((j) => !j.adult && fits(j, k, ctx)));
+  const budget = householdBudget(ctx.adults.length + able.length);
+  const chores = () => rows.filter((r) => !jobById(r.job!)!.own).length;
+  const room = () => chores() < budget;
+  const uncoveredCore = () => household.filter((j) => j.core && !taken.has(j.id)).length;
 
-  // 1. What someone already takes care of keeps its owner (household jobs only; the least busy owner).
-  for (const j of jobs) {
-    if (j.own) continue;
+  // 1. What someone already takes care of keeps its owner, leaving room for the jobs the moment can't do without.
+  for (const j of household) {
+    if (taken.has(j.id) || (!j.core && budget - chores() <= Math.min(uncoveredCore(), ctx.people.length - busy.size))) continue;
     const who = ctx.people.filter((p) => !busy.has(p.id) && fits(j, p, ctx) && alreadyOwns(ctx, j, p.id));
-    // A child's existing area (pets) is specific enough; a grown-up's (meals) only for the grown-up job itself.
+    // A child's existing area (pets) is specific enough; a grown-up's broad one (meals) only for the grown-up job itself.
     const sure = who.filter((p) => p.kind === 'child' || j.adult || j.pets);
-    if (sure.length) add(j, [pick(sure, j.id).id], true);
+    if (sure.length && room()) add(j, pick(sure, j.id).id, true);
   }
-  // 2. Children: one part each. First the jobs she wished for them; then each household job the moment needs, in
-  //    order of need, goes to the free child with the fewest parts so far, then the YOUNGEST who can do it (so the older
-  //    ones are left for the harder jobs, nobody ends up with a token job beside a sibling's real one, and in a large
-  //    family nobody is left out of every moment); then whoever is left does their own individual job.
-  const kids = ctx.children.filter((c) => !busy.has(c.id)).sort((a, b) => ageOf(a) - ageOf(b) || a.id.localeCompare(b.id));
-  const kidChores = () => rows.filter((r) => !jobById(r.job!)!.own && r.owners.some((o) => ctx.children.some((c) => c.id === o))).length;
-  const room = () => kidChores() < KID_HOUSEHOLD && rows.length < MAX_ROWS;
-  const ownRow = (j: Job, id: string) => { const same = rows.find((r) => r.job === j.id); if (same) { same.owners.push(id); give(id); } else if (rows.length < MAX_ROWS) add(j, [id]); };
+  // 2. A job she wished a child would take on (a personal one doesn't use the moment's household room).
   for (const kid of kids) {
-    const wished = jobs.filter((j) => !j.adult && fits(j, kid, ctx) && (j.own || !taken.has(j.id)) && wishedOf(ctx, j, kid.id) && (j.own || room()));
-    if (wished[0]) { if (wished[0].own) ownRow(wished[0], kid.id); else add(wished[0], [kid.id]); }
+    if (busy.has(kid.id)) continue;
+    const w = jobs.find((j) => !j.adult && fits(j, kid, ctx) && !taken.has(j.id) && wishedOf(ctx, j, kid.id) && (j.own || room()));
+    if (w) add(w, kid.id);
   }
-  const toKids = (list: Job[]) => {
-    for (const j of list) {
-      if (!room() || taken.has(j.id)) continue;
-      // Whoever has the fewest parts so far in the plan, then the youngest who can do it.
-      const who = kids.filter((k) => !busy.has(k.id) && fits(j, k, ctx)).sort((a, b) => (load.get(a.id) ?? 0) - (load.get(b.id) ?? 0) || ageOf(a) - ageOf(b))[0];
-      if (who) add(j, [who.id]);
-    }
+  // 3. The moment's essential jobs: the free child with the fewest parts so far, then the youngest who can do it.
+  const toKid = (j: Job) => {
+    const who = kids.filter((k) => !busy.has(k.id) && fits(j, k, ctx)).sort((a, b) => (load.get(a.id) ?? 0) - (load.get(b.id) ?? 0) || ageOf(a) - ageOf(b) || a.id.localeCompare(b.id))[0];
+    if (who) add(j, who.id);
   };
-  const chores = jobs.filter((j) => !j.own && !j.adult);
-  // The jobs the moment needs come first; the grown-ups' parts claim their place before any optional job.
-  toKids(chores.filter((j) => j.core));
-  // 3. Grown-ups: the moment's grown-up job, to the least busy grown-up (the account holder leans last).
-  const freeAdults = () => ctx.adults.filter((a) => !busy.has(a.id));
-  for (const j of jobs.filter((x) => x.adult && !taken.has(x.id))) {
-    if (rows.length >= MAX_ROWS || !freeAdults().length) break;
-    add(j, [pick(freeAdults(), j.id).id]);
+  for (const j of household.filter((x) => x.core && !x.adult)) if (room() && !taken.has(j.id)) toKid(j);
+  // 4. Grown-ups: an essential job no child could take, or the moment's grown-up job; the harder first. Someone who
+  //    already does it keeps it. Without children, one grown-up's share is the moment's main job.
+  const adultJobs = household.filter((j) => !taken.has(j.id) && (j.adult || j.core)).sort((a, b) => b.minAge - a.minAge);
+  for (const j of adultJobs) {
+    if (!room()) break;
+    const free = ctx.adults.filter((a) => !busy.has(a.id));
+    if (!free.length) break;
+    const mine = free.filter((a) => alreadyOwns(ctx, j, a.id));
+    add(j, pick(mine.length ? mine : free, j.id).id, mine.length > 0);
   }
-  // 4. Essentials nobody has yet (no child old enough, or no children): a free grown-up takes them. A family without
-  //    children shares up to two, one each; that's all a two-person kitchen reset needs.
-  // Household jobs only: a grown-up isn't given "Clear my breakfast dishes" or "Put on my shoes".
-  const essentials = jobs.filter((j) => j.core && !j.own && !taken.has(j.id));
-  const noKids = !ctx.children.length;
-  for (const j of essentials.slice(0, noKids ? 2 : 1)) {
-    // Without children, a grown-up who already has a part here can take a second (a one-person kitchen reset).
-    const free = freeAdults().length ? freeAdults() : noKids ? ctx.adults.filter((a) => rows.filter((r) => r.owners.includes(a.id)).length < 2) : [];
-    if (rows.length >= MAX_ROWS || !free.length) break;
-    add(j, [pick(free, j.id).id]);
+  // 5. Optional household jobs, only while there's room.
+  for (const j of household.filter((x) => !x.core && !x.adult)) if (room() && !taken.has(j.id)) toKid(j);
+  // 6. A personal routine job for young children with no part here (each their own row).
+  const routine = jobs.find((j) => j.own && j.core);
+  if (routine) {
+    for (const kid of kids) {
+      if (busy.has(kid.id) || !fits(routine, kid, ctx) || ageOf(kid) > ROUTINE_AGE) continue;
+      if (routine.id === 'd-plate' && taken.has('d-clear')) continue;
+      rows.push({ id: `${momentId}:${routine.id}:${kid.id}`, moment: momentId, job: routine.id, title: routine.title, owners: [kid.id] });
+      give(kid.id);
+    }
   }
-  // Then optional household jobs for children still free, while there's room.
-  toKids(chores.filter((j) => !j.core));
-  // Their own job: the one a sibling already does (one row, each their own), else the moment's essential one. Dinner's
-  // own plate only when nobody is clearing the table.
-  for (const kid of kids.filter((k) => !busy.has(k.id))) {
-    const mine = jobs.filter((j) => j.own && fits(j, kid, ctx) && !(j.id === 'd-plate' && taken.has('d-clear')));
-    const pick = mine.find((j) => taken.has(j.id)) ?? mine.find((j) => j.core) ?? mine[0];
-    if (pick) ownRow(pick, kid.id);
-  }
-  // In the order the work happens (clear, load, wipe…), the moment's list order.
-  const at = (r: Row) => JOBS.findIndex((j) => j.id === r.job);
+  // A moment she turned on never comes up empty: with only older children here, its routine job is everyone's own.
+  if (!rows.length && routine) for (const kid of kids) if (fits(routine, kid, ctx)) { rows.push({ id: `${momentId}:${routine.id}:${kid.id}`, moment: momentId, job: routine.id, title: routine.title, owners: [kid.id] }); give(kid.id); }
+  // In the order the work happens (clear, load, wipe…), the moment's list order; people in household order.
+  const at = (r: Row) => JOBS.findIndex((j) => j.id === r.job) * 100 + ctx.people.findIndex((p) => p.id === r.owners[0]);
   return rows.sort((a, b) => at(a) - at(b));
 }
 
-/** The one or two new habits: a job she wished a child would take on, else the most meaningful new job. */
+/**
+ * The new habits: ONE by default. First a job she named for a particular child (step 4); else, when she named a job
+ * for anyone, the youngest who has it; else the most meaningful new job. A second only when she named a job for a
+ * different child too, so the family practices both because she asked, not for variety. Never something already
+ * theirs, a job far below a child's age, or a grown-up's job when there are children.
+ */
 export function suggestedHabits(ctx: FamilyContext, rows: readonly Row[], moments: readonly Moment[]): string[] {
   const on = new Set(moments.filter((m) => m.enabled).map((m) => m.id));
-  // A job far below its owner's age isn't something to practice ("Put dirty clothes in the hamper" for a teenager).
   const kidAge = (id: string) => { const p = ctx.children.find((x) => x.id === id); return p ? ageOf(p) : null; };
-  const trivial = (r: Row) => { const j = jobById(r.job ?? ''); return Boolean(j) && r.owners.every((o) => { const a = kidAge(o); return a !== null && a - j!.minAge > 7; }); };
-  // One or two people learning it; a row the whole family does each night isn't a focus.
-  const open = rows.filter((r) => on.has(r.moment) && !r.established && r.owners.length <= 2 && !trivial(r) && !r.owners.some((o) => alreadyOwns(ctx, jobById(r.job ?? ''), o)));
-  // The children's new jobs; a family without children practices a grown-up one.
-  const kids = open.filter((r) => r.owners.some((o) => ctx.children.some((c) => c.id === o)));
-  const fresh = kids.length ? kids : open;
-  const wished = fresh.filter((r) => {
-    const j = r.job ? jobById(r.job) : undefined;
-    return j?.wishes?.length && r.owners.some((o) => wishedFor(ctx, j.wishes!).ids.includes(o) || wishedFor(ctx, j.wishes!).anyone);
-  });
-  // Meaningful: a household job the family relies on over a personal one, harder over easier.
+  // A personal routine far below a child's age isn't something to practice (the hamper for a teenager); a household
+  // job is real ownership at any age.
+  const trivial = (r: Row) => { const j = jobById(r.job ?? ''); const a = kidAge(r.owners[0]); return Boolean(j?.own) && a !== null && a - j!.minAge > 7; };
+  const open = rows.filter((r) => on.has(r.moment) && !r.established && r.owners.length === 1 && !trivial(r) && !alreadyOwns(ctx, jobById(r.job ?? ''), r.owners[0]));
+  const kids = open.filter((r) => ctx.children.some((c) => c.id === r.owners[0]));
+  const pool = kids.length ? kids : ctx.children.length ? [] : open;
+  const named = (r: Row) => { const j = jobById(r.job ?? ''); return Boolean(j?.wishes?.length && wishedFor(ctx, j!.wishes!).ids.includes(r.owners[0])); };
+  const anyone = (r: Row) => { const j = jobById(r.job ?? ''); return Boolean(j?.wishes?.length && wishedFor(ctx, j!.wishes!).anyone); };
   const weight = (r: Row) => { const j = jobById(r.job ?? ''); return (j?.minAge ?? 0) + (j?.own ? 0 : 3) + (j?.core ? 1 : 0); };
-  const ranked = [...wished, ...[...fresh].sort((a, b) => weight(b) - weight(a) || a.id.localeCompare(b.id))].filter((r, i, a) => a.indexOf(r) === i);
-  // Prefer two different people in two different moments; settle for less overlap only when there's no choice.
-  const out: Row[] = [];
-  const clash = (a: Row, b: Row) => a.moment === b.moment || a.owners.some((x) => b.owners.includes(x));
-  for (const r of ranked) if (out.length < MAX_HABITS && !out.some((o) => clash(o, r))) out.push(r);
-  for (const r of ranked) if (out.length < MAX_HABITS && !out.includes(r) && !out.some((o) => o.owners.some((x) => r.owners.includes(x)))) out.push(r);
-  return out.map((r) => r.id);
+  const byWeight = [...pool].sort((a, b) => weight(b) - weight(a) || a.id.localeCompare(b.id));
+  const first = pool.find(named) ?? [...pool.filter(anyone)].sort((a, b) => (kidAge(a.owners[0]) ?? 0) - (kidAge(b.owners[0]) ?? 0))[0] ?? byWeight[0];
+  if (!first) return [];
+  const second = pool.find((r) => r !== first && named(r) && named(first) && r.owners[0] !== first.owners[0]);
+  return second ? [first.id, second.id] : [first.id];
 }
 
 /** The whole prepared plan for this family: two moments on, a third offered; jobs; one or two new habits. */
@@ -392,37 +416,54 @@ const whenOf = (m: Moment) => {
 
 export type RowMode = 'one' | 'each' | 'together';
 export interface RowView {
-  id: string; job?: string; title: string; icon: MarchIcon | null; established: boolean; habit: boolean;
+  /** The row (for a line grouping several people's own jobs: the first person's row; `ids` has them all). */
+  id: string; ids: string[]; job?: string; title: string; icon: MarchIcon | null; established: boolean; habit: boolean;
   owners: { id: string; name: string; color: MemberColor; adult: boolean }[];
-  /** One owner; several each doing their own; or several working together. */
+  /** One owner; several each doing their own (parallel rows shown on one line); or several working together. */
   mode: RowMode;
+  ownership: Ownership;
   /** A job that has to happen before this moment's cue (warned in the editor; can't be saved that way). */
   misfit: boolean;
 }
-export interface MomentView { id: string; anchor: AnchorId; title: string; cue: string; reset: string; when: string; enabled: boolean; rows: RowView[]; finish: string }
+export interface MomentView {
+  id: string; anchor: AnchorId; title: string; cue: string; reset: string; when: string; enabled: boolean;
+  /** As printed: people doing the same personal job share a line ("each their own"); a habit keeps its own line. */
+  rows: RowView[];
+  /** Every assignment on its own (one per row in the plan): what the editor and the habit picker work with. */
+  parts: RowView[];
+  finish: string;
+}
 
 export function rhythmView(s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) {
   const ctx = ctxOf(members, prefs, s.profile);
   const plan = s.plan ? cleanPlan(s.plan, ctx) : preparedPlan(ctx);
   const person = (id: string) => ctx.people.find((p) => p.id === id);
+  const viewOf = (r: Row, anchor: AnchorId): RowView => {
+    const j = r.job ? jobById(r.job) : undefined;
+    const owners = r.owners.map(person).filter((p): p is Person => Boolean(p)).map((p) => ({ id: p.id, name: p.name, color: colorFor(ctx.colors, p.id), adult: p.kind === 'adult' }));
+    const ownership = ownershipOf(r, plan);
+    return {
+      id: r.id, ids: [r.id], ...(r.job ? { job: r.job } : {}), title: r.title, icon: j?.icon ?? null, established: Boolean(r.established), habit: plan.habits.includes(r.id), owners,
+      mode: ownership === 'joint' ? 'together' : 'one', ownership, misfit: !fitsCue(anchor, r.title),
+    };
+  };
   const moments: MomentView[] = plan.moments.map((m) => {
     const a = anchorById(m.anchor);
     const mine = plan.rows.filter((r) => r.moment === m.id);
-    const rows: RowView[] = mine.map((r) => {
-      const j = r.job ? jobById(r.job) : undefined;
-      const owners = r.owners.map(person).filter((p): p is Person => Boolean(p)).map((p) => ({ id: p.id, name: p.name, color: colorFor(ctx.colors, p.id), adult: p.kind === 'adult' }));
-      return {
-        id: r.id, ...(r.job ? { job: r.job } : {}), title: r.title, icon: j?.icon ?? null, established: Boolean(r.established), habit: plan.habits.includes(r.id), owners,
-        mode: owners.length < 2 ? 'one' : isIndividual(r) ? 'each' : 'together',
-        misfit: !fitsCue(m.anchor, r.title),
-      };
-    });
+    const parts = mine.map((r) => viewOf(r, m.anchor));
+    // Printed lines: parallel personal jobs on one line (each their own), unless one of them is a habit or established.
+    const rows: RowView[] = [];
+    for (const p of parts) {
+      const line = p.ownership === 'parallel_individual' && !p.habit && !p.established
+        ? rows.find((x) => x.ownership === 'parallel_individual' && !x.habit && !x.established && jobKey(x.title) === jobKey(p.title)) : undefined;
+      if (line) { line.ids.push(p.id); line.owners.push(...p.owners); line.mode = 'each'; } else rows.push({ ...p, ids: [...p.ids], owners: [...p.owners] });
+    }
     // Always from the rows as they are now: an edit can never leave a stale finish line.
-    return { id: m.id, anchor: m.anchor, title: m.label?.trim() || a.title, cue: a.cue, reset: a.reset, when: whenOf(m), enabled: m.enabled, rows, finish: finishLine(mine) };
+    return { id: m.id, anchor: m.anchor, title: m.label?.trim() || a.title, cue: a.cue, reset: a.reset, when: whenOf(m), enabled: m.enabled, rows, parts, finish: finishLine(mine) };
   });
   // Only moments with someone's part print: never an empty section.
   const printed = moments.filter((m) => m.enabled && m.rows.length);
-  const habits = printed.flatMap((m) => m.rows.filter((r) => r.habit).map((r) => ({ ...r, moment: m.title, sentence: habitSentence(r.owners.map((o) => o.name), r.title, m.when) })));
+  const habits = printed.flatMap((m) => m.parts.filter((r) => r.habit).map((r) => ({ ...r, moment: m.title, sentence: habitSentence(r.owners.map((o) => o.name), r.title, m.when) })));
   return {
     moments, printed, habits,
     /** Everyone, in household order, with their January colors (the header legend and the "who" pickers). */
@@ -440,10 +481,14 @@ export const rhythmFingerprint = (s: RhythmState, members: readonly RhythmMember
 
 // ------------------------------------------------------------------ validation
 
-export interface PlanIssue { kind: 'duplicate' | 'misfit' | 'owner' | 'moment' | 'shared' | 'long' | 'habit' | 'empty' | 'crowded'; rowId?: string; text: string }
+export interface PlanIssue { kind: 'duplicate' | 'misfit' | 'owner' | 'moment' | 'shared' | 'long' | 'habit' | 'empty' | 'crowded' | 'supervise'; rowId?: string; text: string }
+/** A job that makes someone the supervisor or reminder of everyone else's work, which this plan exists to avoid. */
+const SUPERVISE = /\b(remind|supervise|make sure|check (that|on|everyone)|keep track of (everyone|the kids)|help (everyone|the kids))\b/i;
+/** Printed lines in a moment: parallel personal jobs share one. */
+const linesIn = (rows: readonly Row[], momentId: string) => new Set(rows.filter((r) => r.moment === momentId).map((r) => (isIndividual(r) && r.owners.length === 1 ? `p:${jobKey(r.title)}` : `r:${r.id}`))).size;
 /**
- * Everything that would make a plan wrong on paper. The prepared plan for any family returns none (tested across
- * families); edits that would add one are refused or flagged in the editor.
+ * Everything that would make a plan wrong. The prepared plan for any family returns none (tested across families);
+ * edits that would add one are refused in `saveRow`.
  */
 export function validatePlan(plan: RhythmPlan, ctx: FamilyContext): PlanIssue[] {
   const issues: PlanIssue[] = [];
@@ -451,13 +496,14 @@ export function validatePlan(plan: RhythmPlan, ctx: FamilyContext): PlanIssue[] 
   const on = plan.moments.filter((m) => m.enabled);
   if (!on.length) issues.push({ kind: 'moment', text: 'No shared moment is on.' });
   for (const m of plan.moments) {
-    const rows = plan.rows.filter((r) => r.moment === m.id);
-    if (rows.length > MAX_ROWS) issues.push({ kind: 'crowded', text: `${m.label ?? anchorById(m.anchor).title} has more than ${MAX_ROWS} jobs.` });
-    const seen = new Map<string, string>();
-    for (const r of rows) {
-      const key = jobKey(r.title);
-      if (seen.has(key)) issues.push({ kind: 'duplicate', rowId: r.id, text: `“${r.title}” is already in this moment.` });
-      seen.set(key, r.id);
+    if (linesIn(plan.rows, m.id) > MAX_ROWS) issues.push({ kind: 'crowded', text: `${m.label ?? anchorById(m.anchor).title} has more than ${MAX_ROWS} lines.` });
+    const seen = new Map<string, Row>();
+    for (const r of plan.rows.filter((x) => x.moment === m.id)) {
+      // The same household job twice, or the same person's personal job twice.
+      const key = isIndividual(r) && r.owners.length === 1 ? `${jobKey(r.title)}|${r.owners[0]}` : jobKey(r.title);
+      const clash = seen.get(key) ?? (!isIndividual(r) ? [...seen.values()].find((x) => jobKey(x.title) === jobKey(r.title)) : undefined);
+      if (clash) issues.push({ kind: 'duplicate', rowId: r.id, text: `“${r.title}” is already in this moment.` });
+      seen.set(key, r);
       if (!fitsCue(m.anchor, r.title)) issues.push({ kind: 'misfit', rowId: r.id, text: `“${r.title}” has to happen before ${anchorById(m.anchor).when}.` });
     }
   }
@@ -465,9 +511,12 @@ export function validatePlan(plan: RhythmPlan, ctx: FamilyContext): PlanIssue[] 
     if (!plan.moments.some((m) => m.id === r.moment)) issues.push({ kind: 'moment', rowId: r.id, text: `“${r.title}” isn’t in a moment.` });
     if (!r.owners.length || r.owners.some((o) => !ids.has(o))) issues.push({ kind: 'owner', rowId: r.id, text: `“${r.title}” needs someone in the family.` });
     if (new Set(r.owners).size !== r.owners.length) issues.push({ kind: 'owner', rowId: r.id, text: `“${r.title}” lists someone twice.` });
-    if (r.owners.length > 1 && !isIndividual(r) && !r.together) issues.push({ kind: 'shared', rowId: r.id, text: `“${r.title}” has several owners but isn’t marked as done together.` });
+    if (r.owners.length > 1 && isIndividual(r)) issues.push({ kind: 'shared', rowId: r.id, text: `“${r.title}” is a personal job: each person needs their own.` });
+    if (r.owners.length > 1 && r.share !== 'joint') issues.push({ kind: 'shared', rowId: r.id, text: `“${r.title}” has several owners but isn’t a shared job.` });
+    if (r.share === 'joint' && r.owners.length < 2) issues.push({ kind: 'shared', rowId: r.id, text: `“${r.title}” is marked shared with one owner.` });
     if (!r.title.trim()) issues.push({ kind: 'empty', rowId: r.id, text: 'A job has no words.' });
     if (r.title.length > TITLE_LIMIT) issues.push({ kind: 'long', rowId: r.id, text: `“${r.title}” is too long for the chart.` });
+    if (SUPERVISE.test(r.title)) issues.push({ kind: 'supervise', rowId: r.id, text: `“${r.title}” makes someone everyone else’s reminder. Give each person their own part instead.` });
   }
   if (plan.habits.length > MAX_HABITS) issues.push({ kind: 'habit', text: 'More than two new habits.' });
   for (const h of plan.habits) {
@@ -478,10 +527,14 @@ export function validatePlan(plan: RhythmPlan, ctx: FamilyContext): PlanIssue[] 
   return issues;
 }
 
-/** A row in this moment that already says the same job (her typing "Wipe counters 2"), if any. */
-export function duplicateIn(plan: Pick<RhythmPlan, 'rows'>, momentId: string, title: string, except?: string) {
+/**
+ * A row in this moment that already is this job: the same household job (anyone), or, for a personal job, the same
+ * person's (another child having their own is not a duplicate).
+ */
+export function duplicateIn(plan: Pick<RhythmPlan, 'rows'>, momentId: string, title: string, except?: string, owner?: string, personal = isIndividual({ title })) {
   const key = jobKey(title);
-  return plan.rows.find((r) => r.moment === momentId && r.id !== except && jobKey(r.title) === key);
+  return plan.rows.find((r) => r.moment === momentId && r.id !== except && jobKey(r.title) === key
+    && (!(personal || isIndividual(r)) || !owner || r.owners.includes(owner)));
 }
 
 // ------------------------------------------------------------------ edits (each changes `s` in place and returns it)
@@ -540,10 +593,14 @@ export function setMomentOn(s: RhythmState, momentId: string, on: boolean, membe
 /** One responsibility as the single-job editor changes it: words, owners, moment and habit together, applied at Done. */
 export interface RowDraft { title: string; job?: string; owners: string[]; moment: string; habit: boolean }
 export type DraftResult = { ok: true; rowId: string } | { ok: false; text: string };
+const freshId = (plan: RhythmPlan, base: string) => { let id = base; for (let n = 2; plan.rows.some((r) => r.id === id); n++) id = `${base}~${n}`; return id; };
 /**
- * Apply her edit to one responsibility (or add a new one when `rowId` is missing). Refused, with the reason, when it
- * would duplicate a job already in that moment, can't follow the moment's cue, has nobody, is too long, or the moment
- * is full. Several owners on a household job means they do it together.
+ * Apply her edit to one assignment (or add a new one when `rowId` is missing). Refused, with the reason, when it would
+ * duplicate a job already in that moment, can't follow the moment's cue, has nobody, is too long, or the moment is full.
+ * Ownership follows the job:
+ * - a personal job: this row stays ONE person's; other people she ticks get their own rows (each their own), and
+ *   nobody else's row changes;
+ * - a household job with several people: one row they share (joint, done together). One person: individual.
  */
 export function saveRow(s: RhythmState, rowId: string | undefined, d: RowDraft, members: readonly RhythmMember[], prefs?: ContextPrefs): DraftResult {
   const plan = own(s, members, prefs);
@@ -556,21 +613,34 @@ export function saveRow(s: RhythmState, rowId: string | undefined, d: RowDraft, 
   if (!title) return { ok: false, text: 'Say what the job is.' };
   if (!owners.length) return { ok: false, text: 'Choose who owns it.' };
   if (!fitsCue(m.anchor, title)) return { ok: false, text: `“${title}” has to happen before ${anchorById(m.anchor).when}. Choose a moment it can follow.` };
-  const dup = duplicateIn(plan, m.id, title, rowId);
-  if (dup) return { ok: false, text: `“${dup.title}” is already ${anchorById(m.anchor).when}. Add a person to that one instead.` };
+  if (SUPERVISE.test(title)) return { ok: false, text: `“${title}” would make someone everyone else’s reminder. Give each person their own part instead.` };
   const current = rowId ? plan.rows.find((r) => r.id === rowId) : undefined;
   if (rowId && !current) return { ok: false, text: 'That job is no longer on the chart.' };
-  if ((!current || current.moment !== m.id) && plan.rows.filter((r) => r.moment === m.id).length >= MAX_ROWS) return { ok: false, text: `${m.label ?? anchorById(m.anchor).title} already has ${MAX_ROWS} jobs. Remove one first.` };
   const job = lib && lib.anchor === m.anchor ? lib.id : current?.job && jobById(current.job)?.title === title && jobById(current.job)?.anchor === m.anchor ? current.job : undefined;
-  const row: Row = current ?? { id: `${m.id}:${job ?? 'own'}:${stableHash(`${title}:${owners.join(',')}:${plan.rows.length}`).toString(36)}`, moment: m.id, title, owners };
+  const personal = isIndividual({ job, title });
+  // This row's person: the one it already belongs to if still ticked, else the first ticked.
+  const mine = personal ? [current && owners.includes(current.owners[0]) ? current.owners[0] : owners[0]] : owners;
+  const extra = personal ? owners.filter((o) => o !== mine[0]) : [];
+  const dup = duplicateIn(plan, m.id, title, rowId, mine[0], personal);
+  if (dup && (!personal || dup.owners.includes(mine[0]))) return { ok: false, text: personal ? `${ctx.people.find((p) => p.id === mine[0])?.name ?? 'They'} already ${dup.title.toLowerCase().startsWith('put') ? 'have' : 'do'} “${dup.title}” ${anchorById(m.anchor).when}.` : `“${dup.title}” is already ${anchorById(m.anchor).when}. Add a person to that one instead.` };
+  // Room: printed lines in the target moment after the change.
+  const trial = plan.rows.filter((r) => r.id !== rowId).concat([{ id: rowId ?? '_new', moment: m.id, title, owners: mine, ...(job ? { job } : {}) }]);
+  if (linesIn(trial, m.id) > MAX_ROWS && (!current || current.moment !== m.id || linesIn(plan.rows, m.id) < linesIn(trial, m.id))) return { ok: false, text: `${m.label ?? anchorById(m.anchor).title} already has ${MAX_ROWS} jobs. Remove one first.` };
+  const row: Row = current ?? { id: freshId(plan, `${m.id}:${job ?? 'own'}:${personal ? mine[0] : stableHash(`${title}:${plan.rows.length}`).toString(36)}`), moment: m.id, title, owners: mine };
   row.title = title;
   row.moment = m.id;
-  row.owners = owners;
+  row.owners = mine;
   if (job) row.job = job; else delete row.job;
-  if (owners.length > 1 && !isIndividual(row)) row.together = true; else delete row.together;
+  delete row.together;
+  if (!personal && mine.length > 1) row.share = 'joint'; else delete row.share;
   // Her change makes it hers: an established job she edits stays established only if the same person still has it.
-  if (row.established && !(job && owners.every((o) => alreadyOwns(ctx, jobById(job), o)))) delete row.established;
+  if (row.established && !(job && row.owners.every((o) => alreadyOwns(ctx, jobById(job), o)))) delete row.established;
   if (!current) plan.rows.push(row);
+  // Others she ticked for a personal job: each their own row, unless they already have it here.
+  for (const o of extra) {
+    if (duplicateIn(plan, m.id, title, undefined, o, true)) continue;
+    plan.rows.push({ id: freshId(plan, `${m.id}:${job ?? 'own'}:${o}`), moment: m.id, title, owners: [o], ...(job ? { job } : {}) });
+  }
   dropHabit(plan, row.id);
   if (d.habit && !row.established) plan.habits = [...plan.habits, row.id].slice(-MAX_HABITS);
   return { ok: true, rowId: row.id };
@@ -581,7 +651,8 @@ export function setRowTitle(s: RhythmState, rowId: string, title: string, member
   if (r) saveRow(s, rowId, { title, owners: r.owners, moment: r.moment, habit: s.plan!.habits.includes(rowId) }, members, prefs);
   return s;
 }
-/** Who owns a row: one person, or several (each their own, or together). Never nobody. */
+/** Who owns a row. A personal job keeps one owner per row (others get their own rows); a household job with several
+ *  owners is done together. Never nobody. */
 export function setRowOwners(s: RhythmState, rowId: string, owners: readonly string[], members: readonly RhythmMember[], prefs?: ContextPrefs) {
   const r = own(s, members, prefs).rows.find((x) => x.id === rowId);
   if (r) saveRow(s, rowId, { title: r.title, job: r.job, owners: [...owners], moment: r.moment, habit: s.plan!.habits.includes(rowId) }, members, prefs);
@@ -589,7 +660,7 @@ export function setRowOwners(s: RhythmState, rowId: string, owners: readonly str
 }
 export function moveRow(s: RhythmState, rowId: string, momentId: string, members: readonly RhythmMember[], prefs?: ContextPrefs) {
   const r = own(s, members, prefs).rows.find((x) => x.id === rowId);
-  if (r) saveRow(s, rowId, { title: r.title, owners: r.owners, moment: momentId, habit: s.plan!.habits.includes(rowId) }, members, prefs);
+  if (r) saveRow(s, rowId, { title: r.title, job: r.job, owners: r.owners, moment: momentId, habit: s.plan!.habits.includes(rowId) }, members, prefs);
   return s;
 }
 /** Add a job to a moment: one from the moment's list (by id) or her own words. Duplicates are refused. */
@@ -597,10 +668,21 @@ export function addRow(s: RhythmState, momentId: string, owner: string, members:
   saveRow(s, undefined, { title: title ?? '', job: jobId, owners: [owner], moment: momentId, habit: false }, members, prefs);
   return s;
 }
+/** Remove one assignment. Other people's own copies of a personal job are separate rows and stay. */
 export function removeRow(s: RhythmState, rowId: string, members: readonly RhythmMember[], prefs?: ContextPrefs) {
   const plan = own(s, members, prefs);
   plan.rows = plan.rows.filter((r) => r.id !== rowId);
   dropHabit(plan, rowId);
+  return s;
+}
+/** Take one person off a job: their own row for a personal job; their place in a shared job (the others keep it). */
+export function removeOwner(s: RhythmState, rowId: string, memberId: string, members: readonly RhythmMember[], prefs?: ContextPrefs) {
+  const plan = own(s, members, prefs);
+  const r = plan.rows.find((x) => x.id === rowId);
+  if (!r || !r.owners.includes(memberId)) return s;
+  if (r.owners.length === 1) return removeRow(s, rowId, members, prefs);
+  r.owners = r.owners.filter((o) => o !== memberId);
+  if (r.owners.length < 2) delete r.share;
   return s;
 }
 /** Mark a row as one of the new habits (at most two; the newest replaces the oldest), or not. Never an established job. */
@@ -616,21 +698,42 @@ export function setHabit(s: RhythmState, rowId: string, on: boolean, members: re
 export const restorePlan = (s: RhythmState) => { delete s.plan; delete s.profile; return s; };
 
 /**
- * Her plan, kept to this family: people who left drop out; a row with nobody left is removed; a numbered or reworded
- * copy of a job already in the same moment is merged into it (owners kept); at most five jobs a moment, two habits.
+ * Her plan, kept to this family and read in today's terms, without losing anything she chose:
+ * - people who left drop out; a row with nobody left is removed;
+ * - an earlier `together` is `share: 'joint'`; several owners on a household job she saved is kept as joint (that's
+ *   what she chose), never split up or merged into something else;
+ * - several owners on a PERSONAL job (earlier saves grouped them) becomes one row per person, the first keeping the
+ *   row's id (and a habit on it), so each can be changed on their own; nobody's assignment is dropped;
+ * - a copy of the same job in the same moment (a numbered or reworded duplicate) is folded into the first: the same
+ *   person's personal job, or the same household job (its people kept, together).
  */
 export function cleanPlan(plan: RhythmPlan, ctx: FamilyContext): RhythmPlan {
   const ids = new Set(ctx.people.map((p) => p.id));
   const rows: Row[] = [];
+  const habits = [...plan.habits];
   for (const r0 of plan.rows) {
-    const r = { ...r0, owners: [...new Set(r0.owners.filter((o) => ids.has(o)))] };
-    if (!r.owners.length || !r.title.trim()) continue;
-    const dup = duplicateIn({ rows }, r.moment, r.title);
-    if (dup) { dup.owners = [...new Set([...dup.owners, ...r.owners])]; if (dup.owners.length > 1 && !isIndividual(dup)) dup.together = true; continue; }
-    if (rows.filter((x) => x.moment === r.moment).length >= MAX_ROWS) continue;
-    rows.push(r);
+    const owners = [...new Set(r0.owners.filter((o) => ids.has(o)))];
+    if (!owners.length || !r0.title.trim()) continue;
+    const { together, ...rest } = r0;
+    const r: Row = { ...rest, owners };
+    if (together && owners.length > 1) r.share = 'joint';
+    const personal = isIndividual(r);
+    const people = personal ? owners : [owners];
+    people.forEach((who, i) => {
+      const one: Row = personal ? { ...r, id: i ? `${r.id}~${who}` : r.id, owners: [who as string] } : { ...r, owners: who as string[] };
+      if (personal) delete one.share;
+      else if (one.owners.length > 1) one.share = 'joint'; else delete one.share;
+      const dup = duplicateIn({ rows }, one.moment, one.title, undefined, one.owners[0], personal);
+      if (dup && (!personal || dup.owners.includes(one.owners[0]))) {
+        if (!personal) { dup.owners = [...new Set([...dup.owners, ...one.owners])]; if (dup.owners.length > 1) dup.share = 'joint'; }
+        const h = habits.indexOf(one.id);
+        if (h >= 0) habits[h] = dup.id;
+        return;
+      }
+      rows.push(one);
+    });
   }
-  return { moments: plan.moments, rows, habits: plan.habits.filter((h) => rows.some((r) => r.id === h && !r.established)).slice(0, MAX_HABITS) };
+  return { moments: plan.moments, rows, habits: [...new Set(habits)].filter((h) => rows.some((r) => r.id === h && !r.established)).slice(0, MAX_HABITS) };
 }
 export const applyFamily = (s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) => {
   if (s.plan) s.plan = cleanPlan(s.plan, ctxOf(members, prefs, s.profile));
@@ -676,9 +779,12 @@ export function fromLegacy(x: unknown, members: readonly RhythmMember[], prefs?:
       const job = d.id ? jobById(LEGACY[d.id] ?? '') : undefined;
       const m = job && plan.moments.find((mm) => mm.anchor === job.anchor && mm.enabled);
       if (!job || !m) continue;
-      const row = plan.rows.find((r) => r.moment === m.id && r.job === job.id);
-      if (row) { if (!row.owners.includes(memberId)) row.owners = job.own ? [...row.owners, memberId] : [memberId]; row.established = true; }
-      else if (plan.rows.filter((r) => r.moment === m.id).length < MAX_ROWS) plan.rows.push({ id: `${m.id}:${job.id}`, moment: m.id, job: job.id, title: job.title, owners: [memberId], established: true });
+      // A personal job is that person's own row; a household job has one owner (the one who did it on their chart).
+      const row = plan.rows.find((r) => r.moment === m.id && r.job === job.id && (!job.own || r.owners.includes(memberId)));
+      if (row) { row.owners = [memberId]; row.established = true; }
+      else if (linesIn(plan.rows.concat([{ id: '_', moment: m.id, job: job.id, title: job.title, owners: [memberId] }]), m.id) <= MAX_ROWS) {
+        plan.rows.push({ id: job.own ? `${m.id}:${job.id}:${memberId}` : `${m.id}:${job.id}`, moment: m.id, job: job.id, title: job.title, owners: [memberId], established: true });
+      }
     }
   }
   plan.habits = plan.habits.filter((h) => !plan.rows.find((r) => r.id === h)?.established);
