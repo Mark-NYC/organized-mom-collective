@@ -72,7 +72,8 @@ if (root && host) {
   locked = isLocked;
   // The daily reference: each block in order, its time or trigger first so the family sees what starts it.
   q('[data-may-rows]').replaceChildren(...s.rows.map((r) => {
-   const when = r.slot ? el('span', { class: `mym-when mym-when--${r.slot.kind}` }, ...(r.slot.kind === 'trigger' ? [arrow()] : []), r.slot.text) : el('span', { class: 'mym-when mym-when--none' }, 'Any time');
+   // Flexible blocks show nothing here, as on paper.
+   const when = r.slot ? el('span', { class: `mym-when mym-when--${r.slot.kind}` }, ...(r.slot.kind === 'trigger' ? [arrow()] : []), r.slot.text) : el('span');
    const li = el('li', { class: 'mym-block' },
     el('div', { class: 'mym-head' }, el('h2', {}, r.title), when),
     el('p', { class: 'mym-desc' }, r.desc),
@@ -85,7 +86,7 @@ if (root && host) {
   const jobs = s.rows.reduce((n, r) => n + r.parts.length, 0);
   q('[data-may-edit]').replaceChildren(
    row('1 · Our day', `${s.rows.length} blocks`, s.rows.map((r) => r.title).join(' · '), () => open('day')),
-   row('2 · When it happens', [times ? `${times} by the clock` : '', triggers ? `${triggers} by what comes before` : ''].filter(Boolean).join(' · ') || 'No set times', 'Time or trigger, block by block', () => open('when')),
+   row('2 · When it happens', [times ? `${times} by the clock` : '', triggers ? `${triggers} after an event` : '', s.rows.length - times - triggers ? `${s.rows.length - times - triggers} flexible` : ''].filter(Boolean).join(' · '), 'Time, trigger or flexible, block by block', () => open('when')),
    row('3 · Activities & responsibilities', jobs ? `${jobs} family ${jobs === 1 ? 'job' : 'jobs'}` : 'Activities only', 'Ideas for each block and who helps', () => open('jobs')));
  };
  ui = mountPlanScreen({ root, host, approvalKey: 'omc:preview:may-summer-rhythm:approval', render });

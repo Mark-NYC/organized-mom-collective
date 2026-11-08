@@ -111,13 +111,15 @@ export function mayEditor(o: Options) {
     const locked = o.locked();
     const issues = mayIssues(s.rows);
     const cards = s.rows.map((r) => {
-      const seg = el('div', { class: 'mye-seg', role: 'radiogroup', 'aria-label': `When ${r.title} happens` }, ...(['time', 'trigger'] as const).map((k) => {
-        const b = btn(k === 'time' ? 'Time' : 'Trigger', 'mye-seg-btn', () => { if (k === 'trigger' && r.when !== 'trigger') focusKey = r.key; change((st) => setWhen(st, r.key, k)); }, { disabled: locked, role: 'radio' });
+      const seg = el('div', { class: 'mye-seg', role: 'radiogroup', 'aria-label': `When ${r.title} happens` }, ...(['time', 'trigger', 'flexible'] as const).map((k) => {
+        const b = btn(k === 'time' ? 'Time' : k === 'trigger' ? 'Trigger' : 'Flexible', 'mye-seg-btn', () => { if (k === 'trigger' && r.when !== 'trigger') focusKey = r.key; change((st) => setWhen(st, r.key, k)); }, { disabled: locked, role: 'radio' });
         b.setAttribute('aria-checked', String(r.when === k));
         return b;
       }));
       let control: HTMLElement;
-      if (r.when === 'time') {
+      if (r.when === 'flexible') {
+        control = el('p', { class: 'mye-hint' }, 'Nothing prints in its box: it fits around the day. Your time and trigger are kept if you switch back.');
+      } else if (r.when === 'time') {
         const input = el('input', { type: 'time', step: '300', class: 'mye-input mye-time', value: r.time || (r.key === 'evening' ? EVENING_TIME : ''), disabled: locked });
         input.setAttribute('aria-label', `${r.title} time`);
         input.addEventListener('change', () => { if (input.value) change((st) => setTime(st, r.key, input.value)); });
@@ -129,10 +131,8 @@ export function mayEditor(o: Options) {
           btn('Change', 'mye-text-btn', () => { focusKey = r.key; o.redraw(); }, { disabled: locked, 'aria-label': `Change the trigger for ${r.title}` }));
       } else {
         const custom = !TRIGGER_CHOICES.includes(r.trigger as (typeof TRIGGER_CHOICES)[number]);
-        // Most likely first: the prepared one, then the block just before this one on her day, then familiar events.
-        const prev = s.rows[s.rows.indexOf(r) - 1];
-        const afterPrev = prev ? `After ${prev.title.replace(/\s*&.*$/, '').toLowerCase()}` : '';
-        const choices = [...new Set([defaultTrigger(r.key, s.options), ...(afterPrev && afterPrev.length <= TRIGGER_LIMIT ? [afterPrev] : []), ...TRIGGER_CHOICES])].filter((t) => t !== 'When we wake up' || r.key === 'morning');
+        // Real events only, the one that fits this block first. Never "after" the block before: that's a chain.
+        const choices = [...new Set([defaultTrigger(r.key, s.options), ...TRIGGER_CHOICES])].filter((t) => t !== 'When we wake up' || r.key === 'morning');
         const chips = el('div', { class: 'mye-chips', role: 'group', 'aria-label': 'Familiar events' }, ...choices.map((t) => {
           const b = btn(t, 'mye-chip', () => { focusKey = null; change((st) => setTrigger(st, r.key, t)); }, { disabled: locked });
           b.setAttribute('aria-pressed', String(r.trigger === t));
@@ -155,7 +155,7 @@ export function mayEditor(o: Options) {
       return card;
     });
     return el('div', { class: 'mye-section' },
-      el('p', { class: 'mye-intro' }, 'Each block shows one thing on the sheet: a time, or the familiar event that starts it. Mix them however your days really go.'),
+      el('p', { class: 'mye-intro' }, 'Give a block a time or a trigger only when it helps everyone know when to begin. A trigger is a real event, like lunch or coming inside. Everything else can stay Flexible.'),
       ...cards);
   };
 
