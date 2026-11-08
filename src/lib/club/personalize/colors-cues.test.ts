@@ -36,7 +36,7 @@ describe('family-member colors: January’s assignment, everywhere', () => {
     const m = custom.members as AugMember[];
     const aug = augView(applyFamily(augFresh(m), m), m, custom.preferences);
     expect(aug.plan.sections.flatMap((s) => s.tasks).flatMap((t) => t.owners).find((o) => o.name === 'Sofia')!.color.id).toBe('orange');
-    expect(aug.routines.find((r) => r.name === 'Sofia')!.color.id).toBe('orange');
+    expect(aug.charts[0].kids.find((k) => k.name === 'Sofia')!.color.id).toBe('orange');
   });
 
   it('saved colors never move when members are reordered, added or removed', () => {

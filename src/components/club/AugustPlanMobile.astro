@@ -11,7 +11,7 @@ import '../../styles/club-marks.css';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="August · Organized Family Club" sheets={['plan', 'r0', 'r1', 'r2', 'r3', 'r4', 'r5']} previewNote="Your family’s plan and a routine for each child, ready to print">
+<ClubPlanScreen deadline={deadline} kicker="August · Organized Family Club" sheets={['plan', 'morning', 'after']} previewNote="Your family’s plan and two routine charts, ready to print">
   <Fragment slot="title">Back to School <em>Without the Scramble</em></Fragment>
   <section class="cp-section" aria-labelledby="aum-plan-title" data-aum-plan-section>
     <h2 id="aum-plan-title">Our back-to-school plan</h2>
@@ -19,18 +19,13 @@ const { deadline } = Astro.props;
     <ul class="cp-group" data-aum-plan></ul>
     <p class="aum-restore" data-aum-plan-restore hidden><button type="button" class="cp-link"><span>Start over with the prepared plan</span></button></p>
   </section>
-  <section class="cp-section" aria-labelledby="aum-who-title">
-    <h2 id="aum-who-title">Each child’s school day</h2>
-    <p class="cp-intro">Every school-aged child gets their own picture routine, prepared for their age and timed to leave on time. Tap a name to change their steps.</p>
-    <ul class="cp-group" data-aum-who></ul>
-  </section>
   <section class="cp-section" aria-labelledby="aum-steps-title">
-    <h2 id="aum-steps-title" data-aum-steps-title>The routines</h2>
-    <p class="cp-intro">Picture steps with times, so kids can see what comes next instead of asking.</p>
+    <h2 id="aum-steps-title">Our routine charts</h2>
+    <p class="cp-intro">One morning chart and one after-school chart for all the children. Each step can have a time, a trigger (the everyday moment that starts it), or both. Tap a chart to change it.</p>
     <ul class="cp-group" data-aum-groups></ul>
   </section>
   <section class="cp-section" aria-labelledby="aum-words-title">
-    <h2 id="aum-words-title">Words on your printable</h2>
+    <h2 id="aum-words-title">Words on your charts</h2>
     <ul class="cp-group" data-aum-words></ul>
     <p class="aum-restore" data-aum-restore hidden><button type="button" class="cp-link"><span>Restore this routine</span></button><span data-aum-restore-note></span></p>
   </section>
@@ -54,6 +49,7 @@ const { deadline } = Astro.props;
 .aum-check{display:flex;gap:10px;align-items:flex-start;margin:4px 0 0;font-size:.92rem;line-height:1.45}
 .aum-check input{width:20px;height:20px;margin-top:2px;flex:0 0 20px}
 .aum-step[data-removed]{background:#f6f6f3}
+.aum-issue{margin:0;padding:8px 10px;border-left:3px solid #c9822f;background:#fbf4ea;color:#5a4630;font-size:.85rem;line-height:1.45}
 .aum-step[data-removed] strong{color:var(--cp-soft);text-decoration:line-through}
 .cp-thumbs [data-cp-thumb][hidden]{display:none}
 [data-aum-plan-section][hidden]{display:none}
@@ -64,7 +60,7 @@ const { deadline } = Astro.props;
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
 import {
-  CHOICES, FOOTER_LIMIT, GROUPS, ageFor, GROUP_INFO, ICONS, LABEL_LIMIT, addStep, clock, move, planEdited, restorePlan, restoreRoutine, routineChanged, routineOf,
+  CHOICES, CUE_TEXT_LIMIT, FOOTER_LIMIT, GROUPS, GROUP_INFO, MAX_STEPS, cueOf, routineKids, setCue, setCueOff, setLeave, setTimeOff, setTimesOff, setWho, ICONS, LABEL_LIMIT, addStep, clock, move, planEdited, restorePlan, restoreRoutine, routineChanged, routineOf,
   setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, type AugPlan, type AugState, type Group, type PlanSection,
 } from '../../lib/club/engines/august-school-routines';
 import { resetTask, setTaskCue, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
@@ -98,34 +94,22 @@ if (root && asr) {
         return row(sec.title, `${on.length} ${on.length === 1 ? 'job' : 'jobs'}`, on.map((t) => `${t.label}: ${t.who}`).join(' · '), () => openSection(sec.id), locked);
       }));
     q('[data-aum-plan-restore]').hidden = locked || !planEdited(s);
-    q('[data-aum-who]').replaceChildren(...(v.kids.length ? v.kids : [{ id: 'family', name: v.childName }]).map((k) =>
-      row(k.id === v.child ? 'Showing below' : 'Routine', k.name, k.id === 'family' ? 'For the whole family' : `Prepared for age ${ageOf(k.id)}`,
-        () => { plan().update((x) => setChild(x, k.id, plan().members())); openGroup('morning'); }, locked, avatar(k.id, k.name))));
-    q('[data-aum-steps-title]').textContent = v.child === 'family' ? 'The routines' : `${v.childName}’s routines`;
-    // Thumbnails: only the sheets this family prints; the large preview is the plan, or the routine without one.
+    // Thumbnails: only the sheets this family prints; the large preview is the plan, or the morning chart without one.
     const hero = root.querySelector<HTMLElement>('.cp-thumb--hero');
-    if (hero) hero.dataset.cpThumb = v.plan.active ? 'plan' : 'r0';
-    const printed = new Set([...(v.plan.active ? ['plan'] : []), ...v.routines.map((_, i) => `r${i}`)]);
-    root.querySelectorAll<HTMLElement>('.cp-thumbs [data-cp-thumb]').forEach((t) => { t.hidden = !printed.has(t.dataset.cpThumb ?? ''); });
-    q('[data-aum-groups]').replaceChildren(...GROUPS.map((g) => {
-      const steps = v.groups[g];
-      const span = steps.length ? `${steps[0].clock} to ${steps.at(-1)!.clock}` : 'No steps yet';
-      return row(GROUP_INFO[g].title, `${steps.length} ${steps.length === 1 ? 'step' : 'steps'} · ${span}`, steps.map((x) => x.label).join(', '), () => openGroup(g), locked);
+    if (hero) hero.dataset.cpThumb = v.plan.active ? 'plan' : 'morning';
+    root.querySelectorAll<HTMLElement>('.cp-thumbs [data-cp-thumb="plan"]').forEach((t) => { t.hidden = !v.plan.active; });
+    q('[data-aum-groups]').replaceChildren(...v.charts.map((c) => {
+      const timed = c.steps.filter((x) => x.time);
+      const span = timed.length ? `${timed[0].clock!.join(' ')} to ${timed.at(-1)!.clock!.join(' ')}` : 'Triggers, no clock times';
+      const warn = c.issues.length ? ` · ${c.issues.length} to check` : '';
+      return row(c.title, `${c.steps.length} ${c.steps.length === 1 ? 'step' : 'steps'} · ${span}${warn}`, c.steps.map((x) => x.label).join(', '), () => openGroup(c.group), locked);
     }));
     q('[data-aum-words]').replaceChildren(
-      row('At the bottom', v.footer, v.routine.mode === 'simple' ? 'Shorter routine is on' : '', openWords, locked));
+      row('Under the title', v.footer, '', openWords, locked));
     q('[data-aum-restore]').hidden = locked || !routineChanged(s, plan().members());
-    q('[data-aum-restore-note]').textContent = `Puts back the prepared steps, times and wording on ${v.childName === 'Our family' ? 'the family' : `${v.childName}’s`} routine. Other routines stay.`;
+    q('[data-aum-restore-note]').textContent = 'Puts back the prepared steps, times, triggers and wording on both charts.';
   };
 
-  const ageOf = (id: string) => ageFor(id, plan().members());
-  // Each child's family color (January's) on their initial; the name is always beside it.
-  const avatar = (id: string, name: string) => {
-    const a = el('span', { class: 'cp-avatar' }, name.charAt(0));
-    const c = plan().view().routines.find((r) => r.child === id)?.color;
-    if (c && id !== 'family') { a.style.background = c.ink; a.style.color = '#fff'; }
-    return a;
-  };
   // One part of the family plan, in the shared owner editor.
   const openSection = (id: PlanSection) => {
     const p = plan();
@@ -150,12 +134,15 @@ if (root && asr) {
     const members = p.members();
     const r = routineOf(p.state(), members);
     const visible = shown(r, g);
-    const again = () => openGroup(g);
+    const chart = p.view().charts.find((c) => c.group === g)!;
+    const kids = routineKids(members);
+    // Redrawing after each change keeps the sheet where she was.
+    const again = () => { const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]'); const top = sheet?.scrollTop ?? 0; openGroup(g); if (sheet) sheet.scrollTop = top; };
     const steps = el('ul', { class: 'aum-steps' }, ...r.steps.filter((x) => x.group === g).map((step) => {
       const off = Boolean(step.removed) || !visible.includes(step);
       const li = el('li', { class: 'aum-step' });
       if (off) li.setAttribute('data-removed', '');
-      li.append(el('div', { class: 'aum-step-head' }, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), el('strong', {}, step.label), off ? '' : el('span', {}, clock(step.time))));
+      li.append(el('div', { class: 'aum-step-head' }, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), el('strong', {}, step.label), off || step.timeOff ? '' : el('span', {}, clock(step.time))));
       const actions = el('div', { class: 'aum-step-actions' });
       if (step.removed) {
         const b = el('button', { type: 'button', class: 'cp-chip' }, 'Put back');
@@ -165,10 +152,24 @@ if (root && asr) {
       } else if (!off) {
         const name = el('input', { type: 'text', maxLength: LABEL_LIMIT, value: step.label });
         name.addEventListener('change', () => { p.update((s) => setLabel(s, step.id, name.value, p.members())); again(); });
-        const time = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30' });
+        const time = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30', disabled: Boolean(step.timeOff) });
         time.addEventListener('change', () => { if (validTime(time.value)) { p.update((s) => setTime(s, step.id, time.value, p.members())); again(); } });
-        li.append(el('div', { class: 'aum-step-fields' }, el('label', { class: 'cp-field' }, 'Step', name), el('label', { class: 'cp-field' }, 'Time', time)));
-        for (const [dir, text] of [[-1, 'Earlier'], [1, 'Later']] as const) {
+        const cue = el('input', { type: 'text', maxLength: CUE_TEXT_LIMIT, value: step.cue ?? cueOf(step), placeholder: 'e.g. After breakfast', disabled: Boolean(step.cueOff) });
+        cue.addEventListener('change', () => { p.update((s) => setCue(s, step.id, cue.value, p.members())); again(); });
+        const check = (label: string, on: boolean, set: (v: boolean) => void) => { const c = el('input', { type: 'checkbox', checked: on }); c.addEventListener('change', () => { set(c.checked); again(); }); return el('label', { class: 'aum-check' }, c, ` ${label}`); };
+        li.append(el('div', { class: 'aum-step-fields' }, el('label', { class: 'cp-field' }, 'Step', name), el('label', { class: 'cp-field' }, 'Time', time)),
+          el('label', { class: 'cp-field' }, 'Trigger (the everyday moment that starts it; blank for none)', cue),
+          el('div', { class: 'aum-step-actions' },
+            check('Show the time', !step.timeOff, (v) => p.update((s) => setTimeOff(s, step.id, !v, p.members()))),
+            check('Show the trigger', !step.cueOff, (v) => p.update((s) => setCueOff(s, step.id, !v, p.members())))));
+        if (kids.length > 1) {
+          const chip = (label: string, on: boolean, pick: () => void) => { const b = el('button', { type: 'button', class: 'cp-chip' }, label); b.setAttribute('aria-pressed', String(on)); b.addEventListener('click', () => { pick(); again(); }); return b; };
+          li.append(el('div', { class: 'cp-field' }, el('span', {}, 'Who does it'), el('div', { class: 'cp-chips', role: 'group' },
+            chip('Everyone', !step.who?.length, () => p.update((s) => setWho(s, step.id, [], p.members()))),
+            ...kids.map((k) => { const on = Boolean(step.who?.includes(k.id)); return chip(k.firstName, on, () => p.update((s) => setWho(s, step.id, on ? (step.who ?? []).filter((w) => w !== k.id) : [...(step.who ?? []), k.id], p.members()))); }))));
+        }
+        for (const issue of chart.issues.filter((x) => x.stepId === step.id)) li.append(el('p', { class: 'aum-issue' }, issue.text));
+        for (const [dir, text] of [[-1, 'Move up'], [1, 'Move down']] as const) {
           const b = el('button', { type: 'button', class: 'cp-chip', disabled: !visible[visible.indexOf(step) + dir] }, text);
           b.setAttribute('aria-label', `Move ${step.label} ${text.toLowerCase()}`);
           b.addEventListener('click', () => { p.update((s) => move(s, step.id, dir, p.members())); again(); });
@@ -184,9 +185,22 @@ if (root && asr) {
       li.append(actions);
       return li;
     }));
+    // The routine as a whole: the morning's out-the-door time, or after school, clock times on or off.
+    const whole: Node[] = [];
+    if (g === 'morning') {
+      const leave = el('input', { type: 'time', step: '300', value: p.view().leave });
+      leave.addEventListener('change', () => { p.update((s) => setLeave(s, leave.value, p.members())); again(); });
+      whole.push(el('label', { class: 'cp-field' }, 'Out the door by', leave),
+        el('p', { class: 'cp-sheet-hint' }, p.view().sampleTimes ? 'Sample times: add when school starts on your family page, or set the out-the-door time here.' : 'Timed back from when school starts on your family page.'));
+    } else {
+      const timed = el('input', { type: 'checkbox', checked: r.steps.some((x) => x.group === 'after' && !x.removed && !x.timeOff) });
+      timed.addEventListener('change', () => { p.update((s) => setTimesOff(s, 'after', !timed.checked, p.members())); again(); });
+      whole.push(el('label', { class: 'aum-check' }, timed, ' Show clock times (afternoons run on triggers by default)'));
+    }
     const present = new Set(r.steps.filter((x) => x.group === g && !x.removed).map((x) => x.id));
+    const full = visible.length >= MAX_STEPS;
     const add = el('div', { class: 'cp-chips', role: 'group' }, ...CHOICES[g].filter((c) => !present.has(c.id)).map((c) => {
-      const b = el('button', { type: 'button', class: 'cp-chip' }, `＋ ${c.label}`);
+      const b = el('button', { type: 'button', class: 'cp-chip', disabled: full }, `＋ ${c.label}`);
       b.addEventListener('click', () => { p.update((s) => addStep(s, g, c.id, p.members())); again(); });
       return b;
     }));
@@ -194,19 +208,16 @@ if (root && asr) {
     const other = GROUPS.find((x) => x !== g)!;
     const next = el('button', { type: 'button', class: 'cp-btn' }, `${GROUP_INFO[other].title} ›`);
     next.addEventListener('click', () => openGroup(other));
-    ui.openSheet(GROUP_INFO[g].title, el('p', { class: 'cp-sheet-hint' }, 'Rename, retime, reorder or remove steps. Removed steps can be put back.'), steps,
-      el('div', { class: 'cp-field' }, el('span', {}, 'Add a step'), add), el('div', { class: 'cp-sheet-actions' }, ui.doneButton(), next));
+    ui.openSheet(GROUP_INFO[g].title, ...whole, el('p', { class: 'cp-sheet-hint' }, 'Rename, retime, reorder or remove steps, and change or turn off a trigger. Removed steps can be put back.'), steps,
+      el('div', { class: 'cp-field' }, el('span', {}, full ? `${MAX_STEPS} steps is the most that fit one page` : 'Add a step'), add), el('div', { class: 'cp-sheet-actions' }, ui.doneButton(), next));
   };
   const openWords = () => {
     const p = plan();
     const v = p.view();
     const input = el('textarea', { maxLength: FOOTER_LIMIT, value: v.footer });
     input.addEventListener('input', () => p.update((s) => setFooter(s, input.value, p.members())));
-    const shorter = el('input', { type: 'checkbox', checked: v.routine.mode === 'simple' });
-    shorter.addEventListener('change', () => p.update((s) => setMode(s, shorter.checked, p.members())));
-    ui.openSheet('Words on your printable', el('label', { class: 'cp-field' }, 'At the bottom', input),
-      el('p', { class: 'cp-sheet-hint' }, 'Blank goes back to the original wording.'),
-      el('label', { class: 'aum-check' }, shorter, ' Use a shorter routine (hides “Wake up” and “Wash hands” without deleting them)'),
+    ui.openSheet('Words on your charts', el('label', { class: 'cp-field' }, 'Under the title', input),
+      el('p', { class: 'cp-sheet-hint' }, 'Blank goes back to “Check the chart. Do the next thing.”'),
       el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
   };
   q('[data-aum-plan-restore] button').addEventListener('click', () => {

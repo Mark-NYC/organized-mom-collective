@@ -74,8 +74,8 @@ rule no longer points at Mom.
 
 **August, Back to School Without the Scramble.** A new first sheet, the family plan, in the routine's own visual
 language (numbered circles, tinted panels, hand-drawn icons): before the first day, the night before, school mornings,
-after school, every job with names; then the existing "My School Day" routine for every school-aged child, timed back
-from the school start on her family page.
+after school, every job with names; then the family's Morning Routine and After-School Routine charts, shared by all the
+children (a step only some do names them), with an optional time and an optional trigger on every step.
 
 ## Tests
 

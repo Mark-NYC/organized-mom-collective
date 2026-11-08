@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { sampleHouseholds } from '../../../data/club/samples';
 import {
-  addCustom, addStep, applyFamily, augFingerprint, augView, freshState, fromLegacy, isAugState, leaveFor, move, planEdited, preparedRoutine, restorePlan, restoreRoutine,
-  routineChanged, setChild, setFooter, setLabel, setMode, setRemoved, setTime, type AugMember, type AugState,
+  MAX_STEPS, addCustom, addStep, applyFamily, augFingerprint, augView, freshState, fromLegacy, isAugState, leaveFor, move, planEdited, preparedRoutine, restorePlan,
+  restoreRoutine, routineChanged, setCue, setCueOff, setFooter, setLabel, setLeave, setRemoved, setTime, setTimeOff, setWho, type AugMember, type AugState,
 } from './august-school-routines';
 import { familySnapshot } from '../personalize/family';
 import { setTaskOwners, setTaskSkip, setTaskTitle } from '../personalize/edits';
@@ -10,127 +10,180 @@ import { setTaskOwners, setTaskSkip, setTaskTitle } from '../personalize/edits';
 const family = (id: string) => sampleHouseholds.find((s) => s.id === id)!.household.members as AugMember[];
 const rivera = family('rivera');
 const id = (n: string) => rivera.find((m) => m.firstName === n)!.id;
-const labels = (s: AugState, g: 'morning' | 'after', members = rivera) => augView(s, members).groups[g].map((x) => x.label);
 
-describe('August school routines', () => {
-  it('starts on the first child’s routine, prepared for their age in August 2027', () => {
+const charts = (s: AugState, m = rivera, prefs = {}) => augView(s, m, prefs).charts;
+const chart = (s: AugState, g: 'morning' | 'after', m = rivera) => charts(s, m).find((c) => c.group === g)!;
+const labels = (s: AugState, g: 'morning' | 'after', m = rivera) => chart(s, g, m).steps.map((x) => x.label);
+const mins = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+
+describe('August routine charts: one morning and one after-school chart for the whole family', () => {
+  it('prints exactly two charts a family, never a page per child', () => {
+    for (const fam of ['rivera', 'chen', 'okafor', 'brooks', 'hughes']) {
+      const m = family(fam);
+      const v = augView(applyFamily(freshState(m), m), m);
+      expect(v.charts.map((c) => c.group)).toEqual(['morning', 'after']);
+    }
     const s = applyFamily(freshState(rivera), rivera);
-    const v = augView(s, rivera);
-    expect(v.title).toBe('Sofia\'s morning & after-school routines');
-    expect(v.age).toBe(11);
-    expect(labels(s, 'morning')).toContain('Check bag & school supplies');
-    expect(labels(s, 'after').at(-1)).toBe('Homework & study time');
-    expect(v.groups.morning.map((x) => x.clock)).toEqual(['7:00 AM', '7:15 AM', '7:25 AM', '7:45 AM', '7:48 AM', '7:49 AM', '7:50 AM']);
+    expect(chart(s, 'morning').kids.map((k) => k.name)).toEqual(['Sofia', 'Mateo', 'Elena']);
+    expect(chart(s, 'morning').title).toBe('Morning Routine');
+    expect(chart(s, 'after').banner.title).toBe('Ready for free time!');
   });
 
-  it('a five-year-old gets little-kid wording; an eight-year-old the prepared routine', () => {
-    const s = setChild(freshState(rivera), id('Elena'), rivera);
-    expect(augView(s, rivera).age).toBe(5);
-    expect(labels(s, 'after').at(-1)).toBe('Look at a book');
-    expect(labels(s, 'morning')).toContain('Get my school bag');
-    setChild(s, id('Mateo'), rivera);
-    expect(augView(s, rivera).age).toBe(8);
-    expect(labels(s, 'after').at(-1)).toBe('Homework & reading');
+  it('times AND triggers: both, only a time, only a trigger, neither', () => {
+    const s = applyFamily(freshState(rivera), rivera);
+    const m = chart(s, 'morning').steps;
+    const by = (id: string) => m.find((x) => x.id === id)!;
+    expect([by('teeth').time, by('teeth').cue]).toEqual(['07:35', 'After breakfast']);
+    expect([by('wake').time, by('wake').cue]).toEqual(['07:05', '']);
+    // After school runs on triggers by default: a trigger, no time.
+    const a = chart(s, 'after').steps;
+    expect(a.find((x) => x.id === 'unpack')).toMatchObject({ time: null, cue: '' });
+    expect(a.find((x) => x.id === 'homework')).toMatchObject({ time: null, cue: 'After snack' });
+    // Turning a time on, a trigger off, and both off.
+    setTimeOff(s, 'snack', false, rivera);
+    setCueOff(s, 'snack', true, rivera);
+    expect(chart(s, 'after').steps.find((x) => x.id === 'snack')).toMatchObject({ time: '15:45', clock: ['3:45', 'PM'], cue: '' });
+    setTimeOff(s, 'snack', true, rivera);
+    expect(chart(s, 'after').steps.find((x) => x.id === 'snack')).toMatchObject({ time: null, cue: '' });
+    setCueOff(s, 'snack', false, rivera);
+    expect(chart(s, 'after').steps.find((x) => x.id === 'snack')!.cue).toBe('After washing hands');
   });
 
-  it('each child keeps their own routine', () => {
-    const s = applyFamily(freshState(rivera), rivera);
-    setLabel(s, 'eat', 'Eat breakfast at the table', rivera);
-    setChild(s, id('Mateo'), rivera);
-    expect(labels(s, 'morning')).toContain('Eat breakfast');
-    setChild(s, id('Sofia'), rivera);
-    expect(labels(s, 'morning')).toContain('Eat breakfast at the table');
+  it('no prepared trigger restates the step, says nothing, or points at a later step', () => {
+    for (const fam of ['rivera', 'chen', 'okafor', 'brooks', 'hughes', 'lindqvist', 'goering']) {
+      const m = family(fam);
+      const prof = sampleHouseholds.find((x) => x.id === fam)!.profile;
+      const s = applyFamily({ ...freshState(m), profile: familySnapshot(prof) }, m);
+      for (const c of charts(s, m)) expect(c.issues).toEqual([]);
+      const wake = chart(s, 'morning', m).steps[0];
+      expect(wake.cue).toBe('');
+      expect(chart(s, 'morning', m).steps.at(-1)!.cue).toBe('');
+    }
   });
 
-  it('retimes, reorders, removes and restores steps', () => {
+  it('her triggers are checked: restating, vague, circular and order-only ones are flagged', () => {
     const s = applyFamily(freshState(rivera), rivera);
-    setTime(s, 'wake', '06:45', rivera);
-    setTime(s, 'wake', '25:00', rivera);
-    expect(augView(s, rivera).groups.morning[0].clock).toBe('6:45 AM');
-    move(s, 'dress', 1, rivera);
-    expect(labels(s, 'morning').slice(1, 3)).toEqual(['Eat breakfast', 'Get dressed']);
-    setRemoved(s, 'teeth', true, rivera);
-    expect(labels(s, 'morning')).not.toContain('Brush teeth');
-    setRemoved(s, 'teeth', false, rivera);
-    expect(labels(s, 'morning')).toContain('Brush teeth');
+    setCue(s, 'wake', 'When I wake up', rivera);
+    setCue(s, 'out', 'When I’m ready', rivera);
+    setCue(s, 'backpack', 'Before shoes on', rivera);
+    setCue(s, 'dress', 'After brushing teeth', rivera);
+    const kinds = Object.fromEntries(chart(s, 'morning').issues.map((i) => [i.stepId, i.kind]));
+    expect(kinds).toEqual({ wake: 'restates', out: 'vague', backpack: 'order-only', dress: 'circular' });
+    // A blank trigger is no trigger.
+    setCue(s, 'wake', '', rivera);
+    expect(chart(s, 'morning').steps[0].cue).toBe('');
+  });
+
+  it('times run in order, end before out the door, and stay in order when steps move', () => {
+    const s = applyFamily(freshState(rivera), rivera);
+    const times = () => chart(s, 'morning').steps.map((x) => x.time).filter(Boolean) as string[];
+    const ordered = () => times().every((t, i, a) => i === 0 || mins(t) >= mins(a[i - 1]));
+    expect(ordered()).toBe(true);
+    expect(chart(s, 'morning').banner.deadline).toBe('7:50 AM');
+    expect(mins(times().at(-1)!)).toBeLessThan(mins('07:50'));
+    // Reordering moves the step; the times stay with the slots.
+    move(s, 'teeth', -1, rivera);
+    expect(labels(s, 'morning').slice(2, 4)).toEqual(['Brush teeth', 'Eat breakfast']);
+    expect(ordered()).toBe(true);
+    // An out-of-order time and a time past the deadline are flagged, never silently changed.
+    setTime(s, 'dress', '06:30', rivera);
+    setTime(s, 'out', '08:05', rivera);
+    const kinds = chart(s, 'morning').issues.map((i) => i.kind);
+    expect(kinds).toContain('order');
+    expect(kinds).toContain('deadline');
+    // Her own out-the-door time moves the deadline.
+    setLeave(s, '08:15', rivera);
+    expect(chart(s, 'morning').banner.deadline).toBe('8:15 AM');
+    expect(chart(s, 'morning').issues.map((i) => i.kind)).not.toContain('deadline');
+  });
+
+  it('uses her school start; without one the sample times are marked as defaults', () => {
+    const r = sampleHouseholds.find((x) => x.id === 'rivera')!;
+    const s = applyFamily({ ...freshState(rivera), profile: familySnapshot(r.profile) }, rivera);
+    expect(augView(s, rivera).sampleTimes).toBe(false);
+    expect(chart(s, 'morning').banner.deadline).toBe('7:40 AM');
+    expect(chart(s, 'morning').steps[0].clock).toEqual(['6:55', 'AM']);
+    const b = family('brooks');
+    expect(augView(applyFamily(freshState(b), b), b).sampleTimes).toBe(true);
+    // A morning with every time off has no clock to beat.
+    for (const x of chart(s, 'morning').steps) setTimeOff(s, x.id, true, rivera);
+    expect(chart(s, 'morning').banner.deadline).toBeNull();
+  });
+
+  it('personalized for the family, not one list for everyone: some steps name the children they’re for', () => {
+    const r = sampleHouseholds.find((x) => x.id === 'rivera')!;
+    const s = applyFamily({ ...freshState(rivera), profile: familySnapshot(r.profile) }, rivera);
+    const pets = chart(s, 'morning').steps.find((x) => x.id === 'pets')!;
+    expect(pets.owners.map((o) => o.name)).toEqual(['Sofia']);
+    expect(chart(s, 'after').steps.find((x) => x.label === 'Pack my soccer bag')).toMatchObject({ cue: 'On soccer days', owners: [{ name: 'Sofia' }] });
+    // Steps for everyone name nobody (the header lists the children).
+    expect(chart(s, 'morning').steps.find((x) => x.id === 'teeth')!.owners).toEqual([]);
+    // Chen: two swimmers share one row, the pianist practices; four children, one chart.
+    const chen = family('chen');
+    const c = applyFamily({ ...freshState(chen), profile: familySnapshot(sampleHouseholds.find((x) => x.id === 'chen')!.profile) }, chen);
+    const after = chart(c, 'after', chen).steps;
+    expect(after.find((x) => x.label === 'Pack my swim team bag')!.owners.map((o) => o.name)).toEqual(['Grace', 'Owen']);
+    expect(after.find((x) => x.label === 'Practice piano')!.owners.map((o) => o.name)).toEqual(['Ivy']);
+    expect(after.length).toBeLessThanOrEqual(8);
+    // Only little ones: picture-book words, no homework to finish.
+    const ok = family('okafor');
+    const o = applyFamily(freshState(ok), ok);
+    expect(labels(o, 'after', ok)).toContain('Look at a book');
+    expect(chart(o, 'after', ok).steps.at(-1)!.cue).toBe('After my book');
+    // No profile: the plain family routine, still complete.
+    const b = family('brooks');
+    expect(labels(applyFamily(freshState(b), b), 'morning', b)).toEqual(['Wake up & stretch', 'Get dressed', 'Eat breakfast', 'Brush teeth', 'Grab backpack & lunch box', 'Shoes on & out the door']);
+  });
+
+  it('edits: rename, reorder, add, remove, who it’s for; never empty, never more than eight', () => {
+    const s = applyFamily(freshState(rivera), rivera);
+    setLabel(s, 'eat', '  Breakfast   at the table ', rivera);
+    expect(labels(s, 'morning')).toContain('Breakfast at the table');
+    addStep(s, 'morning', 'make-bed', rivera);
+    // New steps go before the last step (out the door), timed between their neighbors.
+    expect(labels(s, 'morning').at(-2)).toBe('Make my bed');
+    expect(chart(s, 'morning').issues).toEqual([]);
+    addCustom(s, 'after', 'Feed the fish', 'custom-1', rivera);
+    expect(labels(s, 'after').at(-2)).toBe('Feed the fish');
+    expect(chart(s, 'after').steps.at(-2)!.time).toBeNull();
+    for (let i = 0; i < 6; i++) addCustom(s, 'morning', `Extra ${i}`, `x${i}`, rivera);
+    expect(chart(s, 'morning').steps).toHaveLength(MAX_STEPS);
+    setWho(s, 'make-bed', [id('Mateo')], rivera);
+    expect(chart(s, 'morning').steps.find((x) => x.id === 'make-bed')!.owners.map((o) => o.name)).toEqual(['Mateo']);
+    setWho(s, 'make-bed', [id('Sofia'), id('Mateo'), id('Elena')], rivera);
+    expect(chart(s, 'morning').steps.find((x) => x.id === 'make-bed')!.owners).toEqual([]);
+    for (const x of chart(s, 'after').steps) setRemoved(s, x.id, true, rivera);
+    expect(chart(s, 'after').steps).toHaveLength(1);
     expect(routineChanged(s, rivera)).toBe(true);
     restoreRoutine(s, rivera);
     expect(routineChanged(s, rivera)).toBe(false);
   });
 
-  it('keeps one lunch step and one water step; adds and custom steps go at the end', () => {
+  it('stable family colors: each child keeps January’s color, by member id, in any order', () => {
+    // As her family page saves them: everyone's color, Sofia's changed to orange.
+    const prefs = { colors: { [id('Sofia')]: 'orange', [id('Mateo')]: 'green', [id('Elena')]: 'purple', [id('Ana')]: 'blue', [id('Luis')]: 'pink' } };
     const s = applyFamily(freshState(rivera), rivera);
-    addStep(s, 'morning', 'pack-lunch', rivera);
-    const m = labels(s, 'morning');
-    expect(m).toContain('Pack My Lunch');
-    expect(m).not.toContain('Grab My Lunch Box');
-    addStep(s, 'morning', 'lunch', rivera);
-    expect(labels(s, 'morning').filter((x) => /lunch/i.test(x))).toEqual(['Grab My Lunch Box']);
-    addCustom(s, 'after', '  Feed the dog  ', 'custom-1', rivera);
-    expect(labels(s, 'after').at(-1)).toBe('Feed the dog');
-    addStep(s, 'after', 'nope', rivera);
-    expect(labels(s, 'after')).toHaveLength(6);
+    const before = charts(s, rivera, prefs)[0].kids.map((k) => [k.name, k.color.id]);
+    expect(before[0]).toEqual(['Sofia', 'orange']);
+    const reordered = [...rivera].reverse();
+    const after = charts(applyFamily(freshState(reordered), reordered), reordered, prefs)[0].kids.map((k) => [k.name, k.color.id]);
+    expect(Object.fromEntries(after)).toEqual(Object.fromEntries(before));
   });
 
-  it('the shorter routine hides wake-up and hand-washing without deleting them', () => {
-    const s = applyFamily(freshState(rivera), rivera);
-    setMode(s, true, rivera);
-    expect(labels(s, 'morning')).not.toContain('Wake up & stretch');
-    expect(labels(s, 'after')).not.toContain('Wash hands');
-    setMode(s, false, rivera);
-    expect(labels(s, 'morning')[0]).toBe('Wake up & stretch');
-  });
-
-  it('labels and the footer are trimmed and capped; blank keeps the original', () => {
-    const s = applyFamily(freshState(rivera), rivera);
-    setLabel(s, 'eat', '   ', rivera);
-    expect(labels(s, 'morning')).toContain('Eat breakfast');
-    setLabel(s, 'eat', 'x'.repeat(80), rivera);
-    expect(labels(s, 'morning')[2]).toHaveLength(55);
-    setFooter(s, 'Ready, set, go!', rivera);
-    expect(augView(s, rivera).footer).toBe('Ready, set, go!');
-    setFooter(s, '', rivera);
-    expect(augView(s, rivera).footer).toBe("Check my routine. Do my part. Then I'm ready!");
-  });
-
-  it('archived and removed children never print; another family starts fresh', () => {
-    const s = applyFamily(freshState(rivera), rivera);
-    const archived = rivera.map((m) => (m.firstName === 'Sofia' ? { ...m, archived: true } : m));
-    applyFamily(s, archived);
-    expect(augView(s, archived).childName).toBe('Mateo');
-    expect(Object.keys(s.boards)).not.toContain(id('Sofia'));
-    const brooks = family('brooks');
-    const b = applyFamily(freshState(brooks), brooks);
-    expect(augView(b, brooks).kids.map((k) => k.name)).toEqual(['Max', 'Lily']);
-    expect(JSON.stringify(b)).not.toContain('rivera');
-  });
-
-  it('a family with no children gets the family routine', () => {
-    const hughes = family('hughes');
-    const s = applyFamily(freshState(hughes), hughes);
-    expect(augView(s, hughes).title).toBe('Our morning & after-school routines');
-    expect(augView(s, hughes).age).toBe(8);
-  });
-
-  it('the fingerprint changes with anything that prints', () => {
+  it('the fingerprint covers what prints; saved state is checked; the earlier per-child boards are dropped', () => {
     const s = applyFamily(freshState(rivera), rivera);
     const before = augFingerprint(s, rivera);
-    setTime(s, 'snack', '15:50', rivera);
+    setCue(s, 'teeth', 'After my vitamins', rivera);
     expect(augFingerprint(s, rivera)).not.toBe(before);
-  });
-
-  it('reads the earlier page’s saved routines once, for the same family only', () => {
-    const old = { profile: 'rivera:sample-rivera', active: id('Mateo'), boards: { [id('Mateo')]: { ...preparedRoutine(8), footer: 'Go Mateo!', child: id('Mateo') }, 'gone-kid': preparedRoutine(8) } };
-    old.boards[id('Mateo')].steps[0].label = 'Up and at it';
-    const s = fromLegacy(JSON.stringify(old), 'rivera:sample-rivera', rivera)!;
-    expect(isAugState(s)).toBe(true);
-    expect(augView(s, rivera).childName).toBe('Mateo');
-    expect(labels(s, 'morning')[0]).toBe('Up and at it');
-    expect(augView(s, rivera).footer).toBe('Go Mateo!');
-    expect(Object.keys(s.boards)).not.toContain('gone-kid');
-    expect(fromLegacy(JSON.stringify(old), 'brooks:sample-brooks', rivera)).toBeNull();
+    setFooter(s, 'Look, then go!', rivera);
+    expect(chart(s, 'morning').tagline).toBe('Look, then go!');
+    expect(isAugState(JSON.parse(JSON.stringify(s)))).toBe(true);
+    expect(isAugState({ child: 'x', boards: { x: { steps: [{ id: 'a', time: '07:00', label: 'A', icon: 'bag', group: 'morning', who: [1] }], mode: 'standard' } } })).toBe(false);
+    const old = { child: id('Sofia'), boards: { [id('Sofia')]: preparedRoutine(11) } };
+    const migrated = applyFamily(old as AugState, rivera);
+    expect(Object.keys(migrated.boards)).toEqual(['family']);
+    expect(augView(migrated, rivera).charts).toHaveLength(2);
     expect(fromLegacy('not json', 'rivera:sample-rivera', rivera)).toBeNull();
-    expect(isAugState({ child: 'x', boards: { x: { steps: [{ id: 1 }], mode: 'standard' } } })).toBe(false);
   });
 });
 
@@ -143,11 +196,11 @@ const task = (s: AugState, m: AugMember[], tid: string) => augView(s, m).plan.se
 const plan = (s: AugState, m: AugMember[]) => augView(s, m).plan.sections.flatMap((x) => x.tasks);
 
 describe('August: Back to School Without the Scramble (the family plan)', () => {
-  it('prints the family plan first, then a routine for every school-aged child', () => {
+  it('prints the family plan first, then the two family charts', () => {
     const { m, s } = withProfile('rivera');
     const v = augView(s, m);
     expect(v.plan.active).toBe(true);
-    expect(v.routines.map((r) => r.name)).toEqual(['Sofia', 'Mateo', 'Elena']);
+    expect(v.charts.map((c) => c.group)).toEqual(['morning', 'after']);
     expect(v.plan.sections.map((x) => x.title)).toEqual(['Before the First Day', 'The Night Before', 'School Mornings', 'After School']);
   });
 
@@ -156,7 +209,8 @@ describe('August: Back to School Without the Scramble (the family plan)', () => 
     const v = augView(s, m);
     // School starts 8:00 for Sofia and Mateo: out the door 20 minutes before, Elena with them.
     expect(v.plan.leaveClock).toBe('7:40 AM');
-    for (const r of v.routines) expect(r.groups.morning.at(-1)!.clock).toBe('7:40 AM');
+    expect(v.charts[0].banner.deadline).toBe('7:40 AM');
+    expect(v.charts[0].steps.at(-1)!.clock).toEqual(['7:35', 'AM']);
     expect(leaveFor('08:45')).toBe('08:25');
     expect(leaveFor(undefined)).toBe('07:50');
   });
@@ -181,10 +235,9 @@ describe('August: Back to School Without the Scramble (the family plan)', () => 
     // One child (a four-year-old in preschool): their own small parts; nothing a preschooler can't do.
     const ok = family('okafor');
     const o = applyFamily(freshState(ok), ok);
-    expect(augView(o, ok).routines.map((r) => r.name)).toEqual(['Zara']);
+    expect(augView(o, ok).charts[0].kids.map((k) => k.name)).toEqual(['Zara']);
     expect(task(o, ok, 'pack-bag')).toBeUndefined();
     expect(task(o, ok, 'own-lunch')).toBeUndefined();
-    expect(augView(o, ok).routines[0].groups.morning.map((x) => x.label)).not.toContain('Wake up & stretch');
     // Two school-aged children, one grown-up, no profile answers: a complete plan anyway.
     const br = family('brooks');
     const b = applyFamily(freshState(br), br);

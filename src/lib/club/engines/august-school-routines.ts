@@ -9,13 +9,19 @@
  *   after school, prepared from the family: each child's own jobs by age, the grown-up jobs shared between the
  *   grown-ups (whoever already drives or makes meals keeps it; the account holder is never the default), and the
  *   time to be out the door from the school start she gave. She can change who, the wording, or leave a job off.
- * - "My School Day" for every school-aged child (3 to 18 in August 2027): two picture routines (before school, after
- *   school) of timed steps, prepared for their age and timed back from their school start. Steps can be renamed,
- *   retimed, reordered, removed (and restored) or added from a short list. With no school-aged child, the family
- *   routine sheet alone, as before.
+ * - The family's "Morning Routine" and "After-School Routine", one page each, shared by all the school-aged children
+ *   (3 to 18 in August 2027; rules: ./august-routine-chart.ts): steps with an optional time and an optional habit
+ *   trigger, timed back from the school start, a step only some children do naming them. Steps can be renamed,
+ *   retimed, reordered, removed (and restored), added or given to some children; triggers and times can be edited or
+ *   turned off. Three pages a family, never a page per child.
  * Children are by member ID. Saved means settled: the profile snapshot used is kept with the plan.
  */
 import { ageInMonth } from '../profile';
+import {
+  BANNERS, CHOICES, DEFAULT_LEAVE, DEFAULT_TAGLINE, HEADERS, ICONS, LEGACY_CUES, SHORTER_HIDES, childFacts, clock, clockParts, cueOf,
+  hhmm, minutes, preparedFamilyRoutine, preparedRoutine as prepareFor, shown, stepIssues, swapKeepingTimes, timeBetween, validTime, type Group, type Routine, type Step,
+} from './august-routine-chart';
+export { CHOICES, DEFAULT_LEAVE, ICONS, SHORTER_HIDES, clock, shown, stepIssues, validTime, cueOf, type Group, type Routine, type Step };
 import type { PlanResource } from '../plan/resource';
 import { familyContext, isFamilySnapshot, schoolStartFor, type ContextMember, type ContextPrefs, type FamilyContext, type FamilySnapshot } from '../personalize/family';
 import { colorFor, type MemberColor } from '../personalize/colors';
@@ -24,58 +30,17 @@ import { CUE } from '../personalize/cues';
 import { isTaskEdits, pruneTaskEdits, withEdits, type PlannedTask, type TaskEdits } from '../personalize/edits';
 
 export const KIT_MONTH = '2027-08';
-export type Group = 'morning' | 'after';
 export const GROUPS: readonly Group[] = ['morning', 'after'];
-export const GROUP_INFO: Record<Group, { title: string; tab: string; cue: string }> = { morning: { title: 'Before School', tab: 'Before school', cue: 'When I wake up' }, after: { title: 'After School', tab: 'After school', cue: 'When I get home' } };
-export const LABEL_LIMIT = 55;
-export const FOOTER_LIMIT = 120;
-export const DEFAULT_FOOTER = "Check my routine. Do my part. Then I'm ready!";
-/** Shorter routine: hides these without deleting them. */
-export const SHORTER_HIDES: Record<Group, string> = { morning: 'wake', after: 'wash' };
+export const GROUP_INFO: Record<Group, { title: string; tab: string }> = { morning: { title: 'Morning Routine', tab: 'Morning' }, after: { title: 'After-School Routine', tab: 'After school' } };
+export const LABEL_LIMIT = 40;
+export const CUE_TEXT_LIMIT = 36;
+export const FOOTER_LIMIT = 60;
+/** The line under each chart's header. Routines saved with the earlier sheet's default line get the new one. */
+export const DEFAULT_FOOTER = DEFAULT_TAGLINE;
+const OLD_FOOTER = "Check my routine. Do my part. Then I'm ready!";
+/** A chart holds up to eight steps on one page. */
+export const MAX_STEPS = 8;
 
-export const ICONS: Record<string, string> = {
-  lunch: '/images/club/icon-library/lunch-box.png', water: '/images/club/icon-library/water-bottle.png',
-  quiet: '/images/club/icon-library/quiet-time.png', play: '/images/club/icon-library/free-afternoon.png',
-  wake: '/images/club/icon-library/morning-start.png', clothes: '/images/club/icon-library/getting-dressed.png',
-  breakfast: '/images/club/icon-library/breakfast-bowl.png', teeth: '/images/club/icon-library/toothbrush.png',
-  bag: '/images/club/icon-library/backpack.png', shoes: '/images/club/icon-library/sneakers.png',
-  hands: '/images/club/icon-library/washing-hands.png', snack: '/images/club/icon-library/yogurt-cup.png',
-  book: '/images/club/icon-library/doing-homework.png',
-};
-
-export interface Step { id: string; time: string; label: string; icon: string; group: Group; removed?: boolean }
-const SEEDS: readonly Step[] = [
-  { id: 'wake', time: '07:00', label: 'Wake up & stretch', icon: 'wake', group: 'morning' },
-  { id: 'dress', time: '07:15', label: 'Get dressed', icon: 'clothes', group: 'morning' },
-  { id: 'eat', time: '07:25', label: 'Eat breakfast', icon: 'breakfast', group: 'morning' },
-  { id: 'teeth', time: '07:45', label: 'Brush teeth', icon: 'teeth', group: 'morning' },
-  { id: 'lunch', time: '07:48', label: 'Grab My Lunch Box', icon: 'lunch', group: 'morning' },
-  { id: 'water', time: '07:49', label: 'Grab My Water Bottle', icon: 'water', group: 'morning' },
-  { id: 'backpack', time: '07:50', label: 'Grab backpack & shoes', icon: 'bag', group: 'morning' },
-  { id: 'shoes', time: '15:30', label: 'Shoes & coat away', icon: 'shoes', group: 'after' },
-  { id: 'unpack', time: '15:35', label: 'Unpack backpack & lunch box', icon: 'bag', group: 'after' },
-  { id: 'wash', time: '15:40', label: 'Wash hands', icon: 'hands', group: 'after' },
-  { id: 'snack', time: '15:45', label: 'Snack', icon: 'snack', group: 'after' },
-  { id: 'homework', time: '16:00', label: 'Homework & reading', icon: 'book', group: 'after' },
-];
-/** Steps she can add, a short list for each routine. */
-export const CHOICES: Record<Group, readonly { id: string; label: string; icon: string }[]> = {
-  morning: [
-    { id: 'lunch', label: 'Grab My Lunch Box', icon: 'lunch' }, { id: 'pack-lunch', label: 'Pack My Lunch', icon: 'lunch' },
-    { id: 'stow-lunch', label: 'Put Lunch Box in Backpack', icon: 'lunch' }, { id: 'water', label: 'Grab My Water Bottle', icon: 'water' },
-    { id: 'fill-water', label: 'Fill My Water Bottle', icon: 'water' }, { id: 'stow-water', label: 'Put Water Bottle in Backpack', icon: 'water' },
-    { id: 'read-early', label: 'Ready Early? Read or Draw.', icon: 'book' },
-  ],
-  after: [
-    { id: 'put-backpack', label: 'Put My Backpack Away', icon: 'bag' }, { id: 'snack', label: 'Have a Snack', icon: 'snack' },
-    { id: 'quiet', label: 'Quiet Time', icon: 'quiet' }, { id: 'free', label: 'Free Time', icon: 'play' },
-    { id: 'homework', label: 'Homework', icon: 'book' }, { id: 'snack-free', label: 'Snack & Free Time', icon: 'snack' },
-  ],
-};
-const LUNCH = ['lunch', 'pack-lunch', 'stow-lunch'];
-const WATER = ['water', 'fill-water', 'stow-water'];
-
-export interface Routine { steps: Step[]; mode: 'standard' | 'simple'; footer?: string }
 export interface AugState {
   /** The routine the editor is showing (every school-aged child's prints). */
   child: string;
@@ -99,29 +64,16 @@ export const ageFor = (child: string, members: readonly AugMember[]) => {
   const kid = kidsOf(members).find((k) => k.id === child);
   return kid?.birthYear ? Math.max(3, ageInMonth(kid.birthYear, kid.birthMonth, KIT_MONTH)) : 8;
 };
-/** The prepared out-the-door time, when she hasn't said when school starts. */
-export const DEFAULT_LEAVE = '07:50';
 /** Out the door this long before school starts. */
 export const LEAVE_BEFORE = 20;
-const minutes = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
-const hhmm = (m: number) => `${String(Math.floor(((m % 1440) + 1440) % 1440 / 60)).padStart(2, '0')}:${String(((m % 60) + 60) % 60).padStart(2, '0')}`;
 /** When to be out the door for a school that starts at `start`. */
 export const leaveFor = (start?: string) => (start && validTime(start) ? hhmm(minutes(start) - LEAVE_BEFORE) : DEFAULT_LEAVE);
 
-/**
- * A child's routine for their age, timed so the morning ends when it's time to leave (`leave`, 'HH:MM'): preschoolers
- * get the shorter routine and picture-book words, older children their own alarm and supplies check.
- */
-export const preparedRoutine = (age: number, leave: string = DEFAULT_LEAVE): Routine => {
-  const shift = validTime(leave) ? minutes(leave) - minutes(DEFAULT_LEAVE) : 0;
-  const steps = SEEDS.map((s) => ({ ...s, time: s.group === 'morning' ? hhmm(minutes(s.time) + shift) : s.time }));
-  const set = (id: string, label: string) => { steps.find((s) => s.id === id)!.label = label; };
-  if (age <= 5) { set('homework', 'Look at a book'); set('backpack', 'Get my school bag'); }
-  if (age >= 11) { set('backpack', 'Check bag & school supplies'); set('homework', 'Homework & study time'); }
-  if (age >= 13) set('wake', 'Wake up to my alarm');
-  return { steps, mode: age <= 4 ? 'simple' : 'standard' };
-};
-export const freshState = (members: readonly AugMember[]): AugState => ({ child: schoolKids(members)[0]?.id ?? 'family', boards: {} });
+/** A child's two routines for their age, timed back from `leave` (./august-routine-chart.ts). */
+export const preparedRoutine = (age: number, leave: string = DEFAULT_LEAVE, facts: Parameters<typeof prepareFor>[2] = {}): Routine => prepareFor(age, leave, facts);
+/** The family's routines are one board, kept under this key (the state's per-child boards are from the earlier sheet). */
+export const FAMILY = 'family';
+export const freshState = (_members: readonly AugMember[] = []): AugState => ({ child: FAMILY, boards: {} });
 const ctxOf = (s: Pick<AugState, 'profile'>, members: readonly AugMember[], prefs: ContextPrefs = {}): FamilyContext => familyContext(members as readonly ContextMember[], prefs, KIT_MONTH, s.profile);
 /** A child's out-the-door time from their school start (her answers); otherwise the family's, or the prepared time. */
 export const leaveOf = (s: Pick<AugState, 'profile'>, child: string, members: readonly AugMember[]) => {
@@ -132,8 +84,21 @@ export const leaveOf = (s: Pick<AugState, 'profile'>, child: string, members: re
 /** The earliest out-the-door time among the children whose school start she gave. */
 const knownLeave = (ctx: FamilyContext, members: readonly AugMember[]) =>
   schoolKids(members).map((k) => schoolStartFor(ctx, k.id)).filter((t): t is string => Boolean(t)).map(leaveFor).sort()[0];
-const boardOf = (s: AugState, child: string, members: readonly AugMember[]) => (s.boards[child] ??= preparedRoutine(ageFor(child, members), child === 'family' ? familyLeave(s, members) : leaveOf(s, child, members)));
-export const routineOf = (s: AugState, members: readonly AugMember[]) => boardOf(s, s.child, members);
+/** Whether the morning's times come from her school start, or are the sample default. */
+export const leaveKnown = (s: Pick<AugState, 'profile'>, members: readonly AugMember[]) => Boolean(knownLeave(ctxOf(s, members), members));
+/** The children the family routine is for: the school-aged ones (all the children when none are). */
+export const routineKids = <M extends AugMember>(members: readonly M[]) => (schoolKids(members).length ? schoolKids(members) : []);
+const preparedOf = (s: AugState, members: readonly AugMember[]) => {
+  const ctx = s.profile ? ctxOf(s, members) : null;
+  return preparedFamilyRoutine(routineKids(members).map((k) => childFacts(ctx, k.id, ageFor(k.id, members))), familyLeave(s, members));
+};
+const boardOf = (s: AugState, members: readonly AugMember[]) => (s.boards[FAMILY] ??= preparedOf(s, members));
+export const routineOf = (s: AugState, members: readonly AugMember[]) => boardOf(s, members);
+/** The morning's out-the-door time: hers, else from the school start, else the sample. */
+export const routineLeave = (s: AugState, members: readonly AugMember[]) => {
+  const own = boardOf(s, members).leave;
+  return own && validTime(own) ? own : familyLeave(s, members);
+};
 /** The family is out the door when the earliest school needs them. */
 export const familyLeave = (s: Pick<AugState, 'profile'>, members: readonly AugMember[]) => knownLeave(ctxOf(s, members), members) ?? DEFAULT_LEAVE;
 
@@ -219,30 +184,31 @@ export const ROLE_LABEL = { each: 'Each child', together: 'Together', 'grown-up'
 export type AugPlannedTask = PlannedTask;
 
 export const applyFamily = (s: AugState, members: readonly AugMember[]) => {
-  const ids = new Set(kidsOf(members).map((k) => k.id));
-  for (const id of Object.keys(s.boards)) if (id !== 'family' && !ids.has(id)) delete s.boards[id];
-  if (s.child !== 'family' && !ids.has(s.child)) s.child = schoolKids(members)[0]?.id ?? 'family';
+  // One family routine: the earlier sheet's per-child boards aren't printed any more, so they aren't kept.
+  for (const id of Object.keys(s.boards)) if (id !== FAMILY) delete s.boards[id];
+  s.child = FAMILY;
+  const kids = new Set(kidsOf(members).map((k) => k.id));
+  for (const st of s.boards[FAMILY]?.steps ?? []) {
+    if (!st.who) continue;
+    st.who = st.who.filter((id) => kids.has(id));
+    if (!st.who.length) delete st.who;
+  }
   if (s.profile && !isFamilySnapshot(s.profile)) delete s.profile;
   if (s.plan) { pruneTaskEdits(s.plan, ctxOf(s, members)); if (!Object.keys(s.plan).length) delete s.plan; }
   routineOf(s, members);
   return s;
 };
 
-export const validTime = (t: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t);
-export const clock = (t: string) => {
-  const [h, m] = t.split(':').map(Number);
-  return Number.isFinite(h) && Number.isFinite(m) ? `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}` : t;
-};
-/** The steps that print, in order. */
-export const shown = (r: Routine, g: Group) => r.steps.filter((x) => x.group === g && !x.removed && !(r.mode === 'simple' && x.id === SHORTER_HIDES[g]));
 
 const isStep = (x: unknown): x is Step => {
   const s = x as Partial<Step> | null;
-  return Boolean(s && typeof s.id === 'string' && typeof s.time === 'string' && typeof s.label === 'string' && typeof s.icon === 'string' && (s.group === 'morning' || s.group === 'after'));
+  return Boolean(s && typeof s.id === 'string' && typeof s.time === 'string' && typeof s.label === 'string' && typeof s.icon === 'string' && (s.group === 'morning' || s.group === 'after')
+    && (s.cue === undefined || typeof s.cue === 'string') && (s.who === undefined || (Array.isArray(s.who) && s.who.every((w) => typeof w === 'string'))) && (s.timeOff === undefined || typeof s.timeOff === 'boolean') && (s.cueOff === undefined || typeof s.cueOff === 'boolean'));
 };
 const isRoutine = (x: unknown): x is Routine => {
   const r = x as Partial<Routine> | null;
-  return Boolean(r && Array.isArray(r.steps) && r.steps.every(isStep) && (r.mode === 'standard' || r.mode === 'simple') && (r.footer === undefined || typeof r.footer === 'string'));
+  return Boolean(r && Array.isArray(r.steps) && r.steps.every(isStep) && (r.mode === 'standard' || r.mode === 'simple') && (r.footer === undefined || typeof r.footer === 'string')
+    && (r.leave === undefined || (typeof r.leave === 'string' && validTime(r.leave))));
 };
 export const isAugState = (x: unknown): x is AugState => {
   const s = x as Partial<AugState> | null;
@@ -250,18 +216,56 @@ export const isAugState = (x: unknown): x is AugState => {
     && (s.plan === undefined || isTaskEdits(s.plan)) && (s.profile === undefined || isFamilySnapshot(s.profile)));
 };
 
-/** One printed routine: a school-aged child's, or the family's when there's no school-aged child. */
+/**
+ * One printed chart: a child's morning or after-school routine (the family's when there's no school-aged child). Each
+ * step prints its name, its trigger when it adds something (`cueOf`), and its time unless it's off.
+ */
+export interface ChartStep {
+  id: string; label: string; icon: string; cue: string; time: string | null; clock: [string, string] | null;
+  /** The children a step is for, when it isn't all of them (their names and colors); empty for everyone. */
+  owners: { id: string; name: string; color: MemberColor }[];
+}
+const chartOf = (s: AugState, group: Group, members: readonly AugMember[], colors: Record<string, MemberColor>) => {
+  const r = boardOf(s, members);
+  const kids = routineKids(members);
+  const leave = routineLeave(s, members);
+  const steps: ChartStep[] = shown(r, group).map((x) => {
+    const timed = !x.timeOff && validTime(x.time);
+    const who = (x.who ?? []).filter((id) => kids.some((k) => k.id === id));
+    const some = who.length && who.length < kids.length;
+    return {
+      id: x.id, label: x.label, icon: ICONS[x.icon] ?? ICONS.bag, cue: cueOf(x), time: timed ? x.time : null, clock: timed ? clockParts(x.time) : null,
+      owners: some ? kids.filter((k) => who.includes(k.id)).map((k) => ({ id: k.id, name: k.firstName, color: colorFor(colors, k.id) })) : [],
+    };
+  });
+  // The morning's deadline prints only when the morning is timed (a chart of triggers has no clock to beat).
+  const deadline = group === 'morning' && steps.some((x) => x.time) ? clock(leave) : null;
+  return {
+    group,
+    title: HEADERS[group].title,
+    subtitle: HEADERS[group].subtitle,
+    headerIcon: ICONS[HEADERS[group].icon],
+    tagline: r.footer && r.footer !== OLD_FOOTER ? r.footer : DEFAULT_TAGLINE,
+    /** Whose chart it is: every child, in their colors (the header's legend). */
+    kids: kids.map((k) => ({ id: k.id, name: k.firstName, color: colorFor(colors, k.id) })),
+    steps,
+    banner: { ...BANNERS[group], icon: ICONS[BANNERS[group].icon], deadline },
+    issues: stepIssues(r, group, group === 'morning' ? leave : undefined),
+  };
+};
+export type ChartView = ReturnType<typeof chartOf>;
+
+/** The legacy single-sheet view of the selected routine (the editor and the member's standalone copy). */
 const routineSheet = (s: AugState, child: string, members: readonly AugMember[], colors: Record<string, MemberColor>) => {
-  const r = boardOf(s, child, members);
+  const r = boardOf(s, members);
   const kid = kidsOf(members).find((k) => k.id === child);
   return {
     child,
-    /** Their marker color (January's), neutral for the family routine. */
     color: colorFor(colors, kid?.id),
     name: kid?.firstName ?? 'Our family',
     title: kid ? `${kid.firstName}'s morning & after-school routines` : 'Our morning & after-school routines',
     groups: Object.fromEntries(GROUPS.map((g) => [g, shown(r, g).map((x) => ({ ...x, clock: clock(x.time) }))])) as Record<Group, (Step & { clock: string })[]>,
-    footer: r.footer ?? DEFAULT_FOOTER,
+    footer: r.footer && r.footer !== OLD_FOOTER ? r.footer : DEFAULT_FOOTER,
   };
 };
 
@@ -273,13 +277,18 @@ export const augView = (s: AugState, members: readonly AugMember[], prefs: Conte
   return {
     /** Everything that prints, in order: the family plan (when someone's in school), then each child's routine. */
     plan,
-    routines: school.length ? school.map((k) => routineSheet(s, k.id, members, plan.ctx.colors)) : [routineSheet(s, 'family', members, plan.ctx.colors)],
+    routines: [routineSheet(s, FAMILY, members, plan.ctx.colors)],
+    /** The family's two charts, after the family plan: the morning, then after school. */
+    charts: GROUPS.map((g) => chartOf(s, g, members, plan.ctx.colors)),
+    /** Whether the morning's times are the sample default (no school start on her family page, none set here). */
+    sampleTimes: !leaveKnown(s, members) && !routineOf(s, members).leave,
+    leave: routineLeave(s, members),
     child: s.child,
     childName: kid?.firstName ?? 'Our family',
     title: kid ? `${kid.firstName}'s morning & after-school routines` : 'Our morning & after-school routines',
     age: ageFor(s.child, members),
     groups: Object.fromEntries(GROUPS.map((g) => [g, shown(r, g).map((x) => ({ ...x, clock: clock(x.time) }))])) as Record<Group, (Step & { clock: string })[]>,
-    footer: r.footer ?? DEFAULT_FOOTER,
+    footer: r.footer && r.footer !== OLD_FOOTER ? r.footer : DEFAULT_FOOTER,
     routine: r,
     /** The routines she can edit: every school-aged child, or the family's when there's none. */
     kids: (school.length ? school : []).map((k) => ({ id: k.id, name: k.firstName })),
@@ -291,14 +300,15 @@ export const augFingerprint = (s: AugState, members: readonly AugMember[], prefs
   const v = augView(s, members, prefs);
   return JSON.stringify([
     v.plan.active ? [v.plan.leave, v.plan.sections.map((sec) => sec.tasks.filter((t) => !t.skipped).map((t) => [t.label, t.who, t.owners.map((o) => o.color.id), t.cue ?? null]))] : null,
-    v.routines.map((r) => [r.title, r.color.id, GROUPS.map((g) => r.groups[g].map((x) => [x.icon, x.label, x.time])), r.footer]),
+    v.charts.map((c) => [c.group, c.tagline, c.kids.map((k) => [k.name, k.color.id]), c.steps.map((x) => [x.icon, x.label, x.cue, x.time, x.owners.map((o) => [o.name, o.color.id])]), c.banner.deadline]),
   ]);
 };
 
 // Edits on the selected routine. Each changes `s` in place and returns it.
 
-export const setChild = (s: AugState, child: string, members: readonly AugMember[]) => {
-  if (child === 'family' || kidsOf(members).some((k) => k.id === child)) s.child = child;
+/** Kept for saved callers: the family has one routine now, so every child's is the family's. */
+export const setChild = (s: AugState, _child: string, members: readonly AugMember[]) => {
+  s.child = FAMILY;
   routineOf(s, members);
   return s;
 };
@@ -310,11 +320,52 @@ export const setLabel = (s: AugState, id: string, label: string, members: readon
 };
 export const setTime = (s: AugState, id: string, time: string, members: readonly AugMember[]) => {
   const st = stepOf(s, id, members);
-  if (st && validTime(time)) st.time = time;
+  if (st && validTime(time)) { st.time = time; delete st.timeOff; }
+  return s;
+};
+/** Her trigger for a step; blank means no trigger. */
+export const setCue = (s: AugState, id: string, cue: string, members: readonly AugMember[]) => {
+  const st = stepOf(s, id, members);
+  if (st) { st.cue = cue.replace(/\s+/g, ' ').trim().replace(/[.]$/, '').slice(0, CUE_TEXT_LIMIT); delete st.cueOff; }
+  return s;
+};
+/** Show or hide a step's trigger (kept for later). */
+export const setCueOff = (s: AugState, id: string, off: boolean, members: readonly AugMember[]) => {
+  const st = stepOf(s, id, members);
+  if (st && off) { st.cue ??= LEGACY_CUES[st.id] ?? ''; st.cueOff = true; } else if (st) delete st.cueOff;
+  return s;
+};
+/** Show or hide a step's time (kept for later). */
+export const setTimeOff = (s: AugState, id: string, off: boolean, members: readonly AugMember[]) => {
+  const st = stepOf(s, id, members);
+  if (st && off) st.timeOff = true; else if (st) delete st.timeOff;
+  return s;
+};
+/** Times on or off for a whole routine (an event-based afternoon, or a timed one). */
+export const setTimesOff = (s: AugState, group: Group, off: boolean, members: readonly AugMember[]) => {
+  for (const st of routineOf(s, members).steps) if (st.group === group) { if (off) st.timeOff = true; else delete st.timeOff; }
+  return s;
+};
+/** Her out-the-door time for this child's morning ('' goes back to the one from her family page). */
+export const setLeave = (s: AugState, time: string, members: readonly AugMember[]) => {
+  const r = routineOf(s, members);
+  if (validTime(time)) r.leave = time; else delete r.leave;
+  return s;
+};
+/** Who a step is for: some of the children (by id), or everyone (empty or all of them). */
+export const setWho = (s: AugState, id: string, who: readonly string[], members: readonly AugMember[]) => {
+  const st = stepOf(s, id, members);
+  const kids = routineKids(members).map((k) => k.id);
+  const list = [...new Set(who)].filter((w) => kids.includes(w));
+  if (!st) return s;
+  if (list.length && list.length < kids.length) st.who = list; else delete st.who;
   return s;
 };
 export const setRemoved = (s: AugState, id: string, removed: boolean, members: readonly AugMember[]) => {
   const st = stepOf(s, id, members);
+  // A routine keeps at least one step, and holds at most eight.
+  if (st && removed && shown(routineOf(s, members), st.group).length <= 1) return s;
+  if (st && !removed && st.removed && shown(routineOf(s, members), st.group).length >= MAX_STEPS) return s;
   if (st && removed) st.removed = true;
   else if (st) delete st.removed;
   return s;
@@ -326,25 +377,34 @@ export const move = (s: AugState, id: string, dir: -1 | 1, members: readonly Aug
   if (!st) return s;
   const list = shown(r, st.group);
   const near = list[list.indexOf(st) + dir];
-  if (near) { const a = r.steps.indexOf(st), b = r.steps.indexOf(near); [r.steps[a], r.steps[b]] = [r.steps[b], r.steps[a]]; }
+  // The steps change places; the times stay with the slots, so the chart stays in time order.
+  if (near) swapKeepingTimes(r, st, near);
   return s;
 };
-/** Add a listed step (only one lunch step and one water step at a time) or bring a removed one back. */
+/** Where a new step goes: before the routine's last step (out the door, free play), timed between its neighbors. */
+const placeNew = (r: Routine, group: Group, st: Step) => {
+  const list = shown(r, group);
+  if (list.length >= MAX_STEPS) return false;
+  const last = list.at(-1);
+  st.time = timeBetween(list.at(-2), last);
+  st.timeOff = list.length ? list.every((x) => x.timeOff) : group === 'after';
+  if (last) r.steps.splice(r.steps.indexOf(last), 0, st); else r.steps.push(st);
+  return true;
+};
+/** Add a listed step, or bring a removed one back. */
 export const addStep = (s: AugState, group: Group, id: string, members: readonly AugMember[]) => {
   const choice = CHOICES[group].find((c) => c.id === id);
   if (!choice) return s;
   const r = routineOf(s, members);
-  const family = group === 'morning' ? (LUNCH.includes(id) ? LUNCH : WATER.includes(id) ? WATER : []) : [];
-  for (const other of r.steps) if (other.group === group && family.includes(other.id) && other.id !== id) other.removed = true;
   const prior = r.steps.find((x) => x.id === id && x.group === group);
-  if (prior) { delete prior.removed; prior.label = choice.label; }
-  else r.steps.push({ id, time: r.steps.filter((x) => x.group === group).at(-1)?.time ?? (group === 'morning' ? '07:50' : '16:00'), label: choice.label, icon: choice.icon, group });
+  if (prior) { if (prior.removed && shown(r, group).length < MAX_STEPS) delete prior.removed; return s; }
+  placeNew(r, group, { id, time: '', label: choice.label, icon: choice.icon, group, cue: choice.cue });
   return s;
 };
 export const addCustom = (s: AugState, group: Group, label: string, id: string, members: readonly AugMember[]) => {
   const r = routineOf(s, members);
   const clean = label.replace(/\s+/g, ' ').trim().slice(0, LABEL_LIMIT);
-  if (clean) r.steps.push({ id, time: r.steps.filter((x) => x.group === group).at(-1)?.time ?? (group === 'morning' ? '07:50' : '16:00'), label: clean, icon: group === 'morning' ? 'bag' : 'book', group });
+  if (clean) placeNew(r, group, { id, time: '', label: clean, icon: group === 'morning' ? 'bag' : 'book', group, cue: '' });
   return s;
 };
 export const setMode = (s: AugState, simple: boolean, members: readonly AugMember[]) => { routineOf(s, members).mode = simple ? 'simple' : 'standard'; return s; };
@@ -355,7 +415,7 @@ export const setFooter = (s: AugState, value: string, members: readonly AugMembe
   else r.footer = clean;
   return s;
 };
-const preparedFor = (s: AugState, members: readonly AugMember[]) => preparedRoutine(ageFor(s.child, members), s.child === 'family' ? familyLeave(s, members) : leaveOf(s, s.child, members));
+const preparedFor = (s: AugState, members: readonly AugMember[]) => preparedOf(s, members);
 export const restoreRoutine = (s: AugState, members: readonly AugMember[]) => { s.boards[s.child] = preparedFor(s, members); return s; };
 export const routineChanged = (s: AugState, members: readonly AugMember[]) => JSON.stringify(routineOf(s, members)) !== JSON.stringify(preparedFor(s, members));
 /** Back to the prepared family plan; the profile snapshot goes too, so it's prepared from her newest answers. */
@@ -388,8 +448,8 @@ export interface AugPlan extends PlanResource<AugState> {
   members: () => AugMember[];
   view: () => AugView;
   setLocked: (on: boolean) => void;
-  /** The desktop routine editor, on a child's routine if given. */
-  openEditor: (child?: string) => void;
+  /** The desktop routine editor, on the morning or after-school chart if given. */
+  openEditor: (group?: Group) => void;
   /** The desktop family plan editor. */
   openPlanEditor: () => void;
 }
