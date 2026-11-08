@@ -131,8 +131,22 @@ for (const month of MONTHS) {
     for (let i = 0; i < Math.min(await rows.count(), 6) && !edited; i++) {
       await rows.nth(i).click({ timeout: 5000 });
       await p.waitForTimeout(700);
-      const chip = p.locator('[data-cp-sheet] .po-chip[aria-pressed="false"]:not([disabled]), [data-cp-sheet] .mre-chip[aria-pressed="false"]:not([disabled])').first();
-      if (await chip.count()) { await chip.evaluate((b) => b.click()); edited = true; await p.waitForTimeout(250); }
+      // March opens one moment, then one job, before any owner choices show.
+      if (month === 'march' && await p.locator('[data-cp-sheet] .mre-btn', { hasText: 'Edit responsibilities' }).count()) {
+        await p.locator('[data-cp-sheet] .mre-btn', { hasText: 'Edit responsibilities' }).first().evaluate((b) => b.click());
+        await p.waitForTimeout(250);
+        await p.locator('[data-cp-sheet] .mre-row button', { hasText: 'Edit' }).first().evaluate((b) => b.click());
+        await p.waitForTimeout(250);
+      }
+      const chip = p.locator('[data-cp-sheet] .po-chip[aria-pressed="false"]:not([disabled]), [data-cp-sheet] .mre-chip:not(.mre-chip--job)[aria-pressed="false"]:not([disabled])').first();
+      if (await chip.count()) {
+        await chip.evaluate((b) => b.click());
+        await p.waitForTimeout(150);
+        const done = p.locator('[data-cp-sheet] .mre-btn--dark', { hasText: 'Done' });
+        if (await done.count()) await done.first().evaluate((b) => b.click());
+        edited = true;
+        await p.waitForTimeout(250);
+      }
       // Done (the sheet's own button may be below the fold): close it as Done does.
       await p.evaluate(() => document.querySelector('[data-cp-sheet]')?.close());
       await p.waitForTimeout(150);
