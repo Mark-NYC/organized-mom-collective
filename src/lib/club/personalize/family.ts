@@ -11,7 +11,8 @@
  */
 import type { FamilyProfile } from '../family-profile';
 import { ageOn, stageFor, type GuideStage } from '../meeting-guide/stages';
-import type { FamilyMember, MemberRole } from '../profile';
+import type { FamilyMember, Household, MemberRole } from '../profile';
+import { familyColors, type MemberColor } from './colors';
 
 /** What a month keeps of the profile beyond the people (onboarding steps 2–6). Names and ages are never copied. */
 export interface FamilySnapshot {
@@ -77,14 +78,21 @@ export interface FamilyContext {
   adults: Person[];
   children: Person[];
   pets: boolean;
+  /** 'homeschool' when she said so on her family page. */
+  school?: string;
+  /** Everyone's marker color by member id, January's assignment (./colors.ts). */
+  colors: Record<string, MemberColor>;
   snapshot?: FamilySnapshot;
 }
+
+/** What a month reads of the household preferences. */
+export interface ContextPrefs { pets?: boolean; school?: string; colors?: Record<string, string> }
 
 export interface ContextMember extends Pick<FamilyMember, 'id' | 'firstName' | 'kind' | 'birthYear' | 'birthMonth' | 'archived' | 'isAccountHolder'> {
   role?: MemberRole | string;
 }
 
-export function familyContext(members: readonly ContextMember[], prefs: { pets?: boolean } | undefined, month: string, snapshot?: FamilySnapshot): FamilyContext {
+export function familyContext(members: readonly ContextMember[], prefs: ContextPrefs | undefined, month: string, snapshot?: FamilySnapshot): FamilyContext {
   const people: Person[] = members
     .filter((m) => !m.archived && m.firstName?.trim() && (m.kind === 'adult' || m.kind === 'child'))
     .map((m) => ({
@@ -104,8 +112,10 @@ export function familyContext(members: readonly ContextMember[], prefs: { pets?:
     responsibilities: snapshot.responsibilities.map((r) => ({ ...r, ownerIds: r.ownerIds.filter((i) => present.has(i)), helperIds: (r.helperIds ?? []).filter((i) => present.has(i)) })),
   };
   const pets = Boolean(prefs?.pets) || Boolean(snap?.responsibilities.some((r) => r.category === 'pet-care' || r.item === 'pet-care'));
+  const colors = familyColors({ members: members as unknown as Household['members'], preferences: (prefs ?? {}) as Household['preferences'] });
   return {
-    month, people, pets,
+    month, people, pets, colors,
+    ...(prefs?.school ? { school: prefs.school } : {}),
     adults: people.filter((p) => p.kind === 'adult'),
     children: people.filter((p) => p.kind === 'child'),
     ...(snap ? { snapshot: snap } : {}),
@@ -143,3 +153,17 @@ export function nameList(names: readonly string[]): string {
 
 export const namesOf = (ctx: FamilyContext, memberIds: readonly string[]) =>
   memberIds.map((i) => personOf(ctx, i)?.name).filter((n): n is string => Boolean(n));
+
+/**
+ * Whether a child goes to school (or preschool) this month, as far as her answers say: a school activity naming
+ * them; otherwise school age (5–17) unless she said the family homeschools. Cues never assume a school day otherwise.
+ */
+export function inSchool(ctx: FamilyContext, memberId: string): boolean {
+  const p = personOf(ctx, memberId);
+  if (!p || p.kind !== 'child') return false;
+  const named = (ctx.snapshot?.activities ?? []).filter((a) => a.category === 'school' && a.memberIds.length);
+  if (named.some((a) => a.memberIds.includes(memberId))) return true;
+  if (ctx.school === 'homeschool') return false;
+  const age = p.age ?? 6;
+  return age >= 5 && age <= 17;
+}

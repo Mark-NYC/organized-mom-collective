@@ -7,6 +7,7 @@
  */
 interface Props { month: string }
 const { month } = Astro.props;
+import '../../styles/club-marks.css';
 ---
 <div class="mg" data-meeting-guide data-guide-month={month}>
   <div class="mg-pages" data-mg-pages><p class="mg-empty">Preparing your family’s guide…</p></div>

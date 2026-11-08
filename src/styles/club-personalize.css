@@ -3,8 +3,11 @@
 .po-list{display:grid;border-top:1px solid var(--color-warm-rule,#e7ddd4)}
 .po-task{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
 .po-task.is-off .po-task-head strong{text-decoration:line-through;color:var(--color-warm-soft,#6e6461)}
-.po-task-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;margin:0;font-size:.92rem;line-height:1.35;color:var(--color-warm-ink,#4d4544)}
-.po-task-head span{font-size:.8rem;color:var(--color-warm-soft,#6e6461)}
+.po-task-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;margin:0;font-size:.92rem;line-height:1.35;color:var(--color-warm-ink,#4d4544)}
+.po-chip{display:inline-flex;align-items:center;gap:7px}
+.po-chip-dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px #fff}
+.po-field{display:grid;gap:5px;font-size:.78rem;font-weight:600;color:var(--color-warm-soft,#6e6461)}
+.po-task-head>span:not(.mc-owners){font-size:.8rem;color:var(--color-warm-soft,#6e6461)}
 .po-chips{display:flex;flex-wrap:wrap;gap:6px}
 .po-chip{min-height:44px;padding:8px 14px;border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:999px;background:#fff;color:var(--color-warm-ink,#4d4544);font:600 .85rem var(--font-sans,Montserrat,Arial,sans-serif);cursor:pointer}
 .po-chip[aria-pressed="true"]{background:var(--color-warm-button,#4a3f3e);border-color:var(--color-warm-button,#4a3f3e);color:#fff}

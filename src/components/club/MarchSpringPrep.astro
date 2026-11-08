@@ -27,6 +27,7 @@ const taskTypes:Record<string,string>={
  'mar-curtains':'Adult job for removal, washing, and rehanging. Kids can help with safe sorting.',
  'mar-donate':'Children can suggest items. A grown-up approves what leaves the home.'
 };
+import '../../styles/club-marks.css';
 ---
 <div class="msc" data-msc-managed={managed ? "true" : "false"} data-msc-key={storageKey} data-task-copy={JSON.stringify(Object.fromEntries(project.tasks.map(t=>[t.id,{title:t.label,supplies:handoffs[t.id].supplies,ready:handoffs[t.id].ready,doJob:handoffs[t.id].doJob,done:handoffs[t.id].done}])))} style={`--msc-month:${monthColors[2].hex}`}>
  <div class="msc-intro"><a href="/club" class="msc-back">← Organized Family Club</a><p class="msc-overline">ORGANIZED FAMILY CLUB · MARCH 2027</p><h1>Spring prep. <em>Everyone has a part.</em></h1>
@@ -288,8 +289,15 @@ const taskTypes:Record<string,string>={
 .msc .msc-sheet [contenteditable="true"]:focus::after{opacity:0}
 @media print{.msc .msc-sheet [contenteditable="true"]::after{display:none!important}}
 .msc.msc-image-export .msc-sheet [contenteditable="true"]::after{display:none!important}
+
+/* The owner's family color (January's): a dot before the name and the name in its ink. The ownership copy and the
+   monochrome artwork stay as they are. */
+.msc-task-person strong{color:var(--msc-owner-ink,#3e6c5a)}
+.msc-task-person strong::before{content:"";display:inline-block;width:9px;height:9px;margin-right:6px;border-radius:50%;background:var(--msc-owner,transparent);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);vertical-align:1px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.msc-task-person[data-owner-neutral] strong::before{background:transparent;box-shadow:inset 0 0 0 1.5px #9A918B}
 </style>
 <script>
+import { colorFor, familyColors, NEUTRAL_COLOR, type MemberColor } from '../../lib/club/personalize/colors';
 import {monthlyDeepClean} from '../../data/cleaning';
 type Member={id:string;firstName:string;kind:'adult'|'child';birthYear?:number;birthMonth?:number;archived?:boolean;isAccountHolder?:boolean};
 const project=monthlyDeepClean.find(p=>p.month===2)!;
@@ -315,6 +323,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
  let key=root.dataset.mscKey??'omc:preview:march:v1';
  const store=sessionStorage; // Do not persist family member names beyond this tab.
  let members:Member[]=[];
+ // January's member colors, by stable member id (household.preferences.colors, then auto-assigned).
+ let colors:Record<string,MemberColor>={};
  let family='Our Family';
  let chosen:Record<string,string>={};
  let custom=new Set<string>();
@@ -374,6 +384,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
     const option=document.createElement('option');option.value='custom:'+task.id;option.textContent='Custom: '+customName;select.append(option);select.value=option.value;
    }
    if(document.activeElement!==printed)printed.textContent=(customName && !adultOnly.has(task.id) && !managed)?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
+   // The owner's family color beside their name (a typed name or nobody: neutral). The name always prints.
+   const ownerColor=(customName && !adultOnly.has(task.id) && !managed)||!selected?NEUTRAL_COLOR:colorFor(colors,selected.id);
+   const person=printed.closest<HTMLElement>('.msc-task-person');
+   if(person){person.style.setProperty('--msc-owner',ownerColor.hex);person.style.setProperty('--msc-owner-ink',ownerColor.ink);person.toggleAttribute('data-owner-neutral',ownerColor.id===NEUTRAL_COLOR.id)}
    const summary=root.querySelector<HTMLElement>(`[data-summary-owner="${task.id}"]`);if(summary)summary.textContent=(customName && !adultOnly.has(task.id) && !managed)?customName:selected?ownerLabel(selected,live):'Optional · unassigned';
   }
   root.querySelectorAll<HTMLElement>('[data-march-edit]').forEach(el=>{
@@ -382,7 +396,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
    el.textContent=textEdits[task]?.[field]??copyDefaults[task]?.[field]??'';
   });
   const title=root.querySelector<HTMLElement>('[data-family]');if(title)title.textContent=family;
-  if(managed)root.dispatchEvent(new CustomEvent('msc-state',{detail:{family,members:live.map(m=>({...m})),tasks:project.tasks.map(task=>{const selected=live.find(m=>m.id===chosen[task.id]);return {id:task.id,ownerId:chosen[task.id]??'',owner:customOwnerLabels[task.id]&&!adultOnly.has(task.id)&&!managed?customOwnerLabels[task.id]:selected?ownerLabel(selected,live):'Optional · unassigned',adultOnly:adultOnly.has(task.id),...copyDefaults[task.id],...textEdits[task.id]}})}}));
+  if(managed)root.dispatchEvent(new CustomEvent('msc-state',{detail:{family,members:live.map(m=>({...m})),tasks:project.tasks.map(task=>{const selected=live.find(m=>m.id===chosen[task.id]);return {id:task.id,ownerId:chosen[task.id]??'',color:selected&&!(customOwnerLabels[task.id]&&!adultOnly.has(task.id)&&!managed)?colorFor(colors,selected.id):NEUTRAL_COLOR,owner:customOwnerLabels[task.id]&&!adultOnly.has(task.id)&&!managed?customOwnerLabels[task.id]:selected?ownerLabel(selected,live):'Optional · unassigned',adultOnly:adultOnly.has(task.id),...copyDefaults[task.id],...textEdits[task.id]}})}}));
  };
  const save=()=>{if(managed&&!sampleKey)return;try{store.setItem(key,JSON.stringify({sampleKey,chosen,custom:[...custom],customOwnerLabels,textEdits}))}catch{}};
  const clean=(el:HTMLElement,limit:number)=> (el.textContent??'').replace(/\s+/g,' ').trim().slice(0,limit);
@@ -448,6 +462,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msc')){
   if(managed)key=(root.dataset.mscKey??'omc:club:march:v1')+':'+encodeURIComponent(id);
   const changed=id!==sampleKey;
   members=h.members.filter(m=>!m.archived);
+  colors=familyColors({members:h.members as never,preferences:((h as {preferences?:object}).preferences??{}) as never});
   family=h.displayName??'Our Family';
   if(changed){chosen={};custom.clear();customOwnerLabels={};textEdits={};sampleKey=id;
    try{const saved=JSON.parse(store.getItem(key)??'null');if(saved?.sampleKey===id){chosen=saved.chosen??{};custom=new Set(Array.isArray(saved.custom)?saved.custom:[]);customOwnerLabels=saved.customOwnerLabels??{};textEdits=saved.textEdits??{}}}catch{}
