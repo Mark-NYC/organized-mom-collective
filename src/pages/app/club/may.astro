@@ -20,7 +20,7 @@ const storageKey = 'omc:club:may-app:v1';
   <ClubPlanShell class="may-plan family-brand" kitSlug={kit.slug} month="May" storageKey={storageKey}>
     <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="May · Kit preview" instructions={[
       'A reusable rhythm for the refrigerator, with flexible anchors your kids can check for themselves, prepared for your children’s ages and the interests on your family page.',
-      'Everyone’s part is on the anchor it belongs to: each child’s own jobs and the shared ones, grown-ups included. Each block shows a time or the familiar event that starts it, whichever fits your days. Change the activities, timing or who helps. Plans can change; the rhythm is a guide.',
+      'Everyone’s part is on the anchor it belongs to: each child’s own jobs and the shared ones, grown-ups included. A few blocks have a time or a real event that starts them (like lunch); the rest stay flexible, so a change of plans never stalls the day. Change the activities, timing or who helps. Plans can change; the rhythm is a guide.',
     ]}>
       <Fragment slot="title">Our <em>Summer Day</em></Fragment>
       <div class="cpd-details">
@@ -63,7 +63,7 @@ if (root && msr) {
     lock: (on) => plan().setLocked(on),
     render: (r, locked) => {
       // Each block with its one time or trigger, as it prints.
-      q('[data-may-d-rows]').replaceChildren(...r.state().rows.map((row) => el('div', {}, el('dt', {}, row.title), el('dd', {}, (row.slot ? (row.slot.kind === 'trigger' ? `→ ${row.slot.text}` : row.slot.text) : 'Any time') + (row.parts.length ? ` · ${row.parts.length} ${row.parts.length === 1 ? 'job' : 'jobs'}` : '')))));
+      q('[data-may-d-rows]').replaceChildren(...r.state().rows.map((row) => el('div', {}, el('dt', {}, row.title), el('dd', {}, (row.slot ? (row.slot.kind === 'trigger' ? `→ ${row.slot.text}` : row.slot.text) : 'Flexible') + (row.parts.length ? ` · ${row.parts.length} ${row.parts.length === 1 ? 'job' : 'jobs'}` : '')))));
       q<HTMLButtonElement>('[data-may-d-open]').disabled = locked;
       q<HTMLButtonElement>('[data-may-d-when]').disabled = locked;
     },

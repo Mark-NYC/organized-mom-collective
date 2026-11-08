@@ -329,7 +329,7 @@ const blocks=[
 .mye-when-control--trigger{display:grid}
 .mye-current{font:600 14px Montserrat,Arial,sans-serif;color:#4f6a49}
 .mye-seg{display:inline-flex;border:1px solid #9aaf94;border-radius:999px;overflow:hidden}
-.mye-seg-btn{min-height:40px;min-width:76px;padding:6px 14px;border:0;background:#fff;color:#4f654b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.mye-seg-btn{min-height:40px;min-width:70px;padding:6px 12px;border:0;background:#fff;color:#4f654b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
 .mye-seg-btn[aria-checked="true"]{background:#4f654b;color:#fff}
 .mye-chips{display:flex;flex-wrap:wrap;gap:6px}
 .mye-chip{min-height:40px;padding:6px 12px;border:1px solid #cbd8c5;border-radius:999px;background:#fff;color:#3d5a3d;font:600 12.5px Montserrat,Arial,sans-serif;cursor:pointer;text-align:left}
@@ -370,7 +370,7 @@ type Play='outdoors'|'active'|'creative'|'mixed';
 type Structure='relaxed'|'balanced'|'structured';
 type Days='home'|'mixed'|'camp';
 type Key='morning'|'move'|'create'|'lunch'|'quiet'|'free'|'snack'|'evening';
-type Edit={title?:string;desc?:string;time?:string;cue?:string;when?:'time'|'trigger';trigger?:string};
+type Edit={title?:string;desc?:string;time?:string;cue?:string;when?:'time'|'trigger'|'flexible';trigger?:string};
 type Options={start:number;quiet:Quiet;play:Play;structure:Structure;days:Days;snack:boolean};
 type Detail={household:{id:string;displayName?:string;members:Person[];preferences?:{pets?:boolean}};sample?:string|null;profile?:FamilyProfile|null};
 const keys:Key[]=[...MAY_KEYS];
@@ -490,7 +490,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    const time=node.querySelector<HTMLElement>('[data-time]');
    if(time){const slot=rowsNow.find(r=>r.key===key)?.slot??null;time.hidden=!slot;time.classList.toggle('msr-time--trigger',slot?.kind==='trigger');
     if(slot?.kind==='time'){const match=slot.text.match(/^(.*?)( AM| PM)$/);time.replaceChildren(document.createTextNode(match?match[1]:slot.text));if(match){const suffix=document.createElement('span');suffix.className='msr-meridiem';suffix.textContent=match[2];time.append(suffix)}}
-    else if(slot){const arrow=document.createElementNS('http://www.w3.org/2000/svg','svg');arrow.setAttribute('viewBox','0 0 16 16');arrow.setAttribute('class','msr-trigger-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>';const text=document.createElement('span');text.className='msr-trigger-text';text.append(arrow,slot.text);time.replaceChildren(text)}}
+    else if(slot){const arrow=document.createElementNS('http://www.w3.org/2000/svg','svg');arrow.setAttribute('viewBox','0 0 16 16');arrow.setAttribute('class','msr-trigger-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>';const text=document.createElement('span');text.className='msr-trigger-text';text.append(arrow,slot.text);time.replaceChildren(text)}
+    else time.replaceChildren()}
    node.querySelector<HTMLButtonElement>('[data-move-up]')?.toggleAttribute('disabled',order.indexOf(key)===0);
    node.querySelector<HTMLButtonElement>('[data-move-down]')?.toggleAttribute('disabled',order.indexOf(key)===order.length-1);
    node.querySelector<HTMLButtonElement>('[data-remove]')?.toggleAttribute('disabled',order.length<=1);

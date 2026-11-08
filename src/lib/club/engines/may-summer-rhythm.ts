@@ -13,12 +13,16 @@
  *   holder is never the default. She can change who, the wording, or leave one off.
  * Saved means settled: the profile snapshot used is kept with the plan.
  *
- * When it happens: every block shows ONE thing in its right-hand box, a clock time ("8:00 AM") or a familiar trigger
- * ("After lunch"), chosen per block (August's model, ../personalize/when.ts). Defaults: Morning Start and Lunch & Reset
- * by the clock, the rest by what comes before (a relaxed day: triggers only; a more structured day: times, with the
- * evening still by its trigger; camp mornings by the clock). A block keeps its time while it shows a trigger, so
- * switching back restores it and the day's colors (which follow the time of day) never move. Evening Reset is one
- * flexible block: its time or trigger is when the evening begins, not a deadline for each job in it.
+ * When it happens: each block's right-hand box shows a clock time ("8:00 AM"), a trigger ("After lunch"), or nothing
+ * (Flexible), chosen per block (August's model, ../personalize/when.ts, plus Flexible). A rhythm, not a checklist:
+ * a trigger is used only for a real, naturally occurring event that tells the family to begin (a meal, coming home,
+ * coming inside, brushing teeth), never to narrate the order of the day ("After quiet time", "After afternoon play"):
+ * a chain of those would make every block wait on the one before and break the day when plans change. Defaults: Morning
+ * Start and Lunch & Reset by the clock, Quiet Time after lunch (when lunch comes first), everything else Flexible.
+ * A relaxed day drops the clock; a more structured day times the daytime blocks (the evening stays flexible); camp days
+ * time the morning out the door and start the afternoon when they get home. A block keeps its time and her trigger while
+ * it shows something else, so switching back restores them and the day's colors (which follow the time of day) never
+ * move. Evening Reset is one fluid block: its time or trigger is when the evening begins, never a deadline per job.
  * Saved plans from before triggers read as they were: a time she set keeps the block on its time; her wording for the
  * jobs' moment becomes the block's trigger.
  */
@@ -28,8 +32,10 @@ import { assignTasks, type PlanTask } from '../personalize/assign';
 import { isTaskEdits, pruneTaskEdits, withEdits, type PlannedTask, type TaskEdits } from '../personalize/edits';
 import { CUE } from '../personalize/cues';
 import { CUE_LIMIT, tidyCue } from '../personalize/marks-text';
-import { CONDITION_TRIGGER, TRIGGER_LIMIT, VAGUE_TRIGGER, clock as clockOf, minutes, overlaps, validTime, type SlotKind } from '../personalize/when';
-export { TRIGGER_LIMIT, validTime, type SlotKind };
+import { CONDITION_TRIGGER, TRIGGER_LIMIT, VAGUE_TRIGGER, clock as clockOf, minutes, overlaps, validTime, type SlotKind as BoxKind } from '../personalize/when';
+export { TRIGGER_LIMIT, validTime };
+/** What a May block's box shows: a time, a trigger, or nothing (Flexible). */
+export type SlotKind = BoxKind | 'flexible';
 /** Her trigger, tidied and kept to the box: a long one ends at the last whole word, never mid-word. */
 export const tidyTrigger = (text: string) => {
   const t = text.replace(/\s+/g, ' ').trim().replace(/[.]$/, '');
@@ -210,39 +216,51 @@ export function mayParts(ctx: FamilyContext, edits?: TaskEdits): (PlannedTask & 
 
 // ------------------------------------------------------------------ when it happens
 
-/** Familiar events to choose from (and her own words). */
+/**
+ * Real, naturally occurring events a family can start something on (and her own words). Not the end of another block:
+ * "After quiet time" or "After afternoon play" only narrate the day's order.
+ */
 export const TRIGGER_CHOICES = [
-  'When we wake up', 'After breakfast', 'After getting dressed', 'After morning play', 'After lunch', 'After quiet time',
-  'After afternoon play', 'When we get home', 'After snack', 'When we’re ready for dinner',
+  'When we wake up', 'After breakfast', 'After getting dressed', 'After lunch', 'When everyone comes inside', 'When we get home',
+  'After dinner', 'After bath time', 'After brushing teeth',
 ] as const;
-/** The prepared trigger for each block: the event that comes before it on an ordinary summer day. */
+/** A trigger that only says another block ended: a chain of these makes each block wait on the one before. */
+export const WEAK_TRIGGER = /^(after|once|when)\b.*\b(play|playtime|quiet time|quiet|rest time|free time|activity|activities|snack time|reset|the (last|previous|next) (thing|one|block))\b|^when (it[’']?s|it is) time\b|\bnext thing\b/i;
+/** The trigger suggested first when she chooses Trigger for a block: a real event that fits it. */
 export function defaultTrigger(key: MayKey, o: MayOptions): string {
-  if (o.days === 'camp') return ({ morning: 'When we wake up', move: 'After breakfast', create: 'When we get there', lunch: 'After lunch', quiet: 'When we get home', free: 'After a snack', snack: 'When we get home', evening: 'When we’re ready for dinner' } as Record<MayKey, string>)[key];
-  return ({ morning: 'When we wake up', move: 'After getting dressed', create: 'After morning play', lunch: 'After morning play', quiet: 'After lunch', free: 'After quiet time', snack: 'After afternoon play', evening: 'When we’re ready for dinner' } as Record<MayKey, string>)[key];
+  if (o.days === 'camp') return ({ morning: 'When we wake up', move: 'After breakfast', create: 'After breakfast', lunch: 'When everyone comes inside', quiet: 'When we get home', free: 'When we get home', snack: 'When we get home', evening: 'When everyone comes inside' } as Record<MayKey, string>)[key];
+  return ({ morning: 'When we wake up', move: 'After breakfast', create: 'After breakfast', lunch: 'When everyone comes inside', quiet: 'After lunch', free: 'After lunch', snack: 'When everyone comes inside', evening: 'When everyone comes inside' } as Record<MayKey, string>)[key];
 }
 /**
- * The prepared choice for each block's box. Balanced (the default): the morning and lunch by the clock, everything
- * else by what comes before. Relaxed: no clock at all. More structured: the clock, with the evening still flexible.
- * Camp days: the morning out the door is timed (programs start on time).
+ * The prepared choice for each block's box, given the blocks the day shows (in order). Selective on purpose: a box only
+ * says something when it helps the family know when to begin.
+ * - Balanced (the default): Morning Start and Lunch & Reset by the clock; Quiet Time "After lunch" when lunch comes
+ *   before it; the rest Flexible.
+ * - Relaxed: no clock. Quiet Time still follows lunch; everything else Flexible.
+ * - More structured: the daytime blocks by the clock; the evening Flexible.
+ * - Camp days: the morning out the door and the program by the clock; Home & Snack "When we get home"; the rest Flexible.
  */
-export function defaultKind(key: MayKey, o: MayOptions): SlotKind {
-  if (o.structure === 'relaxed') return 'trigger';
-  if (key === 'evening') return 'trigger';
+export function defaultKind(key: MayKey, o: MayOptions, shown: readonly MayKey[] = visibleKeys(MAY_KEYS, o)): SlotKind {
+  const lunchFirst = shown.includes('lunch') && shown.indexOf('lunch') < shown.indexOf(key);
+  if (key === 'evening') return 'flexible';
+  if (o.days === 'camp') return key === 'morning' || key === 'move' || key === 'create' ? (o.structure === 'relaxed' ? 'flexible' : 'time') : key === 'snack' ? 'trigger' : 'flexible';
   if (o.structure === 'structured') return 'time';
-  if (o.days === 'camp') return key === 'morning' || key === 'move' || key === 'create' ? 'time' : 'trigger';
-  return key === 'morning' || key === 'lunch' ? 'time' : 'trigger';
+  if (key === 'quiet') return lunchFirst ? 'trigger' : o.structure === 'relaxed' ? 'flexible' : 'time';
+  if (o.structure === 'relaxed') return 'flexible';
+  return key === 'morning' || key === 'lunch' ? 'time' : 'flexible';
 }
 /** A time for the evening when she switches it to the clock (it has none prepared: it's "the evening"). */
 export const EVENING_TIME = '17:30';
 
 /**
- * What a block's box shows, read from her edits on top of the prepared choice. Plans saved before triggers: a time she
- * set keeps the block on its time (except on a relaxed day, which never showed times); her moment for the block's jobs
- * becomes its trigger.
+ * What a block's box shows, read from her edits on top of the prepared choice. Her choice always wins. Plans saved
+ * before triggers: a time she set keeps the block on its time (except on a relaxed day, which never showed times); her
+ * moment for the block's jobs becomes its trigger. Her trigger words are kept while the block shows something else.
  */
-export function whenOf(key: MayKey, edit: MayEdit | undefined, o: MayOptions): { when: SlotKind; trigger: string } {
+export function whenOf(key: MayKey, edit: MayEdit | undefined, o: MayOptions, shown?: readonly MayKey[]): { when: SlotKind; trigger: string } {
   const legacyTime = edit?.when === undefined && typeof edit?.time === 'string' && validTime(edit.time) && o.structure !== 'relaxed';
-  const when: SlotKind = edit?.when ?? (legacyTime ? 'time' : defaultKind(key, o));
+  const legacyCue = edit?.when === undefined && !legacyTime && Boolean(edit?.cue?.trim());
+  const when: SlotKind = edit?.when ?? (legacyTime ? 'time' : legacyCue ? 'trigger' : defaultKind(key, o, shown));
   const trigger = (edit?.trigger !== undefined ? tidyTrigger(edit.trigger) : '') || (edit?.cue ? tidyTrigger(edit.cue) : '') || defaultTrigger(key, o);
   return { when, trigger };
 }
@@ -250,17 +268,19 @@ export function whenOf(key: MayKey, edit: MayEdit | undefined, o: MayOptions): {
 /** What prints, in order, with each anchor's family jobs and its one time or trigger. */
 export function mayRows(s: Pick<MayState, 'options' | 'edits' | 'order' | 'parts'>, ctx?: FamilyContext): MayRow[] {
   const parts = ctx ? mayParts(ctx, s.parts) : [];
-  return visibleKeys(s.order, s.options).map((key) => {
+  const shown = visibleKeys(s.order, s.options);
+  return shown.map((key) => {
     const { cue: _cue, when: _when, trigger: _trigger, ...edit } = s.edits[key] ?? {};
     const mine = parts.filter((p) => p.block === key && !p.skipped);
     const base = { ...starter(key, s.options, ctx), ...edit };
-    const { when, trigger } = whenOf(key, s.edits[key], s.options);
-    const slot = when === 'trigger' ? { kind: 'trigger' as const, text: trigger } : validTime(base.time) ? { kind: 'time' as const, text: clock(base.time) } : null;
+    const { when, trigger } = whenOf(key, s.edits[key], s.options, shown);
+    // Flexible: nothing in the box (no label manufactured to fill it).
+    const slot = when === 'trigger' ? { kind: 'trigger' as const, text: trigger } : when === 'time' && validTime(base.time) ? { kind: 'time' as const, text: clock(base.time) } : null;
     return { key, ...base, parts: mine, when, trigger, slot };
   });
 }
 
-export interface MayIssue { key: MayKey; kind: 'order' | 'vague' | 'condition' | 'restates' | 'circular' | 'long'; text: string }
+export interface MayIssue { key: MayKey; kind: 'order' | 'vague' | 'condition' | 'restates' | 'circular' | 'chain' | 'long'; text: string }
 /**
  * What doesn't add up on the printed day (shown in the editor, never changed for her): a time earlier than the timed
  * block before it, and a trigger that says nothing, is a deadline or condition rather than an event, repeats the
@@ -282,7 +302,9 @@ export function mayIssues(rows: readonly MayRow[]): MayIssue[] {
     if (VAGUE_TRIGGER.test(t)) issues.push({ key: r.key, kind: 'vague', text: `“${t}” doesn’t name an event. Try something that happens every day, like “After lunch”.` });
     else if (CONDITION_TRIGGER.test(t)) issues.push({ key: r.key, kind: 'condition', text: `“${t}” is a deadline or a condition, not the moment it starts. Use the event that starts it, like “After quiet time”.` });
     else if (/^(after|once)\b/i.test(t) && later.some((l) => overlaps(t, l.title)) && !earlier.some((e) => overlaps(t, e.title))) issues.push({ key: r.key, kind: 'circular', text: `“${t}” is about a block that comes later in the day. A trigger has to happen first.` });
-    else if (/^(after|once)\b/i.test(t) && overlaps(t, r.title)) issues.push({ key: r.key, kind: 'restates', text: `“${t}” is this block itself. Use what comes just before it.` });
+    else if (/^(after|once)\b/i.test(t) && overlaps(t, r.title)) issues.push({ key: r.key, kind: 'restates', text: `“${t}” is this block itself. Choose an event that starts it, or make it Flexible.` });
+    // Only the end of another block: the day becomes a chain where skipping one stalls the rest.
+    else if (WEAK_TRIGGER.test(t) || (/^(after|once)\b/i.test(t) && i > 0 && overlaps(t, rows[i - 1].title) && !/\b(breakfast|lunch|dinner|bath|teeth|home|inside|dressed|wake)\b/i.test(t))) issues.push({ key: r.key, kind: 'chain', text: `“${t}” only says the block before it ended, so this block waits on that one. Use a real event (a meal, coming home or inside), or make it Flexible.` });
   });
   return issues;
 }
@@ -300,7 +322,7 @@ export function readEdit(obj: unknown): MayEdit | null {
   if (typeof o.desc === 'string') edit.desc = o.desc.slice(0, DESC_LIMIT);
   if (typeof o.cue === 'string' && o.cue.trim()) edit.cue = tidyCue(o.cue);
   if (typeof o.time === 'string' && (validTime(o.time) || o.time === '')) edit.time = o.time;
-  if (o.when === 'time' || o.when === 'trigger') edit.when = o.when;
+  if (o.when === 'time' || o.when === 'trigger' || o.when === 'flexible') edit.when = o.when;
   if (typeof o.trigger === 'string') edit.trigger = tidyTrigger(o.trigger);
   return edit;
 }
@@ -319,7 +341,7 @@ export function moveBlock(s: Pick<MayState, 'edits' | 'options' | 'order'>, key:
   const a = s.order.indexOf(key), b = s.order.indexOf(other);
   [s.order[a], s.order[b]] = [s.order[b], s.order[a]];
   const timeOf = (k: MayKey) => s.edits[k]?.time ?? starter(k, s.options, ctx).time;
-  const timed = (k: MayKey) => whenOf(k, s.edits[k], s.options).when === 'time' && validTime(timeOf(k));
+  const timed = (k: MayKey) => whenOf(k, s.edits[k], s.options, visibleKeys(s.order, s.options)).when === 'time' && validTime(timeOf(k));
   if (timed(key) && timed(other)) {
     const [t1, t2] = [timeOf(key), timeOf(other)];
     s.edits[key] = { ...(s.edits[key] ?? {}), time: t2, when: 'time' };
@@ -331,9 +353,10 @@ export function moveBlock(s: Pick<MayState, 'edits' | 'options' | 'order'>, key:
 export function setWhen(s: Pick<MayState, 'edits' | 'options'>, key: MayKey, when: SlotKind) {
   const e = { ...(s.edits[key] ?? {}) };
   // Keep what she sees: a plan saved before triggers carries its words over once she chooses.
-  const cur = whenOf(key, e, s.options);
-  if (e.trigger === undefined && e.cue) e.trigger = cur.trigger;
+  // Her words are kept when the block shows something else (Flexible, a time), so switching back restores them.
+  if (e.trigger === undefined && e.cue) e.trigger = tidyTrigger(e.cue);
   e.when = when;
+  if (when === 'trigger' && e.trigger === undefined) e.trigger = defaultTrigger(key, s.options);
   if (when === 'time' && key === 'evening' && !validTime(e.time ?? '')) e.time = EVENING_TIME;
   s.edits[key] = e;
 }
@@ -344,7 +367,8 @@ export function setTime(s: Pick<MayState, 'edits'>, key: MayKey, time: string) {
 export function setTrigger(s: Pick<MayState, 'edits' | 'options'>, key: MayKey, text: string) {
   const t = tidyTrigger(text);
   const e = { ...(s.edits[key] ?? {}), when: 'trigger' as const };
-  if (t && t !== defaultTrigger(key, s.options)) e.trigger = t; else delete e.trigger;
+  // Kept as she chose it, even when it's the suggested one: a later change to suggestions never changes her plan.
+  if (t) e.trigger = t; else delete e.trigger;
   delete e.cue;
   s.edits[key] = e;
 }

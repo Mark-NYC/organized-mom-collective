@@ -260,27 +260,32 @@ summer rule no longer sends the kids to Mom: "Check the rhythm before asking wha
 tightens the sheet's spacing (`msr-dense`) rather than run off the page. Tab-only `omc:club:may-app:v1` now also
 holds `parts` (her who-helps changes) and `snapshot`.
 
-**When it happens** (August's timing model, shared in `src/lib/club/personalize/when.ts`: `SlotKind`, the clock helpers
-and the trigger checks; August re-exports them unchanged). Every block shows ONE thing in its right-hand box: the
-large clock time, or a short trigger with a small arrow ("→ After lunch", two lines at most, wrapped at the last whole
-word; the editor warns when it would need more). No separate WHEN pill. Per block, saved as `edits[key].when`
-('time' | 'trigger') and `edits[key].trigger`; a block keeps its time while it shows a trigger, so switching back
-restores it and the day's colors (they follow the time of day) never move. Defaults (`defaultKind`,
-`defaultTrigger`): balanced days time Morning Start and Lunch & Reset and trigger the rest; relaxed days are all
-triggers; more structured days are all times except Evening Reset; camp mornings are timed. Evening Reset stays one
-flexible block: its time or trigger is when the evening begins, not a deadline for each job in it, and its jobs are
-never checked against each other. `mayIssues` says what doesn't add up (a time earlier than the timed block before
-it; a trigger that's vague, a deadline or condition, the block itself, or a later block). Moving blocks (`moveBlock`)
-keeps times in order like August: two timed blocks trading places trade times; a trigger moves with its block.
-Saved plans from before triggers read as they were (`readEdit`, `whenOf`): a time she set keeps that block on its
-time (except on a relaxed day, which never printed times); her wording for a block's jobs ("WHEN …") becomes the
-block's trigger.
+**When it happens** (August's timing model, shared in `src/lib/club/personalize/when.ts`: the clock helpers and the
+trigger checks; August re-exports them unchanged), plus a third state. Each block's right-hand box shows a large clock
+time, a short trigger with a small arrow ("→ After lunch", two lines at most, cut at a whole word), or nothing
+(**Flexible**). No WHEN pill. A rhythm, not a checklist: a trigger is only a real, naturally occurring event (a meal,
+waking, coming home or inside, brushing teeth), never the end of another block ("After quiet time", "After afternoon
+play"), because a chain of those makes every block wait on the one before and a change of plans stalls the day.
+Defaults (`defaultKind`, given the blocks' order): Morning Start 8:00 AM and Lunch & Reset 12:00 PM by the clock,
+Quiet Time "After lunch" (when lunch comes first), everything else Flexible. Relaxed days drop the clock; more
+structured days time the daytime blocks; camp days time the morning and the program, and Home & Snack starts "When we
+get home"; Evening Reset is Flexible. `defaultTrigger` is only the first suggestion when she chooses Trigger (a real
+event that fits the block). Saved per block as `edits[key].when` ('time' | 'trigger' | 'flexible') and
+`edits[key].trigger` (kept exactly as she chose it); a block keeps her time and trigger while it shows something else,
+so switching back restores them and the day's colors (they follow the time of day) never move. Evening Reset stays one
+fluid block: its time or trigger is when the evening begins, never a deadline per job, and its jobs are never checked
+against each other. `mayIssues` says what doesn't add up: a time earlier than the timed block before it; a trigger
+that's vague, a deadline or condition, the block itself, a later block, or only the end of the block before it
+(`chain`, `WEAK_TRIGGER`). Moving blocks (`moveBlock`) keeps times in order like August: two timed blocks trading
+places trade times; triggers and flexible blocks move with their block. Saved plans keep her choices (`readEdit`,
+`whenOf`): an explicit choice always wins; from before triggers, a time she set stays a time (not on a relaxed day,
+which never printed times) and her wording for a block's jobs becomes its trigger.
 
 Editing (`src/lib/club/may-editor.ts`, the same in the desktop dialog and the phone sheet): **Our day** (the kind of
 day, structure, morning start, quiet time, play; the blocks in order with their names, earlier/later, on or off;
-restore the prepared rhythm, with a confirmation), **When it happens** (Time or Trigger per block; Time shows a time
-field, Trigger shows familiar events, the most likely first, and her own words; only the chosen control shows, and a
-trigger block stays compact until she changes it), **Activities & responsibilities** (one block at a time: its
+restore the prepared rhythm, with a confirmation), **When it happens** (Time, Trigger or Flexible per block; Time shows a
+time field, Trigger shows real events, the best fit first, and her own words, Flexible shows nothing to set; only the
+chosen control shows, and a trigger block stays compact until she changes it), **Activities & responsibilities** (one block at a time: its
 activities and the shared owner editor). Changes show live and save as she goes; Done keeps them, Cancel puts the plan
 back as it was when the editor opened. Clicking a block's time or trigger on the sheet opens When it happens at that
 block. Phones: a reference view of the same plan (each block's time or trigger, activities and who helps, the summer
