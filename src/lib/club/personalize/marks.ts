@@ -19,13 +19,9 @@ import { NEUTRAL_COLOR, type MemberColor } from './colors';
 export { CUE_LIMIT, tidyCue } from './marks-text';
 export const CLOCK_ICON = clockUrl;
 
-/**
- * `large`: the same mark scaled for a chart a child reads from across the room (August's routine charts), on warm white
- * so it reads on a tinted row. Same icon, label, order and proportions everywhere.
- */
-export function habitCue(text: string, opts: { large?: boolean } = {}): HTMLElement {
+export function habitCue(text: string): HTMLElement {
   const icon = el('img', { class: 'hc-cue-icon', src: CLOCK_ICON, alt: '', width: 12, height: 12 });
-  const cue = el('span', { class: `hc-cue${opts.large ? ' hc-cue--large' : ''}` }, icon, el('span', { class: 'hc-cue-label' }, 'When'), el('span', { class: 'hc-cue-text' }, text));
+  const cue = el('span', { class: 'hc-cue' }, icon, el('span', { class: 'hc-cue-label' }, 'When'), el('span', { class: 'hc-cue-text' }, text));
   cue.setAttribute('aria-label', `When: ${text}`);
   return cue;
 }

@@ -22,7 +22,7 @@ const storageKey = 'omc:club:august-app:v1';
   <ClubPlanShell class="aug-plan family-brand" kitSlug={kit.slug} month="August" storageKey={storageKey}>
     <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="August · Kit preview" instructions={[
       'Your family’s back-to-school plan: who does what before the first day, the night before, on school mornings and after school, prepared from your family page with every child’s own part and the grown-up jobs shared between the grown-ups.',
-      'Then two charts for the whole family to see: a Morning Routine timed to be out the door on time, and an After-School Routine. Each step has a time, a trigger (the everyday moment that starts it), or both; a step only some children do names them.',
+      'Then two charts for the whole family to see: a Morning Routine timed to be out the door on time, and an After-School Routine. Each row shows a time (mornings) or a trigger, the everyday moment that starts it (after school), in the same box on the right; a step only some children do names them.',
     ]}>
       <Fragment slot="title">Back to School <em>Without the Scramble</em></Fragment>
       <div class="cpd-details">
@@ -82,8 +82,8 @@ if (root && asr) {
       q('[data-aug-d-rows]').replaceChildren(...v.charts.map((c) => {
         const b = el('button', { type: 'button', class: 'cpd-link', disabled: locked }, c.title);
         b.addEventListener('click', () => plan().openEditor(c.group));
-        const timed = c.steps.filter((x) => x.time);
-        const when = timed.length ? `${timed[0].clock!.join(' ')} to ${timed.at(-1)!.clock!.join(' ')}` : 'triggers only';
+        const timed = c.steps.flatMap((x) => (x.slot?.kind === 'time' ? [x.slot] : []));
+        const when = c.mode === 'time' && timed.length ? `times ${timed[0].clock.join(' ')} to ${timed.at(-1)!.clock.join(' ')}` : 'triggers';
         return el('div', {}, el('dt', {}, b), el('dd', {}, `${c.steps.length} steps, ${when}${c.issues.length ? ` · ${c.issues.length} to check` : ''}`));
       }), ...(v.sampleTimes ? [row('Times', 'Sample times: add when school starts on your family page')] : []));
       q<HTMLButtonElement>('[data-aug-d-open]').disabled = locked;

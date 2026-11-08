@@ -4,12 +4,20 @@
  * ./august-school-routines.ts). Pure functions only. A family gets two charts, never a page per child: a step that's
  * only some children's (feeding the pet, a practice bag) names them in their colors; a step for everyone names no one.
  *
- * Every step has an optional clock time and an optional habit trigger, and they mean different things:
- * - the time is when it's expected to happen (the right-hand column);
- * - the trigger is the familiar event that tells the child to start without being reminded (WHEN, under the step).
- * A trigger prints only when it adds something: never one that restates the step ("Wake up" · When I wake up), a vague
- * one ("When I'm ready"), or one that only repeats the order ("Grab backpack" · Before shoes on). `stepIssues` checks
- * her own triggers and times the same way, so the editor can say what's wrong; the prepared routines have none.
+ * Every step can have a clock time and a habit trigger, and they mean different things: the time is when it's expected
+ * to happen; the trigger is the familiar event that tells the child to start without being reminded. The chart shows
+ * ONE of them per step, in the same white box on the right of the row: each chart has a mode (`modes`: the morning shows
+ * times, after school shows triggers, because mornings race a departure and afternoons move with activities), and any
+ * step can show the other instead (`show`). Nothing else to set per row.
+ * Fewer, smarter triggers. The numbered sequence already says what comes next, so a trigger is prepared only where it
+ * adds independent information:
+ * - the routine's starting event (after school: "When I walk in the door"), a real transition, not the step before;
+ * - a step that happens only on some days, with the days from her family page ("Pack my swim team bag" · On Mon, Wed &
+ *   Fri), or "On swim team days" when she gave no days.
+ * Every other row's box is empty. Nothing is invented: no routine, place or activity the profile doesn't support.
+ * `stepIssues` checks what she types (only what the chart shows): a trigger that restates the step, says nothing,
+ * repeats the chart's order ("After washing hands" right after washing hands), is a deadline or condition rather than
+ * a starting event ("Before screen time"), or points at a later step; and times out of order or past out the door.
  *
  * Times: the morning is timed back from the out-the-door time (her family page's school start minus 20 minutes, the
  * earliest for children leaving together; a sample 7:50 marked as a default otherwise), in order, ending before it.
@@ -30,15 +38,23 @@ export interface Step {
   removed?: boolean;
   /** The habit trigger ('' = none). Missing on routines saved before triggers: the step's prepared trigger applies. */
   cue?: string;
-  /** No clock time on the chart (event-based). */
+  /** This step shows the other kind than its chart's mode ('time' or 'trigger'). */
+  show?: SlotKind;
+  /** From the earlier chart (separate time and trigger switches); ignored now, kept so saved plans still read. */
   timeOff?: boolean;
-  /** Trigger hidden on the chart (kept for later). */
   cueOff?: boolean;
   /** The children it's for (member ids); missing = every child. */
   who?: string[];
 }
+/** What a row's right-hand box shows. */
+export type SlotKind = 'time' | 'trigger';
+/** Each chart's default: mornings race a departure (times); afternoons move with activities (triggers). */
+export const DEFAULT_MODES: Record<Group, SlotKind> = { morning: 'time', after: 'trigger' };
+
 export interface Routine {
   steps: Step[];
+  /** Her chart-level choice, when it isn't the default. */
+  modes?: Partial<Record<Group, SlotKind>>;
   mode: 'standard' | 'simple';
   /** The line under the header ("Check the chart. Do the next thing."), when she changed it. */
   footer?: string;
@@ -78,20 +94,21 @@ export const DEFAULT_AFTER = '15:30';
  */
 const MORNING = [
   { id: 'wake', label: 'Wake up & stretch', icon: 'wake', before: 45, cue: '' },
-  { id: 'dress', label: 'Get dressed', icon: 'clothes', before: 35, cue: 'After I get up' },
-  { id: 'eat', label: 'Eat breakfast', icon: 'breakfast', before: 30, cue: 'After I’m dressed' },
-  { id: 'teeth', label: 'Brush teeth', icon: 'teeth', before: 15, cue: 'After breakfast' },
-  { id: 'backpack', label: 'Grab backpack & lunch box', icon: 'bag', before: 10, cue: 'After brushing teeth' },
+  { id: 'dress', label: 'Get dressed', icon: 'clothes', before: 35, cue: '' },
+  { id: 'eat', label: 'Eat breakfast', icon: 'breakfast', before: 30, cue: '' },
+  { id: 'teeth', label: 'Brush teeth', icon: 'teeth', before: 15, cue: '' },
+  { id: 'backpack', label: 'Grab backpack & lunch box', icon: 'bag', before: 10, cue: '' },
   { id: 'out', label: 'Shoes on & out the door', icon: 'shoes', before: 5, cue: '' },
 ] as const;
 /** After school, by default event-based: the sample times show only if she turns them on. */
 const AFTER = [
-  { id: 'shoes', label: 'Shoes & coat away', icon: 'shoes', after: 0, cue: 'When I get home' },
+  // The one starting cue: a real transition. The rest follow the numbers.
+  { id: 'shoes', label: 'Shoes & coat away', icon: 'shoes', after: 0, cue: 'When I walk in the door' },
   { id: 'unpack', label: 'Unpack backpack & lunch box', icon: 'bag', after: 5, cue: '' },
-  { id: 'wash', label: 'Wash hands', icon: 'hands', after: 10, cue: 'After unpacking' },
-  { id: 'snack', label: 'Have a snack', icon: 'snack', after: 15, cue: 'After washing hands' },
-  { id: 'homework', label: 'Homework or reading', icon: 'book', after: 30, cue: 'After snack' },
-  { id: 'free', label: 'Free play', icon: 'play', after: 60, cue: 'When homework is finished' },
+  { id: 'wash', label: 'Wash hands', icon: 'hands', after: 10, cue: '' },
+  { id: 'snack', label: 'Have a snack', icon: 'snack', after: 15, cue: '' },
+  { id: 'homework', label: 'Homework or reading', icon: 'book', after: 30, cue: '' },
+  { id: 'free', label: 'Free play', icon: 'play', after: 60, cue: '' },
 ] as const;
 /** Triggers for routines saved before triggers existed (by step id). */
 export const LEGACY_CUES: Record<string, string> = Object.fromEntries([...MORNING, ...AFTER].filter((s) => s.cue).map((s) => [s.id, s.cue]));
@@ -114,6 +131,10 @@ export interface ChildFacts {
   pets?: boolean;
   /** Their sports or clubs by name: a bag to pack on those days. */
   practice?: string[];
+  /** The days of that practice (0 = Sunday … 6), when her family page says. */
+  practiceDays?: number[];
+  /** A sport has gear to pack; a club only something to get ready (no equipment is assumed for it). */
+  practiceKind?: 'sports' | 'clubs';
   /** Their lessons by name: practice after homework. */
   lessons?: string[];
 }
@@ -125,7 +146,10 @@ export function childFacts(ctx: FamilyContext | null, id: string, age: number): 
   return {
     id, age,
     pets: ctx.pets && existingFor(ctx, 'pet-care').owners.includes(id),
-    practice: [...named('sports'), ...named('clubs')].slice(0, 1),
+    ...(() => {
+      const a = [...activitiesOf(ctx, id, 'sports'), ...activitiesOf(ctx, id, 'clubs')].find((x) => x.memberIds.includes(id) && x.name?.trim());
+      return a ? { practice: [a.name!.trim()], practiceDays: a.days, practiceKind: a.category as 'sports' | 'clubs' } : { practice: [] };
+    })(),
     lessons: named('lessons').slice(0, 1),
   };
 }
@@ -133,6 +157,15 @@ export function childFacts(ctx: FamilyContext | null, id: string, age: number): 
 const step = (group: Group, id: string, label: string, icon: string, time: string, cue: string, extra: Partial<Step> = {}): Step =>
   ({ id, time, label, icon, group, cue, ...extra });
 const lower = (t: string) => t.toLowerCase();
+const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+/** "On Mon, Wed & Fri" from her family page; "On swim team days" when she gave no days; nothing for every weekday. */
+export function daysCue(days: readonly number[] | undefined, name: string): string {
+  const list = [...new Set(days ?? [])].filter((d) => d >= 0 && d <= 6).sort((x, y) => ((x + 6) % 7) - ((y + 6) % 7));
+  if (!list.length) return `On ${name} days`;
+  if (list.length >= 5) return '';
+  const names = list.map((d) => DAY[d]);
+  return `On ${names.length > 1 ? `${names.slice(0, -1).join(', ')} & ${names.at(-1)}` : names[0]}`;
+}
 
 /**
  * The family's two routines for its school-aged children (`kids`), the morning timed back from `leave`. Worded for the
@@ -143,21 +176,21 @@ const lower = (t: string) => t.toLowerCase();
 export function preparedFamilyRoutine(kids: readonly ChildFacts[], leave: string = DEFAULT_LEAVE): Routine {
   const out = validTime(leave) ? minutes(leave) : minutes(DEFAULT_LEAVE);
   const morning: Step[] = MORNING.map((m) => step('morning', m.id, m.label, m.icon, hhmm(out - m.before), m.cue));
-  const after: Step[] = AFTER.map((a) => step('after', a.id, a.label, a.icon, hhmm(minutes(DEFAULT_AFTER) + a.after), a.cue, { timeOff: true }));
+  const after: Step[] = AFTER.map((a) => step('after', a.id, a.label, a.icon, hhmm(minutes(DEFAULT_AFTER) + a.after), a.cue));
   const m = (id: string) => morning.find((x) => x.id === id)!;
   const a = (id: string) => after.find((x) => x.id === id)!;
   const ages = kids.map((k) => k.age);
   // Only little ones: picture-book words, and free play follows their book (no homework to finish).
-  if (ages.length && ages.every((x) => x <= 5)) { m('backpack').label = 'Get my school bag'; a('homework').label = 'Look at a book'; a('free').cue = 'After my book'; }
+  if (ages.length && ages.every((x) => x <= 5)) { m('backpack').label = 'Get my school bag'; a('homework').label = 'Look at a book'; }
   if (ages.length && ages.every((x) => x >= 13)) { m('wake').label = 'Wake up to my alarm'; a('homework').label = 'Homework & study time'; a('free').label = 'Free time'; }
   const pets = kids.filter((k) => k.pets && k.age >= 4).map((k) => k.id);
   if (pets.length) {
     const t = m('teeth');
-    morning.splice(morning.indexOf(t), 0, step('morning', 'pets', 'Feed the pets', 'pets', hhmm(minutes(t.time) - 5), 'After breakfast', { who: pets }));
+    morning.splice(morning.indexOf(t), 0, step('morning', 'pets', 'Feed the pets', 'pets', hhmm(minutes(t.time) - 5), '', { who: pets }));
   }
   for (const k of kids.filter((x) => x.lessons?.length && x.age >= 5).slice(0, 1)) {
     const f = a('free');
-    after.splice(after.indexOf(f), 0, step('after', `practice-${k.id}`, `Practice ${lower(k.lessons![0])}`, 'book', hhmm(minutes(f.time) - 15), 'When homework is finished', { timeOff: true, who: [k.id] }));
+    after.splice(after.indexOf(f), 0, step('after', `practice-${k.id}`, `Practice ${lower(k.lessons![0])}`, 'book', hhmm(minutes(f.time) - 15), '', { who: [k.id] }));
   }
   for (const k of kids.filter((x) => x.practice?.length && x.age >= 6)) {
     const f = a('free');
@@ -166,7 +199,7 @@ export function preparedFamilyRoutine(kids: readonly ChildFacts[], leave: string
     const same = after.find((x) => x.id === `gear-${name}`);
     if (same) { same.who = [...(same.who ?? []), k.id]; continue; }
     if (after.length >= 8) break;
-    after.splice(after.indexOf(f), 0, step('after', `gear-${name}`, `Pack my ${name} bag`, 'bag', hhmm(minutes(f.time) - 5), `On ${name} days`, { timeOff: true, who: [k.id] }));
+    after.splice(after.indexOf(f), 0, step('after', `gear-${name}`, k.practiceKind === 'clubs' ? `Get ready for ${name}` : `Pack my ${name} bag`, 'bag', hhmm(minutes(f.time) - 5), daysCue(k.practiceDays, name), { who: [k.id] }));
   }
   return { steps: [...morning, ...after], mode: 'standard' };
 }
@@ -178,19 +211,22 @@ export const preparedRoutine = (age: number, leave: string = DEFAULT_LEAVE, fact
 /** Steps she can add, a short list for each routine (each with a trigger she can change). */
 export const CHOICES: Record<Group, readonly { id: string; label: string; icon: string; cue: string }[]> = {
   morning: [
-    { id: 'lunch', label: 'Grab my lunch box', icon: 'lunch', cue: '' }, { id: 'pack-lunch', label: 'Pack my lunch', icon: 'lunch', cue: 'After breakfast' },
-    { id: 'water', label: 'Fill my water bottle', icon: 'water', cue: '' }, { id: 'make-bed', label: 'Make my bed', icon: 'wake', cue: 'After I get dressed' },
-    { id: 'read-early', label: 'Ready early? Read or draw', icon: 'book', cue: 'If there’s time left' },
+    { id: 'lunch', label: 'Grab my lunch box', icon: 'lunch', cue: '' }, { id: 'pack-lunch', label: 'Pack my lunch', icon: 'lunch', cue: '' },
+    { id: 'water', label: 'Fill my water bottle', icon: 'water', cue: '' }, { id: 'make-bed', label: 'Make my bed', icon: 'wake', cue: '' },
+    { id: 'read-early', label: 'Ready early? Read or draw', icon: 'book', cue: '' },
   ],
   after: [
-    { id: 'put-backpack', label: 'Put my backpack away', icon: 'bag', cue: '' }, { id: 'quiet', label: 'Quiet time', icon: 'quiet', cue: 'After snack' },
-    { id: 'lunchbox', label: 'Empty my lunch box', icon: 'lunch', cue: '' }, { id: 'read', label: 'Read for 20 minutes', icon: 'book', cue: 'After homework' },
-    { id: 'friends', label: 'Play outside or with friends', icon: 'friends', cue: 'When homework is finished' },
+    { id: 'put-backpack', label: 'Put my backpack away', icon: 'bag', cue: '' }, { id: 'quiet', label: 'Quiet time', icon: 'quiet', cue: '' },
+    { id: 'lunchbox', label: 'Empty my lunch box', icon: 'lunch', cue: '' }, { id: 'read', label: 'Read for 20 minutes', icon: 'book', cue: '' },
+    { id: 'friends', label: 'Play outside or with friends', icon: 'friends', cue: '' },
   ],
 };
 
-/** The trigger that prints for a step: hers, the prepared one, or none. */
-export const cueOf = (s: Step) => (s.cueOff ? '' : (s.cue ?? LEGACY_CUES[s.id] ?? '').trim());
+/** A step's trigger: hers, the prepared one, or none. */
+export const cueOf = (s: Step) => (s.cue ?? LEGACY_CUES[s.id] ?? '').trim();
+export const modeOf = (r: Routine, g: Group): SlotKind => r.modes?.[g] ?? DEFAULT_MODES[g];
+/** What a step shows in its box: its own choice, else its chart's mode. */
+export const slotKind = (r: Routine, s: Step): SlotKind => s.show ?? modeOf(r, s.group);
 
 // ------------------------------------------------------------------ checks
 
@@ -201,7 +237,9 @@ const overlaps = (a: string, b: string) => { const x = new Set(words(b)); return
 /** Triggers that say nothing: there's no event in them. */
 const VAGUE = /^(when|once)\s+(i[’']?m|i am|we[’']?re|we are)\s+ready$|^(now|later|soon|then|next|when it[’']?s time)$/i;
 
-export interface StepIssue { stepId: string; kind: 'order' | 'deadline' | 'restates' | 'vague' | 'circular' | 'order-only' | 'missing'; text: string }
+export interface StepIssue { stepId: string; kind: 'order' | 'deadline' | 'restates' | 'vague' | 'circular' | 'order-only' | 'condition' | 'missing'; text: string }
+/** A deadline or condition, not a starting event: "Before screen time", "By 5:00", "No screens until…", "If …". */
+const CONDITION = /^(before|by|until|no\b.*\buntil|if|only if|unless)\b/i;
 
 /**
  * What doesn't add up on a routine (shown in the editor, never silently changed): a time earlier than the step before
@@ -209,21 +247,24 @@ export interface StepIssue { stepId: string; kind: 'order' | 'deadline' | 'resta
  * step that comes later.
  */
 export function stepIssues(r: Routine, group: Group, leave?: string): StepIssue[] {
+  // Only what the chart shows is checked: a hidden time can't be out of order, a hidden trigger can't confuse anyone.
   const list = r.steps.filter((x) => x.group === group && !x.removed && !(r.mode === 'simple' && x.id === SHORTER_HIDES[group]));
   const hidden = r.steps.filter((x) => x.group === group && !list.includes(x));
   const issues: StepIssue[] = [];
   let last: { label: string; time: string } | null = null;
   list.forEach((s, i) => {
-    if (!s.timeOff && validTime(s.time)) {
+    if (slotKind(r, s) === 'time' && validTime(s.time)) {
       if (last && minutes(s.time) < minutes(last.time)) issues.push({ stepId: s.id, kind: 'order', text: `“${s.label}” at ${clock(s.time)} is earlier than “${last.label}” at ${clock(last.time)}.` });
       if (group === 'morning' && leave && validTime(leave) && minutes(s.time) >= minutes(leave)) issues.push({ stepId: s.id, kind: 'deadline', text: `“${s.label}” at ${clock(s.time)} isn’t before out the door at ${clock(leave)}.` });
       last = { label: s.label, time: s.time };
     }
-    const cue = cueOf(s);
+    const cue = slotKind(r, s) === 'trigger' ? cueOf(s) : '';
     if (!cue) return;
     const later = list.slice(i + 1);
     if (VAGUE.test(cue)) issues.push({ stepId: s.id, kind: 'vague', text: `“${cue}” doesn’t name an event. Try something that happens every day, like “After breakfast”, or leave it off.` });
-    else if (/^before\b/i.test(cue) && later.length && overlaps(cue, later[0].label)) issues.push({ stepId: s.id, kind: 'order-only', text: `“${cue}” only repeats the order of the chart. Leave it off, or use the event that comes before.` });
+    else if (/^before\b/i.test(cue) && later.length && overlaps(cue, later[0].label)) issues.push({ stepId: s.id, kind: 'order-only', text: `“${cue}” only repeats the order of the chart. Leave it empty: the numbers already say what’s next.` });
+    else if (/^(after|once|when)\b/i.test(cue) && i > 0 && overlaps(cue, list[i - 1].label) && !list.slice(i + 1).some((l) => overlaps(cue, l.label))) issues.push({ stepId: s.id, kind: 'order-only', text: `“${cue}” just names the step before it. Leave it empty: the numbers already say what’s next.` });
+    else if (CONDITION.test(cue)) issues.push({ stepId: s.id, kind: 'condition', text: `“${cue}” is a deadline or a condition, not the moment it starts. Use the event that starts it, like “When I walk in the door”, or leave it empty.` });
     else if (/^(after|once)\b/i.test(cue) && later.some((l) => overlaps(cue, l.label)) && !list.slice(0, i).some((e) => overlaps(cue, e.label))) issues.push({ stepId: s.id, kind: 'circular', text: `“${cue}” comes later on the chart. A trigger has to happen first.` });
     else if (/^(after|once)\b/i.test(cue) && !list.some((e) => overlaps(cue, e.label)) && hidden.some((h) => overlaps(cue, h.label))) issues.push({ stepId: s.id, kind: 'missing', text: `“${cue}” is about a step that isn’t on the chart now.` });
     // "On soccer days" for "Pack my soccer bag" names the day it happens: that's the trigger, not a repeat.

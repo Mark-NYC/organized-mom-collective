@@ -23,7 +23,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
   {!planMode && <dialog class="asr-dialog" data-asr-vision aria-labelledby="asr-vision-title"><div class="asr-dialog-head"><h2 id="asr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>School mornings and afternoons shouldn't depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.</p><button type="button" class="asr-dialog-done" data-close-dialog>Back to our plan</button></dialog>}
   <dialog class="asr-dialog asr-guided-dialog" data-asr-editor aria-labelledby="asr-editor-title">
    <div class="asr-dialog-head"><div><span class="asr-guide-kicker">MAKE IT YOURS · AUGUST</span><h2 id="asr-editor-title">Our family routines</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
-   <p class="asr-guide-intro">One morning chart and one after-school chart for all the children. Each step can have a time, a trigger (the everyday moment that starts it), or both; a step only some of the children do names them.</p>
+   <p class="asr-guide-intro">One morning chart and one after-school chart for all the children. Each row shows a time or a trigger (the everyday moment that starts it) in the box on the right: choose for the whole chart, and change single steps only if you want to.</p>
    <div class="asr-guide-section" data-asr-routine-controls></div>
    <div class="asr-routine-tabs" role="tablist" aria-label="School routine"><button type="button" data-asr-tab="morning" role="tab" aria-selected="true">Morning</button><button type="button" data-asr-tab="after" role="tab" aria-selected="false">After school</button></div>
    <div class="asr-guide-section"><div class="asr-guide-caption"><strong data-asr-guided-title>Morning routine</strong><span>Tap any step to change it</span></div><div class="asr-guided-steps" data-asr-options></div>
@@ -240,7 +240,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 .rc-tagline .rc-rule{flex:1 1 0}
 .rc-tagline [contenteditable]{white-space:normal;text-align:center}
 .rc-rows{flex:1;min-height:0;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.rc-row{position:relative;flex:1 1 0;min-height:0;max-height:118px;display:grid;grid-template-columns:92px 104px 1px minmax(0,1fr) auto;align-items:center;border-radius:12px;background:var(--rc-tint);overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-row{position:relative;flex:1 1 0;min-height:0;max-height:118px;display:grid;grid-template-columns:92px 104px 1px minmax(0,1fr) var(--rc-when-w,176px);align-items:center;border-radius:12px;background:var(--rc-tint);overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .rc-num{align-self:stretch;display:flex;align-items:center;justify-content:center;background:var(--rc-deep);font:italic 400 44px/1 Georgia,serif;color:var(--rc-ink)}
 .rc-icon{display:flex;align-items:center;justify-content:center}
 .rc-icon img{display:block;width:var(--rc-icon,66px);height:var(--rc-icon,66px);object-fit:contain}
@@ -250,16 +250,24 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 .rc-row.rc-long .rc-name{font-size:calc(var(--rc-name,31px) * .84)}
 .rc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px}
 .rc-meta .mc-owner{font-size:11.5px}
-.rc-time{margin-right:18px;padding:9px 14px 8px;border-radius:12px;background:#fff;font:400 var(--rc-time,31px)/1 Georgia,serif;color:#2f372d;white-space:nowrap;font-variant-numeric:lining-nums}
-.rc-time small{margin-left:2px;font:400 calc(var(--rc-time,31px) * .42)/1 Georgia,serif;letter-spacing:.02em;text-transform:uppercase}
+.rc-when{box-sizing:border-box;justify-self:end;margin-right:18px;width:calc(var(--rc-when-w,176px) - 18px);height:var(--rc-when-h,62px);display:flex;align-items:center;justify-content:center;padding:6px 12px;border-radius:12px;background:#fff;color:#2f372d;text-align:center;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-when--none{background:transparent}
+.rc-when--time{font:400 var(--rc-time,31px)/1 Georgia,serif;white-space:nowrap;font-variant-numeric:lining-nums}
+.rc-when--time small{margin-left:3px;font:400 calc(var(--rc-time,31px) * .42)/1 Georgia,serif;letter-spacing:.02em;text-transform:uppercase}
+/* A trigger: up to two centered lines in the same box (the editors warn if it needs a third). */
+.rc-when--trigger{font:600 var(--rc-trigger,16px)/1.22 Montserrat,Arial,sans-serif;color:#3a4237}
+.rc-when-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:break-word}
+.rc-when-measure{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none}
+.rc-when-measure .rc-when{height:auto}
+.rc-when-measure .rc-when-text{display:block;-webkit-line-clamp:unset;line-clamp:none}
 .rc-banner{display:flex;align-items:center;gap:26px;margin-top:14px;padding:16px 34px;border-radius:12px;background:#E6EDE0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .rc-banner img{flex:none;width:84px;height:84px;object-fit:contain}
 .rc-banner .rc-vrule{flex:none;width:1px;align-self:stretch;margin:6px 0;background:rgba(60,60,50,.22)}
 .rc-banner-title{margin:0;font:italic 400 44px/1.05 Georgia,serif;color:#2f3a2d}
 .rc-banner-line{margin:8px 0 0;font:600 14px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5f7457}
 /* Seven or eight steps: smaller rows, still one page. */
-.rc-sheet[data-rc-count="7"]{--rc-name:27px;--rc-time:27px;--rc-icon:56px}
-.rc-sheet[data-rc-count="8"]{--rc-name:24px;--rc-time:24px;--rc-icon:50px}
+.rc-sheet[data-rc-count="7"]{--rc-name:27px;--rc-time:27px;--rc-icon:56px;--rc-when-h:56px;--rc-trigger:15px}
+.rc-sheet[data-rc-count="8"]{--rc-name:24px;--rc-time:24px;--rc-icon:50px;--rc-when-h:50px;--rc-trigger:14px}
 .rc-sheet[data-rc-count="7"] .rc-num,.rc-sheet[data-rc-count="8"] .rc-num{font-size:36px}
 .rc-sheet[data-rc-count="8"] .rc-rows{gap:8px}
 .rc-sheet[data-rc-count="8"] .rc-copy{gap:4px}
@@ -274,14 +282,13 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 .rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-banner img{width:62px;height:62px}
 .rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-banner-title{font-size:36px}
 .rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-banner-line{margin-top:5px}
-.rc-sheet[data-rc-count="8"] .hc-cue--large{padding:3px 12px 3px 8px;font-size:13.5px}
-.rc-sheet[data-rc-count="8"] .rc-time{padding:7px 12px 6px}
+
 /* On-sheet editing (screen only). */
 .rc-row .asr-remove{top:8px;right:8px;transform:none}
 .rc-row:hover .asr-remove,.rc-row:focus-within .asr-remove{opacity:1}
-.rc-time[role=button]{cursor:pointer}
-.rc-time[role=button]:hover{outline:1px dashed #9bb4a1;outline-offset:2px}
-.rc-sheet[data-asr-locked] .rc-time{cursor:default;outline:none!important}
+.rc-when[role=button]{cursor:pointer}
+.rc-when[role=button]:hover{outline:1px dashed #9bb4a1;outline-offset:2px}
+.rc-sheet[data-asr-locked] .rc-when{cursor:default;outline:none!important}
 @media print{.rc-row .asr-remove{display:none!important}}
 .cp-thumb .rc-row .asr-remove{display:none!important}
 /* The routine editor's per-step fields. */
@@ -289,6 +296,9 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 .asr-step-toggles label{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;font-weight:600!important}
 .asr-step-toggles input{width:18px!important;height:18px;min-height:0!important}
 .asr-who{display:flex;flex-wrap:wrap;gap:6px}
+.asr-mode{display:inline-grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#f0f4ef;border-radius:9px}
+.asr-mode button{min-height:40px;padding:6px 18px;border:0;border-radius:6px;background:transparent;color:#637768;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.asr-mode button[aria-pressed=true]{background:#fff;color:#45624f;box-shadow:0 1px 5px #0001}
 .asr-who-chip{min-height:40px;padding:8px 14px;border:1px solid #cbd8cb;border-radius:99px;background:#fff;color:#516b5b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
 .asr-who-chip[aria-pressed=true]{background:#506d60;border-color:#506d60;color:#fff}
 .asr-issue{margin:0;padding:8px 10px;border-left:3px solid #c9822f;background:#fbf4ea;color:#5a4630;font:12px/1.45 Montserrat,Arial,sans-serif}
@@ -300,7 +310,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 import {
   CHOICES, ICONS, LABEL_LIMIT, addCustom, addStep, applyFamily, augFingerprint, augView, clock, freshState, fromLegacy, isAugState,
   move, restorePlan, routineOf, setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, restoreRoutine,
-  GROUP_INFO, ROLE_LABEL, MAX_STEPS, cueOf, CUE_TEXT_LIMIT, routineKids, setCue, setCueOff, setLeave, setTimeOff, setTimesOff, setWho,
+  GROUP_INFO, ROLE_LABEL, MAX_STEPS, cueOf, CUE_TEXT_LIMIT, routineKids, setChartMode, setCue, setLeave, setShowOther, setWho, slotKind,
   type AugMember, type AugPlan, type AugState, type AugView, type ChartView, type Group,
 } from '../../lib/club/engines/august-school-routines';
 import { doneLine, habitCue, ownerTag, ownerTags } from '../../lib/club/personalize/marks';
@@ -478,8 +488,8 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
         name.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); name.blur(); } });
         name.addEventListener('blur', () => { if ((name.textContent ?? '').trim() !== st.label) update((s) => setLabel(s, st.id, name.textContent ?? '', members)); });
       }
-      // The step, then (when it isn't everyone's) who it's for in their colors, then its trigger.
-      const meta = st.owners.length || st.cue ? [el('span', { className: 'rc-meta' }, ...(st.owners.length ? [ownerTags(st.owners)] : []), ...(st.cue ? [habitCue(st.cue, { large: true })] : []))] : [];
+      // The step, then (when it isn't everyone's) who it's for, in their colors.
+      const meta = st.owners.length ? [el('span', { className: 'rc-meta' }, ownerTags(st.owners))] : [];
       const row = el('li', { className: `rc-row${st.label.length > 24 ? ' rc-long' : ''}` },
         el('span', { className: 'rc-num', textContent: String(i + 1).padStart(2, '0') }),
         el('span', { className: 'rc-icon' }, el('img', { src: st.icon, alt: '', width: 66, height: 66 })),
@@ -488,17 +498,23 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
       row.style.setProperty('--rc-tint', tint);
       row.style.setProperty('--rc-deep', deep);
       row.style.setProperty('--rc-ink', ink);
-      if (st.clock) {
-        const time = el('time', { className: 'rc-time' }, st.clock[0], el('small', { textContent: st.clock[1] }));
+      // The one box on the right: the time (large) or the trigger (up to two centered lines), same size and place.
+      const box = el('span', { className: `rc-when rc-when--${st.slot?.kind ?? 'none'}` });
+      box.dataset.stepId = st.id;
+      if (st.slot?.kind === 'time') {
+        box.append(st.slot.clock[0], el('small', { textContent: st.slot.clock[1] }));
         if (!locked) {
-          time.setAttribute('role', 'button');
-          time.tabIndex = 0;
-          time.setAttribute('aria-label', `Change time for ${st.label}`);
-          time.addEventListener('click', () => openTimePicker(time, st.id));
-          time.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimePicker(time, st.id); } });
+          box.setAttribute('role', 'button');
+          box.tabIndex = 0;
+          box.setAttribute('aria-label', `Change time for ${st.label}`);
+          box.addEventListener('click', () => openTimePicker(box, st.id));
+          box.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimePicker(box, st.id); } });
         }
-        row.append(time);
+      } else if (st.slot?.kind === 'trigger') {
+        box.append(el('span', { className: 'rc-when-text', textContent: st.slot.text }));
+        box.setAttribute('aria-label', `When: ${st.slot.text}`);
       }
+      row.append(box);
       if (!locked && c.steps.length > 1) {
         const remove = el('button', { type: 'button', className: 'asr-remove', textContent: '×', title: 'Remove step' });
         remove.setAttribute('aria-label', `Remove ${st.label}`);
@@ -577,6 +593,33 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     }
     if (planMode) papers.forEach((sheet, i) => sheet.toggleAttribute('data-plan-sheet-end', i === papers.length - 1));
     fit();
+    measureTriggers(v);
+  };
+  // Which triggers need more than the box's two lines, measured at print size off screen (the charts themselves may be
+  // hidden on a phone). The editors warn about exactly these; nothing is cut short silently.
+  let overflowing = new Set<string>();
+  const measureTriggers = (v: AugView) => {
+    const next = new Set<string>();
+    const host = el('div', { className: 'rc-when-measure', 'aria-hidden': 'true' });
+    root.append(host);
+    for (const c of v.charts) {
+      const sheet = el('div', { className: 'rc-sheet' });
+      sheet.dataset.rcCount = String(c.steps.length);
+      host.append(sheet);
+      for (const st of c.steps) {
+        if (st.slot?.kind !== 'trigger') continue;
+        const text = el('span', { className: 'rc-when-text', textContent: st.slot.text });
+        const row = el('div', { className: 'rc-row' }, el('span', { className: 'rc-when rc-when--trigger' }, text));
+        sheet.append(row);
+        const lineHeight = parseFloat(getComputedStyle(text).lineHeight) || 20;
+        const lines = Math.round(text.getBoundingClientRect().height / lineHeight);
+        if (lines > 2) next.add(`${c.group}:${st.id}`);
+      }
+    }
+    host.remove();
+    const changed = [...next].join() !== [...overflowing].join();
+    overflowing = next;
+    if (changed && editorDialog?.open) makeOptions();
   };
   // The family plan editor (desktop dialog; the phone sheet uses the same editor).
   const fillPlanEditor = () => {
@@ -618,18 +661,27 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     const controls = $('[data-asr-routine-controls]');
     if (controls) {
       const parts: Node[] = [];
+      // One choice for the chart: times or triggers in every row's box. Each step can still show the other.
+      const modeGroup = el('div', { className: 'asr-mode', role: 'group' });
+      modeGroup.setAttribute('aria-label', 'Show on the chart');
+      for (const [m, label] of [['time', 'Times'], ['trigger', 'Triggers']] as const) {
+        const b = el('button', { type: 'button', textContent: label, disabled: locked });
+        b.setAttribute('aria-pressed', String(chart.mode === m));
+        b.addEventListener('click', () => update((s) => setChartMode(s, tab, m, members)));
+        modeGroup.append(b);
+      }
+      parts.push(el('div', { className: 'asr-routine-field' }, el('span', { textContent: 'Show on the chart' }), modeGroup),
+        el('p', { className: 'asr-routine-note', textContent: chart.mode === 'time'
+          ? 'Each row shows its time. Open a step to show its trigger instead.'
+          : 'Each row shows the everyday moment that starts it. Open a step to show its time instead.' }));
       if (tab === 'morning') {
         const leave = el('input', { type: 'time', step: '300', value: v.leave, disabled: locked });
         leave.addEventListener('change', () => update((s) => setLeave(s, leave.value, members)));
         parts.push(el('label', { className: 'asr-routine-field' }, 'Out the door by', leave),
-          el('p', { className: 'asr-routine-note', textContent: v.sampleTimes ? 'These are sample times: add when school starts on your family page, or set the out-the-door time here, and change any step’s time.' : 'Timed back from when school starts on your family page. Change any step’s time below.' }));
-      } else {
-        const timed = el('input', { type: 'checkbox', checked: r.steps.some((x) => x.group === 'after' && !x.removed && !x.timeOff), disabled: locked });
-        timed.addEventListener('change', () => update((s) => setTimesOff(s, 'after', !timed.checked, members)));
-        parts.push(el('label', { className: 'asr-routine-field' }, timed, 'Show clock times after school'),
-          el('p', { className: 'asr-routine-note', textContent: 'Afternoons change with activities, so this routine runs on triggers by default. Turn times on if your afternoons are the same every day.' }));
+          el('p', { className: 'asr-routine-note', textContent: v.sampleTimes ? 'Sample times: add when school starts on your family page, or set the out-the-door time here.' : 'Timed back from when school starts on your family page.' }));
       }
       for (const issue of chart.issues) parts.push(el('p', { className: 'asr-issue', textContent: issue.text }));
+      for (const st of chart.steps) if (overflowing.has(`${tab}:${st.id}`)) parts.push(el('p', { className: 'asr-issue', textContent: `“${st.label}”: the trigger needs more than two lines in its box. Shorten it a little.` }));
       controls.replaceChildren(...parts);
     }
     $$('[data-asr-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.asrTab === tab)));
@@ -643,7 +695,8 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
       const head = el('button', { type: 'button', className: 'asr-step-main' });
       head.setAttribute('aria-expanded', String(open));
       const name = el('strong', { textContent: step.label + (removed ? ' · Removed' : '') });
-      const time = el('small', { textContent: removed ? 'Tap to restore' : [step.timeOff ? 'No time' : clock(step.time), cueOf(step) ? `When: ${cueOf(step)}` : ''].filter(Boolean).join(' · ') });
+      const shows = slotKind(r, step);
+      const time = el('small', { textContent: removed ? 'Tap to restore' : shows === 'time' ? clock(step.time) : cueOf(step) || 'No trigger' });
       const copy = el('span', { className: 'asr-step-copy' });
       copy.append(name, time);
       head.append(el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), copy, el('span', { className: 'asr-step-chevron', textContent: open ? '⌃' : '›' }));
@@ -654,22 +707,21 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
         if (!removed) {
           const input = el('input', { type: 'text', maxLength: LABEL_LIMIT, value: step.label });
           input.addEventListener('input', () => { name.textContent = input.value; update((s) => setLabel(s, step.id, input.value, members), false); });
-          const timeInput = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30', disabled: Boolean(step.timeOff) });
+          // The box shows one of these (the chart's choice); both are kept, so switching never loses anything.
+          const timeInput = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30' });
           timeInput.addEventListener('change', () => { if (!validTime(timeInput.value)) return; update((s) => setTime(s, step.id, timeInput.value, members)); });
-          const cueInput = el('input', { type: 'text', maxLength: CUE_TEXT_LIMIT, value: step.cue ?? cueOf(step), placeholder: 'e.g. After breakfast', disabled: Boolean(step.cueOff) });
+          const cueInput = el('input', { type: 'text', maxLength: CUE_TEXT_LIMIT, value: step.cue ?? cueOf(step), placeholder: 'e.g. After breakfast' });
           cueInput.addEventListener('change', () => update((s) => setCue(s, step.id, cueInput.value, members)));
           const l1 = el('label', { textContent: 'Activity name' }); l1.append(input);
           const l2 = el('label', { textContent: 'Time' }); l2.append(timeInput);
-          const l3 = el('label', { textContent: 'Trigger: the everyday moment that starts it (blank for none)' }); l3.append(cueInput);
-          // Time and trigger each switch off on their own; what's typed is kept for later.
-          const showTime = el('input', { type: 'checkbox', checked: !step.timeOff });
-          showTime.addEventListener('change', () => update((s) => setTimeOff(s, step.id, !showTime.checked, members)));
-          const showCue = el('input', { type: 'checkbox', checked: !step.cueOff });
-          showCue.addEventListener('change', () => update((s) => setCueOff(s, step.id, !showCue.checked, members)));
+          const l3 = el('label', { textContent: 'Trigger: the everyday moment that starts it' }); l3.append(cueInput);
+          const mode = chart.mode;
+          const other = el('input', { type: 'checkbox', checked: Boolean(step.show && step.show !== mode) });
+          other.addEventListener('change', () => update((s) => setShowOther(s, step.id, other.checked, members)));
           const toggles = el('div', { className: 'asr-step-toggles' });
-          const t1 = el('label', {}); t1.append(showTime, 'Show the time');
-          const t2 = el('label', {}); t2.append(showCue, 'Show the trigger');
-          toggles.append(t1, t2);
+          const t1 = el('label', {}); t1.append(other, mode === 'time' ? 'Show the trigger instead of the time' : 'Show the time instead of the trigger');
+          toggles.append(t1);
+          const fields = mode === 'time' ? [l1, l2, l3] : [l1, l3, l2];
           // Who it's for: everyone, or some of the children.
           const kids = routineKids(members);
           const who = el('div', { className: 'asr-who', role: 'group' });
@@ -680,7 +732,8 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
               ...kids.map((k) => { const on = Boolean(step.who?.includes(k.id)); return mk(k.firstName, on, () => update((s) => setWho(s, step.id, on ? (step.who ?? []).filter((w) => w !== k.id) : [...(step.who ?? []), k.id], members))); }));
           }
           const issues = chart.issues.filter((x) => x.stepId === step.id).map((x) => el('p', { className: 'asr-issue', textContent: x.text }));
-          detail.append(l1, l2, l3, toggles, ...(kids.length > 1 ? [el('label', { textContent: 'Who does it' }), who] : []), ...issues);
+          if (overflowing.has(`${tab}:${step.id}`)) issues.push(el('p', { className: 'asr-issue', textContent: 'This trigger needs more than two lines in its box. Shorten it a little.' }));
+          detail.append(...fields, toggles, ...(kids.length > 1 ? [el('label', { textContent: 'Who does it' }), who] : []), ...issues);
         }
         const actions = el('div', { className: 'asr-step-actions' });
         const toggle = el('button', { type: 'button', textContent: removed ? '＋ Restore step' : 'Remove step' });
@@ -786,6 +839,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     setLocked,
     openEditor,
     openPlanEditor,
+    overflowing: () => [...overflowing],
   };
   window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
   const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
