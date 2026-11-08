@@ -5,8 +5,9 @@ import { familyContext } from '../personalize/family';
 import {
   ANCHORS, JOBS, MAX_HABITS, MAX_ROWS, addRow, cleanPlan, duplicateIn, finishLine, finishOf, fitsCue, freshState, fromLegacy, habitSentence, isRhythmState, jobKey,
   moveRow, preparedPlan, removeRow, restorePlan, rhythmFingerprint, rhythmView, saveRow, setAnchor, setHabit, setMomentLabel, setMomentOn, setRowOwners,
-  setRowTitle, validatePlan, type RhythmMember, type RhythmState,
+  setRowTitle, validatePlan, type RhythmMember, type RhythmState, householdBudget, ownershipOf, removeOwner,
 } from './march-family-rhythm';
+import { familyColors } from '../personalize/colors';
 
 const sample = (id: string) => {
   const s = sampleHouseholds.find((x) => x.id === id)!;
@@ -213,7 +214,7 @@ describe('March Family Rhythm: her edits', () => {
   it('at most two new habits; choosing a third replaces the oldest', () => {
     const { members, prefs, state, view } = sample('rivera');
     const s = state();
-    const rows = view(s).printed.flatMap((m) => m.rows).filter((r) => !r.habit);
+    const rows = view(s).printed.flatMap((m) => m.parts).filter((r) => !r.habit && !r.established);
     for (const r of rows.slice(0, 3)) setHabit(s, r.id, true, members, prefs);
     expect(view(s).habits.map((h) => h.id)).toEqual(rows.slice(1, 3).map((r) => r.id));
     setHabit(s, rows[2].id, false, members, prefs);
@@ -387,5 +388,182 @@ describe('March Family Rhythm: safeguards', () => {
     const est = view(s).printed.flatMap((m) => m.rows).find((r) => r.established)!;
     setHabit(s, est.id, true, members, prefs);
     expect(view(s).habits.some((h) => h.id === est.id)).toBe(false);
+  });
+});
+
+// A one-parent family with three children and long names (not a site sample; a test fixture).
+const VANDERHOEVEN: RhythmMember[] = [
+  { id: 'vc-dana', firstName: 'Dana', kind: 'adult', role: 'parent', isAccountHolder: true } as RhythmMember,
+  { id: 'vc-ar', firstName: 'Alexandriana-Rose', kind: 'child', birthYear: 2015, birthMonth: 2 } as RhythmMember,
+  { id: 'vc-b', firstName: 'Bartholomew', kind: 'child', birthYear: 2018, birthMonth: 5 } as RhythmMember,
+  { id: 'vc-kit', firstName: 'Kit', kind: 'child', birthYear: 2022, birthMonth: 8 } as RhythmMember,
+];
+const families = () => [
+  ...['rivera', 'chen', 'hughes'].map((id) => { const x = sample(id); return { id, members: x.members, prefs: x.prefs as object, state: x.state }; }),
+  { id: 'vanderhoeven-castellanos', members: VANDERHOEVEN, prefs: { pets: true } as object, state: freshState },
+];
+const partsOf = (v: ReturnType<typeof rhythmView>) => v.printed.flatMap((m) => m.parts);
+
+describe('March Family Rhythm: quantity and ownership', () => {
+  it('1. a seven-person family gets a sensible number of jobs, not one per person per moment', () => {
+    const { members, prefs, view } = sample('chen');
+    const v = view();
+    expect(v.people).toHaveLength(7);
+    const parts = partsOf(v);
+    expect(parts.length).toBeLessThanOrEqual(7);
+    for (const m of v.printed) expect(m.parts.filter((r) => !JOBS.find((j) => j.title === r.title)?.own).length).toBeLessThanOrEqual(householdBudget(7));
+    // Nobody is given a job just to even things out: some people have no part, and that's fine.
+    expect(v.people.some((p) => !parts.some((r) => r.owners.some((o) => o.id === p.id)))).toBe(true);
+    expect(rhythmView(freshState(), members, prefs).printed.length).toBe(2);
+  });
+
+  it('2. a small household gets a useful, minimal plan', () => {
+    const one = sample('hughes').view();
+    expect(partsOf(one).length).toBe(2);
+    expect(one.printed.every((m) => m.rows.length === 1)).toBe(true);
+    const two = rhythmView(freshState(), [VANDERHOEVEN[0], { id: 'k', firstName: 'Sam', kind: 'child', birthYear: 2019, birthMonth: 4 } as RhythmMember], {});
+    expect(partsOf(two).length).toBeGreaterThanOrEqual(2);
+    expect(partsOf(two).length).toBeLessThanOrEqual(4);
+    expect(validatePlan(preparedPlan(familyContext([VANDERHOEVEN[0]], {}, '2027-03')), familyContext([VANDERHOEVEN[0]], {}, '2027-03'))).toEqual([]);
+  });
+
+  it('3. a personal job several people do stays each person’s own (one row each), shown together only on paper', () => {
+    const { state, view } = sample('rivera');
+    const s = state();
+    const v = view(s);
+    const hamper = v.printed.flatMap((m) => m.parts).filter((r) => r.title === 'Put dirty clothes in the hamper');
+    expect(hamper.length).toBeGreaterThanOrEqual(2);
+    for (const r of hamper) { expect(r.owners).toHaveLength(1); expect(r.ownership).toBe('parallel_individual'); }
+    const line = v.printed.flatMap((m) => m.rows).find((r) => r.title === 'Put dirty clothes in the hamper')!;
+    expect(line.mode).toBe('each');
+    expect(line.ids).toEqual(hamper.map((r) => r.id));
+  });
+
+  it('4. a genuinely shared job stays jointly owned: one shared outcome, every owner named, kept on reload', () => {
+    const { members, prefs, state, view } = sample('rivera');
+    const s = state();
+    const bed = view(s).printed.find((m) => m.anchor === 'teeth')!;
+    const kids = view(s).people.filter((p) => !p.adult).map((p) => p.id).slice(1, 3);
+    const r = saveRow(s, undefined, { title: '', job: 't-shared-toys', owners: kids, moment: bed.id, habit: false }, members, prefs);
+    expect(r.ok).toBe(true);
+    const row = s.plan!.rows.find((x) => x.job === 't-shared-toys')!;
+    expect(row.owners).toEqual(kids);
+    expect(row.share).toBe('joint');
+    expect(ownershipOf(row, s.plan!)).toBe('joint');
+    const shown = view(s).printed.find((m) => m.id === bed.id)!;
+    expect(shown.rows.find((x) => x.id === row.id)!.mode).toBe('together');
+    expect(shown.finish).toMatch(/the shared toys are put away/);
+    const back = JSON.parse(JSON.stringify(s)) as RhythmState;
+    expect(rhythmView(back, members, prefs).printed.find((m) => m.id === bed.id)!.rows.find((x) => x.id === row.id)!.owners.map((o) => o.id)).toEqual(kids);
+  });
+
+  it('5. sharing a moment never creates shared ownership: prepared plans have one owner per row', () => {
+    for (const f of families()) {
+      const v = rhythmView(f.state(), f.members as RhythmMember[], f.prefs);
+      for (const r of partsOf(v)) { expect(r.owners, `${f.id} · ${r.title}`).toHaveLength(1); expect(r.ownership).not.toBe('joint'); }
+    }
+  });
+
+  it('6. editing one person’s own job doesn’t change anyone else’s', () => {
+    const { members, prefs, state, view } = sample('rivera');
+    const s = state();
+    const [a, b] = view(s).printed.flatMap((m) => m.parts).filter((r) => r.title === 'Put dirty clothes in the hamper');
+    const r = saveRow(s, a.id, { title: '', job: 't-toys', owners: [a.owners[0].id], moment: s.plan?.rows.find((x) => x.id === a.id)?.moment ?? view(s).printed[1].id, habit: false }, members, prefs);
+    expect(r.ok).toBe(true);
+    const after = view(s).printed.flatMap((m) => m.parts);
+    expect(after.find((x) => x.id === a.id)!.title).toBe('Put my toys away');
+    expect(after.find((x) => x.id === b.id)).toMatchObject({ title: 'Put dirty clothes in the hamper', owners: [expect.objectContaining({ id: b.owners[0].id })] });
+    // Ticking another person on a personal job gives them their own row; the first person's stays theirs.
+    const sofia = view(s).people.find((p) => p.name === 'Sofia')!.id;
+    saveRow(s, a.id, { title: '', job: 't-toys', owners: [a.owners[0].id, sofia], moment: after.find((x) => x.id === a.id) ? s.plan!.rows.find((x) => x.id === a.id)!.moment : '', habit: false }, members, prefs);
+    const toys = s.plan!.rows.filter((x) => x.job === 't-toys');
+    expect(toys.map((x) => x.owners)).toEqual([[a.owners[0].id], [sofia]]);
+  });
+
+  it('7. taking one person off a job leaves everyone else’s part', () => {
+    const { members, prefs, state, view } = sample('rivera');
+    const s = state();
+    const [a, b] = view(s).printed.flatMap((m) => m.parts).filter((r) => r.title === 'Put dirty clothes in the hamper');
+    removeOwner(s, a.id, a.owners[0].id, members, prefs);
+    const left = view(s).printed.flatMap((m) => m.parts).filter((r) => r.title === 'Put dirty clothes in the hamper');
+    expect(left.map((r) => r.id)).toEqual([b.id]);
+    // A shared job: the others keep it; down to one, it's that person's own.
+    const bed = view(s).printed.find((m) => m.anchor === 'teeth')!;
+    const kids = view(s).people.filter((p) => !p.adult).map((p) => p.id);
+    saveRow(s, undefined, { title: '', job: 't-shared-toys', owners: kids, moment: bed.id, habit: false }, members, prefs);
+    const joint = s.plan!.rows.find((x) => x.job === 't-shared-toys')!;
+    removeOwner(s, joint.id, kids[0], members, prefs);
+    expect(s.plan!.rows.find((x) => x.id === joint.id)!.owners).toEqual(kids.slice(1));
+    removeOwner(s, joint.id, kids[1], members, prefs);
+    expect(s.plan!.rows.find((x) => x.id === joint.id)).toMatchObject({ owners: [kids[2]] });
+    expect(s.plan!.rows.find((x) => x.id === joint.id)!.share).toBeUndefined();
+  });
+
+  it('8. saved plans keep what she chose: grouped personal jobs become one row each, shared jobs stay shared', () => {
+    const { members, prefs, state, view } = sample('rivera');
+    const kids = view().people.filter((p) => !p.adult).map((p) => p.id);
+    const saved: RhythmState = {
+      ...state(),
+      plan: {
+        moments: [{ id: 'm1', anchor: 'dinner', enabled: true, label: 'After our dinner' }, { id: 'm2', anchor: 'teeth', enabled: true }, { id: 'm3', anchor: 'breakfast', enabled: false }],
+        rows: [
+          // Earlier saves grouped a personal job, with a habit on it.
+          { id: 'm2:t-clothes', moment: 'm2', job: 't-clothes', title: 'Put dirty clothes in the hamper', owners: [kids[1], kids[2]] },
+          // She put two people on a household job (earlier: `together`; or without the flag).
+          { id: 'm1:d-clear', moment: 'm1', job: 'd-clear', title: 'Clear the dinner table', owners: [kids[1], kids[2]], together: true },
+          { id: 'm1:d-wipe', moment: 'm1', job: 'd-wipe', title: 'Wipe the counters', owners: [kids[0], kids[1]] },
+          // Her own words.
+          { id: 'm1:own:x', moment: 'm1', title: 'Water the plants', owners: [kids[0]] },
+        ],
+        habits: ['m2:t-clothes'],
+      },
+    };
+    const v = rhythmView(JSON.parse(JSON.stringify(saved)), members, prefs);
+    const parts = v.printed.flatMap((m) => m.parts);
+    expect(parts.filter((r) => r.title === 'Put dirty clothes in the hamper').map((r) => r.owners.map((o) => o.id))).toEqual([[kids[1]], [kids[2]]]);
+    expect(v.habits.map((h) => h.id)).toEqual(['m2:t-clothes']);
+    expect(parts.find((r) => r.id === 'm1:d-clear')).toMatchObject({ mode: 'together', ownership: 'joint' });
+    expect(parts.find((r) => r.id === 'm1:d-wipe')!.owners.map((o) => o.id)).toEqual([kids[0], kids[1]]);
+    expect(parts.find((r) => r.id === 'm1:own:x')!.title).toBe('Water the plants');
+    expect(v.printed[0].title).toBe('After our dinner');
+    const ctx = familyContext(members, prefs, '2027-03', saved.profile);
+    expect(validatePlan(cleanPlan(saved.plan!, ctx), ctx)).toEqual([]);
+  });
+
+  it('9. one new habit by default (a second only when she named jobs for two different children), never more than two', () => {
+    for (const f of families()) {
+      const v = rhythmView(f.state(), f.members as RhythmMember[], f.prefs);
+      expect(v.habits.length, f.id).toBeGreaterThanOrEqual(1);
+      expect(v.habits.length, f.id).toBeLessThanOrEqual(MAX_HABITS);
+      for (const h of v.habits) { expect(h.established).toBe(false); expect(h.owners).toHaveLength(1); }
+    }
+    // Without named wishes (no profile), exactly one.
+    for (const f of families()) expect(rhythmView(freshState(), f.members as RhythmMember[], f.prefs).habits.length).toBeLessThanOrEqual(1);
+  });
+
+  it('10. member ids and colors are January’s, unchanged; the printed fingerprint survives a round trip', () => {
+    for (const f of families()) {
+      const v = rhythmView(f.state(), f.members as RhythmMember[], f.prefs);
+      const jan = familyColors({ members: f.members, preferences: f.prefs } as never);
+      for (const r of partsOf(v)) for (const o of r.owners) { expect(f.members.some((m) => m.id === o.id)).toBe(true); expect(o.color.id).toBe(jan[o.id].id); }
+      const s = f.state();
+      expect(rhythmFingerprint(JSON.parse(JSON.stringify(s)), f.members as RhythmMember[], f.prefs)).toBe(rhythmFingerprint(s, f.members as RhythmMember[], f.prefs));
+    }
+  });
+
+  it('every test family’s plan passes validation and fits the page budget', () => {
+    for (const f of families()) {
+      const s = f.state();
+      const ctx = familyContext(f.members, f.prefs, '2027-03', s.profile);
+      const plan = preparedPlan(ctx);
+      expect(validatePlan(plan, ctx), f.id).toEqual([]);
+    }
+  });
+
+  it('a job that makes someone everyone’s reminder is refused', () => {
+    const { members, prefs, state, view } = sample('rivera');
+    const s = state();
+    const r = saveRow(s, undefined, { title: 'Remind everyone to clean up', owners: [view(s).people[0].id], moment: view(s).printed[1].id, habit: false }, members, prefs);
+    expect(r.ok).toBe(false);
   });
 });
