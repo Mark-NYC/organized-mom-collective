@@ -208,6 +208,22 @@ export const saveResource = (slug: string, state: ResourceVersion['state'], revi
   accountRpc<number>('club_resource_save', { p_kit: slug, p_state: state, p_revision: revision });
 export const approveResource = (slug: string) => accountRpc<boolean>('club_fulfillment_approve', { p_kit: slug });
 
+/**
+ * Her Welcome Family Rhythm (club_welcome_plans; docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 2b), in the same
+ * shape as a month's saved version so the plan page's account bridge (plan/account.ts) works unchanged.
+ */
+export interface WelcomePlanVersion extends ResourceVersion {
+  approved_fingerprint: string | null;
+}
+interface WelcomePlanRow { can: 'edit' | 'read'; state: ResourceVersion['state']; revision: number; approved_at: string | null; approved_fingerprint: string | null }
+const welcomeVersion = (r: WelcomePlanRow): WelcomePlanVersion => ({ ...r, month: '', mailing: null });
+export const loadWelcomePlan = () => accountRpc<WelcomePlanRow>('club_welcome_plan_get').then(welcomeVersion);
+export const saveWelcomePlan = (state: ResourceVersion['state'], revision: number) =>
+  accountRpc<number>('club_welcome_plan_save', { p_state: state, p_revision: revision });
+export const approveWelcomePlan = (revision: number, fingerprint: string, state: ResourceVersion['state'] | null) =>
+  accountRpc<WelcomePlanRow>('club_welcome_plan_approve', { p_revision: revision, p_fingerprint: fingerprint, p_state: state }).then((r) => r.revision);
+export const unapproveWelcomePlan = (revision: number) => accountRpc<WelcomePlanRow>('club_welcome_plan_unapprove', { p_revision: revision }).then(() => undefined);
+
 export interface Vision { family_name: string; value: string }
 export interface WelcomeOrder {
   status: string;

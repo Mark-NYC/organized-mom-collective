@@ -208,6 +208,11 @@ export interface RhythmMember extends ContextMember { kind: 'adult' | 'child'; r
 export const freshState = (): RhythmState => ({ v: 3 });
 
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+/** This month in New York (YYYY-MM): the month a new Welcome plan takes its ages from. */
+export const welcomeMonth = (now: Date = new Date()) => {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit' }).formatToParts(now);
+  return `${parts.find((x) => x.type === 'year')!.value}-${parts.find((x) => x.type === 'month')!.value}`;
+};
 /** The month a plan's ages are taken from. */
 export const monthOf = (s: Pick<RhythmState, 'month'>) => (s.month && MONTH_RE.test(s.month) ? s.month : KIT_MONTH);
 const ctxOf = (members: readonly RhythmMember[], prefs: ContextPrefs | undefined, s: Pick<RhythmState, 'profile' | 'month'>): FamilyContext =>

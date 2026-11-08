@@ -8,7 +8,7 @@
 import { editingWindow } from '../edition-status';
 import { earlierCopyLink, PLAN_SAVE, saveText, type PlanSaveStatus } from './account';
 import { onPlanFamily } from './family';
-import { inWelcomeKit, PLAN_APPROVAL, PLAN_CHANGE, PLAN_WELCOME, PLAN_WELCOME_APPROVE, type PlanResource, type PlanResourceHost } from './resource';
+import { inWelcomeKit, isWelcomeResource, PLAN_APPROVAL, PLAN_CHANGE, PLAN_WELCOME, PLAN_WELCOME_APPROVE, type PlanResource, type PlanResourceHost } from './resource';
 import { approvalDay, approvalState, planNow, readApproval, writeApproval, type Approval } from './status';
 
 export interface PlanDesktopOptions<S> {
@@ -48,6 +48,12 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
     const detail = $('[data-cpd-detail]');
     const box = $('[data-cpd-countdown]');
     box.hidden = true;
+    // The Welcome resource has no deadline: it's hers to change and print whenever she likes.
+    if (isWelcomeResource(root)) {
+      status.textContent = 'Yours to keep. Change it or print it anytime.';
+      detail.textContent = '';
+      return;
+    }
     if (!Number.isFinite(ms)) {
       status.textContent = 'Print deadline not scheduled yet';
       detail.textContent = '';
@@ -79,11 +85,17 @@ export function mountPlanDesktop<S>(o: PlanDesktopOptions<S>) {
     const state = approvalState(a, r.fingerprint());
     approve.hidden = locked;
     const welcome = inWelcomeKit(root);
-    approve.textContent = welcome ? 'Approve for printing' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve preview';
+    const evergreen = isWelcomeResource(root);
+    approve.textContent = welcome ? 'Approve for printing' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : evergreen ? 'Approve my plan' : 'Approve preview';
     approve.setAttribute('aria-disabled', String(!welcome && state === 'approved'));
     // A member's plan saves to her account (./account.ts); approval here is still this tab's check mark only.
     const member = root.dataset.planSource === 'account';
     if (welcome) note.textContent = 'Review your family’s plan. Make any changes, then approve it for printing. You’ll confirm all three printed pieces together at the end.';
+    else if (evergreen) note.textContent = !member
+      ? (state === 'approved' ? `Approved ${approvalDay(a)} in this preview. Nothing is saved to an account.` : 'Approval is kept in this preview only. Nothing is saved to an account.')
+      : state === 'approved' ? `Approved ${approvalDay(a)}. Change it whenever life changes; print it as often as you like.`
+      : state === 'changed' ? 'Changed since you approved it. Approve it again when it looks right.'
+      : 'Look it over and change anything that doesn’t fit, then approve it. That’s all it needs.';
     else if (state === 'approved') note.textContent = member
       ? `Approved ${approvalDay(a)} on this device. Approval is optional: it only says you’ve checked it. Nothing is submitted or mailed from here.`
       : `Approved ${approvalDay(a)} in this preview. Approval is optional: it only says you’ve checked it. Nothing is saved to an account, submitted or mailed.`;

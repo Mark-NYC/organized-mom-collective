@@ -1,0 +1,31 @@
+---
+/** The Welcome Family Rhythm: every member's permanent Club resource, whatever month she joins
+ * (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 2b). The same Family Rhythm as March, one engine
+ * (src/lib/club/engines/family-rhythm.ts), one sheet and editor (MarchFamilyRhythm), one rail (FamilyRhythmDesktop),
+ * one phone view (MarchPlanMobile), on the shared Club plan shell in its Welcome context: no month, no deadline, no
+ * monthly Family Meeting. Her plan and approval save to her account (club_welcome_plans); ages are taken from the
+ * month she first opens it. Its own keys: it never reads or writes March's. Evergreen: nothing here asks her to come
+ * back, check in or approve again. */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import '../../../styles/club-marks.css';
+import MarchFamilyRhythm from '../../../components/club/MarchFamilyRhythm.astro';
+import MarchPlanMobile from '../../../components/club/MarchPlanMobile.astro';
+import FamilyRhythmDesktop from '../../../components/club/FamilyRhythmDesktop.astro';
+import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
+const storageKey = 'omc:club:welcome-family-rhythm:v1';
+---
+<AppLayout title="Our Family Rhythm">
+  <ClubPlanShell class="mch-plan family-brand" context="welcome" month="Family Rhythm" storageKey={storageKey}>
+    <FamilyRhythmDesktop slot="desktop" deadline="" kicker="Family Rhythm · Your Club" instructions={[
+      'Two moments your family already shares each day, and everyone’s part in them. When the moment comes, each person knows their job, so nobody has to be the reminder.',
+      'It’s prepared from your family profile. Change anything that doesn’t fit, print it and hang it where everyone passes. It’s yours to keep: update it whenever life changes.',
+    ]} />
+    <div class="mch-proof" slot="printable" data-plan-proof-body>
+      <div class="mch-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <MarchFamilyRhythm storageKey={storageKey} context="welcome" kicker="Make it yours" />
+      </div>
+    </div>
+    <MarchPlanMobile slot="mobile" deadline="" kicker="Your Club · Organized Family Club" tabs={false} />
+  </ClubPlanShell>
+</AppLayout>

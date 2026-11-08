@@ -14,13 +14,19 @@
  * right after it; a large one tighter, never clipped (the script measures and steps down if the words run long).
  */
 import '../../styles/club-marks.css';
-interface Props { storageKey: string }
-const { storageKey } = Astro.props;
+interface Props {
+  storageKey: string;
+  /** 'welcome': the permanent Welcome resource (ages from the month she first opens it, priority-led habit). */
+  context?: 'march' | 'welcome';
+  /** The editor's kicker. */
+  kicker?: string;
+}
+const { storageKey, context = 'march', kicker = 'Make it yours · March' } = Astro.props;
 ---
-<div class="mfr" data-mfr data-mfr-key={storageKey}>
+<div class="mfr" data-mfr data-mfr-key={storageKey} data-mfr-context={context === 'welcome' ? 'welcome' : undefined}>
   <dialog class="mfr-dialog" data-mfr-editor aria-labelledby="mfr-editor-title">
     <div class="mfr-dialog-head">
-      <div><p class="mfr-dialog-kicker">Make it yours · March</p><h2 id="mfr-editor-title">Our family rhythm</h2></div>
+      <div><p class="mfr-dialog-kicker">{kicker}</p><h2 id="mfr-editor-title">Our family rhythm</h2></div>
       <button type="button" class="mfr-close" data-mfr-close aria-label="Close">×</button>
     </div>
     <div class="mfr-steps" role="tablist" aria-label="What to change" data-mfr-steps></div>
@@ -157,9 +163,9 @@ const { storageKey } = Astro.props;
 
 <script>
 import {
-  applyFamily, freshState, fromLegacy, isRhythmState, rhythmFingerprint, rhythmView,
+  applyFamily, freshState, fromLegacy, isRhythmState, rhythmFingerprint, rhythmView, welcomeMonth,
   type RhythmMember, type RhythmPlanResource, type RhythmState, type RhythmView,
-} from '../../lib/club/engines/march-family-rhythm';
+} from '../../lib/club/engines/family-rhythm';
 import { marchIconArt } from '../../data/club/march-chore-icons';
 import { rhythmEditor, restoreButton, type RhythmSection } from '../../lib/club/march-rhythm-editor';
 import { ownerTag } from '../../lib/club/personalize/marks';
@@ -180,7 +186,13 @@ if (root) {
   let current = '', members: RhythmMember[] = [], prefs: ContextPrefs = {}, family = 'Our Family', state: RhythmState = freshState(), persist = true, locked = false;
   // Her newest profile answers: used when the plan has none saved yet, or after "Start over".
   let latest: FamilySnapshot | undefined;
-  const settle = () => { const p = settledSnapshot(state.profile, latest); if (p) state.profile = p; else delete state.profile; };
+  // The Welcome resource: ages from the month she first opens it (kept with the plan), her priority leading.
+  const welcome = root.dataset.mfrContext === 'welcome';
+  const settle = () => {
+    const p = settledSnapshot(state.profile, latest); if (p) state.profile = p; else delete state.profile;
+    if (welcome) { state.context = 'welcome'; state.month ??= welcomeMonth(); }
+  };
+  const upgrade = (x: unknown) => (welcome ? null : fromLegacy(x, members, prefs, latest));
   const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
   const view = () => rhythmView(state, members, prefs);
 
@@ -349,7 +361,7 @@ if (root) {
       current = next;
       // This key held the earlier per-person chore charts: a family that changed them keeps who-does-what.
       const saved = readScoped(tabStorage.get(key), current, (x): x is unknown => x !== null && typeof x === 'object');
-      state = isRhythmState(saved) ? saved : fromLegacy(saved, members, prefs, latest) ?? freshState();
+      state = isRhythmState(saved) ? saved : upgrade(saved) ?? freshState();
     }
     applyFamily(state, members, prefs);
     settle();
@@ -361,7 +373,7 @@ if (root) {
     state: () => state,
     update,
     // A saved version from her account, or from before this page changed: upgraded the same way.
-    replace: (s) => { state = isRhythmState(s) ? structuredClone(s) : fromLegacy(s, members, prefs, latest) ?? freshState(); applyFamily(state, members, prefs); settle(); changed(); },
+    replace: (s) => { state = isRhythmState(s) ? structuredClone(s) : upgrade(s) ?? freshState(); applyFamily(state, members, prefs); settle(); changed(); },
     setPersist: (on) => { persist = on; if (on) save(); },
     fingerprint: () => rhythmFingerprint(state, members, prefs),
     view,
