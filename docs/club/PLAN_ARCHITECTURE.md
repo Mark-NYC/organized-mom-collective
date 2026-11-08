@@ -234,15 +234,23 @@ holds `parts` (her who-helps changes) and `snapshot`.
   the pet, a practice bag on practice days, practicing lessons) names them in their colors; a step for everyone names
   no one.
 
-Every step has an optional **time** (when it's expected) and an optional **trigger** (the familiar event that starts it
-without a reminder). Prepared triggers only where they add something (never "Wake up · When I wake up" or "Shoes on ·
-When I'm ready"); `stepIssues` flags her own triggers that restate the step, say nothing, only repeat the order or
-point at a later step, and times out of order or past the out-the-door time (shown in the editors, never silently
-changed). The morning is timed back from the out-the-door time (school start on her family page minus 20 minutes; a
-7:50 sample marked as a default otherwise, editable as "Out the door by"); the after-school chart is event-based by
-default (times can be turned on). Reordering keeps times in order (the times stay with the slots). Desktop: the
-shared rail beside the sheets, with the routine editor (tabs, out-the-door time, per-step name, time, trigger,
-show-time and show-trigger, who it's for, move, add, remove). Phones: the same controls per chart. Icons are the
+Every step can have a **time** (when it's expected) and a **trigger** (the familiar event that starts it without a
+reminder). The chart shows **one of them per row**, in the same white box on the right (times large, triggers up to
+two centered lines): each chart has a mode, the morning **times** and after school **triggers** by default
+(`setChartMode`), and any step can show the other instead (`setShowOther`); nothing to set per row otherwise. Both
+values are kept, so switching never loses one. **Fewer, smarter triggers:** the numbered sequence already says what
+comes next, so the only prepared triggers are the routine's starting event (after school: "When I walk in the door")
+and steps that happen only on some days, with the days from her family page ("Pack my swim team bag" · On Mon, Wed &
+Fri; "On robotics days" without days; clubs get "Get ready for…", never an assumed bag). Every other box is empty;
+she can type a trigger on any step. `stepIssues` checks only what shows: triggers that restate the step, say nothing,
+just name the step before, are a deadline or condition ("Before screen time") rather than a starting event, or point
+at a later step; and times out of order or past the out-the-door time.
+A trigger needing a third line is measured at print size off screen and flagged in the editors (no character limit).
+The morning is timed back from the out-the-door time (school start on her family page minus 20 minutes; a 7:50 sample
+marked as a default otherwise, editable as "Out the door by"). Reordering keeps times in order (the times stay with the
+slots). Desktop: the
+shared rail beside the sheets, with the routine editor (tabs, the Times/Triggers switch, out-the-door time, per-step name, time, trigger,
+show the other, who it's for, move, add, remove). Phones: the same controls per chart. Icons are the
 icon-library art cleaned of its alpha haze for print (`public/images/club/routine-icons/`,
 `scripts/prepare-routine-chart-icons.py`), feeding pets the March art. Standalone uses (a member's copy, the kit page,
 `/club/august-preview`) print the two charts. Tab-only `omc:club:august-app:v1` holds the family board

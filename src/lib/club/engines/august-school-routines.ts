@@ -19,9 +19,10 @@
 import { ageInMonth } from '../profile';
 import {
   BANNERS, CHOICES, DEFAULT_LEAVE, DEFAULT_TAGLINE, HEADERS, ICONS, LEGACY_CUES, SHORTER_HIDES, childFacts, clock, clockParts, cueOf,
-  hhmm, minutes, preparedFamilyRoutine, preparedRoutine as prepareFor, shown, stepIssues, swapKeepingTimes, timeBetween, validTime, type Group, type Routine, type Step,
+  DEFAULT_MODES, hhmm, minutes, modeOf, preparedFamilyRoutine, preparedRoutine as prepareFor, shown, slotKind, stepIssues, swapKeepingTimes, timeBetween, validTime,
+  type Group, type Routine, type SlotKind, type Step,
 } from './august-routine-chart';
-export { CHOICES, DEFAULT_LEAVE, ICONS, SHORTER_HIDES, clock, shown, stepIssues, validTime, cueOf, type Group, type Routine, type Step };
+export { CHOICES, DEFAULT_LEAVE, DEFAULT_MODES, ICONS, SHORTER_HIDES, clock, shown, stepIssues, validTime, cueOf, modeOf, slotKind, type Group, type Routine, type SlotKind, type Step };
 import type { PlanResource } from '../plan/resource';
 import { familyContext, isFamilySnapshot, schoolStartFor, type ContextMember, type ContextPrefs, type FamilyContext, type FamilySnapshot } from '../personalize/family';
 import { colorFor, type MemberColor } from '../personalize/colors';
@@ -33,7 +34,8 @@ export const KIT_MONTH = '2027-08';
 export const GROUPS: readonly Group[] = ['morning', 'after'];
 export const GROUP_INFO: Record<Group, { title: string; tab: string }> = { morning: { title: 'Morning Routine', tab: 'Morning' }, after: { title: 'After-School Routine', tab: 'After school' } };
 export const LABEL_LIMIT = 40;
-export const CUE_TEXT_LIMIT = 36;
+/** A safety cap on a trigger's length; the real limit is two lines in the box, which the chart measures and the editors flag. */
+export const CUE_TEXT_LIMIT = 60;
 export const FOOTER_LIMIT = 60;
 /** The line under each chart's header. Routines saved with the earlier sheet's default line get the new one. */
 export const DEFAULT_FOOTER = DEFAULT_TAGLINE;
@@ -203,12 +205,13 @@ export const applyFamily = (s: AugState, members: readonly AugMember[]) => {
 const isStep = (x: unknown): x is Step => {
   const s = x as Partial<Step> | null;
   return Boolean(s && typeof s.id === 'string' && typeof s.time === 'string' && typeof s.label === 'string' && typeof s.icon === 'string' && (s.group === 'morning' || s.group === 'after')
-    && (s.cue === undefined || typeof s.cue === 'string') && (s.who === undefined || (Array.isArray(s.who) && s.who.every((w) => typeof w === 'string'))) && (s.timeOff === undefined || typeof s.timeOff === 'boolean') && (s.cueOff === undefined || typeof s.cueOff === 'boolean'));
+    && (s.cue === undefined || typeof s.cue === 'string') && (s.show === undefined || s.show === 'time' || s.show === 'trigger') && (s.who === undefined || (Array.isArray(s.who) && s.who.every((w) => typeof w === 'string'))) && (s.timeOff === undefined || typeof s.timeOff === 'boolean') && (s.cueOff === undefined || typeof s.cueOff === 'boolean'));
 };
 const isRoutine = (x: unknown): x is Routine => {
   const r = x as Partial<Routine> | null;
   return Boolean(r && Array.isArray(r.steps) && r.steps.every(isStep) && (r.mode === 'standard' || r.mode === 'simple') && (r.footer === undefined || typeof r.footer === 'string')
-    && (r.leave === undefined || (typeof r.leave === 'string' && validTime(r.leave))));
+    && (r.leave === undefined || (typeof r.leave === 'string' && validTime(r.leave)))
+    && (r.modes === undefined || (typeof r.modes === 'object' && Object.values(r.modes).every((m) => m === 'time' || m === 'trigger'))));
 };
 export const isAugState = (x: unknown): x is AugState => {
   const s = x as Partial<AugState> | null;
@@ -221,7 +224,11 @@ export const isAugState = (x: unknown): x is AugState => {
  * step prints its name, its trigger when it adds something (`cueOf`), and its time unless it's off.
  */
 export interface ChartStep {
-  id: string; label: string; icon: string; cue: string; time: string | null; clock: [string, string] | null;
+  id: string; label: string; icon: string;
+  /** What the right-hand box holds: the time, the trigger, or nothing (a step with neither). */
+  slot: { kind: 'time'; time: string; clock: [string, string] } | { kind: 'trigger'; text: string } | null;
+  /** The step shows the other kind than its chart's mode. */
+  override: boolean;
   /** The children a step is for, when it isn't all of them (their names and colors); empty for everyone. */
   owners: { id: string; name: string; color: MemberColor }[];
 }
@@ -229,19 +236,23 @@ const chartOf = (s: AugState, group: Group, members: readonly AugMember[], color
   const r = boardOf(s, members);
   const kids = routineKids(members);
   const leave = routineLeave(s, members);
+  const mode = modeOf(r, group);
   const steps: ChartStep[] = shown(r, group).map((x) => {
-    const timed = !x.timeOff && validTime(x.time);
+    const kind = slotKind(r, x);
+    const cue = cueOf(x);
+    const slot = kind === 'time' ? (validTime(x.time) ? { kind: 'time' as const, time: x.time, clock: clockParts(x.time) } : null) : cue ? { kind: 'trigger' as const, text: cue } : null;
     const who = (x.who ?? []).filter((id) => kids.some((k) => k.id === id));
     const some = who.length && who.length < kids.length;
     return {
-      id: x.id, label: x.label, icon: ICONS[x.icon] ?? ICONS.bag, cue: cueOf(x), time: timed ? x.time : null, clock: timed ? clockParts(x.time) : null,
+      id: x.id, label: x.label, icon: ICONS[x.icon] ?? ICONS.bag, slot, override: kind !== mode,
       owners: some ? kids.filter((k) => who.includes(k.id)).map((k) => ({ id: k.id, name: k.firstName, color: colorFor(colors, k.id) })) : [],
     };
   });
   // The morning's deadline prints only when the morning is timed (a chart of triggers has no clock to beat).
-  const deadline = group === 'morning' && steps.some((x) => x.time) ? clock(leave) : null;
+  const deadline = group === 'morning' && steps.some((x) => x.slot?.kind === 'time') ? clock(leave) : null;
   return {
     group,
+    mode,
     title: HEADERS[group].title,
     subtitle: HEADERS[group].subtitle,
     headerIcon: ICONS[HEADERS[group].icon],
@@ -300,7 +311,7 @@ export const augFingerprint = (s: AugState, members: readonly AugMember[], prefs
   const v = augView(s, members, prefs);
   return JSON.stringify([
     v.plan.active ? [v.plan.leave, v.plan.sections.map((sec) => sec.tasks.filter((t) => !t.skipped).map((t) => [t.label, t.who, t.owners.map((o) => o.color.id), t.cue ?? null]))] : null,
-    v.charts.map((c) => [c.group, c.tagline, c.kids.map((k) => [k.name, k.color.id]), c.steps.map((x) => [x.icon, x.label, x.cue, x.time, x.owners.map((o) => [o.name, o.color.id])]), c.banner.deadline]),
+    v.charts.map((c) => [c.group, c.tagline, c.kids.map((k) => [k.name, k.color.id]), c.steps.map((x) => [x.icon, x.label, x.slot, x.owners.map((o) => [o.name, o.color.id])]), c.banner.deadline]),
   ]);
 };
 
@@ -320,30 +331,31 @@ export const setLabel = (s: AugState, id: string, label: string, members: readon
 };
 export const setTime = (s: AugState, id: string, time: string, members: readonly AugMember[]) => {
   const st = stepOf(s, id, members);
-  if (st && validTime(time)) { st.time = time; delete st.timeOff; }
+  if (st && validTime(time)) st.time = time;
   return s;
 };
 /** Her trigger for a step; blank means no trigger. */
 export const setCue = (s: AugState, id: string, cue: string, members: readonly AugMember[]) => {
   const st = stepOf(s, id, members);
-  if (st) { st.cue = cue.replace(/\s+/g, ' ').trim().replace(/[.]$/, '').slice(0, CUE_TEXT_LIMIT); delete st.cueOff; }
+  if (st) st.cue = cue.replace(/\s+/g, ' ').trim().replace(/[.]$/, '').slice(0, CUE_TEXT_LIMIT);
   return s;
 };
-/** Show or hide a step's trigger (kept for later). */
-export const setCueOff = (s: AugState, id: string, off: boolean, members: readonly AugMember[]) => {
-  const st = stepOf(s, id, members);
-  if (st && off) { st.cue ??= LEGACY_CUES[st.id] ?? ''; st.cueOff = true; } else if (st) delete st.cueOff;
+/** A chart's mode: times or triggers in every row's box (each step can still show the other). */
+export const setChartMode = (s: AugState, group: Group, mode: SlotKind, members: readonly AugMember[]) => {
+  const r = routineOf(s, members);
+  if (mode === DEFAULT_MODES[group]) { if (r.modes) delete r.modes[group]; } else r.modes = { ...r.modes, [group]: mode };
+  if (r.modes && !Object.keys(r.modes).length) delete r.modes;
+  // A step that chose the new mode is just following its chart now.
+  for (const st of r.steps) if (st.group === group && st.show === mode) delete st.show;
   return s;
 };
-/** Show or hide a step's time (kept for later). */
-export const setTimeOff = (s: AugState, id: string, off: boolean, members: readonly AugMember[]) => {
-  const st = stepOf(s, id, members);
-  if (st && off) st.timeOff = true; else if (st) delete st.timeOff;
-  return s;
-};
-/** Times on or off for a whole routine (an event-based afternoon, or a timed one). */
-export const setTimesOff = (s: AugState, group: Group, off: boolean, members: readonly AugMember[]) => {
-  for (const st of routineOf(s, members).steps) if (st.group === group) { if (off) st.timeOff = true; else delete st.timeOff; }
+/** One step shows the other kind than its chart (true), or follows its chart (false). */
+export const setShowOther = (s: AugState, id: string, other: boolean, members: readonly AugMember[]) => {
+  const r = routineOf(s, members);
+  const st = r.steps.find((x) => x.id === id);
+  if (!st) return s;
+  const mode = modeOf(r, st.group);
+  if (other) st.show = mode === 'time' ? 'trigger' : 'time'; else delete st.show;
   return s;
 };
 /** Her out-the-door time for this child's morning ('' goes back to the one from her family page). */
@@ -387,7 +399,6 @@ const placeNew = (r: Routine, group: Group, st: Step) => {
   if (list.length >= MAX_STEPS) return false;
   const last = list.at(-1);
   st.time = timeBetween(list.at(-2), last);
-  st.timeOff = list.length ? list.every((x) => x.timeOff) : group === 'after';
   if (last) r.steps.splice(r.steps.indexOf(last), 0, st); else r.steps.push(st);
   return true;
 };
@@ -452,4 +463,6 @@ export interface AugPlan extends PlanResource<AugState> {
   openEditor: (group?: Group) => void;
   /** The desktop family plan editor. */
   openPlanEditor: () => void;
+  /** Triggers that need more than two lines in their box, as '<group>:<step id>' (measured at print size). */
+  overflowing: () => string[];
 }

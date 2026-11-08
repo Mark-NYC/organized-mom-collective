@@ -21,7 +21,7 @@ const { deadline } = Astro.props;
   </section>
   <section class="cp-section" aria-labelledby="aum-steps-title">
     <h2 id="aum-steps-title">Our routine charts</h2>
-    <p class="cp-intro">One morning chart and one after-school chart for all the children. Each step can have a time, a trigger (the everyday moment that starts it), or both. Tap a chart to change it.</p>
+    <p class="cp-intro">One morning chart and one after-school chart for all the children. Each row shows a time (mornings) or a trigger, the everyday moment that starts it (after school). Tap a chart to change it.</p>
     <ul class="cp-group" data-aum-groups></ul>
   </section>
   <section class="cp-section" aria-labelledby="aum-words-title">
@@ -60,7 +60,7 @@ const { deadline } = Astro.props;
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
 import {
-  CHOICES, CUE_TEXT_LIMIT, FOOTER_LIMIT, GROUPS, GROUP_INFO, MAX_STEPS, cueOf, routineKids, setCue, setCueOff, setLeave, setTimeOff, setTimesOff, setWho, ICONS, LABEL_LIMIT, addStep, clock, move, planEdited, restorePlan, restoreRoutine, routineChanged, routineOf,
+  CHOICES, CUE_TEXT_LIMIT, FOOTER_LIMIT, GROUPS, GROUP_INFO, MAX_STEPS, cueOf, routineKids, setChartMode, setCue, setLeave, setShowOther, setWho, slotKind, ICONS, LABEL_LIMIT, addStep, clock, move, planEdited, restorePlan, restoreRoutine, routineChanged, routineOf,
   setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, type AugPlan, type AugState, type Group, type PlanSection,
 } from '../../lib/club/engines/august-school-routines';
 import { resetTask, setTaskCue, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
@@ -99,8 +99,8 @@ if (root && asr) {
     if (hero) hero.dataset.cpThumb = v.plan.active ? 'plan' : 'morning';
     root.querySelectorAll<HTMLElement>('.cp-thumbs [data-cp-thumb="plan"]').forEach((t) => { t.hidden = !v.plan.active; });
     q('[data-aum-groups]').replaceChildren(...v.charts.map((c) => {
-      const timed = c.steps.filter((x) => x.time);
-      const span = timed.length ? `${timed[0].clock!.join(' ')} to ${timed.at(-1)!.clock!.join(' ')}` : 'Triggers, no clock times';
+      const timed = c.steps.flatMap((x) => (x.slot?.kind === 'time' ? [x.slot] : []));
+      const span = c.mode === 'time' && timed.length ? `times ${timed[0].clock.join(' ')} to ${timed.at(-1)!.clock.join(' ')}` : 'triggers';
       const warn = c.issues.length ? ` · ${c.issues.length} to check` : '';
       return row(c.title, `${c.steps.length} ${c.steps.length === 1 ? 'step' : 'steps'} · ${span}${warn}`, c.steps.map((x) => x.label).join(', '), () => openGroup(c.group), locked);
     }));
@@ -135,6 +135,8 @@ if (root && asr) {
     const r = routineOf(p.state(), members);
     const visible = shown(r, g);
     const chart = p.view().charts.find((c) => c.group === g)!;
+    const mode = chart.mode;
+    const overflow = new Set(p.overflowing());
     const kids = routineKids(members);
     // Redrawing after each change keeps the sheet where she was.
     const again = () => { const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]'); const top = sheet?.scrollTop ?? 0; openGroup(g); if (sheet) sheet.scrollTop = top; };
@@ -142,7 +144,8 @@ if (root && asr) {
       const off = Boolean(step.removed) || !visible.includes(step);
       const li = el('li', { class: 'aum-step' });
       if (off) li.setAttribute('data-removed', '');
-      li.append(el('div', { class: 'aum-step-head' }, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), el('strong', {}, step.label), off || step.timeOff ? '' : el('span', {}, clock(step.time))));
+      const shows = slotKind(r, step) === 'time' ? clock(step.time) : cueOf(step);
+      li.append(el('div', { class: 'aum-step-head' }, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), el('strong', {}, step.label), off || !shows ? '' : el('span', {}, shows)));
       const actions = el('div', { class: 'aum-step-actions' });
       if (step.removed) {
         const b = el('button', { type: 'button', class: 'cp-chip' }, 'Put back');
@@ -152,16 +155,15 @@ if (root && asr) {
       } else if (!off) {
         const name = el('input', { type: 'text', maxLength: LABEL_LIMIT, value: step.label });
         name.addEventListener('change', () => { p.update((s) => setLabel(s, step.id, name.value, p.members())); again(); });
-        const time = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30', disabled: Boolean(step.timeOff) });
+        const time = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30' });
         time.addEventListener('change', () => { if (validTime(time.value)) { p.update((s) => setTime(s, step.id, time.value, p.members())); again(); } });
-        const cue = el('input', { type: 'text', maxLength: CUE_TEXT_LIMIT, value: step.cue ?? cueOf(step), placeholder: 'e.g. After breakfast', disabled: Boolean(step.cueOff) });
+        const cue = el('input', { type: 'text', maxLength: CUE_TEXT_LIMIT, value: step.cue ?? cueOf(step), placeholder: 'e.g. After breakfast' });
         cue.addEventListener('change', () => { p.update((s) => setCue(s, step.id, cue.value, p.members())); again(); });
         const check = (label: string, on: boolean, set: (v: boolean) => void) => { const c = el('input', { type: 'checkbox', checked: on }); c.addEventListener('change', () => { set(c.checked); again(); }); return el('label', { class: 'aum-check' }, c, ` ${label}`); };
         li.append(el('div', { class: 'aum-step-fields' }, el('label', { class: 'cp-field' }, 'Step', name), el('label', { class: 'cp-field' }, 'Time', time)),
-          el('label', { class: 'cp-field' }, 'Trigger (the everyday moment that starts it; blank for none)', cue),
-          el('div', { class: 'aum-step-actions' },
-            check('Show the time', !step.timeOff, (v) => p.update((s) => setTimeOff(s, step.id, !v, p.members()))),
-            check('Show the trigger', !step.cueOff, (v) => p.update((s) => setCueOff(s, step.id, !v, p.members())))));
+          el('label', { class: 'cp-field' }, 'Trigger (the everyday moment that starts it)', cue),
+          check(mode === 'time' ? 'Show the trigger instead of the time' : 'Show the time instead of the trigger', Boolean(step.show && step.show !== mode), (v) => p.update((s) => setShowOther(s, step.id, v, p.members()))));
+        if (overflow.has(`${g}:${step.id}`)) li.append(el('p', { class: 'aum-issue' }, 'This trigger needs more than two lines in its box. Shorten it a little.'));
         if (kids.length > 1) {
           const chip = (label: string, on: boolean, pick: () => void) => { const b = el('button', { type: 'button', class: 'cp-chip' }, label); b.setAttribute('aria-pressed', String(on)); b.addEventListener('click', () => { pick(); again(); }); return b; };
           li.append(el('div', { class: 'cp-field' }, el('span', {}, 'Who does it'), el('div', { class: 'cp-chips', role: 'group' },
@@ -185,17 +187,15 @@ if (root && asr) {
       li.append(actions);
       return li;
     }));
-    // The routine as a whole: the morning's out-the-door time, or after school, clock times on or off.
-    const whole: Node[] = [];
+    // The chart as a whole: times or triggers in every row's box; the morning's out-the-door time.
+    const modeChip = (m: 'time' | 'trigger', label: string) => { const b = el('button', { type: 'button', class: 'cp-chip' }, label); b.setAttribute('aria-pressed', String(mode === m)); b.addEventListener('click', () => { p.update((s) => setChartMode(s, g, m, p.members())); again(); }); return b; };
+    const whole: Node[] = [el('div', { class: 'cp-field' }, el('span', {}, 'Show on the chart'), el('div', { class: 'cp-chips', role: 'group' }, modeChip('time', 'Times'), modeChip('trigger', 'Triggers'))),
+      el('p', { class: 'cp-sheet-hint' }, mode === 'time' ? 'Each row shows its time. Open a step to show its trigger instead.' : 'Each row shows the everyday moment that starts it. Open a step to show its time instead.')];
     if (g === 'morning') {
       const leave = el('input', { type: 'time', step: '300', value: p.view().leave });
       leave.addEventListener('change', () => { p.update((s) => setLeave(s, leave.value, p.members())); again(); });
       whole.push(el('label', { class: 'cp-field' }, 'Out the door by', leave),
         el('p', { class: 'cp-sheet-hint' }, p.view().sampleTimes ? 'Sample times: add when school starts on your family page, or set the out-the-door time here.' : 'Timed back from when school starts on your family page.'));
-    } else {
-      const timed = el('input', { type: 'checkbox', checked: r.steps.some((x) => x.group === 'after' && !x.removed && !x.timeOff) });
-      timed.addEventListener('change', () => { p.update((s) => setTimesOff(s, 'after', !timed.checked, p.members())); again(); });
-      whole.push(el('label', { class: 'aum-check' }, timed, ' Show clock times (afternoons run on triggers by default)'));
     }
     const present = new Set(r.steps.filter((x) => x.group === g && !x.removed).map((x) => x.id));
     const full = visible.length >= MAX_STEPS;
@@ -208,7 +208,7 @@ if (root && asr) {
     const other = GROUPS.find((x) => x !== g)!;
     const next = el('button', { type: 'button', class: 'cp-btn' }, `${GROUP_INFO[other].title} ›`);
     next.addEventListener('click', () => openGroup(other));
-    ui.openSheet(GROUP_INFO[g].title, ...whole, el('p', { class: 'cp-sheet-hint' }, 'Rename, retime, reorder or remove steps, and change or turn off a trigger. Removed steps can be put back.'), steps,
+    ui.openSheet(GROUP_INFO[g].title, ...whole, el('p', { class: 'cp-sheet-hint' }, 'Rename, retime, reorder or remove steps, or change a trigger. Removed steps can be put back.'), steps,
       el('div', { class: 'cp-field' }, el('span', {}, full ? `${MAX_STEPS} steps is the most that fit one page` : 'Add a step'), add), el('div', { class: 'cp-sheet-actions' }, ui.doneButton(), next));
   };
   const openWords = () => {

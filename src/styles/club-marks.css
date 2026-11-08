@@ -7,10 +7,6 @@
 .hc-cue-icon{flex:none;display:block;width:12px;height:12px;object-fit:contain;margin:0}
 .hc-cue-label{flex:none;font:700 8.5px/1 Montserrat,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#3F3B39}
 .hc-cue-text{min-width:0;overflow-wrap:anywhere;white-space:normal;text-align:left}
-/* Large: the same mark scaled 1.45× for the routine charts, on warm white so it reads on a tinted row. */
-.hc-cue--large{gap:8px;padding:5px 14px 5px 9px;border-radius:14px;background:#FFFCF8;font-size:15px}
-.hc-cue--large .hc-cue-icon{width:17px;height:17px}
-.hc-cue--large .hc-cue-label{font-size:12px}
 /* Directly below its responsibility. */
 .hc-cue-row{display:block;margin-top:4px;line-height:0}
 .hc-cue-row .hc-cue{line-height:1.25}
