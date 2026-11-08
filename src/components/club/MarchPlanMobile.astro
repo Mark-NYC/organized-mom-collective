@@ -9,12 +9,17 @@
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
 import '../../styles/club-marks.css';
 import MarchTabs from './MarchTabs.astro';
-interface Props { deadline: string }
-const { deadline } = Astro.props;
+interface Props {
+  deadline: string;
+  kicker?: string;
+  /** March's Family rhythm / Spring Prep switch (off for the Welcome resource). */
+  tabs?: boolean;
+}
+const { deadline, kicker = 'March · Organized Family Club', tabs = true } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['front']} previewNote="One page for the whole family, ready to print" hero={false}>
+<ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front']} previewNote="One page for the whole family, ready to print" hero={false}>
   <Fragment slot="title">Our Family <em>Rhythm</em></Fragment>
-  <MarchTabs current="rhythm" />
+  {tabs && <MarchTabs current="rhythm" />}
   <div class="mrm" data-mrm>
     <p class="mrm-motto">Same moments. Everyone has a part.</p>
     <div class="mrm-moments" data-mrm-moments></div>
@@ -72,9 +77,11 @@ import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
 import { restorePlan, type RhythmPlanResource, type RhythmState } from '../../lib/club/engines/march-family-rhythm';
 import { rhythmEditor, type RhythmSection } from '../../lib/club/march-rhythm-editor';
 import { monthTints } from '../../lib/club/month-tints';
+import { WELCOME_APPROVAL_KEY } from '../../lib/club/plan/family';
+import { isWelcomeResource } from '../../lib/club/plan/resource';
 
-const APPROVAL_KEY = 'omc:preview:march-chore-charts:approval';
 const root = document.querySelector<HTMLElement>('.club-plan:has([data-mfr])');
+const APPROVAL_KEY = root && isWelcomeResource(root) ? WELCOME_APPROVAL_KEY : 'omc:preview:march-chore-charts:approval';
 const host = root?.querySelector<HTMLElement & { clubPlan?: RhythmPlanResource }>('[data-mfr]');
 if (root && host) {
   const plan = () => host.clubPlan!;

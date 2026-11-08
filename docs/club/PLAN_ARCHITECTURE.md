@@ -250,6 +250,20 @@ prepares the same sheet. The earlier March page, Spring Prep (`MarchSpringPrep.a
 `/club/march-preview` still describe Spring Prep. The prototype at `/app/club/family-chore-chart-prototype` is kept
 as the design reference.
 
+## The Welcome Family Rhythm (Phase 2b, not a month)
+
+`/app/club/family-rhythm`: every member's permanent Family Rhythm, whatever month she joins
+([WELCOME_MARCH_DECEMBER_MIGRATION.md](WELCOME_MARCH_DECEMBER_MIGRATION.md)). The same engine, sheet, editor, rail and
+phone view as March (`family-rhythm.ts`, `MarchFamilyRhythm.astro context="welcome"`, `FamilyRhythmDesktop.astro`,
+`MarchPlanMobile.astro tabs={false}`), on `ClubPlanShell context="welcome"`: `data-plan-context="welcome"`
+(`isWelcomeResource`), no kit, no editing deadline (the rail and screen say "Yours to keep"), no monthly Family Meeting,
+no Welcome Kit confirmation. The family loads with `loadKitHousehold(null, …)` (open with Club access or any month she
+held). Her plan saves through the same account bridge (`connectPlanAccount`) to `club_welcome_plans`, and her
+approval is stored there too (`setApprovalStore` in `status.ts`; `approve`/`unapprove` in `account.ts`), so it holds
+on every device; a saved change clears it. The plan state carries `context: 'welcome'` and the `month` its ages come
+from (the month she first opens it). Keys: `omc:club:welcome-family-rhythm:v1`, approval
+`omc:club:welcome-family-rhythm:approval`. Evergreen: no reminders, check-ins or reapproval.
+
 ## May
 
 `/app/club/may`: Our Summer Day, one Letter-size reusable rhythm of flexible anchors (`MaySummerRhythm.astro` in

@@ -383,6 +383,18 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
         </ol>
       </section>
 
+      {/* ------------------------------------------------ her Family Rhythm: permanent, whatever month she joined */}
+      {me.member && people.length > 0 && (
+        <section className="ofc-this-week" aria-labelledby="ofc-rhythm-title" data-home-rhythm>
+          <p className="label text-[#71866c]">Yours to keep</p>
+          <h2 id="ofc-rhythm-title" className="ofc-this-week-title">Our Family Rhythm</h2>
+          <p className="ofc-home-lede">Two moments your family already shares, and everyone’s part in them. Made from your family profile; change it whenever life changes.</p>
+          <div className="ofc-actions">
+            <a className="ofc-member-cta" href={routes.appClubFamilyRhythm}>Open our Family Rhythm</a>
+          </div>
+        </section>
+      )}
+
       {/* ------------------------------------------------ her family and account */}
       <footer className="ofc-home-foot" data-club-home>
         <div className="ofc-home-family">
@@ -400,6 +412,7 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
           <p className="ofc-kit-status">{profileLeft} optional family {profileLeft === 1 ? 'question' : 'questions'} left. <a className="ofc-home-link" href={`${routes.clubFamily}?setup=1`}>Finish your family profile</a></p>
         )}
         <p className="ofc-home-foot-links">
+          {me.member && <><a href={routes.appClubFamilyRhythm}>Our Family Rhythm</a> · </>}
           {me.welcome && <><a href={routes.clubFamilyVision}>Your Family Vision Print</a> · <a href={routes.clubMeetingGuide}>Family Meeting Guide</a> · </>}
           <a href={routes.clubDashboard}>Account &amp; Billing</a>
         </p>

@@ -35,7 +35,11 @@ export interface KitHouseholdEnv {
 
 const onSheet = (h: Household) => h.members.some((m) => !m.archived && (m.kind === 'adult' || m.kind === 'child'));
 
-export async function loadKitHousehold(slug: string, search: string, env: KitHouseholdEnv): Promise<KitHousehold> {
+/**
+ * `slug` null: a resource that isn't a month (the Welcome Family Rhythm). Open to a member with Club access or any
+ * month she ever held; the account's own functions decide what she can change.
+ */
+export async function loadKitHousehold(slug: string | null, search: string, env: KitHouseholdEnv): Promise<KitHousehold> {
   const requested = new URLSearchParams(search).get('sample');
   let sample: string | null = requested && sampleById(requested) ? requested : null;
   try {
@@ -51,7 +55,7 @@ export async function loadKitHousehold(slug: string, search: string, env: KitHou
     if (!store) return { status: 'error' };
     const source = store.kind;
     const me = await store.me();
-    if (!me.kits.some((k) => k.slug === slug)) return { status: 'denied', source, sample };
+    if (slug === null ? !me.access && !me.kits.length : !me.kits.some((k) => k.slug === slug)) return { status: 'denied', source, sample };
     const household = await store.household();
     if (!household || !onSheet(household)) return { status: 'empty', source, sample };
     // The profile only personalizes; a page still works without it.

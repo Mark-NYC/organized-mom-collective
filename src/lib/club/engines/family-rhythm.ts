@@ -197,12 +197,22 @@ export interface RhythmState {
    * before. Set once by a context that isn't March (the Welcome resource) and kept, like `profile`.
    */
   month?: string;
+  /**
+   * Where the plan is used. 'welcome': the permanent Welcome resource, whose default new habit comes from the moment
+   * she most wants to stop managing (her step-6 priority) when she named no job for a child. Absent: March, unchanged.
+   */
+  context?: 'welcome';
 }
 export interface RhythmMember extends ContextMember { kind: 'adult' | 'child'; role?: string }
 
 export const freshState = (): RhythmState => ({ v: 3 });
 
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+/** This month in New York (YYYY-MM): the month a new Welcome plan takes its ages from. */
+export const welcomeMonth = (now: Date = new Date()) => {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit' }).formatToParts(now);
+  return `${parts.find((x) => x.type === 'year')!.value}-${parts.find((x) => x.type === 'month')!.value}`;
+};
 /** The month a plan's ages are taken from. */
 export const monthOf = (s: Pick<RhythmState, 'month'>) => (s.month && MONTH_RE.test(s.month) ? s.month : KIT_MONTH);
 const ctxOf = (members: readonly RhythmMember[], prefs: ContextPrefs | undefined, s: Pick<RhythmState, 'profile' | 'month'>): FamilyContext =>
@@ -231,6 +241,7 @@ export function suggestedAnchors(ctx: FamilyContext): [AnchorId, AnchorId, Ancho
   const p = ctx.snapshot?.priority;
   const hard = (c: string) => Boolean(ctx.snapshot?.challenges?.includes(c));
   const has = (cat: string) => Boolean(ctx.snapshot?.responsibilities.some((r) => r.category === cat));
+  if (p === 'bedtime') return ['teeth', 'dinner', 'breakfast'];
   if (p === 'evenings' || p === 'tidying') return ['dinner', 'teeth', 'breakfast'];
   if (p === 'school-stuff') return ['home', 'dinner', 'teeth'];
   if (p === 'mornings' || (!p && hard('routines'))) return ['breakfast', 'dinner', 'leave'];
@@ -341,7 +352,7 @@ export function prepareMoment(ctx: FamilyContext, momentId: string, anchor: Anch
  * different child too, so the family practices both because she asked, not for variety. Never something already
  * theirs, a job far below a child's age, or a grown-up's job when there are children.
  */
-export function suggestedHabits(ctx: FamilyContext, rows: readonly Row[], moments: readonly Moment[]): string[] {
+export function suggestedHabits(ctx: FamilyContext, rows: readonly Row[], moments: readonly Moment[], opts: PrepareOptions = {}): string[] {
   const on = new Set(moments.filter((m) => m.enabled).map((m) => m.id));
   const kidAge = (id: string) => { const p = ctx.children.find((x) => x.id === id); return p ? ageOf(p) : null; };
   // A personal routine far below a child's age isn't something to practice (the hamper for a teenager); a household
@@ -354,19 +365,29 @@ export function suggestedHabits(ctx: FamilyContext, rows: readonly Row[], moment
   const anyone = (r: Row) => { const j = jobById(r.job ?? ''); return Boolean(j?.wishes?.length && wishedFor(ctx, j!.wishes!).anyone); };
   const weight = (r: Row) => { const j = jobById(r.job ?? ''); return (j?.minAge ?? 0) + (j?.own ? 0 : 3) + (j?.core ? 1 : 0); };
   const byWeight = [...pool].sort((a, b) => weight(b) - weight(a) || a.id.localeCompare(b.id));
-  const first = pool.find(named) ?? [...pool.filter(anyone)].sort((a, b) => (kidAge(a.owners[0]) ?? 0) - (kidAge(b.owners[0]) ?? 0))[0] ?? byWeight[0];
+  // Welcome: with a priority and no job named for anyone, the habit is practiced in her priority's moment (the first
+  // moment, see suggestedAnchors) when that moment has a job to practice.
+  const lead = opts.lead && ctx.snapshot?.priority && moments[0] ? byWeight.find((r) => r.moment === moments[0].id) : undefined;
+  const first = pool.find(named) ?? [...pool.filter(anyone)].sort((a, b) => (kidAge(a.owners[0]) ?? 0) - (kidAge(b.owners[0]) ?? 0))[0] ?? lead ?? byWeight[0];
   if (!first) return [];
   const second = pool.find((r) => r !== first && named(r) && named(first) && r.owners[0] !== first.owners[0]);
   return second ? [first.id, second.id] : [first.id];
 }
 
+export interface PrepareOptions {
+  /** Lead with her priority (the Welcome resource): see `suggestedHabits`. */
+  lead?: boolean;
+}
+/** How a plan in this state is prepared. */
+export const prepareOptions = (s: Pick<RhythmState, 'context'>): PrepareOptions => (s.context === 'welcome' ? { lead: true } : {});
+
 /** The whole prepared plan for this family: two moments on, a third offered; jobs; one or two new habits. */
-export function preparedPlan(ctx: FamilyContext): RhythmPlan {
+export function preparedPlan(ctx: FamilyContext, opts: PrepareOptions = {}): RhythmPlan {
   const [a, b, c] = suggestedAnchors(ctx);
   const moments: Moment[] = [{ id: 'm1', anchor: a, enabled: true }, { id: 'm2', anchor: b, enabled: true }, { id: 'm3', anchor: c, enabled: false }];
   const load = new Map<string, number>();
   const rows = moments.flatMap((m) => prepareMoment(ctx, m.id, m.anchor, load));
-  return { moments, rows, habits: suggestedHabits(ctx, rows, moments) };
+  return { moments, rows, habits: suggestedHabits(ctx, rows, moments, opts) };
 }
 
 // ------------------------------------------------------------------ words: finish lines and habit sentences
@@ -452,7 +473,7 @@ export interface MomentView {
 
 export function rhythmView(s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) {
   const ctx = ctxOf(members, prefs, s);
-  const plan = s.plan ? cleanPlan(s.plan, ctx) : preparedPlan(ctx);
+  const plan = s.plan ? cleanPlan(s.plan, ctx) : preparedPlan(ctx, prepareOptions(s));
   const person = (id: string) => ctx.people.find((p) => p.id === id);
   const viewOf = (r: Row, anchor: AnchorId): RowView => {
     const j = r.job ? jobById(r.job) : undefined;
@@ -556,7 +577,7 @@ export function duplicateIn(plan: Pick<RhythmPlan, 'rows'>, momentId: string, ti
 // ------------------------------------------------------------------ edits (each changes `s` in place and returns it)
 
 /** Her plan to edit: the saved one, or the prepared one written down the first time she changes anything. */
-const own = (s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) => (s.plan ??= preparedPlan(ctxOf(members, prefs, s)));
+const own = (s: RhythmState, members: readonly RhythmMember[], prefs?: ContextPrefs) => (s.plan ??= preparedPlan(ctxOf(members, prefs, s), prepareOptions(s)));
 const tidy = (t: string, max: number) => t.replace(/\s+/g, ' ').trim().slice(0, max);
 const dropHabit = (plan: RhythmPlan, rowId: string) => { plan.habits = plan.habits.filter((h) => h !== rowId); };
 
@@ -575,7 +596,7 @@ export function setAnchor(s: RhythmState, momentId: string, anchor: AnchorId, me
   for (const r of plan.rows) if (r.moment !== momentId) r.owners.forEach((o) => load.set(o, (load.get(o) ?? 0) + 1));
   plan.rows = [...plan.rows.filter((r) => r.moment !== momentId), ...prepareMoment(ctx, momentId, anchor, load)];
   plan.habits = plan.habits.filter((h) => plan.rows.some((r) => r.id === h));
-  if (!plan.habits.length) plan.habits = suggestedHabits(ctx, plan.rows, plan.moments);
+  if (!plan.habits.length) plan.habits = suggestedHabits(ctx, plan.rows, plan.moments, prepareOptions(s));
   return s;
 }
 export function setMomentLabel(s: RhythmState, momentId: string, label: string, members: readonly RhythmMember[], prefs?: ContextPrefs) {
@@ -769,6 +790,7 @@ export function isRhythmState(x: unknown): x is RhythmState {
   if (!s || s.v !== 3) return false;
   if (s.profile !== undefined && !isFamilySnapshot(s.profile)) return false;
   if (s.month !== undefined && (typeof s.month !== 'string' || !MONTH_RE.test(s.month))) return false;
+  if (s.context !== undefined && s.context !== 'welcome') return false;
   if (s.plan === undefined) return true;
   const p = s.plan;
   return Array.isArray(p.moments) && p.moments.length <= MAX_MOMENTS && p.moments.every((m) => m && typeof m.id === 'string' && ANCHORS.some((a) => a.id === m.anchor) && typeof m.enabled === 'boolean')

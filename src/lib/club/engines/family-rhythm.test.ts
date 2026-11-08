@@ -6,7 +6,8 @@
 import { describe, expect, it } from 'vitest';
 import { families, kid, adult, family } from '../../../../tests/club/fixtures';
 import { sampleHouseholds } from '../../../data/club/samples';
-import { familySnapshot } from '../personalize/family';
+import { familySnapshot, type FamilySnapshot } from '../personalize/family';
+import { PRIORITIES } from '../../../data/club/family-profile';
 import {
   KIT_MONTH, JOBS, MAX_HABITS, freshState, isRhythmState, monthOf, preparedPlan, restorePlan, rhythmContext, rhythmFingerprint, rhythmView,
   setHabit, validatePlan, type RhythmMember, type RhythmState,
@@ -98,5 +99,61 @@ describe('Family Rhythm: the plan month', () => {
     const people = (month?: string) => rhythmView({ ...freshState(), ...(month ? { month } : {}) }, r.household.members as RhythmMember[], r.household.preferences).people
       .map((p) => `${p.id}:${p.color.id}`);
     expect(people('2026-11')).toEqual(people());
+  });
+});
+
+describe('Family Rhythm: the Welcome context', () => {
+  const snap = (priority?: string, extra: Partial<FamilySnapshot> = {}): FamilySnapshot => ({ v: 1, activities: [], responsibilities: [], ...(priority ? { priority } : {}), ...extra });
+  const ids = ['A', 'B', 'C', 'D', 'teens', 'bigSolo', 'grandparent', 'toddlers', 'noKids', 'soloNoKids'];
+
+  it('bedtime is a step-6 priority, and it leads with the bedtime moment', () => {
+    expect(PRIORITIES.some((p) => p.id === 'bedtime')).toBe(true);
+    for (const key of ids) {
+      const v = rhythmView({ ...freshState(), month: '2026-11', context: 'welcome', profile: snap('bedtime') }, members(key), prefs(key));
+      if (families[key].members.some((m) => m.kind === 'child')) expect(v.moments[0].anchor, key).toBe('teeth');
+    }
+  });
+
+  it('with a priority and no job named for a child, the habit is in her priority’s moment', () => {
+    for (const p of ['mornings', 'evenings', 'bedtime', 'school-stuff', 'tidying']) {
+      for (const key of ['A', 'B', 'D', 'grandparent']) {
+        const v = rhythmView({ ...freshState(), month: '2026-11', context: 'welcome', profile: snap(p) }, members(key), prefs(key));
+        const first = v.moments[0];
+        const candidates = first.parts.filter((r) => !r.established && r.owners.length === 1 && !r.owners[0].adult);
+        if (!candidates.length) continue;
+        expect(v.habits[0].moment, `${p} ${key}`).toBe(first.title);
+      }
+    }
+  });
+
+  it('a job she named for a child still comes first, before the priority', () => {
+    const r = sampleHouseholds.find((x) => x.id === 'rivera')!;
+    const m = r.household.members as RhythmMember[];
+    const profile = familySnapshot(r.profile!)!;
+    const welcome = rhythmView({ ...freshState(), context: 'welcome', profile }, m, r.household.preferences);
+    const march = rhythmView({ ...freshState(), profile }, m, r.household.preferences);
+    // Rivera named jobs for children: the same habits as March.
+    expect(welcome.habits.map((h) => h.sentence)).toEqual(march.habits.map((h) => h.sentence));
+  });
+
+  it('the Welcome lead never applies to a March plan', () => {
+    for (const key of ids) {
+      const s = { ...freshState(), profile: snap('bedtime') };
+      expect(rhythmFingerprint(s, members(key), prefs(key))).toBe(rhythmFingerprint({ ...s }, members(key), prefs(key)));
+      expect(isRhythmState({ ...s, context: 'march' })).toBe(false);
+      expect(isRhythmState({ ...s, context: 'welcome' })).toBe(true);
+    }
+  });
+
+  it('every household shape, every priority: a valid Welcome plan with one habit by default', () => {
+    for (const p of [undefined, ...PRIORITIES.map((x) => x.id)]) {
+      for (const key of Object.keys(families)) {
+        const s: RhythmState = { ...freshState(), month: '2026-11', context: 'welcome', ...(p ? { profile: snap(p) } : {}) };
+        const v = rhythmView(s, members(key), prefs(key));
+        const ctx = rhythmContext(members(key), prefs(key), s);
+        expect(validatePlan(preparedPlan(ctx, { lead: true }), ctx), `${key} ${p}`).toEqual([]);
+        expect(v.habits.length, `${key} ${p}`).toBeLessThanOrEqual(1);
+      }
+    }
   });
 });
