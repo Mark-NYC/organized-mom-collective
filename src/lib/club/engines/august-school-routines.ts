@@ -17,14 +17,16 @@
  */
 import { ageInMonth } from '../profile';
 import type { PlanResource } from '../plan/resource';
-import { familyContext, isFamilySnapshot, schoolStartFor, type ContextMember, type FamilyContext, type FamilySnapshot } from '../personalize/family';
+import { familyContext, isFamilySnapshot, schoolStartFor, type ContextMember, type ContextPrefs, type FamilyContext, type FamilySnapshot } from '../personalize/family';
+import { colorFor, type MemberColor } from '../personalize/colors';
 import { assignTasks, type PlanTask } from '../personalize/assign';
+import { CUE } from '../personalize/cues';
 import { isTaskEdits, pruneTaskEdits, withEdits, type PlannedTask, type TaskEdits } from '../personalize/edits';
 
 export const KIT_MONTH = '2027-08';
 export type Group = 'morning' | 'after';
 export const GROUPS: readonly Group[] = ['morning', 'after'];
-export const GROUP_INFO: Record<Group, { title: string; tab: string }> = { morning: { title: 'Before School', tab: 'Before school' }, after: { title: 'After School', tab: 'After school' } };
+export const GROUP_INFO: Record<Group, { title: string; tab: string; cue: string }> = { morning: { title: 'Before School', tab: 'Before school', cue: 'When I wake up' }, after: { title: 'After School', tab: 'After school', cue: 'When I get home' } };
 export const LABEL_LIMIT = 55;
 export const FOOTER_LIMIT = 120;
 export const DEFAULT_FOOTER = "Check my routine. Do my part. Then I'm ready!";
@@ -120,7 +122,7 @@ export const preparedRoutine = (age: number, leave: string = DEFAULT_LEAVE): Rou
   return { steps, mode: age <= 4 ? 'simple' : 'standard' };
 };
 export const freshState = (members: readonly AugMember[]): AugState => ({ child: schoolKids(members)[0]?.id ?? 'family', boards: {} });
-const ctxOf = (s: Pick<AugState, 'profile'>, members: readonly AugMember[]): FamilyContext => familyContext(members as readonly ContextMember[], {}, KIT_MONTH, s.profile);
+const ctxOf = (s: Pick<AugState, 'profile'>, members: readonly AugMember[], prefs: ContextPrefs = {}): FamilyContext => familyContext(members as readonly ContextMember[], prefs, KIT_MONTH, s.profile);
 /** A child's out-the-door time from their school start (her answers); otherwise the family's, or the prepared time. */
 export const leaveOf = (s: Pick<AugState, 'profile'>, child: string, members: readonly AugMember[]) => {
   const ctx = ctxOf(s, members);
@@ -138,16 +140,19 @@ export const familyLeave = (s: Pick<AugState, 'profile'>, members: readonly AugM
 // ------------------------------------------------------------------ the family plan
 
 export type PlanSection = 'before' | 'night' | 'morning' | 'after';
-export const PLAN_SECTIONS: readonly { id: PlanSection; title: string; line: string; icon: string }[] = [
-  { id: 'before', title: 'Before the First Day', line: 'Get ready together, not at the last minute.', icon: '/images/club/icon-library/backpack.png' },
-  { id: 'night', title: 'The Night Before', line: 'Tomorrow starts tonight.', icon: '/images/club/icon-library/lunch-box.png' },
-  { id: 'morning', title: 'School Mornings', line: 'Everyone knows their part.', icon: '/images/club/icon-library/morning-start.png' },
-  { id: 'after', title: 'After School', line: 'Home, unpack, reset.', icon: '/images/club/icon-library/doing-homework.png' },
+/** `done`: the section's completion standard, said once for the panel (DONE WHEN). */
+export const PLAN_SECTIONS: readonly { id: PlanSection; title: string; line: string; icon: string; done: string }[] = [
+  { id: 'before', title: 'Before the First Day', line: 'Get ready together, not at the last minute.', icon: '/images/club/icon-library/backpack.png', done: 'supplies, forms and dates are ready.' },
+  { id: 'night', title: 'The Night Before', line: 'Tomorrow starts tonight.', icon: '/images/club/icon-library/lunch-box.png', done: 'bags are by the door and tomorrow’s clothes are out.' },
+  { id: 'morning', title: 'School Mornings', line: 'Everyone knows their part.', icon: '/images/club/icon-library/morning-start.png', done: 'everyone’s out the door on time.' },
+  { id: 'after', title: 'After School', line: 'Home, unpack, reset.', icon: '/images/club/icon-library/doing-homework.png', done: 'bags are empty and homework has started.' },
 ];
 export type AugTask = PlanTask & { section: PlanSection };
 /**
  * The plan's jobs. Children's are their own ('each', at their age); one-owner jobs go to whoever already takes care
  * of the area, a child she wished it for, or the person with the most room. Grown-up jobs teens can share say so.
+ * Recurring jobs carry their habit cue (one-time jobs before the first day don't); ../personalize/cues.ts keeps
+ * each cue true to her answers (no school-day cue for a child who isn't in school).
  */
 export const PLAN_TASKS: readonly AugTask[] = [
   { section: 'before', id: 'supplies', title: 'Shop the school supply list', mode: 'one', who: 'any', minAge: 15, prefer: 'adult', areas: ['school-prep'] },
@@ -156,25 +161,25 @@ export const PLAN_TASKS: readonly AugTask[] = [
   { section: 'before', id: 'bag-spot', title: 'Give backpacks a home by the door', mode: 'one', who: 'any', minAge: 7, wishes: ['own-belongings', 'pack-school-bag'], areas: ['belongings'] },
   { section: 'before', id: 'calendar', title: 'Add school dates to the wall calendar', mode: 'one', who: 'any', minAge: 12 },
   { section: 'before', id: 'practice', title: 'Practice the new morning once', mode: 'together', who: 'any' },
-  { section: 'night', id: 'pack-bag', title: 'Pack my backpack, set it by the door', mode: 'each', who: 'child', minAge: 5, wishes: ['pack-school-bag'] },
-  { section: 'night', id: 'own-lunch', title: 'Pack my own lunch', mode: 'each', who: 'child', minAge: 10 },
-  { section: 'night', id: 'lunches', title: 'Pack lunches for the younger kids', mode: 'one', who: 'any', minAge: 14, prefer: 'adult', areas: ['meals'] },
-  { section: 'night', id: 'clothes-out', title: 'Lay out tomorrow’s clothes', mode: 'each', who: 'child', minAge: 3, maxAge: 12 },
-  { section: 'night', id: 'papers', title: 'Read and sign school papers', mode: 'one', who: 'adult', areas: ['school-prep', 'homework'] },
-  { section: 'morning', id: 'routine', title: 'Follow my morning routine', mode: 'each', who: 'child', minAge: 3 },
-  { section: 'morning', id: 'breakfast', title: 'Get breakfast on the table', mode: 'one', who: 'any', minAge: 14, prefer: 'adult', areas: ['meals'] },
-  { section: 'morning', id: 'dropoff', title: 'School drop-off', mode: 'one', who: 'adult', areas: ['transportation'] },
-  { section: 'after', id: 'pickup', title: 'School pickup', mode: 'one', who: 'adult', areas: ['transportation'] },
-  { section: 'after', id: 'unpack', title: 'Unpack backpack and lunch box', mode: 'each', who: 'child', minAge: 4 },
-  { section: 'after', id: 'homework', title: 'Start homework at the homework spot', mode: 'each', who: 'child', minAge: 6, wishes: ['homework-start'] },
-  { section: 'after', id: 'rinse', title: 'Rinse the lunch boxes', mode: 'one', who: 'any', minAge: 8, areas: ['meals'] },
+  { section: 'night', id: 'pack-bag', title: 'Pack my backpack, set it by the door', mode: 'each', who: 'child', minAge: 5, wishes: ['pack-school-bag'], cue: CUE.dinner },
+  { section: 'night', id: 'own-lunch', title: 'Pack my own lunch', mode: 'each', who: 'child', minAge: 10, cue: CUE.dinner },
+  { section: 'night', id: 'lunches', title: 'Pack lunches for the younger kids', mode: 'one', who: 'any', minAge: 14, prefer: 'adult', areas: ['meals'], cue: CUE.dinner },
+  { section: 'night', id: 'clothes-out', title: 'Lay out tomorrow’s clothes', mode: 'each', who: 'child', minAge: 3, maxAge: 12, cue: CUE.bed },
+  { section: 'night', id: 'papers', title: 'Read and sign school papers', mode: 'one', who: 'adult', areas: ['school-prep', 'homework'], cue: CUE.dinner },
+  { section: 'morning', id: 'routine', title: 'Follow my morning routine', mode: 'each', who: 'child', minAge: 3, cue: CUE.wake },
+  { section: 'morning', id: 'breakfast', title: 'Get breakfast on the table', mode: 'one', who: 'any', minAge: 14, prefer: 'adult', areas: ['meals'], cue: CUE.kidsUp },
+  { section: 'morning', id: 'dropoff', title: 'School drop-off', mode: 'one', who: 'adult', areas: ['transportation'], cue: CUE.ready },
+  { section: 'after', id: 'pickup', title: 'School pickup', mode: 'one', who: 'adult', areas: ['transportation'], cue: CUE.schoolOut },
+  { section: 'after', id: 'unpack', title: 'Unpack backpack and lunch box', mode: 'each', who: 'child', minAge: 4, cue: CUE.home },
+  { section: 'after', id: 'homework', title: 'Start homework at the homework spot', mode: 'each', who: 'child', minAge: 6, wishes: ['homework-start'], cue: CUE.snack },
+  { section: 'after', id: 'rinse', title: 'Rinse the lunch boxes', mode: 'one', who: 'any', minAge: 8, areas: ['meals'], cue: CUE.unpack },
 ];
 const TASK_BY_ID = new Map(PLAN_TASKS.map((t) => [t.id, t]));
 export const taskRules = Object.fromEntries(PLAN_TASKS.map((t) => [t.id, { who: t.who, minAge: t.minAge, maxAge: t.maxAge }]));
 
 /** The family plan as prepared, then with her changes. Only school-aged children's jobs; little ones join the practice. */
-export function familyPlan(s: AugState, members: readonly AugMember[]) {
-  const ctx = ctxOf(s, members);
+export function familyPlan(s: AugState, members: readonly AugMember[], prefs: ContextPrefs = {}) {
+  const ctx = ctxOf(s, members, prefs);
   const school = new Set(schoolKids(members).map((k) => k.id));
   const people = ctx.people.filter((p) => p.kind === 'adult' || school.has(p.id));
   const planCtx: FamilyContext = { ...ctx, people, children: people.filter((p) => p.kind === 'child') };
@@ -194,11 +199,23 @@ export function familyPlan(s: AugState, members: readonly AugMember[]) {
     leaveClock: clock(leave),
     // A family with nobody in school yet has no school plan to print.
     active: planCtx.children.length > 0,
-    sections: PLAN_SECTIONS.map((sec) => ({ ...sec, tasks: planned.filter((t) => TASK_BY_ID.get(t.id)?.section === sec.id) })),
+    sections: PLAN_SECTIONS.map((sec) => ({ ...sec, tasks: planned.filter((t) => TASK_BY_ID.get(t.id)?.section === sec.id).map((t) => ({ ...t, role: roleOf(t, ctx) })) })),
     ctx,
   };
 }
 export type AugFamilyPlan = ReturnType<typeof familyPlan>;
+/**
+ * What kind of job a row is, printed beside the owners so it isn't told by color alone: each child their own, a job
+ * done together, or a grown-up's. A single child's or teen's job needs no label: their name says it.
+ */
+export function roleOf(t: Pick<PlannedTask, 'id' | 'ownerIds'>, ctx: FamilyContext): 'each' | 'together' | 'grown-up' | null {
+  const people = t.ownerIds.map((id) => ctx.people.find((p) => p.id === id)).filter(Boolean);
+  if (!people.length) return null;
+  if (people.every((p) => p!.kind === 'adult')) return 'grown-up';
+  if (people.length > 1) return TASK_BY_ID.get(t.id)?.mode === 'each' ? 'each' : 'together';
+  return null;
+}
+export const ROLE_LABEL = { each: 'Each child', together: 'Together', 'grown-up': 'Grown-up job' } as const;
 export type AugPlannedTask = PlannedTask;
 
 export const applyFamily = (s: AugState, members: readonly AugMember[]) => {
@@ -234,11 +251,13 @@ export const isAugState = (x: unknown): x is AugState => {
 };
 
 /** One printed routine: a school-aged child's, or the family's when there's no school-aged child. */
-const routineSheet = (s: AugState, child: string, members: readonly AugMember[]) => {
+const routineSheet = (s: AugState, child: string, members: readonly AugMember[], colors: Record<string, MemberColor>) => {
   const r = boardOf(s, child, members);
   const kid = kidsOf(members).find((k) => k.id === child);
   return {
     child,
+    /** Their marker color (January's), neutral for the family routine. */
+    color: colorFor(colors, kid?.id),
     name: kid?.firstName ?? 'Our family',
     title: kid ? `${kid.firstName}'s morning & after-school routines` : 'Our morning & after-school routines',
     groups: Object.fromEntries(GROUPS.map((g) => [g, shown(r, g).map((x) => ({ ...x, clock: clock(x.time) }))])) as Record<Group, (Step & { clock: string })[]>,
@@ -246,15 +265,15 @@ const routineSheet = (s: AugState, child: string, members: readonly AugMember[])
   };
 };
 
-export const augView = (s: AugState, members: readonly AugMember[]) => {
+export const augView = (s: AugState, members: readonly AugMember[], prefs: ContextPrefs = {}) => {
   const r = routineOf(s, members);
   const kid = kidsOf(members).find((k) => k.id === s.child);
   const school = schoolKids(members);
-  const plan = familyPlan(s, members);
+  const plan = familyPlan(s, members, prefs);
   return {
     /** Everything that prints, in order: the family plan (when someone's in school), then each child's routine. */
     plan,
-    routines: school.length ? school.map((k) => routineSheet(s, k.id, members)) : [routineSheet(s, 'family', members)],
+    routines: school.length ? school.map((k) => routineSheet(s, k.id, members, plan.ctx.colors)) : [routineSheet(s, 'family', members, plan.ctx.colors)],
     child: s.child,
     childName: kid?.firstName ?? 'Our family',
     title: kid ? `${kid.firstName}'s morning & after-school routines` : 'Our morning & after-school routines',
@@ -268,11 +287,11 @@ export const augView = (s: AugState, members: readonly AugMember[]) => {
 };
 export type AugView = ReturnType<typeof augView>;
 
-export const augFingerprint = (s: AugState, members: readonly AugMember[]) => {
-  const v = augView(s, members);
+export const augFingerprint = (s: AugState, members: readonly AugMember[], prefs: ContextPrefs = {}) => {
+  const v = augView(s, members, prefs);
   return JSON.stringify([
-    v.plan.active ? [v.plan.leave, v.plan.sections.map((sec) => sec.tasks.filter((t) => !t.skipped).map((t) => [t.label, t.who]))] : null,
-    v.routines.map((r) => [r.title, GROUPS.map((g) => r.groups[g].map((x) => [x.icon, x.label, x.time])), r.footer]),
+    v.plan.active ? [v.plan.leave, v.plan.sections.map((sec) => sec.tasks.filter((t) => !t.skipped).map((t) => [t.label, t.who, t.owners.map((o) => o.color.id), t.cue ?? null]))] : null,
+    v.routines.map((r) => [r.title, r.color.id, GROUPS.map((g) => r.groups[g].map((x) => [x.icon, x.label, x.time])), r.footer]),
   ]);
 };
 

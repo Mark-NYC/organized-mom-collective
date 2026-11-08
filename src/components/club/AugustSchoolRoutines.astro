@@ -9,6 +9,7 @@
  * routine sheet for the child she picks, as before. */
 import { ICONS, preparedRoutine, shown, clock } from '../../lib/club/engines/august-school-routines';
 import '../../styles/club-personalize.css';
+import '../../styles/club-marks.css';
 interface Props {storageKey?:string; planMode?:boolean}
 const {storageKey='omc:club:august-school-routines:v1',planMode=false}=Astro.props;
 const prepared=preparedRoutine(8);
@@ -204,13 +205,13 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 /* The family's back-to-school plan (plan mode, first sheet): four panels of who does what, the same paper, panels and
    numbered circles as the routine. Names print with every job. */
 .asr-sheets{display:flex;flex-direction:column;align-items:center;gap:26px}
-.asr-family{padding:28px 40px 20px}
+.asr-family{padding:24px 40px 18px}
 .asr-fam-head{text-align:center;padding:0 10px 4px}
 .asr-fam-head p{margin:0;font-size:10px;letter-spacing:.15em;font-weight:700;color:#7c9085}
 .asr-fam-head h2{font:400 40px/1.1 Georgia,serif;color:#506255;margin:7px 0 6px}
 .asr-fam-head h2 em{color:#788e72}
 .asr-fam-head>span{font:italic 16px Georgia,serif;color:#7d8e81}
-.asr-fam-grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr);gap:12px;margin-top:14px}
+.asr-fam-grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr);gap:12px;margin-top:14px}
 .asr-fam-panel{margin:0;display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:12px 14px 13px}
 .asr-fam-panel>header{gap:10px;margin-bottom:8px}
 .asr-fam-panel h3{font-size:22px}
@@ -219,33 +220,48 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 .asr-fam-before{background:#f4ecd9}.asr-fam-night{background:#e5e8f0}.asr-fam-morning{background:#f7ebd0}.asr-fam-after{background:#dfeae8}
 .asr-fam-night h3{color:#4f5a72}.asr-fam-night .asr-circle{color:#7b86a3}.asr-fam-night header p{color:#69728a}
 .asr-fam-after h3{color:#4c6d65}.asr-fam-after .asr-circle{color:#6e958e}.asr-fam-after header p{color:#67817b}
-.asr-fam-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.asr-fam-rows li{display:grid;gap:3px;padding:9px 12px;border-radius:7px;background:#fff}
-.asr-fam-rows strong{font:600 14.5px/1.25 Montserrat,Arial,sans-serif;color:#4f5c50}
-.asr-fam-rows span{font:700 11px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#7a6a4b}
-.asr-fam-night .asr-fam-rows span{color:#5f6886}.asr-fam-after .asr-fam-rows span{color:#4f7068}
+.asr-fam-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.asr-fam-rows li{display:grid;gap:3px;padding:7px 11px;border-radius:7px;background:#fff}
+.asr-fam-rows strong{font:600 14px/1.25 Montserrat,Arial,sans-serif;color:#4f5c50}
 .asr-fam-panel:has(li:nth-child(6)) .asr-fam-rows li{padding-top:7px;padding-bottom:7px}
 .asr-fam-panel:has(li:nth-child(6)) .asr-fam-rows strong{font-size:13.5px}
 .asr-fam-panel:has(li:nth-child(7)) .asr-fam-rows li{padding-top:5px;padding-bottom:5px}
 .asr-fam-panel:has(li:nth-child(7)) .asr-fam-rows strong{font-size:12.5px}
 .asr-family .asr-paper-foot{margin-top:14px}
 @media screen{.asr-family:not([data-asr-locked]) .asr-fam-rows li{cursor:pointer}.asr-family:not([data-asr-locked]) .asr-fam-rows li:hover{outline:1px dashed #98b19c;outline-offset:1px}}
+
+/* Shared marks on the family plan: owners in their family colors with the kind of job, the cue under it, and the
+   section's DONE WHEN at the foot of each panel. The panels keep their own tints. */
+.asr-fam-rows li{gap:4px}
+.asr-fam-who{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px}
+.asr-fam-role{font:600 9px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#7c7670;border:1px solid #ddd6cc;border-radius:3px;padding:1px 5px}
+.asr-accent[hidden]{display:none}
+.asr-panel>header>.hc-cue{flex:none}
+.asr-fam-panel .hc-done{margin-top:auto;padding-top:6px}
+.asr-fam-panel:has(li:nth-child(5)) .asr-fam-rows li{padding-top:6px;padding-bottom:6px}
+.asr-fam-panel:has(li:nth-child(5)) .asr-fam-rows strong{font-size:13.5px}
+.asr-paper-head>span .mc-owner{font:italic 17px Georgia,serif;letter-spacing:0;text-transform:none}
+.asr-paper-head>span .mc-dot{width:10px;height:10px}
 </style>
 <script>
 import {
   CHOICES, ICONS, LABEL_LIMIT, addCustom, addStep, applyFamily, augFingerprint, augView, clock, freshState, fromLegacy, isAugState,
   move, restorePlan, routineOf, setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, restoreRoutine,
+  GROUP_INFO, ROLE_LABEL,
   type AugMember, type AugPlan, type AugState, type AugView, type Group,
 } from '../../lib/club/engines/august-school-routines';
+import { doneLine, habitCue, ownerTag, ownerTags } from '../../lib/club/personalize/marks';
+import type { ContextPrefs } from '../../lib/club/personalize/family';
+import { colorFor } from '../../lib/club/personalize/colors';
 import type { FamilyProfile } from '../../lib/club/family-profile';
-import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
+import { resetTask, setTaskCue, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
 import { taskEditor } from '../../lib/club/personalize/editor';
 import { familySnapshot, settledSnapshot, type FamilySnapshot } from '../../lib/club/personalize/family';
 import { el } from '../../lib/club/plan/dom';
 import { PLAN_CHANGE } from '../../lib/club/plan/resource';
 import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
 
-type Detail = { household: { id: string; displayName?: string; members?: AugMember[] } | null; sample?: string | null; profile?: FamilyProfile | null };
+type Detail = { household: { id: string; displayName?: string; members?: AugMember[]; preferences?: ContextPrefs } | null; sample?: string | null; profile?: FamilyProfile | null };
 
 for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan }>('.asr')) {
   const key = root.dataset.asrKey ?? 'omc:club:august-school-routines:v1';
@@ -256,6 +272,8 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
   let persist = true;
   let locked = false;
   let familyName = '';
+  // The household's preferences: January's saved member colors, school, pets.
+  let prefs: ContextPrefs = {};
   // Her newest profile answers: used when the plan has none saved yet, or after restoring the prepared plan.
   let latest: FamilySnapshot | undefined;
   const settle = () => { const p = settledSnapshot(state.profile, latest); if (p) state.profile = p; else delete state.profile; };
@@ -432,8 +450,20 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
         return row;
       }));
     }
+    // Whose routine: their name in their color (the family routine has no person, so plain words).
     const name = sheet.querySelector<HTMLElement>('[data-asr-name]');
-    if (name) name.textContent = v.title;
+    if (name) {
+      if (v.child === 'family') name.textContent = v.title;
+      else name.replaceChildren(ownerTag(v.name, v.color), ' morning & after-school routines');
+    }
+    // One cue per routine: the moment it starts, in the panel's heading where the time-of-day label was.
+    for (const group of ['morning', 'after'] as Group[]) {
+      const head = sheet.querySelector<HTMLElement>(`.asr-panel:has([data-asr-group="${group}"]) > header`);
+      if (!head) continue;
+      head.querySelector('.hc-cue')?.remove();
+      head.querySelector('.asr-accent')?.setAttribute('hidden', '');
+      head.append(habitCue(GROUP_INFO[group].cue));
+    }
     const foot = sheet.querySelector<HTMLElement>('[data-asr-footer]');
     if (foot) {
       foot.setAttribute('contenteditable', locked ? 'false' : 'true');
@@ -466,19 +496,24 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
             el('div', {}, el('h3', { textContent: sec.title }), el('p', { textContent: sec.line })),
             el('img', { src: sec.icon, alt: '', width: 50, height: 50 })),
           el('ul', { className: 'asr-fam-rows' }, ...rows.map((t) => {
-            const li = el('li', {}, el('strong', { textContent: t.label }), el('span', { textContent: t.who }));
+            // The job, who owns it (their colors and names, and what kind of job it is), then its cue.
+            // One line under the job: owners (and what kind of job), then its cue, so nothing crowds the panel.
+            const who = el('div', { className: 'asr-fam-who' }, ownerTags(t.owners), ...(t.role ? [el('span', { className: 'asr-fam-role', textContent: ROLE_LABEL[t.role] })] : []),
+              ...(t.cue ? [habitCue(t.cue)] : []));
+            const li = el('li', {}, el('strong', { textContent: t.label }), who);
             if (!locked) li.addEventListener('click', () => openPlanEditor());
             return li;
-          })));
+          })),
+          doneLine(sec.done));
       })),
       el('footer', { className: 'asr-paper-foot' }, el('strong', { textContent: 'Everyone has a part. Nobody has to remember it all.' }), el('span', { textContent: 'ORGANIZED FAMILY CLUB · AUGUST' })));
     familyStage.replaceChildren(sheet);
   };
   const draw = () => {
-    const v = augView(state, members);
+    const v = augView(state, members, prefs);
     if (!planMode || !sheetsHost || !template || !stage) {
       // Standalone: the one routine sheet, for the child she picked.
-      if (paper) fillRoutine(paper, { child: v.child, name: v.childName, title: v.title, groups: v.groups, footer: v.footer });
+      if (paper) fillRoutine(paper, { child: v.child, name: v.childName, title: v.title, groups: v.groups, footer: v.footer, color: colorFor(v.plan.ctx.colors, v.child === 'family' ? undefined : v.child) });
       if (paper) bindPaper(paper);
       return;
     }
@@ -508,7 +543,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     const body = $('[data-asr-plan-body]');
     if (!body || !planDialog) return;
     const top = planDialog.scrollTop;
-    const v = augView(state, members);
+    const v = augView(state, members, prefs);
     const edit = (fn: (s: AugState) => void) => update((s) => { s.plan ??= {}; fn(s); });
     const restore = el('button', { type: 'button', className: 'po-text-btn', textContent: 'Start over with the prepared plan', disabled: locked });
     restore.addEventListener('click', () => update((s) => restorePlan(s)));
@@ -518,6 +553,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
         ctx: v.plan.ctx, tasks: sec.tasks, rules: taskRules, locked,
         onOwners: (id, person, cur) => edit((s) => toggleTaskOwner(s.plan!, id, cur, person)),
         onTitle: (id, title) => edit((s) => setTaskTitle(s.plan!, id, title, sec.tasks.find((t) => t.id === id)?.title ?? title)),
+        onCue: (id, cue) => edit((s) => setTaskCue(s.plan!, id, cue, sec.tasks.find((t) => t.id === id)?.preparedCue)),
         onSkip: (id, skip) => edit((s) => setTaskSkip(s.plan!, id, skip)),
         onReset: (id) => edit((s) => resetTask(s.plan!, id)),
       }),
@@ -534,7 +570,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
   let expanded = '';
   let galleryOpen = false;
   const makeOptions = () => {
-    const v = augView(state, members);
+    const v = augView(state, members, prefs);
     const r = v.routine;
     const people = $('[data-asr-children]');
     // On the plan page every school-aged child's routine prints, so the family routine is only for a family without one.
@@ -640,6 +676,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     const next = planKey(detail.sample ?? null, detail.household.id);
     members = detail.household.members ?? [];
     familyName = detail.household.displayName?.trim() ?? '';
+    prefs = detail.household.preferences ?? {};
     // The owner's print view has no profile (null): the plan comes from the snapshot saved with her plan.
     if (detail.profile) latest = familySnapshot(detail.profile);
     if (next !== current) {
@@ -664,9 +701,9 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     update,
     replace: (s) => { state = structuredClone(s); applyFamily(state, members); settle(); changed(); },
     setPersist: (on) => { persist = on; if (on) save(); },
-    fingerprint: () => augFingerprint(state, members),
+    fingerprint: () => augFingerprint(state, members, prefs),
     members: () => members,
-    view: () => augView(state, members),
+    view: () => augView(state, members, prefs),
     setLocked,
     openEditor,
     openPlanEditor,

@@ -7,6 +7,7 @@
  */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
 import '../../styles/club-personalize.css';
+import '../../styles/club-marks.css';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
@@ -66,7 +67,7 @@ import {
   CHOICES, FOOTER_LIMIT, GROUPS, ageFor, GROUP_INFO, ICONS, LABEL_LIMIT, addStep, clock, move, planEdited, restorePlan, restoreRoutine, routineChanged, routineOf,
   setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, type AugPlan, type AugState, type Group, type PlanSection,
 } from '../../lib/club/engines/august-school-routines';
-import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
+import { resetTask, setTaskCue, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
 import { taskEditor } from '../../lib/club/personalize/editor';
 
 const APPROVAL_KEY = 'omc:preview:august-school-routines:approval';
@@ -99,7 +100,7 @@ if (root && asr) {
     q('[data-aum-plan-restore]').hidden = locked || !planEdited(s);
     q('[data-aum-who]').replaceChildren(...(v.kids.length ? v.kids : [{ id: 'family', name: v.childName }]).map((k) =>
       row(k.id === v.child ? 'Showing below' : 'Routine', k.name, k.id === 'family' ? 'For the whole family' : `Prepared for age ${ageOf(k.id)}`,
-        () => { plan().update((x) => setChild(x, k.id, plan().members())); openGroup('morning'); }, locked, el('span', { class: 'cp-avatar' }, k.name.charAt(0)))));
+        () => { plan().update((x) => setChild(x, k.id, plan().members())); openGroup('morning'); }, locked, avatar(k.id, k.name))));
     q('[data-aum-steps-title]').textContent = v.child === 'family' ? 'The routines' : `${v.childName}’s routines`;
     // Thumbnails: only the sheets this family prints; the large preview is the plan, or the routine without one.
     const hero = root.querySelector<HTMLElement>('.cp-thumb--hero');
@@ -118,6 +119,13 @@ if (root && asr) {
   };
 
   const ageOf = (id: string) => ageFor(id, plan().members());
+  // Each child's family color (January's) on their initial; the name is always beside it.
+  const avatar = (id: string, name: string) => {
+    const a = el('span', { class: 'cp-avatar' }, name.charAt(0));
+    const c = plan().view().routines.find((r) => r.child === id)?.color;
+    if (c && id !== 'family') { a.style.background = c.ink; a.style.color = '#fff'; }
+    return a;
+  };
   // One part of the family plan, in the shared owner editor.
   const openSection = (id: PlanSection) => {
     const p = plan();
@@ -126,11 +134,12 @@ if (root && asr) {
     const again = () => { const sheet = root.querySelector<HTMLDialogElement>('[data-cp-sheet]'); const top = sheet?.scrollTop ?? 0; openSection(id); if (sheet) sheet.scrollTop = top; };
     const edit = (fn: (s: AugState) => void) => { p.update((s) => { s.plan ??= {}; fn(s); }); again(); };
     ui.openSheet(sec.title,
-      el('p', { class: 'cp-sheet-hint' }, 'Tap names to change who does each job (more than one is fine), change the wording, or leave a job off the page.'),
+      el('p', { class: 'cp-sheet-hint' }, 'Tap names to change who does each job (more than one is fine), change the wording or when it happens, or leave a job off the page.'),
       taskEditor({
         ctx: p.view().plan.ctx, tasks: sec.tasks, rules: taskRules, locked: ui.readOnly(),
         onOwners: (tid, person, cur) => edit((s) => toggleTaskOwner(s.plan!, tid, cur, person)),
         onTitle: (tid, title) => edit((s) => setTaskTitle(s.plan!, tid, title, sec.tasks.find((t) => t.id === tid)?.title ?? title)),
+        onCue: (tid, cue) => edit((s) => setTaskCue(s.plan!, tid, cue, sec.tasks.find((t) => t.id === tid)?.preparedCue)),
         onSkip: (tid, skip) => edit((s) => setTaskSkip(s.plan!, tid, skip)),
         onReset: (tid) => edit((s) => resetTask(s.plan!, tid)),
       }),

@@ -4,6 +4,7 @@
  * It reads and changes the plan only through the printable's controller (`.msr` root's `clubPlan`). */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
 import '../../styles/club-personalize.css';
+import '../../styles/club-marks.css';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
@@ -23,7 +24,9 @@ import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
 import { LABELS, partRules, type MayState, type MayKey, type MayOptions, type MayPlan } from '../../lib/club/engines/may-summer-rhythm';
 import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
 import { taskEditor } from '../../lib/club/personalize/editor';
-import { mayParts } from '../../lib/club/engines/may-summer-rhythm';
+import { mayParts, cueOf, BLOCK_CUES, CUE_LIMIT } from '../../lib/club/engines/may-summer-rhythm';
+import { tidyCue } from '../../lib/club/personalize/marks-text';
+import { habitCue, ownerTags } from '../../lib/club/personalize/marks';
 const root = document.querySelector<HTMLElement>('.may-plan');
 const host = root?.querySelector<HTMLElement & {clubPlan?: MayPlan}>('.msr');
 if (root && host) {
@@ -32,7 +35,7 @@ if (root && host) {
  const labels:Record<MayKey,string>=LABELS;
  const render = (_ui:PlanScreen<MayState>, s:MayState, locked:boolean) => {
   q<HTMLElement>('[data-may-rows]').replaceChildren(...s.rows.map(row=>{
-   const b=el('button',{type:'button',class:'cp-row',disabled:locked},el('span',{class:'cp-avatar'},row.time ? row.time.slice(0,2) : '•'),el('span',{class:'cp-row-text'},el('strong',{},row.title),el('span',{},row.desc),...(row.parts.length?[el('span',{},row.parts.map(p=>`${p.who}: ${p.label}`).join(' · '))]:[]),el('span',{},row.time || 'No set time')),el('span',{class:'cp-chev','aria-hidden':'true'}));
+   const b=el('button',{type:'button',class:'cp-row',disabled:locked},el('span',{class:'cp-avatar'},row.time ? row.time.slice(0,2) : '•'),el('span',{class:'cp-row-text'},el('strong',{},row.title),el('span',{},row.desc),...row.parts.map(p=>el('span',{class:'mpm-part'},ownerTags(p.owners),' ',p.label)),...(row.cue?[el('span',{class:'hc-cue-row'},habitCue(row.cue))]:[]),el('span',{},row.time || 'No set time')),el('span',{class:'cp-chev','aria-hidden':'true'}));
    b.addEventListener('click',()=>openRow(row.key));
    return el('li',{},b);
   }));
@@ -60,7 +63,9 @@ if (root && host) {
    const all=mayParts(ctx,ui.resource().state().parts).filter(p=>p.block===key);
    if(all.length){
     const edit=(fn:(s:MayState)=>void)=>{const sheet=root.querySelector<HTMLDialogElement>('[data-cp-sheet]');const top=sheet?.scrollTop??0;ui?.resource().update(s=>{s.parts??={};fn(s)});openRow(key);if(sheet)sheet.scrollTop=top};
-    body.push(el('p',{class:'cp-sheet-hint'},'Who helps here. Tap names to change who, or leave a job off.'),taskEditor({ctx,tasks:all,rules:partRules,locked:ui.readOnly(),
+    const cue=el('input',{type:'text',value:cueOf(key,ui.resource().state().edits)??'',maxlength:String(CUE_LIMIT)});
+    cue.addEventListener('change',()=>{const v=tidyCue(cue.value);ui?.resource().update(s=>{const e={...(s.edits[key]??{})};if(v&&v!==BLOCK_CUES[key])e.cue=v;else delete e.cue;s.edits[key]=e})});
+    body.push(el('label',{class:'cp-field'},'When the family jobs happen (an everyday moment)',cue),el('p',{class:'cp-sheet-hint'},'Who helps here. Tap names to change who, or leave a job off.'),taskEditor({ctx,tasks:all,rules:partRules,locked:ui.readOnly(),
      onOwners:(id,person,cur)=>edit(s=>toggleTaskOwner(s.parts!,id,cur,person)),
      onTitle:(id,title)=>edit(s=>setTaskTitle(s.parts!,id,title,all.find(t=>t.id===id)?.title??title)),
      onSkip:(id,skip)=>edit(s=>setTaskSkip(s.parts!,id,skip)),
@@ -90,3 +95,6 @@ if (root && host) {
  q<HTMLButtonElement>('[data-may-settings]').addEventListener('click',openSettings);
 }
 </script>
+<style is:global>
+.mpm-part{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+</style>

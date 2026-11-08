@@ -28,6 +28,8 @@ export interface PlanTask {
   wishes?: readonly string[];
   /** For 'any': who to try first. Default: children, so the grown-ups aren't the fallback for everything. */
   prefer?: 'child' | 'adult';
+  /** A recurring job's habit cue (./cues.ts → CUE), fitted to its owners. One-time jobs have none. */
+  cue?: string;
 }
 
 export interface Assigned {
@@ -35,6 +37,8 @@ export interface Assigned {
   title: string;
   ownerIds: string[];
   why: 'existing' | 'wished' | 'room' | 'each' | 'together' | 'none';
+  /** The prepared cue, as the task gives it (fitted to the owners when it's planned, ./edits.ts). */
+  cue?: string;
 }
 
 /** A child with no saved age is planned as a six-year-old: never more than a young child can do. */
@@ -73,9 +77,10 @@ export function assignTasks(tasks: readonly PlanTask[], ctx: FamilyContext, opts
   return tasks.map((t) => {
     const effort = t.effort ?? 1;
     const able = ctx.people.filter((p) => canDo(t, p));
-    if (!able.length) return { id: t.id, title: t.title, ownerIds: [], why: 'none' as const };
+    const cue = t.cue ? { cue: t.cue } : {};
+    if (!able.length) return { id: t.id, title: t.title, ownerIds: [], why: 'none' as const, ...cue };
     // Everyone's own jobs (their bag, their routine) don't take room from the shared ones.
-    if (t.mode === 'each' || t.mode === 'together') return { id: t.id, title: t.title, ownerIds: able.map((p) => p.id), why: t.mode };
+    if (t.mode === 'each' || t.mode === 'together') return { id: t.id, title: t.title, ownerIds: able.map((p) => p.id), why: t.mode, ...cue };
     const adults = able.filter((p) => p.kind === 'adult').length;
     const score = (p: Person) => (load.get(p.id) ?? 0) / room(p)
       + (p.holder && adults > 1 ? HOLDER_LEAN : 0)
@@ -92,6 +97,6 @@ export function assignTasks(tasks: readonly PlanTask[], ctx: FamilyContext, opts
     const first = lightest(pool), open = lightest(able);
     const [owner, why] = score(first) > score(open) + PREFER_MARGIN ? [open, 'room' as const] : [first, preferred];
     add([owner.id], effort);
-    return { id: t.id, title: t.title, ownerIds: [owner.id], why };
+    return { id: t.id, title: t.title, ownerIds: [owner.id], why, ...cue };
   });
 }

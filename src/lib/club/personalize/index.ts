@@ -6,3 +6,5 @@
 export * from './family';
 export * from './assign';
 export * from './edits';
+export * from './colors';
+export * from './cues';
