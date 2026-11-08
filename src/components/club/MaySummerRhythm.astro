@@ -49,26 +49,9 @@ const blocks=[
   </dialog>
   <dialog class="msr-dialog msr-edit-dialog" data-editor-dialog aria-labelledby="msr-edit-title">
    <div class="msr-dialog-top"><div><span class="msr-label">MAKE IT YOURS · MAY</span><h2 id="msr-edit-title">Edit your summer rhythm</h2></div><button type="button" class="msr-dialog-close" data-close-modal aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-   <p>The rhythm is ready to use. Change only what needs to fit your family.</p>
-   <div class="msr-dialog-form">   <label>Kind of summer day<select data-days><option value="home">Mostly at home</option><option value="mixed">A mix of home days and outings</option><option value="camp">Camp or scheduled programs</option></select></label>
-   <fieldset class="msr-structure"><legend>How much structure?</legend>
-    <label><input type="radio" name="msr-structure" value="relaxed" /> Relaxed <small>Five broad anchors; no set times</small></label>
-    <label><input type="radio" name="msr-structure" value="balanced" checked /> Balanced <small>A few reusable anchors with flexible times</small></label>
-    <label><input type="radio" name="msr-structure" value="structured" /> More structured <small>Daily anchors with suggested times</small></label>
-   </fieldset>
-   <label>Morning starts<select data-start><option value="7">7:00 AM</option><option value="7.5">7:30 AM</option><option value="8" selected>8:00 AM</option><option value="8.5">8:30 AM</option><option value="9">9:00 AM</option><option value="9.5">9:30 AM</option></select></label>
-   <label>Quiet time<select data-quiet><option value="independent">Independent play and reading</option><option value="rest">Rest or nap</option><option value="older">Independent recharge</option></select></label>
-   <label class="msr-snack-choice"><input type="checkbox" data-snack checked /> Include late-afternoon Snack & Reset</label>
-   <label>Favorite kind of play<select data-play><option value="outdoors">Outdoor play</option><option value="active">Sports and movement</option><option value="creative">Making and creativity</option><option value="mixed">A mix of everything</option></select></label>
-   <div class="msr-parts-editor" data-msr-parts-wrap hidden><strong>Who helps</strong><p>The family’s jobs on the day, shared out by age. Tap names to change who, or leave a job off.</p><div data-msr-parts-editor></div></div>
-   <details class="msr-customize" data-customize>
-    <summary>Edit activities on mobile <span>Optional</span></summary>
-    <p>These seven blocks are already prepared. Change any title, activity or time, or move a block up or down. Changes appear on the printable immediately.</p>
-    <div data-edit-rows class="msr-edit-rows"></div>
-   </details>
-   <div class="msr-removed" data-removed-container hidden><strong>Removed blocks</strong><div data-removed-actions></div><p>Tap a block to add it back without losing your other changes.</p></div>
-</div>
-   <button type="button" class="msr-dialog-done" data-close-modal>Done · See our plan</button>
+   <div class="mye-tabs" role="tablist" aria-label="What to change" data-mye-tabs></div>
+   <div class="mye-body" data-mye-body></div>
+   <div class="mye-footer"><button type="button" class="msr-dialog-done" data-mye-done>Done · See our day</button><button type="button" class="mye-cancel" data-mye-cancel>Cancel</button></div>
   </dialog>
   <section class={planMode ? "msr-plan-view" : "msr-preview"} data-msr-view aria-label="May illustrated rhythm board preview">
    {!planMode && <button type="button" class="msr-floating-edit" data-open-editor aria-label="Make changes to your plan"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>}
@@ -80,7 +63,7 @@ const blocks=[
      {blocks.map((b,i)=><div class="msr-row" data-rhythm-key={b.key} style={'--msr-tint:'+b.tint}>
       <div class="msr-icon-box"><img src={b.icon} alt="" width="70" height="70" loading="eager" class="msr-icon" /></div>
       <div class="msr-row-copy"><h3 data-title contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} name`}>{b.title}</h3><p data-desc contenteditable="true" spellcheck="true" role="textbox" aria-label={`Edit ${b.title} activities`}>{b.desc}</p><p class="msr-parts" data-parts hidden></p></div>
-      <span class="msr-time" data-time role="button" tabindex="0" title="Click to change this time" aria-label={`Change ${b.title} time`}>{b.time}</span>
+      <span class="msr-time" data-time role="button" tabindex="0" title="Change when this happens" aria-label={`Change when ${b.title} happens`}>{b.time}</span>
       <div class="msr-row-actions" aria-label={`Edit ${b.title} position`}><button type="button" data-move-up aria-label={`Move ${b.title} earlier`} title="Move earlier">↑</button><button type="button" data-move-down aria-label={`Move ${b.title} later`} title="Move later">↓</button><button type="button" data-remove aria-label={`Remove ${b.title}`} title="Remove block">×</button></div>
      </div>)}
     </div>
@@ -146,7 +129,6 @@ const blocks=[
 .msr-editor .msr-edit-row label{border:0;margin:0 0 7px;padding:0;font-weight:600;font-size:10px}
 .msr-edit-row input{display:block;width:100%;border:1px solid #cbd7c4;border-radius:3px;padding:8px;font:12px Montserrat,Arial,sans-serif;color:#404a3e;margin-top:4px;min-height:36px}
 .msr-edit-row .msr-edit-clock{width:120px}
-.msr[data-msr-structure="relaxed"] .msr-time{display:none}
 .msr[data-msr-structure="relaxed"] .msr-row{min-height:94px}
 .msr[data-msr-structure="relaxed"] .msr-rows{gap:15px}
 .msr[data-msr-structure="structured"] .msr-time{font-weight:800}
@@ -311,20 +293,76 @@ const blocks=[
 .msr-parts-editor>strong{display:block;font:700 12px Montserrat,Arial,sans-serif}
 .msr-parts-editor>p{font-size:12px;line-height:1.55;color:#6c7468;margin:6px 0 4px}
 .msr-parts-editor[hidden]{display:none}
+
+/* When it happens: one box on the right, a time or a trigger (August's model). A trigger keeps the time's place and
+   color, wraps to two lines at most, and carries a small arrow so it reads as "after this, we…". */
+.msr-time{display:flex;align-items:center;justify-content:flex-end;min-height:44px}
+.msr-time[hidden]{display:none!important}
+.msr-time--trigger{gap:6px;font:600 14.5px/1.22 Montserrat,Arial,sans-serif;letter-spacing:0;color:#4f6a49;white-space:normal;text-align:right;font-variant-numeric:normal}
+/* The arrow sits at the start of the trigger's first line, so a wrapped trigger still reads as one phrase. */
+.msr-trigger-arrow{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-1px;color:#7c9675}
+.msr-trigger-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:break-word;max-width:132px}
+.msr-when-probe{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;width:132px;text-indent:17px;font:600 14.5px/1.22 Montserrat,Arial,sans-serif;overflow-wrap:break-word}
+/* Responsibilities stay secondary: a quiet line under the activities, a touch roomier than before. */
+.msr-parts{gap:3px 14px!important;font-size:11.5px!important;line-height:1.4!important}
+.msr-sheet.msr-dense .msr-parts{font-size:11px!important}
+
+/* The editor: three small areas, Done and Cancel (desktop dialog and phone sheet share the .mye-* look). */
+.msr-edit-dialog{width:min(600px,calc(100vw - 32px))}
+.mye-tabs{display:flex;flex-wrap:wrap;gap:2px 20px;margin:6px 0 4px;border-bottom:1px solid #dfe5d9}
+.mye-tabs button{min-height:44px;margin-bottom:-1px;padding:8px 2px;border:0;border-bottom:2px solid transparent;background:none;color:#6b7867;font:700 11px Montserrat,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.mye-tabs button[aria-selected="true"]{color:#3f5a40;border-bottom-color:#4f654b}
+.mye-footer{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:18px;position:sticky;bottom:-24px;background:#fff;padding:10px 0 4px}
+.mye-cancel{min-height:46px;border:1px solid #9aaf94;border-radius:0;background:#fff;color:#4f654b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.mye-section{display:grid;gap:12px;padding-top:10px;font-family:Montserrat,Arial,sans-serif;color:#454a43}
+.mye-intro{margin:0;font-size:13px;line-height:1.55;color:#5d685b}
+.mye-card{display:grid;gap:10px;padding:13px 14px;border:1px solid #dfe5d9;border-radius:8px;background:#fff}
+.mye-card.is-focus{border-color:#6f9866;box-shadow:0 0 0 2px #dbe9d4}
+.mye-card-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.mye-card-title{margin:0;font:400 19px/1.2 Georgia,serif;color:#3f5a40}
+.mye-field{display:grid;gap:5px}
+.mye-label{margin:0;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#62765e}
+.mye-hint{margin:0;font-size:12px;line-height:1.45;color:#6b7867;font-weight:400;letter-spacing:0;text-transform:none}
+.mye-input,.mye-select{width:100%;min-height:44px;box-sizing:border-box;padding:9px 11px;border:1px solid #c5d1bf;border-radius:4px;background:#fff;color:#404a3e;font:14px Montserrat,Arial,sans-serif}
+.mye-time{width:160px}
+.mye-when-control{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.mye-when-control--trigger{display:grid}
+.mye-current{font:600 14px Montserrat,Arial,sans-serif;color:#4f6a49}
+.mye-seg{display:inline-flex;border:1px solid #9aaf94;border-radius:999px;overflow:hidden}
+.mye-seg-btn{min-height:40px;min-width:70px;padding:6px 12px;border:0;background:#fff;color:#4f654b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.mye-seg-btn[aria-checked="true"]{background:#4f654b;color:#fff}
+.mye-chips{display:flex;flex-wrap:wrap;gap:6px}
+.mye-chip{min-height:40px;padding:6px 12px;border:1px solid #cbd8c5;border-radius:999px;background:#fff;color:#3d5a3d;font:600 12.5px Montserrat,Arial,sans-serif;cursor:pointer;text-align:left}
+.mye-chip[aria-pressed="true"]{background:#e7f1e3;border-color:#4f654b;box-shadow:inset 0 0 0 1px #4f654b}
+.mye-blocks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.mye-block{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.mye-block.is-off .mye-input{opacity:.55;text-decoration:line-through}
+.mye-block-actions{display:flex;align-items:center;gap:4px}
+.mye-icon-btn{width:40px;height:40px;border:1px solid #c9d6c3;border-radius:4px;background:#fff;color:#3d5a3d;font-size:15px;cursor:pointer}
+.mye-text-btn{min-height:40px;padding:0 6px;border:0;background:none;color:#4c6046;font:700 12px Montserrat,Arial,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer;justify-self:start}
+.mye-btn{min-height:42px;padding:0 16px;border:1px solid #4f654b;border-radius:4px;background:#fff;color:#4f654b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.mye-btn--dark{background:#4f654b;color:#fff}
+.mye-actions{display:flex;flex-wrap:wrap;gap:8px}
+.mye-confirm{display:grid;gap:8px;padding:12px 14px;border-radius:8px;background:#f4f7f1}
+.mye-confirm p{margin:0;font-size:13px;line-height:1.5}
+.mye-issue{margin:0;padding:7px 10px;border-left:3px solid #c9822f;background:#fbf4ea;color:#5a4630;font:12px/1.45 Montserrat,Arial,sans-serif}
+.mye-section :disabled{opacity:.5;cursor:not-allowed}
+.mye-section :focus-visible,.mye-tabs :focus-visible,.mye-footer :focus-visible{outline:2px solid #4f654b;outline-offset:2px}
+@media print{.mye-section,.mye-tabs,.mye-footer{display:none!important}}
 </style>
 <script>
 import { PLAN_CHANGE } from "../../lib/club/plan/resource";
 import {
- DESC_LIMIT, LABELS, MAY_KEYS, START_TIMES, TINTS, TITLE_LIMIT, clock as engineClock, familyDefaults, keepToFamily, mayContext,
- mayFingerprint, mayParts, mayRows, partRules, readSaved, starter as prepared, visibleKeys as shownKeys, cueOf, CUE_LIMIT,
- type MayState, type MayPlan, type MayMember,
+ LABELS, MAY_KEYS, START_TIMES, TINTS, clock as engineClock, familyDefaults, keepToFamily, mayContext,
+ mayFingerprint, mayParts, mayRows, readEdit, readSaved, starter as prepared, visibleKeys as shownKeys,
+ type MayState, type MayPlan, type MayMember, type MayRow,
 } from "../../lib/club/engines/may-summer-rhythm";
 import type { FamilyContext, FamilySnapshot } from '../../lib/club/personalize/family';
 import { familySnapshot, settledSnapshot } from '../../lib/club/personalize/family';
-import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner, type TaskEdits } from '../../lib/club/personalize/edits';
-import { taskEditor } from '../../lib/club/personalize/editor';
-import { habitCue, ownerTags } from '../../lib/club/personalize/marks';
-import { tidyCue } from '../../lib/club/personalize/marks-text';
+import type { TaskEdits } from '../../lib/club/personalize/edits';
+import { ownerTags } from '../../lib/club/personalize/marks';
+import { MAY_SECTIONS, mayEditor, type MaySection } from '../../lib/club/may-editor';
+import { moveBlock as moveSlots } from '../../lib/club/engines/may-summer-rhythm';
 import type { FamilyProfile } from '../../lib/club/family-profile';
 type Person=MayMember;
 type Quiet='independent'|'rest'|'older';
@@ -332,7 +370,7 @@ type Play='outdoors'|'active'|'creative'|'mixed';
 type Structure='relaxed'|'balanced'|'structured';
 type Days='home'|'mixed'|'camp';
 type Key='morning'|'move'|'create'|'lunch'|'quiet'|'free'|'snack'|'evening';
-type Edit={title?:string;desc?:string;time?:string;cue?:string};
+type Edit={title?:string;desc?:string;time?:string;cue?:string;when?:'time'|'trigger'|'flexible';trigger?:string};
 type Options={start:number;quiet:Quiet;play:Play;structure:Structure;days:Days;snack:boolean};
 type Detail={household:{id:string;displayName?:string;members:Person[];preferences?:{pets?:boolean}};sample?:string|null;profile?:FamilyProfile|null};
 const keys:Key[]=[...MAY_KEYS];
@@ -363,7 +401,6 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const stage=root.querySelector<HTMLElement>('[data-stage]');
  const sheet=root.querySelector<HTMLElement>('[data-sheet]');
  const list=root.querySelector<HTMLElement>('[data-print-rows]');
- const editor=root.querySelector<HTMLElement>('[data-edit-rows]');
  const nodes=new Map<Key,HTMLElement>();
  list?.querySelectorAll<HTMLElement>('[data-rhythm-key]').forEach(el=>{const key=el.dataset.rhythmKey as Key;if(keys.includes(key))nodes.set(key,el)});
  const fit=()=>{
@@ -388,73 +425,22 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   removed=[];
   parts={};
  };
- const starter=(key:Key):Required<Omit<Edit,'cue'>>=>prepared(key,options,ctx??undefined);
- const resolved=(key:Key):Required<Omit<Edit,'cue'>>=>{const {cue:_c,...e}=edits[key]??{};return {...starter(key),...e}};
+ const starter=(key:Key)=>prepared(key,options,ctx??undefined);
+ const resolved=(key:Key)=>{const {cue:_c,when:_w,trigger:_t,...e}=edits[key]??{};return {...starter(key),...e}};
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
  root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
- root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>editorDialog?.showModal()));
+ root.querySelectorAll('[data-open-editor]').forEach(button=>button.addEventListener('click',()=>openEditor()));
  root.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog')?.close()));
- for(const dialog of [visionDialog,editorDialog])dialog?.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+ visionDialog?.addEventListener('click',event=>{if(event.target===visionDialog)visionDialog.close()});
  const save=()=>{if(!persist)return;try{(planMode?sessionStorage:localStorage).setItem(storageKey,JSON.stringify({profile,options,edits,order,removed,...(Object.keys(parts).length?{parts}:{}),...(snapshot?{snapshot}:{})}))}catch{}};
- const renderEditor=()=>{
-  if(!editor)return;
-  editor.replaceChildren();
-  for(const [i,key] of order.entries()){
-   const values=resolved(key);
-   const wrapper=document.createElement('div');wrapper.className='msr-edit-row';
-   const top=document.createElement('div');top.className='msr-edit-top';
-   const name=document.createElement('span');name.textContent=String(i+1)+'. '+labels[key];
-   const buttons=document.createElement('div');buttons.className='msr-edit-buttons';
-   for(const dir of [-1,1]){
-    const button=document.createElement('button');button.type='button';button.textContent=dir<0?'↑':'↓';button.title=dir<0?'Move earlier':'Move later';
-    button.setAttribute('aria-label',(dir<0?'Move ':'Move ')+labels[key]+(dir<0?' earlier':' later'));
-    button.disabled=dir<0?i===0:i===order.length-1;
-    button.addEventListener('click',()=>{const j=order.indexOf(key),next=j+dir;if(next<0||next>=order.length)return;[order[j],order[next]]=[order[next],order[j]];save();render(true)});
-    buttons.append(button);
-   }
-   const removeButton=document.createElement('button');removeButton.type='button';removeButton.textContent='×';removeButton.title='Remove block';removeButton.setAttribute('aria-label','Remove '+labels[key]);removeButton.disabled=order.length<=1;
-   removeButton.addEventListener('click',()=>removeBlock(key));
-   buttons.append(removeButton);
-   top.append(name,buttons);wrapper.append(top);
-   const fields:[Exclude<keyof Edit,'cue'>,string,number][]=[['title','Block name',38],['desc','Activity examples',78],['time','Start time (optional)',5]];
-   for(const [field,labelText,max] of fields){
-    const label=document.createElement('label');label.textContent=labelText;
-    const input=document.createElement('input');input.type=field==='time'?'time':'text';
-    input.maxLength=max;input.value=values[field];input.setAttribute('aria-label',labels[key]+' — '+labelText);
-    if(field==='time')input.className='msr-edit-clock';
-    input.addEventListener('input',()=>{
-      const raw=input.value;const clean=field==='time'?raw:raw.slice(0,max);
-      edits[key]={...(edits[key]??{}),[field]:clean};
-      save();render(false);
-    });
-    label.append(input);wrapper.append(label);
-   }
-   editor.append(wrapper);
-  }
- };
- const renderRemoved=()=>{
-  const container=root.querySelector<HTMLElement>('[data-removed-container]');
-  const actions=root.querySelector<HTMLElement>('[data-removed-actions]');
-  if(!container||!actions)return;
-  container.hidden=removed.length===0;actions.replaceChildren();
-  for(const key of removed){
-   const button=document.createElement('button');button.type='button';button.textContent='+ '+labels[key];
-   button.setAttribute('aria-label','Restore '+labels[key]);
-   button.addEventListener('click',()=>{removed=removed.filter(k=>k!==key);order.push(key);update()});
-   actions.append(button);
-  }
- };
  const removeBlock=(key:Key)=>{
   if(!order.includes(key)||order.length<=1)return;
   order=order.filter(k=>k!==key);removed.push(key);
   update();
  };
- const moveBlock=(key:Key,dir:number)=>{
-  const i=order.indexOf(key),next=i+dir;
-  if(i<0||next<0||next>=order.length)return;
-  [order[i],order[next]]=[order[next],order[i]];update();
- };
+ // Earlier/later on the sheet: the same move as the editor (times stay in order).
+ const moveBlock=(key:Key,dir:-1|1)=>{const s={edits,options,order};moveSlots(s,key,dir,ctx??undefined);order=s.order;update()};
  // Time-based pastel progression. Each daypart has its own palette, with a
  // gradual change within that range rather than a hardcoded color per activity.
  const interpolate=(first:string,last:string,progress:number)=>{
@@ -472,29 +458,6 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
  const visibleKeys=()=>shownKeys(order,options);
  // The family jobs on each anchor, as printed.
  const partsByKey=()=>{const all=ctx?mayParts(ctx,parts):[];return (key:Key)=>all.filter(p=>p.block===key&&!p.skipped)};
- const partsEditor=root.querySelector<HTMLElement>('[data-msr-parts-editor]');
- const renderPartsEditor=()=>{
-  const wrap=root.querySelector<HTMLElement>('[data-msr-parts-wrap]');
-  if(!partsEditor||!wrap)return;
-  const all=ctx?mayParts(ctx,parts):[];
-  wrap.hidden=!ctx||!all.length;
-  if(!ctx||!all.length){partsEditor.replaceChildren();return}
-  const edit=(fn:()=>void)=>{fn();update()};
-  const c=ctx;
-  // Grouped by anchor: its one WHEN for the family jobs, then who does each.
-  partsEditor.replaceChildren(...keys.filter(k=>all.some(p=>p.block===k)).flatMap(k=>{
-   const cue=document.createElement('input');cue.type='text';cue.className='po-input';cue.maxLength=CUE_LIMIT;cue.value=cueOf(k,edits)??'';cue.disabled=locked;
-   cue.setAttribute('aria-label','When the '+labels[k]+' jobs happen');
-   cue.addEventListener('change',()=>edit(()=>{const v=tidyCue(cue.value);const e={...(edits[k]??{})};if(v&&v!==cueOf(k,{}))e.cue=v;else delete e.cue;edits[k]=e}));
-   const field=document.createElement('label');field.className='po-field';const span=document.createElement('span');span.textContent='When (an everyday moment, like “After breakfast”)';field.append(span,cue);
-   const h=document.createElement('h4');h.className='po-section';h.textContent=labels[k];
-   return [h,field,taskEditor({ctx:c,tasks:all.filter(p=>p.block===k),rules:partRules,locked,
-    onOwners:(id,person,cur)=>edit(()=>toggleTaskOwner(parts,id,cur,person)),
-    onTitle:(id,title)=>edit(()=>setTaskTitle(parts,id,title,all.find(t=>t.id===id)?.title??title)),
-    onSkip:(id,skip)=>edit(()=>setTaskSkip(parts,id,skip)),
-    onReset:(id)=>edit(()=>resetTask(parts,id))})];
-  }));
- };
  // A long family plan can make the rows taller: a little tighter spacing keeps it on one page, never clipped.
  const fitSheet=()=>{
   if(!sheet)return;
@@ -511,6 +474,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   const dayLabel=root.querySelector<HTMLElement>('[data-day-label]');if(dayLabel)dayLabel.textContent=options.days==='camp'?'CAMP / PROGRAM DAY':options.days==='mixed'?'HOME OR OUTING DAY':'A DAY AT HOME';
   const visible=visibleKeys();
   const partsOf=partsByKey();
+  const rowsNow=mayRows({options,edits,order,parts},ctx??undefined);
   for(const key of order){
    const node=nodes.get(key);if(!node||!list)continue;
    list.append(node);
@@ -522,42 +486,24 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    const who=node.querySelector<HTMLElement>('[data-parts]');
    // The anchor's family jobs: each job with its owners in their family colors, then the one moment they follow.
    if(who){const list=partsOf(key);who.hidden=!list.length;who.replaceChildren(...list.map(p=>{const chip=document.createElement('span');chip.className='msr-part';const job=document.createElement('span');job.className='msr-part-job';job.textContent=p.label;chip.append(ownerTags(p.owners),job);return chip}))}
-   // The jobs' one cue ends their line (it wraps under them when the line is full).
-   if(who&&!who.hidden){const cue=cueOf(key,edits);if(cue)who.append(habitCue(cue))}
-   const time=node.querySelector<HTMLElement>('[data-time]');if(time){const formatted=clock(v.time);const match=formatted.match(/^(.*?)( AM| PM)$/);time.replaceChildren(document.createTextNode(match?match[1]:formatted));if(match){const suffix=document.createElement('span');suffix.className='msr-meridiem';suffix.textContent=match[2];time.append(suffix)}}
-   if(time)time.hidden=options.structure==='relaxed'||!v.time;
+   // One box on the right: the block's time, or the familiar event that starts it (never both, no WHEN pill).
+   const time=node.querySelector<HTMLElement>('[data-time]');
+   if(time){const slot=rowsNow.find(r=>r.key===key)?.slot??null;time.hidden=!slot;time.classList.toggle('msr-time--trigger',slot?.kind==='trigger');
+    if(slot?.kind==='time'){const match=slot.text.match(/^(.*?)( AM| PM)$/);time.replaceChildren(document.createTextNode(match?match[1]:slot.text));if(match){const suffix=document.createElement('span');suffix.className='msr-meridiem';suffix.textContent=match[2];time.append(suffix)}}
+    else if(slot){const arrow=document.createElementNS('http://www.w3.org/2000/svg','svg');arrow.setAttribute('viewBox','0 0 16 16');arrow.setAttribute('class','msr-trigger-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>';const text=document.createElement('span');text.className='msr-trigger-text';text.append(arrow,slot.text);time.replaceChildren(text)}
+    else time.replaceChildren()}
    node.querySelector<HTMLButtonElement>('[data-move-up]')?.toggleAttribute('disabled',order.indexOf(key)===0);
    node.querySelector<HTMLButtonElement>('[data-move-down]')?.toggleAttribute('disabled',order.indexOf(key)===order.length-1);
    node.querySelector<HTMLButtonElement>('[data-remove]')?.toggleAttribute('disabled',order.length<=1);
   }
   const summaries:[string,string][]=[['days',options.days==='camp'?'Camp or program':options.days==='mixed'?'Home + outings':'Mostly at home'],['structure',options.structure==='relaxed'?'Relaxed':options.structure==='structured'?'More structured':'Balanced'],['start',clock(hhmm(options.start))],['quiet',options.quiet==='rest'?'Rest or nap':options.quiet==='older'?'Independent recharge':'Independent play']];
   for(const [kind,value] of summaries){const el=root.querySelector<HTMLElement>('[data-summary-'+kind+']');if(el)el.textContent=value}
-  const day=root.querySelector<HTMLSelectElement>('[data-days]');if(day)day.value=options.days;
-  const start=root.querySelector<HTMLSelectElement>('[data-start]');if(start)start.value=String(options.start);
-  const quiet=root.querySelector<HTMLSelectElement>('[data-quiet]');if(quiet)quiet.value=options.quiet;
-  const play=root.querySelector<HTMLSelectElement>('[data-play]');if(play)play.value=options.play;
-  const snack=root.querySelector<HTMLInputElement>('[data-snack]');if(snack)snack.checked=options.snack;
-  root.querySelectorAll<HTMLInputElement>('input[name="msr-structure"]').forEach(el=>{el.checked=el.value===options.structure});
   for(const key of keys){const node=nodes.get(key);if(node&&!order.includes(key))node.hidden=true}
-  renderRemoved();
-  if(buildEditor)renderEditor();
-  if(editorDialog?.open||buildEditor)renderPartsEditor();
+  if(editorDialog?.open&&buildEditor)drawEditor();
   fitSheet();
   if(planMode) root.dispatchEvent(new Event(PLAN_CHANGE,{bubbles:true}));
  };
  const update=()=>{save();render(true)};
- root.querySelector<HTMLSelectElement>('[data-days]')?.addEventListener('change',e=>{
-  options.days=(e.target as HTMLSelectElement).value as Days;
-  // The parent's custom words are preserved when changing day types.
-  update();
- });
- root.querySelectorAll<HTMLInputElement>('input[name="msr-structure"]').forEach(el=>el.addEventListener('change',()=>{
-  if(el.checked){options.structure=el.value as Structure;update()}
- }));
- root.querySelector<HTMLSelectElement>('[data-start]')?.addEventListener('change',e=>{options.start=Number((e.target as HTMLSelectElement).value);update()});
- root.querySelector<HTMLSelectElement>('[data-quiet]')?.addEventListener('change',e=>{options.quiet=(e.target as HTMLSelectElement).value as Quiet;update()});
- root.querySelector<HTMLInputElement>('[data-snack]')?.addEventListener('change',e=>{options.snack=(e.target as HTMLInputElement).checked;update()});
- root.querySelector<HTMLSelectElement>('[data-play]')?.addEventListener('change',e=>{options.play=(e.target as HTMLSelectElement).value as Play;update()});
  root.querySelector('[data-reset]')?.addEventListener('click',()=>{snapshot=latest;rebuild();ageDefaults();update()});
  for(const key of keys){
   const node=nodes.get(key);if(!node)continue;
@@ -574,56 +520,11 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
     edits[key]={...(edits[key]??{}),[field]:text};update()});
    el?.addEventListener('keydown',(e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();el.blur()}});
   }
+  // The time-or-trigger box opens "When it happens" at this block.
   const time=node.querySelector<HTMLElement>('[data-time]');
-  const editTime=()=>{
-   if(!time||time.hidden)return;
-   root.querySelector('.msr-time-popover')?.remove();
-   const current=resolved(key).time;
-   const pop=document.createElement('div');pop.className='msr-time-popover';
-   pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Choose '+labels[key]+' time');
-   const title=document.createElement('strong');title.textContent=labels[key]+' · Choose a time';
-   const grid=document.createElement('div');grid.className='msr-time-grid';
-   const hour=current?Number(current.slice(0,2))+Number(current.slice(3))/60:options.start;
-   const center=Math.round(hour*2)/2;
-   const choices=Array.from({length:9},(_,i)=>hhmm(Math.max(0,Math.min(23.5,center+(i-4)/2)))).filter((v,i,a)=>a.indexOf(v)===i);
-   const position=()=>{
-    const rect=time.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
-    pop.style.left=Math.max(8,Math.min(window.innerWidth-w-8,rect.right-w))+'px';
-    pop.style.top=(rect.bottom+h+8>window.innerHeight?Math.max(8,rect.top-h-8):rect.bottom+8)+'px';
-   };
-   const dismiss=(focus=false)=>{
-    pop.remove();document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',keysDown,true);
-    window.removeEventListener('resize',position);scroller()?.removeEventListener('scroll',position);
-    if(focus)time.focus();
-   };
-   const outside=(e:PointerEvent)=>{if(!pop.contains(e.target as Node)&&!time.contains(e.target as Node))dismiss()};
-   const keysDown=(e:KeyboardEvent)=>{if(e.key==='Escape'){e.preventDefault();dismiss(true)}};
-   const apply=(value:string)=>{dismiss();edits[key]={...(edits[key]??{}),time:value};update()};
-   for(const value of choices){
-    const button=document.createElement('button');button.type='button';button.className='msr-time-choice';
-    button.textContent=clock(value);button.setAttribute('aria-pressed',String(current===value));
-    button.addEventListener('click',()=>apply(value));grid.append(button);
-   }
-   const actions=document.createElement('div');actions.className='msr-time-actions';
-   const none=document.createElement('button');none.type='button';none.textContent='No set time';none.addEventListener('click',()=>apply(''));
-   const custom=document.createElement('button');custom.type='button';custom.textContent='Custom time…';
-   custom.addEventListener('click',()=>{
-    actions.replaceChildren();
-    const input=document.createElement('input');input.type='time';input.value=current||hhmm(options.start);
-    input.setAttribute('aria-label','Custom time for '+labels[key]);
-    const save=document.createElement('button');save.type='button';save.textContent='Set time';
-    save.addEventListener('click',()=>{if(input.value)apply(input.value)});
-    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save.click()}});
-    actions.append(input,save);input.focus();position();
-   });
-   actions.append(none,custom);pop.append(title,grid,actions);root.append(pop);
-   position();document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',keysDown,true);
-   window.addEventListener('resize',position);scroller()?.addEventListener('scroll',position);
-   (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]')||grid.querySelector<HTMLButtonElement>('button'))?.focus();
-  };
-  time?.addEventListener('click',editTime);
-  time?.addEventListener('keydown',e=>{if(e.target===time&&(e.key==='Enter'||e.key===' ')){e.preventDefault();editTime()}});
-
+  const editWhen=()=>{if(!locked)openEditor('when',key)};
+  time?.addEventListener('click',editWhen);
+  time?.addEventListener('keydown',e=>{if(e.target===time&&(e.key==='Enter'||e.key===' ')){e.preventDefault();editWhen()}});
  }
  root.querySelector('[data-print]')?.addEventListener('click',()=>window.print());
  const download=root.querySelector<HTMLButtonElement>('[data-download]');
@@ -672,15 +573,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
      if(Array.isArray(mine.removed)&&new Set(mine.removed).size===mine.removed.length&&mine.removed.every((k:Key)=>keys.includes(k))&&mine.removed.length+order.length===keys.length&&mine.removed.every((k:Key)=>!order.includes(k)))removed=mine.removed;
      else if(order.length<keys.length)removed=keys.filter(k=>!order.includes(k));
      if(mine.edits&&typeof mine.edits==='object'){
-      for(const key of keys){
-       const obj=mine.edits[key];if(!obj||typeof obj!=='object')continue;
-       const edit:Edit={};
-       if(typeof obj.title==='string')edit.title=obj.title.slice(0,TITLE_LIMIT);
-       if(typeof obj.desc==='string')edit.desc=obj.desc.slice(0,DESC_LIMIT);
-       if(typeof obj.cue==='string'&&obj.cue.trim())edit.cue=tidyCue(obj.cue);
-       if(typeof obj.time==='string'&&(/^([01]\d|2[0-3]):[0-5]\d$/.test(obj.time)||obj.time===''))edit.time=obj.time;
-       edits[key]=edit;
-      }
+      // Saved before triggers or after: read the same way (a time she set stays a time; her jobs' moment becomes the trigger).
+      for(const key of keys){const edit=readEdit(mine.edits[key]);if(edit)edits[key]=edit}
      }
      parts=saved.parts??{};
      rebuild();
@@ -688,17 +582,48 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   }else rebuild();
   update();
  };
+ // One state for the editor (both modes) and the Club plan (plan mode).
+ const current=():MayState=>({options:structuredClone(options),edits:structuredClone(edits),order:[...order],removed:[...removed],rows:mayRows({options,edits,order,parts},ctx??undefined),familyLabel,parts:structuredClone(parts),...(snapshot?{snapshot:structuredClone(snapshot)}:{})});
+ const replace=(s:MayState)=>{options=structuredClone(s.options);edits=structuredClone(s.edits);order=[...s.order];removed=[...s.removed];parts=structuredClone(s.parts??{});if(s.snapshot!==undefined||!snapshot)snapshot=s.snapshot??latest;rebuild();save();render(true)};
+ const updateState=(fn:(s:MayState)=>void)=>{if(locked)return;const s=current();fn(s);replace(s)};
+ // How many lines a trigger takes in its printed box (measured at the sheet's size, off screen).
+ const lines=(text:string)=>{const probe=document.createElement('div');probe.className='msr-when-probe';probe.textContent=text;document.body.append(probe);const n=Math.round(probe.offsetHeight/(14.5*1.22));probe.remove();return n};
+ let section:MaySection='when';
+ let opened:MayState|null=null;
+ const tabs=root.querySelector<HTMLElement>('[data-mye-tabs]');
+ const body=root.querySelector<HTMLElement>('[data-mye-body]');
+ const drawEditor=()=>{
+  if(!editorDialog?.open||!tabs||!body)return;
+  tabs.replaceChildren(...MAY_SECTIONS.map(([id,label])=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.textContent=label;b.setAttribute('aria-selected',String(id===section));b.addEventListener('click',()=>{section=id;editor.focus();drawEditor()});return b}));
+  const top=editorDialog.scrollTop;
+  body.replaceChildren(editor.section(section));
+  editorDialog.scrollTop=top;
+ };
+ const restoreAll=()=>{snapshot=latest;rebuild();ageDefaults();update()};
+ const editor=mayEditor({state:current,update:updateState,ctx:()=>ctx,locked:()=>locked,redraw:drawEditor,lines,restore:restoreAll});
+ const openEditor=(s:MaySection='day',key?:Key)=>{
+  if(locked||!editorDialog)return;
+  section=s;editor.focus(key);opened=current();
+  if(!editorDialog.open)editorDialog.showModal();
+  drawEditor();
+  if(key)editorDialog.querySelector<HTMLElement>(`.mye-when[data-key="${key}"]`)?.scrollIntoView({block:'center'});
+ };
+ // Done keeps the changes (they're already saved as she goes); Cancel puts the plan back as it was when she opened it.
+ root.querySelector('[data-mye-done]')?.addEventListener('click',()=>{opened=null;editorDialog?.close()});
+ const cancel=()=>{if(opened)replace(opened);opened=null;editorDialog?.close()};
+ root.querySelector('[data-mye-cancel]')?.addEventListener('click',cancel);
+ editorDialog?.addEventListener('cancel',e=>{e.preventDefault();cancel()});
+ editorDialog?.addEventListener('click',event=>{if(event.target===editorDialog){opened=null;editorDialog.close()}});
  if(planMode){
-  const current=():MayState=>({options:structuredClone(options),edits:structuredClone(edits),order:[...order],removed:[...removed],rows:mayRows({options,edits,order,parts},ctx??undefined),familyLabel,parts:structuredClone(parts),...(snapshot?{snapshot:structuredClone(snapshot)}:{})});
-  const replace=(s:MayState)=>{options=structuredClone(s.options);edits=structuredClone(s.edits);order=[...s.order];removed=[...s.removed];parts=structuredClone(s.parts??{});if(s.snapshot!==undefined||!snapshot)snapshot=s.snapshot??latest;rebuild();save();render(true)};
   (root as HTMLElement & {clubPlan?:MayPlan}).clubPlan={
    ready:()=>Boolean(profile),state:current,
-   update:fn=>{const s=current();fn(s);replace(s)},replace,
+   update:updateState,replace,
    setPersist:on=>{persist=on;if(on)save()},
    fingerprint:()=>mayFingerprint({options,edits,order,parts,familyLabel},ctx??undefined),
    context:()=>ctx,
+   restore:restoreAll,
    setLocked:on=>{locked=on;root.querySelectorAll<HTMLElement>('.msr-sheet [contenteditable]').forEach(el=>el.setAttribute('contenteditable',on?'false':'true'));root.querySelectorAll<HTMLElement>('.msr-sheet [data-time], .msr-sheet [data-move-up], .msr-sheet [data-move-down], .msr-sheet [data-remove]').forEach(el=>{el.style.pointerEvents=on?'none':'';el.tabIndex=on?-1:0});if(on)editorDialog?.close()},
-   openEditor:()=>{if(!locked&&editorDialog&&!editorDialog.open)editorDialog.showModal()},
+   openEditor:(s?:MaySection,key?:Key)=>openEditor(s??'day',key),
   };
  }
  window.addEventListener('omc:club-preview-household',(event:Event)=>applyHousehold((event as CustomEvent<Detail>).detail));

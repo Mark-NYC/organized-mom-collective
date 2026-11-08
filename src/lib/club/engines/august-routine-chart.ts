@@ -26,6 +26,7 @@
  */
 import { marchIconArt } from '../../../data/club/march-chore-icons';
 import { activitiesOf, existingFor, wishedFor, type FamilyContext } from '../personalize/family';
+import { CONDITION_TRIGGER, VAGUE_TRIGGER, clock, hhmm, minutes, overlaps, validTime, type SlotKind } from '../personalize/when';
 
 export type Group = 'morning' | 'after';
 export interface Step {
@@ -46,8 +47,8 @@ export interface Step {
   /** The children it's for (member ids); missing = every child. */
   who?: string[];
 }
-/** What a row's right-hand box shows. */
-export type SlotKind = 'time' | 'trigger';
+/** What a row's right-hand box shows (the shared timing model). */
+export type { SlotKind } from '../personalize/when';
 /** Each chart's default: mornings race a departure (times); afternoons move with activities (triggers). */
 export const DEFAULT_MODES: Record<Group, SlotKind> = { morning: 'time', after: 'trigger' };
 
@@ -75,15 +76,8 @@ export const ICONS: Record<string, string> = {
   pets: marchIconArt('feed-pets')?.src ?? '/images/club/routine-icons/morning-start.png',
 };
 
-export const validTime = (t: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t);
-export const minutes = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
-export const hhmm = (m: number) => `${String(Math.floor((((m % 1440) + 1440) % 1440) / 60)).padStart(2, '0')}:${String(((m % 60) + 60) % 60).padStart(2, '0')}`;
-export const clock = (t: string) => {
-  const [h, m] = t.split(':').map(Number);
-  return Number.isFinite(h) && Number.isFinite(m) ? `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}` : t;
-};
-/** '7:30 AM' → ['7:30', 'AM'] for the chart's time box. */
-export const clockParts = (t: string): [string, string] => { const c = clock(t); const i = c.lastIndexOf(' '); return i > 0 ? [c.slice(0, i), c.slice(i + 1)] : [c, '']; };
+// The clock helpers and the time-or-trigger kind are the Club's shared timing model (../personalize/when.ts).
+export { validTime, minutes, hhmm, clock, clockParts } from '../personalize/when';
 
 export const DEFAULT_LEAVE = '07:50';
 export const DEFAULT_AFTER = '15:30';
@@ -230,16 +224,10 @@ export const slotKind = (r: Routine, s: Step): SlotKind => s.show ?? modeOf(r, s
 
 // ------------------------------------------------------------------ checks
 
-const STOP = new Set(['when', 'after', 'before', 'i', 'im', 'i’m', "i'm", 'my', 'the', 'a', 'an', 'and', 'to', 'on', 'of', 'is', 'are', 'it', 'get', 'got', 'getting', 'go', 'do', '&', 'for', 'at', 'in', 'up', 'out', 'with', 'all', 'done', 'finished', 'ready']);
-const stem = (w: string) => w.replace(/(ing|ed|es|s)$/, '');
-const words = (t: string) => t.toLowerCase().replace(/[’']/g, '').split(/[^a-z]+/).filter((w) => w && !STOP.has(w)).map(stem).filter((w) => w.length > 1);
-const overlaps = (a: string, b: string) => { const x = new Set(words(b)); return words(a).some((w) => x.has(w)); };
-/** Triggers that say nothing: there's no event in them. */
-const VAGUE = /^(when|once)\s+(i[’']?m|i am|we[’']?re|we are)\s+ready$|^(now|later|soon|then|next|when it[’']?s time)$/i;
-
+/** Triggers that say nothing, and deadlines or conditions instead of events: the shared checks. */
+const VAGUE = VAGUE_TRIGGER;
 export interface StepIssue { stepId: string; kind: 'order' | 'deadline' | 'restates' | 'vague' | 'circular' | 'order-only' | 'condition' | 'missing'; text: string }
-/** A deadline or condition, not a starting event: "Before screen time", "By 5:00", "No screens until…", "If …". */
-const CONDITION = /^(before|by|until|no\b.*\buntil|if|only if|unless)\b/i;
+const CONDITION = CONDITION_TRIGGER;
 
 /**
  * What doesn't add up on a routine (shown in the editor, never silently changed): a time earlier than the step before

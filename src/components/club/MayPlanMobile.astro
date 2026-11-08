@@ -1,100 +1,120 @@
 ---
-/** May, Our Summer Day, on phones and tablets (below 1100px): the day's anchors with the family's jobs on each (who,
- * by name), edited with the shared owner editor (src/lib/club/personalize/editor.ts), inside the shared ClubPlanScreen.
- * It reads and changes the plan only through the printable's controller (`.msr` root's `clubPlan`). */
+/** May, Our Summer Day, on phones and tablets (below 1100px), inside the shared ClubPlanScreen (approval, action bar,
+ * print). A reference the family can glance at all summer without zooming into the Letter sheet: the blocks in order,
+ * each with its time or trigger, its activities and who helps, then the summer rule. The same plan as the printable
+ * (the `.msr` root's `clubPlan`); nothing is tracked. Editing opens the shared May editor (src/lib/club/may-editor.ts)
+ * in an edit sheet: Our day, When it happens, Activities & responsibilities, with Done and Cancel. */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
 import '../../styles/club-personalize.css';
 import '../../styles/club-marks.css';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="May · Organized Family Club" sheets={['sheet']} previewNote="One reusable Letter-size rhythm">
+<ClubPlanScreen deadline={deadline} kicker="May · Organized Family Club" sheets={['sheet']} previewNote="One reusable Letter-size rhythm" hero={false}>
   <Fragment slot="title">Our <em>Summer Day</em></Fragment>
-  <section class="cp-section">
-    <h2>Your summer rhythm</h2>
-    <p class="cp-intro">A little structure, plenty of freedom, prepared for your family’s ages and interests. Everyone’s part is on the anchor it belongs to. Tap a block to change it.</p>
-    <ul class="cp-group" data-may-rows></ul>
-    <button type="button" class="cp-link" data-may-settings>Adjust the day <span>Change suggestions</span></button>
-    <div data-may-removed></div>
-  </section>
+  <div class="mym" data-mym>
+    <p class="mym-motto">A little structure. Plenty of freedom.</p>
+    <ol class="mym-blocks" data-may-rows></ol>
+    <section class="mym-rule" aria-label="Our summer rule"><span>Our summer rule</span><strong>Check the rhythm before asking what’s next.</strong><p>Our plans can change. We can still find what's next.</p></section>
+    <section class="cp-section" aria-labelledby="mym-edit-title">
+      <h2 id="mym-edit-title">Make it yours</h2>
+      <p class="cp-intro">It’s prepared from your family page. Change only what doesn’t fit your summer.</p>
+      <ul class="cp-group" data-may-edit></ul>
+    </section>
+  </div>
 </ClubPlanScreen>
 <script>
 import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
-import { LABELS, partRules, type MayState, type MayKey, type MayOptions, type MayPlan } from '../../lib/club/engines/may-summer-rhythm';
-import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner } from '../../lib/club/personalize/edits';
-import { taskEditor } from '../../lib/club/personalize/editor';
-import { mayParts, cueOf, BLOCK_CUES, CUE_LIMIT } from '../../lib/club/engines/may-summer-rhythm';
-import { tidyCue } from '../../lib/club/personalize/marks-text';
-import { habitCue, ownerTags } from '../../lib/club/personalize/marks';
+import type { MayState, MayPlan, MayKey } from '../../lib/club/engines/may-summer-rhythm';
+import { ownerTags } from '../../lib/club/personalize/marks';
+import { MAY_SECTIONS, mayEditor, type MaySection } from '../../lib/club/may-editor';
 const root = document.querySelector<HTMLElement>('.may-plan');
 const host = root?.querySelector<HTMLElement & {clubPlan?: MayPlan}>('.msr');
 if (root && host) {
  const q = <T extends HTMLElement>(sel:string) => root.querySelector<T>(sel)!;
+ const plan = () => host.clubPlan!;
  let ui:PlanScreen<MayState> | null = null;
- const labels:Record<MayKey,string>=LABELS;
- const render = (_ui:PlanScreen<MayState>, s:MayState, locked:boolean) => {
-  q<HTMLElement>('[data-may-rows]').replaceChildren(...s.rows.map(row=>{
-   const b=el('button',{type:'button',class:'cp-row',disabled:locked},el('span',{class:'cp-avatar'},row.time ? row.time.slice(0,2) : '•'),el('span',{class:'cp-row-text'},el('strong',{},row.title),el('span',{},row.desc),...row.parts.map(p=>el('span',{class:'mpm-part'},ownerTags(p.owners),' ',p.label)),...(row.cue?[el('span',{class:'hc-cue-row'},habitCue(row.cue))]:[]),el('span',{},row.time || 'No set time')),el('span',{class:'cp-chev','aria-hidden':'true'}));
-   b.addEventListener('click',()=>openRow(row.key));
-   return el('li',{},b);
+ let locked = false;
+ let section: MaySection = 'day';
+ let opened: MayState | null = null;
+ const TITLES: Record<MaySection, string> = Object.fromEntries(MAY_SECTIONS) as Record<MaySection, string>;
+ const sheetEl = () => root.querySelector<HTMLDialogElement>('[data-cp-sheet]');
+ // The trigger's printed box is ~128px wide at 14.5px: the same measure as the sheet.
+ const lines = (text: string) => { const p = el('div', { class: 'msr-when-probe' }, text); document.body.append(p); const n = Math.round(p.offsetHeight / (14.5 * 1.22)); p.remove(); return n; };
+ const show = () => {
+  if (!ui) return;
+  const sheet = sheetEl();
+  const top = sheet?.open ? sheet.scrollTop : 0;
+  const done = el('button', { type: 'button', class: 'cp-btn cp-btn-dark' }, 'Done');
+  done.addEventListener('click', () => { opened = null; ui?.closeSheet(); });
+  const cancel = el('button', { type: 'button', class: 'cp-btn' }, 'Cancel');
+  cancel.addEventListener('click', () => { if (opened) plan().replace(opened); opened = null; ui?.closeSheet(); });
+  ui.openSheet(TITLES[section], editor.section(section), el('div', { class: 'cp-sheet-actions' }, done, cancel));
+  if (sheet) sheet.scrollTop = top;
+ };
+ const editor = mayEditor({
+  state: () => plan().state(), update: (fn) => plan().update(fn), ctx: () => plan().context(), locked: () => locked,
+  redraw: () => { if (sheetEl()?.open) show(); }, lines,
+  restore: () => plan().restore(),
+ });
+ const open = (s: MaySection, key?: MayKey) => { section = s; editor.focus(key); opened = structuredClone(plan().state()); sheetEl()?.close(); show(); };
+ const arrow = () => { const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 16 16'); svg.setAttribute('class', 'mym-arrow'); svg.setAttribute('aria-hidden', 'true'); svg.innerHTML = '<path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'; return svg; };
+ const row = (step: string, title: string, detail: string, go: () => void) => {
+  const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, el('span'),
+   el('span', { class: 'cp-row-text' }, el('span', { class: 'mym-step' }, step), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+   el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+  b.setAttribute('aria-label', `${step}: ${title}.${locked ? '' : ' Change'}`);
+  b.addEventListener('click', go);
+  return el('li', {}, b);
+ };
+ const render = (_ui: PlanScreen<MayState>, s: MayState, isLocked: boolean) => {
+  locked = isLocked;
+  // The daily reference: each block in order, its time or trigger first so the family sees what starts it.
+  q('[data-may-rows]').replaceChildren(...s.rows.map((r) => {
+   // Flexible blocks show nothing here, as on paper.
+   const when = r.slot ? el('span', { class: `mym-when mym-when--${r.slot.kind}` }, ...(r.slot.kind === 'trigger' ? [arrow()] : []), r.slot.text) : el('span');
+   const li = el('li', { class: 'mym-block' },
+    el('div', { class: 'mym-head' }, el('h2', {}, r.title), when),
+    el('p', { class: 'mym-desc' }, r.desc),
+    ...(r.parts.length ? [el('p', { class: 'mym-parts' }, ...r.parts.map((p) => el('span', { class: 'mym-part' }, ownerTags(p.owners), ' ', p.label)))] : []),
+    ...(locked ? [] : [(() => { const b = el('button', { type: 'button', class: 'cp-link mym-change' }, el('span', {}, 'Change when')); b.addEventListener('click', () => open('when', r.key)); return b; })()]));
+   li.style.setProperty('--mym-tint', ({ morning: '#F8E8B5', move: '#F4DEA3', create: '#F0D493', lunch: '#DDEBDB', quiet: '#D1E5D6', free: '#C3DDCF', snack: '#E4E9D5', evening: '#D1D7EA' } as Record<MayKey, string>)[r.key]);
+   return li;
   }));
-  q<HTMLButtonElement>('[data-may-settings]').hidden=locked;
-  const removed=q<HTMLElement>('[data-may-removed]'); removed.replaceChildren();
-  if(!locked && s.removed.length){
-   const heading=el('p',{class:'cp-intro'},'Add a removed block back:'); removed.append(heading);
-   for(const key of s.removed){const b=el('button',{type:'button',class:'cp-link'},`+ ${labels[key]}`);b.addEventListener('click',()=>ui?.resource().update(x=>{x.removed=x.removed.filter(k=>k!==key);x.order.push(key)}));removed.append(b)}
-  }
+  const times = s.rows.filter((r) => r.slot?.kind === 'time').length, triggers = s.rows.filter((r) => r.slot?.kind === 'trigger').length;
+  const jobs = s.rows.reduce((n, r) => n + r.parts.length, 0);
+  q('[data-may-edit]').replaceChildren(
+   row('1 · Our day', `${s.rows.length} blocks`, s.rows.map((r) => r.title).join(' · '), () => open('day')),
+   row('2 · When it happens', [times ? `${times} by the clock` : '', triggers ? `${triggers} after an event` : '', s.rows.length - times - triggers ? `${s.rows.length - times - triggers} flexible` : ''].filter(Boolean).join(' · '), 'Time, trigger or flexible, block by block', () => open('when')),
+   row('3 · Activities & responsibilities', jobs ? `${jobs} family ${jobs === 1 ? 'job' : 'jobs'}` : 'Activities only', 'Ideas for each block and who helps', () => open('jobs')));
  };
- const openRow=(key:MayKey)=>{
-  if(!ui)return; const row=ui.resource().state().rows.find(r=>r.key===key);if(!row)return;
-  const field=(label:string, name:'title'|'desc'|'time',limit:number)=>{
-   const input=el('input',{type:name==='time'?'time':'text',value:row[name],maxlength:String(limit)});
-   input.addEventListener('input',()=>ui?.resource().update(s=>{s.edits[key]={...s.edits[key],[name]:input.value.slice(0,limit)}}));
-   return el('label',{class:'cp-field'},label,input);
-  };
-  const move=(direction:number)=>{ui?.resource().update(s=>{const i=s.order.indexOf(key),j=i+direction;if(j>=0&&j<s.order.length)[s.order[i],s.order[j]]=[s.order[j],s.order[i]]});ui?.closeSheet()};
-  const earlier=el('button',{type:'button',class:'cp-btn'},'Move earlier');earlier.addEventListener('click',()=>move(-1));
-  const later=el('button',{type:'button',class:'cp-btn'},'Move later');later.addEventListener('click',()=>move(1));
-  const body:Node[]=[field('Block name','title',38),field('Activities','desc',78),field('Start time','time',5),el('div',{class:'cp-sheet-actions'},earlier,later)];
-  // Who helps on this anchor: the shared owner editor, same as the desktop editor.
-  const ctx=host.clubPlan?.context();
-  if(ctx){
-   const all=mayParts(ctx,ui.resource().state().parts).filter(p=>p.block===key);
-   if(all.length){
-    const edit=(fn:(s:MayState)=>void)=>{const sheet=root.querySelector<HTMLDialogElement>('[data-cp-sheet]');const top=sheet?.scrollTop??0;ui?.resource().update(s=>{s.parts??={};fn(s)});openRow(key);if(sheet)sheet.scrollTop=top};
-    const cue=el('input',{type:'text',value:cueOf(key,ui.resource().state().edits)??'',maxlength:String(CUE_LIMIT)});
-    cue.addEventListener('change',()=>{const v=tidyCue(cue.value);ui?.resource().update(s=>{const e={...(s.edits[key]??{})};if(v&&v!==BLOCK_CUES[key])e.cue=v;else delete e.cue;s.edits[key]=e})});
-    body.push(el('label',{class:'cp-field'},'When the family jobs happen (an everyday moment)',cue),el('p',{class:'cp-sheet-hint'},'Who helps here. Tap names to change who, or leave a job off.'),taskEditor({ctx,tasks:all,rules:partRules,locked:ui.readOnly(),
-     onOwners:(id,person,cur)=>edit(s=>toggleTaskOwner(s.parts!,id,cur,person)),
-     onTitle:(id,title)=>edit(s=>setTaskTitle(s.parts!,id,title,all.find(t=>t.id===id)?.title??title)),
-     onSkip:(id,skip)=>edit(s=>setTaskSkip(s.parts!,id,skip)),
-     onReset:(id)=>edit(s=>resetTask(s.parts!,id))}));
-   }
-  }
-  body.push(el('div',{class:'cp-sheet-actions'},ui.doneButton()));
-  if(ui.resource().state().order.length>1){const remove=el('button',{type:'button',class:'cp-text-btn'},'Remove this block');remove.addEventListener('click',()=>{ui?.resource().update(s=>{s.order=s.order.filter(k=>k!==key);s.removed.push(key)});ui?.closeSheet()});body.push(remove)}
-  ui.openSheet(row.title,...body);
- };
- const openSettings=()=>{
-  if(!ui)return;const s=ui.resource().state();
-  const select=(label:string,key:keyof MayOptions,choices:Array<[string,string]>)=>{
-   const input=el('select',{});for(const [value,text] of choices){const option=el('option',{value},text);input.append(option)}
-   input.value=String(s.options[key]);input.addEventListener('change',()=>ui?.resource().update(state=>{(state.options as unknown as Record<string,unknown>)[key]=key==='start'?Number(input.value):key==='snack'?input.value==='true':input.value}));
-   return el('label',{class:'cp-field'},label,input);
-  };
-  ui.openSheet('Adjust your summer day',
-   select('Kind of day','days',[['home','Mostly at home'],['mixed','Home and outings'],['camp','Camp or scheduled programs']]),
-   select('Structure','structure',[['relaxed','Relaxed'],['balanced','Balanced'],['structured','More structured']]),
-   select('Morning starts','start',[['7','7:00 AM'],['7.5','7:30 AM'],['8','8:00 AM'],['8.5','8:30 AM'],['9','9:00 AM'],['9.5','9:30 AM']]),
-   select('Quiet time','quiet',[['independent','Independent play and reading'],['rest','Rest or nap'],['older','Independent recharge']]),
-   select('Favorite play','play',[['outdoors','Outdoor play'],['active','Sports and movement'],['creative','Making and creativity'],['mixed','A mix of everything']]),
-   select('Late afternoon snack','snack',[['true','Include'],['false','Leave out']]),el('div',{class:'cp-sheet-actions'},ui.doneButton()));
- };
- ui=mountPlanScreen({root,host,approvalKey:'omc:preview:may-summer-rhythm:approval',render});
- q<HTMLButtonElement>('[data-may-settings]').addEventListener('click',openSettings);
+ ui = mountPlanScreen({ root, host, approvalKey: 'omc:preview:may-summer-rhythm:approval', render });
+ // Closing the sheet another way (×, backdrop, Escape) keeps her changes, like Done: they save as she goes.
+ sheetEl()?.addEventListener('close', () => { opened = null; });
 }
 </script>
 <style is:global>
-.mpm-part{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+@media screen and (max-width:1099px){
+.mym{display:grid;gap:14px;margin:0 0 24px}
+.mym-motto{margin:0;font:italic 400 1.05rem/1.4 var(--font-serif);color:var(--cp-soft)}
+.mym-blocks{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.mym-block{padding:14px 16px 12px;border:1px solid #e4e8e0;border-radius:9px;background:linear-gradient(90deg,var(--mym-tint,#eef4ea) 0%,#fff 92%)}
+.mym-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.mym-head h2{margin:0;font:400 clamp(21px,5.8vw,25px)/1.15 var(--font-serif);color:#455644}
+.mym-when{flex:none;max-width:48%;display:block;text-align:right;color:#4f6a49}
+.mym-when--time{font:700 1.2rem/1.1 var(--font-sans);letter-spacing:-.02em}
+.mym-when--trigger{font:600 .9rem/1.25 var(--font-sans)}
+.mym-when--none{font-size:.8rem;color:var(--cp-soft)}
+.mym-arrow{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-1px;color:#7c9675}
+.mym-desc{margin:6px 0 0;font-size:.95rem;line-height:1.45;color:#5d685b}
+.mym-parts{display:flex;flex-wrap:wrap;gap:4px 12px;margin:8px 0 0;font-size:.85rem;color:#59664f}
+.mym-part{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px 5px}
+.mym-change{margin-top:6px}
+.mym-rule{padding:14px 15px;border-radius:7px;background:#edf3e9;text-align:center}
+.mym-rule span{display:block;font-size:.66rem;letter-spacing:.13em;font-weight:700;text-transform:uppercase;color:#687c61}
+.mym-rule strong{display:block;margin:5px 0;font:400 1.2rem/1.3 var(--font-serif);color:#3e5e3f}
+.mym-rule p{margin:0;font-size:.85rem;color:#647960}
+.mym-step{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+}
 </style>
