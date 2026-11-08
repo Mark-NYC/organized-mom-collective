@@ -94,6 +94,19 @@ end $$;
 revoke execute on function public.club_welcome_rhythm_order_set(uuid), public.club_welcome_rhythm_order_clear(uuid) from public, anon, authenticated;
 grant execute on function public.club_welcome_rhythm_order_set(uuid), public.club_welcome_rhythm_order_clear(uuid) to service_role;
 
+-- Which welcome item her Welcome Kit carries, for the emails (club-webhook, club-admin): 'rhythm' or 'vision' (also
+-- when she has no welcome order yet: what the switch would give her).
+create function public.club_welcome_item_of(p_user uuid) returns text
+language sql stable security definer set search_path = '' as $$
+  select coalesce(
+    (select case when o.fulfillment_type = 'welcome_rhythm' then 'rhythm' else 'vision' end from public.club_fulfillment_orders o
+      where o.user_id = p_user and o.fulfillment_type in ('welcome_vision', 'welcome_rhythm') and o.status <> 'canceled'
+      order by o.created_at desc limit 1),
+    (select s.welcome_item from public.club_settings s limit 1), 'vision');
+$$;
+revoke execute on function public.club_welcome_item_of(uuid) from public, anon, authenticated;
+grant execute on function public.club_welcome_item_of(uuid) to service_role;
+
 -- club_fulfillment_queue: from 20261110000000_club_welcome_kit_approvals.sql, with the replacements listed in scripts/generate-welcome-rhythm-kit-migration.py
 create or replace view public.club_fulfillment_queue with (security_invoker = true) as
 select o.id, o.user_id, o.household_id, o.resource_month, o.kit_id, k.slug as kit_slug, k.title as kit_title,

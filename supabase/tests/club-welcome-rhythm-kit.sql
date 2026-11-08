@@ -170,3 +170,5 @@ end $$;
 select pg_temp.expect(not has_function_privilege('authenticated', 'public.club_welcome_rhythm_order_set(uuid)', 'execute')
   and not has_function_privilege('authenticated', 'public.club_welcome_rhythm_order_clear(uuid)', 'execute')
   and not has_function_privilege('anon', 'public.club_rhythm_valid(jsonb)', 'execute'), 'the order helpers are internal');
+select pg_temp.expect(public.club_welcome_item_of(pg_temp.u(2)) = 'rhythm' and public.club_welcome_item_of(pg_temp.u(1)) = 'vision', 'the emails can tell which item her kit carries');
+select pg_temp.expect(not has_function_privilege('authenticated', 'public.club_welcome_item_of(uuid)', 'execute'), 'service only');

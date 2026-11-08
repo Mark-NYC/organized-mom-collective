@@ -417,6 +417,7 @@ grant select on public.club_fulfillment_queue to service_role;
 drop function public.club_welcome_rhythm_order_set(uuid);
 drop function public.club_welcome_rhythm_order_clear(uuid);
 drop function public.club_rhythm_valid(jsonb);
+drop function public.club_welcome_item_of(uuid);
 drop index public.club_fulfillment_one_welcome_rhythm;
 alter table public.club_fulfillment_orders drop constraint club_fulfillment_orders_personalization_check;
 alter table public.club_fulfillment_orders add constraint club_fulfillment_orders_personalization_check

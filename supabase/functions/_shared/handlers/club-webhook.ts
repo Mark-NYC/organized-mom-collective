@@ -7,7 +7,7 @@
  * granted only by club_invoice_apply from a PAID invoice's line periods; emails are deduped by key.
  */
 import { clubStripeBlocked, CLUB_PRODUCT_TAG, type ClubDeps } from '../club/deps.ts';
-import { longDate, monthLabel, sendClubEmail } from '../club/emails.ts';
+import { longDate, monthLabel, sendClubEmail, welcomeItemOf } from '../club/emails.ts';
 import { findOrCreateUser } from '../club/members.ts';
 import {
   checkoutAddress,
@@ -187,6 +187,7 @@ async function trialStarted(deps: ClubDeps, sub: StripeSubscription, member: { u
     plan: 'monthly',
     freeMonth: freeMonth ? monthLabel(freeMonth) : null,
     firstCharge: firstCharge ? longDate(new Date(firstCharge * 1000).toISOString()) : null,
+    welcomeItem: await welcomeItemOf(deps, member.userId),
   });
 }
 
@@ -280,6 +281,7 @@ export async function applyInvoice(deps: ClubDeps, invoiceId: string, eventAt: n
     await sendClubEmail(deps, `welcome:${member.userId}`, 'welcome', member.userId, member.email, {
       plan: paidPeriods(inv)[0]?.plan ?? null,
       monthLabel: first ? monthLabel(first) : undefined,
+      welcomeItem: await welcomeItemOf(deps, member.userId),
     });
   }
   if (failed && inv.status !== 'paid') {

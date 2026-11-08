@@ -14,7 +14,7 @@
  *   refund         { invoice } → full refund in Stripe; the webhook then revokes that invoice's months
  */
 import { clubStripeBlocked, CLUB_LEGACY_LOOKUP_KEYS, CLUB_PRICES, CLUB_PRODUCT_TAG, OFFERED_PLANS, type ClubDeps, type ClubPlan } from '../club/deps.ts';
-import { monthLabel, sendClubEmail, type ClubEmailKind } from '../club/emails.ts';
+import { monthLabel, sendClubEmail, welcomeItemOf, type ClubEmailKind } from '../club/emails.ts';
 import { corsHeaders, json, readJson, type Handler } from '../http.ts';
 import { clubPrice } from './club-billing.ts';
 import { applyInvoice, CLUB_EVENTS, storedWebhookSecret, syncSubscription, webhookSecret } from './club-webhook.ts';
@@ -211,7 +211,8 @@ async function sendBatch(deps: ClubDeps, kind: string, month: string | null) {
       : kind === 'kit_reminder' ? `kit_reminder:${a.order_id}${a.reminder === 2 ? ':2' : ''}` : `review:${a.order_id}`;
     // A kit reminder names her first month, from its resource's slug ('2027-01-…').
     const label = month ? monthLabel(month) : kind === 'kit_reminder' && a.kit_slug ? monthLabel(`${a.kit_slug.slice(0, 7)}-01`) : undefined;
-    const outcome = await sendClubEmail(deps, key, kind as ClubEmailKind, a.user_id, a.email, { kitSlug: a.kit_slug, monthLabel: label, reminder: a.reminder ?? 1 });
+    const outcome = await sendClubEmail(deps, key, kind as ClubEmailKind, a.user_id, a.email, { kitSlug: a.kit_slug, monthLabel: label, reminder: a.reminder ?? 1,
+      ...(kind === 'kit_reminder' ? { welcomeItem: await welcomeItemOf(deps, a.user_id) } : {}) });
     counts[outcome]++;
   }
   return { audience: audience.length, ...counts };

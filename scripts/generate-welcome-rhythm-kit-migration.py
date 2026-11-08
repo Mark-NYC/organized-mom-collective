@@ -247,7 +247,20 @@ begin
      and (personalization is not null or member_approved_at is not null);
 end $$;
 revoke execute on function public.club_welcome_rhythm_order_set(uuid), public.club_welcome_rhythm_order_clear(uuid) from public, anon, authenticated;
-grant execute on function public.club_welcome_rhythm_order_set(uuid), public.club_welcome_rhythm_order_clear(uuid) to service_role;"""
+grant execute on function public.club_welcome_rhythm_order_set(uuid), public.club_welcome_rhythm_order_clear(uuid) to service_role;
+
+-- Which welcome item her Welcome Kit carries, for the emails (club-webhook, club-admin): 'rhythm' or 'vision' (also
+-- when she has no welcome order yet: what the switch would give her).
+create function public.club_welcome_item_of(p_user uuid) returns text
+language sql stable security definer set search_path = '' as $$
+  select coalesce(
+    (select case when o.fulfillment_type = 'welcome_rhythm' then 'rhythm' else 'vision' end from public.club_fulfillment_orders o
+      where o.user_id = p_user and o.fulfillment_type in ('welcome_vision', 'welcome_rhythm') and o.status <> 'canceled'
+      order by o.created_at desc limit 1),
+    (select s.welcome_item from public.club_settings s limit 1), 'vision');
+$$;
+revoke execute on function public.club_welcome_item_of(uuid) from public, anon, authenticated;
+grant execute on function public.club_welcome_item_of(uuid) to service_role;"""
 TAIL = "commit;"
 parts = [HEAD.rstrip(), queue, set_kit, welcome_queue, audience, kit_submitted, me, members, member_months, bundle,
          plan_save, plan_approve, plan_unapprove, TAIL.rstrip()]
@@ -280,6 +293,7 @@ grant select on public.club_fulfillment_queue to service_role;
 drop function public.club_welcome_rhythm_order_set(uuid);
 drop function public.club_welcome_rhythm_order_clear(uuid);
 drop function public.club_rhythm_valid(jsonb);
+drop function public.club_welcome_item_of(uuid);
 drop index public.club_fulfillment_one_welcome_rhythm;
 alter table public.club_fulfillment_orders drop constraint club_fulfillment_orders_personalization_check;
 alter table public.club_fulfillment_orders add constraint club_fulfillment_orders_personalization_check

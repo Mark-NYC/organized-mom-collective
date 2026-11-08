@@ -236,7 +236,7 @@ async function portal(deps: ClubDeps, req: Request) {
  */
 async function kitSubmitted(deps: ClubDeps, req: Request) {
   const user = await signedIn(deps, req);
-  const kit = await deps.db.rpc<{ order_id: string; email: string; family_name: string | null; first_month: string | null; ship_by: string | null } | null>(
+  const kit = await deps.db.rpc<{ order_id: string; email: string; family_name: string | null; first_month: string | null; ship_by: string | null; welcome_item?: string } | null>(
     'club_kit_submitted', { p_user: user.id });
   if (!kit) return { notified: false };
   const outcome = await sendClubEmail(deps, `kit_submitted:${kit.order_id}`, 'kit_submitted', null, deps.env.supportInbox, {
@@ -244,6 +244,7 @@ async function kitSubmitted(deps: ClubDeps, req: Request) {
     memberEmail: kit.email,
     monthLabel: kit.first_month ? monthLabel(kit.first_month) : undefined,
     shipBy: kit.ship_by ? longDate(`${kit.ship_by}T12:00:00Z`) : null,
+    welcomeItem: kit.welcome_item === 'welcome_rhythm' ? 'rhythm' : 'vision',
   });
   return { notified: outcome === 'sent' || outcome === 'duplicate' };
 }
