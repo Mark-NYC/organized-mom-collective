@@ -12,24 +12,27 @@ for (const name of ['make-bed','clear-dishes','shoes-away','feed-pets','clothes-
   if (art) icons[name] = art.src;
 }
 ---
-<AppLayout title="Family Chore Chart Design Prototype">
+<AppLayout title="Family Rhythm Design Prototype">
   <div class="fc-prototype" data-fc-root>
     <aside class="fc-sidebar">
       <p class="fc-kicker"><a href="/app/club">Club</a> / Design experiment</p>
-      <h1>Our Family <em>Chore Chart</em></h1>
+      <h1>Our Family <em>Rhythm</em></h1>
       <p class="fc-status">Independent prototype · Not part of March's Club kit</p>
-      <p class="fc-intro">A few responsibilities for each person. One clear moment to begin. No points or rewards.</p>
+      <p class="fc-intro">Two shared moments. A few clear responsibilities. Less reminding.</p>
       <div class="fc-buttons">
         <button type="button" class="fc-primary" data-fc-print>Download and print</button>
         <button type="button" class="fc-secondary" data-fc-reset>Reset sample</button>
       </div>
       <p class="fc-heading">Make changes</p>
       <label class="fc-field">Family name <input data-fc-family maxlength="35" value="Rivera" /></label>
-      <label class="fc-field">Edit a person's chores <select data-fc-person></select></label>
+      <p class="fc-heading">1 · Choose our shared moments</p>
+      <div data-fc-anchors class="fc-anchor-edit"></div>
+      <p class="fc-heading">2 · Give each person a part</p>
+      <label class="fc-field">Edit responsibilities for <select data-fc-person></select></label>
       <div class="fc-edit-person" data-fc-edit></div>
       <p class="fc-tip">Changes appear on the printable immediately and stay in this browser. This sample does not change your saved family profile or Club plans.</p>
       <p class="fc-heading">The idea</p>
-      <p class="fc-tip">Names and colors tell each person where to look. The little WHEN cue tells them when to begin. Each person gets only a few jobs, so the sheet stays easy to read on the fridge.</p>
+      <p class="fc-tip">One familiar moment starts several responsibilities. Each person owns their part, without needing a separate reminder. Keep the plan small and repeatable.</p>
     </aside>
     <section class="fc-preview" aria-label="Print preview">
       <div class="fc-preview-label">LIVE PRINTABLE PREVIEW · 8.5 × 11 IN</div>
@@ -37,13 +40,13 @@ for (const name of ['make-bed','clear-dishes','shoes-away','feed-pets','clothes-
         <header class="fc-paper-head">
           <div class="fc-paper-top">ORGANIZED FAMILY CLUB · DESIGN EXPERIMENT</div>
           <div class="fc-paper-heading">
-            <div><h2>Our Family <em>Chore Chart</em></h2><p>Our shared responsibilities at home.</p></div>
+            <div><h2>Our Family <em>Rhythm</em></h2><p>Same moments. Everyone has a part.</p></div>
             <span class="fc-house" aria-hidden="true">⌂</span>
           </div>
           <div class="fc-family-line" data-fc-family-display>The Rivera Family</div>
         </header>
         <div class="fc-charts" data-fc-charts></div>
-        <footer class="fc-paper-foot">We all pitch in to keep our home running smoothly.<small>ORGANIZED FAMILY CLUB · FAMILY CHORE CHART</small></footer>
+        <footer class="fc-paper-foot">When the moment comes, we each know our part.<small>ORGANIZED FAMILY CLUB · FAMILY RHYTHM</small></footer>
       </div>
     </section>
   </div>
@@ -75,7 +78,7 @@ for (const name of ['make-bed','clear-dishes','shoes-away','feed-pets','clothes-
 .fc-paper-heading p{font:italic 16px Georgia,serif;color:#6b6e61;margin:6px 0 0}
 .fc-house{font:80px/.75 Georgia,serif;color:#9aab98}
 .fc-family-line{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#768375;padding:10px 0}
-.fc-charts{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0}
+.fc-charts{flex:1;display:flex;flex-direction:column;gap:18px;min-height:0}
 .fc-person{border:1px solid #dbd8d1;border-radius:13px;display:grid;grid-template-columns:135px 1fr;overflow:hidden;min-height:0;flex:1}
 .fc-person-name{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;background:var(--person-tint);padding:12px;color:#3e5042}
 .fc-person-name strong{font:700 25px Georgia,serif;word-break:break-word;text-align:center}
@@ -112,64 +115,158 @@ body:has(.fc-prototype) header,body:has(.fc-prototype) nav,body:has(.fc-prototyp
 .fc-prototype,.fc-preview{display:block!important;width:8.5in!important;min-height:0!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important}
 .fc-paper{zoom:1!important;width:8.5in!important;height:11in!important;box-shadow:none!important;margin:0!important;break-inside:avoid!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+.fc-paper{color:#545454;padding:45px 49px 30px}
+.fc-paper h2{color:#545454;font-size:39px}
+.fc-paper h2 em{color:#617c67}
+.fc-paper-heading p{color:#756f6a}
+.fc-house{color:#b6c3b4}
+.fc-family-line{color:#77736f;padding:12px 0 18px}
+.fc-rhythm{border:1px solid #d9ded8;border-radius:10px;overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0;background:#fff}
+.fc-rhythm-head{display:flex;align-items:center;gap:13px;background:var(--rhythm-tint);padding:14px 18px;border-bottom:1px solid #d9ded8}
+.fc-rhythm-mark{font:34px Georgia,serif;width:43px;height:43px;display:grid;place-items:center;border:1px solid #8f9f91;border-radius:50%;color:#536c59;background:#fff9}
+.fc-rhythm-head h3{font:400 25px Georgia,serif;color:#445a48;margin:0}
+.fc-rhythm-head p{font:500 10px Montserrat,Arial,sans-serif;letter-spacing:.04em;color:#666961;margin:5px 0 0}
+.fc-rhythm-rows{flex:1;display:flex;flex-direction:column;justify-content:center;padding:4px 19px}
+.fc-rhythm-row{display:grid;grid-template-columns:115px 36px minmax(0,1fr);gap:12px;align-items:center;border-bottom:1px solid #ece9e3;padding:11px 0;min-height:54px}
+.fc-rhythm-row:last-child{border-bottom:0}
+.fc-rhythm-person{font:700 15px Georgia,serif;color:#545454;display:flex;align-items:center;gap:8px;min-width:0}
+.fc-rhythm-person::before{content:'';width:7px;height:23px;border-radius:4px;background:var(--person-tint);flex:none}
+.fc-rhythm-task{font:600 13px Montserrat,Arial,sans-serif;color:#545454;line-height:1.4}
+.fc-rhythm-row .fc-job-icon,.fc-rhythm-row .fc-job-icon-fallback{width:34px;height:34px}
+.fc-rhythm-empty{font:italic 13px Georgia,serif;color:#827b75;padding:25px}
+.fc-paper-foot{color:#617c67}
+.fc-anchor-edit{display:grid;gap:10px;margin:8px 0 24px}
+.fc-anchor-card{padding:12px;background:#fff;border:1px solid #e6dfd7;display:grid;gap:7px}
+.fc-anchor-card label{font:700 10px Montserrat,Arial,sans-serif;color:#716961;letter-spacing:.06em}
+.fc-anchor-card input{width:100%;padding:9px;border:1px solid #cec6bd;border-radius:3px;font:12px Montserrat,Arial,sans-serif}
+.fc-anchor-desc{font:11px/1.5 Montserrat,Arial,sans-serif;color:#827b75}
+.fc-anchor-switch{display:flex;gap:8px;align-items:center;font:12px Montserrat,Arial,sans-serif;color:#514845}
+.fc-anchor-switch input{accent-color:#536c59}
+.fc-task-editor select{width:100%}
+@media(max-width:720px){.fc-rhythm-head{padding:13px 16px}.fc-rhythm-row{grid-template-columns:115px 36px minmax(0,1fr)}}
+@media print{.fc-rhythm-head,.fc-rhythm-person::before{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+
+/* Shared-rhythm refinement: compact clusters, unmistakable cues, no artificial tall cards. */
+.fc-charts{flex:1;justify-content:center;gap:22px}
+.fc-rhythm{flex:none;min-height:0;border-radius:8px}
+.fc-rhythm-head{padding:15px 19px;gap:13px}
+.fc-rhythm-head h3{font-size:27px}
+.fc-rhythm-head p{font-size:11px;line-height:1.4;margin-top:5px}
+.fc-rhythm-mark{width:46px;height:46px;flex:none}
+.fc-rhythm-rows{flex:none;padding:5px 20px}
+.fc-rhythm-row{min-height:0;padding:10px 0;grid-template-columns:116px 39px minmax(0,1fr)}
+.fc-rhythm-person{font-size:16px}
+.fc-rhythm-task{font-size:14px;line-height:1.4}
+.fc-rhythm-row .fc-job-icon,.fc-rhythm-row .fc-job-icon-fallback{width:37px;height:37px}
+.fc-rhythm-finish{padding:12px 20px 13px;border-top:1px solid #e8e8e2;background:#fcfcfa;font:italic 12px/1.5 Georgia,serif;color:#6c726a}
+.fc-rhythm-finish strong{font:700 9px Montserrat,Arial,sans-serif;letter-spacing:.11em;color:#556956;margin-right:5px}
+.fc-rhythm-empty{padding:20px}
+.fc-paper-foot{margin-top:0}
+.fc-anchor-edit{margin:6px 0 12px}
+.fc-heading{margin-top:14px}
+@media(max-width:720px){.fc-rhythm-head h3{font-size:27px}.fc-rhythm-row{grid-template-columns:116px 39px minmax(0,1fr)}}
 </style>
 <script>
 import { marchIconArt } from '../../../data/club/march-chore-icons';
-type Job = {title:string;when:string;icon:string};
-type Person = {name:string;color:string;symbol:string;adult?:boolean;jobs:Job[]};
-type Chart = {family:string;people:Person[]};
-const defaults:Chart={family:'Rivera',people:[
-{name:'Sofia',color:'#D8E6F0',symbol:'✿',jobs:[{title:'Make my bed',when:'After getting dressed',icon:'make-bed'},{title:'Clear my dishes',when:'After meals',icon:'clear-dishes'},{title:'Keep my school area tidy',when:'After homework',icon:'tidy-desk'}]},
-{name:'Mateo',color:'#F7E8C2',symbol:'✦',jobs:[{title:'Feed the pets',when:'After breakfast',icon:'feed-pets'},{title:'Put away my laundry',when:'After it is dry',icon:'clothes-away'},{title:'Keep the play area picked up',when:'Before dinner',icon:'toys-away'}]},
-{name:'Elena',color:'#E9DEEC',symbol:'❀',jobs:[{title:'Tidy my room',when:'Before bed',icon:'toys-away'},{title:'Put books away',when:'After reading',icon:'tidy-desk'},{title:'Water the plants',when:'On Sunday',icon:'wipe-surface'}]},
-{name:'Ana',color:'#F1D2D8',symbol:'',adult:true,jobs:[{title:'Plan and make dinner',when:'Weeknights',icon:'make-dinner'}]},
-{name:'Luis',color:'#E6CDB9',symbol:'',adult:true,jobs:[{title:'Keep up with laundry',when:'Sundays',icon:'clothes-away'}]}
-]};
+type Job={title:string;anchor:string;icon:string};
+type Person={name:string;color:string;adult?:boolean;jobs:Job[]};
+type Anchor={id:string;title:string;subtitle:string;symbol:string;tint:string;enabled:boolean};
+type Chart={family:string;people:Person[];anchors:Anchor[]};
+const defaults:Chart={
+ family:'Rivera',
+ anchors:[
+  {id:'breakfast',title:'After Breakfast',subtitle:'We reset together before moving on',symbol:'☀',tint:'#CDDDE1',enabled:true},
+  {id:'dinner',title:'After Dinner',subtitle:'We leave the kitchen ready for tomorrow',symbol:'◒',tint:'#D4DFC4',enabled:true},
+  {id:'bedtime',title:'After Brushing Teeth',subtitle:'We finish our evening together',symbol:'☾',tint:'#F1D8A8',enabled:false}
+ ],
+ people:[
+  {name:'Sofia',color:'#CDDDE1',jobs:[{title:'Clear breakfast dishes',anchor:'breakfast',icon:'clear-dishes'},{title:'Load the dishwasher',anchor:'dinner',icon:'empty-dishwasher'}]},
+  {name:'Mateo',color:'#F1D8A8',jobs:[{title:'Feed the pets',anchor:'breakfast',icon:'feed-pets'},{title:'Clear the dinner table',anchor:'dinner',icon:'clear-dishes'}]},
+  {name:'Elena',color:'#E8D2D6',jobs:[{title:'Put breakfast supplies away',anchor:'breakfast',icon:'tidy-desk'}]},
+  {name:'Ana',color:'#D4DFC4',adult:true,jobs:[{title:'Put away dinner leftovers',anchor:'dinner',icon:'clear-dishes'}]},
+  {name:'Luis',color:'#D5C5B8',adult:true,jobs:[{title:'Clean the kitchen counters',anchor:'dinner',icon:'wipe-surface'}]}
+ ]
+};
 const root=document.querySelector<HTMLElement>('[data-fc-root]');
 if(root){
- const key='omc:prototype:family-chore-chart:v1';
- const load=():Chart=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v?.people?.length===5?v:structuredClone(defaults)}catch{return structuredClone(defaults)}};
+ const key='omc:prototype:family-chore-chart:v2-shared-rhythm';
+ const load=():Chart=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v?.anchors?.length===3&&v?.people?.length===5?v:structuredClone(defaults)}catch{return structuredClone(defaults)}};
  let state=load();let selected=0;
+// Correct the old sample's impossible cue without overwriting custom assignments.
+const ana=state.people.find(p=>p.name==='Ana');
+const latePrep=ana?.jobs.find(j=>j.title==='Own dinner preparation'&&j.anchor==='dinner');
+if(latePrep){latePrep.title='Put away dinner leftovers';latePrep.icon='clear-dishes';}
+state.anchors.forEach(a=>{if(a.id==='breakfast'&&a.subtitle==='Our morning reset')a.subtitle='We reset together before moving on';if(a.id==='dinner'&&a.subtitle==='Our kitchen reset')a.subtitle='We leave the kitchen ready for tomorrow';});
  const paper=root.querySelector<HTMLElement>('[data-fc-charts]')!;
  const edit=root.querySelector<HTMLElement>('[data-fc-edit]')!;
+ const anchorEdit=root.querySelector<HTMLElement>('[data-fc-anchors]')!;
  const picker=root.querySelector<HTMLSelectElement>('[data-fc-person]')!;
  const family=root.querySelector<HTMLInputElement>('[data-fc-family]')!;
  const elt=(tag:string,cls?:string,txt?:string)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
  const iconFor=(key:string)=>marchIconArt(key as Parameters<typeof marchIconArt>[0])?.src;
  const iconNode=(job:Job)=>{const src=iconFor(job.icon);if(src){const img=elt('img','fc-job-icon') as HTMLImageElement;img.src=src;img.alt='';return img}return elt('span','fc-job-icon-fallback','•')};
- const cue=(when:string)=>{const c=elt('span','fc-job-cue');c.append(elt('span','fc-clock','◷'),elt('b',undefined,'WHEN'),document.createTextNode(when));return c};
  const render=()=>{
   paper.replaceChildren();
   root.querySelector<HTMLElement>('[data-fc-family-display]')!.textContent='The '+state.family+' Family';
   family.value=state.family;
-  state.people.forEach((p,i)=>{
-   if(p.adult)return;
-   const card=elt('section','fc-person');card.style.setProperty('--person-tint',p.color);
-   const badge=elt('div','fc-person-name');badge.append(elt('span',undefined,'MY JOBS'),elt('strong',undefined,p.name),elt('span','fc-person-symbol',p.symbol));card.append(badge);
-   const content=elt('div','fc-person-content');content.append(elt('h3',undefined,'My responsibilities'));
-   p.jobs.forEach(j=>{const line=elt('div','fc-job');const mid=elt('div');mid.append(elt('div','fc-job-title',j.title),cue(j.when));line.append(iconNode(j),mid,elt('span','fc-checkbox'));content.append(line)});
-   card.append(content);paper.append(card);
+  state.anchors.filter(a=>a.enabled).forEach(a=>{
+   const card=elt('section','fc-rhythm');
+   card.style.setProperty('--rhythm-tint',a.tint);
+   const head=elt('div','fc-rhythm-head');
+   head.append(elt('span','fc-rhythm-mark',a.symbol));
+   const h=elt('div');h.append(elt('h3',undefined,a.title),elt('p',undefined,a.subtitle));head.append(h);card.append(head);
+   const body=elt('div','fc-rhythm-rows');
+   let count=0;
+   state.people.forEach(p=>p.jobs.filter(j=>j.anchor===a.id&&j.title.trim()).forEach(job=>{
+    count++;
+    const row=elt('div','fc-rhythm-row');row.style.setProperty('--person-tint',p.color);
+    row.append(elt('span','fc-rhythm-person',p.name),iconNode(job),elt('span','fc-rhythm-task',job.title));body.append(row);
+   }));
+   if(!count)body.append(elt('div','fc-rhythm-empty','Choose a responsibility for this moment.'));
+   card.append(body);
+   if(count){const finish=elt('div','fc-rhythm-finish');finish.append(elt('strong',undefined,'WE’RE DONE WHEN'),document.createTextNode(' everyone has finished their part.'));card.append(finish)}
+   paper.append(card);
   });
-  const adults=state.people.filter(p=>p.adult);
-  const card=elt('section','fc-person fc-adults');card.style.setProperty('--person-tint','#E7F0E5');
-  const badge=elt('div','fc-person-name');badge.append(elt('span','fc-person-symbol','⌂'),elt('strong',undefined,'Family'),elt('span',undefined,'GROWN-UPS'));card.append(badge);
-  const content=elt('div','fc-person-content');adults.forEach(p=>{const a=elt('div','fc-adult-card');const n=elt('span','fc-adult-name',p.name);n.style.background=p.color;a.append(n);p.jobs.forEach(j=>{const row=elt('div','fc-adult-task');row.append(iconNode(j),elt('span',undefined,j.title));a.append(row,cue(j.when))});content.append(a)});card.append(content);paper.append(card);
   localStorage.setItem(key,JSON.stringify(state));
+ };
+ const anchorRender=()=>{
+  anchorEdit.replaceChildren();
+  state.anchors.forEach((a,i)=>{
+   const card=elt('div','fc-anchor-card');
+   const togg=elt('label','fc-anchor-switch');const check=document.createElement('input');check.type='checkbox';check.checked=a.enabled;
+   check.disabled=i<2;
+   check.addEventListener('change',()=>{a.enabled=check.checked;anchorRender();editRender();render()});
+   togg.append(check,document.createTextNode(i===2?'Include a third family moment':'Shared moment '+(i+1)));card.append(togg);
+   const label=elt('label',undefined,'MOMENT');const input=document.createElement('input');input.value=a.title;input.maxLength=36;input.disabled=!a.enabled;
+   input.addEventListener('input',()=>{a.title=input.value;render()});label.append(input);card.append(label);
+   if(i===2)card.append(elt('p','fc-anchor-desc','Optional. Two moments are enough for most families.'));
+   anchorEdit.append(card);
+  });
  };
  const editRender=()=>{
   picker.replaceChildren(...state.people.map((p,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=p.name;return o}));picker.value=String(selected);
   edit.replaceChildren();const p=state.people[selected];
-  const nameLabel=elt('label','fc-field','Name');const input=document.createElement('input');input.value=p.name;input.maxLength=22;input.addEventListener('input',()=>{p.name=input.value;picker.options[selected].textContent=p.name;render()});nameLabel.append(input);edit.append(nameLabel);
+  const nameLabel=elt('label','fc-field','Name');const input=document.createElement('input');input.value=p.name;input.maxLength=22;
+  input.addEventListener('input',()=>{p.name=input.value;picker.options[selected].textContent=p.name;render()});nameLabel.append(input);edit.append(nameLabel);
   p.jobs.forEach((job,i)=>{
    const panel=elt('div','fc-task-editor');panel.append(elt('strong',undefined,'Responsibility '+(i+1)));
    const t=elt('label','fc-mini-label','JOB');const ti=document.createElement('input');ti.value=job.title;ti.maxLength=38;ti.addEventListener('input',()=>{job.title=ti.value;render()});t.append(ti);
-   const w=elt('label','fc-mini-label','WHEN');const wi=document.createElement('input');wi.value=job.when;wi.maxLength=32;wi.addEventListener('input',()=>{job.when=wi.value;render()});w.append(wi);panel.append(t,w);edit.append(panel);
-  })
+   const w=elt('label','fc-mini-label','SHARED MOMENT');const wi=document.createElement('select');
+   state.anchors.filter(a=>a.enabled).forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.title;wi.append(o)});
+   wi.value=job.anchor;
+   wi.addEventListener('change',()=>{job.anchor=wi.value;render()});w.append(wi);panel.append(t,w);edit.append(panel);
+  });
+  if(p.jobs.length<3){
+   const add=elt('button','fc-secondary','Add responsibility') as HTMLButtonElement;add.type='button';
+   add.addEventListener('click',()=>{p.jobs.push({title:'',anchor:state.anchors.find(a=>a.enabled)?.id||'breakfast',icon:'tidy-desk'});editRender();render()});edit.append(add);
+  }
  };
  picker.addEventListener('change',()=>{selected=Number(picker.value);editRender()});
  family.addEventListener('input',()=>{state.family=family.value;render()});
- root.querySelector('[data-fc-reset]')!.addEventListener('click',()=>{state=structuredClone(defaults);selected=0;render();editRender()});
+ root.querySelector('[data-fc-reset]')!.addEventListener('click',()=>{state=structuredClone(defaults);selected=0;anchorRender();render();editRender()});
  root.querySelector('[data-fc-print]')!.addEventListener('click',()=>window.print());
- render();editRender();
+ anchorRender();render();editRender();
 }
 </script>
