@@ -6,8 +6,8 @@ import type { RhythmMember } from '../src/lib/club/engines/march-family-rhythm';
 // Phase 2a regression: the default remains March while Welcome may ask for another month.
 // Do not add a second independent recommendation engine.
 const members: RhythmMember[] = [
-  { id: 'adult-1', name: 'Jess', kind: 'adult' },
-  { id: 'child-1', name: 'Max', kind: 'child', birthYear: 2018 },
+  { id: 'adult-1', firstName: 'Jess', kind: 'adult', isAccountHolder: true },
+  { id: 'child-1', firstName: 'Max', kind: 'child', birthYear: 2018, birthMonth: 6 },
 ] as RhythmMember[];
 
 describe('Family Rhythm reusable month boundary', () => {
@@ -29,7 +29,7 @@ describe('Family Rhythm reusable month boundary', () => {
   });
   it('prioritizes the bedtime anchor when bedtime is the stated priority', () => {
     const ctx = rhythmContext(members, undefined);
-    const withBedtime = { ...ctx, snapshot: { ...(ctx.snapshot ?? {}), priority: 'bedtime' } } as typeof ctx;
+    const withBedtime = { ...ctx, snapshot: { v: 1, activities: [], responsibilities: [], priority: 'bedtime' } } as typeof ctx;
     expect(suggestedAnchors(withBedtime)[0]).toBe('teeth');
   });
 });
