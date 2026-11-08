@@ -5,7 +5,7 @@ rely on chat history. Started 2026-11-08 from `main` at `9d113b9`.
 
 | Phase | Scope | Status | PR |
 | --- | --- | --- | --- |
-| 1 | Architecture audit and migration plan (this document) | READY FOR REVIEW | Phase 1 docs PR (see §12) |
+| 1 | Architecture audit and migration plan (this document) | READY FOR REVIEW | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
 | 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | NOT STARTED (blocked on §11 decisions D1–D4) | – |
 | 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 COMPLETE, D5–D6) | – |
 | 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE, D7–D9) | – |
@@ -383,7 +383,7 @@ Recommended option first. Phase 2 needs D1–D4.
 
 | Phase | PR | Status | Notes |
 | --- | --- | --- | --- |
-| 1 | Phase 1 docs PR (link added on creation) | READY FOR REVIEW | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
+| 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) (open) | READY FOR REVIEW | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
 
 ### Phase 1 log (2026-11-08)
 
