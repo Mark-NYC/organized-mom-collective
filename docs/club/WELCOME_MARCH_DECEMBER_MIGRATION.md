@@ -6,7 +6,7 @@ rely on chat history. Started 2026-11-08 from `main` at `9d113b9`.
 | Phase | Scope | Status | PR |
 | --- | --- | --- | --- |
 | 1 | Architecture audit and migration plan (this document) | READY FOR REVIEW | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
-| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | NOT STARTED (blocked on §11 decisions D1–D4) | – |
+| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | NOT STARTED (D1–D4 approved; phased implementation pending) | – |
 | 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 COMPLETE, D5–D6) | – |
 | 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE, D7–D9) | – |
 
@@ -280,7 +280,7 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
       1,600+ commits behind, don't build on it; #251/#253 (December 2026) predate the current page; nothing else
       touches the Welcome Kit
 - [x] Tracker and plan written
-- [ ] Owner review and decisions D1–D9
+- [x] Owner reviewed and approved D1–D6 (D7–D9 deferred; D10 approved in principle)
 
 ### Phase 2: Welcome Family Rhythm
 
@@ -379,6 +379,28 @@ Recommended option first. Phase 2 needs D1–D4.
 | D9 | What the gift variant says | Our family's chosen value ("From our family to yours: Kindness") vs. a value for them | **Our value, given**: never claims the recipient's values or uses their details |
 | D10 | Spring Prep's fate | Retire (redirect) / keep as a digital extra | **Retire** in Phase 3; its jobs and safety notes feed the guide library |
 
+## 11.1 Owner decisions and implementation guardrails (approved 2026-11-08)
+
+- **D1 APPROVED:** separate household-scoped `club_welcome_plans` storage. Do not use a fabricated monthly kit.
+- **D2 APPROVED:** existing members have digital access to Family Rhythm, not another physical mailing.
+- **D3 APPROVED:** all existing Vision orders retain the originally promised Vision print, including pending orders; never convert orders at cutover.
+- **D4 APPROVED:** Welcome and March plans are independent; no March prefill.
+- **D5 APPROVED:** add a bedtime choice to the existing onboarding priority question, with no new question.
+- **D6 TARGET:** premium uncoated paper. Stock and printer compatibility must be verified; no unverified production assumptions are hardcoded.
+- **D7–D9 DEFERRED:** December 2027 configuration, Mission integration and gift language are not yet finally approved. Do not implement Phase 4 on presumed decisions.
+- **D10 APPROVED IN PRINCIPLE:** retire standalone Spring Prep only after its valuable tasks, safety guidance and content are carried into the new March resource.
+
+### Permanent launch guardrails
+
+1. **Avoid overlapping welcome routines.** A member whose *first fulfilled monthly resource* already gives the household a daily rhythm (particularly May Summer Day or August School Day Routines) should not also receive a competing mailed Welcome Family Rhythm. Classify based on the first actual eligible fulfillment, not merely signup calendar month. Document and implement the exception as a separate focused follow-up **before any automated Welcome fulfillment or new-rhythm cutover is activated**. The Family Rhythm stays available digitally in every case. The conditional path must not generate duplicate welcome print orders; its effect on welcome-package order pairing, email copy and readiness must be tested.
+2. **Evergreen, not homework.** The welcome Family Rhythm remains an optional ongoing reference. No mandatory progress tracking, periodic check-ins, reapprovals or automated prompts asking Mom to refresh her plan. An initial print approval is still required for any mailed copy; later voluntary edits can be supported without interfering with an already approved fulfillment snapshot.
+
+### Implementation authorization boundaries
+
+- Phase 2a, 2b and 2c each require a reviewable PR and tracker update. Phase 3 cannot start before Phase 2 is tested and verified.
+- Do **not** apply production database migrations, deploy production functions, change live checkout, flip fulfillment switches or activate automatic mail handling without explicit owner authorization.
+- Protect existing Vision orders and all historical approval snapshots. Run before/after March snapshot tests for 2a.
+
 ## 12. PR links and completion log
 
 | Phase | PR | Status | Notes |
@@ -391,4 +413,4 @@ Recommended option first. Phase 2 needs D1–D4.
 - Changed files: this document; a pointer in `docs/club/WELCOME_KIT.md`.
 - Tests: none needed (docs only).
 - Remaining: owner decisions D1–D9.
-- Next phase depends on: D1–D4; a production fingerprint before any `create or replace` of kit functions.
+- Next phase depends on: approved D1–D4; a production fingerprint before any `create or replace` of kit functions.
