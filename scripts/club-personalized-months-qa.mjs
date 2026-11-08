@@ -76,15 +76,25 @@ for (const month of MONTHS) {
           return [...s.querySelectorAll('h2,h3,strong,span,p,li,img,time,.msr-row,.mcc-row,.asr-row')].filter((el) => {
             const b = el.getBoundingClientRect();
             if (!b.width || !b.height || getComputedStyle(el).visibility === 'hidden') return false;
-            return b.bottom > box.bottom + 1 * scale || b.right > box.right + 1 * scale || b.top < box.top - 1 || b.left < box.left - 1;
+            if (b.bottom > box.bottom + 1 * scale || b.right > box.right + 1 * scale || b.top < box.top - 1 || b.left < box.left - 1) return true;
+            // Cut off by a box inside the sheet (a panel or row that hides its overflow).
+            for (let a = el.parentElement; a && a !== s; a = a.parentElement) {
+              const cs = getComputedStyle(a);
+              if (cs.overflow === 'visible' && cs.overflowY === 'visible' && cs.overflowX === 'visible') continue;
+              const r = a.getBoundingClientRect();
+              if (b.bottom > r.bottom + 1 || b.right > r.right + 1) return true;
+            }
+            return false;
           }).slice(0, 3).map((el) => `${s.dataset.planSheet}: ${el.tagName} “${(el.textContent || el.getAttribute('src') || '').slice(0, 40)}”`);
         }),
         images: sheets.flatMap((s) => [...s.querySelectorAll('img')].filter((i) => i.complete && i.naturalWidth === 0).map((i) => i.getAttribute('src'))),
+        cue: (() => { const c = sheets.map((s) => s.querySelector('.hc-cue')).find(Boolean); if (!c) return null; const cs = getComputedStyle(c); const l = getComputedStyle(c.querySelector('.hc-cue-label')); const i = c.querySelector('img'); return [cs.backgroundColor, cs.color, cs.fontSize, cs.fontFamily.split(',')[0], cs.paddingLeft, cs.paddingRight, cs.borderRadius, l.fontSize, l.letterSpacing, l.textTransform, i?.getAttribute('src')?.includes('clock'), Math.round(i?.getBoundingClientRect().width / (sheets[0].getBoundingClientRect().width / (Number(sheets[0].dataset.planWidth) || 816)))].join('|'); })(),
         mom: /\bMom\b/.test(sheets.map((s) => s.textContent).join(' ')),
         rewards: /\b(points?|stars?|streaks?|rewards?)\b|%/i.test(sheets.map((s) => s.textContent).join(' ')),
       };
     });
     r.sheets = info.sheets.length;
+    r.cueStyle = info.cue;
     r.sheetIds = info.sheets;
     if (!info.sheets.length) fail(r, 'no sheets');
     if (info.ends !== 1) fail(r, `${info.ends} sheets marked as the last`);
@@ -150,5 +160,9 @@ for (const month of MONTHS) {
 await browser.close();
 server.close();
 writeFileSync(join(out, 'report.json'), JSON.stringify(report, null, 2));
+// The WHEN cue must look the same in every month.
+const styles = [...new Set(report.map((r) => r.cueStyle).filter(Boolean))];
+console.log(`WHEN cue styles across months: ${styles.length === 1 ? 'identical' : `DIFFERENT\n  ${styles.join('\n  ')}`}`);
+if (styles.length > 1) failed++;
 console.log(failed ? `\n${failed} problem(s)` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);

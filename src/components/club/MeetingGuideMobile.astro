@@ -15,6 +15,7 @@ import { routes } from '../../routes';
 /** approvalKey: the same key the page gives the desktop rail, so approval agrees on both screens. */
 interface Props { deadline: string; kicker: string; approvalKey: string }
 const { deadline, kicker, approvalKey } = Astro.props;
+import '../../styles/club-marks.css';
 ---
 <ClubPlanScreen deadline={deadline} kicker={kicker} sheets={['front']} previewNote="Ready to print on Letter paper" hero={false}>
   <slot name="title" slot="title" />
@@ -88,6 +89,7 @@ import { el } from '../../lib/club/plan/dom';
 import { mountPlanScreen } from '../../lib/club/plan/screen';
 import { planNow } from '../../lib/club/plan/status';
 import { anchorLine } from '../../lib/club/meeting-guide/anchor';
+import { habitCue } from '../../lib/club/personalize/marks';
 import { monthTints } from '../../lib/club/month-tints';
 import type { GuidePlan } from '../../lib/club/meeting-guide/printable';
 import type { GuideState } from '../../lib/club/meeting-guide/state';
@@ -123,7 +125,7 @@ if (root && host) {
           ...(e.basis === 'consider' && e.memberIds.length ? [el('p', { class: 'mgm-consider' }, g.considerLabel)] : []),
           el('p', { class: 'mgm-what' }, e.action),
           ...(e.adaptations ? [el('ul', { class: 'mgm-parts' }, ...e.adaptations.map((a) => el('li', {}, dot(a.memberId), el('span', {}, el('strong', {}, a.name), a.action))))] : []),
-          ...(e.anchor.text ? [el('p', { class: 'mgm-line' }, el('b', {}, 'When: '), anchorLine(e.anchor))] : []),
+          ...(e.anchor.text ? [el('p', { class: 'mgm-line' }, habitCue(anchorLine(e.anchor).replace(/\.$/, '')))] : []),
           el('p', { class: 'mgm-line' }, el('b', {}, 'Ownership: '), e.ownership),
           ...(e.support && (e.adaptations || e.principle === 'environment') ? [el('p', { class: 'mgm-line' }, el('b', {}, 'Help: '), e.support)] : []),
           progress);

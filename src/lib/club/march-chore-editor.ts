@@ -5,9 +5,10 @@
  */
 import { el } from './plan/dom';
 import {
-  DAILY_MAX, TEXT_LIMIT, addDaily, ageOf, chartPeople, dailyChoices, removeDaily, renameJob, setChartOn, setPalette,
-  setWeekly, weeklyChoices, type ChorePlan,
+  DAILY_MAX, TEXT_LIMIT, addDaily, ageOf, chartPeople, dailyChoices, removeDaily, renameJob, setChartOn, setDailyCue, setPalette,
+  setWeekly, setWeeklyCue, weeklyChoices, type ChorePlan,
 } from './engines/march-chore-charts';
+import { CUE_LIMIT, habitCue } from './personalize/marks';
 import { toolPalettes } from '../../data/tool-palettes';
 
 const chip = (text: string, on: boolean, pick: () => void, opts: { disabled?: boolean } = {}) => {
@@ -35,39 +36,49 @@ export function kidEditor(plan: ChorePlan, kidId: string, redraw: () => void): H
   const daily = el('div', { class: 'mcc-ed-list' }, ...chart.daily.map((j, i) => {
     const name = el('input', { type: 'text', value: j.title, maxLength: TEXT_LIMIT });
     name.setAttribute('aria-label', `Daily chore ${i + 1}`);
-    name.addEventListener('change', () => change(() => p.update((s) => renameJob(s, kidId, { daily: i }, name.value, m(), p.pets()))));
+    name.addEventListener('change', () => change(() => p.update((s) => renameJob(s, kidId, { daily: i }, name.value, m(), p.prefs()))));
     const remove = el('button', { type: 'button', class: 'mcc-ed-remove' }, 'Remove');
     remove.setAttribute('aria-label', `Remove ${j.title}`);
-    remove.addEventListener('click', () => change(() => p.update((s) => removeDaily(s, kidId, i, m(), p.pets()))));
-    return el('div', { class: 'mcc-ed-row' }, name, remove);
+    remove.addEventListener('click', () => change(() => p.update((s) => removeDaily(s, kidId, i, m(), p.prefs()))));
+    // Its cue: the everyday moment it follows. Blank goes back to the prepared one.
+    const cue = el('input', { type: 'text', class: 'mcc-ed-cue', value: j.cue, maxLength: CUE_LIMIT });
+    cue.setAttribute('aria-label', `When: ${j.title}`);
+    cue.addEventListener('change', () => change(() => p.update((s) => setDailyCue(s, kidId, i, cue.value, m(), p.prefs()))));
+    return el('div', { class: 'mcc-ed-job' }, el('div', { class: 'mcc-ed-row' }, name, remove),
+      el('label', { class: 'mcc-ed-when' }, habitCue(j.cue), el('span', { class: 'mcc-ed-label' }, 'Change when'), cue));
   }));
   const present = new Set(chart.daily.map((j) => j.id));
   const full = chart.daily.length >= DAILY_MAX;
   const adds = group('Add a daily chore', ...dailyChoices(kid, p.pets()).filter((d) => !present.has(d.id))
-    .map((d) => chip(`+ ${d.title}`, false, () => change(() => p.update((s) => addDaily(s, kidId, d.id, m(), p.pets()))), { disabled: full })));
+    .map((d) => chip(`+ ${d.title}`, false, () => change(() => p.update((s) => addDaily(s, kidId, d.id, m(), p.prefs()))), { disabled: full })));
   const own = el('input', { type: 'text', maxLength: TEXT_LIMIT, placeholder: 'Or type your own', disabled: full });
   own.setAttribute('aria-label', 'Your own daily chore');
   own.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); own.dispatchEvent(new Event('change')); } });
   // Enter and the browser's own change both land here; clearing first keeps it to one chore.
-  own.addEventListener('change', () => { const v = own.value.trim(); own.value = ''; if (v) change(() => p.update((s) => addDaily(s, kidId, `own-${Date.now().toString(36)}`, m(), p.pets(), v))); });
+  own.addEventListener('change', () => { const v = own.value.trim(); own.value = ''; if (v) change(() => p.update((s) => addDaily(s, kidId, `own-${Date.now().toString(36)}`, m(), p.prefs(), v))); });
 
   const weekly = el('div', { class: 'mcc-ed-list' }, ...chart.weekly.map((w) => el('div', { class: 'mcc-ed-job' },
     el('p', { class: 'mcc-ed-day' }, el('strong', {}, w.label), ` · ${w.zone} on your calendar`),
     group(`${w.label} chore`,
-      ...weeklyChoices(kid, w.day).map((d) => chip(d.title, w.job?.id === d.id, () => change(() => p.update((s) => setWeekly(s, kidId, w.day, d.id, m(), p.pets()))))),
-      chip('Day off', !w.job, () => change(() => p.update((s) => setWeekly(s, kidId, w.day, null, m(), p.pets())))))),
+      ...weeklyChoices(kid, w.day).map((d) => chip(d.title, w.job?.id === d.id, () => change(() => p.update((s) => setWeekly(s, kidId, w.day, d.id, m(), p.prefs()))))),
+      chip('Day off', !w.job, () => change(() => p.update((s) => setWeekly(s, kidId, w.day, null, m(), p.prefs())))))),
   ));
 
+  const wc = el('input', { type: 'text', class: 'mcc-ed-cue', value: chart.weeklyCue, maxLength: CUE_LIMIT });
+  wc.setAttribute('aria-label', 'When the weekly chores happen');
+  wc.addEventListener('change', () => change(() => p.update((s) => setWeeklyCue(s, kidId, wc.value, m(), p.prefs()))));
+  const weeklyCueField = el('label', { class: 'mcc-ed-when' }, habitCue(chart.weeklyCue), el('span', { class: 'mcc-ed-label' }, 'Change when'), wc);
   const parts: Node[] = [
     el('h3', { class: 'mcc-ed-h' }, 'Daily chores'),
     el('p', { class: 'mcc-ed-hint' }, chart.adult
-      ? 'Grown-up jobs, shared out between the grown-ups so nobody carries them all. Only the chores listed here print.'
-      : `Prepared for age ${age}: their own jobs plus a share of the family’s, so nobody has the same job twice. Only the chores listed here print, so fewer is fine.`),
+      ? 'Grown-up jobs, shared out between the grown-ups so nobody carries them all. Only the chores listed here print. Each has a cue: the everyday moment it follows.'
+      : `Prepared for age ${age}: their own jobs plus a share of the family’s, so nobody has the same job twice. Only the chores listed here print, so fewer is fine. Each has a cue: the everyday moment it follows.`),
     daily,
     el('p', { class: 'mcc-ed-label' }, full ? `${DAILY_MAX} is the most that fit. Remove one to add another.` : 'Add a daily chore'),
     adds, own,
     el('h3', { class: 'mcc-ed-h' }, 'Weekly chores'),
-    el('p', { class: 'mcc-ed-hint' }, 'One a day, matched to that day’s cleaning zone on your wall calendar, or a day off.'),
+    el('p', { class: 'mcc-ed-hint' }, 'One a day, matched to that day’s cleaning zone on your wall calendar, or a day off. One cue for the week: the day changes, the moment doesn’t.'),
+    weeklyCueField,
     weekly,
   ];
   return el('div', { class: 'mcc-ed' }, ...parts);

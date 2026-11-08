@@ -26,8 +26,11 @@ import { responsibilityById } from '../../../data/responsibilities';
 import { defaultToolPalette, resolveToolPalette, type ToolPaletteId } from '../../../data/tool-palettes';
 import { stableHash } from '../hash';
 import { ageInMonth } from '../profile';
-import { familyContext, isFamilySnapshot, type ContextMember, type FamilyContext, type FamilySnapshot } from '../personalize/family';
+import { familyContext, isFamilySnapshot, type ContextMember, type ContextPrefs, type FamilyContext, type FamilySnapshot } from '../personalize/family';
 import { assignTasks } from '../personalize/assign';
+import { colorFor } from '../personalize/colors';
+import { CUE, DEFAULT_CUE, cueFor } from '../personalize/cues';
+import { tidyCue } from '../personalize/marks-text';
 import type { PlanResource } from '../plan/resource';
 
 export const KIT_MONTH = '2027-03';
@@ -94,13 +97,18 @@ export const WEEK: readonly { day: number; label: string; zone: string }[] = [..
 export interface ChoreMember {
   id: string; firstName: string; kind: string; role?: string; birthYear?: number; birthMonth?: number; archived?: boolean; isAccountHolder?: boolean;
 }
-export interface ChorePrefs { pets?: boolean }
-export interface Job { id: string; title: string }
+export interface ChorePrefs extends ContextPrefs { pets?: boolean }
+/** `cue`: her own habit cue for this chore; without one the chart prints the prepared cue (`CHORE_CUES`). */
+export interface Job { id: string; title: string; cue?: string }
 export interface KidPlan {
   daily?: Job[];
   /** By weekday number (0–6); null = a day off. */
   weekly?: Record<string, Job | null>;
+  /** Her cue for the weekly jobs (one for the section: the day changes, the moment doesn't). */
+  weeklyCue?: string;
 }
+/** A person's chart as prepared or edited: their daily chores and a job (or day off) per weekday. */
+export interface PreparedChart { daily: Job[]; weekly: Record<string, Job | null>; weeklyCue?: string }
 export interface ChoreState {
   palette: ToolPaletteId;
   /** Her changes, by member id (children and grown-ups; the name is from when only children had charts). */
@@ -143,10 +151,10 @@ const ctxOf = (members: readonly ChoreMember[], prefs: ChorePrefs, snapshot?: Fa
  * The prepared charts for the whole family at once, so household jobs are shared out. Charts she has changed
  * (`pinned`) stay as they are, and the household jobs on them count as taken.
  */
-export function preparedFamily(members: readonly ChoreMember[], prefs: ChorePrefs, snapshot?: FamilySnapshot, pinned: Record<string, KidPlan> = {}, off: string[] = []): Record<string, Required<KidPlan>> {
+export function preparedFamily(members: readonly ChoreMember[], prefs: ChorePrefs, snapshot?: FamilySnapshot, pinned: Record<string, KidPlan> = {}, off: string[] = []): Record<string, PreparedChart> {
   const ctx = ctxOf(members, prefs, snapshot);
   const people = chartPeople({ off }, members);
-  const out: Record<string, Required<KidPlan>> = {};
+  const out: Record<string, PreparedChart> = {};
   const free = people.filter((p) => !pinned[p.id]?.daily);
   const takenDaily = new Set(people.flatMap((p) => pinned[p.id]?.daily?.map((j) => j.id) ?? []));
   const person = (id: string) => ctx.people.find((p) => p.id === id);
@@ -220,11 +228,24 @@ export const preparedWeekly = (age: number): Record<string, Job | null> =>
     return [String(w.day), toJob(able.at(-1) ?? ZONE_CHORES[w.day][0])];
   }));
 
-export const kidChart = (s: ChoreState, kid: ChoreMember, members: readonly ChoreMember[], prefs: ChorePrefs, prepared?: Record<string, Required<KidPlan>>) => {
+export const kidChart = (s: ChoreState, kid: ChoreMember, members: readonly ChoreMember[], prefs: ChorePrefs, prepared?: Record<string, PreparedChart>) => {
   const k = s.kids[kid.id] ?? {};
   const p = (prepared ?? preparedFamily(members, prefs, s.profile, s.kids, s.off))[kid.id] ?? { daily: [], weekly: {} };
   return { daily: k.daily ?? p.daily, weekly: k.weekly ?? p.weekly };
 };
+
+/**
+ * Each listed chore's habit cue: the existing moment it follows (../personalize/cues.ts). A chore she typed gets the
+ * shared default, and every cue is hers to change. Never a clock time or a due date.
+ */
+export const CHORE_CUES: Readonly<Record<string, string>> = {
+  'make-my-bed': CUE.dressed, 'put-toys-away': CUE.beforeDinner, 'put-clothes-away': CUE.bed, 'tidy-my-desk': CUE.homework,
+  'set-the-table': CUE.beforeDinner, 'clear-the-table': CUE.dinner, 'wipe-the-counters': CUE.dinner, 'feed-pets': CUE.breakfast,
+  'take-out-the-trash': CUE.dinner, dishwasher: CUE.breakfast, 'help-dinner': CUE.home,
+  'cook-dinner': CUE.everyoneHome, 'run-dishwasher': CUE.dinner, 'laundry-load': CUE.breakfast, 'mail-papers': CUE.dinner, 'evening-pickup': CUE.kidsDown,
+};
+/** The weekly section's cue: after school for a school-aged child, after lunch at home, after dinner for grown-ups. */
+const WEEKLY_CUE = { child: CUE.school, adult: CUE.dinner } as const;
 
 const LISTED = new Map([...DAILY_CHORES, ...ADULT_DAILY, ...Object.values(ZONE_CHORES).flat()].map((d) => [d.id, d]));
 /** A listed chore's icon while it still says what the list says; renamed and typed chores have none. */
@@ -238,6 +259,9 @@ const prefsOf = (pets: boolean | ChorePrefs): ChorePrefs => (typeof pets === 'bo
 export const choreView = (s: ChoreState, members: readonly ChoreMember[], pets: boolean | ChorePrefs = false) => {
   const prefs = prefsOf(pets);
   const prepared = preparedFamily(members, prefs, s.profile, s.kids, s.off);
+  const ctx = ctxOf(members, prefs, s.profile);
+  // Her cue, or the chore's prepared cue fitted to this person (no school-day cue for a child who isn't in school).
+  const cueOf = (j: Job, id: string) => (j.cue && tidyCue(j.cue)) || cueFor(ctx, CHORE_CUES[j.id] ?? DEFAULT_CUE, id);
   return {
     palette: s.palette,
     charts: chartPeople(s, members).map((person) => {
@@ -249,7 +273,12 @@ export const choreView = (s: ChoreState, members: readonly ChoreMember[], pets: 
         /** Children's age in March 2027; null for grown-ups. */
         age: isAdult(person) ? null : ageOf(person),
         changed: Boolean(s.kids[person.id]),
-        daily: c.daily.map((j) => ({ ...j, icon: iconFor(j) })),
+        /** January's marker color for this person, by member id (neutral when there's none). */
+        color: colorFor(ctx.colors, person.id),
+        daily: c.daily.map((j) => ({ ...j, icon: iconFor(j), cue: cueOf(j, person.id) })),
+        /** The weekly jobs' one cue, and the prepared one (for the editor). */
+        weeklyCue: (s.kids[person.id]?.weeklyCue && tidyCue(s.kids[person.id].weeklyCue!)) || cueFor(ctx, isAdult(person) ? WEEKLY_CUE.adult : WEEKLY_CUE.child, person.id),
+        preparedWeeklyCue: cueFor(ctx, isAdult(person) ? WEEKLY_CUE.adult : WEEKLY_CUE.child, person.id),
         weekly: WEEK.map((w) => {
           const j = c.weekly[String(w.day)] ?? null;
           return { day: w.day, label: w.label, zone: w.zone, job: j ? { ...j, icon: iconFor(j) } : null };
@@ -265,7 +294,7 @@ export type ChartView = ChoreView['charts'][number];
 
 export const choreFingerprint = (s: ChoreState, members: readonly ChoreMember[], pets: boolean | ChorePrefs = false) => {
   const v = choreView(s, members, pets);
-  return JSON.stringify([v.palette, v.charts.map((c) => [c.name, c.daily.map((j) => j.title), c.weekly.map((w) => w.job?.title ?? null)])]);
+  return JSON.stringify([v.palette, v.charts.map((c) => [c.name, c.color.id, c.daily.map((j) => [j.title, j.cue]), c.weeklyCue, c.weekly.map((w) => w.job?.title ?? null)])]);
 };
 
 /** The chores someone can add: children by age, grown-ups anything on the lists. */
@@ -277,11 +306,12 @@ export const dailyChoices = (person: ChoreMember, pets: boolean) => {
 export const weeklyChoices = (person: ChoreMember, day: number) => ZONE_CHORES[day].filter((d) => d.minAge <= ageOf(person) + 1);
 
 // Edits. Each changes `s` in place and returns it.
-const own = (s: ChoreState, kidId: string, members: readonly ChoreMember[], pets: boolean | ChorePrefs): Required<KidPlan> | null => {
+const own = (s: ChoreState, kidId: string, members: readonly ChoreMember[], pets: boolean | ChorePrefs): PreparedChart | null => {
   const person = chartPeople(s, members).find((k) => k.id === kidId);
   if (!person) return null;
   const c = kidChart(s, person, members, prefsOf(pets));
-  return (s.kids[kidId] = { daily: structuredClone(c.daily), weekly: structuredClone(c.weekly) });
+  const weeklyCue = s.kids[kidId]?.weeklyCue;
+  return (s.kids[kidId] = { daily: structuredClone(c.daily), weekly: structuredClone(c.weekly), ...(weeklyCue ? { weeklyCue } : {}) });
 };
 const tidy = (text: string) => text.replace(/\s+/g, ' ').trim().slice(0, TEXT_LIMIT);
 export const removeDaily = (s: ChoreState, kidId: string, i: number, members: readonly ChoreMember[], pets: boolean | ChorePrefs = false) => {
@@ -316,6 +346,25 @@ export const setWeekly = (s: ChoreState, kidId: string, day: number, id: string 
   k.weekly[String(day)] = def ? toJob(def) : null;
   return s;
 };
+/** Her cue for a daily chore; blank (or the prepared cue) goes back to the prepared one. */
+export const setDailyCue = (s: ChoreState, kidId: string, i: number, cue: string, members: readonly ChoreMember[], pets: boolean | ChorePrefs = false) => {
+  const k = own(s, kidId, members, pets);
+  const j = k?.daily[i];
+  if (!j) return s;
+  const prepared = cueFor(ctxOf(members, prefsOf(pets), s.profile), CHORE_CUES[j.id] ?? DEFAULT_CUE, kidId);
+  const clean = tidyCue(cue);
+  if (clean && clean !== prepared) j.cue = clean; else delete j.cue;
+  return s;
+};
+/** Her cue for the weekly jobs. */
+export const setWeeklyCue = (s: ChoreState, kidId: string, cue: string, members: readonly ChoreMember[], pets: boolean | ChorePrefs = false) => {
+  const prepared = choreView(s, members, pets).charts.find((c) => c.id === kidId)?.preparedWeeklyCue;
+  const k = own(s, kidId, members, pets);
+  if (!k) return s;
+  const clean = tidyCue(cue);
+  if (clean && clean !== prepared) (k as KidPlan).weeklyCue = clean; else delete (k as KidPlan).weeklyCue;
+  return s;
+};
 export const setPalette = (s: ChoreState, id: string) => { s.palette = resolveToolPalette(id); return s; };
 /** Print a grown-up's chart, or leave it off (their jobs go back to the others). */
 export const setChartOn = (s: ChoreState, adultId: string, on: boolean, members: readonly ChoreMember[]) => {
@@ -348,7 +397,7 @@ export const applyFamily = (s: ChoreState, members: readonly ChoreMember[]) => {
 
 const isJob = (x: unknown): x is Job => {
   const j = x as Partial<Job> | null;
-  return Boolean(j && typeof j.id === 'string' && typeof j.title === 'string');
+  return Boolean(j && typeof j.id === 'string' && typeof j.title === 'string' && (j.cue === undefined || typeof j.cue === 'string'));
 };
 export const isChoreState = (x: unknown): x is ChoreState => {
   const s = x as Partial<ChoreState> | null;
@@ -362,6 +411,8 @@ export const isChoreState = (x: unknown): x is ChoreState => {
 export interface ChorePlan extends PlanResource<ChoreState> {
   members: () => ChoreMember[];
   pets: () => boolean;
+  /** The household preferences the charts read (pets, school, January's saved member colors). */
+  prefs: () => ChorePrefs;
   view: () => ChoreView;
   setLocked: (on: boolean) => void;
   openEditor: (kidId?: string) => void;

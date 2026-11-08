@@ -4,6 +4,7 @@
  * docs/club/PERSONALIZATION_FOUNDATION.md): quiet time by ages, activities from their interests, and the family's jobs
  * on the anchors they belong to, with names. planMode: the Club plan page (/app/club/may) brings the layout and rail. */
 import '../../styles/club-personalize.css';
+import '../../styles/club-marks.css';
 interface Props {storageKey?:string; planMode?:boolean}
 const {storageKey='omc:club:may-summer-rhythm:v1', planMode=false}=Astro.props;
 const blocks=[
@@ -296,7 +297,10 @@ const blocks=[
 /* Who helps: the family's jobs on each anchor, with names (shared personalization). One quiet line under the activities. */
 .msr-parts{display:flex;flex-wrap:wrap;gap:2px 12px;margin:5px 0 0!important;font:500 11px/1.35 Montserrat,Arial,sans-serif!important;color:#59664f!important}
 .msr-parts[hidden]{display:none!important}
-.msr-part b{font-weight:700;letter-spacing:.04em;color:#41583f;margin-right:4px}
+.msr-part{display:inline-flex;align-items:center;gap:5px}
+.msr-part .mc-owner{font-size:10px}
+.msr-part-job{color:#4f5c4b}
+.msr-parts>.hc-cue{margin-left:2px}
 .msr-sheet.msr-dense .msr-rows{gap:5px}
 .msr-sheet.msr-dense .msr-row{min-height:76px}
 .msr-sheet.msr-dense .msr-row-copy h3{font-size:22px;margin-bottom:4px}
@@ -312,13 +316,15 @@ const blocks=[
 import { PLAN_CHANGE } from "../../lib/club/plan/resource";
 import {
  DESC_LIMIT, LABELS, MAY_KEYS, START_TIMES, TINTS, TITLE_LIMIT, clock as engineClock, familyDefaults, keepToFamily, mayContext,
- mayFingerprint, mayParts, mayRows, partRules, readSaved, starter as prepared, visibleKeys as shownKeys,
+ mayFingerprint, mayParts, mayRows, partRules, readSaved, starter as prepared, visibleKeys as shownKeys, cueOf, CUE_LIMIT,
  type MayState, type MayPlan, type MayMember,
 } from "../../lib/club/engines/may-summer-rhythm";
 import type { FamilyContext, FamilySnapshot } from '../../lib/club/personalize/family';
 import { familySnapshot, settledSnapshot } from '../../lib/club/personalize/family';
 import { resetTask, setTaskSkip, setTaskTitle, toggleTaskOwner, type TaskEdits } from '../../lib/club/personalize/edits';
 import { taskEditor } from '../../lib/club/personalize/editor';
+import { habitCue, ownerTags } from '../../lib/club/personalize/marks';
+import { tidyCue } from '../../lib/club/personalize/marks-text';
 import type { FamilyProfile } from '../../lib/club/family-profile';
 type Person=MayMember;
 type Quiet='independent'|'rest'|'older';
@@ -326,7 +332,7 @@ type Play='outdoors'|'active'|'creative'|'mixed';
 type Structure='relaxed'|'balanced'|'structured';
 type Days='home'|'mixed'|'camp';
 type Key='morning'|'move'|'create'|'lunch'|'quiet'|'free'|'snack'|'evening';
-type Edit={title?:string;desc?:string;time?:string};
+type Edit={title?:string;desc?:string;time?:string;cue?:string};
 type Options={start:number;quiet:Quiet;play:Play;structure:Structure;days:Days;snack:boolean};
 type Detail={household:{id:string;displayName?:string;members:Person[];preferences?:{pets?:boolean}};sample?:string|null;profile?:FamilyProfile|null};
 const keys:Key[]=[...MAY_KEYS];
@@ -369,6 +375,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   sheet.style.setProperty('--msr-scale',String(scale));
  };
  fit();
+ // The sheet is measured when it's visible: the plan page shows it only once the family is ready (then it resizes).
+ window.addEventListener('resize',()=>fitSheet());
  const parent=stage?.parentElement;
  if(parent&&typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(parent);
  window.addEventListener('resize',fit);
@@ -380,8 +388,8 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   removed=[];
   parts={};
  };
- const starter=(key:Key):Required<Edit>=>prepared(key,options,ctx??undefined);
- const resolved=(key:Key):Required<Edit>=>({...starter(key),...(edits[key]??{})});
+ const starter=(key:Key):Required<Omit<Edit,'cue'>>=>prepared(key,options,ctx??undefined);
+ const resolved=(key:Key):Required<Omit<Edit,'cue'>>=>{const {cue:_c,...e}=edits[key]??{};return {...starter(key),...e}};
  const visionDialog=root.querySelector<HTMLDialogElement>('[data-vision-dialog]');
  const editorDialog=root.querySelector<HTMLDialogElement>('[data-editor-dialog]');
  root.querySelector('[data-open-vision]')?.addEventListener('click',()=>visionDialog?.showModal());
@@ -409,7 +417,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    removeButton.addEventListener('click',()=>removeBlock(key));
    buttons.append(removeButton);
    top.append(name,buttons);wrapper.append(top);
-   const fields:[keyof Edit,string,number][]=[['title','Block name',38],['desc','Activity examples',78],['time','Start time (optional)',5]];
+   const fields:[Exclude<keyof Edit,'cue'>,string,number][]=[['title','Block name',38],['desc','Activity examples',78],['time','Start time (optional)',5]];
    for(const [field,labelText,max] of fields){
     const label=document.createElement('label');label.textContent=labelText;
     const input=document.createElement('input');input.type=field==='time'?'time':'text';
@@ -472,11 +480,20 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
   wrap.hidden=!ctx||!all.length;
   if(!ctx||!all.length){partsEditor.replaceChildren();return}
   const edit=(fn:()=>void)=>{fn();update()};
-  partsEditor.replaceChildren(taskEditor({ctx,tasks:all.map(t=>({...t,label:t.label})),rules:partRules,locked,
-   onOwners:(id,person,cur)=>edit(()=>toggleTaskOwner(parts,id,cur,person)),
-   onTitle:(id,title)=>edit(()=>setTaskTitle(parts,id,title,all.find(t=>t.id===id)?.title??title)),
-   onSkip:(id,skip)=>edit(()=>setTaskSkip(parts,id,skip)),
-   onReset:(id)=>edit(()=>resetTask(parts,id))}));
+  const c=ctx;
+  // Grouped by anchor: its one WHEN for the family jobs, then who does each.
+  partsEditor.replaceChildren(...keys.filter(k=>all.some(p=>p.block===k)).flatMap(k=>{
+   const cue=document.createElement('input');cue.type='text';cue.className='po-input';cue.maxLength=CUE_LIMIT;cue.value=cueOf(k,edits)??'';cue.disabled=locked;
+   cue.setAttribute('aria-label','When the '+labels[k]+' jobs happen');
+   cue.addEventListener('change',()=>edit(()=>{const v=tidyCue(cue.value);const e={...(edits[k]??{})};if(v&&v!==cueOf(k,{}))e.cue=v;else delete e.cue;edits[k]=e}));
+   const field=document.createElement('label');field.className='po-field';const span=document.createElement('span');span.textContent='When (an everyday moment, like “After breakfast”)';field.append(span,cue);
+   const h=document.createElement('h4');h.className='po-section';h.textContent=labels[k];
+   return [h,field,taskEditor({ctx:c,tasks:all.filter(p=>p.block===k),rules:partRules,locked,
+    onOwners:(id,person,cur)=>edit(()=>toggleTaskOwner(parts,id,cur,person)),
+    onTitle:(id,title)=>edit(()=>setTaskTitle(parts,id,title,all.find(t=>t.id===id)?.title??title)),
+    onSkip:(id,skip)=>edit(()=>setTaskSkip(parts,id,skip)),
+    onReset:(id)=>edit(()=>resetTask(parts,id))})];
+  }));
  };
  // A long family plan can make the rows taller: a little tighter spacing keeps it on one page, never clipped.
  const fitSheet=()=>{
@@ -503,7 +520,10 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
    const title=node.querySelector<HTMLElement>('[data-title]');if(title)title.textContent=v.title;
    const desc=node.querySelector<HTMLElement>('[data-desc]');if(desc)desc.textContent=v.desc;
    const who=node.querySelector<HTMLElement>('[data-parts]');
-   if(who){const list=partsOf(key);who.hidden=!list.length;who.replaceChildren(...list.map(p=>{const chip=document.createElement('span');chip.className='msr-part';const b=document.createElement('b');b.textContent=p.who;chip.append(b,document.createTextNode(p.label));return chip}))}
+   // The anchor's family jobs: each job with its owners in their family colors, then the one moment they follow.
+   if(who){const list=partsOf(key);who.hidden=!list.length;who.replaceChildren(...list.map(p=>{const chip=document.createElement('span');chip.className='msr-part';const job=document.createElement('span');job.className='msr-part-job';job.textContent=p.label;chip.append(ownerTags(p.owners),job);return chip}))}
+   // The jobs' one cue ends their line (it wraps under them when the line is full).
+   if(who&&!who.hidden){const cue=cueOf(key,edits);if(cue)who.append(habitCue(cue))}
    const time=node.querySelector<HTMLElement>('[data-time]');if(time){const formatted=clock(v.time);const match=formatted.match(/^(.*?)( AM| PM)$/);time.replaceChildren(document.createTextNode(match?match[1]:formatted));if(match){const suffix=document.createElement('span');suffix.className='msr-meridiem';suffix.textContent=match[2];time.append(suffix)}}
    if(time)time.hidden=options.structure==='relaxed'||!v.time;
    node.querySelector<HTMLButtonElement>('[data-move-up]')?.toggleAttribute('disabled',order.indexOf(key)===0);
@@ -657,6 +677,7 @@ for(const root of document.querySelectorAll<HTMLElement>('.msr')){
        const edit:Edit={};
        if(typeof obj.title==='string')edit.title=obj.title.slice(0,TITLE_LIMIT);
        if(typeof obj.desc==='string')edit.desc=obj.desc.slice(0,DESC_LIMIT);
+       if(typeof obj.cue==='string'&&obj.cue.trim())edit.cue=tidyCue(obj.cue);
        if(typeof obj.time==='string'&&(/^([01]\d|2[0-3]):[0-5]\d$/.test(obj.time)||obj.time===''))edit.time=obj.time;
        edits[key]=edit;
       }

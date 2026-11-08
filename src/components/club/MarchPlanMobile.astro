@@ -5,6 +5,7 @@
  * (src/lib/club/march-chore-editor.ts) in an edit sheet. Plan changes go through the printable's `clubPlan`.
  */
 import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+import '../../styles/club-marks.css';
 import MarchTabs from './MarchTabs.astro';
 interface Props { deadline: string }
 const { deadline } = Astro.props;
@@ -57,11 +58,18 @@ if (root && host) {
     b.addEventListener('click', open);
     return el('li', {}, b);
   };
+  // Each person's family color (January's) on their initial; the name is always beside it.
+  const avatar = (c: { name: string; color: { hex: string; ink: string } }) => {
+    const a = el('span', { class: 'cp-avatar' }, c.name.charAt(0));
+    a.style.background = c.color.ink;
+    a.style.color = '#fff';
+    return a;
+  };
   const render = (_ui: PlanScreen<ChoreState>, s: ChoreState, locked: boolean) => {
     const v = plan().view();
     q('[data-mpm-kids]').replaceChildren(...(v.charts.length ? v.charts.map((c) => row(c.adult ? 'Grown-up' : `Age ${c.age}`, c.name,
       `${c.daily.length} daily chores · ${c.weekly.filter((w) => w.job).length} weekly`,
-      () => openKid(c.id), locked, el('span', { class: 'cp-avatar' }, c.name.charAt(0)))) : [el('li', { class: 'cp-intro' }, 'Add your family to your family profile to prepare their charts.')]));
+      () => openKid(c.id), locked, avatar(c))) : [el('li', { class: 'cp-intro' }, 'Add your family to your family profile to prepare their charts.')]));
     const grownUps = v.adults.filter((a) => a.on).map((a) => a.name);
     q('[data-mpm-family]').replaceChildren(
       row('Colors', toolPalettes[v.palette].label, '', openFamily, locked),

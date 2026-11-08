@@ -5,6 +5,7 @@
  * Presentation only: what it says comes from ./generate.ts and the month's content.
  */
 import { anchorLine } from './anchor';
+import { habitCue } from '../personalize/marks';
 import { monthTints } from '../month-tints';
 import { guideMonth } from '../../../data/club/meeting-guides';
 import { routes } from '../../../routes';
@@ -65,7 +66,8 @@ function blocks(g: MeetingGuide, monthLabel: string) {
       ...(e.basis === 'consider' && e.memberIds.length ? [el('p', { class: 'mg-exp-why' }, g.considerLabel)] : []),
       el('p', { class: 'mg-exp-action' }, e.action),
       ...(e.adaptations ? [el('ul', { class: 'mg-exp-adapt' }, ...e.adaptations.map((x) => el('li', {}, chip(g, x.memberId), el('span', {}, x.action))))] : []),
-      ...(e.anchor.text ? [el('p', { class: 'mg-exp-line' }, el('b', {}, 'When: '), anchorLine(e.anchor))] : []),
+      // The shared WHEN mark (../personalize/marks.ts), the same in every month.
+      ...(e.anchor.text ? [el('p', { class: 'mg-exp-line mg-exp-cue' }, habitCue(anchorLine(e.anchor).replace(/\.$/, '')))] : []),
       el('p', { class: 'mg-exp-line' }, el('b', {}, 'Ownership: '), e.ownership),
       // A support only where it changes the odds: shared routines and environment-led habits.
       ...(e.support && (e.adaptations || e.principle === 'environment') ? [el('p', { class: 'mg-exp-line' }, el('b', {}, 'Help: '), e.support)] : []));

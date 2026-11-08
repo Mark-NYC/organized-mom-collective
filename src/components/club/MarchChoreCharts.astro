@@ -14,6 +14,7 @@
  * portrait page, so the paper still comes out landscape.
  */
 import '@fontsource/kalam/latin-700.css';
+import '../../styles/club-marks.css';
 interface Props { storageKey: string }
 const { storageKey } = Astro.props;
 ---
@@ -137,15 +138,32 @@ const { storageKey } = Astro.props;
 .mcc-ed-chip[aria-pressed="true"]{background:var(--color-warm-button,#4a3f3e);border-color:var(--color-warm-button,#4a3f3e);color:#fff}
 .mcc-ed-chip:disabled{opacity:.45;cursor:not-allowed}
 .mcc-dialog :focus-visible,.cp-sheet .mcc-ed :focus-visible{outline:2px solid var(--color-warm-button,#4a3f3e);outline-offset:2px}
+
+/* The person's family color (January's): a dot and their name in its ink, and a short rule under the header. The
+   chart's own palette stays everywhere else. Daily chores carry their cue under the name; the weekly section one cue. */
+.mcc-for{display:inline-flex;align-items:center;gap:10px;color:var(--mcc-member-ink,var(--mcc-ink))}
+.mcc-for-dot{width:16px;height:16px;border-radius:50%;background:var(--mcc-member,#9A918B);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.mcc-head::after{content:"";display:block;width:56px;height:3px;margin:8px auto 0;border-radius:2px;background:var(--mcc-member,#9A918B);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.mcc-chore-text{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.mcc-chore-text .hc-cue-row{margin-top:0}
+.mcc-section-cue{display:flex;justify-content:center;margin:-2px 0 8px}
+.mcc-few .mcc-weekly .mcc-chore-text{display:contents}
+.mcc-ed-job{padding:8px 0;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
+.mcc-ed-job .mcc-ed-row{border-bottom:0;padding:0 0 6px}
+.mcc-ed-when{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 10px;font-size:.8rem;color:var(--color-warm-soft,#6e6461)}
+.mcc-ed-when .mcc-ed-label{margin:0;grid-column:1/-1}
+.mcc-ed-when input{grid-column:1/-1}
+.mcc-ed input.mcc-ed-cue{min-height:44px}
 </style>
 
 <script>
 import {
   applyFamily, choreFingerprint, choreView, freshState, isChoreState,
-  type ChartView, type ChoreMember, type ChorePlan, type ChoreState, type Job,
+  type ChartView, type ChoreMember, type ChorePlan, type ChorePrefs, type ChoreState, type Job,
 } from '../../lib/club/engines/march-chore-charts';
 import type { MarchIconArt } from '../../data/club/march-chore-icons';
 import { familyEditor, kidEditor } from '../../lib/club/march-chore-editor';
+import { habitCue } from '../../lib/club/personalize/marks';
 import { familySnapshot, settledSnapshot, type FamilySnapshot } from '../../lib/club/personalize/family';
 import type { FamilyProfile } from '../../lib/club/family-profile';
 import { el } from '../../lib/club/plan/dom';
@@ -153,12 +171,12 @@ import { PLAN_CHANGE } from '../../lib/club/plan/resource';
 import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
 import { toolPalettes } from '../../data/tool-palettes';
 
-type Detail = { household: { id: string; members?: ChoreMember[]; preferences?: { pets?: boolean } } | null; sample?: string | null; profile?: FamilyProfile | null };
+type Detail = { household: { id: string; members?: ChoreMember[]; preferences?: ChorePrefs } | null; sample?: string | null; profile?: FamilyProfile | null };
 const root = document.querySelector<HTMLElement & { clubPlan?: ChorePlan }>('[data-mcc]');
 if (root) {
   const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
   const key = root.dataset.mccKey ?? 'omc:club:march-chore-charts:v2';
-  let current = '', members: ChoreMember[] = [], pets = false, state: ChoreState = freshState(), persist = true, locked = false;
+  let current = '', members: ChoreMember[] = [], pets = false, prefs: ChorePrefs = {}, state: ChoreState = freshState(), persist = true, locked = false;
   // Her newest profile answers: used when the plan has none saved yet, or after "Restore the prepared charts".
   let latest: FamilySnapshot | undefined;
   const settle = () => { const p = settledSnapshot(state.profile, latest); if (p) state.profile = p; else delete state.profile; };
@@ -178,7 +196,7 @@ if (root) {
     : n <= 5 ? { row: 70, 'row-max': 96, box: 44, icon: 50, text: 18 }
       : n <= 6 ? { row: 64, 'row-max': 84, box: 42, icon: 46, text: 17 } : { row: 54, 'row-max': 62, box: 40, icon: 42, text: 16 });
   // A chore with a picture has a fixed-size slot for it; one without starts its words at the edge, no placeholder.
-  const chore = (j: Job & { icon: MarchIconArt | null }, long: number, day?: string) => {
+  const chore = (j: Job & { icon: MarchIconArt | null }, long: number, day?: string, cue?: string) => {
     const cell = el('span', { class: `mcc-chore${j.title.length > long ? ' mcc-long' : ''}` });
     if (j.icon) {
       const img = el('img', { class: 'mcc-icon', src: j.icon.src, alt: '', decoding: 'async' });
@@ -188,7 +206,9 @@ if (root) {
       img.addEventListener('error', () => slot.remove(), { once: true });
       cell.append(slot);
     }
-    cell.append(el('span', { class: 'mcc-chore-text' }, ...(day ? [el('span', { class: 'mcc-weekday' }, day)] : []), el('span', { class: 'mcc-chore-name' }, j.title)));
+    // The chore, then (daily chores) the everyday moment it follows, directly below it.
+    cell.append(el('span', { class: 'mcc-chore-text' }, ...(day ? [el('span', { class: 'mcc-weekday' }, day)] : []), el('span', { class: 'mcc-chore-name' }, j.title),
+      ...(cue ? [el('span', { class: 'hc-cue-row' }, habitCue(cue))] : [])));
     return cell;
   };
   const sheet = (c: ChartView, i: number, last: boolean) => {
@@ -205,21 +225,26 @@ if (root) {
           day.title = x;
           return day;
         })),
-        ...c.daily.map((j) => el('div', { class: 'mcc-row' }, chore(j, 24), ...Array.from({ length: 7 }, () => el('span', { class: 'mcc-box' })))))) : null;
+        ...c.daily.map((j) => el('div', { class: 'mcc-row' }, chore(j, 24, undefined, j.cue), ...Array.from({ length: 7 }, () => el('span', { class: 'mcc-box' })))))) : null;
+    // Weekly: one cue for the section (the day changes, the moment doesn't), under its title.
     const weekly = el('section', { class: 'mcc-weekly' }, el('div', { class: 'mcc-section-title' }, 'Weekly chores'),
+      el('div', { class: 'mcc-section-cue' }, habitCue(c.weeklyCue)),
       el('div', { class: 'mcc-table' }, ...c.weekly.map((w) => el('div', { class: 'mcc-week-row' },
         ...(w.job ? [chore(w.job, 22, w.label), el('span', { class: 'mcc-box' })]
           : [el('span', { class: 'mcc-off' }, el('span', { class: 'mcc-weekday' }, w.label), el('span', { class: 'mcc-off-text' }, 'Day off'))])))));
     const paper = el('div', { class: 'mcc-paper' },
-      el('div', { class: 'mcc-head' }, el('div', { class: 'mcc-for' }, `${c.name}’s`), el('div', { class: 'mcc-title' }, 'Weekly Chore Chart'), el('p', { class: 'mcc-motto' }, 'My jobs, start to finish.')),
+      // Whose chart: their family color beside their name, in that color (the name says it, too).
+      el('div', { class: 'mcc-head' }, el('div', { class: 'mcc-for' }, el('span', { class: 'mcc-for-dot', 'aria-hidden': 'true' }), `${c.name}’s`), el('div', { class: 'mcc-title' }, 'Weekly Chore Chart'), el('p', { class: 'mcc-motto' }, 'My jobs, start to finish.')),
       el('div', { class: `mcc-main${!daily ? ' mcc-solo' : c.daily.length <= 3 ? ' mcc-few' : ''}` }, ...(daily ? [daily] : []), weekly),
       el('p', { class: 'mcc-foot' }, 'My jobs are finished when I’ve done the work and put everything away.'));
     Object.entries(d).forEach(([k, v]) => paper.style.setProperty(`--mcc-${k}`, `${v}px`));
+    paper.style.setProperty('--mcc-member', c.color.hex);
+    paper.style.setProperty('--mcc-member-ink', c.color.ink);
     page.append(paper);
     return el('div', { class: 'mcc-stage' }, page);
   };
   const draw = () => {
-    const v = choreView(state, members, pets);
+    const v = choreView(state, members, prefs);
     const colors = toolPalettes[v.palette].colors;
     root.style.setProperty('--mcc-a', colors[0]);
     root.style.setProperty('--mcc-b', colors[1]);
@@ -234,7 +259,7 @@ if (root) {
   let tab = 'family';
   const drawEditor = () => {
     if (!editor.open) return;
-    const v = choreView(state, members, pets);
+    const v = choreView(state, members, prefs);
     if (tab !== 'family' && !v.charts.some((c) => c.id === tab)) tab = v.charts[0]?.id ?? 'family';
     q('[data-mcc-tabs]').replaceChildren(...[...v.charts.map((c) => ({ id: c.id, name: c.name })), { id: 'family', name: 'Whole family' }].map((t) => {
       const b = el('button', { type: 'button', role: 'tab' }, t.name);
@@ -257,7 +282,8 @@ if (root) {
     if (!detail?.household) return;
     const next = planKey(detail.sample ?? null, detail.household.id);
     members = detail.household.members ?? [];
-    pets = Boolean(detail.household.preferences?.pets);
+    prefs = detail.household.preferences ?? {};
+    pets = Boolean(prefs.pets);
     // The owner's print view has no profile (null): the charts come from the snapshot saved with her plan.
     if (detail.profile !== undefined && detail.profile !== null) latest = familySnapshot(detail.profile);
     if (next !== current) { current = next; state = readScoped(tabStorage.get(key), current, isChoreState) ?? freshState(); }
@@ -272,14 +298,15 @@ if (root) {
     update,
     replace: (s) => { state = structuredClone(s); applyFamily(state, members); settle(); changed(); },
     setPersist: (on) => { persist = on; if (on) save(); },
-    fingerprint: () => choreFingerprint(state, members, pets),
+    fingerprint: () => choreFingerprint(state, members, prefs),
     members: () => members,
     pets: () => pets,
-    view: () => choreView(state, members, pets),
+    prefs: () => prefs,
+    view: () => choreView(state, members, prefs),
     setLocked: (on) => { locked = on; if (on) editor.close(); },
     openEditor: (kidId) => {
       if (locked) return;
-      tab = kidId ?? choreView(state, members, pets).charts[0]?.id ?? 'family';
+      tab = kidId ?? choreView(state, members, prefs).charts[0]?.id ?? 'family';
       if (!editor.open) editor.showModal();
       drawEditor();
     },

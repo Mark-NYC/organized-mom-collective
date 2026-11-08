@@ -17,11 +17,14 @@ import type { PlanResource } from '../plan/resource';
 import { activitiesOf, familyContext, isFamilySnapshot, type ContextMember, type FamilyContext, type FamilySnapshot } from '../personalize/family';
 import { assignTasks, type PlanTask } from '../personalize/assign';
 import { isTaskEdits, pruneTaskEdits, withEdits, type PlannedTask, type TaskEdits } from '../personalize/edits';
+import { CUE } from '../personalize/cues';
+import { CUE_LIMIT, tidyCue } from '../personalize/marks-text';
 
 export const KIT_MONTH = '2027-05';
 export type MayKey = 'morning' | 'move' | 'create' | 'lunch' | 'quiet' | 'free' | 'snack' | 'evening';
 export const MAY_KEYS: readonly MayKey[] = ['morning', 'move', 'create', 'lunch', 'quiet', 'free', 'snack', 'evening'];
-export type MayEdit = { title?: string; desc?: string; time?: string };
+/** `cue`: her habit cue for the anchor's family jobs. */
+export type MayEdit = { title?: string; desc?: string; time?: string; cue?: string };
 export interface MayOptions {
   start: number;
   quiet: 'independent' | 'rest' | 'older';
@@ -49,7 +52,8 @@ export const BASE_DESC: Record<MayKey, string> = {
 export const TINTS: Record<MayKey, string> = { morning: '#F8E8B5', move: '#F4DEA3', create: '#F0D493', lunch: '#DDEBDB', quiet: '#D1E5D6', free: '#C3DDCF', snack: '#E4E9D5', evening: '#D1D7EA' };
 
 export interface MayMember extends ContextMember { kind: 'adult' | 'child' }
-export interface MayRow { key: MayKey; title: string; desc: string; time: string; parts: PlannedTask[] }
+/** `cue`: the existing moment the anchor's family jobs follow (shared by them, printed once), when it has jobs. */
+export interface MayRow { key: MayKey; title: string; desc: string; time: string; parts: PlannedTask[]; cue?: string }
 export interface MayState {
   options: MayOptions;
   edits: Partial<Record<MayKey, MayEdit>>;
@@ -102,7 +106,7 @@ const fit = (desc: string) => {
 };
 
 /** An anchor as prepared for the options and the family (her edits go on top). */
-export function starter(key: MayKey, o: MayOptions, ctx?: FamilyContext): Required<MayEdit> {
+export function starter(key: MayKey, o: MayOptions, ctx?: FamilyContext): Required<Omit<MayEdit, 'cue'>> {
   let title = LABELS[key], desc = BASE_DESC[key];
   const idx = MAY_KEYS.indexOf(key);
   let time = key === 'evening' ? '' : hhmm(o.start + [0, 1, 2.5, 4, 5, 6, 8, 10][idx]);
@@ -166,6 +170,14 @@ export const MAY_PARTS: readonly MayPart[] = [
 export const partRules = Object.fromEntries(MAY_PARTS.map((p) => [p.id, { who: p.who, minAge: p.minAge, maxAge: p.maxAge }]));
 const PART_BLOCK = new Map(MAY_PARTS.map((p) => [p.id, p.block]));
 
+/**
+ * The cue for each anchor's family jobs: one existing moment the jobs on that anchor share, printed once below them
+ * (WHEN). Anchors without family jobs have no cue: the anchor itself is the moment.
+ */
+export const BLOCK_CUES: Partial<Record<MayKey, string>> = { morning: CUE.wake, lunch: CUE.lunchtime, snack: CUE.snack, evening: CUE.dinnertime };
+export const cueOf = (key: MayKey, edits: MayState['edits']) => (edits[key]?.cue && tidyCue(edits[key]!.cue!)) || BLOCK_CUES[key];
+export { CUE_LIMIT };
+
 /** Every prepared family job with her changes, in order. Jobs nobody can do yet (or pets without pets) aren't listed. */
 export function mayParts(ctx: FamilyContext, edits?: TaskEdits): (PlannedTask & { block: MayKey })[] {
   const tasks = MAY_PARTS.filter((p) => p.id !== 'pets' || ctx.pets);
@@ -176,15 +188,17 @@ export function mayParts(ctx: FamilyContext, edits?: TaskEdits): (PlannedTask & 
 /** What prints, in order, with each anchor's family jobs. */
 export function mayRows(s: Pick<MayState, 'options' | 'edits' | 'order' | 'parts'>, ctx?: FamilyContext): MayRow[] {
   const parts = ctx ? mayParts(ctx, s.parts) : [];
-  return visibleKeys(s.order, s.options).map((key) => ({
-    key, ...starter(key, s.options, ctx), ...(s.edits[key] ?? {}),
-    parts: parts.filter((p) => p.block === key && !p.skipped),
-  }));
+  return visibleKeys(s.order, s.options).map((key) => {
+    const { cue: _cue, ...edit } = s.edits[key] ?? {};
+    const mine = parts.filter((p) => p.block === key && !p.skipped);
+    const cue = mine.length ? cueOf(key, s.edits) : undefined;
+    return { key, ...starter(key, s.options, ctx), ...edit, parts: mine, ...(cue ? { cue } : {}) };
+  });
 }
 
 /** Everything that prints, as a stable string: what approval is checked against. */
 export const mayFingerprint = (s: Pick<MayState, 'options' | 'edits' | 'order' | 'parts' | 'familyLabel'>, ctx?: FamilyContext) =>
-  JSON.stringify({ familyLabel: s.familyLabel, days: s.options.days, structure: s.options.structure, rows: mayRows(s, ctx).map((r) => ({ key: r.key, title: r.title, desc: r.desc, time: r.time, parts: r.parts.map((p) => [p.label, p.who]) })) });
+  JSON.stringify({ familyLabel: s.familyLabel, days: s.options.days, structure: s.options.structure, rows: mayRows(s, ctx).map((r) => ({ key: r.key, title: r.title, desc: r.desc, time: r.time, cue: r.cue ?? null, parts: r.parts.map((p) => [p.label, p.who, p.owners.map((o) => o.color.id)]) })) });
 
 /** Her saved plan's parts and snapshot, checked; anything malformed is dropped. */
 export function readSaved(stored: { parts?: unknown; snapshot?: unknown }): Pick<MayState, 'parts' | 'snapshot'> {

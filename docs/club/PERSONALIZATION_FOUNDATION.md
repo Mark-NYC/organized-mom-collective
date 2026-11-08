@@ -24,6 +24,42 @@ from ages alone; a child with no birth year is planned as a young child (assign:
 nobody can do yet isn't printed; a family with no children still gets a complete, honest page where the month has
 one (March: the grown-ups' charts; August: the family routine; May: the day with the grown-ups' jobs).
 
+## Shared marks: the WHEN cue, owner colors, DONE WHEN
+
+One implementation, used by January, March, May and August (and every month after): `src/lib/club/personalize/marks.ts`
+with `src/styles/club-marks.css`. Never re-create these per month.
+
+| Mark | What it is | Rules |
+| --- | --- | --- |
+| `habitCue(text)` | `[clock] WHEN After breakfast`: the approved hand-drawn monochrome clock (`assets/icons/ofc/updatedicons/svg/clock.svg`), a small uppercase WHEN, charcoal text on a warm neutral (`#F3EEE7`) | Directly below the responsibility it applies to (or once for a section where one moment is unmistakably shared: May's anchors, March's weekly jobs, August's routine panels). A habit trigger, never a due date or a clock time; short; prefers an existing daily event |
+| `ownerTag(name, color)` / `ownerTags` | The person's marker dot and their name in the same hue | Always the name with the color. "Everyone" is one neutral tag |
+| `doneLine(text)` | `DONE WHEN …` | The completion standard, once per section where it fits |
+
+Reading order everywhere: **the responsibility, its owner, its WHEN, then DONE WHEN.** Small rows put owner and WHEN on
+one line under the job rather than crowd the page.
+
+**Cue vocabulary and rules** (`src/lib/club/personalize/cues.ts`): one list of moments (`CUE`) so the same moment reads
+the same everywhere. `cueFor` keeps a cue true to her answers: no school-day cue ("When I get home", "After school",
+"After homework") for a child who isn't in school (not of school age, or the family homeschools, unless a school
+activity names them), no cue about the kids for a family without children. Every prepared cue is editable (the shared
+editor's "When" field, March's editor, May's block editors); a chore she typed gets `DEFAULT_CUE` ("After dinner").
+
+**Member colors** (`src/lib/club/personalize/colors.ts`): January's one assignment, reused exactly. Canonical source:
+`memberColors()` in `src/data/club/family-colors.ts`: her saved choices by stable member id in
+`household.preferences.colors` (migration `20261120000000_club_household_colors.sql`), then the eight marker tokens
+(`MARKER_COLORS`) auto-assigned children first in family order. `familyColors` only adds `ink`, the same hue darkened
+until 10px type reads at 4.5:1 or better on white and the palest panel tints, and `NEUTRAL_COLOR` for anyone without a
+color (a typed name). `familyContext(...).colors` carries them to every month. Saved colors never move when people are
+reordered, added or removed; auto colors are made permanent the first time she saves her family page (it saves
+everyone's current color), so adding someone later shifts nobody. Every dot prints exactly (`print-color-adjust`).
+
+Where they show: March, each chart's name and dot plus a short rule under the header (the chart's own palette and
+icons unchanged), and initials on the phone rows; Spring Prep, each owner's name and dot (ownership copy and artwork
+unchanged); May, every job on an anchor with its owners' colors (the rhythm-block tints unchanged); August, every job's
+owners with "Each child", "Together" or "Grown-up job" beside them (the four panel tints unchanged), each routine's name,
+and the phone avatars; January, the WHEN line on its habit cards now uses the shared cue (its colors were already the
+source and are unchanged).
+
 ## The three months
 
 **March, Family Chore Charts.** Charts for every child and every participating grown-up, the same landscape layout
@@ -47,9 +83,11 @@ from the school start on her family page.
   `may-summer-rhythm.test.ts`, `august-school-routines.test.ts`. Families: one child (Okafor, a preschooler), two
   school-aged children and one grown-up with no profile (Brooks), mixed ages with a full profile (Rivera), four
   children and three grown-ups (Chen), limited intake (Goering), no children (Hughes).
+- Shared marks: `src/lib/club/personalize/colors-cues.test.ts` (January's colors carried through, a customized color in
+  March, May and August, reorder and add without shifts, neutral fallback, ink contrast, cue rules).
 - Browser, by hand on a build: `node scripts/club-personalized-months-qa.mjs <dist> <out>` (Playwright installed
   globally: `NODE_PATH=$(npm root -g)`). Every month × family at 1440 and 390: names on the sheets, nothing clipped,
-  no broken images, no "Mom" on a sheet, no rewards language on March, one US Letter PDF page per sheet, a phone edit
+  no broken images, nothing cut off inside a panel, the WHEN cue's computed style identical in every month, no "Mom" on a sheet, no rewards language on March, one US Letter PDF page per sheet, a phone edit
   that changes the printed sheet, approval, and both still there after a reload.
 
 ## Moving another month over
