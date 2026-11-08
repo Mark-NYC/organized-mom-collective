@@ -120,7 +120,8 @@ export function rhythmEditor(o: Options) {
 
   const momentRows = (mo: MomentView) => {
     const locked = o.locked();
-    const rows = mo.rows.map((r) => {
+    // Every assignment on its own line here (each person's own job separately), so a change touches one person.
+    const rows = mo.parts.map((r) => {
       if (confirmRow === r.id) {
         return el('li', { class: 'mre-row mre-confirm', role: 'alertdialog', 'aria-label': `Remove ${r.title}` },
           el('p', {}, `Remove “${r.title}”?`),
@@ -242,7 +243,7 @@ export function rhythmEditor(o: Options) {
   const habits = () => {
     const v = p().view();
     const locked = o.locked();
-    const items = v.printed.flatMap((mo) => mo.rows.map((r) => {
+    const items = v.printed.flatMap((mo) => mo.parts.map((r) => {
       const box = el('input', { type: 'checkbox', checked: r.habit, disabled: locked || r.established });
       box.addEventListener('change', () => change((s) => setHabit(s, r.id, box.checked, m(), pr())));
       return el('label', { class: 'mre-check mre-habit' }, box,

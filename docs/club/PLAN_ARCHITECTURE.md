@@ -185,25 +185,39 @@ rewards, points, streaks, percentages, checkboxes or tracking.**
 Rules: `src/lib/club/engines/march-family-rhythm.ts` (pure; cue → action → finish). Five shared moments (after
 breakfast, before we head out, when we get home, after dinner, after brushing teeth), each with its own job library.
 Every job has to make sense at its moment (`fitsCue`): nothing that must happen before the cue, and no kitchen jobs at
-bedtime; her typed jobs are checked the same way and refused with the reason. Jobs are either **household** (one owner;
-several only when she chooses, printed "together") or **individual** (each does their own, several names on one row,
-printed "each their own").
+bedtime; her typed jobs are checked the same way and refused with the reason.
 
-How the plan is prepared, for any household (no family is special-cased):
+**Ownership** (`ownershipOf`), with no schema change (an optional `share` on a row):
+- `individual`: one person, one row.
+- `parallel_individual`: a personal job several people each do for themselves ("Lay out tomorrow's clothes"). Stored as
+  ONE ROW PER PERSON, so changing, removing or making a habit of one child's never touches another's. The sheet may put
+  them on one line, marked "each their own" (`MomentView.rows`); the editor and habit picker list each person
+  separately (`MomentView.parts`).
+- `joint`: one shared outcome several people work on together ("Put the shared toys away together"): one row, every
+  owner, `share: 'joint'`, printed "together". Only when she chooses it; never inferred from a shared moment or a
+  shared title, and never recommended (the family page doesn't say what's shared).
+Saved plans are read in these terms without losing anything (`cleanPlan`): an earlier `together` is joint; several
+owners on a household job she saved stays joint; a grouped personal job becomes one row per person (the first keeps the
+row id and any habit on it); a copy of the same job (the same person's, or the same household job) is folded in.
+
+How the plan is prepared, for any household (no family is special-cased): the smallest set of meaningful jobs.
 1. Two moments from her priority and challenges (no children: breakfast and dinner); a third offered, off.
-2. Whoever already takes care of an area keeps that job, as established context.
-3. Children, one part a moment: a job she wished for them first; then each household job the moment needs (essential
-   jobs first) goes to the child with the fewest parts so far, then the youngest who can do it; whoever is left does
-   their own individual job, sharing a sibling's row. At most four household jobs go to children; five rows a moment.
-4. Grown-ups: the moment's grown-up job, and an essential job no child could take. No grown-up part at bedtime, and
-   no family is evened out for its own sake; a single grown-up gets a two-job reset.
-5. One or two new habits: a wished job first, else the most meaningful new one (household over personal, harder over
-   easier), for one or two people; never an established job, one far below a child's age, or a row the whole family
-   does.
+2. Each moment holds as many household jobs as the people who can take part call for (`householdBudget`: 1 for a
+   one-person home, 2 for up to three, 3 for up to six, 4 at most), never one per person. In order: what someone
+   already takes care of (leaving room for the moment's essential jobs), a job she wished a child would take on, the
+   essential jobs (to the child with the fewest parts so far, then the youngest who can), grown-ups for what only a
+   grown-up can do or no child could take (no grown-up part at bedtime), then optional jobs if room remains.
+3. A personal routine job (the bedtime hamper, clearing your own breakfast plate) only for children ten and under with
+   no part in that moment, or a child she wished it for; a moment she turned on never comes up empty.
+4. ONE new habit by default: a job she named for a particular child, else one she named for anyone, else the most
+   meaningful new job. A second only when she named a job for a different child too. Never something already theirs,
+   a personal routine far below a child's age, or a shared row.
 
 `validatePlan` checks every plan: duplicates (`jobKey` normalizes words and drops trailing numbers, so "… game 0" and
-"… game 2" are one job), jobs that can't follow their moment, owners who aren't in the family, unintended sharing,
-long labels, crowded moments and habits that point nowhere or at an established job. The prepared plan for the sample
+"… game 2" are one job; another child's own copy of a personal job isn't a duplicate), jobs that can't follow their
+moment, owners who aren't in the family, a personal job with several owners on one row, several owners without
+`share: 'joint'`, long labels, crowded moments, jobs that make someone everyone's reminder ("Remind everyone…", also
+refused when typed), and habits that point nowhere or at an established job. The prepared plan for the sample
 families and 300 generated households (1–9 people, any ages, with and without pets) passes every check (unit tests).
 Saved plans are cleaned on load (`cleanPlan`): a copy of a job already in the same moment is merged into it.
 
