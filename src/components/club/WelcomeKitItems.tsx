@@ -7,9 +7,12 @@ import { KIT_ITEM_STATUS, type KitItem } from '../../lib/club/onboarding';
 import { memberPlanHref } from '../../lib/club/plan/account';
 import { routes } from '../../routes';
 import KitPreview from './KitPreview';
+import { welcomeItemPreview } from '../../lib/club/welcome-item';
 
 /** Where each piece's printable is drawn from, and which element on that page is the printed sheet. */
 export function previewFor(item: KitItem, firstSlug: string | null): { src: string; target: string } | null {
+  // Her Family Rhythm: its page is the item's own href without Welcome Kit mode.
+  if (item.id === 'print' && item.href.startsWith(routes.appClubFamilyRhythm)) return welcomeItemPreview({ welcome: { kind: 'rhythm' } } as Parameters<typeof welcomeItemPreview>[0]);
   if (item.id === 'print') return { src: routes.clubFamilyVision, target: '#club-vision-content:not([hidden]) #fvp-art' };
   if (item.id === 'guide') return { src: routes.clubMeetingGuide, target: '[data-meeting-guide-sheet]' };
   if (!firstSlug || item.status === 'preparing') return null;

@@ -12,6 +12,7 @@ import { routes } from '../../routes';
 import { memberPlanHref } from '../../lib/club/plan/account';
 import { clubResourceBySlug } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/supabase-config';
+import { specLine, WELCOME_PRINT_SPECS } from '../../data/club/print-specs';
 
 const SUPABASE = SUPABASE_URL;
 const ANON = SUPABASE_ANON_KEY;
@@ -68,7 +69,9 @@ interface Order {
   mailed_at: string | null;
   note: string | null;
   address: Record<string, string> | null;
-  fulfillment_type: 'monthly_resource' | 'welcome_vision';
+  fulfillment_type: 'monthly_resource' | 'welcome_vision' | 'welcome_rhythm';
+  /** Welcome Kits list: which personalized item the package carries. */
+  welcome_item?: 'welcome_vision' | 'welcome_rhythm';
   batch: 'regular' | 'catch_up' | 'welcome' | 'welcome_kit';
   satisfies_month: string | null;
   first_paid_month: string | null;
@@ -89,6 +92,7 @@ interface Order {
 const BATCH: Record<Order['batch'], string> = { regular: 'Regular batch', catch_up: 'Catch-up (paid after the cutoff)', welcome: 'Welcome print', welcome_kit: 'Welcome Kit' };
 const printHref = (o: Pick<Order, 'id' | 'kit_slug' | 'fulfillment_type'>) =>
   o.fulfillment_type === 'welcome_vision' ? `${routes.clubFamilyVision}?fulfillment=${o.id}`
+  : o.fulfillment_type === 'welcome_rhythm' ? `${routes.appClubFamilyRhythm}?fulfillment=${o.id}`
     // Her month's real tool with her saved plan (/app/club/<month>; November's lives on its /club/resources page).
     : o.kit_slug && clubResourceBySlug(o.kit_slug) ? `${memberPlanHref(o.kit_slug)}?fulfillment=${o.id}` : null;
 
@@ -320,6 +324,7 @@ const KIT_READINESS: Record<string, string> = {
   needs_address: 'Needs a mailing address',
   mail_paused: 'Held: she paused printed mailings',
   needs_vision: 'Waiting for her to approve her print',
+  needs_rhythm: 'Waiting for her to approve her Family Rhythm',
   needs_resource: 'Her first month isn’t published yet',
   needs_confirmation: 'Waiting for her to confirm her first resource',
   needs_pdf: 'Make the PDFs',
@@ -368,6 +373,11 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
         <button type="button" className="underline" onClick={csv}>Download approved kits (CSV, one row per package)</button>
       </div>
       <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One package per new member: her Family Vision print and her first month’s resource, approved, printed and mailed together, outside the monthly cutoff. Three items: her Family Vision print, the standard Family Meeting guide (<a className="underline" href={routes.clubMeetingGuide}>print it</a>), and her first month’s resource. She approves her print and confirms her first resource herself (nothing is confirmed for her; reminders go from Emails). Once both are in, the kit is submitted: mail within two business days. Make both PDFs → Approve kit → Printed → Mailed. Nothing is marked automatically.</p>
+      {rows?.some((o) => o.fulfillment_type === 'welcome_rhythm') && (
+        <ul className="mt-2 max-w-3xl text-[0.8rem] text-soft" data-print-specs aria-label="Print specifications">
+          {(['welcome_rhythm', 'meeting_guide', 'first_month'] as const).map((k) => <li key={k}>{specLine(WELCOME_PRINT_SPECS[k])}</li>)}
+        </ul>
+      )}
       {err && <p role="alert">{err}</p>}
       {rows && rows.length > 0 && (
         <div className="mt-3 overflow-x-auto">
@@ -381,9 +391,15 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
                   <tr key={o.id} className="border-b border-rule align-top">
                     <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span><br /><span className="text-soft">joined {day(o.enrolled_at)}</span></td>
                     <td>
+                      {o.fulfillment_type === 'welcome_rhythm' ? (
+                        // Her Family Rhythm: the plan she approved is on the order; the print view prints exactly that.
+                        <p><strong>Family Rhythm</strong> · {o.member_approved_at ? `approved ${day(o.member_approved_at)}` : 'not approved'}
+                          {' · '}{o.pdf_status === 'ready' ? 'PDF ✓' : o.member_approved_at ? <a className="underline" href={printHref(o)!}>Print view</a> : 'PDF –'}</p>
+                      ) : (
                       <p><strong>Family Vision print</strong> · {o.family_name ? `${o.family_name} · ${o.vision_value}` : <span className="text-soft">not personalized</span>}
                         {' · '}{o.member_approved_at ? `approved ${day(o.member_approved_at)}` : 'not approved'}
                         {' · '}{o.pdf_status === 'ready' ? 'PDF ✓' : o.family_name ? <a className="underline" href={printHref(o)!}>Print view</a> : 'PDF –'}</p>
+                      )}
                       {fm ? (
                         <p className="mt-1"><strong>{monthName(fm.resource_month)}</strong> · {clubResourceBySlug(fm.kit_slug)?.title ?? fm.kit_title ?? 'Monthly resource'}
                           {' · '}{fm.member_approved_at ? `confirmed ${day(fm.member_approved_at)}` : 'not confirmed yet'}
@@ -414,7 +430,7 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
 
 /** What's in one package, for the mail-house CSV. */
 const contents = (o: Order) =>
-  [`Family Vision print (${o.vision_value ?? '–'})`, o.first_month ? 'Family Meeting guide' : null,
+  [o.fulfillment_type === 'welcome_rhythm' ? 'Family Rhythm' : `Family Vision print (${o.vision_value ?? '–'})`, o.first_month ? 'Family Meeting guide' : null,
     o.first_month ? `${month(o.first_month.resource_month)} ${clubResourceBySlug(o.first_month.kit_slug)?.title ?? o.first_month.kit_title ?? ''}`.trim() : null].filter(Boolean).join(' + ');
 /** Today's New York date ("2026-11-03"), to compare with a ship-by date. */
 const todayNy = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
@@ -487,7 +503,7 @@ function MonthlyFulfillment({ session, signOut, kits }: AdminContext & { kits: O
               {rows.map((o) => (
                 <tr key={o.id} className="border-b border-rule align-top">
                   <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span></td>
-                  <td>{o.fulfillment_type === 'welcome_vision' ? 'Welcome print' : clubResourceBySlug(o.kit_slug)?.title ?? o.kit_slug ?? 'Monthly resource'}<br />
+                  <td>{o.fulfillment_type === 'welcome_vision' ? 'Welcome print' : o.fulfillment_type === 'welcome_rhythm' ? 'Family Rhythm' : clubResourceBySlug(o.kit_slug)?.title ?? o.kit_slug ?? 'Monthly resource'}<br />
                     <span className={o.batch === 'catch_up' ? 'font-semibold' : 'text-soft'}>{BATCH[o.batch]}</span>{o.satisfies_month && <><br /><span className="text-soft">is their {month(o.satisfies_month)}</span></>}</td>
                   <td>{o.readiness}{o.pdf_status === 'ready' ? ' · PDF ✓' : ''}</td>
                   <td>{o.status}{o.mailed_at ? ` ${day(o.mailed_at)}` : ''}{o.note && <><br /><span className="text-soft">{o.note}</span></>}</td>

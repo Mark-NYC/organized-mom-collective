@@ -1371,6 +1371,63 @@ scenarios.welcomeRhythm = async (browser) => {
   await home.context().close();
 };
 
+// The Welcome Kit carrying her Family Rhythm (Phase 2c), with the owner's switch on (club_settings.welcome_item =
+// 'rhythm'; it ships off). Her welcome order is created the way billing creates it, and the switch makes it a Family
+// Rhythm. The kit page names it, her Family Rhythm opens in Welcome Kit mode, approving it puts the plan she approved on
+// her order, and the owner's print view prints exactly that.
+scenarios.welcomeRhythmKit = async (browser) => {
+  console.log('The Welcome Kit with her Family Rhythm (switch on): kit page, approve for printing, owner print view');
+  freshDb();
+  sql(`update public.club_settings set welcome_item = 'rhythm'`);
+  sql(`delete from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
+  as.family();
+  as.profileDone();
+  sql(`insert into public.club_fulfillment_orders (user_id, household_id, resource_month, fulfillment_type, provider)
+       select '${USER.id}', h.id, date_trunc('month', now())::date, 'welcome_vision', 'manual' from public.club_households h where h.owner_user_id = '${USER.id}'`);
+  const rhythmOrder = () => sql(`select id from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_rhythm' and status <> 'canceled'`);
+  check('switch on: her welcome order is a Family Rhythm', Boolean(rhythmOrder()));
+
+  const page = await newPage(browser, DESKTOP);
+  await page.goto(`${BASE}/club/welcome-kit`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  const kitText = await page.locator('main').innerText();
+  check('kit page: Your Family Rhythm in place of the Vision print', /Your Family Rhythm/.test(kitText) && !/Family Vision Print/.test(kitText), kitText.replace(/\s+/g, ' ').slice(0, 200));
+  const link = page.locator('a[href="/app/club/family-rhythm?welcome=1"]').first();
+  check('kit page: it opens her Family Rhythm in Welcome Kit mode', await link.count() > 0);
+  await page.goto(`${BASE}/app/club/family-rhythm?welcome=1`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 }).catch(() => undefined);
+  await page.waitForTimeout(1500);
+  check('Welcome Kit mode: the step bar and "Approve for printing"', await page.isVisible('[data-welcome-rhythm-kit]') && /approve for printing/i.test(await page.locator('[data-cpd-approve]').innerText()));
+  await page.click('[data-cpd-approve]');
+  await page.waitForURL((u) => !u.pathname.startsWith('/app/club/family-rhythm'), { timeout: 15000 }).catch(() => undefined);
+  check('approving goes on to the next piece of her kit', !page.url().includes('/app/club/family-rhythm'), page.url());
+  const fp = sql(`select personalization ->> 'fingerprint' from public.club_fulfillment_orders where id = '${rhythmOrder()}'`);
+  check('the plan she approved is on her order, with her approval', Boolean(fp) && fp === welcomeRow('approved_fingerprint')
+    && Boolean(sql(`select member_approved_at from public.club_fulfillment_orders where id = '${rhythmOrder()}'`)));
+  check('no script errors', page.errors.length === 0, page.errors.slice(0, 2).join(' | '));
+  await page.context().close();
+
+  // The owner: the Welcome Kits list names it with the print specs, and its print view prints her approved plan.
+  const admin = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(admin);
+  await admin.goto(`${BASE}/admin/club`, { waitUntil: 'networkidle' });
+  await admin.waitForTimeout(1500);
+  await admin.locator('button, a', { hasText: 'Fulfillment' }).first().click().catch(() => undefined);
+  await admin.waitForTimeout(1500);
+  const adminText = await admin.locator('main').innerText();
+  check('admin: the kit shows her Family Rhythm', /Family Rhythm/.test(adminText));
+  check('admin: print specs shown, marked not yet confirmed', /Premium uncoated \(target\)/.test(adminText) && /not yet confirmed with the printer/.test(adminText));
+  await admin.goto(`${BASE}/app/club/family-rhythm?fulfillment=${rhythmOrder()}`, { waitUntil: 'networkidle' });
+  const ok = await admin.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 }).then(() => true, () => false);
+  await admin.waitForTimeout(1200);
+  check('print view: opens her approved plan', ok && /Rivera/i.test(await admin.locator('.club-plan').innerText()), ok ? '' : (await admin.locator('.club-plan').innerText().catch(() => '')).slice(0, 160));
+  check('print view: prints what she approved', ok && (await admin.evaluate(() => document.querySelector('[data-mfr]').clubPlan.fingerprint())) === fp);
+  const pages = ok ? await printPdf(admin, 'welcome-rhythm-print-view') : 0;
+  check('print view: one Letter page', pages === 1, `${pages}`);
+  await admin.context().close();
+  sql(`update public.club_settings set welcome_item = 'vision'`);
+};
+
 const names = ONLY ? ONLY.split(',') : Object.keys(scenarios).filter((n) => n !== 'months');
 const browser = await chromium.launch();
 try {

@@ -164,3 +164,29 @@ describe('the three pieces as steps', () => {
     expect(kitNext(noPrint, 'first', f(true, true))).toMatchObject({ id: 'print', href: '/club/family-vision' });
   });
 });
+
+// Phase 2c (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md): a kit whose personalized item is her Family Rhythm.
+describe('a Welcome Kit with the Family Rhythm', () => {
+  const rw = (readiness: string, approved: boolean, status = 'pending') => ({ ...w(readiness, approved, status), kind: 'rhythm' as const });
+  it('the same steps, the Family Rhythm in place of the print', () => {
+    const me = base({ onboarded: true, welcome: rw('needs_rhythm', false) });
+    expect(nextStep(me)).toBe('print');
+    expect(stepHref(me)).toBe('/club/welcome-kit');
+    const [item] = kitItems(me, false);
+    expect(item).toMatchObject({ id: 'print', name: 'Your Family Rhythm', status: 'needs_review', href: '/app/club/family-rhythm?welcome=1' });
+    expect(kitText(me)).toMatch(/Family Rhythm is ready/);
+    expect(kitNext(base({ onboarded: true, welcome: rw('needs_rhythm', false) }), 'first', { reviewed: true, guideSeen: true }).label).toBe('Next: Family Rhythm');
+  });
+  it('once she approves it, the kit moves on to her first month, in her words', () => {
+    const me = base({ onboarded: true, welcome: rw('needs_confirmation', true) });
+    expect(nextStep(me)).toBe('first_resource');
+    expect(kitText(me)).toBe('Your Family Rhythm is approved. Review your first resource, then prepare your Welcome Kit.');
+    expect(kitItems(me, false)[0]).toMatchObject({ status: 'approved', action: 'View or change' });
+  });
+  it('a Vision kit (or an older database without `kind`) is exactly as before', () => {
+    const me = base({ onboarded: true, welcome: w('needs_confirmation', true) });
+    expect(kitItems(me, false)[0]).toMatchObject({ name: 'Family Vision Print', href: '/club/family-vision' });
+    expect(kitText(me)).toBe('Your print is approved. Review your first resource, then prepare your Welcome Kit.');
+    expect(kitNext(base({ onboarded: true, welcome: w('needs_vision', false) }), 'first', { reviewed: true, guideSeen: true }).label).toBe('Next: Family Vision Print');
+  });
+});
