@@ -430,7 +430,7 @@ Options as proposed in Phase 1. The owner's decisions (2026-11-08) are in §11.1
 | 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) | COMPLETE (merged) | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
 | 2a | [#432](https://github.com/Mark-NYC/organized-mom-collective/pull/432) (branch `claude/epic-noether-i7st9u`) | READY FOR REVIEW | Engine refactor |
 | 2b | [#434](https://github.com/Mark-NYC/organized-mom-collective/pull/434) (branch `claude/welcome-rhythm-2b`, stacked on 2a) | READY FOR REVIEW | Welcome page + storage |
-| 2c | Branch `claude/welcome-rhythm-2c`, stacked on 2b | READY FOR REVIEW | Welcome Kit fulfillment behind a switch (off) |
+| 2c | [#435](https://github.com/Mark-NYC/organized-mom-collective/pull/435) (branch `claude/welcome-rhythm-2c`, stacked on 2b) | READY FOR REVIEW | Welcome Kit fulfillment behind a switch (off) |
 
 ### Phase 1 log (2026-11-08)
 
