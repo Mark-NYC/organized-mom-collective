@@ -222,16 +222,31 @@ holds `parts` (her who-helps changes) and `snapshot`.
 ## August
 
 `/app/club/august`: Back to School Without the Scramble (`AugustSchoolRoutines.astro` in `planMode`,
-`AugustPlanMobile.astro`, rules `src/lib/club/engines/august-school-routines.ts`). Sheets: `plan`, the family's
-back-to-school plan (four panels: Before the First Day, The Night Before, School Mornings, After School; every job
-with names), when any child is 3 to 17 in August 2027; then `r0`, `r1`… a "My School Day" routine for every
-school-aged child, each timed so the morning ends at the out-the-door time (20 minutes before the school start on her
-family page, the earliest for children leaving together; 7:50 without one). Preschoolers get the shorter routine;
-teens wake to their own alarm. A family with no school-aged child gets the family routine alone, as before. The
-family plan is edited in its own desktop dialog and the phone sections with the shared owner editor (who, wording,
-leave it off; "Start over with the prepared plan"). Standalone uses (a member's copy at `/club/resources/<slug>`, the
-kit page, `/club/august-preview`) print the one routine she picks, unchanged. Tab-only `omc:club:august-app:v1` now
-also holds `plan` (her changes) and `profile` (the snapshot).
+`AugustPlanMobile.astro`, rules `src/lib/club/engines/august-school-routines.ts` and, for the charts,
+`src/lib/club/engines/august-routine-chart.ts`). Three pages a family, never a page per child:
+
+- `plan`: the family's back-to-school plan (four panels: Before the First Day, The Night Before, School Mornings,
+  After School; every job with names), when any child is 3 to 17 in August 2027.
+- `morning` and `after`: the family's Morning Routine and After-School Routine, shared by all the school-aged children,
+  in the approved reference design (sage header with the family name, a large Georgia title, italic subtitle and the
+  children's names in their January colors; "Check the chart. Do the next thing."; up to eight softly tinted rows of
+  number, hand-drawn icon, step, WHEN trigger and time; the completion banner). A step only some children do (feeding
+  the pet, a practice bag on practice days, practicing lessons) names them in their colors; a step for everyone names
+  no one.
+
+Every step has an optional **time** (when it's expected) and an optional **trigger** (the familiar event that starts it
+without a reminder). Prepared triggers only where they add something (never "Wake up · When I wake up" or "Shoes on ·
+When I'm ready"); `stepIssues` flags her own triggers that restate the step, say nothing, only repeat the order or
+point at a later step, and times out of order or past the out-the-door time (shown in the editors, never silently
+changed). The morning is timed back from the out-the-door time (school start on her family page minus 20 minutes; a
+7:50 sample marked as a default otherwise, editable as "Out the door by"); the after-school chart is event-based by
+default (times can be turned on). Reordering keeps times in order (the times stay with the slots). Desktop: the
+shared rail beside the sheets, with the routine editor (tabs, out-the-door time, per-step name, time, trigger,
+show-time and show-trigger, who it's for, move, add, remove). Phones: the same controls per chart. Icons are the
+icon-library art cleaned of its alpha haze for print (`public/images/club/routine-icons/`,
+`scripts/prepare-routine-chart-icons.py`), feeding pets the March art. Standalone uses (a member's copy, the kit page,
+`/club/august-preview`) print the two charts. Tab-only `omc:club:august-app:v1` holds the family board
+(`boards.family`), `plan` (her plan changes) and `profile` (the snapshot); the earlier per-child boards are dropped.
 
 ## September and October
 

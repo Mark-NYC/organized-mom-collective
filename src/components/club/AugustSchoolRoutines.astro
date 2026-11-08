@@ -1,22 +1,15 @@
 ---
-/** August Club printable: "My School Day", a picture routine for before and after school, and on the Club plan page
- * the family's back-to-school plan.
+/** August Club printable: the family's Morning Routine and After-School Routine charts (one Letter page each, shared by
+ * all the children), and on the Club plan page the family's back-to-school plan first.
  * Steps, choices and rules: src/lib/club/engines/august-school-routines.ts.
  * planMode: inside a Club plan page (/app/club/august) the page brings the layout, rail and mobile screen; this keeps
  * the editors and the sheets, marked data-plan-sheet: "plan" (Back to School Without the Scramble: who does what,
- * from the family profile) when anyone's in school, then "r0", "r1"… (each school-aged child's routine), and publishes
- * the plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md). Standalone (a member's copy, the kit page): the one
- * routine sheet for the child she picks, as before. */
-import { ICONS, preparedRoutine, shown, clock } from '../../lib/club/engines/august-school-routines';
+ * from the family profile) when anyone's in school, then "morning" and "after" (the routine charts), and publishes the
+ * plan as `clubPlan` (docs/club/PLAN_ARCHITECTURE.md). Standalone (a member's copy, the kit page): the two charts. */
 import '../../styles/club-personalize.css';
 import '../../styles/club-marks.css';
 interface Props {storageKey?:string; planMode?:boolean}
 const {storageKey='omc:club:august-school-routines:v1',planMode=false}=Astro.props;
-const prepared=preparedRoutine(8);
-const panels=[
- {group:'morning' as const,num:'01',cls:'asr-panel-am',title:'Before School',line:'First things first. I can do this!',accent:'MORNING'},
- {group:'after' as const,num:'02',cls:'asr-panel-pm',title:'After School',line:'Come home. Reset. Enjoy the afternoon.',accent:'AFTERNOON'},
-];
 const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg>';
 ---
 <div class="asr" data-asr-key={storageKey} data-asr-plan={planMode ? "" : undefined}>
@@ -29,16 +22,16 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
   {!planMode && <aside class="asr-editor"><div class="asr-editor-head"><h2>Fewer reminders. <em>Smoother school days.</em></h2><button type="button" class="asr-edit-link" data-open-vision>Why this matters</button></div><div class="asr-prepared" id="august-edit-controls"><span class="asr-eyebrow">YOUR FAMILY'S SCHOOL ROUTINES</span><strong>My School Day</strong><p>Two ready-made picture routines for before and after school.</p><button type="button" class="asr-edit-link" data-open-editor>Edit routines <Fragment set:html={pencil} /></button></div><div class="asr-actions"><div class="asr-primary-actions"><a class="asr-jump" href="#august-edit-controls">Make changes</a><button class="asr-primary" data-asr-print type="button">Print / Save PDF</button></div><button class="asr-secondary" data-asr-png type="button">Download image (PNG)</button><button class="asr-reset" data-asr-reset type="button">Restore original steps</button></div></aside>}
   {!planMode && <dialog class="asr-dialog" data-asr-vision aria-labelledby="asr-vision-title"><div class="asr-dialog-head"><h2 id="asr-vision-title">Why this matters</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><p>School mornings and afternoons shouldn't depend on Mom repeating the same reminders. These prepared routines show kids their next step so they can take more responsibility for getting ready and resetting after school.</p><button type="button" class="asr-dialog-done" data-close-dialog>Back to our plan</button></dialog>}
   <dialog class="asr-dialog asr-guided-dialog" data-asr-editor aria-labelledby="asr-editor-title">
-   <div class="asr-dialog-head"><div><span class="asr-guide-kicker">MAKE IT YOURS · AUGUST</span><h2 id="asr-editor-title">Our school routines</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
-   <p class="asr-guide-intro">We've prepared a starting routine. Just change what doesn't fit your child.</p>
-   <div class="asr-guide-section"><strong>Whose routine?</strong><div class="asr-child-chips" data-asr-children></div></div>
-   <div class="asr-routine-tabs" role="tablist" aria-label="School routine"><button type="button" data-asr-tab="morning" role="tab" aria-selected="true">Before school</button><button type="button" data-asr-tab="after" role="tab" aria-selected="false">After school</button></div>
+   <div class="asr-dialog-head"><div><span class="asr-guide-kicker">MAKE IT YOURS · AUGUST</span><h2 id="asr-editor-title">Our family routines</h2></div><button type="button" data-close-dialog aria-label="Close">×</button></div>
+   <p class="asr-guide-intro">One morning chart and one after-school chart for all the children. Each step can have a time, a trigger (the everyday moment that starts it), or both; a step only some of the children do names them.</p>
+   <div class="asr-guide-section" data-asr-routine-controls></div>
+   <div class="asr-routine-tabs" role="tablist" aria-label="School routine"><button type="button" data-asr-tab="morning" role="tab" aria-selected="true">Morning</button><button type="button" data-asr-tab="after" role="tab" aria-selected="false">After school</button></div>
    <div class="asr-guide-section"><div class="asr-guide-caption"><strong data-asr-guided-title>Morning routine</strong><span>Tap any step to change it</span></div><div class="asr-guided-steps" data-asr-options></div>
     <button type="button" class="asr-guide-add" data-asr-add>＋ Add a step</button>
     <div data-asr-gallery class="asr-guide-gallery" hidden></div>
    </div>
-   <details class="asr-guide-more"><summary>More options</summary><label class="asr-mode-choice"><input type="checkbox" data-asr-shorter/> Use a shorter routine</label><p>Hides two optional steps without deleting them. Removed steps can be restored in the list above.</p></details>
-   <div class="asr-guide-saved">{planMode ? '✓ Each child keeps their own routine' : '✓ Changes save automatically for each child'}</div>
+   
+   <div class="asr-guide-saved">✓ Changes save as you go</div>
    <button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>
   {planMode && <dialog class="asr-dialog asr-guided-dialog" data-asr-plan-editor aria-labelledby="asr-plan-editor-title">
@@ -48,22 +41,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
    <button type="button" class="asr-dialog-done" data-close-dialog>Done · See our plan</button>
   </dialog>}
   <section class={planMode ? "asr-plan-view" : "asr-preview"}>{!planMode && <button type="button" class="asr-float" data-open-editor><Fragment set:html={pencil} /><span>MAKE CHANGES</span></button>}
-   <div class="asr-sheets" data-asr-sheets>
-   <div class="asr-stage" data-asr-stage>
-    <article class="asr-sheet" data-asr-sheet data-plan-sheet={planMode ? "r0" : undefined}>
-     <header class="asr-paper-head"><h2>My School Day</h2><span data-asr-name>Our morning & after-school routines</span></header>
-     {panels.map((p)=><div class={'asr-panel '+p.cls}><header><span class="asr-circle">{p.num}</span><div><h3>{p.title}</h3><p>{p.line}</p></div><span class="asr-accent">{p.accent}</span></header><div class="asr-rows" data-asr-group={p.group}>
-      {shown(prepared,p.group).map((item)=><div class="asr-row" data-asr-id={item.id} data-asr-section={p.group}>
-        <time data-asr-time role="button" tabindex="0" aria-label={'Change time for '+item.label}>{clock(item.time)}</time>
-        <img src={ICONS[item.icon]} alt="" width="76" height="76"/>
-        <strong data-asr-text contenteditable="true" role="textbox" aria-label={'Edit '+item.label}>{item.label}</strong>
-        <button type="button" data-asr-remove class="asr-remove" title="Remove step" aria-label={'Remove '+item.label}>×</button>
-       </div>)}
-     </div></div>)}
-     <footer class="asr-paper-foot"><strong data-asr-footer contenteditable="true" role="textbox" aria-label="Edit reminder">Check my routine. Do my part. Then I'm ready!</strong><span>ORGANIZED FAMILY CLUB · AUGUST</span></footer>
-    </article>
-   </div>
-   </div>
+   <div class="asr-sheets" data-asr-sheets></div>
   </section>
  </div>
 </div>
@@ -84,7 +62,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 @media(max-width:1050px){.asr-layout{display:flex;flex-direction:column}.asr-preview{order:0;width:100%}.asr-editor{order:1;max-width:720px;width:100%}.asr-remove{opacity:1}}
 @page{size:letter portrait;margin:0}
 /* Printing outside a Club plan page; on one, ClubPrintStyles prints the data-plan-sheet page. */
-@media print{html,body{padding:0!important;margin:0!important;background:#fff!important}body:has(.asr:not([data-asr-plan])) *{visibility:hidden!important}.asr:not([data-asr-plan]) :is(.asr-stage,.asr-sheet,.asr-sheet *){visibility:visible!important}.asr:not([data-asr-plan]) .asr-stage{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important}.asr:not([data-asr-plan]) .asr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.asr-remove{display:none!important}.asr [contenteditable]{outline:none!important;background:transparent!important}}
+@media print{html,body{padding:0!important;margin:0!important;background:#fff!important}body:has(.asr:not([data-asr-plan])) *{visibility:hidden!important}.asr:not([data-asr-plan]) :is(.asr-sheets,.asr-stage,.asr-sheet,.asr-sheet *){visibility:visible!important}.asr:not([data-asr-plan]) .asr-sheets{position:absolute!important;top:0!important;left:0!important;display:block!important;gap:0!important}.asr:not([data-asr-plan]) .asr-stage{position:relative!important;width:8.5in!important;height:11in!important;break-after:page;page-break-after:always}.asr:not([data-asr-plan]) .asr-stage:last-child{break-after:auto;page-break-after:auto}.asr:not([data-asr-plan]) .asr-sheet{position:absolute!important;top:0!important;left:0!important;width:8.5in!important;height:11in!important;border:0!important;box-shadow:none!important;transform:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.asr-remove{display:none!important}.asr [contenteditable]{outline:none!important;background:transparent!important}}
 
 /* August is a sequential time-based routine, never a card grid. */
 .asr-sheet{padding:27px 46px 22px}
@@ -242,13 +220,88 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 .asr-fam-panel:has(li:nth-child(5)) .asr-fam-rows strong{font-size:13.5px}
 .asr-paper-head>span .mc-owner{font:italic 17px Georgia,serif;letter-spacing:0;text-transform:none}
 .asr-paper-head>span .mc-dot{width:10px;height:10px}
+
+/* The routine charts (the approved reference): brand rule, a sage header band with a large Georgia title and italic
+   subtitle, the tagline between rules, up to eight softly tinted rows (number, hand-drawn icon, the step, its WHEN,
+   its time in a white box) and the completion banner. White paper, no gradients. Sizes follow the number of steps. */
+.rc-sheet{padding:30px 40px 30px;display:flex;flex-direction:column;gap:0;color:#3a3f37;font-family:Montserrat,Arial,sans-serif}
+.rc-brand{display:flex;align-items:center;justify-content:center;gap:18px}
+.rc-rule{flex:0 1 110px;height:1px;background:#b9c1b4}
+.rc-logo{display:block;height:24px;width:auto}
+.rc-head{display:flex;align-items:center;gap:20px;margin-top:16px;padding:18px 30px 18px 32px;background:#E6EDE0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-titles{flex:1;min-width:0}
+.rc-family{margin:0 0 2px;font:italic 400 20px/1.2 Georgia,serif;color:#5f6e59}
+.rc-title{margin:0;font:400 56px/1.04 Georgia,serif;letter-spacing:-.01em;color:#2f3a2d}
+.rc-sub{margin:6px 0 0;font:italic 400 22px/1.2 Georgia,serif;color:#6f8566}
+.rc-kids{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px}
+.rc-kids .mc-owner{font-size:12px}
+.rc-head-icon{flex:none;width:118px;height:118px;object-fit:contain}
+.rc-tagline{display:flex;align-items:center;gap:16px;margin:16px 0 14px;font:600 15px/1.2 Montserrat,Arial,sans-serif;letter-spacing:.08em;color:#3c4639;white-space:nowrap}
+.rc-tagline .rc-rule{flex:1 1 0}
+.rc-tagline [contenteditable]{white-space:normal;text-align:center}
+.rc-rows{flex:1;min-height:0;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.rc-row{position:relative;flex:1 1 0;min-height:0;max-height:118px;display:grid;grid-template-columns:92px 104px 1px minmax(0,1fr) auto;align-items:center;border-radius:12px;background:var(--rc-tint);overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-num{align-self:stretch;display:flex;align-items:center;justify-content:center;background:var(--rc-deep);font:italic 400 44px/1 Georgia,serif;color:var(--rc-ink)}
+.rc-icon{display:flex;align-items:center;justify-content:center}
+.rc-icon img{display:block;width:var(--rc-icon,66px);height:var(--rc-icon,66px);object-fit:contain}
+.rc-divider{align-self:center;height:56%;background:rgba(60,60,50,.16)}
+.rc-copy{min-width:0;padding:6px 18px 6px 22px;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.rc-name{display:block;max-width:100%;font:400 var(--rc-name,31px)/1.1 Georgia,serif;color:#2f372d;overflow-wrap:break-word}
+.rc-row.rc-long .rc-name{font-size:calc(var(--rc-name,31px) * .84)}
+.rc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px}
+.rc-meta .mc-owner{font-size:11.5px}
+.rc-time{margin-right:18px;padding:9px 14px 8px;border-radius:12px;background:#fff;font:400 var(--rc-time,31px)/1 Georgia,serif;color:#2f372d;white-space:nowrap;font-variant-numeric:lining-nums}
+.rc-time small{margin-left:2px;font:400 calc(var(--rc-time,31px) * .42)/1 Georgia,serif;letter-spacing:.02em;text-transform:uppercase}
+.rc-banner{display:flex;align-items:center;gap:26px;margin-top:14px;padding:16px 34px;border-radius:12px;background:#E6EDE0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-banner img{flex:none;width:84px;height:84px;object-fit:contain}
+.rc-banner .rc-vrule{flex:none;width:1px;align-self:stretch;margin:6px 0;background:rgba(60,60,50,.22)}
+.rc-banner-title{margin:0;font:italic 400 44px/1.05 Georgia,serif;color:#2f3a2d}
+.rc-banner-line{margin:8px 0 0;font:600 14px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5f7457}
+/* Seven or eight steps: smaller rows, still one page. */
+.rc-sheet[data-rc-count="7"]{--rc-name:27px;--rc-time:27px;--rc-icon:56px}
+.rc-sheet[data-rc-count="8"]{--rc-name:24px;--rc-time:24px;--rc-icon:50px}
+.rc-sheet[data-rc-count="7"] .rc-num,.rc-sheet[data-rc-count="8"] .rc-num{font-size:36px}
+.rc-sheet[data-rc-count="8"] .rc-rows{gap:8px}
+.rc-sheet[data-rc-count="8"] .rc-copy{gap:4px}
+/* More steps: a more compact header, tagline and banner give the rows the room (never clipped, still one page). */
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-head{margin-top:12px;padding:12px 26px 12px 30px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-title{font-size:48px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-sub{font-size:19px;margin-top:4px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-kids{margin-top:6px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-head-icon{width:92px;height:92px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-tagline{margin:12px 0 10px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-banner{margin-top:10px;padding:10px 30px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-banner img{width:62px;height:62px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-banner-title{font-size:36px}
+.rc-sheet:is([data-rc-count="7"],[data-rc-count="8"]) .rc-banner-line{margin-top:5px}
+.rc-sheet[data-rc-count="8"] .hc-cue--large{padding:3px 12px 3px 8px;font-size:13.5px}
+.rc-sheet[data-rc-count="8"] .rc-time{padding:7px 12px 6px}
+/* On-sheet editing (screen only). */
+.rc-row .asr-remove{top:8px;right:8px;transform:none}
+.rc-row:hover .asr-remove,.rc-row:focus-within .asr-remove{opacity:1}
+.rc-time[role=button]{cursor:pointer}
+.rc-time[role=button]:hover{outline:1px dashed #9bb4a1;outline-offset:2px}
+.rc-sheet[data-asr-locked] .rc-time{cursor:default;outline:none!important}
+@media print{.rc-row .asr-remove{display:none!important}}
+.cp-thumb .rc-row .asr-remove{display:none!important}
+/* The routine editor's per-step fields. */
+.asr-step-toggles{display:flex;flex-wrap:wrap;gap:6px 18px}
+.asr-step-toggles label{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;font-weight:600!important}
+.asr-step-toggles input{width:18px!important;height:18px;min-height:0!important}
+.asr-who{display:flex;flex-wrap:wrap;gap:6px}
+.asr-who-chip{min-height:40px;padding:8px 14px;border:1px solid #cbd8cb;border-radius:99px;background:#fff;color:#516b5b;font:700 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.asr-who-chip[aria-pressed=true]{background:#506d60;border-color:#506d60;color:#fff}
+.asr-issue{margin:0;padding:8px 10px;border-left:3px solid #c9822f;background:#fbf4ea;color:#5a4630;font:12px/1.45 Montserrat,Arial,sans-serif}
+.asr-routine-note{margin:0 0 8px;font:12px/1.5 Montserrat,Arial,sans-serif;color:#66705f}
+.asr-routine-field{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font:700 12px Montserrat,Arial,sans-serif;color:#465d50}
+.asr-routine-field input[type=time]{min-height:40px;border:1px solid #c6d6ca;border-radius:5px;padding:6px 8px}
 </style>
 <script>
 import {
   CHOICES, ICONS, LABEL_LIMIT, addCustom, addStep, applyFamily, augFingerprint, augView, clock, freshState, fromLegacy, isAugState,
   move, restorePlan, routineOf, setChild, setFooter, setLabel, setMode, setRemoved, setTime, shown, taskRules, validTime, restoreRoutine,
-  GROUP_INFO, ROLE_LABEL,
-  type AugMember, type AugPlan, type AugState, type AugView, type Group,
+  GROUP_INFO, ROLE_LABEL, MAX_STEPS, cueOf, CUE_TEXT_LIMIT, routineKids, setCue, setCueOff, setLeave, setTimeOff, setTimesOff, setWho,
+  type AugMember, type AugPlan, type AugState, type AugView, type ChartView, type Group,
 } from '../../lib/club/engines/august-school-routines';
 import { doneLine, habitCue, ownerTag, ownerTags } from '../../lib/club/personalize/marks';
 import type { ContextPrefs } from '../../lib/club/personalize/family';
@@ -281,10 +334,6 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
   const $$ = <T extends HTMLElement>(sel: string) => [...root.querySelectorAll<T>(sel)];
 
   const sheetsHost = $('[data-asr-sheets]');
-  const stage = $('[data-asr-stage]');
-  const paper = $('[data-asr-sheet]');
-  // Plan mode prints a routine for every school-aged child: copies of the first routine sheet, made as needed.
-  const template = stage?.cloneNode(true) as HTMLElement | undefined;
   const fit = () => {
     for (const st of $$('.asr-stage')) {
       const sheet = st.querySelector<HTMLElement>('.asr-sheet');
@@ -303,9 +352,9 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
   const visionDialog = $<HTMLDialogElement>('[data-asr-vision]');
   const editorDialog = $<HTMLDialogElement>('[data-asr-editor]');
   const planDialog = $<HTMLDialogElement>('[data-asr-plan-editor]');
-  const openEditor = (child?: string) => {
+  const openEditor = (group?: string) => {
     if (locked || !editorDialog) return;
-    if (child) setChild(state, child, members);
+    if (group === 'morning' || group === 'after') { tab = group; expanded = ''; galleryOpen = false; }
     makeOptions();
     if (!editorDialog.open) editorDialog.showModal();
   };
@@ -399,76 +448,81 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     (grid.querySelector<HTMLButtonElement>('[aria-pressed="true"]') ?? grid.querySelector<HTMLButtonElement>('button'))?.focus();
   };
 
-  // The sheets. A routine sheet carries its child (data-asr-child); every edit on it is that child's routine.
-  type RoutineView = AugView['routines'][number];
-  const bindPaper = (sheet: HTMLElement) => {
-    if (sheet.dataset.asrBound) return;
-    sheet.dataset.asrBound = '';
-    const foot = sheet.querySelector<HTMLElement>('[data-asr-footer]');
-    foot?.addEventListener('blur', () => { if (!locked) update((s) => { setChild(s, sheet.dataset.asrChild ?? s.child, members); setFooter(s, foot.textContent ?? '', members); }); });
-    foot?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); foot.blur(); } });
-  };
-  const fillRoutine = (sheet: HTMLElement, v: RoutineView) => {
-    const child = v.child;
-    sheet.dataset.asrChild = child;
-    sheet.setAttribute('aria-label', `${v.name}’s school day`);
+  // The routine charts. Rows alternate the reference's soft tints (never one color for every row).
+  const TINTS: [string, string, string][] = [
+    ['#F8EDE1', '#F1DFCB', '#8C7350'], ['#E9EFE5', '#DAE5D3', '#5F7859'], ['#F6E7E4', '#EDD6D1', '#8E625C'], ['#E7EEE6', '#D7E3D5', '#5C7558'],
+    ['#E6EDF2', '#D4E0EA', '#56708A'], ['#F6EEDD', '#EDE0C5', '#86714A'], ['#EDE9F1', '#DED7E8', '#6B5F85'], ['#E4EEEA', '#D1E3DB', '#557568'],
+  ];
+  const chartSheet = (c: ChartView) => {
+    const sheet = el('article', { className: 'asr-sheet rc-sheet' });
+    if (planMode) sheet.dataset.planSheet = c.group;
+    sheet.dataset.asrGroup = c.group;
+    sheet.dataset.rcCount = String(c.steps.length);
     sheet.toggleAttribute('data-asr-locked', locked);
-    for (const group of ['morning', 'after'] as Group[]) {
-      const holder = sheet.querySelector<HTMLElement>(`[data-asr-group="${group}"]`);
-      if (!holder) continue;
-      holder.replaceChildren(...v.groups[group].map((step) => {
-        const row = el('div', { className: 'asr-row' });
-        row.dataset.asrId = step.id;
-        row.dataset.asrSection = group;
-        const time = el('time', { textContent: step.clock });
-        time.dataset.asrTime = '';
+    sheet.setAttribute('aria-label', `Our ${c.title}`);
+    const tagline = el('span', { textContent: c.tagline });
+    if (!locked) {
+      tagline.setAttribute('contenteditable', 'true');
+      tagline.setAttribute('role', 'textbox');
+      tagline.setAttribute('aria-label', 'Edit the line under the title');
+      tagline.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); tagline.blur(); } });
+      tagline.addEventListener('blur', () => update((s) => setFooter(s, tagline.textContent ?? '', members)));
+    }
+    const rows = c.steps.map((st, i) => {
+      const [tint, deep, ink] = TINTS[i % TINTS.length];
+      const name = el('strong', { className: 'rc-name', textContent: st.label });
+      if (!locked) {
+        name.setAttribute('contenteditable', 'true');
+        name.setAttribute('role', 'textbox');
+        name.setAttribute('aria-label', `Edit ${st.label}`);
+        name.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); name.blur(); } });
+        name.addEventListener('blur', () => { if ((name.textContent ?? '').trim() !== st.label) update((s) => setLabel(s, st.id, name.textContent ?? '', members)); });
+      }
+      // The step, then (when it isn't everyone's) who it's for in their colors, then its trigger.
+      const meta = st.owners.length || st.cue ? [el('span', { className: 'rc-meta' }, ...(st.owners.length ? [ownerTags(st.owners)] : []), ...(st.cue ? [habitCue(st.cue, { large: true })] : []))] : [];
+      const row = el('li', { className: `rc-row${st.label.length > 24 ? ' rc-long' : ''}` },
+        el('span', { className: 'rc-num', textContent: String(i + 1).padStart(2, '0') }),
+        el('span', { className: 'rc-icon' }, el('img', { src: st.icon, alt: '', width: 66, height: 66 })),
+        el('span', { className: 'rc-divider', 'aria-hidden': 'true' }),
+        el('span', { className: 'rc-copy' }, name, ...meta));
+      row.style.setProperty('--rc-tint', tint);
+      row.style.setProperty('--rc-deep', deep);
+      row.style.setProperty('--rc-ink', ink);
+      if (st.clock) {
+        const time = el('time', { className: 'rc-time' }, st.clock[0], el('small', { textContent: st.clock[1] }));
         if (!locked) {
           time.setAttribute('role', 'button');
           time.tabIndex = 0;
-          time.title = 'Choose a time';
-          time.setAttribute('aria-label', `Change time for ${step.label}`);
-          time.addEventListener('click', () => openTimePicker(time, step.id, child));
-          time.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimePicker(time, step.id, child); } });
+          time.setAttribute('aria-label', `Change time for ${st.label}`);
+          time.addEventListener('click', () => openTimePicker(time, st.id));
+          time.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTimePicker(time, st.id); } });
         }
-        const label = el('strong', { textContent: step.label });
-        label.dataset.asrText = '';
-        label.setAttribute('contenteditable', locked ? 'false' : 'true');
-        if (!locked) {
-          label.setAttribute('role', 'textbox');
-          label.setAttribute('aria-label', `Edit ${step.label}`);
-          label.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); label.blur(); } });
-          label.addEventListener('blur', () => { if (!locked) update((s) => { setChild(s, child, members); setLabel(s, step.id, label.textContent ?? '', members); }); });
-        }
-        row.append(time, el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '', width: 76, height: 76 }), label);
-        if (!locked) {
-          const remove = el('button', { type: 'button', className: 'asr-remove', textContent: '×', title: 'Remove step' });
-          remove.dataset.asrRemove = '';
-          remove.setAttribute('aria-label', `Remove ${step.label}`);
-          remove.addEventListener('click', () => update((s) => { setChild(s, child, members); setRemoved(s, step.id, true, members); }));
-          row.append(remove);
-        }
-        return row;
-      }));
-    }
-    // Whose routine: their name in their color (the family routine has no person, so plain words).
-    const name = sheet.querySelector<HTMLElement>('[data-asr-name]');
-    if (name) {
-      if (v.child === 'family') name.textContent = v.title;
-      else name.replaceChildren(ownerTag(v.name, v.color), ' morning & after-school routines');
-    }
-    // One cue per routine: the moment it starts, in the panel's heading where the time-of-day label was.
-    for (const group of ['morning', 'after'] as Group[]) {
-      const head = sheet.querySelector<HTMLElement>(`.asr-panel:has([data-asr-group="${group}"]) > header`);
-      if (!head) continue;
-      head.querySelector('.hc-cue')?.remove();
-      head.querySelector('.asr-accent')?.setAttribute('hidden', '');
-      head.append(habitCue(GROUP_INFO[group].cue));
-    }
-    const foot = sheet.querySelector<HTMLElement>('[data-asr-footer]');
-    if (foot) {
-      foot.setAttribute('contenteditable', locked ? 'false' : 'true');
-      if (document.activeElement !== foot) foot.textContent = v.footer;
-    }
+        row.append(time);
+      }
+      if (!locked && c.steps.length > 1) {
+        const remove = el('button', { type: 'button', className: 'asr-remove', textContent: '×', title: 'Remove step' });
+        remove.setAttribute('aria-label', `Remove ${st.label}`);
+        remove.addEventListener('click', () => update((s) => setRemoved(s, st.id, true, members)));
+        row.append(remove);
+      }
+      return row;
+    });
+    const deadline = c.banner.deadline ? `By ${c.banner.deadline} · ${c.banner.line}` : c.banner.line;
+    sheet.append(
+      el('div', { className: 'rc-brand' }, el('span', { className: 'rc-rule' }), el('img', { className: 'rc-logo', src: '/images/club/organized-family-club-logo.png', alt: 'Organized Family Club', width: 106, height: 24 }), el('span', { className: 'rc-rule' })),
+      el('header', { className: 'rc-head' },
+        el('div', { className: 'rc-titles' },
+          el('p', { className: 'rc-family', textContent: familyName || 'Our family' }),
+          el('h2', { className: 'rc-title', textContent: c.title }),
+          el('p', { className: 'rc-sub', textContent: c.subtitle }),
+          // Whose chart: every child by name, in their family color.
+          ...(c.kids.length > 1 ? [el('div', { className: 'rc-kids' }, ownerTags(c.kids))] : c.kids.length ? [el('div', { className: 'rc-kids' }, ownerTags(c.kids))] : [])),
+        el('img', { className: 'rc-head-icon', src: c.headerIcon, alt: '', width: 118, height: 118 })),
+      el('p', { className: 'rc-tagline' }, el('span', { className: 'rc-rule' }), tagline, el('span', { className: 'rc-rule' })),
+      el('ol', { className: 'rc-rows' }, ...rows),
+      el('div', { className: 'rc-banner' }, el('img', { src: c.banner.icon, alt: '', width: 84, height: 84 }), el('span', { className: 'rc-vrule', 'aria-hidden': 'true' }),
+        el('div', {}, el('p', { className: 'rc-banner-title', textContent: c.banner.title }), el('p', { className: 'rc-banner-line', textContent: deadline }))));
+    return sheet;
   };
   // The family plan sheet: four panels of who does what.
   let familyStage: HTMLElement | null = null;
@@ -510,32 +564,18 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     familyStage.replaceChildren(sheet);
   };
   const draw = () => {
+    if (!sheetsHost) return;
     const v = augView(state, members, prefs);
-    if (!planMode || !sheetsHost || !template || !stage) {
-      // Standalone: the one routine sheet, for the child she picked.
-      if (paper) fillRoutine(paper, { child: v.child, name: v.childName, title: v.title, groups: v.groups, footer: v.footer, color: colorFor(v.plan.ctx.colors, v.child === 'family' ? undefined : v.child) });
-      if (paper) bindPaper(paper);
-      return;
-    }
-    drawPlan(v);
-    // One routine sheet per school-aged child (the family's when there's none).
-    const stages = $$('.asr-stage').filter((x) => x !== familyStage);
-    while (stages.length < v.routines.length) {
-      const copy = template.cloneNode(true) as HTMLElement;
-      sheetsHost.append(copy);
-      stages.push(copy);
-    }
-    while (stages.length > v.routines.length) stages.pop()!.remove();
-    const papers: HTMLElement[] = [];
-    if (familyStage) papers.push(familyStage.querySelector<HTMLElement>('.asr-sheet')!);
-    v.routines.forEach((r, i) => {
-      const sheet = stages[i].querySelector<HTMLElement>('.asr-sheet')!;
-      sheet.dataset.planSheet = `r${i}`;
-      bindPaper(sheet);
-      fillRoutine(sheet, r);
+    if (planMode) drawPlan(v);
+    // The two family charts, rebuilt from the plan on every change (after the family plan on the plan page).
+    for (const st of $$('.asr-stage')) if (st !== familyStage) st.remove();
+    const papers: HTMLElement[] = familyStage ? [familyStage.querySelector<HTMLElement>('.asr-sheet')!] : [];
+    for (const c of v.charts) {
+      const sheet = chartSheet(c);
+      sheetsHost.append(el('div', { className: 'asr-stage' }, sheet));
       papers.push(sheet);
-    });
-    papers.forEach((sheet, i) => sheet.toggleAttribute('data-plan-sheet-end', i === papers.length - 1));
+    }
+    if (planMode) papers.forEach((sheet, i) => sheet.toggleAttribute('data-plan-sheet-end', i === papers.length - 1));
     fit();
   };
   // The family plan editor (desktop dialog; the phone sheet uses the same editor).
@@ -572,17 +612,29 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
   const makeOptions = () => {
     const v = augView(state, members, prefs);
     const r = v.routine;
-    const people = $('[data-asr-children]');
-    // On the plan page every school-aged child's routine prints, so the family routine is only for a family without one.
-    people?.replaceChildren(...[...(planMode && v.kids.length ? [] : [{ id: 'family', name: 'Our family' }]), ...v.kids].map((k) => {
-      const chip = el('button', { type: 'button', textContent: k.name });
-      chip.setAttribute('aria-pressed', String(state.child === k.id));
-      chip.addEventListener('click', () => { if (k.id === state.child) return; expanded = ''; galleryOpen = false; update((s) => setChild(s, k.id, members)); });
-      return chip;
-    }));
+    const chart = v.charts.find((c) => c.group === tab)!;
+    // The routine as a whole: the morning's out-the-door time (sample when her family page has no school start), or
+    // after school, clock times on or off; then anything that doesn't add up.
+    const controls = $('[data-asr-routine-controls]');
+    if (controls) {
+      const parts: Node[] = [];
+      if (tab === 'morning') {
+        const leave = el('input', { type: 'time', step: '300', value: v.leave, disabled: locked });
+        leave.addEventListener('change', () => update((s) => setLeave(s, leave.value, members)));
+        parts.push(el('label', { className: 'asr-routine-field' }, 'Out the door by', leave),
+          el('p', { className: 'asr-routine-note', textContent: v.sampleTimes ? 'These are sample times: add when school starts on your family page, or set the out-the-door time here, and change any step’s time.' : 'Timed back from when school starts on your family page. Change any step’s time below.' }));
+      } else {
+        const timed = el('input', { type: 'checkbox', checked: r.steps.some((x) => x.group === 'after' && !x.removed && !x.timeOff), disabled: locked });
+        timed.addEventListener('change', () => update((s) => setTimesOff(s, 'after', !timed.checked, members)));
+        parts.push(el('label', { className: 'asr-routine-field' }, timed, 'Show clock times after school'),
+          el('p', { className: 'asr-routine-note', textContent: 'Afternoons change with activities, so this routine runs on triggers by default. Turn times on if your afternoons are the same every day.' }));
+      }
+      for (const issue of chart.issues) parts.push(el('p', { className: 'asr-issue', textContent: issue.text }));
+      controls.replaceChildren(...parts);
+    }
     $$('[data-asr-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.asrTab === tab)));
     const title = $('[data-asr-guided-title]');
-    if (title) title.textContent = `${v.childName}${tab === 'morning' ? '’s morning' : ' · After school'}`;
+    if (title) title.textContent = tab === 'morning' ? 'Morning routine' : 'After-school routine';
     const visible = shown(r, tab);
     $('[data-asr-options]')?.replaceChildren(...r.steps.filter((x) => x.group === tab).map((step) => {
       const removed = Boolean(step.removed), open = expanded === step.id;
@@ -591,7 +643,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
       const head = el('button', { type: 'button', className: 'asr-step-main' });
       head.setAttribute('aria-expanded', String(open));
       const name = el('strong', { textContent: step.label + (removed ? ' · Removed' : '') });
-      const time = el('small', { textContent: removed ? 'Tap to restore' : clock(step.time) });
+      const time = el('small', { textContent: removed ? 'Tap to restore' : [step.timeOff ? 'No time' : clock(step.time), cueOf(step) ? `When: ${cueOf(step)}` : ''].filter(Boolean).join(' · ') });
       const copy = el('span', { className: 'asr-step-copy' });
       copy.append(name, time);
       head.append(el('img', { src: ICONS[step.icon] ?? ICONS.bag, alt: '' }), copy, el('span', { className: 'asr-step-chevron', textContent: open ? '⌃' : '›' }));
@@ -602,18 +654,40 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
         if (!removed) {
           const input = el('input', { type: 'text', maxLength: LABEL_LIMIT, value: step.label });
           input.addEventListener('input', () => { name.textContent = input.value; update((s) => setLabel(s, step.id, input.value, members), false); });
-          const timeInput = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30' });
-          timeInput.addEventListener('change', () => { if (!validTime(timeInput.value)) return; time.textContent = clock(timeInput.value); update((s) => setTime(s, step.id, timeInput.value, members), false); });
+          const timeInput = el('input', { type: 'time', step: '300', value: validTime(step.time) ? step.time : '07:30', disabled: Boolean(step.timeOff) });
+          timeInput.addEventListener('change', () => { if (!validTime(timeInput.value)) return; update((s) => setTime(s, step.id, timeInput.value, members)); });
+          const cueInput = el('input', { type: 'text', maxLength: CUE_TEXT_LIMIT, value: step.cue ?? cueOf(step), placeholder: 'e.g. After breakfast', disabled: Boolean(step.cueOff) });
+          cueInput.addEventListener('change', () => update((s) => setCue(s, step.id, cueInput.value, members)));
           const l1 = el('label', { textContent: 'Activity name' }); l1.append(input);
-          const l2 = el('label', { textContent: 'Time (5-minute choices or custom)' }); l2.append(timeInput);
-          detail.append(l1, l2);
+          const l2 = el('label', { textContent: 'Time' }); l2.append(timeInput);
+          const l3 = el('label', { textContent: 'Trigger: the everyday moment that starts it (blank for none)' }); l3.append(cueInput);
+          // Time and trigger each switch off on their own; what's typed is kept for later.
+          const showTime = el('input', { type: 'checkbox', checked: !step.timeOff });
+          showTime.addEventListener('change', () => update((s) => setTimeOff(s, step.id, !showTime.checked, members)));
+          const showCue = el('input', { type: 'checkbox', checked: !step.cueOff });
+          showCue.addEventListener('change', () => update((s) => setCueOff(s, step.id, !showCue.checked, members)));
+          const toggles = el('div', { className: 'asr-step-toggles' });
+          const t1 = el('label', {}); t1.append(showTime, 'Show the time');
+          const t2 = el('label', {}); t2.append(showCue, 'Show the trigger');
+          toggles.append(t1, t2);
+          // Who it's for: everyone, or some of the children.
+          const kids = routineKids(members);
+          const who = el('div', { className: 'asr-who', role: 'group' });
+          who.setAttribute('aria-label', `Who does ${step.label}`);
+          const mk = (label: string, on: boolean, pick: () => void) => { const b = el('button', { type: 'button', className: 'asr-who-chip', textContent: label }); b.setAttribute('aria-pressed', String(on)); b.addEventListener('click', pick); return b; };
+          if (kids.length > 1) {
+            who.append(mk('Everyone', !step.who?.length, () => update((s) => setWho(s, step.id, [], members))),
+              ...kids.map((k) => { const on = Boolean(step.who?.includes(k.id)); return mk(k.firstName, on, () => update((s) => setWho(s, step.id, on ? (step.who ?? []).filter((w) => w !== k.id) : [...(step.who ?? []), k.id], members))); }));
+          }
+          const issues = chart.issues.filter((x) => x.stepId === step.id).map((x) => el('p', { className: 'asr-issue', textContent: x.text }));
+          detail.append(l1, l2, l3, toggles, ...(kids.length > 1 ? [el('label', { textContent: 'Who does it' }), who] : []), ...issues);
         }
         const actions = el('div', { className: 'asr-step-actions' });
         const toggle = el('button', { type: 'button', textContent: removed ? '＋ Restore step' : 'Remove step' });
         toggle.addEventListener('click', () => update((s) => setRemoved(s, step.id, !removed, members)));
         actions.append(toggle);
         if (!removed) for (const dir of [-1, 1] as const) {
-          const b = el('button', { type: 'button', textContent: dir < 0 ? '↑ Earlier' : '↓ Later', disabled: !visible[visible.indexOf(step) + dir] });
+          const b = el('button', { type: 'button', textContent: dir < 0 ? '↑ Move up' : '↓ Move down', disabled: !visible[visible.indexOf(step) + dir] });
           b.addEventListener('click', () => update((s) => move(s, step.id, dir, members)));
           actions.append(b);
         }
@@ -623,7 +697,12 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
       return card;
     }) ?? []);
     const add = $('[data-asr-add]');
-    if (add) { add.textContent = galleryOpen ? '× Close activity choices' : '＋ Add a step'; add.setAttribute('aria-expanded', String(galleryOpen)); }
+    if (add) {
+      const full = visible.length >= MAX_STEPS;
+      add.textContent = full ? `${MAX_STEPS} steps is the most that fit one page` : galleryOpen ? '× Close activity choices' : '＋ Add a step';
+      (add as HTMLButtonElement).disabled = full || locked;
+      add.setAttribute('aria-expanded', String(galleryOpen));
+    }
     const gallery = $('[data-asr-gallery]');
     if (gallery) {
       gallery.hidden = !galleryOpen;
@@ -642,25 +721,25 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
         gallery.append(el('strong', { textContent: 'Choose an activity' }), grid);
       }
     }
-    const shorter = $<HTMLInputElement>('[data-asr-shorter]');
-    if (shorter) shorter.checked = r.mode === 'simple';
   };
   $$('[data-asr-tab]').forEach((b) => b.addEventListener('click', () => { tab = b.dataset.asrTab as Group; expanded = ''; galleryOpen = false; makeOptions(); }));
   $('[data-asr-add]')?.addEventListener('click', () => { galleryOpen = !galleryOpen; expanded = ''; makeOptions(); });
-  $<HTMLInputElement>('[data-asr-shorter]')?.addEventListener('change', (e) => update((s) => setMode(s, (e.target as HTMLInputElement).checked, members)));
 
   // Standalone page controls.
   $('[data-asr-reset]')?.addEventListener('click', () => update((s) => restoreRoutine(s, members)));
   $('[data-asr-print]')?.addEventListener('click', () => window.print());
   const dl = $<HTMLButtonElement>('[data-asr-png]');
   dl?.addEventListener('click', async () => {
-    if (!paper || !dl) return;
-    dl.disabled = true; const old = dl.textContent; dl.textContent = 'Preparing image…'; root.classList.add('asr-export');
+    const papers = $$('.rc-sheet');
+    if (!papers.length || !dl) return;
+    dl.disabled = true; const old = dl.textContent; dl.textContent = 'Preparing images…'; root.classList.add('asr-export');
     try {
-      await Promise.all([...paper.querySelectorAll('img')].map((img) => (img.complete ? null : img.decode().catch(() => null))));
       const { toPng } = await import('html-to-image');
-      const png = await toPng(paper, { pixelRatio: 2, width: 816, height: 1056, backgroundColor: '#fff' });
-      const a = document.createElement('a'); a.href = png; a.download = 'my-school-day-routines.png'; a.click();
+      for (const paper of papers) {
+        await Promise.all([...paper.querySelectorAll('img')].map((img) => (img.complete ? null : img.decode().catch(() => null))));
+        const png = await toPng(paper, { pixelRatio: 2, width: 816, height: 1056, backgroundColor: '#fff' });
+        const a = document.createElement('a'); a.href = png; a.download = `our-${paper.dataset.asrGroup === 'after' ? 'after-school' : 'morning'}-routine.png`; a.click();
+      }
     } catch (error) { console.error('August export failed', error); alert('Image download failed. Use Print / Save PDF instead.'); }
     finally { root.classList.remove('asr-export'); dl.disabled = false; dl.textContent = old; }
   });
