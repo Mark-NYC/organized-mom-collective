@@ -1,0 +1,175 @@
+---
+/**
+ * Independent proof-of-concept. Does not alter March's Club delivery, member data,
+ * approvals or billing. Uses the approved March chore illustrations where available.
+ */
+import AppLayout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import { marchIconArt, type MarchIcon } from '../../../data/club/march-chore-icons';
+const icons: Record<string, string> = {};
+for (const name of ['make-bed','clear-dishes','shoes-away','feed-pets','clothes-away','tidy-desk','toys-away','set-table','wipe-surface','make-dinner','empty-dishwasher','change-sheets','dust','clean-floor'] as MarchIcon[]) {
+  const art = marchIconArt(name);
+  if (art) icons[name] = art.src;
+}
+---
+<AppLayout title="Family Chore Chart Design Prototype">
+  <div class="fc-prototype" data-fc-root>
+    <aside class="fc-sidebar">
+      <p class="fc-kicker"><a href="/app/club">Club</a> / Design experiment</p>
+      <h1>Our Family <em>Chore Chart</em></h1>
+      <p class="fc-status">Independent prototype · Not part of March's Club kit</p>
+      <p class="fc-intro">A few responsibilities for each person. One clear moment to begin. No points or rewards.</p>
+      <div class="fc-buttons">
+        <button type="button" class="fc-primary" data-fc-print>Download and print</button>
+        <button type="button" class="fc-secondary" data-fc-reset>Reset sample</button>
+      </div>
+      <p class="fc-heading">Make changes</p>
+      <label class="fc-field">Family name <input data-fc-family maxlength="35" value="Rivera" /></label>
+      <label class="fc-field">Edit a person's chores <select data-fc-person></select></label>
+      <div class="fc-edit-person" data-fc-edit></div>
+      <p class="fc-tip">Changes appear on the printable immediately and stay in this browser. This sample does not change your saved family profile or Club plans.</p>
+      <p class="fc-heading">The idea</p>
+      <p class="fc-tip">Names and colors tell each person where to look. The little WHEN cue tells them when to begin. Each person gets only a few jobs, so the sheet stays easy to read on the fridge.</p>
+    </aside>
+    <section class="fc-preview" aria-label="Print preview">
+      <div class="fc-preview-label">LIVE PRINTABLE PREVIEW · 8.5 × 11 IN</div>
+      <div class="fc-paper" data-fc-paper>
+        <header class="fc-paper-head">
+          <div class="fc-paper-top">ORGANIZED FAMILY CLUB · DESIGN EXPERIMENT</div>
+          <div class="fc-paper-heading">
+            <div><h2>Our Family <em>Chore Chart</em></h2><p>Our shared responsibilities at home.</p></div>
+            <span class="fc-house" aria-hidden="true">⌂</span>
+          </div>
+          <div class="fc-family-line" data-fc-family-display>The Rivera Family</div>
+        </header>
+        <div class="fc-charts" data-fc-charts></div>
+        <footer class="fc-paper-foot">We all pitch in to keep our home running smoothly.<small>ORGANIZED FAMILY CLUB · FAMILY CHORE CHART</small></footer>
+      </div>
+    </section>
+  </div>
+</AppLayout>
+<style is:global>
+.fc-prototype{--ink:#514845;--green:#365744;--muted:#817b76;--line:#e6e1d9;display:grid;grid-template-columns:clamp(300px,30%,420px) minmax(0,1fr);font-family:Montserrat,Arial,sans-serif;color:var(--ink);margin:-48px calc(50% - 50vw) -60px;min-height:calc(100vh - 68px)}
+.fc-sidebar{border-right:1px solid #e3dcd1;background:#fbf8f4;padding:32px 30px 60px;min-width:0}
+.fc-kicker,.fc-heading{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#81766f}
+.fc-kicker a{text-decoration:underline;text-underline-offset:4px}
+.fc-sidebar h1{font:400 34px/1.1 Georgia,serif;margin:21px 0 14px;letter-spacing:-.03em}
+.fc-sidebar h1 em{font-style:italic}
+.fc-status{display:inline-block;font-size:11px;padding:7px 10px;background:#eaf1e7;color:#46624d;border-radius:4px;font-weight:600;line-height:1.4}
+.fc-intro,.fc-tip{font-size:13px;line-height:1.65;color:#7d746f;margin:16px 0}
+.fc-buttons{display:grid;gap:10px;margin:20px 0 28px}
+.fc-buttons button{width:100%;min-height:46px;border:1px solid #514845;font:700 11px Montserrat,Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;border-radius:3px}
+.fc-primary{color:white;background:#514845}.fc-secondary{color:#514845;background:transparent}
+.fc-heading{padding:18px 0 10px;border-top:1px solid #e6dfd7}
+.fc-field{display:grid;gap:6px;font-size:12px;margin:12px 0;color:#665e59}
+.fc-field input,.fc-field select,.fc-edit-person input,.fc-edit-person select{width:100%;min-height:38px;padding:8px 10px;border:1px solid #cfc8c1;border-radius:3px;background:white;color:#514845;font:12px Montserrat,Arial,sans-serif}
+.fc-edit-person{display:grid;gap:14px}.fc-task-editor{border:1px solid #e6dfd7;padding:12px;display:grid;gap:8px;background:#fff}.fc-task-editor strong{font-size:11px;color:#536750}
+.fc-mini-label{font-size:10px;letter-spacing:.08em;color:#7d746f}
+.fc-preview{min-width:0;background:#efeeec;display:flex;flex-direction:column;align-items:center;padding:20px 25px 60px;overflow-x:auto}
+.fc-preview-label{font:700 10px Montserrat,Arial,sans-serif;color:#7f7b75;letter-spacing:.15em;margin-bottom:15px;text-align:center}
+.fc-paper{background:#fff;box-shadow:0 15px 36px #463c301e;width:816px;height:1056px;flex:none;box-sizing:border-box;padding:45px 46px 29px;display:flex;flex-direction:column;color:#3b4f42;overflow:hidden}
+.fc-paper-top{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.16em;color:#4c644e}
+.fc-paper-heading{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd7ce;padding:13px 0 12px}
+.fc-paper h2{font:400 38px/1.1 Georgia,serif;margin:0;color:#344d3d;letter-spacing:-.03em}
+.fc-paper h2 em{color:#6c8a6c}
+.fc-paper-heading p{font:italic 16px Georgia,serif;color:#6b6e61;margin:6px 0 0}
+.fc-house{font:80px/.75 Georgia,serif;color:#9aab98}
+.fc-family-line{font:700 10px Montserrat,Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#768375;padding:10px 0}
+.fc-charts{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0}
+.fc-person{border:1px solid #dbd8d1;border-radius:13px;display:grid;grid-template-columns:135px 1fr;overflow:hidden;min-height:0;flex:1}
+.fc-person-name{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;background:var(--person-tint);padding:12px;color:#3e5042}
+.fc-person-name strong{font:700 25px Georgia,serif;word-break:break-word;text-align:center}
+.fc-person-name span{font:700 9px Montserrat,Arial,sans-serif;text-transform:uppercase;letter-spacing:.13em;opacity:.75}
+.fc-person-name .fc-person-symbol{font:45px Georgia,serif;line-height:1;color:#526e59}
+.fc-person-content{padding:12px 15px;display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0}
+.fc-person-content h3{font:700 17px Georgia,serif;color:#3c5b44;margin:0 0 3px}
+.fc-job{display:grid;grid-template-columns:41px minmax(0,1fr) 23px;gap:9px;align-items:center;min-height:46px;border-top:1px solid #eee9e3;padding:4px 0}
+.fc-job:first-of-type{border-top:0}
+.fc-job-icon{width:38px;height:38px;object-fit:contain}
+.fc-job-icon-fallback{width:38px;height:38px;display:grid;place-items:center;font:30px Georgia,serif;color:#849282}
+.fc-job-title{font:600 13px Montserrat,Arial,sans-serif;color:#343f38;line-height:1.25}
+.fc-job-cue{display:inline-flex;align-items:center;gap:5px;font:500 10px Montserrat,Arial,sans-serif;color:#56544e;background:#f5f0e7;border-radius:20px;padding:3px 7px;margin-top:4px}
+.fc-job-cue b{font-size:9px;letter-spacing:.07em}
+.fc-job-cue .fc-clock{font-size:12px}
+.fc-checkbox{width:17px;height:17px;border:1px solid #9e9891;border-radius:3px}
+.fc-person.fc-adults{grid-template-columns:135px 1fr;flex:.85}
+.fc-person.fc-adults .fc-person-name strong{font-size:20px}
+.fc-person.fc-adults .fc-person-content{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fc-adult-card{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.fc-adult-name{font:700 13px Georgia,serif;color:#425d49;padding:4px 8px;border-radius:15px;align-self:flex-start}
+.fc-adult-task{display:flex;gap:7px;align-items:center;font:600 12px Montserrat,Arial,sans-serif;color:#3f4c41}
+.fc-adult-task img{width:34px;height:34px;object-fit:contain}
+.fc-person.fc-adults .fc-job-cue{align-self:flex-start}
+.fc-paper-foot{text-align:center;padding-top:14px;margin-top:10px;border-top:1px solid #ddd7ce;font:italic 16px Georgia,serif;color:#567157}
+.fc-paper-foot small{display:block;margin-top:8px;font:700 8px Montserrat,Arial,sans-serif;letter-spacing:.14em;color:#849184}
+@media(min-width:1100px){body:has(.fc-prototype) #main{max-width:none;width:100%;padding:0;margin:0}body:has(.fc-prototype){overflow-x:hidden}.fc-prototype{margin:0;min-height:calc(100vh - 64px)}.fc-sidebar{height:calc(100vh - 64px);overflow-y:auto}.fc-preview{height:calc(100vh - 64px);overflow-y:auto}}
+@media(max-width:1099px){.fc-prototype{grid-template-columns:1fr;margin:0 -20px}.fc-sidebar{padding:25px 22px}.fc-preview{padding:22px 10px 35px}.fc-paper{zoom:.78}}
+@media(max-width:720px){.fc-paper{zoom:.43}.fc-preview{overflow:hidden}.fc-sidebar h1{font-size:30px}}
+@media print{
+@page{size:letter portrait;margin:0}
+html,body,body:has(.fc-prototype) #main{margin:0!important;padding:0!important;width:8.5in!important;height:auto!important;overflow:visible!important;background:white!important}
+body:has(.fc-prototype) header,body:has(.fc-prototype) nav,body:has(.fc-prototype) footer:not(.fc-paper-foot),.fc-sidebar,.fc-preview-label{display:none!important}
+.fc-prototype,.fc-preview{display:block!important;width:8.5in!important;min-height:0!important;margin:0!important;padding:0!important;overflow:visible!important;background:white!important}
+.fc-paper{zoom:1!important;width:8.5in!important;height:11in!important;box-shadow:none!important;margin:0!important;break-inside:avoid!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+<script>
+import { marchIconArt } from '../../../data/club/march-chore-icons';
+type Job = {title:string;when:string;icon:string};
+type Person = {name:string;color:string;symbol:string;adult?:boolean;jobs:Job[]};
+type Chart = {family:string;people:Person[]};
+const defaults:Chart={family:'Rivera',people:[
+{name:'Sofia',color:'#D8E6F0',symbol:'✿',jobs:[{title:'Make my bed',when:'After getting dressed',icon:'make-bed'},{title:'Clear my dishes',when:'After meals',icon:'clear-dishes'},{title:'Keep my school area tidy',when:'After homework',icon:'tidy-desk'}]},
+{name:'Mateo',color:'#F7E8C2',symbol:'✦',jobs:[{title:'Feed the pets',when:'After breakfast',icon:'feed-pets'},{title:'Put away my laundry',when:'After it is dry',icon:'clothes-away'},{title:'Keep the play area picked up',when:'Before dinner',icon:'toys-away'}]},
+{name:'Elena',color:'#E9DEEC',symbol:'❀',jobs:[{title:'Tidy my room',when:'Before bed',icon:'toys-away'},{title:'Put books away',when:'After reading',icon:'tidy-desk'},{title:'Water the plants',when:'On Sunday',icon:'wipe-surface'}]},
+{name:'Ana',color:'#F1D2D8',symbol:'',adult:true,jobs:[{title:'Plan and make dinner',when:'Weeknights',icon:'make-dinner'}]},
+{name:'Luis',color:'#E6CDB9',symbol:'',adult:true,jobs:[{title:'Keep up with laundry',when:'Sundays',icon:'clothes-away'}]}
+]};
+const root=document.querySelector<HTMLElement>('[data-fc-root]');
+if(root){
+ const key='omc:prototype:family-chore-chart:v1';
+ const load=():Chart=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v?.people?.length===5?v:structuredClone(defaults)}catch{return structuredClone(defaults)}};
+ let state=load();let selected=0;
+ const paper=root.querySelector<HTMLElement>('[data-fc-charts]')!;
+ const edit=root.querySelector<HTMLElement>('[data-fc-edit]')!;
+ const picker=root.querySelector<HTMLSelectElement>('[data-fc-person]')!;
+ const family=root.querySelector<HTMLInputElement>('[data-fc-family]')!;
+ const elt=(tag:string,cls?:string,txt?:string)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e};
+ const iconFor=(key:string)=>marchIconArt(key as Parameters<typeof marchIconArt>[0])?.src;
+ const iconNode=(job:Job)=>{const src=iconFor(job.icon);if(src){const img=elt('img','fc-job-icon') as HTMLImageElement;img.src=src;img.alt='';return img}return elt('span','fc-job-icon-fallback','•')};
+ const cue=(when:string)=>{const c=elt('span','fc-job-cue');c.append(elt('span','fc-clock','◷'),elt('b',undefined,'WHEN'),document.createTextNode(when));return c};
+ const render=()=>{
+  paper.replaceChildren();
+  root.querySelector<HTMLElement>('[data-fc-family-display]')!.textContent='The '+state.family+' Family';
+  family.value=state.family;
+  state.people.forEach((p,i)=>{
+   if(p.adult)return;
+   const card=elt('section','fc-person');card.style.setProperty('--person-tint',p.color);
+   const badge=elt('div','fc-person-name');badge.append(elt('span',undefined,'MY JOBS'),elt('strong',undefined,p.name),elt('span','fc-person-symbol',p.symbol));card.append(badge);
+   const content=elt('div','fc-person-content');content.append(elt('h3',undefined,'My responsibilities'));
+   p.jobs.forEach(j=>{const line=elt('div','fc-job');const mid=elt('div');mid.append(elt('div','fc-job-title',j.title),cue(j.when));line.append(iconNode(j),mid,elt('span','fc-checkbox'));content.append(line)});
+   card.append(content);paper.append(card);
+  });
+  const adults=state.people.filter(p=>p.adult);
+  const card=elt('section','fc-person fc-adults');card.style.setProperty('--person-tint','#E7F0E5');
+  const badge=elt('div','fc-person-name');badge.append(elt('span','fc-person-symbol','⌂'),elt('strong',undefined,'Family'),elt('span',undefined,'GROWN-UPS'));card.append(badge);
+  const content=elt('div','fc-person-content');adults.forEach(p=>{const a=elt('div','fc-adult-card');const n=elt('span','fc-adult-name',p.name);n.style.background=p.color;a.append(n);p.jobs.forEach(j=>{const row=elt('div','fc-adult-task');row.append(iconNode(j),elt('span',undefined,j.title));a.append(row,cue(j.when))});content.append(a)});card.append(content);paper.append(card);
+  localStorage.setItem(key,JSON.stringify(state));
+ };
+ const editRender=()=>{
+  picker.replaceChildren(...state.people.map((p,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=p.name;return o}));picker.value=String(selected);
+  edit.replaceChildren();const p=state.people[selected];
+  const nameLabel=elt('label','fc-field','Name');const input=document.createElement('input');input.value=p.name;input.maxLength=22;input.addEventListener('input',()=>{p.name=input.value;picker.options[selected].textContent=p.name;render()});nameLabel.append(input);edit.append(nameLabel);
+  p.jobs.forEach((job,i)=>{
+   const panel=elt('div','fc-task-editor');panel.append(elt('strong',undefined,'Responsibility '+(i+1)));
+   const t=elt('label','fc-mini-label','JOB');const ti=document.createElement('input');ti.value=job.title;ti.maxLength=38;ti.addEventListener('input',()=>{job.title=ti.value;render()});t.append(ti);
+   const w=elt('label','fc-mini-label','WHEN');const wi=document.createElement('input');wi.value=job.when;wi.maxLength=32;wi.addEventListener('input',()=>{job.when=wi.value;render()});w.append(wi);panel.append(t,w);edit.append(panel);
+  })
+ };
+ picker.addEventListener('change',()=>{selected=Number(picker.value);editRender()});
+ family.addEventListener('input',()=>{state.family=family.value;render()});
+ root.querySelector('[data-fc-reset]')!.addEventListener('click',()=>{state=structuredClone(defaults);selected=0;render();editRender()});
+ root.querySelector('[data-fc-print]')!.addEventListener('click',()=>window.print());
+ render();editRender();
+}
+</script>
