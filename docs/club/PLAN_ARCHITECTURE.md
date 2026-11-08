@@ -182,7 +182,9 @@ The one or two NEW habits get a pale March wash, bold words and a "New habit" ta
 Habits"; established jobs show plainly as context. Footer: "When the moment comes, we each know our part." **No
 rewards, points, streaks, percentages, checkboxes or tracking.**
 
-Rules: `src/lib/club/engines/march-family-rhythm.ts` (pure; cue → action → finish). Five shared moments (after
+Rules: `src/lib/club/engines/family-rhythm.ts`, the one Family Rhythm engine (March imports it through
+`march-family-rhythm.ts`; a plan's `month` sets the ages, none means March 2027; the Welcome resource reuses it:
+[WELCOME_MARCH_DECEMBER_MIGRATION.md](WELCOME_MARCH_DECEMBER_MIGRATION.md)) (pure; cue → action → finish). Five shared moments (after
 breakfast, before we head out, when we get home, after dinner, after brushing teeth), each with its own job library.
 Every job has to make sense at its moment (`fitsCue`): nothing that must happen before the cue, and no kitchen jobs at
 bedtime; her typed jobs are checked the same way and refused with the reason.

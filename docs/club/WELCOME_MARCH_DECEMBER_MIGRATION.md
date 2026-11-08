@@ -290,10 +290,12 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 
 ### Phase 2: Welcome Family Rhythm
 
-- [ ] 2a Engine: `month` parameter (default `'2027-03'`); March output unchanged for every fixture (snapshot test
-      before/after). The priority-led habit and `bedtime` (D5) ship in 2b behind the Welcome context, so March stays
-      byte-identical
-- [ ] 2a Tests: Welcome month ages; small (1 adult), large (2 adults + 5 kids), no kids, teens only; individual,
+- [x] 2a Engine moved to `src/lib/club/engines/family-rhythm.ts` (`march-family-rhythm.ts` re-exports it). A plan's
+      ages come from `RhythmState.month` (optional, `YYYY-MM`, validated, saved with the plan, cleared by "start over");
+      absent = March 2027, so every March plan reads exactly as before. `monthOf`, `rhythmContext` exported. Snapshot of
+      March recorded before the move (`family-rhythm-march-snapshot.test.ts`, separate commit) and unchanged after
+- [ ] 2b: the priority-led default habit and `bedtime` (D5) (moved from 2a so 2a changes nothing March prints)
+- [x] 2a Tests (`family-rhythm.test.ts`): Welcome month ages; small (1 adult), large (2 adults + 5 kids), no kids, teens only; individual,
       parallel and joint rows; colors stable across reorder/add; 300 generated households still pass `validatePlan`
 - [ ] 2b Shared components (re-exports), `context="welcome"` in `ClubPlanShell` (no deadline, no meeting tab, no
       `kitSlug` entitlement), page `/app/club/family-rhythm`, `routes.ts`, `ClubNav`/Club Home link, README routes and keys
@@ -416,6 +418,7 @@ Options as proposed in Phase 1. The owner's decisions (2026-11-08) are in §11.1
 | Phase | PR | Status | Notes |
 | --- | --- | --- | --- |
 | 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) | COMPLETE (merged) | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
+| 2a | Engine refactor (branch `claude/epic-noether-i7st9u`) | READY FOR REVIEW | PR link added once opened |
 
 ### Phase 1 log (2026-11-08)
 
@@ -424,3 +427,20 @@ Options as proposed in Phase 1. The owner's decisions (2026-11-08) are in §11.1
 - Tests: none needed (docs only).
 - Owner review 2026-11-08: architecture approved; decisions and guardrails in §11.1.
 - Next phase depends on: approved D1–D4; a production fingerprint before any `create or replace` of kit functions.
+
+### Phase 2a log (2026-11-08)
+
+- Completed: engine moved to `family-rhythm.ts` with `month` on the state; old path re-exports; README and
+  PLAN_ARCHITECTURE point at the new file.
+- Changed files: `src/lib/club/engines/family-rhythm.ts` (moved from `march-family-rhythm.ts`), `march-family-rhythm.ts`
+  (re-export), `family-rhythm.test.ts`, `family-rhythm-march-snapshot.test.ts` + `__snapshots__/`, README,
+  PLAN_ARCHITECTURE, this tracker.
+- Tests: March snapshot (23 cases: every sample family, 12 fixture households, 120 generated households, an edit
+  sequence with a save round trip, the legacy chore-chart migration) recorded on the old engine, passing unchanged;
+  `family-rhythm.test.ts` 9 passed; `src/lib/club/engines` + `personalize` 201 passed; `npm run check` 0 errors;
+  `astro build` passes, and `/app/club/march` and `/app/club/march/spring-prep` HTML match `main`'s (only Astro's
+  random island uids differ). Full `vitest run`: 53 failures, every one also failing on `main` by name (main also
+  fails the known slow `club-edits` property test); no new failures. Pre-existing failures have grown since
+  `KNOWN_TEST_FAILURES.md` (42 on 2026-10-30) and aren't part of this project.
+- Decisions: the priority-led habit moved to 2b so 2a changes nothing March prints.
+- Next (2b): stacked on 2a.
