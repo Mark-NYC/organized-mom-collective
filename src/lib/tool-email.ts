@@ -91,7 +91,7 @@ export function recognizeSubscriberResourceAccess(): Promise<boolean> {
       return false;
     } catch { return false; }
     finally { clearResourcePassFragment(); }
-  })();
+  })().finally(() => { resourcePassVerification = undefined; });
   return resourcePassVerification;
 }
 
