@@ -384,7 +384,7 @@ Welcome Kit orders or approval, the 2d overlap rule, or historical March data (t
 - [ ] Tests: households 1–9 people, toddlers only, teens, no kids; adult-only jobs never to children; print = 2 pages
       (one sheet, duplex); March independent of Welcome
 
-#### Phase 3b log (2026-11-09): READY FOR REVIEW (branch `claude/march-spring-clean-3b`, from `main` after #439)
+#### Phase 3b log (2026-11-09): READY FOR REVIEW, [#441](https://github.com/Mark-NYC/organized-mom-collective/pull/441) (branch `claude/march-spring-clean-3b`, from `main` after #439)
 
 Owner's 3b requirements: a visibly improved room, not the most jobs; the front readable at a glance; illustrated
 instructions on the back with eight as a ceiling and no shrinking type; unassigned jobs set apart; approved
