@@ -2,7 +2,7 @@
 
 **Owner:** Organized Mom Collective  
 **Last updated:** 2026-11-09  
-**Status:** Strategy approved for drafting. Sending is OFF. Copy, templates, links, and automation must be reviewed before launch.  
+**Status:** Two-email welcome automation LIVE for net-new marketing opt-ins. Sunday Family Reset and Wednesday One Small Win broadcasts are DRAFTS ONLY, not scheduled. Subscriber Access backend is deployed; actual tracked email-click-to-browser journey awaits QA.  
 **Platform:** Resend Marketing + Supabase + existing Astro website.  
 **Implementation companion:** [RESEND_MARKETING_MVP.md](./RESEND_MARKETING_MVP.md)
 
@@ -10,7 +10,7 @@
 
 Give away practical, genuinely useful help to moms with school-aged children. Each message solves **one small family problem** so the reader can try something today. Build trust through repeated wins, then make a relevant, low-pressure invitation to a paid offer.
 
-Our repeatable editorial franchise is **One Small Win**. It should be worth reading even when someone never purchases.
+Our repeatable editorial franchises are **Sunday Family Reset** and **One Small Win**. Each should be worth reading even when someone never purchases.
 
 - The email is valuable on its own; a website click is not required to get the takeaway.
 - One specific problem and one short action plan. Most issues need **no outbound CTA**; the reader can finish the win inside the email.
@@ -23,13 +23,47 @@ Our repeatable editorial franchise is **One Small Win**. It should be worth read
 
 | Path | Trigger | Planned messages | Conditions |
 | --- | --- | --- | --- |
-| Free guide / tool / quiz opt-in | Explicit unchecked-by-default marketing consent | Day 2 useful tip, Day 6 useful tip, then One Small Win | Match the first tip/link to the resource interest where practical |
-| One Small Win | Opted-in and eligible contact | **Weekly** helpful email as the editorial target, starting with prepared drafts and controlled rollout | Roughly 3 useful/value emails to 1 more directly product-connected email as an initial editorial mix; even offer emails must teach |
+| Free guide / tool opt-in | Explicit, unchecked-by-default marketing consent | Day 2 and Day 6 welcome emails **live**; then Sunday Family Reset and One Small Win **planned** | Newsletter audience segmentation must exclude anyone still in welcome |
+| Sunday Family Reset | Welcome-completed and opted-in contact | **Weekly Sunday** family meeting/rhythm email; four Resend drafts prepared | Use seasonal Club theme and a small family action, not a hard sell |\n| One Small Win | Welcome-completed and opted-in contact | **Weekly Wednesday** practical tip; eight usable Resend drafts prepared | Self-contained quick win, occasional deeper resource or product link |
 | Club onboarding | Confirmed member activation | Day 3 and Day 10 practical coaching | Existing transactional messages remain; avoid overlapping or redundant messages |
 | Calendar buyer follow-up | **Confirmed delivery** | One practical getting-started email, then a follow-up ~7 days later | Promotional follow-up only with marketing consent; avoid Club pitch to active Club members |
 | Transactional | Checkout, account, delivery, payment, resource availability | Existing operational emails | Separate from marketing consent and marketing broadcasts |
 
-**Cadence decision:** Earlier engineering MVP proposed One Small Win twice monthly. The updated editorial goal is weekly, but we can launch twice monthly if production or list quality requires it. Do not change live sending frequency without approval. Cap marketing to **one email per person per day** and coordinate welcome/onboarding vs broadcasts.
+**Cadence decision (current):** Two editorial emails per week are the approved **target**, Sunday Family Reset on Sundays and One Small Win on Wednesdays. Neither series is scheduled yet. A monthly Family Toolkit/resource announcement and separate short promotional campaigns are optional, not automatic extra sends. Keep marketing to **one email per recipient per day**, avoid welcome/newsletter overlap, and only schedule with approval.
+
+## 2026-11-09 strategy update: what we learned from Clean Mama's actual emails
+
+**Evidence examined:** 27 Clean Mama emails found in the owner's Gmail, dated October 14 through November 9, 2026. The sample is **one subscriber's received mail**, not Clean Mama's whole list, and does not establish her open/click/conversion metrics or exact segmentation.
+
+| Observed in received mail | Implication for OMC |
+| --- | --- |
+| Recurring Sunday Routine Reset, Tuesday Quick Tip, and Friday Catch-All editorial formats | Give readers recognizable recurring series rather than unrelated blasts |
+| Dense welcome/teaching sequence in mid-October, introducing an accessible paid offer alongside practical guidance | Our live Day 2 and Day 6 are a minimal welcome, not yet a full educational sales sequence. Evaluate expansion only after measuring and reviewing copy |
+| Additional membership/class/product launch messages, with varied education, testimonials, FAQ and time-limited offers | Separate short, relevant promotions from the regular value cadence |
+| Monthly routine and calendar themes tying free advice to paid systems | Anchor Sunday Family Reset to our Family Meeting and the Organized Family Club monthly theme |
+| Editorial-style sender and campaign-style sender addresses | Useful concept, **not** proof of her internal audience routing |
+
+**Our deliberate adaptation, not a copy:** Begin with **two** recognizable weekly emails, not her three. Sunday is the family's whole-week rhythm; Wednesday is a single practical win. Let Club's personalized *printed* resources support putting the ideas into practice. Consider a monthly Family Toolkit touchpoint and focused Club/calendar offers when there is a strong reason, rather than stacking automatic weekly promotions.
+
+**Editorial rule:** Each email must stand alone. Sunday Family Reset gives a question and a doable shared action, usually with a quiet guide link; One Small Win helps with one friction point. Sell naturally where the offered tool directly helps. The Family Meeting is the conceptual backbone, not a request to create a complicated weekly project.
+
+### Actual campaign status and authoritative source documents
+
+- **Day 0:** Requested free download/guide via site's existing signup gate; *optional* marketing checkbox. Download is not promotional consent.
+- **Day 2 / Day 6:** Published, tested welcome templates and automated Supabase delivery **enabled for new explicit opt-ins**. No historical opt-in backfill. See [welcome copy](./OMC_WELCOME_SEQUENCE_REVIEW_DRAFTS.md) and [technical state](./RESEND_MARKETING_MVP.md).
+- **Sunday:** Four branded **draft** broadcasts, intended Nov 15 / 22 / 29 / Dec 6. See [Sunday rollout](./SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md).
+- **Wednesday:** Eight usable One Small Win **draft** broadcasts. See [first eight copy](./ONE_SMALL_WIN_FIRST_8_DRAFTS.md). Broken superseded editor drafts exist in Resend and must not be scheduled.
+- **Subscriber Access:** Three existing opted-in contacts now have token properties synced to Resend; free resource links in Sunday 01–03 and One Small Win 05 carry `#omc_pass={{{RESOURCE_PASS}}}`. Valid/invalid token API QA passed. The browser deploy, click tracking, and actual cross-device journey have **not** passed end-to-end QA. See [Subscriber Access runbook](./SUBSCRIBER_RESOURCE_ACCESS.md).
+- **Unsent audiences:** The current Resend Free Resource Opt-Ins segment includes people who haven't completed welcome. Do not schedule Sunday or Wednesday until a welcome-completed broadcast audience is proven, or recipients could receive conflicting sequences.
+- **Resend controls:** Reserve broadcast dates in Supabase before Resend scheduling. The scheduler remains locked; the direct Resend dashboard can bypass it, so off-cycle sends must not bypass reservation and suppression checks.
+
+### Immediate priorities
+
+1. Smoke-test deployed website and one real Resend personalized tracked link into the free guide library or generator, including a fresh browser and an unsubscribed/consent-free scenario.
+2. Build and verify a **newsletter-ready audience** separate from new subscribers still in Day 2/Day 6 welcome.
+3. Review and schedule the four Sunday and eight Wednesday drafts only once audience, link, mobile and scheduling tests pass.
+4. Keep monthly Club themes integrated: November 2026 **Our Family, Our Team**; December **Give to Others**; January 2027 **Family Meeting Introduction**. The paid Club provides personalized mailed resources, not just links to free PDF guides.
+5. After meaningful data arrives, evaluate whether expanding welcome education to five/six messages improves activation without hurting unsubscribe rates. **No longer welcome drip has been built or approved.**
 
 ## 3. Email format and design
 
@@ -76,11 +110,13 @@ These are the editorial queue. Titles, actual links, images and chronology must 
 
 The site may use different precise titles or URLs; do not manufacture live links. Each email should be useful without clicking. Link only to a confirmed matching page.
 
-## Direct links for existing subscribers
+## Subscriber resource links
 
-**Do not include a PDF by default.** Most One Small Win emails are self-contained with no link or big CTA. Aim for one deeper resource roughly every 3–4 emails rather than overwhelming the first three emails with 12 pages of guides. When a deeper guide *is* worth offering, opted-in subscribers already on the list should link **straight to the PDF** declared in `src/data/guides/guide-directory.ts` rather than returning to a gated guide landing page. Use stable public `/downloads/*.pdf` URLs, verify live HTTP success and PDF content before sending, and avoid temporary storage links. Interactive tools can link to the generator only when useful, and returning subscribers should not have to submit their email again. Use low-pressure inline text links by default, with a charcoal square button reserved for a genuinely important action.
+Existing browser downloads already remember access locally. For opted-in readers on another device, use the private `RESOURCE_PASS` Resend contact property in a fragment link, e.g. `https://www.organizedmomcollective.com/guides/#omc_pass={{{RESOURCE_PASS}}}`. The public site verifies this token and grants remembered access to **free** guide and generator downloads without asking for the email again. Never expose email addresses or private/member access in these URLs. Do not add tokens to public Pinterest links. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md) for expiration, verification and outstanding live tests.
 
-**First eight complete drafts with PDF CTA URLs:** [ONE_SMALL_WIN_FIRST_8_DRAFTS.md](./ONE_SMALL_WIN_FIRST_8_DRAFTS.md). This is the authoritative working copy for the first batch. Keep it updated as links and content are approved.
+Direct public `/downloads/*.pdf` links remain a simple alternative for a specific file (these assets are public). However, when referring readers to an interactive generator or guide library, prefer a tested Subscriber Access URL so they can browse further without repeated capture.
+
+**First eight complete drafts:** [ONE_SMALL_WIN_FIRST_8_DRAFTS.md](./ONE_SMALL_WIN_FIRST_8_DRAFTS.md).
 
 ## 6. Draft structure for One Small Win
 
@@ -130,7 +166,7 @@ Start with **weekly content production**, but enable sending only after explicit
 - The user added `EMAIL_SYNC_SECRET` to Supabase, but the **Edge Function importer has not had its authenticated dry-run tested**.
 - Three consented, unsuppressed free-resource contacts were imported directly through the Resend plugin into `OMC | Free Resource Opt-Ins` segment and verified.
 - Remaining contacts without consent were **not** imported.
-- **No marketing messages have been sent by this setup. No automation activated.**
+- **Historical snapshot, superseded by the 2026-11-09 update above:** welcome automation was later activated; Sunday/Wednesday broadcasts remain unscheduled.
 
 ### Next engineering steps
 
