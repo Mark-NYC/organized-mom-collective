@@ -161,3 +161,34 @@ No broadcasts or automated email sequences have been enabled. A real fresh opt-i
 - Applied to the production Supabase project and versioned in `supabase/migrations/20261109030000_marketing_welcome_queue_hold.sql`.
 - Verified within a rolled-back SQL transaction: 2 welcome jobs created, repeat signup stayed at 2, consent revocation cancelled both. After rollback: **0 welcome jobs**, **0 QA records**, **0 scheduled welcome sending jobs**.
 - **Not yet implemented:** sending worker, template publishing, sender physical address, per-recipient daily send cap, scheduled send times, delivery reconciliation, site browser-level fresh-signup test, and coordination with One Small Win broadcasts. Do not flip statuses to ready or publish templates before the owner approves sending.
+
+
+### Paused welcome delivery worker built and tested (2026-11-09)
+
+**Deployed:** `supabase/functions/resend-welcome-delivery/index.ts` version 1. Migration files:
+- `supabase/migrations/20261109040000_welcome_delivery_worker_guardrails.sql`: settings, daily send ledger, atomic claim/finish functions and cron every 5 minutes.
+- `supabase/migrations/20261109050000_marketing_welcome_service_rpc.sql`: public-schema RPC wrappers callable **only by service_role**, with no execute access for anon/authenticated.
+- `supabase/migrations/20261109060000_marketing_welcome_due_promotion.sql`: safe promotion of held jobs, cancellation of jobs over 14 days overdue or no longer consented; Day 6 only after Day 2 status = sent.
+
+**Two independent send locks:** Supabase `marketing_delivery_settings` must have all `enabled`, `postal_address_verified`, and `broadcasts_coordinated` true, AND the Edge Function must have `WELCOME_DELIVERY_ENABLED=true`. Current database settings are all **false**. This is deliberately not a production send activation.
+
+**Worker behavior:** Receives a 64-hex opaque dispatch token, no email address in the HTTP request. Uses an atomic service-only RPC to lock the queue and reserve the date in `marketing_send_ledger`, unique on `(email,local_day)` (America/New_York). Rechecks the live Supabase opt-in and suppression row and Resend contact's unsubscribe state. Requires its Resend template to be **published**. Sends via Resend `POST /emails` with a stable Idempotency-Key, then records Resend message ID. If a request may have been accepted but cannot be confirmed, sets `uncertain` and does not auto-resend. Resend idempotency keys only cover 24 hours; SQL ledger is permanent.
+
+**Tests passed:**
+- Disabled lock prevented claiming and dispatch.
+- Day 6 could not precede a Day 2 sent confirmation.
+- First claim succeeded while repeat claim failed.
+- Second welcome step on same NYC calendar day was blocked by daily ledger.
+- Held Day 2 entry was promoted and dispatched under simulated launch flags while Day 6 remained held.
+- All stateful SQL tests ran in transactions subsequently **rolled back**, with zero QA records retained or HTTP dispatch committed.
+- A real HTTP call to the deployed Edge Function returned `200 {"status":"disabled"}`.
+- Final DB verification: **0 welcome jobs**, **0 ledger entries**, cron active, all launch settings false, anon/authenticated cannot call claim RPC, service_role can.
+
+**Before a real email test / production launch:**
+1. Replace the placeholder `[Physical mailing address required before publishing]` in both Resend templates with a valid postal mailing address; verify unsubscribe functionality and publish templates.
+2. Coordinate One Small Win broadcasts with the welcome ledger. Currently, the ledger protects **welcome emails**, not the manually sent broadcast list. The third settings lock (`broadcasts_coordinated`) must remain false until this is solved.
+3. Review use of the Resend email API for marketing-category lifecycle emails against Resend plan and contact suppression requirements.
+4. Run a deliberately scoped test to the authorized test address after compliance and above conditions are complete, then review email delivery status in Resend.
+5. Only after approval, explicitly set all three database flags true and the `WELCOME_DELIVERY_ENABLED` Edge Function secret to `true`. No launch switch was changed during this build.
+
+**Important operational note:** Staged new opt-ins are **held** until launch. Do not manually mark queue entries as sent to bypass locks. Events with uncertain send outcomes require operator investigation before further sends.
