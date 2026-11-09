@@ -192,3 +192,10 @@ No broadcasts or automated email sequences have been enabled. A real fresh opt-i
 5. Only after approval, explicitly set all three database flags true and the `WELCOME_DELIVERY_ENABLED` Edge Function secret to `true`. No launch switch was changed during this build.
 
 **Important operational note:** Staged new opt-ins are **held** until launch. Do not manually mark queue entries as sent to bypass locks. Events with uncertain send outcomes require operator investigation before further sends.
+
+
+### Postal footer verified (2026-11-09)
+
+The owner supplied the mailing address for the marketing footer. Both draft Resend welcome templates (Day 2: `a70163c4-3c72-4cd8-9b89-17e089282af1`; Day 6: `105ee0e7-9078-4372-8ef3-4aa2cd3dedc2`) were updated with the address in both HTML and plain text. Retrieved both saved templates: footer present twice (HTML and text), unsubscribe placeholder preserved, no old placeholder, and both remain drafts. The `marketing_delivery_settings.postal_address_verified` flag was set true, while `enabled=false` and `broadcasts_coordinated=false` remain unchanged.
+
+**Do not activate:** One Small Win overlap handling remains unverified. This DB address-verification flag only confirms footer presence, not legal assessment of postal-address use. No email sent.
