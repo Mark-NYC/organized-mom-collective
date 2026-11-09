@@ -230,3 +230,23 @@ Created and deployed `supabase/functions/resend-broadcast-scheduler/index.ts` (v
 - **Test-address delivery not performed:** A full-cycle welcome email test requires the two welcome templates to be published and the delivery locks selectively configured. The currently deployed worker is fail-closed and not capable of a test-only address bypass; do not enable production sending merely to test one mailbox.
 
 Recommended next operation: repair six broken rendered newsletters with owner approval if conversion to raw HTML is required, then add a dedicated one-recipient test mode that does not change production flags or send to the audience.
+
+
+### Six broken One Small Win broadcasts replaced (2026-11-09)
+
+Resend rejected raw HTML updates to the six editor-composed drafts (422: `html` and `text` cannot be updated on editor-composed broadcasts). Their original TipTap content was preserved and recovered. We created new HTML broadcasts with identical subjects/body text, original links, brand styling, postal footer, and unsubscribe placeholder:
+
+| Issue | Original draft | Verified replacement |
+|---|---|---|
+| 01 | `0e1b9464-3c43-4c28-a917-7a4bb6472123` | `36761fdf-d316-4921-9c20-bdf44bce02fd` |
+| 04 | `71d5e3a8-511c-4e6a-b4bd-ff2a01f172cf` | `cb6b9c36-696c-4006-a039-93519616db73` |
+| 05 | `6b2252e0-bfb7-4557-863c-e6cccb64e098` | `5745766c-36c5-4ab1-a3c1-0becd37ba0a5` |
+| 06 | `c7cd24b9-f52e-4d13-9e75-745e08102eaa` | `f821718f-f926-4b09-b3bf-baf17d5d89e6` |
+| 07 | `9e20b95f-d77a-4b69-be09-3b78316769af` | `ce4ae542-4759-438d-a422-077c35c582a8` |
+| 08 | `507efb45-222f-4d38-9b38-fec86ebd54b3` | `fa2fb8e7-1305-449e-a0e6-816e99f259f3` |
+
+Issues **02** (`71b315ae-e4b4-41d5-b2c1-f67769eb310b`) and **03** (`f754f259-ad49-450e-95fc-c490b5f38298`) were already rendering correctly and remain unchanged.
+
+Verification: all eight usable broadcasts returned nonempty HTML and plain text from Resend, contained the mailing address `14839 61st Road, Flushing, NY 11367` and `{{{RESEND_UNSUBSCRIBE_URL}}}`, and remained in draft status. Old broken originals are still in Resend for reference but **must not be used for scheduling**.
+
+Updated the approved-broadcast allowlist in `supabase/functions/resend-broadcast-scheduler/index.ts`; deployed v3 with these six verified replacement IDs. Scheduling remains locked behind `BROADCAST_SCHEDULING_ENABLED=true`, and welcome delivery is still disabled. No broadcasts sent or scheduled.
