@@ -54,7 +54,7 @@ Our repeatable editorial franchises are **Sunday Family Reset** and **One Small 
 - **Sunday:** Four branded **draft** broadcasts, intended Nov 15 / 22 / 29 / Dec 6. See [Sunday rollout](./SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md).
 - **Wednesday:** Eight usable One Small Win **draft** broadcasts. See [first eight copy](./ONE_SMALL_WIN_FIRST_8_DRAFTS.md). Broken superseded editor drafts exist in Resend and must not be scheduled.
 - **Subscriber Access:** Three existing opted-in contacts now have token properties synced to Resend; free resource links in Sunday 01–03 and One Small Win 05 carry `#omc_pass={{{RESOURCE_PASS}}}`. Valid/invalid token API QA passed. The browser deploy, click tracking, and actual cross-device journey have **not** passed end-to-end QA. See [Subscriber Access runbook](./SUBSCRIBER_RESOURCE_ACCESS.md).
-- **Unsent audiences:** The current Resend Free Resource Opt-Ins segment includes people who haven't completed welcome. Do not schedule Sunday or Wednesday until a welcome-completed broadcast audience is proven, or recipients could receive conflicting sequences.
+- **Unsent audiences (resolved for drafts):** All 12 usable broadcasts now target a separate `OMC | Newsletter Ready` audience. SQL simulation and initial provider sync passed; real new-subscriber Day 6 handoff and the personalized link still need full end-to-end QA before scheduling.
 - **Resend controls:** Reserve broadcast dates in Supabase before Resend scheduling. The scheduler remains locked; the direct Resend dashboard can bypass it, so off-cycle sends must not bypass reservation and suppression checks.
 
 ### Immediate priorities
@@ -186,3 +186,10 @@ Start with **weekly content production**, but enable sending only after explicit
 - No campaigns, automated sequences or imported contacts are a reason to begin sending without user approval.
 - Reuse existing artwork first. Preserve brand consistency. Make the email useful even without its image.
 - Record changes and operational status here when the plan evolves. Keep lower-level deployment notes in [RESEND_MARKETING_MVP.md](./RESEND_MARKETING_MVP.md).
+
+### Newsletter audience separation implemented (2026-11-09)
+
+**Done:** A new Resend segment `OMC | Newsletter Ready` (`98ec76b1-fe2e-42d4-898d-b235b9c9df8b`) is populated by a consent-aware Supabase job every five minutes. Existing eligible prelaunch opt-ins qualify; new opt-ins qualify only after a confirmed Day 6 welcome send. Suppressed/nonconsenting and welcome-incomplete contacts are ineligible. All 12 usable Sunday/Wednesday broadcasts now target this segment and remain `draft`, unsent, unscheduled. The guarded broadcast scheduler also requires that audience. See [NEWSLETTER_AUDIENCE_HANDOFF.md](./NEWSLETTER_AUDIENCE_HANDOFF.md).
+
+**Next:** Real personalized email-link / new-browser QA; genuine Day 6-to-audience handoff observation; reviewed broadcast scheduling. No editorial broadcasts were activated by audience separation.
+
