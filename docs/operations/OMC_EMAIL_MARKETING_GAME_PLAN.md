@@ -13,7 +13,7 @@ Give away practical, genuinely useful help to moms with school-aged children. Ea
 Our repeatable editorial franchise is **One Small Win**. It should be worth reading even when someone never purchases.
 
 - The email is valuable on its own; a website click is not required to get the takeaway.
-- One specific problem, one short action plan, one primary call to action.
+- One specific problem and one short action plan. Most issues need **no outbound CTA**; the reader can finish the win inside the email.
 - No manufactured urgency, guilt, or spammy scarcity.
 - Lead with results, not features. Favor kids taking responsibility, lighter mental load, and a home that works better for everyone.
 - Sell the **Organized Family Club** as personalized, mailed tools that help a family put ideas into action. Offer calendars and responsibility cards when directly related to the email's problem.
@@ -40,7 +40,7 @@ Our repeatable editorial franchise is **One Small Win**. It should be worth read
 - Prefer a restrained header/logo, short paragraphs, clear spacing, one prominent link or button, modest footer.
 - Body usually ~100–180 words for One Small Win. Shorter when the idea is simple.
 - Keep the valuable instruction in real HTML text, not only inside an image. Supply alt text and a plain-text email. Check mobile, dark mode, Gmail, and Outlook.
-- For value emails: usually **zero or one** relevant image (existing black-and-white hand-drawn icon, cropped mini-checklist, or printable preview). Do not require an image if it does not help.
+- For value emails: usually **zero or one** relevant image (existing black-and-white hand-drawn icon or mini-checklist). Do not require an image if it does not help. Do not over-package short tips into downloadable multi-page guides.
 - For offer emails: one stronger actual-product or Club-printable preview. Still text first.
 - Avoid faces, generic stock photography, made-up printable previews, and changing the artwork/text of a real product.
 - Product imagery must accurately show the real calendar/card/Club resource; no Gemini asset unless an actual gap remains.
@@ -78,7 +78,7 @@ The site may use different precise titles or URLs; do not manufacture live links
 
 ## Direct links for existing subscribers
 
-For opted-in subscribers already on the email list, link **straight to the PDF** declared in `src/data/guides/guide-directory.ts` rather than returning them to another email-gated guide landing page. Use stable public `/downloads/*.pdf` URLs, verify live HTTP success and PDF content before sending, and avoid temporary storage links. Interactive tools can link to the generator, but the returning subscriber should not have to submit their email again. Club and product links may go to their offer pages.
+**Do not include a PDF by default.** Most One Small Win emails are self-contained with no link or big CTA. Aim for one deeper resource roughly every 3–4 emails rather than overwhelming the first three emails with 12 pages of guides. When a deeper guide *is* worth offering, opted-in subscribers already on the list should link **straight to the PDF** declared in `src/data/guides/guide-directory.ts` rather than returning to a gated guide landing page. Use stable public `/downloads/*.pdf` URLs, verify live HTTP success and PDF content before sending, and avoid temporary storage links. Interactive tools can link to the generator only when useful, and returning subscribers should not have to submit their email again. Use low-pressure inline text links by default, with a charcoal square button reserved for a genuinely important action.
 
 **First eight complete drafts with PDF CTA URLs:** [ONE_SMALL_WIN_FIRST_8_DRAFTS.md](./ONE_SMALL_WIN_FIRST_8_DRAFTS.md). This is the authoritative working copy for the first batch. Keep it updated as links and content are approved.
 
@@ -93,7 +93,7 @@ For opted-in subscribers already on the email list, link **straight to the PDF**
 
 **Payoff:** Explain how the step moves ownership to a child or reduces reminders/mental load.
 
-**Primary link:** [verified matching free guide/tool] or an offer link when the email is intentionally offer-focused.
+**Optional link:** Only when the deeper guide, tool, or offer genuinely adds value. Most weeks end with one concrete invitation to try the action, **not** a button or download.
 
 **Optional P.S.:** Light Club mention only when relevant and not too frequent. Do not put a Club promotion in every value email. Exclude active Club members from Club pitches.
 
@@ -138,7 +138,7 @@ Start with **weekly content production**, but enable sending only after explicit
 - Implement and test **automatic future signup syncing**. A one-time manual import is not an ongoing integration. Ensure unsubscribes cannot be reactivated on subsequent syncs.
 - Check signup consent capture, topic/segment handling, sender identity/domain verification, physical address and unsubscribe footer.
 - Confirm that contact updates and suppression cases are handled for actual Resend payload versions. Existing unsubscribe path passed; bounce and complaint cases still need explicit testing.
-- Build the branded responsive email template and first eight **drafts**, using the live site/repo assets.
+- First eight visually editable branded drafts were created in Resend and revised to reduce resource overload: Emails 01, 02, 06, 08 are email-only; 03 includes a short checklist; 04 has a soft Club text link; 05 an optional routine chart generator link; 07 an optional four-page dinner PDF and calendar P.S. No automatic sending. Extra duplicate drafts from an interrupted build must not be scheduled.
 - Review final copy with user before enabling sequences. Build Day 2/6 welcome and later Club/Calendar paths, coordinating cadence and suppressions.
 - Add measurement and a simple production status record before first live marketing send.
 
