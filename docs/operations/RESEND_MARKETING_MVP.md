@@ -250,3 +250,17 @@ Issues **02** (`71b315ae-e4b4-41d5-b2c1-f67769eb310b`) and **03** (`f754f259-ad4
 Verification: all eight usable broadcasts returned nonempty HTML and plain text from Resend, contained the mailing address `14839 61st Road, Flushing, NY 11367` and `{{{RESEND_UNSUBSCRIBE_URL}}}`, and remained in draft status. Old broken originals are still in Resend for reference but **must not be used for scheduling**.
 
 Updated the approved-broadcast allowlist in `supabase/functions/resend-broadcast-scheduler/index.ts`; deployed v3 with these six verified replacement IDs. Scheduling remains locked behind `BROADCAST_SCHEDULING_ENABLED=true`, and welcome delivery is still disabled. No broadcasts sent or scheduled.
+
+
+### Mobile adjustment, Day 6 delivery test and activation handoff (2026-11-09)
+
+- Both welcome templates have a mobile-only media query reducing inner horizontal padding from 34px to 22px, keeping desktop spacing. Existing copy and footer preserved.
+- One-recipient Day 6 test delivered to the authorized test mailbox; Resend ID `01a1c1b2-a525-70a7-ae17-8fe4686e25cd`, subject `[TEST] Give the reminder a place to live`; did not use the production queue or Resend broadcasts. Earlier Day 2 test also delivered.
+- Both templates **published** in Resend, confirmed by retrieving their published status and timestamps:
+  - Day 2 `a70163c4-3c72-4cd8-9b89-17e089282af1`
+  - Day 6 `105ee0e7-9078-4372-8ef3-4aa2cd3dedc2`
+- `marketing_delivery_settings.postal_address_verified=true` and `broadcasts_coordinated=true` reflect verified footer and the Wednesday + reserved-date newsletter coordination policy. Newsletter broadcasts still remain drafts; **manual off-cycle sends directly through the Resend dashboard bypass the reservation protocol**, so always reserve such dates first.
+- **Production welcome sending remains OFF:** `marketing_delivery_settings.enabled=false` and the deployed Edge Function returns `{"status":"disabled"}`. This prevents queued jobs from exhausting their capped dispatch attempts before the environment lock can be enabled.
+- **Manual step required to finish launch:** In the Supabase dashboard, Edge Functions → Secrets, set `WELCOME_DELIVERY_ENABLED` to the literal string `true` (not a credential). It is not manageable using currently connected Supabase tools. Once set, update `public.marketing_delivery_settings.enabled=true`, then verify the live worker, cron and a net-new opt-in in production. DO NOT switch DB flag first, because jobs due while the function lock is off could consume all 5 dispatch attempts.
+- This is a first-email contact opt-in flow, not historical backfill. There is no scheduled One Small Win send yet.
+
