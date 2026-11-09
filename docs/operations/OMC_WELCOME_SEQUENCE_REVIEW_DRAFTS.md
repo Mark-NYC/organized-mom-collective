@@ -1,6 +1,12 @@
 # Organized Mom Collective: resource signup welcome sequence
 
-**Status:** Copy for owner review. Not in Resend, not scheduled, not sent.
+**Status:** Two editable Resend template drafts created for owner review. Not published, not scheduled, not sent.
+
+**Resend Day 2 draft:** https://resend.com/templates/a70163c4-3c72-4cd8-9b89-17e089282af1
+
+**Resend Day 6 draft:** https://resend.com/templates/105ee0e7-9078-4372-8ef3-4aa2cd3dedc2
+
+**Implementation note:** These are Resend *templates*, not broadcasts: the eventual subscriber-specific Day 2/Day 6 workflow must send per subscriber with durable queue and consent checks, not blast a segment. Both are intentionally unpublished until owner approval and required postal footer details.
 **Audience:** Brand-new subscribers who explicitly chose marketing emails through a free tool or guide form.
 **Delivery proposal:** Day 2 and Day 6 after first opt-in, then enter One Small Win on the next normal newsletter send day.
 **Rules:** A repeat signup or free download never restarts the welcome series. No retroactive enrollment of existing subscribers without a separate decision. One marketing email max per recipient per day. Respect suppressions, and never send a welcome email to someone who did not opt in. Do not send existing One Small Win tips as welcome emails.
