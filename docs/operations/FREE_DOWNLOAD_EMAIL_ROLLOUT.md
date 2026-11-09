@@ -1,5 +1,7 @@
 # Free download email collection rollout (2026-11-06)
 
+**Update, November 9, 2026:** Subscriber Access has been built as an extension to this existing gate, not a replacement. The site now recognizes secure subscriber links from OMC email through the `RESOURCE_PASS` Resend contact property. Backend sync and token verification have passed tests, but the live email-click/browser flow still needs deployment smoke testing. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md) and [email strategy](./OMC_EMAIL_MARKETING_GAME_PLAN.md). Historical rollout steps remain below.
+
 ## What is implemented
 - Existing `tool_email_contacts` remains the source for captured leads. Signup requires an email but marketing checkbox is optional and unchecked.
 - Existing chore-chart and responsibility-chart gates keep working on the previous RPC if the new v2 endpoint is not yet deployed.
@@ -7,6 +9,7 @@
 - PDF links from `/guides/<slug>` and `/resources/<slug>` use the same gate when clicked normally (links to static files under `/downloads/`). Custom export buttons still need explicit wiring if they do not use `src/lib/printable.ts`. The standalone free Family Meeting Agenda print button now uses the gate.
 - First-touch UTM source/medium/campaign/content are recorded for **new signup submissions** after v2 is deployed. This does not backfill historical visitors.
 - Access is remembered in localStorage, so the modal is not repeatedly shown. This does NOT imply the visitor consented to promotional email.
+- **Subscriber Access:** Already opted-in readers may also arrive via an email URL fragment `#omc_pass={{{RESOURCE_PASS}}}`. The browser verifies the pass with an Edge Function, removes the fragment and reuses the same localStorage key. A fragment pass does not require another signup and does not imply a new marketing opt-in. Access is limited to the **free-resource download gate**, not paid member rights.
 
 ## Deployment order (important)
 1. Apply `supabase/migrations/20261106000000_unified_free_download_capture.sql` in the correct Supabase project.
@@ -23,6 +26,18 @@
 - This PR does NOT create welcome emails, send requested printables by email, or configure unsubscribe processing. Do not enable promotional sequences until unsubscribe/suppression handling and sender verification are audited.
 - V2 retains a past opt-in if a customer later downloads without checking the box. Explicit unsubscribe/withdrawal must be applied in the outbound-email system. The database must not treat an opt-out from that system as permission to email.
 - Source attribution is only stored when the visitor submits the form; later free downloads after browser access are not linked back to her identity.
+
+## Subscriber link QA (added 2026-11-09)
+
+- [x] Three existing marketing-eligible contacts have synced pass properties in Resend.
+- [x] Valid pass verified by deployed endpoint: `{ok:true}`.
+- [x] Invalid pass rejected by deployed endpoint: `{ok:false}`.
+- [x] Email links in Sunday 01–03 and One Small Win 05 updated to pass the personalized fragment.
+- [ ] Confirm the site includes recent `tool-email.ts` / `PublicLayout.astro` changes in the **deployed production build**.
+- [ ] Follow a real Resend personalized, click-tracked email URL on a clean device and verify a guide PDF and generator can be downloaded without another form.
+- [ ] Test expired pass, unavailable API, subscriber who opted out after earlier access, and access from a new browser.
+- [ ] Test that no `/club`, `/app` or paid feature can be unlocked by the free pass.
+- [ ] Do not schedule Sunday/Wednesday newsletters until the separate welcome-completion audience rule passes QA.
 
 ## QA cases
 1. Invalid email: blocked without network request.
