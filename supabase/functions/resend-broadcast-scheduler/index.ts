@@ -7,7 +7,7 @@
 const json = (data: unknown, status=200) =>
  new Response(JSON.stringify(data), {status,headers:{"Content-Type":"application/json"}});
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const SEGMENT="7bf64eae-a8f7-4fb4-a18d-3578a2e1e557";
+const SEGMENT="98ec76b1-fe2e-42d4-898d-b235b9c9df8b";
 const allowed=new Set([
  "36761fdf-d316-4921-9c20-bdf44bce02fd",
  "71b315ae-e4b4-41d5-b2c1-f67769eb310b",
