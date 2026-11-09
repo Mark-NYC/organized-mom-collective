@@ -788,6 +788,7 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
 
 <script>
   import { downloadPng } from '../lib/printable';
+  import { requireToolEmail } from '../lib/tool-email';
   import { planKey, readScoped, tabStorage } from '../lib/club/plan/storage';
 
   /** An activity is a rule, not a list of dates: weekly on some weekdays, or from a date with an optional repeat. */
@@ -1177,16 +1178,19 @@ const weekdays = [{ day:1,short:'Mon' },{ day:2,short:'Tue' },{ day:3,short:'Wed
   // Download.
   const sheet = document.getElementById('family-calendar')!;
   const download = $<HTMLButtonElement>('[data-fc-download]');
-  download.addEventListener('click', () =>
-    downloadPng(sheet, {
+  download.addEventListener('click', async () => {
+    // The public PNG export is generated in JavaScript, so the shared anchor
+    // interceptor cannot catch it. Gate only this public export, never Club.
+    if (!clubCalendar && !(await requireToolEmail())) return;
+    await downloadPng(sheet, {
       filename: `family-calendar-${MONTHS[month.getMonth()].toLowerCase()}-${month.getFullYear()}.png`,
       width: 816,
       height: 1056,
       layoutHost: sheet.closest<HTMLElement>('.family-calendar-container')!,
       exportClass: 'fc-exporting',
       button: download,
-    }),
-  );
+    });
+  });
 
   renderMembers();
   render();
