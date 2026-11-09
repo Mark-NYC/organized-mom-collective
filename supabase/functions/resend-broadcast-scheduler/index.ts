@@ -17,6 +17,10 @@ const allowed=new Set([
  "f821718f-f926-4b09-b3bf-baf17d5d89e6",
  "ce4ae542-4759-438d-a422-077c35c582a8",
  "fa2fb8e7-1305-449e-a0e6-816e99f259f3",
+ "a042b85c-d216-4fc1-9a19-9caf8660ee4a",
+ "9a9acbdc-8150-4f0b-9ce3-bc3e9b7b4a37",
+ "cb0061d6-7faf-49fe-b823-ce338b9d5960",
+ "c0570537-539b-4976-80fe-ebd30949b205",
 ]);
 Deno.serve(async(req: Request)=>{
  if(req.method!=="POST")return json({error:"method_not_allowed"},405);
