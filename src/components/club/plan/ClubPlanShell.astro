@@ -27,6 +27,11 @@ interface Props {
    * and approval saved to her account (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 2b).
    */
   context?: 'month' | 'welcome';
+  /**
+   * Keep the plan in this tab only, never on her account (a page in review, like March's Spring Clean before it
+   * replaces the month: docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 3b).
+   */
+  tabOnly?: boolean;
   /** "October": used in the gate's messages. */
   month: string;
   /** The printable's sides for the full-screen Front/Back switch (none for a single sheet). */
@@ -36,7 +41,7 @@ interface Props {
   /** The Monthly Tool / Family Meeting switch. Off for a month whose tool is the Family Meeting guide (January). */
   meeting?: boolean;
 }
-const { kitSlug, month, sides, storageKey, class: cls = '', meeting = true, context = 'month' } = Astro.props;
+const { kitSlug, month, sides, storageKey, class: cls = '', meeting = true, context = 'month', tabOnly = false } = Astro.props;
 const welcome = context === 'welcome';
 const kit = welcome ? null : kitBySlug(kitSlug ?? '');
 if (!welcome && !kit) throw new Error(`Unknown kit ${kitSlug}`);
@@ -44,7 +49,7 @@ if (!welcome && !kit) throw new Error(`Unknown kit ${kitSlug}`);
 <!-- A signed-in member: the Club nav, and her Welcome Kit confirmation when this is her first month (both render nothing otherwise). -->
 <ClubNavForMembers client:only="react" />
 {!welcome && <WelcomeKitConfirm client:only="react" kitSlug={kitSlug!} />}
-<div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={welcome ? undefined : kitSlug} data-plan-context={welcome ? 'welcome' : undefined} data-plan-month={month} data-plan-key={storageKey}>
+<div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={welcome ? undefined : kitSlug} data-plan-context={welcome ? 'welcome' : undefined} data-plan-month={month} data-plan-key={storageKey} data-plan-tab-only={tabOnly ? '' : undefined}>
   <ClubFamilyGate />
   {meeting && kit && <ClubFamilyMeeting kitMonth={kit.month} />}
   <slot name="desktop" />

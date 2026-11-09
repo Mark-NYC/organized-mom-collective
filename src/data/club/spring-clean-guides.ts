@@ -10,8 +10,6 @@
  * child's job never asks for a cleaning product (jobs that need one are grown-ups only in the library, or say who hands
  * it over). The safety notes from March's earlier Spring Prep page are carried into the matching jobs here.
  */
-import { MARCH_ICONS, marchIconArt, type MarchIcon } from './march-chore-icons';
-
 export type GuideIcon = { set: 'march'; name: string } | { set: 'library'; name: string };
 
 export interface JobGuide {
@@ -39,7 +37,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'k-pantry': g(lib('grocery-bag-with-produce'), 'A bag for anything past its date, and a clear spot on the counter.',
     ['Take out one shelf at a time and check the dates.', 'Put expired food in the bag; put the rest back, like with like.'],
     'Every shelf is back in order with nothing expired on it.', 'Show a grown-up anything you’re unsure about before it goes.'),
-  'k-containers': g(lib('stack-of-clothes'), 'All the food containers and lids, on the table.',
+  'k-containers': g(m('clear-dishes'), 'All the food containers and lids, on the table.',
     ['Match each container to its lid.', 'Stack the matched sets; put lids with no container and containers with no lid in the recycling.'],
     'Every container in the cupboard has its lid.'),
   'k-wipe-counters': g(m('wipe-surface'), 'A damp cloth.',
@@ -57,7 +55,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'k-floor': g(m('clean-floor'), 'The broom and dustpan, or the vacuum.',
     ['Start in the far corner and work toward the door.', 'Get under the table and along the edges.'],
     'No crumbs on the floor, under the table or in the corners.'),
-  'k-oven': g(m('clean-bathroom'), 'Oven or stovetop cleaner, gloves and a cloth.',
+  'k-oven': g(lib('cooking-pot'), 'Oven or stovetop cleaner, gloves and a cloth.',
     ['Make sure the oven and burners are off and cool.', 'Follow the cleaner’s label, then wipe it all clean.'],
     'The stovetop or oven is clean with no cleaner left on it.', 'Grown-ups only: cleaning products, and keep children out of the way while you use them.'),
   'k-fridge': g(m('clean-fridge'), 'A cooler or the counter for the food, and a damp cloth.',
@@ -95,7 +93,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'l-glass': g(lib('washing-window'), 'Glass cleaner and a dry cloth.',
     ['Spray the cloth, not the glass.', 'Wipe top to bottom, then buff with a dry part of the cloth.'],
     'You can see through the glass with no streaks.', 'Children: a grown-up sprays the cloth for you.'),
-  'l-storage': g(lib('stack-of-clothes'), 'The basket or drawer, and a clear spot to sort.',
+  'l-storage': g(m('clothes-away'), 'The basket or drawer, and a clear spot to sort.',
     ['Take everything out.', 'Put back only what belongs; take the rest where it lives.'],
     'The basket or drawer holds only what belongs there.'),
   'l-baseboards': g(lib('spray-bottle-and-cloth'), 'A soft cloth dampened with water.',
@@ -109,7 +107,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'd-clear': g(m('clear-dishes'), 'A basket for things that live in other rooms.',
     ['Take everything off the table.', 'Put each thing back where it lives.'],
     'Nothing is on the table that doesn’t belong there.'),
-  'd-drawer': g(lib('stack-of-clothes'), 'A clear spot to sort.',
+  'd-drawer': g(m('clothes-away'), 'A clear spot to sort.',
     ['Take everything out of the drawer.', 'Put back what belongs, neatly; take the rest where it lives.'],
     'The drawer closes easily and holds only what belongs.'),
   'd-wipe': g(m('wipe-surface'), 'A damp cloth.',
@@ -225,7 +223,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'la-fold': g(lib('stack-of-clothes'), 'A basket of clean towels, washcloths or T-shirts.',
     ['Fold each one the way your family folds it.', 'Stack them by type.'],
     'Everything in the basket is folded in neat stacks.'),
-  'la-lint': g(lib('sorting-clothes'), 'Nothing: just your hands.',
+  'la-lint': g(m('wipe-surface'), 'Nothing: just your hands.',
     ['Pull out the lint screen.', 'Peel off the lint, throw it away and slide the screen back.'],
     'The lint screen is clean and back in place.', 'Only with the dryer off.'),
   'la-tops': g(m('wipe-surface'), 'A damp cloth.',
@@ -237,7 +235,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'la-floor': g(m('clean-floor'), 'A broom and dustpan.',
     ['Sweep around and in front of the machines.', 'Get the corners.'],
     'No lint or dust on the floor.'),
-  'la-seal': g(m('clean-bathroom'), 'Washer cleaner, gloves and a cloth.',
+  'la-seal': g(lib('spray-bottle-and-cloth'), 'Washer cleaner, gloves and a cloth.',
     ['Wipe the rubber seal and the dispenser drawer.', 'Run the machine’s cleaning cycle if it has one.'],
     'The seal and dispenser are clean.', 'Grown-ups only: cleaning products.'),
   'la-behind': g(m('vacuum'), 'The vacuum and a second grown-up.',
@@ -271,7 +269,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'o-desk': g(m('tidy-desk'), 'A basket for things that live elsewhere.',
     ['Take everything off the desk.', 'Put back only what’s used here.'],
     'The desk is clear except its everyday things.'),
-  'o-papers': g(lib('stack-of-clothes'), 'Three piles: file, recycle, shred.',
+  'o-papers': g(m('tidy-desk'), 'Three piles: file, recycle, shred.',
     ['Look at each paper and choose a pile.', 'File the keepers.'],
     'No loose papers left; the shred pile is set aside for a grown-up.', 'Anything with names, numbers or accounts goes to the shred pile.'),
   'o-wipe': g(m('wipe-surface'), 'A barely damp cloth.',
@@ -286,7 +284,7 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
   'o-vacuum': g(m('vacuum'), 'The vacuum.',
     ['Move the chair out of the way.', 'Vacuum the floor, under the desk too.'],
     'The floor is clean, under the desk too.'),
-  'o-shred': g(lib('stack-of-clothes'), 'The shred pile and the shredder.',
+  'o-shred': g(m('tidy-desk'), 'The shred pile and the shredder.',
     ['Shred a few sheets at a time.', 'Empty the shredder bin into the recycling.'],
     'The shred pile is gone.', 'Grown-ups only: shredder blades.'),
   'o-cords': g(m('tidy-desk'), 'Small labels or tape and a pen.',
@@ -340,23 +338,46 @@ export const JOB_GUIDES: Readonly<Record<string, JobGuide>> = {
     'The floor is clean to the edges.'),
 };
 
-/** The project's one finish line: what the whole room looks like when the family is done (room ids from the library). */
-export const ROOM_FINISH: Readonly<Record<string, string>> = {
-  kitchen: 'The counters are clear and wiped, and the floor is clean.',
-  living: 'Everything is put away, the surfaces are dusted and the floor is vacuumed.',
-  dining: 'The table is clear and clean, the chairs are in, and the floor is swept.',
-  bathroom: 'The counter is clear, the sink and mirror shine, and the floor is clean.',
-  bedroom: 'The floor is picked up, the give-away bag is by the door, and the room is dusted and vacuumed.',
-  entry: 'Every shoe, coat and bag has its spot, winter things are packed, and the floor is swept.',
-  laundry: 'The socks are matched, the machines are wiped, and the floor is swept.',
-  playroom: 'The toys are in their bins, the give-away bag is by the door, and the floor is clean.',
-  office: 'The desk is clear, the papers are sorted, and the floor is vacuumed.',
-  closet: 'Only what fits is left, everything is hung or folded, and the give-away bag is by the door.',
-  other: 'Everything has its place, the surfaces are clean, and the floor is done.',
+/**
+ * The project's one finish line, written from the jobs actually on the plan (so it never promises a clean floor when
+ * nobody is doing the floor): each room's parts, in the order the work happens, each with the jobs that bring it about.
+ */
+const part = (jobs: string[], text: string) => ({ jobs, text });
+export const ROOM_FINISH_PARTS: Readonly<Record<string, { jobs: string[]; text: string }[]>> = {
+  kitchen: [part(['k-counters-clear', 'k-wipe-counters'], 'the counters are clear and wiped'), part(['k-pantry', 'k-containers', 'k-fridge'], 'the cupboards are sorted'),
+    part(['k-cabinets', 'k-microwave', 'k-oven', 'k-high'], 'everything is wiped down'), part(['k-floor', 'k-mop'], 'the floor is clean'), part(['k-trash'], 'the trash is out')],
+  living: [part(['l-stray', 'l-toys-books', 'l-storage'], 'everything is put away'), part(['l-cushions'], 'the sofa is straightened'),
+    part(['l-tables', 'l-dust', 'l-high', 'l-glass', 'l-baseboards'], 'the surfaces are dusted and wiped'), part(['l-vacuum', 'l-sofa'], 'the floor is vacuumed')],
+  dining: [part(['d-clear', 'd-drawer'], 'the table is clear'), part(['d-wipe', 'd-light', 'd-linens'], 'the table and chairs are clean'),
+    part(['d-chairs'], 'the chairs are in'), part(['d-floor'], 'the floor is swept')],
+  bathroom: [part(['b-counter', 'b-under-sink', 'b-medicine'], 'the counter is clear'), part(['b-towels', 'b-curtain'], 'fresh towels are out'),
+    part(['b-sink', 'b-mirror', 'b-toilet', 'b-tub'], 'the sink and mirror shine'), part(['b-floor'], 'the floor is clean'), part(['b-trash'], 'the trash is empty')],
+  bedroom: [part(['r-floor-pickup', 'r-nightstand'], 'the floor is picked up'), part(['r-outgrown', 'r-donate-toys'], 'the give-away bag is by the door'),
+    part(['r-dust', 'r-bedding', 'r-light-bedding', 'r-mattress'], 'the room is dusted and the beds are fresh'), part(['r-vacuum'], 'the floor is vacuumed')],
+  entry: [part(['e-shoes-coats', 'e-bags'], 'every shoe, coat and bag has its spot'), part(['e-outgrown', 'e-winter', 'e-store-high'], 'winter things are packed away'),
+    part(['e-wipe', 'e-mat'], 'the hooks and shelves are wiped'), part(['e-floor'], 'the floor is swept')],
+  laundry: [part(['la-socks', 'la-fold'], 'the socks are matched and the laundry is folded'), part(['la-lint', 'la-tops', 'la-supplies', 'la-seal'], 'the machines are wiped'),
+    part(['la-floor', 'la-behind'], 'the floor is swept')],
+  playroom: [part(['p-bins', 'p-books'], 'the toys and books are put away'), part(['p-sort', 'p-pieces'], 'the give-away bag is by the door'),
+    part(['p-wipe', 'p-wash'], 'the table and bins are clean'), part(['p-vacuum'], 'the floor is vacuumed')],
+  office: [part(['o-desk', 'o-restock'], 'the desk is clear'), part(['o-papers', 'o-shred'], 'the papers are sorted'),
+    part(['o-wipe', 'o-dust', 'o-cords'], 'the surfaces are dusted'), part(['o-vacuum'], 'the floor is vacuumed')],
+  closet: [part(['c-pull', 'c-donate'], 'only what fits is left and the give-away bag is by the door'), part(['c-shoes', 'c-rehang', 'c-top', 'c-swap'], 'everything is hung or folded'),
+    part(['c-floor'], 'the floor is clean')],
+  other: [part(['x-pickup', 'x-pile'], 'everything has its place'), part(['x-dust', 'x-wipe', 'x-high'], 'the surfaces are clean'), part(['x-floor'], 'the floor is done'), part(['x-trash'], 'the trash is out')],
 };
-
-/** The icon's image (the printable and the phone view): March art through its own registry, library art from public/. */
-export function guideIconSrc(icon: GuideIcon): string | null {
-  if (icon.set === 'library') return `/images/club/icon-library/${icon.name}.png`;
-  return (MARCH_ICONS as readonly string[]).includes(icon.name) ? marchIconArt(icon.name as MarchIcon)?.src ?? null : null;
+/** "The counters are clear and wiped, and the floor is clean." from the room and the plan's job ids. */
+export function finishLine(room: string, jobIds: readonly string[]): string {
+  const have = new Set(jobIds);
+  const parts = (ROOM_FINISH_PARTS[room] ?? ROOM_FINISH_PARTS.other).filter((p) => p.jobs.some((id) => have.has(id))).map((p) => p.text);
+  if (!parts.length) return 'Every job on the plan is finished.';
+  const text = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+  return `${text.charAt(0).toUpperCase()}${text.slice(1)}.`;
 }
+
+/**
+ * The icon's print-ready image (the printable and the phone view): the approved art with its alpha haze removed,
+ * trimmed to the drawing and centered on the same transparent square as every other guide icon
+ * (scripts/prepare-spring-clean-icons.py → public/images/club/spring-clean-icons/).
+ */
+export const guideIconSrc = (icon: GuideIcon) => `/images/club/spring-clean-icons/${icon.set === 'march' ? 'm' : 'l'}-${icon.name}.png`;

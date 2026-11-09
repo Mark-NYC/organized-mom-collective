@@ -384,6 +384,55 @@ Welcome Kit orders or approval, the 2d overlap rule, or historical March data (t
 - [ ] Tests: households 1–9 people, toddlers only, teens, no kids; adult-only jobs never to children; print = 2 pages
       (one sheet, duplex); March independent of Welcome
 
+#### Phase 3b log (2026-11-09): READY FOR REVIEW, [#441](https://github.com/Mark-NYC/organized-mom-collective/pull/441) (branch `claude/march-spring-clean-3b`, from `main` after #439)
+
+Owner's 3b requirements: a visibly improved room, not the most jobs; the front readable at a glance; illustrated
+instructions on the back with eight as a ceiling and no shrinking type; unassigned jobs set apart; approved
+black-and-white icons, transparent and consistently sized; previews of at least three household sizes inspected at
+print size; the Club's desktop and phone patterns; no production change; the March page kept until 3c.
+
+- **Focus (engine):** a prepared project stops at six jobs (`FOCUS_JOBS`). `MAX_JOBS` is also six for her edits: the
+  back's cards were measured at print size and six is what prints at 13px or larger in two columns; eight would have
+  meant smaller type, so the ceiling came down rather than the type. The last phase prefers a floor job (a clean floor
+  is what makes a room look finished). The finish line is now written from the jobs actually on the plan
+  (`ROOM_FINISH_PARTS`, `finishLine`): it never promises a clean floor without a floor job (found in the kitchen
+  preview). A one-person plan's start steps drop the repeated name.
+- **Printable** `src/components/club/MarchSpringClean.astro`, two 816 × 1056 sheets:
+  - FRONT "Our Family Spring Clean": the room as the title, the family, "One room · About N minutes · Everyone has a
+    part" (or "N jobs, one finish line" when someone has no part), What to gather, How we start (by work phase, with
+    names), Who does what (each person in their January color with their jobs, icons and honest minutes), "Still
+    needs someone" in a dashed box apart from the family (never shown as anyone's job), people with no part this time,
+    the finish line on March's wash, and a footer. Text size is measured: the largest step that fits.
+  - BACK "How We Do Our Jobs": one card per job on the plan (icon and title on a header row, owners or "Needs
+    someone", GET READY / DO THE JOB / FINISHED WHEN, safety), one column for one or two jobs, two after; body text
+    15, 14 or 13px, never smaller. Rows size to their content; the footer stays on the page.
+  - Every sheet is measured off-screen at full size; anything cut off marks it `data-scl-overflow`.
+- **Icons:** `scripts/prepare-spring-clean-icons.py` makes print copies of the approved art (March chore set and Club
+  icon library) in `public/images/club/spring-clean-icons/`: the library's alpha haze removed, trimmed to the drawing
+  and centered on the same 256 px transparent square, so every icon prints at the same size with no gray box. Each
+  pairing was checked on a contact sheet; eight wrong ones were fixed (a toilet on the oven card, folded shirts on
+  food containers and papers…).
+- **Editing:** `src/lib/club/march-spring-editor.ts`, one editor for the desktop dialog and the phone sheet: The room
+  (any room, prepared afresh), Who does what (chips for the people who may own each job; grown-ups-only jobs offer only
+  grown-ups; "together" only when she ticks it), The jobs (swap, remove, add up to six), Start over with Undo; a
+  refused change says why and changes nothing.
+- **Phone:** `MarchSpringCleanMobile.astro` on the shared plan screen: the project (room, time, gather, start, finish),
+  who does what, still needs someone, each job's how-to (expand), three edit rows.
+- **Review page:** `/app/club/march/spring-clean` (not linked; `?sample=…`) on the shared shell with the shared rail
+  (`ClubPlanDesktop`), March's deadline, approval, Front/Back proof, printing; `ClubPlanShell tabOnly` (new, opt-in)
+  keeps it in the tab only, never on anyone's account; no Family Meeting yet (3c). `/app/club/march` and Spring Prep
+  are untouched.
+- **Previews (print size, 110 dpi, from real Letter PDFs):** `docs/club/previews/march-spring-clean/`: Hughes (one
+  person), Okafor (three), Rivera (five, the kitchen from her priority), Chen (seven, two with no part).
+- **Tests:** engine 43 (focus, max six, floor first, honest finish line, all earlier checks). `scripts/march-spring-clean-qa.mjs`
+  (new): 7 sample families × the prepared plan and all 11 rooms = 84 plans printed as Letter PDFs: two pages each,
+  nothing cut off, icons load, no script errors; all pass. Worst case (each room's six longest guides): nothing cut
+  off. Browser: desktop rail, editor (room, owners, grown-ups-only offered to no child, together, remove, add), reload,
+  approve, start over, two-page print; phone reference, how-to, edit sheet, no sideways scrolling: 17/17. Regressions:
+  `/app/club/march`, `/app/club/march/spring-prep`, `/app/club/family-rhythm`, January, May built HTML identical to
+  `main`; full `vitest run` identical failures to `main` (54); `npm run check` 0 errors.
+- **Waiting on the owner:** a judgment of the printable's visual quality and usefulness before 3c replaces March.
+
 ### Phase 4: December 2027, Family Values gift
 
 - [ ] Brief and D7–D9 decided

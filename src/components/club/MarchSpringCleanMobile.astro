@@ -1,0 +1,156 @@
+---
+/**
+ * March's Spring Clean as a Team on phones and tablets (below 1100px), inside the shared ClubPlanScreen (approval,
+ * action bar, print). A readable reference of the same plan as the printable (`[data-scl]`'s `clubPlan.view()`): the
+ * room, the time, what to gather, how we start, who does what, anything that still needs someone, the finish line, and
+ * each job's how-to, so nobody has to zoom into the sheet. Three edit rows open the shared editor
+ * (src/lib/club/march-spring-editor.ts) in the edit sheet.
+ */
+import ClubPlanScreen from './plan/ClubPlanScreen.astro';
+import '../../styles/club-marks.css';
+interface Props { deadline: string; approvalKey: string }
+const { deadline, approvalKey } = Astro.props;
+---
+<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['front', 'back']} previewNote="Two sides: the plan, then how we do our jobs" hero={false}>
+  <Fragment slot="title">Spring Clean <em>as a Team</em></Fragment>
+  <div class="scm" data-scm data-scm-approval={approvalKey}>
+    <section class="scm-project" data-scm-project></section>
+    <section class="cp-section" aria-labelledby="scm-who-title">
+      <h2 id="scm-who-title">Who does what</h2>
+      <div class="scm-people" data-scm-people></div>
+      <div data-scm-needs></div>
+    </section>
+    <section class="cp-section" aria-labelledby="scm-how-title">
+      <h2 id="scm-how-title">How we do our jobs</h2>
+      <div class="scm-guides" data-scm-guides></div>
+    </section>
+    <section class="cp-section" aria-labelledby="scm-edit-title">
+      <h2 id="scm-edit-title">Make it yours</h2>
+      <p class="cp-intro">It’s prepared from your family page. Change only what doesn’t fit.</p>
+      <ul class="cp-group" data-scm-edit></ul>
+      <p class="scm-restore" data-scm-restore hidden><button type="button" class="cp-link"><span>Start over with the prepared plan</span></button></p>
+    </section>
+  </div>
+</ClubPlanScreen>
+
+<style is:global>
+@media screen and (max-width:1099px){
+.scm{display:grid;gap:22px;margin:0 0 26px}
+.scm-project{padding:16px;border:1px solid var(--color-warm-rule);border-radius:8px;background:#fff;display:grid;gap:12px}
+.scm-room{margin:0;font:400 1.6rem/1.15 var(--font-serif)}
+.scm-meta{margin:0;font-size:.9rem;color:var(--cp-soft)}
+.scm-label{margin:0 0 6px;font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cp-soft)}
+.scm-list{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.95rem;line-height:1.45}
+.scm-finish{padding:12px 14px;border-radius:6px;background:var(--scm-wash)}
+.scm-finish p{margin:0;font:italic 400 1.05rem/1.4 var(--font-serif)}
+.scm-people{display:grid;gap:12px}
+.scm-person{display:grid;grid-template-columns:4px minmax(0,1fr);gap:12px;padding:12px 14px;border:1px solid var(--color-warm-rule);border-radius:8px;background:#fff}
+.scm-person .scm-bar{border-radius:2px;background:var(--scm-member)}
+.scm-name{margin:0 0 6px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--scm-member-ink)}
+.scm-jobs{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.scm-job{display:grid;grid-template-columns:36px minmax(0,1fr);gap:10px;align-items:center;font:400 1.02rem/1.35 var(--font-serif)}
+.scm-job img,.scm-guide img{width:36px;height:36px;object-fit:contain;display:block}
+.scm-job small{display:block;font:500 .78rem var(--font-sans);color:var(--cp-soft)}
+.scm-needs{margin-top:12px;padding:12px 14px;border:1.5px dashed #b9aea4;border-radius:8px}
+.scm-needs ul{margin:0;padding-left:18px;font-size:.95rem}
+.scm-guides{display:grid;gap:10px}
+.scm-guide{border:1px solid var(--color-warm-rule);border-radius:8px;background:#fff}
+.scm-guide summary{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;min-height:56px;padding:8px 14px;cursor:pointer;list-style:none;font:400 1rem/1.3 var(--font-serif)}
+.scm-guide summary::-webkit-details-marker{display:none}
+.scm-guide summary::after{content:'+';font:400 1.3rem var(--font-sans);color:var(--cp-soft)}
+.scm-guide[open] summary::after{content:'−'}
+.scm-guide-body{padding:0 14px 14px 60px;font-size:.93rem;line-height:1.5}
+.scm-guide-body p,.scm-guide-body ol{margin:0}
+.scm-guide-body ol{padding-left:18px}
+.scm-step{display:block;margin:8px 0 2px;font-size:.68rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cp-soft)}
+.scm-safety{margin-top:8px!important;color:#7a4f34}
+.scm-step-row{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cp-soft)}
+}
+</style>
+
+<script>
+import { el } from '../../lib/club/plan/dom';
+import { mountPlanScreen, type PlanScreen } from '../../lib/club/plan/screen';
+import { restoreProject, type SpringPlanResource, type SpringState, type JobView } from '../../lib/club/engines/march-spring-clean';
+import { springEditor, type SpringSection } from '../../lib/club/march-spring-editor';
+import { guideIconSrc } from '../../data/club/spring-clean-guides';
+import { monthTints } from '../../lib/club/month-tints';
+
+const root = document.querySelector<HTMLElement>('.club-plan:has([data-scl])');
+const host = root?.querySelector<HTMLElement & { clubPlan?: SpringPlanResource }>('[data-scl]');
+if (root && host) {
+  const plan = () => host.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const APPROVAL_KEY = q('[data-scm]').dataset.scmApproval!;
+  q('[data-scm]').style.setProperty('--scm-wash', monthTints('2027-03').wash);
+  let ui: PlanScreen<SpringState>;
+  let isLocked = false;
+  let section: SpringSection = 'people';
+  const img = (j: Pick<JobView, 'guide'>) => el('img', { src: guideIconSrc(j.guide.icon), alt: '', decoding: 'async' });
+
+  const row = (step: string, title: string, detail: string, open: () => void, locked: boolean) => {
+    const b = el('button', { type: 'button', class: 'cp-row', disabled: locked }, el('span'),
+      el('span', { class: 'cp-row-text' }, el('span', { class: 'scm-step-row' }, step), el('strong', {}, title), detail ? el('span', {}, detail) : ''),
+      el('span', { class: 'cp-chev', 'aria-hidden': 'true' }));
+    b.setAttribute('aria-label', `${step}: ${title}.${locked ? '' : ' Change'}`);
+    b.addEventListener('click', open);
+    return el('li', {}, b);
+  };
+
+  const render = (_ui: PlanScreen<SpringState>, _s: SpringState, locked: boolean) => {
+    isLocked = locked;
+    const v = plan().view();
+    if (!v.jobs.length) {
+      q('[data-scm-project]').replaceChildren(el('p', { class: 'cp-intro' }, 'Add your family to your family page and your spring clean is prepared here.'));
+      return;
+    }
+    q('[data-scm-project]').replaceChildren(
+      el('div', {}, el('p', { class: 'scm-label' }, 'This spring we’re cleaning'), el('h2', { class: 'scm-room' }, v.room.label),
+        el('p', { class: 'scm-meta' }, `About ${v.minutes} minutes, working at the same time${v.withinTime ? '' : '. That’s long: move a job or save one for another day'}.`)),
+      el('div', {}, el('p', { class: 'scm-label' }, 'What to gather'), el('ul', { class: 'scm-list' }, ...(v.supplies.length ? v.supplies : ['Just your hands']).map((x) => el('li', {}, x)))),
+      el('div', {}, el('p', { class: 'scm-label' }, 'How we start'), el('ol', { class: 'scm-list' }, ...v.sequence.map((x) => el('li', {}, x)))),
+      el('div', { class: 'scm-finish' }, el('p', { class: 'scm-label' }, 'Finished when'), el('p', {}, v.finish)));
+    q('[data-scm-people]').replaceChildren(...v.people.map((p) => {
+      const card = el('section', { class: 'scm-person' }, el('span', { class: 'scm-bar', 'aria-hidden': 'true' }),
+        el('div', {}, el('p', { class: 'scm-name' }, p.name),
+          el('ul', { class: 'scm-jobs' }, ...p.jobs.map((j) => el('li', { class: 'scm-job' }, img(j), el('span', {}, j.title, el('small', {}, `about ${j.minutes} min${j.joint ? ' · together' : ''}`)))))));
+      card.style.setProperty('--scm-member', p.color.hex);
+      card.style.setProperty('--scm-member-ink', p.color.ink);
+      return card;
+    }));
+    const needs = v.jobs.filter((j) => !j.owners.length);
+    q('[data-scm-needs]').replaceChildren(...(needs.length ? [el('div', { class: 'scm-needs' }, el('p', { class: 'scm-label' }, 'Still needs someone'),
+      el('ul', {}, ...needs.map((j) => el('li', {}, `${j.title}. ${j.needs ?? ''}`))))] : []));
+    q('[data-scm-guides]').replaceChildren(...v.jobs.map((j) => el('details', { class: 'scm-guide' },
+      el('summary', {}, img(j), el('span', {}, j.title)),
+      el('div', { class: 'scm-guide-body' },
+        el('span', { class: 'scm-step' }, 'Get ready'), el('p', {}, j.guide.ready),
+        el('span', { class: 'scm-step' }, 'Do the job'), el('ol', {}, ...j.guide.steps.map((x) => el('li', {}, x))),
+        el('span', { class: 'scm-step' }, 'Finished when'), el('p', {}, j.guide.finished),
+        ...(j.guide.safety ? [el('p', { class: 'scm-safety' }, `Safety: ${j.guide.safety}`)] : [])))));
+    const owned = v.jobs.filter((j) => j.owners.length).length;
+    q('[data-scm-edit]').replaceChildren(
+      row('1 · The room', v.room.label, 'Choose another room or space', () => open('room'), locked),
+      row('2 · Who does what', `${owned} of ${v.jobs.length} jobs have an owner`, 'Only people who can safely do a job are offered', () => open('people'), locked),
+      row('3 · The jobs', `${v.jobs.length} ${v.jobs.length === 1 ? 'job' : 'jobs'}`, 'Swap, remove or add one', () => open('jobs'), locked));
+    q('[data-scm-restore]').hidden = locked || !v.changed;
+  };
+  const TITLES: Record<SpringSection, string> = { room: 'The room', people: 'Who does what', jobs: 'The jobs' };
+  const sheetEl = () => root.querySelector<HTMLDialogElement>('[data-cp-sheet]');
+  const show = () => {
+    const sheet = sheetEl();
+    const top = sheet?.open ? sheet.scrollTop : 0;
+    ui.openSheet(TITLES[section], editor.section(section), el('div', { class: 'cp-sheet-actions' }, ui.doneButton()));
+    if (sheet) sheet.scrollTop = top;
+  };
+  const editor = springEditor({ plan, locked: () => isLocked, redraw: () => { if (sheetEl()?.open) show(); } });
+  const open = (s: SpringSection) => { section = s; editor.clear(); sheetEl()?.close(); show(); };
+  q('[data-scm-restore] button').addEventListener('click', () => {
+    const before = structuredClone(plan().state());
+    plan().update((s) => { restoreProject(s); });
+    ui.toast('The prepared plan is back.', () => plan().replace(before));
+  });
+  const mounted = mountPlanScreen<SpringState>({ root, host, approvalKey: APPROVAL_KEY, render });
+  if (mounted) ui = mounted;
+}
+</script>

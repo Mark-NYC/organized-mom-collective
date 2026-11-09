@@ -14,7 +14,8 @@
  *    bedrooms), else the living room, the room everyone uses. She can choose any other.
  * 2. The jobs: the room's starting jobs, added one at a time (one per work phase first: clear, clean, floors and
  *    trash), keeping a job only if the whole session still fits about thirty minutes with people working side by
- *    side (the busiest person's time, younger helpers' slower pace included) and the back page can still print it.
+ *    side (the busiest person's time, younger helpers' slower pace included), and stopping at FOCUS_JOBS: a visibly
+ *    finished room, not as many jobs as fit.
  *    Jobs that don't fit wait for another day; nobody gets filler. A room's extra jobs are offered only to someone
  *    who would otherwise have nothing and can do it safely.
  * 3. Who: the builder's planner: grown-ups-only jobs to grown-ups, the rest to whoever can safely do it and has done
@@ -30,15 +31,23 @@ import {
   OTHER_ROOM, cannotDo, canDo, cleaningRooms, coreJobs, jobById, paceFor, planRoom, roomById, sessionMinutes,
   type CleaningJob, type PlannedJob,
 } from '../../../data/spring-cleaning';
-import { JOB_GUIDES, ROOM_FINISH, type JobGuide } from '../../../data/club/spring-clean-guides';
+import { JOB_GUIDES, finishLine, type JobGuide } from '../../../data/club/spring-clean-guides';
 
 export const KIT_MONTH = '2027-03';
 /** The session the project is planned for, in minutes. */
 export const SESSION = 30 as const;
 /** "About thirty minutes": a prepared project never runs longer than this. */
 export const MAX_MINUTES = 35;
-/** The most job guides the back of the sheet prints legibly (two columns of four). */
-export const MAX_JOBS = 8;
+/**
+ * The most jobs a plan holds: what the back prints as illustrated cards without shrinking the type below 13px (two
+ * columns of three, checked at print size). A ceiling, not a target.
+ */
+export const MAX_JOBS = 6;
+/**
+ * The prepared project stops here: a focused room the family can visibly finish together (clear, clean, floors), not
+ * as many jobs as fit.
+ */
+export const FOCUS_JOBS = 6;
 /** The fewest jobs a project has when anyone can do them (a real project, not one chore). */
 export const MIN_JOBS = 3;
 /** The youngest helpers (under six) work about fifteen minutes: one achievable job, not the whole session. */
@@ -137,11 +146,14 @@ export function preparedProject(ctx: FamilyContext, roomId?: string): SpringPlan
   const core = coreJobs(room);
   const doable = (job: CleaningJob) => helpers.some((h) => canDo(job, h));
   // One job from each work phase first (clear, clean, floors and trash), in library order; then the rest of the core.
-  const firsts = [1, 2, 3].map((ph) => core.find((x) => x.phase === ph && doable(x))).filter((x): x is CleaningJob => Boolean(x));
+  // Floors before trash in the last phase: a clean floor is what makes a room look finished.
+  const firstOf = (ph: number) => (ph === 3 ? core.find((x) => x.phase === 3 && x.tags?.includes('floor') && doable(x)) : undefined)
+    ?? core.find((x) => x.phase === ph && doable(x));
+  const firsts = [1, 2, 3].map(firstOf).filter((x): x is CleaningJob => Boolean(x));
   const order = [...firsts, ...core.filter((x) => !firsts.includes(x))];
   let chosen: CleaningJob[] = [];
   const tryAdd = (job: CleaningJob) => {
-    if (chosen.length >= MAX_JOBS || chosen.includes(job)) return false;
+    if (chosen.length >= FOCUS_JOBS || chosen.includes(job)) return false;
     const next = [...chosen, job];
     if (doable(job) && !fits(plannedFor(next, helpers, ctx), helpers)) return false;
     chosen = next;
@@ -294,7 +306,7 @@ export interface JobView {
   supplies?: string;
 }
 
-const PHASE_WORDS: Record<1 | 2 | 3, string> = { 1: 'Clear and sort', 2: 'Clean', 3: 'Floors and trash' };
+const PHASE_WORDS: Record<1 | 2 | 3, string> = { 1: 'clearing and sorting', 2: 'cleaning', 3: 'the floors and trash' };
 
 export function springView(s: SpringState, members: readonly SpringMember[], prefs?: ContextPrefs) {
   const ctx = ctxOf(members, prefs, s);
@@ -325,7 +337,12 @@ export function springView(s: SpringState, members: readonly SpringMember[], pre
   const phases = [...new Set(jobs.map((j) => j.phase))].sort();
   const sequence = [
     'Gather the supplies together first.',
-    ...phases.map((ph, i) => `${i === 0 ? 'Start' : i === phases.length - 1 ? 'Finish' : 'Then'} with ${PHASE_WORDS[ph].toLowerCase()}: ${listNames(jobs.filter((j) => j.phase === ph).flatMap((j) => j.owners.map((o) => o.name)))}.`),
+    // Names only when there's more than one person on the plan (one person doesn't need their name on every line).
+    ...phases.map((ph, i) => {
+      const step = `${i === 0 ? 'Start' : i === phases.length - 1 ? 'Finish' : 'Then'} with ${PHASE_WORDS[ph]}`;
+      const who = jobs.filter((j) => j.phase === ph).flatMap((j) => j.owners.map((o) => o.name));
+      return people.length > 1 && who.length ? `${step}: ${listNames(who)}.` : `${step}.`;
+    }),
   ];
   const supplies = [...new Set(jobs.map((j) => j.supplies).filter((x): x is string => Boolean(x)))];
   return {
@@ -334,7 +351,7 @@ export function springView(s: SpringState, members: readonly SpringMember[], pre
     /** The schedule honestly fits about thirty minutes. */
     withinTime: minutes <= MAX_MINUTES,
     supplies, sequence,
-    finish: ROOM_FINISH[plan.room] ?? ROOM_FINISH.other,
+    finish: finishLine(plan.room, plan.jobs.map((x) => x.jobId)),
     /** People with no part this time (never given filler). */
     free: ctx.people.filter((p) => !people.some((x) => x.id === p.id)).map((p) => p.name),
     issues: validateProject(plan, ctx),
@@ -398,4 +415,6 @@ export interface SpringPlanResource extends PlanResource<SpringState> {
   prefs: () => ContextPrefs;
   familyName: () => string;
   setLocked: (on: boolean) => void;
+  /** The desktop editor, open at a section. */
+  openEditor: (section?: 'room' | 'people' | 'jobs') => void;
 }
