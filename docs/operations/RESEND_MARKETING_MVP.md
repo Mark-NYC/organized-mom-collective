@@ -264,3 +264,16 @@ Updated the approved-broadcast allowlist in `supabase/functions/resend-broadcast
 - **Manual step required to finish launch:** In the Supabase dashboard, Edge Functions → Secrets, set `WELCOME_DELIVERY_ENABLED` to the literal string `true` (not a credential). It is not manageable using currently connected Supabase tools. Once set, update `public.marketing_delivery_settings.enabled=true`, then verify the live worker, cron and a net-new opt-in in production. DO NOT switch DB flag first, because jobs due while the function lock is off could consume all 5 dispatch attempts.
 - This is a first-email contact opt-in flow, not historical backfill. There is no scheduled One Small Win send yet.
 
+
+
+### Welcome sequence activation, 2026-11-09
+
+**Activated** database-controlled sending for new explicit marketing opt-ins only. The previous standalone `WELCOME_DELIVERY_ENABLED` Edge Function check was redundant and repeatedly returned `disabled`; the current `supabase/functions/resend-welcome-delivery/index.ts` relies instead on the atomic database claim and the `marketing_delivery_settings` launch gate. The current GitHub version was redeployed as Edge Function v8.
+
+Production `public.marketing_delivery_settings` now has all three fields `enabled=true`, `postal_address_verified=true`, and `broadcasts_coordinated=true`. The five-minute `omc-welcome-delivery-dispatch` cron is active. An HTTP request to the deployed worker using an invalid (nonexistent) 64-character token returned `{"status":"not_found"}`, confirming the worker is not stuck behind the old flag.
+
+**QA:** A new explicitly opted-in test contact created held Day 2 and Day 6 jobs with the correct due dates. Test insertion was run inside a transaction and rolled back; no test contact, dispatch, or email remained. Production queue and send ledger were each empty at completion.
+
+**Outstanding live observation:** No real new subscriber has reached the Day 2 due time since activation. End-to-end scheduled live delivery, recipient unsubscribe handling, and provider confirmation for a queued welcome have not yet been observed. Review first real due job, `marketing_send_ledger`, and Resend delivery status; if a job becomes uncertain, investigate rather than retry blindly. Keep One Small Win broadcasts unscheduled unless the reservation-first process is followed.
+
+Old written instructions requiring a `WELCOME_DELIVERY_ENABLED` function secret are superseded by this entry. The database switch `marketing_delivery_settings.enabled` is the operative production kill switch.
