@@ -18,6 +18,18 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'chores-for-8-9-year-olds',
+    browseCategory: 'family-systems',
+    title: 'Chores for 8–9-Year-Olds',
+    teaser: '18 realistic chores for growing independence, with simple teaching steps and a printable weekly responsibility plan.',
+    area: 'Family responsibilities',
+    kicker: 'Age-appropriate chores · One-job handoff · Weekly printable',
+    image: '/images/guides/chores-8-9-page-1.webp',
+    imageAlt: 'Illustrated first page of the Chores for 8–9-Year-Olds printable',
+    pdf: '/downloads/chores-for-8-9-year-olds.pdf',
+    pages: 4,
+  },
+  {
     slug: "family-responsibility-system",
     browseCategory: "family-systems",
     title: "The Family Responsibility System",
