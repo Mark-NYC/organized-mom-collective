@@ -38,7 +38,7 @@ All four **currently use** the opted-in Free Resource Resend segment `7bf64eae-a
 5. Monthly themes: November 2026 *Our Family, Our Team*; December 2026 *Give to Others*.
 
 ## Critical pre-scheduling gates
-**Do not schedule any Sunday or Wednesday newsletter yet.** The current broadcast audience segment includes all marketing opt-ins, including people still completing Day 2 and Day 6 welcome emails. The database welcome-send ledger blocks welcome sends on newsletter dates, but Resend bulk broadcasts do not automatically exclude new contacts or respect a per-contact welcome completion state.
+**Do not schedule any Sunday or Wednesday newsletter yet.** Audience separation is now implemented and all twelve drafts target Newsletter Ready. Real tracked-link and live new-subscriber handoff checks remain before first scheduling. The database welcome-send ledger blocks welcome sends on reserved newsletter dates; do not bypass the Resend scheduling guard.
 
 Before sending, build and verify a newsletter-ready audience that excludes subscribers who have incomplete welcome steps, including an end-to-end test where a newly opted-in contact does not receive the Sunday broadcast. Keep existing unsubscribe and suppression safeguards in both Supabase and Resend. The reservation-first scheduler requires service-role and `BROADCAST_SCHEDULING_ENABLED=true`; it is not enabled.
 
@@ -54,3 +54,10 @@ Once gates are resolved, review the emails with the owner; schedule Sunday sends
 - [ ] Confirm unsubscribe/suppression enforcement in the actual broadcast segment.
 - [ ] Confirm per-day coordination with Wednesday One Small Win and any launch campaigns.
 - [ ] Owner approves content, dates, and schedule. **Do not send before approval.**
+
+## Newsletter Ready audience (implemented 2026-11-09)
+
+The four Sunday drafts have been reassigned in Resend to `OMC | Newsletter Ready` (`98ec76b1-fe2e-42d4-898d-b235b9c9df8b`). The separate marketing capture segment remains `OMC | Free Resource Opt-Ins`. Supabase admits new readers to Newsletter Ready only after their Day 6 welcome has a confirmed `sent` status; the three existing prelaunch opted-in contacts were synced successfully. Suppression and explicit consent still apply. SQL eligibility tests passed; a genuine new subscriber's complete lifecycle has not yet been observed. See [handoff runbook](./NEWSLETTER_AUDIENCE_HANDOFF.md).
+
+All four emails remain **draft**, unsent and unscheduled. The guarded broadcast scheduler was redeployed to require the new segment.
+
