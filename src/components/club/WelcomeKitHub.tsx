@@ -21,6 +21,7 @@ import { clubResourceBySlug } from '../../data/club/resources';
 import { getSession } from '../../lib/account';
 import { routes } from '../../routes';
 import { clubNav } from '../../lib/club/nav';
+import { kitPieces } from '../../lib/club/welcome-item';
 
 export default function WelcomeKitHub() {
   return <ClubGate page="kit">{(ctx) => <Hub ctx={ctx} />}</ClubGate>;
@@ -99,18 +100,19 @@ function Hub({ ctx }: { ctx: ClubContext }) {
   };
 
   const month = first ? clubResourceBySlug(first.slug)?.month : null;
-  const monthWord = items[2]?.name.replace(/ Resource$/, '') ?? 'first';
+  const monthWord = items.find((i) => i.id === 'first')?.name.replace(/ Resource$/, '') ?? 'first';
+  const pieces = kitPieces(me);
   const todo = items.filter((i) => i.status === 'needs_review');
   const next = nextItem(items);
   const readyCount = items.filter((i) => i.status === 'approved' || i.status === 'ready').length;
-  const doneName = done === 'print' ? `${items[0]?.name.replace(/^Your /, '') ?? 'Family Vision Print'} approved for printing.` : done === 'first' ? `${monthWord} Resource approved for printing.` : done === 'guide' ? 'Family Meeting Guide: ready, nothing to change.' : null;
+  const doneName = done === 'print' ? `${items.find((i) => i.id === 'print')?.name.replace(/^Your /, '') ?? 'Family Vision Print'} approved for printing.` : done === 'first' ? `${monthWord} Resource approved for printing.` : done === 'guide' ? 'Family Meeting Guide: ready, nothing to change.' : null;
 
   if (submitted) {
     return (
       <div className="wk" data-welcome-kit data-kit-submitted>
         <p className="label text-[#71866c]">Your Welcome Kit</p>
         <h1 className="wk-title"><span aria-hidden="true">✓ </span>Your Welcome Kit is getting ready!</h1>
-        <p className="wk-lede">{w.status === 'mailed' ? kitText(me) : 'We’re printing your three resources together and aim to mail them within two business days. Club Home shows when your package is on its way.'}</p>
+        <p className="wk-lede">{w.status === 'mailed' ? kitText(me) : `We’re printing your ${pieces} resources together and aim to mail them within two business days. Club Home shows when your package is on its way.`}</p>
         <WelcomeKitItems items={items} firstSlug={first?.slug ?? null} />
         <section className="wk-next" aria-labelledby="wk-next-title">
           <h2 id="wk-next-title" className="wk-h2">Here’s what’s coming next</h2>
@@ -125,11 +127,11 @@ function Hub({ ctx }: { ctx: ClubContext }) {
     <div className="wk" data-welcome-kit>
       <p className="label text-[#71866c]">Your Welcome Kit{month ? ` · ${monthWord} ${month.slice(0, 4)}` : ''}</p>
       <h1 className="wk-title">Let’s get your first family package ready.</h1>
-      <p className="wk-lede">Three printed resources, made for your family and mailed together to your door.</p>
+      <p className="wk-lede">{pieces === 'two' ? `Your ${monthWord} resource, made for your family, and our Family Meeting guide, mailed together to your door. Your Family Rhythm is ready in Club Home too.` : 'Three printed resources, made for your family and mailed together to your door.'}</p>
       {doneName && (
         <p className="wk-flash" role="status" data-kit-flash><span aria-hidden="true">✓</span> {doneName} {canSubmit || (allReady && !todo.length) ? 'Everything’s ready: confirm your kit below.' : next ? `Next: ${next.name}.` : ''}</p>
       )}
-      <p className="wk-count" data-kit-count><strong>{readyCount} of 3 ready</strong>{todo.length ? ` · ${todo.length === 1 ? 'one piece needs' : `${todo.length} pieces need`} you` : ''}</p>
+      <p className="wk-count" data-kit-count><strong>{readyCount} of {items.length} ready</strong>{todo.length ? ` · ${todo.length === 1 ? 'one piece needs' : `${todo.length} pieces need`} you` : ''}</p>
       <WelcomeKitItems items={items} firstSlug={first?.slug ?? null} startHere={next?.id ?? null} justDone={done === 'guide' ? null : done} />
 
       <section className="wk-confirm" aria-labelledby="wk-confirm-title">
@@ -157,7 +159,7 @@ function Hub({ ctx }: { ctx: ClubContext }) {
             {busy ? 'Preparing…' : 'Prepare My Welcome Kit'}
           </button>
           <p id="wk-submit-note" className="wk-submit-note" role="status">
-            {canSubmit ? 'We print all three together and aim to mail them within two business days.'
+            {canSubmit ? `We print all ${pieces} together and aim to mail them within two business days.`
               : todo.length ? `First, ${todo.map((i) => (i.id === 'print' ? `approve your ${i.name.replace(/^Your /, '')}` : `review your ${monthWord} Resource`)).join(' and ')}.`
               : kitText(me)}
           </p>

@@ -27,7 +27,7 @@ export default function WelcomeKitItems({ items, firstSlug, compact = false, sta
   justDone?: KitItem['id'] | null;
 }) {
   return (
-    <ol className={`wk-items${compact ? ' wk-items--compact' : ''}`} aria-label="Your Welcome Kit: three printed resources">
+    <ol className={`wk-items${compact ? ' wk-items--compact' : ''}`} aria-label={`Your Welcome Kit: ${items.length === 2 ? 'two' : 'three'} printed resources`}>
       {items.map((item, i) => {
         const p = previewFor(item, firstSlug);
         return (

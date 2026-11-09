@@ -275,8 +275,10 @@ var monthLabel = (isoMonth) => (/* @__PURE__ */ new Date(`${isoMonth.slice(0, 7)
 var longDate = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
 var WELCOME_KIT = "Your first mailing is your Welcome Kit: a personalized Family Vision watercolor print for your wall, our gift, our one-page Family Meeting guide, and your family’s first monthly resource. Once you approve your print and your first resource, we print them together and mail them to your door in one package.";
 var WELCOME_KIT_RHYTHM = "Your first mailing is your Welcome Kit: your family’s personalized Family Rhythm, one page with two moments your family already shares and everyone’s part in them; our one-page Family Meeting guide; and your family’s first monthly resource. Your Family Rhythm is ready in your account as soon as you sign in. Once you approve it and your first resource, we print them together and mail them to your door in one package.";
-var kitText = (d) => d.welcomeItem === "rhythm" ? WELCOME_KIT_RHYTHM : WELCOME_KIT;
+var WELCOME_KIT_MONTHLY = "Your first mailing is your Welcome Kit: your family’s first monthly resource, personalized with your family’s names, and our one-page Family Meeting guide. Your Family Rhythm is ready in your account too, as soon as you sign in. Once you approve your first resource, we print your kit and mail it to your door.";
+var kitText = (d) => d.welcomeItem === "monthly" ? WELCOME_KIT_MONTHLY : d.welcomeItem === "rhythm" ? WELCOME_KIT_RHYTHM : WELCOME_KIT;
 var itemName = (d) => d.welcomeItem === "rhythm" ? "Family Rhythm" : "Family Vision print";
+var approveStep = (d) => d.welcomeItem === "monthly" ? "Look over your first resource, and we’ll prepare your Welcome Kit." : `Approve your ${itemName(d)}, look over your first resource, and we’ll prepare your Welcome Kit.`;
 var MONTH_PAGES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
 function toolUrl(siteUrl, slug, welcome = false) {
   const month = MONTH_PAGES[Number(slug.slice(5, 7)) - 1];
@@ -308,7 +310,7 @@ function renderClubEmail(kind, to, d, siteUrl) {
               steps([
                 "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
                 "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
-                `Approve your ${itemName(d)}, look over your first resource, and we’ll prepare your Welcome Kit.`
+                approveStep(d)
               ]),
               button("Sign in to your account", login)
             ]),
@@ -330,7 +332,7 @@ function renderClubEmail(kind, to, d, siteUrl) {
             steps([
               "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
               "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
-              `Approve your ${itemName(d)}, look over your first resource, and we’ll prepare your Welcome Kit.`
+              approveStep(d)
             ]),
             button("Sign in to your account", login)
           ]),
@@ -383,7 +385,7 @@ function renderClubEmail(kind, to, d, siteUrl) {
         eyebrow: "Your Welcome Kit",
         title: "Does your first resource look right?",
         blocks: [
-          p(`Your ${itemName(d)} is approved. Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? "first"} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
+          p(`${d.welcomeItem === "monthly" ? "" : `Your ${itemName(d)} is approved. `}Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? "first"} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
           button("Take a look", d.kitSlug ? toolUrl(siteUrl, d.kitSlug, true) : dash),
           small("We print your Welcome Kit only after you confirm it, and aim to mail it within two business days.")
         ]
@@ -396,8 +398,8 @@ function renderClubEmail(kind, to, d, siteUrl) {
         eyebrow: "Welcome Kit submitted",
         title: "A Welcome Kit is ready to prepare",
         blocks: [
-          p(`${d.familyName ?? "A new member"}${d.memberEmail ? ` (${d.memberEmail})` : ""} approved her ${itemName(d)} and her ${d.monthLabel ?? "first"} resource.`),
-          p(`Packing list: ${itemName(d)} · Family Meeting guide (standard insert) · ${d.monthLabel ?? "first month"} resource.${d.shipBy ? ` Target: mail by ${d.shipBy} (two business days).` : ""}`),
+          p(`${d.familyName ?? "A new member"}${d.memberEmail ? ` (${d.memberEmail})` : ""} approved ${d.welcomeItem === "monthly" ? "" : `her ${itemName(d)} and `}her ${d.monthLabel ?? "first"} resource.`),
+          p(`Packing list: ${d.welcomeItem === "monthly" ? "" : `${itemName(d)} · `}Family Meeting guide (standard insert) · ${d.monthLabel ?? "first month"} resource.${d.shipBy ? ` Target: mail by ${d.shipBy} (two business days).` : ""}`),
           button("Open Welcome Kits", `${siteUrl}/admin/club`),
           small("Make both PDFs, approve the kit, then mark it printed and mailed in /admin/club. Nothing is marked automatically.")
         ]
@@ -662,7 +664,7 @@ async function kitSubmitted(deps, req) {
     memberEmail: kit.email,
     monthLabel: kit.first_month ? monthLabel(kit.first_month) : void 0,
     shipBy: kit.ship_by ? longDate(`${kit.ship_by}T12:00:00Z`) : null,
-    welcomeItem: kit.welcome_item === "welcome_rhythm" ? "rhythm" : "vision"
+    welcomeItem: kit.welcome_item === "welcome_rhythm" ? "rhythm" : kit.welcome_item === "none" ? "monthly" : "vision"
   });
   return { notified: outcome === "sent" || outcome === "duplicate" };
 }

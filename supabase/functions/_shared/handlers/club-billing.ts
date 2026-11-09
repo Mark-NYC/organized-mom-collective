@@ -244,7 +244,7 @@ async function kitSubmitted(deps: ClubDeps, req: Request) {
     memberEmail: kit.email,
     monthLabel: kit.first_month ? monthLabel(kit.first_month) : undefined,
     shipBy: kit.ship_by ? longDate(`${kit.ship_by}T12:00:00Z`) : null,
-    welcomeItem: kit.welcome_item === 'welcome_rhythm' ? 'rhythm' : 'vision',
+    welcomeItem: kit.welcome_item === 'welcome_rhythm' ? 'rhythm' : kit.welcome_item === 'none' ? 'monthly' : 'vision',
   });
   return { notified: outcome === 'sent' || outcome === 'duplicate' };
 }

@@ -11,7 +11,11 @@
 > on the kit page, the queue (`needs_rhythm`), admin, CSV, reminders and emails; approving it copies the plan she approved
 > onto her order, which the owner's print view (`/app/club/family-rhythm?fulfillment=<order>`) prints. Existing Vision
 > orders never change. Print assumptions: `src/data/club/print-specs.ts` (targets until confirmed). Do not turn the switch
-> on before the May/August overlap rule (2d) and the owner's go-ahead.
+> on before the owner's go-ahead.
+>
+> **Built, not live (Phase 2d):** `20261123000000_club_welcome_overlap.sql`: when her first month is a kit flagged
+> `establishes_daily_rhythm` (May, August), that month is her Welcome win: her kit is that month and the Family Meeting
+> guide, with no welcome print order (`club_households.welcome_kit_monthly_only`).
 
 A new member's first mailing is **one package with three things**, mailed as soon as she has approved her
 personalized items (target: **within two business days**):
