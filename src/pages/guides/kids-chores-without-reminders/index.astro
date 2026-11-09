@@ -1,0 +1,10 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import KidsChoresMiniGuide from '../../../components/guides/KidsChoresMiniGuide.astro';
+import {findMiniGuide} from '../../../../scripts/lib/kids-chores-mini-guides.mjs';
+const slug='kids-chores-without-reminders';
+const guide=findMiniGuide(slug)!;
+---
+<PublicLayout title={guide.title+' | Free One-Page Printable'} description={guide.teaser} width="full" ogType="article">
+<KidsChoresMiniGuide slug={slug}/>
+</PublicLayout>
