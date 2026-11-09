@@ -305,3 +305,12 @@ The research sample from the owner's Clean Mama Gmail showed three recurring edi
 - **Not yet verified:** Real Resend merge/click-tracking behavior, actual deployed browser behavior on a clean device, email-link expiration in browser, and newsletter-ready audience separation. These are blockers to scheduling.
 
 Detailed record and QA: [SUBSCRIBER_RESOURCE_ACCESS.md](./SUBSCRIBER_RESOURCE_ACCESS.md).
+
+## Newsletter Ready audience implemented (November 9, 2026)
+
+The additional Resend segment `OMC | Newsletter Ready` was created and populated from a separate Supabase membership ledger. `supabase/migrations/20261109100000_newsletter_ready_audience.sql` maintains the eligibility function, private membership and five-minute sync cron; `supabase/functions/resend-newsletter-audience/index.ts` synchronizes verified eligible contacts with Resend but **sends no messages**.
+
+Eligibility requires explicit marketing opt-in, no suppression, and either a legacy prelaunch consented record with no queued welcome or a confirmed Day 6 `sent` entry. Simulated new and completed welcome, no-consent and suppression cases passed in a rolled-back SQL transaction. All three legacy opted-in contacts synced successfully (three first-attempt successes). Twelve usable Sunday and Wednesday Resend broadcasts were reassigned and read back as drafts targeting `98ec76b1-fe2e-42d4-898d-b235b9c9df8b`. The approved broadcast scheduler now rejects the old acquisition segment.
+
+**Still not done:** First real automatic Day 6-to-newsletter segment handoff; personalized tracked email-to-browser resource access test; explicit approval and scheduling of Sunday/Wednesday issues. No broadcasts sent or scheduled. See [NEWSLETTER_AUDIENCE_HANDOFF.md](./NEWSLETTER_AUDIENCE_HANDOFF.md).
+
