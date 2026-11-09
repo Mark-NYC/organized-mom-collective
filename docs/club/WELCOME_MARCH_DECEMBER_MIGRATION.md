@@ -446,7 +446,7 @@ implemented and tested, and production changes only with the owner's explicit ap
 | 2a | [#432](https://github.com/Mark-NYC/organized-mom-collective/pull/432) (branch `claude/epic-noether-i7st9u`) | MERGED 2026-11-09 | Engine refactor |
 | 2b | [#434](https://github.com/Mark-NYC/organized-mom-collective/pull/434) (branch `claude/welcome-rhythm-2b`) | MERGED 2026-11-09 via [#437](https://github.com/Mark-NYC/organized-mom-collective/pull/437) | Welcome page + storage (#434 itself left open, now redundant) |
 | 2c | [#435](https://github.com/Mark-NYC/organized-mom-collective/pull/435) (branch `claude/welcome-rhythm-2c`) | MERGED 2026-11-09 via [#437](https://github.com/Mark-NYC/organized-mom-collective/pull/437) | Welcome Kit fulfillment behind a switch (off); #435 left open, now redundant |
-| 2d | Branch `claude/welcome-rhythm-2d` from `main` | READY FOR REVIEW | Welcome overlap rule (owner decision 2026-11-09) |
+| 2d | [#438](https://github.com/Mark-NYC/organized-mom-collective/pull/438) (branch `claude/welcome-rhythm-2d`, from `main`) | READY FOR REVIEW | Welcome overlap rule (owner decision 2026-11-09) |
 
 ### Phase 1 log (2026-11-08)
 
