@@ -1,5 +1,16 @@
 # Resend email marketing foundation, November 9, 2026
 
+> **CURRENT STATUS | November 9, 2026. Read this before historical notes below.**
+>
+> - **Live:** Day 2 and Day 6 automated welcome for **new explicitly opted-in contacts**. Templates are published; real one-recipient tests were delivered; Supabase DB launch gate is enabled. The previous `WELCOME_DELIVERY_ENABLED` secret check was removed from the worker because the database claim controls eligibility. No historical backfill.
+> - **Drafts only:** Sunday Family Reset (4 issues) and Wednesday One Small Win (8 usable issues). Neither broadcast series has been scheduled or sent. Cadence reflects the Clean Mama-informed decision to start with **two recurring value emails each week**, not three.
+> - **Subscriber Access backend deployed:** RLS-protected per-subscriber access passes, Resend contact `RESOURCE_PASS` property, 15-minute sync cron and verification Edge Function. Three existing opted-in contacts synced successfully; valid/invalid verifier tests passed. `src/lib/tool-email.ts` and `src/layouts/PublicLayout.astro` now recognize the token on free resources. Site deployment and the end-to-end click-tracking/browser experience remain unverified.
+> - **Do not launch broadcasts yet:** The current Free Resource Opt-Ins broadcast segment has not been separated from welcome-incomplete readers. Resend dashboard sends may bypass Supabase day reservations. Complete audience segmentation and a real personalized click-through test first.
+> - For the editorial plan see [OMC_EMAIL_MARKETING_GAME_PLAN.md](./OMC_EMAIL_MARKETING_GAME_PLAN.md), [SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md](./SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md), and [SUBSCRIBER_RESOURCE_ACCESS.md](./SUBSCRIBER_RESOURCE_ACCESS.md).
+>
+> **History note:** Earlier sections below describe successive deployments and may say `sending off`, `draft templates`, or `no automation`. These are historical snapshots, not the current state above.
+
+
 ## Status
 **Contact sync trigger deployed but Resend credential check failed (401); no marketing messages enabled.** The existing transactional delivery and Club mail remain unchanged.
 This branch adds suppression persistence, verified Resend feedback ingestion, and an on-demand
@@ -277,3 +288,20 @@ Production `public.marketing_delivery_settings` now has all three fields `enable
 **Outstanding live observation:** No real new subscriber has reached the Day 2 due time since activation. End-to-end scheduled live delivery, recipient unsubscribe handling, and provider confirmation for a queued welcome have not yet been observed. Review first real due job, `marketing_send_ledger`, and Resend delivery status; if a job becomes uncertain, investigate rather than retry blindly. Keep One Small Win broadcasts unscheduled unless the reservation-first process is followed.
 
 Old written instructions requiring a `WELCOME_DELIVERY_ENABLED` function secret are superseded by this entry. The database switch `marketing_delivery_settings.enabled` is the operative production kill switch.
+
+## Subscriber Access implementation and editorial transition (November 9, 2026)
+
+The research sample from the owner's Clean Mama Gmail showed three recurring editorial types (Sunday routine, Tuesday quick tip, Friday catch-all), a multi-day onboarding/education series, and separate product/membership promotions. OMC has chosen a **two-email/week starting target**: Sunday Family Reset (Family Meeting rhythm + Club monthly theme) and Wednesday One Small Win (a self-contained actionable tip). Longer onboarding or additional promotions remain proposals, not deployed drips. Sunday and Wednesday broadcasts are still unscheduled.
+
+### Access without repeat guide email capture
+
+- Existing same-browser access: `omc:tool-download-access:v1` in localStorage.
+- New cross-browser email-link access: Resend contact property `RESOURCE_PASS`, 64-hex per-subscriber pass renewed at expiry. In emails, link to free resources with `#omc_pass={{{RESOURCE_PASS}}}` rather than including an address in the URL.
+- SQL source mirror: `supabase/migrations/20261109090000_subscriber_resource_passes.sql`. Tables: `public.subscriber_resource_passes` and `public.subscriber_resource_pass_sync_jobs`, each RLS-protected and not granted to anon/authenticated. Private signup trigger and 15-minute `omc-resource-pass-sync` cron provision and update eligible opt-in passes.
+- Deployed Edge Functions: `resend-resource-pass-sync` (syncs contact property with consent/suppression/re-unsubscribe checks, **does not send mail**) and `subscriber-resource-access` (validates hashed pass + expiry; responds only `ok`).
+- Website: `src/lib/tool-email.ts` recognizes the fragment, verifies via POST, clears it from the browser address and reuses the existing remembered free-download state; `src/layouts/PublicLayout.astro` loads this path on public pages. This is not authorization for Club or paid/member resources. Static PDF files remain publicly reachable.
+- Resend draft changes: Sunday Family Reset 01, 02, 03 and One Small Win 05 now use personalized access links; Sunday 04's Club offer link intentionally does not.
+- Verified: three eligible passes synced into Resend on first attempt; valid token returned `200 {ok:true}`; invalid token returned `200 {ok:false}`; those four drafts are still draft and retain mailing/unsubscribe footers.
+- **Not yet verified:** Real Resend merge/click-tracking behavior, actual deployed browser behavior on a clean device, email-link expiration in browser, and newsletter-ready audience separation. These are blockers to scheduling.
+
+Detailed record and QA: [SUBSCRIBER_RESOURCE_ACCESS.md](./SUBSCRIBER_RESOURCE_ACCESS.md).
