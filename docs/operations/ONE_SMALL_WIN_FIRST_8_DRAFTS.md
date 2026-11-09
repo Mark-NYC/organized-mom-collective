@@ -1,9 +1,13 @@
 # One Small Win: First Eight Email Drafts
 
 **Updated:** 2026-11-09  
-**Status:** Copy ready for review; **NOT in Resend and NOT scheduled**.  
+**Status:** Eight redesigned broadcasts are **drafts in Resend; NOT scheduled or sent**. The approved email design is charcoal #545454 square buttons when used, Georgia headlines, Montserrat body with fallbacks, warm ivory and soft accent colors.  
 **Series branding:** “One Small Win” belongs in the email header, **not in recurring subject-line prefixes**.  
-**CTA rule:** Subscribers already on the opted-in marketing list get direct, stable PDF URLs instead of another gated guide landing page. Generator/product links may remain on-site, but must avoid duplicate email capture. All marketing requires explicit consent.
+**CTA rule:** One Small Win emails deliver their entire practical win in the email. No automatic PDF or button every week. Direct PDF links appear only for occasional deeper resources; interactive tool and Club links are subtle when relevant. Existing opted-in subscribers must not face another email gate. All marketing requires explicit consent.
+
+**Current resource cadence:** 01 email only; 02 email only; 03 compact in-email checklist; 04 soft Club link; 05 optional routine-chart generator text link; 06 email only; 07 optional Family Dinner System PDF text link plus calendar P.S.; 08 email only. No full PDF download in first three emails.
+
+**Resend review draft IDs:** 01 `0e1b9464-3c43-4c28-a917-7a4bb6472123`; 02 `71b315ae-e4b4-41d5-b2c1-f67769eb310b`; 03 `f754f259-ad49-450e-95fc-c490b5f38298`; 04 `71d5e3a8-511c-4e6a-b4bd-ff2a01f172cf`; 05 `6b2252e0-bfb7-4557-863c-e6cccb64e098`; 06 `c7cd24b9-f52e-4d13-9e75-745e08102eaa`; 07 `9e20b95f-d77a-4b69-be09-3b78316769af`; 08 `507efb45-222f-4d38-9b38-fec86ebd54b3`. Separate extra duplicate drafts exist from an interrupted run; do not schedule them.
 
 **Source for printable URLs:** `src/data/guides/guide-directory.ts`, which declares each `pdf` path. Public-host 200/PDF content-type and access checks are **still required** before scheduling, since external URL probing did not confirm delivery. Do not treat these as live-tested. Email links use `https://www.organizedmomcollective.com` + the registered PDF path.
 
@@ -13,7 +17,7 @@
 
 **Preview:** One little change that could take a daily reminder off your plate.  
 **Header:** ONE SMALL WIN · The backpack routine they can own  
-**Primary link:** [Open the free After-School Routine PDF](https://www.organizedmomcollective.com/downloads/family-after-school-routine.pdf)  
+**Primary CTA:** None. The action is fully contained in this email.
 **Artwork:** `/images/guides/after-school-guide-page-1.webp` or existing backpack icon.
 
 The backpack on the floor. The lunchbox still inside. Shoes in the doorway.
@@ -38,7 +42,8 @@ The goal isn't just a cleaner entryway. It's helping your child take responsibil
 
 One less reminder for you. One more thing they can own.
 
-**[Open your free After-School Routine PDF](https://www.organizedmomcollective.com/downloads/family-after-school-routine.pdf)**
+Try it after school today. That's your one small win.
+
 
 Organized Mom Collective
 
@@ -48,7 +53,7 @@ Organized Mom Collective
 
 **Preview:** Tomorrow morning might feel a little different.  
 **Header:** ONE SMALL WIN · The five-minute living room reset  
-**Primary link:** [Open the Living Room Reset PDF](https://www.organizedmomcollective.com/downloads/family-living-room-reset.pdf)  
+**Primary CTA:** None. The action is fully contained in this email.
 **Artwork:** `/images/guides/living-room-guide-page-1.webp`.
 
 Imagine walking into your living room tomorrow morning and not finding yesterday's mess waiting for you.
@@ -75,7 +80,8 @@ Try it for three evenings and see what changes.
 
 Five minutes together might save you fifteen minutes alone tomorrow.
 
-**[Open your free Living Room Reset PDF](https://www.organizedmomcollective.com/downloads/family-living-room-reset.pdf)**
+Set the timer tonight. Five minutes is enough to begin.
+
 
 Organized Mom Collective
 
@@ -85,7 +91,7 @@ Organized Mom Collective
 
 **Preview:** You don't have to hand over the entire laundry basket.  
 **Header:** ONE SMALL WIN · Start with one laundry responsibility  
-**Primary link:** [Open the Family Laundry System PDF](https://www.organizedmomcollective.com/downloads/family-laundry-system-guide.pdf)  
+**Primary CTA:** None. The action is fully contained in this email.
 **Artwork:** `/images/guides/laundry-guide-page-1.webp`.
 
 Laundry has a way of becoming one person's job.
@@ -112,7 +118,15 @@ You're building a skill, not hiring a laundry service.
 
 And every small responsibility they learn is one less thing that has to depend entirely on you.
 
-**[Open your free Family Laundry System PDF](https://www.organizedmomcollective.com/downloads/family-laundry-system-guide.pdf)**
+A tiny laundry handoff checklist:
+
+- Pick one job your child can do.
+- Show what finished looks like.
+- Practice it together once.
+- Give them the same job next laundry day.
+
+One laundry job. One child. One repeatable rhythm.
+
 
 Organized Mom Collective
 
@@ -122,7 +136,7 @@ Organized Mom Collective
 
 **Preview:** Their answer might surprise you.  
 **Header:** ONE SMALL WIN · Let them help solve a family problem  
-**Primary link:** [See how the Organized Family Club works](https://www.organizedmomcollective.com/club/)  
+**Primary CTA:** None. Soft inline link to the Club (no button).
 **Artwork:** Actual Family Meeting resource preview from the Club, not a fabricated illustration.  
 **Note:** This is the intentional Club introduction; no PDF required as the main CTA.
 
@@ -152,7 +166,9 @@ Every month, we help families have these conversations and put their decisions i
 
 Not another complicated system to manage. Just one small improvement at a time.
 
-**[See how the Organized Family Club works](https://www.organizedmomcollective.com/club/)**
+If you'd like help putting these small changes into practice, [take a look at the Organized Family Club](https://www.organizedmomcollective.com/club/).
+
+Start with the question tonight. That's enough for this week.
 
 Organized Mom Collective
 
@@ -162,7 +178,7 @@ Organized Mom Collective
 
 **Preview:** Three tiny decisions you can take off tomorrow's plate.  
 **Header:** ONE SMALL WIN · The two-minute morning setup  
-**Primary link:** [Open the Family Morning Routine PDF](https://www.organizedmomcollective.com/downloads/family-morning-routine.pdf)  
+**Primary CTA:** Optional inline link to the personalized routine-chart generator at `https://www.organizedmomcollective.com/routine-chart/` (no button).
 **Artwork:** `/images/guides/morning-guide-page-1.webp`.  
 **Optional secondary CTA:** Personalised routine chart generator, but only after its correct URL and repeat-gate behaviour are verified.
 
@@ -190,7 +206,6 @@ Instead of you answering it fifteen times.
 
 Start with one part of the morning your child can learn to manage independently.
 
-**[Open your free Family Morning Routine PDF](https://www.organizedmomcollective.com/downloads/family-morning-routine.pdf)**
 
 Organized Mom Collective
 
@@ -200,7 +215,7 @@ Organized Mom Collective
 
 **Preview:** A simple way to get family responsibilities out of your head.  
 **Header:** ONE SMALL WIN · Make the invisible jobs visible  
-**Primary link:** [Open the Family Responsibility System PDF](https://www.organizedmomcollective.com/downloads/family-responsibility-system.pdf)  
+**Primary CTA:** None. The action is fully contained in this email.
 **Artwork:** `/images/guides/responsibility-guide-page-1.webp`.
 
 Sometimes the exhausting part of running a home isn't doing all the work.
@@ -231,7 +246,8 @@ It's to help your family share the remembering, not just the doing.
 
 Because a responsibility isn't fully shared if you're still the only one who remembers it exists.
 
-**[Open your free Family Responsibility System PDF](https://www.organizedmomcollective.com/downloads/family-responsibility-system.pdf)**
+Three responsibilities on paper is plenty for a first try.
+
 
 Organized Mom Collective
 
@@ -241,7 +257,7 @@ Organized Mom Collective
 
 **Preview:** One small change could make dinner feel more like teamwork.  
 **Header:** ONE SMALL WIN · Give everyone a dinner job  
-**Primary link:** [Open the Family Dinner System PDF](https://www.organizedmomcollective.com/downloads/family-dinner-system.pdf)  
+**Primary CTA:** Optional inline link to the four-page Family Dinner System PDF, plus the existing calendar P.S. (no buttons).
 **Optional product connection:** [Family Wall Calendar](https://www.organizedmomcollective.com/calendar/)  
 **Artwork:** `/images/guides/dinner-guide-page-1.webp`; optional small real calendar image.
 
@@ -265,7 +281,8 @@ Keep them the same for a week so everyone gets a chance to learn.
 
 You might be surprised how much changes when dinner becomes something the family does together instead of something one person does for everybody else.
 
-**[Open your free Family Dinner System PDF](https://www.organizedmomcollective.com/downloads/family-dinner-system.pdf)**
+
+Want to put the full dinner system in place? [Open the free Family Dinner System PDF](https://www.organizedmomcollective.com/downloads/family-dinner-system.pdf).
 
 P.S. One thing that helps us think about family organization differently is getting plans and responsibilities where everyone can see them. That's why we created our [Family Wall Calendar](https://www.organizedmomcollective.com/calendar/).
 
@@ -273,11 +290,11 @@ Organized Mom Collective
 
 ---
 
-## 08. The 10-minute habit that changes your week
+## 08. The 15-minute habit that changes your week
 
 **Preview:** You shouldn't have to be the only one who knows the plan.  
 **Header:** ONE SMALL WIN · A quick family reset before Monday  
-**Primary link:** [Open the Family Weekly Reset PDF](https://www.organizedmomcollective.com/downloads/family-weekly-reset.pdf)  
+**Primary CTA:** None. The action is fully contained in this email.
 **Artwork:** `/images/guides/weekly-guide-page-1.webp`.  
 **Editorial QA:** The registered guide teaches a 15-minute check-in while this draft teaches a 10-minute version. Decide whether to harmonize timing before sending.
 
@@ -285,15 +302,15 @@ Ever get to Monday morning and realize you're the only one who knows what's happ
 
 Soccer practice. School projects. Appointments. Laundry. The thing someone needs to bring on Friday.
 
-Try giving your family ten minutes together on Sunday.
+Try giving your family fifteen minutes together on Sunday.
 
 Not for a long planning meeting. Just a quick reset.
 
-**First three minutes:** Look at what's happening this week.
+**First five minutes:** Look at what's happening this week.
 
-**Next three minutes:** Notice anything that needs preparation.
+**Next five minutes:** Notice anything that needs preparation.
 
-**Last four minutes:** Decide who will handle what.
+**Last five minutes:** Decide who will handle what.
 
 Write down the plan where everyone can see it.
 
@@ -303,9 +320,10 @@ It's that your family starts the week knowing what to expect and how they can he
 
 And you're no longer responsible for communicating every single detail individually.
 
-Ten minutes. One shared plan. A little less mental load.
+Fifteen minutes. One shared plan. A little less mental load.
 
-**[Open your free Family Weekly Reset PDF](https://www.organizedmomcollective.com/downloads/family-weekly-reset.pdf)**
+Choose a time for your family's 15-minute reset this weekend. The habit is the win.
+
 
 Organized Mom Collective
 
@@ -313,11 +331,11 @@ Organized Mom Collective
 
 ## Pre-send checklist
 
-- [ ] Verify each public `/downloads/*.pdf` URL returns HTTP 200 with a PDF response on deployed production domain.
+- [ ] Verify Email 07's optional `/downloads/family-dinner-system.pdf` link returns HTTP 200 with a PDF response.
 - [ ] Confirm the PDFs are the correct/current versions with readable mobile layouts.
-- [ ] Resolve the 10-minute vs 15-minute discrepancy in email 08.
+- [x] Align Email 08 with the 15-minute Weekly Reset PDF.
 - [ ] Verify Club and calendar URLs, and membership-based suppression.
 - [ ] Add accessible alt text and a text-only version to each email.
 - [ ] Confirm required footer, sender address, unsubscribe link, and opt-in eligibility.
 - [ ] Keep email-gated landing pages out of repeat subscriber flows; never infer marketing permission from a download alone.
-- [ ] User reviews all eight drafts, visuals and links before anything is sent.
+- [ ] User reviews all eight revised drafts, visual design and links before anything is sent.
