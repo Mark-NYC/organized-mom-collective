@@ -59,7 +59,7 @@ for(const guide of miniGuides){
   text(p,'Week of: ___________________',349,240,9.6);
   const days=['M','T','W','T','F','S','S'];
   for(let j=0;j<2;j++){
-   const y=j===0?208:139;
+   const y=j===0?208:153;
    text(p,j===0?'01  MY LITTLE JOB':'02  MY HELPING JOB',45,y,8.8,'bold');
    text(p,'_______________________________',246,y,9);
    text(p,'When we do it: ______________________________',45,y-20,9.2);
@@ -70,9 +70,9 @@ for(const guide of miniGuides){
    });
    rule(p,44,y-51,524);
   }
-  rect(p,44,58,3,48,c.apricot);
-  text(p,'A LITTLE NOTE FOR GROWN-UPS',58,94,8.8,'bold');
-  paragraph(p,'Keep it short. Show what finished looks like, notice the effort, and practice again tomorrow. Grown-up help counts.',58,77,491,{size:8.7,leading:11});
+  rect(p,44,58,3,37,c.apricot);
+  text(p,'A LITTLE NOTE FOR GROWN-UPS',58,85,8.8,'bold');
+  paragraph(p,'Keep it short. Show what finished looks like, notice the effort, and practice again tomorrow. Grown-up help counts.',58,67,491,{size:8.7,leading:11});
   rule(p,44,43,524);
   text(p,'SMALL HABITS. SHARED RESPONSIBILITY.',44,27,8,'bold');
   text(p,'organizedmomcollective.com',420,27,7.6,'regular',c.muted);
