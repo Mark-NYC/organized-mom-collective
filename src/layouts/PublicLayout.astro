@@ -125,5 +125,8 @@ const mainClass =
 
 <script>
   import { installPublicResourceDownloadGate } from '../lib/guide-downloads';
+  import { recognizeSubscriberResourceAccess } from '../lib/tool-email';
+  // A verified newsletter pass unlocks all public free downloads for this browser.
+  void recognizeSubscriberResourceAccess();
   installPublicResourceDownloadGate();
 </script>
