@@ -1,0 +1,107 @@
+---
+/** March's Spring Clean as a Team, IN REVIEW (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 3b): the new March
+ * tool on the shared Club plan shell, before it replaces /app/club/march in 3c. Kept in this browser tab only
+ * (`tabOnly`): nothing is read from or saved to anyone's account, and the existing March page and its saved plans are
+ * untouched. Not linked from the Club; open it with a sample family (?sample=rivera). No monthly Family Meeting yet
+ * (3c). Desktop (>= 1100px): the shared rail beside the two sheets. Below 1100px: the shared plan screen with the
+ * reference view. Rules: src/lib/club/engines/march-spring-clean.ts. */
+import AppLayout from '../../../../layouts/AppLayout.astro';
+import '../../../../styles/family-app-brand.css';
+import '../../../../styles/club-marks.css';
+import MarchSpringClean from '../../../../components/club/MarchSpringClean.astro';
+import MarchSpringCleanMobile from '../../../../components/club/MarchSpringCleanMobile.astro';
+import ClubPlanDesktop from '../../../../components/club/plan/ClubPlanDesktop.astro';
+import ClubPlanShell from '../../../../components/club/plan/ClubPlanShell.astro';
+import { clubEditingDeadline } from '../../../../lib/club/deadline';
+import { kits } from '../../../../data/club/kits';
+const kit = kits.find((k) => k.month === '2027-03');
+if (!kit) throw new Error('March kit missing');
+const deadline = clubEditingDeadline(kit.month);
+const storageKey = 'omc:club:march-spring-clean:v1';
+const approvalKey = 'omc:preview:march-spring-clean:approval';
+---
+<AppLayout title="March Spring Clean (review)">
+  <ClubPlanShell class="scp-plan family-brand" kitSlug={kit.slug} month="March" sides={['front', 'back']} storageKey={storageKey} meeting={false} tabOnly>
+    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="March · In review" instructions={[
+      'One room, about thirty minutes, everyone has a part. Gather the supplies, start together, and stop when the room matches the finish line.',
+      'The back has each job’s steps. Hand everyone their card, or read it together before you start.',
+    ]}>
+      <Fragment slot="title">Spring Clean <em>as a Team</em></Fragment>
+      <div class="cpd-details">
+        <section class="cpd-block" aria-labelledby="scp-d-room">
+          <p class="cpd-label" id="scp-d-room">The room</p>
+          <strong data-scp-room></strong>
+          <p data-scp-time></p>
+          <button type="button" class="cpd-link" data-scp-open="room">Change the room</button>
+        </section>
+        <section class="cpd-block" aria-labelledby="scp-d-who">
+          <p class="cpd-label" id="scp-d-who">Who does what</p>
+          <ul class="scp-d-people" data-scp-people></ul>
+          <p class="cpd-hint" data-scp-needs hidden></p>
+          <button type="button" class="cpd-link" data-scp-open="people">Change who does what</button>
+        </section>
+        <section class="cpd-block" aria-labelledby="scp-d-jobs">
+          <p class="cpd-label" id="scp-d-jobs">The jobs</p>
+          <p data-scp-jobs></p>
+          <button type="button" class="cpd-link" data-scp-open="jobs">Swap, remove or add a job</button>
+          <button type="button" class="cpd-link" data-scp-restore hidden>Start over with the prepared plan</button>
+          <p class="cpd-hint" data-scp-restored role="status" tabindex="-1"></p>
+        </section>
+      </div>
+    </ClubPlanDesktop>
+    <div class="scp-proof" slot="printable" data-plan-proof-body>
+      <div class="scp-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
+        <MarchSpringClean storageKey={storageKey} />
+      </div>
+    </div>
+    <MarchSpringCleanMobile slot="mobile" deadline={deadline} approvalKey={approvalKey} />
+  </ClubPlanShell>
+</AppLayout>
+<style is:global>
+.scp-d-people{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:4px;font-size:.88rem}
+.scp-d-people li{display:flex;align-items:baseline;gap:8px}
+.scp-d-people .mc-owner{flex:none}
+.scp-d-people span.scp-d-jobs{color:var(--color-warm-soft,#6e6461)}
+</style>
+<script>
+import { restoreProject, type SpringPlanResource, type SpringState } from '../../../../lib/club/engines/march-spring-clean';
+import { ownerTag } from '../../../../lib/club/personalize/marks';
+import { mountPlanDesktop } from '../../../../lib/club/plan/desktop';
+import { el } from '../../../../lib/club/plan/dom';
+
+const root = document.querySelector<HTMLElement>('.scp-plan');
+const host = root?.querySelector<HTMLElement & { clubPlan?: SpringPlanResource }>('[data-scl]');
+if (root && host) {
+  const plan = () => host.clubPlan!;
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const restored = q('[data-scp-restored]');
+  mountPlanDesktop<SpringState>({
+    root,
+    host,
+    approvalKey: 'omc:preview:march-spring-clean:approval',
+    edit: () => plan().openEditor(),
+    lock: (on) => plan().setLocked(on),
+    render: (_r, locked) => {
+      const v = plan().view();
+      q('[data-scp-room]').textContent = v.room.label;
+      q('[data-scp-time]').textContent = v.withinTime ? `About ${v.minutes} minutes, working at the same time.` : `About ${v.minutes} minutes: long for one session. Move a job or save one for another day.`;
+      q('[data-scp-people]').replaceChildren(...v.people.map((p) => el('li', {}, ownerTag(p.name, p.color), el('span', { class: 'scp-d-jobs' }, p.jobs.map((j) => j.title).join(', ')))));
+      const needs = v.jobs.filter((j) => !j.owners.length);
+      q('[data-scp-needs]').hidden = !needs.length;
+      q('[data-scp-needs]').textContent = needs.length ? `Still needs someone: ${needs.map((j) => j.title).join(', ')}.` : '';
+      q('[data-scp-jobs]').textContent = `${v.jobs.length} ${v.jobs.length === 1 ? 'job' : 'jobs'}, each with its steps on the back.`;
+      root.querySelectorAll<HTMLButtonElement>('[data-scp-open]').forEach((b) => { b.disabled = locked; });
+      q('[data-scp-restore]').hidden = locked || !v.changed;
+    },
+  });
+  root.querySelectorAll<HTMLButtonElement>('[data-scp-open]').forEach((b) => b.addEventListener('click', () => plan().openEditor(b.dataset.scpOpen as 'room' | 'people' | 'jobs')));
+  q('[data-scp-restore]').addEventListener('click', () => {
+    const undo = structuredClone(plan().state());
+    plan().update((s) => { restoreProject(s); });
+    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
+    u.addEventListener('click', () => { plan().replace(undo); restored.textContent = 'Changes put back.'; });
+    restored.replaceChildren('The prepared plan is back. ', u);
+    restored.focus();
+  });
+}
+</script>

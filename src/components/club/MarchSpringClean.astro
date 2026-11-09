@@ -1,0 +1,375 @@
+---
+/**
+ * March 2027, Spring Clean as a Team: one double-sided US Letter sheet (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md
+ * → Phase 3b). Rules: src/lib/club/engines/march-spring-clean.ts; editor: src/lib/club/march-spring-editor.ts; job
+ * guides and icons: src/data/club/spring-clean-guides.ts (icons prepared by scripts/prepare-spring-clean-icons.py).
+ *
+ * FRONT, Our Family Spring Clean: the room, the family, the honest time, what to gather, how we start, who does what
+ * (each person in their January color), anything that still needs an owner set apart (never shown as a family
+ * member's job), and the one finish line. No timeline, no checkboxes, no tracking.
+ * BACK, How We Do Our Jobs: one illustrated card per job on this plan (GET READY / DO THE JOB / FINISHED WHEN, safety
+ * where it matters), at a size chosen by how many cards there are: eight is a ceiling, and the type never goes below
+ * its smallest step; a card that still wouldn't fit marks the sheet (data-scl-overflow) for the checks to catch.
+ *
+ * On the Club plan page the page brings the layout, rail and phone screen; this keeps the desktop editor dialog and
+ * the two sheets (data-plan-sheet="front" / "back") and publishes the plan as `clubPlan`. Each sheet is a fixed
+ * 816 × 1056 px page.
+ */
+import '../../styles/club-marks.css';
+import '../../styles/club-personalize.css';
+interface Props { storageKey: string }
+const { storageKey } = Astro.props;
+---
+<div class="scl" data-scl data-scl-key={storageKey}>
+  <dialog class="scl-dialog" data-scl-editor aria-labelledby="scl-editor-title">
+    <div class="scl-dialog-head">
+      <div><p class="scl-dialog-kicker">Make it yours · March</p><h2 id="scl-editor-title">Our family spring clean</h2></div>
+      <button type="button" class="scl-close" data-scl-close aria-label="Close">×</button>
+    </div>
+    <div class="scl-steps" role="tablist" aria-label="What to change" data-scl-steps></div>
+    <div class="scl-dialog-body" data-scl-editor-body></div>
+    <div class="scl-dialog-actions"><span data-scl-restore></span><button type="button" class="scl-done" data-scl-close>Done · See our plan</button></div>
+  </dialog>
+  <p class="scl-empty" data-scl-empty hidden>Add your family on your family page and your spring clean is prepared for you.</p>
+  <div class="scl-sheets" data-scl-pages></div>
+</div>
+
+<style is:global>
+.scl{--scl-ink:#3d3834;--scl-soft:#6e6461;--scl-rule:#e3dbd2;font-family:Montserrat,Arial,sans-serif;color:var(--scl-ink)}
+.scl-sheets{display:grid;gap:28px;justify-items:center}
+.scl-stage{position:relative;overflow:hidden}
+.scl-sheet{position:absolute;top:0;left:0;width:816px;height:1056px;transform-origin:0 0;transform:scale(var(--scl-scale,1));background:#fff;box-shadow:0 8px 28px rgba(61,56,52,.09);overflow:hidden}
+.scl-paper{box-sizing:border-box;width:816px;height:1056px;padding:54px 60px 46px;display:flex;flex-direction:column}
+.scl-kicker{margin:0;font:700 12px/1 Montserrat,Arial,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:var(--scl-accent)}
+.scl-label{margin:0 0 10px;font:700 11px/1.2 Montserrat,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--scl-soft)}
+
+/* ---------------- front */
+.scl-head{text-align:center;padding-bottom:22px;border-bottom:1px solid var(--scl-rule)}
+.scl-room{margin:12px 0 6px;font:400 46px/1.05 Georgia,'Times New Roman',serif;letter-spacing:-.01em}
+.scl-family{margin:0;font:italic 400 20px/1.3 Georgia,serif;color:var(--scl-soft)}
+.scl-promise{margin:14px 0 0;font:600 13px/1.4 Montserrat,Arial,sans-serif;letter-spacing:.04em}
+.scl-promise span+span::before{content:'·';margin:0 10px;color:var(--scl-accent)}
+.scl-body{display:grid;grid-template-columns:220px minmax(0,1fr);gap:34px;padding-top:24px;flex:1;min-height:0}
+.scl-aside{display:grid;align-content:start;gap:26px;padding-right:26px;border-right:1px solid var(--scl-rule)}
+.scl-gather{margin:0;padding:0;list-style:none;display:grid;gap:7px;font-size:14px;line-height:1.35}
+.scl-gather li{position:relative;padding-left:16px}
+.scl-gather li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:var(--scl-accent)}
+.scl-start{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:9px;font-size:13.5px;line-height:1.4}
+.scl-start li{counter-increment:s;position:relative;padding-left:26px}
+.scl-start li::before{content:counter(s);position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:var(--scl-wash);font:700 11px/18px Montserrat,Arial,sans-serif;text-align:center;color:var(--scl-ink)}
+.scl-who{display:grid;align-content:start;gap:var(--scl-gap,14px);min-height:0;overflow:hidden}
+.scl-person{display:grid;grid-template-columns:5px minmax(0,1fr);gap:14px}
+.scl-bar{border-radius:3px;background:var(--scl-member)}
+.scl-name{margin:0 0 6px;font:700 13px/1.2 Montserrat,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--scl-member-ink)}
+.scl-tasks{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.scl-task{display:grid;grid-template-columns:var(--scl-icon,38px) minmax(0,1fr) auto;align-items:center;gap:12px}
+.scl-task img{width:var(--scl-icon,38px);height:var(--scl-icon,38px);object-fit:contain;display:block}
+.scl-task-title{font:400 var(--scl-task,18px)/1.25 Georgia,serif}
+.scl-task-with{display:block;font:500 11.5px/1.3 Montserrat,Arial,sans-serif;color:var(--scl-soft)}
+.scl-min{font:500 12px/1 Montserrat,Arial,sans-serif;color:var(--scl-soft);white-space:nowrap}
+.scl-needs{margin-top:4px;padding:12px 14px;border:1.5px dashed #b9aea4;border-radius:6px}
+.scl-needs .scl-label{color:#8a5a3c}
+.scl-needs ul{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:13.5px;line-height:1.35}
+.scl-needs em{display:block;font-style:normal;font-size:12px;color:var(--scl-soft)}
+.scl-free{margin:2px 0 0;font-size:12.5px;line-height:1.4;color:var(--scl-soft)}
+.scl-finish{margin-top:22px;padding:18px 24px;background:var(--scl-wash);border-radius:6px;text-align:center}
+.scl-finish .scl-label{color:var(--scl-ink);margin-bottom:6px}
+.scl-finish p:last-child{margin:0;font:italic 400 21px/1.35 Georgia,serif}
+.scl-foot{margin:16px 0 0;text-align:center;font:500 12px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.06em;color:var(--scl-soft)}
+
+/* ---------------- back */
+.scl-paper--back{padding:44px 48px 34px}
+.scl-back-head{text-align:center;padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--scl-rule)}
+.scl-back-title{margin:8px 0 0;font:400 30px/1.1 Georgia,serif}
+.scl-cards{display:grid;grid-template-columns:repeat(var(--scl-cols,2),minmax(0,1fr));grid-auto-rows:auto;align-content:start;gap:var(--scl-card-gap,16px)}
+.scl-card{display:flex;flex-direction:column;gap:6px;padding:12px 14px 12px;border:1px solid var(--scl-rule);border-top:4px solid var(--scl-accent);border-radius:6px;overflow:hidden;font-size:var(--scl-text,13px);line-height:1.36}
+.scl-card-head{display:grid;grid-template-columns:var(--scl-card-icon,48px) minmax(0,1fr);gap:12px;align-items:center;margin-bottom:2px}
+.scl-card img{width:var(--scl-card-icon,48px);height:var(--scl-card-icon,48px);object-fit:contain;display:block}
+.scl-card h3{margin:0 0 3px;font:400 var(--scl-card-title,17px)/1.18 Georgia,serif}
+.scl-card-who{display:flex;flex-wrap:wrap;gap:3px 10px;margin:0}
+.scl-card-who .scl-tag-needs{font:600 11px/1.2 Montserrat,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8a5a3c;border:1px dashed #b9aea4;border-radius:3px;padding:2px 6px}
+.scl-run{font:700 10px/1 Montserrat,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--scl-soft);margin-right:6px}
+.scl-card p,.scl-card ol{margin:0}
+.scl-card ol{padding-left:17px}
+.scl-card ol li+li{margin-top:1px}
+.scl-safety{margin-top:2px!important;padding-top:6px;border-top:1px dotted var(--scl-rule);color:#5c4a3e}
+.scl-safety .scl-run{color:#8a5a3c}
+.scl-back-foot{margin:auto 0 0;padding-top:14px;text-align:center;font:500 12px/1.3 Montserrat,Arial,sans-serif;color:var(--scl-soft)}
+
+/* ---------------- editor (desktop dialog; the phone sheet uses the same .sce rows) */
+.scl-dialog{border:0;padding:0;width:min(760px,94vw);max-height:90dvh;background:var(--color-ivory,#fffdfa);color:var(--color-warm-ink,#4d4544)}
+.scl-dialog::backdrop{background:rgba(30,26,24,.42)}
+.scl-dialog-head{display:flex;align-items:start;justify-content:space-between;padding:22px 26px 10px}
+.scl-dialog-kicker{margin:0;font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
+.scl-dialog-head h2{margin:6px 0 0;font:400 1.7rem/1.2 var(--font-serif,Georgia,serif)}
+.scl-close{width:44px;height:44px;font-size:28px;line-height:1}
+.scl-steps{display:flex;gap:6px;padding:0 26px;border-bottom:1px solid var(--color-warm-rule,#e7ddd4)}
+.scl-steps button{min-height:44px;padding:0 12px;border-bottom:2px solid transparent;font:600 .74rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--color-warm-soft,#6e6461)}
+.scl-steps button[aria-selected="true"]{color:var(--color-warm-ink,#4d4544);border-bottom-color:var(--color-warm-button,#4a3f3e)}
+.scl-dialog-body{padding:18px 26px;max-height:62dvh;overflow:auto}
+.scl-dialog-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 26px 20px;border-top:1px solid var(--color-warm-rule,#e7ddd4)}
+.scl-done{min-height:46px;padding:0 20px;background:var(--color-warm-button,#4a3f3e);color:#fff;font:600 .78rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase}
+.sce-section{display:grid;gap:14px}
+.sce-intro{margin:0;font-size:.92rem;line-height:1.55;color:var(--color-warm-soft,#6e6461)}
+.sce-rooms{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.sce-jobs{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.sce-job{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--color-warm-rule,#e7ddd4);border-radius:6px;background:#fff}
+.sce-job-head{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px}
+.sce-icon img{width:36px;height:36px;object-fit:contain;display:block}
+.sce-min{font-size:.8rem;color:var(--color-warm-soft,#6e6461)}
+.sce-note,.sce-needs{margin:0;font-size:.85rem;color:#8a5a3c}
+.sce-joint{font-size:.88rem}
+.sce-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.sce-select{min-height:44px;max-width:100%;padding:8px 10px;border:1px solid #cfc6bf;border-radius:3px;background:#fff;font:400 .92rem var(--font-sans)}
+.sce-link{min-height:44px;text-decoration:underline;text-underline-offset:4px;color:#536e4e}
+.sce-status{margin:0;min-height:1.2em;font-size:.9rem;color:#3f5b3c}
+.sce-status.is-error{color:#9a3b3b}
+@media print{.scl-dialog{display:none!important}.scl-sheet{position:static!important;transform:none!important;box-shadow:none!important}.scl-stage{width:auto!important;height:auto!important;overflow:visible!important}}
+@page{size:letter portrait;margin:0}
+</style>
+
+<script>
+import { freshState, isSpringState, springFingerprint, springView, type SpringMember, type SpringPlanResource, type SpringState, type SpringView, type JobView } from '../../lib/club/engines/march-spring-clean';
+import { guideIconSrc } from '../../data/club/spring-clean-guides';
+import { springEditor, type SpringSection } from '../../lib/club/march-spring-editor';
+import { ownerTag } from '../../lib/club/personalize/marks';
+import { familySnapshot, settledSnapshot, type ContextPrefs, type FamilySnapshot } from '../../lib/club/personalize/family';
+import type { FamilyProfile } from '../../lib/club/family-profile';
+import { el } from '../../lib/club/plan/dom';
+import { PLAN_CHANGE } from '../../lib/club/plan/resource';
+import { planKey, readScoped, tabStorage } from '../../lib/club/plan/storage';
+import { monthTints } from '../../lib/club/month-tints';
+import { familyTitle } from '../../lib/club/meeting-guide/generate';
+
+type Detail = { household: { id: string; displayName?: string; members?: SpringMember[]; preferences?: ContextPrefs } | null; sample?: string | null; profile?: FamilyProfile | null };
+const root = document.querySelector<HTMLElement & { clubPlan?: SpringPlanResource }>('[data-scl]');
+if (root) {
+  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+  const key = root.dataset.sclKey ?? 'omc:club:march-spring-clean:v1';
+  let current = '', members: SpringMember[] = [], prefs: ContextPrefs = {}, family = 'Our Family', state: SpringState = freshState(), persist = true, locked = false;
+  let latest: FamilySnapshot | undefined;
+  const settle = () => { const p = settledSnapshot(state.profile, latest); if (p) state.profile = p; else delete state.profile; };
+  const save = () => { if (persist && current) tabStorage.set(key, JSON.stringify({ current, state })); };
+  const view = () => springView(state, members, prefs);
+
+  const tints = monthTints('2027-03');
+  root.style.setProperty('--scl-accent', tints.accent);
+  root.style.setProperty('--scl-wash', tints.wash);
+
+  const fit = () => root.querySelectorAll<HTMLElement>('.scl-stage').forEach((stage) => {
+    const scale = Math.min(1, Math.max(240, (q('[data-scl-pages]').clientWidth || 816) - 4) / 816);
+    stage.style.width = `${816 * scale}px`;
+    stage.style.height = `${1056 * scale}px`;
+    stage.querySelector<HTMLElement>('.scl-sheet')?.style.setProperty('--scl-scale', String(scale));
+  });
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(q('[data-scl-pages]'));
+  window.addEventListener('resize', fit);
+
+  const img = (j: Pick<JobView, 'guide'>) => el('img', { src: guideIconSrc(j.guide.icon), alt: '', decoding: 'async' });
+  const named = (o: { name: string; color: { ink: string } }) => { const s = el('span', {}, o.name); s.style.color = o.color.ink; return s; };
+  const words = (n: number) => ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'][n] ?? String(n);
+
+  // Front sizes: the largest step whose "who does what" fits its space, measured at print size; never below the last.
+  const FRONT = [
+    { gap: 26, icon: 54, task: 22 },
+    { gap: 20, icon: 48, task: 20 },
+    { gap: 16, icon: 42, task: 18.5 },
+    { gap: 12, icon: 36, task: 17 },
+  ];
+  const setFront = (paper: HTMLElement, i: number) => {
+    paper.dataset.tier = String(i);
+    paper.style.setProperty('--scl-gap', `${FRONT[i].gap}px`);
+    paper.style.setProperty('--scl-icon', `${FRONT[i].icon}px`);
+    paper.style.setProperty('--scl-task', `${FRONT[i].task}px`);
+  };
+  // Back sizes by number of cards (six at most): one column for one or two, then two columns. 13px is the smallest
+  // body text; nothing shrinks further (the plan holds fewer jobs instead).
+  const BACK = (n: number) => n <= 2 ? { cols: 1, text: 15, title: 21, icon: 64, gap: 18 }
+    : n <= 4 ? { cols: 2, text: 14, title: 18.5, icon: 56, gap: 16 }
+    : { cols: 2, text: 13, title: 17, icon: 48, gap: 12 };
+
+  const front = (v: SpringView) => {
+    const page = el('article', { class: 'scl-sheet' });
+    page.dataset.planSheet = 'front';
+    page.setAttribute('aria-label', `${family}: our family spring clean, front`);
+    const everyone = v.free.length === 0 && v.people.length > 1;
+    const people = v.people.map((p) => {
+      const block = el('section', { class: 'scl-person' }, el('span', { class: 'scl-bar', 'aria-hidden': 'true' }),
+        el('div', {}, el('p', { class: 'scl-name' }, p.name),
+          el('ul', { class: 'scl-tasks' }, ...p.jobs.map((j) => {
+            const others = j.owners.filter((o) => o.id !== p.id);
+            return el('li', { class: 'scl-task' }, img(j),
+              el('span', { class: 'scl-task-title' }, j.title, ...(others.length ? [el('span', { class: 'scl-task-with' }, `${j.joint ? 'Together with' : 'Also'} ${others.map((o) => o.name).join(' and ')}`)] : [])),
+              el('span', { class: 'scl-min' }, `about ${j.minutes} min`));
+          }))));
+      block.style.setProperty('--scl-member', p.color.hex);
+      block.style.setProperty('--scl-member-ink', p.color.ink);
+      return block;
+    });
+    const needs = v.jobs.filter((j) => !j.owners.length);
+    const paper = el('div', { class: 'scl-paper' },
+      el('header', { class: 'scl-head' },
+        el('p', { class: 'scl-kicker' }, 'Our Family Spring Clean'),
+        el('h1', { class: 'scl-room' }, roomTitle(v.room.label)),
+        el('p', { class: 'scl-family' }, family),
+        el('p', { class: 'scl-promise' }, el('span', {}, v.room.id === 'other' ? 'One space' : 'One room'),
+          el('span', {}, v.withinTime ? `About ${v.minutes} minutes` : `About ${v.minutes} minutes (long: move a job)`),
+          el('span', {}, everyone ? 'Everyone has a part' : `${words(v.jobs.length)} jobs, one finish line`))),
+      el('div', { class: 'scl-body' },
+        el('aside', { class: 'scl-aside' },
+          el('section', {}, el('p', { class: 'scl-label' }, 'What to gather'),
+            el('ul', { class: 'scl-gather' }, ...(v.supplies.length ? v.supplies : ['Just your hands']).map((x) => el('li', {}, upper(x))))),
+          el('section', {}, el('p', { class: 'scl-label' }, 'How we start'),
+            el('ol', { class: 'scl-start' }, ...v.sequence.map((x) => el('li', {}, x))))),
+        el('div', { class: 'scl-who' },
+          el('p', { class: 'scl-label' }, 'Who does what'),
+          ...people,
+          ...(needs.length ? [el('section', { class: 'scl-needs' }, el('p', { class: 'scl-label' }, 'Still needs someone'),
+            el('ul', {}, ...needs.map((j) => el('li', {}, j.title, el('em', {}, j.needs ?? '')))))] : []),
+          ...(v.free.length && v.people.length ? [el('p', { class: 'scl-free' }, `${list(v.free)}: no job this time. Join anyone who’d like a hand.`)] : []))),
+      el('section', { class: 'scl-finish' }, el('p', { class: 'scl-label' }, 'Finished when'), el('p', {}, v.finish)),
+      el('p', { class: 'scl-foot' }, v.people.length > 1 ? 'Start together. Finish together. Then stand back and look at what you did.' : 'Start with the first job. Finish with the floor. Then stand back and look at what you did.'));
+    setFront(paper, 0);
+    page.append(paper);
+    return page;
+  };
+
+  const back = (v: SpringView) => {
+    const page = el('article', { class: 'scl-sheet' });
+    page.dataset.planSheet = 'back';
+    page.setAttribute('data-plan-sheet-end', '');
+    page.setAttribute('aria-label', `${family}: how we do our jobs, back`);
+    const t = BACK(v.jobs.length);
+    const run = (label: string) => el('span', { class: 'scl-run' }, label);
+    const cards = v.jobs.map((j) => el('section', { class: 'scl-card' },
+      el('div', { class: 'scl-card-head' }, img(j),
+        el('div', {}, el('h3', {}, j.title),
+          el('p', { class: 'scl-card-who' }, ...(j.owners.length ? j.owners.map((o) => ownerTag(o.name, o.color)) : [el('span', { class: 'scl-tag-needs' }, 'Needs someone')])))),
+      el('p', {}, run('Get ready'), j.guide.ready),
+      el('div', {}, run('Do the job'), el('ol', {}, ...j.guide.steps.map((x) => el('li', {}, x)))),
+      el('p', {}, run('Finished when'), j.guide.finished),
+      ...(j.guide.safety ? [el('p', { class: 'scl-safety' }, run('Safety'), j.guide.safety)] : [])));
+    const paper = el('div', { class: 'scl-paper scl-paper--back' },
+      el('header', { class: 'scl-back-head' }, el('p', { class: 'scl-kicker' }, 'Our Family Spring Clean'), el('h2', { class: 'scl-back-title' }, 'How We Do Our Jobs')),
+      el('div', { class: 'scl-cards' }, ...cards),
+      el('p', { class: 'scl-back-foot' }, 'Read your card before you start. When your job is finished, see who’d like a hand.'));
+    paper.style.setProperty('--scl-cols', String(t.cols));
+    paper.style.setProperty('--scl-text', `${t.text}px`);
+    paper.style.setProperty('--scl-card-title', `${t.title}px`);
+    paper.style.setProperty('--scl-card-icon', `${t.icon}px`);
+    paper.style.setProperty('--scl-card-gap', `${t.gap}px`);
+    page.append(paper);
+    return page;
+  };
+
+  // Measured on an off-screen copy at full size. The front steps down until "who does what" fits; anything still cut
+  // off (front or back) marks the sheet, so it can't slip by.
+  const measure = (page: HTMLElement) => {
+    const probe = el('div', { 'aria-hidden': 'true' });
+    probe.style.cssText = 'position:absolute;left:-10000px;top:0;width:816px;height:1056px;visibility:hidden';
+    const copy = page.cloneNode(true) as HTMLElement;
+    copy.style.transform = 'none';
+    probe.append(copy);
+    document.body.append(probe);
+    const paper = copy.querySelector<HTMLElement>('.scl-paper')!;
+    const cut = () => [...copy.querySelectorAll<HTMLElement>('.scl-card, .scl-paper, .scl-who')].some((x) => x.scrollHeight > x.clientHeight + 1);
+    if (page.dataset.planSheet === 'front') {
+      let t = 0;
+      while (t < FRONT.length - 1 && cut()) setFront(paper, ++t);
+      setFront(page.querySelector<HTMLElement>('.scl-paper')!, t);
+    }
+    const over = cut();
+    probe.remove();
+    return over;
+  };
+
+  const draw = () => {
+    const v = view();
+    const has = v.jobs.length > 0 && v.ctx.people.length > 0;
+    q('[data-scl-empty]').hidden = has;
+    if (!has) { q('[data-scl-pages]').replaceChildren(); return; }
+    const pages = [front(v), back(v)].map((page) => {
+      const stage = el('div', { class: 'scl-stage' }, page);
+      return { stage, page };
+    });
+    q('[data-scl-pages]').replaceChildren(...pages.map((x) => x.stage));
+    for (const { page } of pages) page.toggleAttribute('data-scl-overflow', measure(page));
+    fit();
+  };
+
+  // ---------------------------------------------------------------- the desktop editor
+  const dialog = q<HTMLDialogElement>('[data-scl-editor]');
+  let section: SpringSection = 'people';
+  const STEPS: [SpringSection, string][] = [['room', '1 · The room'], ['people', '2 · Who does what'], ['jobs', '3 · The jobs']];
+  const drawEditor = () => {
+    if (!dialog.open) return;
+    q('[data-scl-steps]').replaceChildren(...STEPS.map(([id, label]) => {
+      const b = el('button', { type: 'button', role: 'tab' }, label);
+      b.setAttribute('aria-selected', String(id === section));
+      b.addEventListener('click', () => { section = id; editor.clear(); drawEditor(); });
+      return b;
+    }));
+    const scroll = q('[data-scl-editor-body]').scrollTop;
+    q('[data-scl-editor-body]').replaceChildren(editor.section(section));
+    q('[data-scl-editor-body]').scrollTop = scroll;
+    q('[data-scl-restore]').replaceChildren(editor.restore());
+  };
+  root.querySelectorAll('[data-scl-close]').forEach((b) => b.addEventListener('click', () => dialog.close()));
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+
+  const changed = () => { save(); draw(); if (current) root.dispatchEvent(new Event(PLAN_CHANGE, { bubbles: true })); };
+  const update = (change: (s: SpringState) => void) => { if (locked) return; change(state); settle(); changed(); };
+
+  const applyHousehold = (detail: Detail) => {
+    if (!detail?.household) return;
+    const next = planKey(detail.sample ?? null, detail.household.id);
+    members = detail.household.members ?? [];
+    prefs = detail.household.preferences ?? {};
+    family = familyTitle({ displayName: detail.household.displayName } as Parameters<typeof familyTitle>[0]);
+    if (detail.profile !== undefined && detail.profile !== null) latest = familySnapshot(detail.profile);
+    if (next !== current) {
+      current = next;
+      const saved = readScoped(tabStorage.get(key), current, (x): x is unknown => x !== null && typeof x === 'object');
+      state = isSpringState(saved) ? saved : freshState();
+    }
+    settle();
+    changed();
+  };
+
+  const plan: SpringPlanResource = {
+    ready: () => Boolean(current),
+    state: () => state,
+    update,
+    replace: (s) => { state = isSpringState(s) ? structuredClone(s) : freshState(); settle(); changed(); },
+    setPersist: (on) => { persist = on; if (on) save(); },
+    fingerprint: () => springFingerprint(state, members, prefs),
+    view,
+    members: () => members,
+    prefs: () => prefs,
+    familyName: () => family,
+    setLocked: (on) => { locked = on; if (on) dialog.close(); },
+    openEditor: (s?: SpringSection) => {
+      if (locked) return;
+      section = s ?? 'people';
+      editor.clear();
+      if (!dialog.open) dialog.showModal();
+      drawEditor();
+    },
+  };
+  const editor = springEditor({ plan: () => plan, locked: () => locked, redraw: () => { drawEditor(); } });
+  root.clubPlan = plan;
+  document.fonts?.ready.then(() => { if (current) draw(); });
+  window.addEventListener('beforeprint', () => { if (current) draw(); });
+  window.addEventListener('omc:club-preview-household', (e) => applyHousehold((e as CustomEvent<Detail>).detail));
+  const cached = (window as Window & { __ofcPreviewHousehold?: Detail }).__ofcPreviewHousehold;
+  if (cached) applyHousehold(cached);
+}
+
+function roomTitle(label: string) {
+  // "Living room" → "The Living Room"; "Bedrooms" → "The Bedrooms"; "Another space" → "Our Space".
+  if (/^another space$/i.test(label)) return 'Our Space';
+  return `The ${label.replace(/\b\w/g, (c) => c.toUpperCase()).replace(/ Or /, ' or ')}`;
+}
+function upper(x: string) { return x.charAt(0).toUpperCase() + x.slice(1); }
+function list(names: readonly string[]) { return names.length <= 1 ? names[0] ?? '' : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`; }
+</script>

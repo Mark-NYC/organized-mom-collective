@@ -7,10 +7,10 @@ import { describe, expect, it } from 'vitest';
 import { families, family, adult, kid } from '../../../../tests/club/fixtures';
 import { sampleHouseholds } from '../../../data/club/samples';
 import { cleaningRooms, coreJobs, jobById, otherRoomJobs, roomById } from '../../../data/spring-cleaning';
-import { JOB_GUIDES, ROOM_FINISH } from '../../../data/club/spring-clean-guides';
+import { JOB_GUIDES, ROOM_FINISH_PARTS, finishLine, guideIconSrc } from '../../../data/club/spring-clean-guides';
 import { familySnapshot, type FamilySnapshot } from '../personalize/family';
 import {
-  MAX_JOBS, MAX_MINUTES, MIN_JOBS, YOUNG_MINUTES, addJob, cleanProject, freshState, helpersOf, isSpringState, preparedProject, removeJob,
+  FOCUS_JOBS, MAX_JOBS, MAX_MINUTES, MIN_JOBS, YOUNG_MINUTES, addJob, cleanProject, freshState, helpersOf, isSpringState, preparedProject, removeJob,
   replaceJob, restoreProject, setOwners, setRoom, springContext, springFingerprint, springView, suggestedRoom, validateProject,
   type SpringMember, type SpringState,
 } from './march-spring-clean';
@@ -28,7 +28,7 @@ function checkPlan(label: string, m: readonly SpringMember[], p: Parameters<type
   const ctx = v.ctx;
   const helpers = helpersOf(ctx);
   expect(v.issues, label).toEqual([]);
-  expect(v.jobs.length, label).toBeLessThanOrEqual(MAX_JOBS);
+  expect(v.jobs.length, label).toBeLessThanOrEqual(s.plan ? MAX_JOBS : FOCUS_JOBS);
   expect(v.minutes, label).toBeLessThanOrEqual(MAX_MINUTES);
   expect(v.withinTime, label).toBe(true);
   for (const j of v.jobs) {
@@ -57,7 +57,8 @@ describe('Spring Clean: the prepared project', () => {
     const v = checkPlan(key, members(key), prefs(key), freshState());
     expect(v.room.id).toBe('living');
     expect(v.jobs.length).toBeGreaterThanOrEqual(MIN_JOBS);
-    expect(v.finish).toBe(ROOM_FINISH.living);
+    expect(v.finish).toBe(finishLine('living', v.jobs.map((j) => j.jobId)));
+    expect(v.finish).toMatch(/^[A-Z].*\.$/);
     expect(v.supplies.length).toBeGreaterThan(0);
     expect(v.sequence[0]).toMatch(/supplies/i);
   });
@@ -142,8 +143,8 @@ describe('Spring Clean: the prepared project', () => {
     }
   });
 
-  it('children have meaningful, achievable jobs: every child old enough for one of the room’s jobs has a part', () => {
-    for (const key of ['A', 'B', 'D', 'teens', 'grandparent', 'bigSolo']) {
+  it('children have meaningful, achievable jobs: in a family the focused project can hold, every child old enough has a part', () => {
+    for (const key of ['A', 'B', 'D', 'teens', 'grandparent']) {
       const v = springView(freshState(), members(key), prefs(key));
       for (const c of v.ctx.children) {
         const able = roomById('living')!.jobs.some((x) => !x.adultOnly && (c.age ?? 6) >= x.minAge);
@@ -175,7 +176,14 @@ describe('Spring Clean: the prepared project', () => {
   it('a job nobody here can safely do stays unassigned, with the reason, never given to a child or Mom by default', () => {
     // Only teenagers at home (no grown-up on the family page): grown-ups-only jobs wait for a grown-up.
     const teensOnly = [{ id: 't1', firstName: 'Tess', kind: 'child', birthYear: 2011, birthMonth: 1 }, { id: 't2', firstName: 'Theo', kind: 'child', birthYear: 2013, birthMonth: 1 }] as SpringMember[];
-    const v = springView(freshState(), teensOnly, {});
+    const s = freshState();
+    springView(s, teensOnly, {});
+    if (!springView(s, teensOnly, {}).jobs.some((j) => j.jobId === 'l-high')) {
+      setRoom(s, 'living', teensOnly, {});
+      if (s.plan!.jobs.length >= MAX_JOBS) removeJob(s, s.plan!.jobs[0].key, teensOnly, {});
+      addJob(s, 'l-high', teensOnly, {});
+    }
+    const v = springView(s, teensOnly, {});
     const high = v.jobs.find((j) => j.jobId === 'l-high');
     expect(high?.owners ?? []).toEqual([]);
     expect(high?.needs).toMatch(/grown-ups only/);
@@ -246,6 +254,11 @@ describe('Spring Clean: her edits', () => {
   it('change who owns a job; grown-ups-only work is refused for a child, with the reason', () => {
     const s = freshState();
     setRoom(s, 'bathroom', m, p);
+    for (const id of ['b-toilet', 'b-mirror']) {
+      if (s.plan!.jobs.some((x) => x.jobId === id)) continue;
+      if (s.plan!.jobs.length >= MAX_JOBS) removeJob(s, s.plan!.jobs.find((x) => !['b-toilet', 'b-mirror'].includes(x.jobId))!.key, m, p);
+      expect(addJob(s, id, m, p)).toEqual({ ok: true });
+    }
     const toilet = s.plan!.jobs.find((x) => x.jobId === 'b-toilet')!;
     const r = setOwners(s, toilet.key, [kidId('cal')], m, p);
     expect(r.ok).toBe(false);
@@ -365,6 +378,8 @@ describe('Spring Clean: the job guides', () => {
     for (const [id, g] of Object.entries(JOB_GUIDES)) {
       const file = g.icon.set === 'march' ? `assets/icons/ofc/march/${g.icon.name}.webp` : `public/images/club/icon-library/${g.icon.name}.png`;
       expect(existsSync(file), `${id}: ${file}`).toBe(true);
+      // …and its print-ready copy (no haze, the same square as every other icon).
+      expect(existsSync(`public${guideIconSrc(g.icon)}`), `${id}: prepared icon`).toBe(true);
     }
   });
 
@@ -384,7 +399,27 @@ describe('Spring Clean: the job guides', () => {
     expect(JOB_GUIDES['r-donate-toys'].safety).toMatch(/grown-up says yes/);
   });
 
-  it('every room has its one finish line', () => {
-    for (const room of ALL_ROOMS) expect(ROOM_FINISH[room], room).toMatch(/\.$/);
+  it('every room’s finish line is made of parts, and every job brings one about', () => {
+    for (const room of ALL_ROOMS) {
+      const ids = (roomById(room)?.jobs ?? []).map((x) => x.id);
+      const covered = new Set(ROOM_FINISH_PARTS[room].flatMap((x) => x.jobs));
+      for (const id of ids) expect(covered.has(id), `${room}: ${id}`).toBe(true);
+      for (const id of covered) expect(ids.includes(id), `${room}: ${id} isn't this room's`).toBe(true);
+    }
+  });
+
+  it('the finish line only promises what the plan’s jobs do (no clean floor without a floor job)', () => {
+    expect(finishLine('kitchen', ['k-counters-clear', 'k-trash'])).toBe('The counters are clear and wiped and the trash is out.');
+    expect(finishLine('kitchen', ['k-counters-clear', 'k-floor'])).toMatch(/floor is clean/);
+    for (const key of Object.keys(families)) for (const room of ALL_ROOMS) {
+      const s = freshState();
+      setRoom(s, room, members(key), prefs(key));
+      const v = springView(s, members(key), prefs(key));
+      const have = new Set(v.jobs.map((j) => j.jobId));
+      for (const part of ROOM_FINISH_PARTS[room]) if (v.finish.toLowerCase().includes(part.text)) expect(part.jobs.some((id) => have.has(id)), `${key}/${room}: ${part.text}`).toBe(true);
+      // A clean floor is what makes a room look finished: there's a floor job whenever someone here can do one.
+      const floor = coreJobs(roomById(room)!).some((x) => x.tags?.includes('floor'));
+      if (floor && v.ctx.adults.length) expect(v.jobs.some((j) => jobById(j.jobId)!.tags?.includes('floor')), `${key}/${room} floor`).toBe(true);
+    }
   });
 });

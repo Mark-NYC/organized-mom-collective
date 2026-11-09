@@ -212,7 +212,10 @@ export function startPlanFamily(root: HTMLElement) {
     const slug = root.dataset.kitSlug;
     const key = root.dataset.planKey;
     const planFor = planKey(result.sample, result.household.id);
-    if (result.source === 'account' && welcome && key) {
+    const tabOnly = root.hasAttribute('data-plan-tab-only');
+    if (tabOnly) {
+      // A page in review: nothing is read from or saved to her account.
+    } else if (result.source === 'account' && welcome && key) {
       await connectWelcomeAccount(root, key, planFor);
     } else if (result.source === 'account' && slug && key) {
       const account = await connectPlanAccount(slug, key, {
