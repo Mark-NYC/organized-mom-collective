@@ -6,7 +6,7 @@ rely on chat history. Started 2026-11-08 from `main` at `9d113b9`.
 | Phase | Scope | Status | PR |
 | --- | --- | --- | --- |
 | 1 | Architecture audit and migration plan (this document) | COMPLETE (approved and merged 2026-11-08) | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
-| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | IN PROGRESS (2a → 2b → 2c → 2d, one PR each) | see §12 |
+| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | READY FOR REVIEW (2a–2c merged; 2d in review; nothing applied to production) | see §12 |
 | 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 tested and verified) | – |
 | 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE; D7–D9 deferred to Phase 4) | – |
 
@@ -313,9 +313,11 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
       `welcome_rhythm`, existing Vision orders untouched, no second order on retry; approve → snapshot; edit/undo after
       approval clears; kit approved locks the mailing copy; reprint identical; refund cancels; switch back off),
       `tests/club-onboarding.test.ts`, `tests/club-billing-e2e.test.ts` (38/38), e2e `--only=welcomeRhythmKit`
-- [ ] 2d Welcome overlap exception (§11.1 guardrail 1): classify by the first fulfilled monthly resource; no Rhythm
-      in the mailing for May/August; no duplicate welcome orders; pairing, readiness and email copy tested; digital
-      access kept. Before any automated Welcome fulfillment or cutover
+- [x] 2d Welcome overlap rule (§11.1 guardrail 1; decision D11): classified by the first fulfilled monthly resource
+      (`club_kits.establishes_daily_rhythm`); May/August first months are the whole Welcome Kit with the guide; no
+      welcome order, no duplicate; an approved Rhythm order is never removed; readiness, kit actions, admin, CSV,
+      reminders and emails follow; Family Rhythm stays digital. Migration `20261123000000_club_welcome_overlap.sql`
+      (not applied)
 - [x] Rehearsal (local, all migrations): migrate → rollback → existing suites pass → re-apply → new suite passes →
       rollback refuses once a Rhythm order exists. Production fingerprint (read-only): the 11 functions and the queue
       view 2c regenerates are identical (md5 of normalized definitions) to the repository text they were generated
@@ -423,14 +425,28 @@ Options as proposed in Phase 1. The owner's decisions (2026-11-08) are in §11.1
 - Do **not** apply production database migrations, deploy production functions, change live checkout, flip fulfillment switches or activate automatic mail handling without explicit owner authorization.
 - Protect existing Vision orders and all historical approval snapshots. Run before/after March snapshot tests for 2a.
 
+### D11: the Welcome overlap rule (owner decision 2026-11-09)
+
+When a new member's first fulfilled monthly resource is May's Summer Day Rhythm or August's Back-to-School Routines,
+that monthly resource also serves as her personalized Welcome win. No Family Vision print instead, no additional
+Welcome printable: the Welcome Kit is the monthly routine and the standard Family Meeting guide, without a separate
+Family Rhythm print. Requirements: (1) decided from the actual first fulfilled monthly resource, not the signup date;
+(2) no duplicate print or fulfillment order for the same routine; (3) readiness, approval, packing lists, admin, CSV
+and emails reflect the actual contents; (4) the Family Rhythm stays available digitally to every member; (5) May and
+August first, designed for more overlapping resources later; (6) existing Vision orders keep their promised contents;
+(7) an already-approved fulfillment order is never removed or replaced; (8) overlapping and non-overlapping
+onboarding tested, including print readiness and order counts; (9) the Welcome switch stays OFF until 2d is
+implemented and tested, and production changes only with the owner's explicit approval.
+
 ## 12. PR links and completion log
 
 | Phase | PR | Status | Notes |
 | --- | --- | --- | --- |
 | 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) | COMPLETE (merged) | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
-| 2a | [#432](https://github.com/Mark-NYC/organized-mom-collective/pull/432) (branch `claude/epic-noether-i7st9u`) | READY FOR REVIEW | Engine refactor |
-| 2b | [#434](https://github.com/Mark-NYC/organized-mom-collective/pull/434) (branch `claude/welcome-rhythm-2b`, stacked on 2a) | READY FOR REVIEW | Welcome page + storage |
-| 2c | [#435](https://github.com/Mark-NYC/organized-mom-collective/pull/435) (branch `claude/welcome-rhythm-2c`, stacked on 2b) | READY FOR REVIEW | Welcome Kit fulfillment behind a switch (off) |
+| 2a | [#432](https://github.com/Mark-NYC/organized-mom-collective/pull/432) (branch `claude/epic-noether-i7st9u`) | MERGED 2026-11-09 | Engine refactor |
+| 2b | [#434](https://github.com/Mark-NYC/organized-mom-collective/pull/434) (branch `claude/welcome-rhythm-2b`) | MERGED 2026-11-09 via [#437](https://github.com/Mark-NYC/organized-mom-collective/pull/437) | Welcome page + storage (#434 itself left open, now redundant) |
+| 2c | [#435](https://github.com/Mark-NYC/organized-mom-collective/pull/435) (branch `claude/welcome-rhythm-2c`) | MERGED 2026-11-09 via [#437](https://github.com/Mark-NYC/organized-mom-collective/pull/437) | Welcome Kit fulfillment behind a switch (off); #435 left open, now redundant |
+| 2d | [#438](https://github.com/Mark-NYC/organized-mom-collective/pull/438) (branch `claude/welcome-rhythm-2d`, from `main`) | READY FOR REVIEW | Welcome overlap rule (owner decision 2026-11-09) |
 
 ### Phase 1 log (2026-11-08)
 
@@ -526,10 +542,48 @@ Options as proposed in Phase 1. The owner's decisions (2026-11-08) are in §11.1
   Back out: `update public.club_settings set welcome_item = 'vision';` (existing Rhythm orders stay); full rollback
   only while no Rhythm order exists.
 
-### Next: 2d, the Welcome overlap exception (not started)
+### Phase 2d log (2026-11-09)
 
-When her **first fulfilled monthly resource** already gives the household a daily rhythm (May: Our Summer Day; August:
-School Day Routines), her Welcome Kit carries no Family Rhythm print; she keeps it digitally. Classify by the kit's
-first month (`first_paid_month`), not the signup date, from one list in code. Open product question for the owner:
-what, if anything, takes the Rhythm's place in that kit (nothing; the Vision print; something else). Must cover order
-pairing (no welcome order, or none in the kit), readiness, the kit page, emails and tests, and land before the switch.
+- Decision: D11 (§11 above). Built on `main` after #432 and #437 (2a–2c) merged.
+- How:
+  - Which resources: `club_kits.establishes_daily_rhythm` (May `2027-05-finish-the-school-year`, August
+    `2027-08-school-year`), mirrored by `dailyRhythm: true` in `src/data/club/resources.ts`;
+    `tests/club-welcome-overlap.test.ts` fails if the site, the generator and the migration disagree. A future kit is
+    added by flagging it in all three (requirement 5).
+  - When: her first fulfilled month is `club_households.first_paid_month`, which billing sets before it creates her
+    welcome order. With the switch on, `club_welcome_item_choose` makes no welcome order when that kit is flagged and
+    sets `club_households.welcome_kit_monthly_only`. If her first month only becomes known later (a Rhythm order was
+    made first), `club_welcome_overlap_check` (after her first month's order is inserted) cancels the Rhythm order
+    only if she never approved it; an approved one stays and her kit keeps it (requirement 7).
+  - The kit: her first month's order alone is her Welcome Kit (`in_welcome_kit`, no partner, `kit_welcome_type
+    'none'`); readiness skips the welcome item; submitted = her first month's approval; the owner moves that one order
+    (`club_admin_set_welcome_kit`); the Welcome Kits list shows it with packing list "Family Meeting guide + <Month>
+    resource"; reminders count from the kit's creation; the owner email and `club_me` (`kind 'monthly'`, nothing to
+    approve) follow; `club_welcome_item_of` returns 'monthly' for the emails. It is never on the monthly list, so May
+    prints once (requirement 2).
+  - Site: two pieces on the kit page ("n of 2 ready", no Rhythm/Vision card, "Your Family Rhythm is ready in Club Home
+    too"), Club Home package and copy, member copy page, admin row ("No separate welcome print…"), CSV contents, emails
+    (welcome, reminder and owner wording for a first-month-only kit).
+- Changed files: `scripts/generate-welcome-overlap-migration.py` (new) and its outputs
+  `supabase/migrations/20261123000000_club_welcome_overlap.sql`, `supabase/rollout/rollback-welcome-overlap.sql`;
+  `scripts/generate-welcome-rhythm-kit-migration.py` now reads only migrations before its own (its output unchanged);
+  `supabase/tests/club-welcome-overlap.sql` + runner; `tests/club-welcome-overlap.test.ts`; resources, membership,
+  welcome-item, onboarding, WelcomeKitHub/Items, AppKitLibrary, ClubResourceAccess, Dashboard, ClubAdmin; emails,
+  club-billing; regenerated `supabase/dashboard/club-{admin,billing,webhook}.ts`; e2e scenario `welcomeOverlapKit`.
+- Tests: SQL all 8 suites pass; new `club-welcome-overlap.sql` (37 checks): switch off = today for a May joiner;
+  February joiner = Rhythm + February (2 orders); May joiner = 1 order, retry adds none, kit readiness
+  profile → confirmation → submitted → ready → approved/printed/mailed, reminder, owner email, Welcome Kits list and
+  packing list, not on May's monthly list, member lists; August joiner; September after August is an ordinary
+  mailing; first month learned later cancels only an unapproved Rhythm order; an approved one stays; a Vision order
+  from before the switch keeps its print. Rehearsal: migrate → rollback refused while a first-month-only kit exists →
+  rollback applies otherwise → re-apply. Billing e2e 38/38. Unit: 35 pass in the touched suites; full run same
+  failures as `main`, plus one `tests/shop.test.ts` date-filter test that failed once in the full run (run near
+  midnight New York) and passes 3/3 alone and on `main` (unrelated, date-sensitive). `npm run check` 0 errors. e2e:
+  `welcomeOverlapKit`, `welcomeRhythmKit`, `welcomeRhythm` all pass; `months` (March, May, August) all pass; default
+  run 399 ok with the same 3 `familyColors` failures as `main`.
+- Remaining before Phase 2 is COMPLETE: owner applies `20261121`, `20261122`, `20261123` (in order) and deploys
+  `club-billing`, `club-admin`, `club-webhook`; production-replay rehearsal; public Club/join copy and privacy wording
+  for the Family Rhythm; then the owner sets `welcome_item = 'rhythm'`. The switch stays OFF.
+- Activation runbook (updated): (1) apply 20261121, (2) 20261122, (3) 20261123, (4) deploy the three functions, (5)
+  deploy the site, (6) with the copy updated and the owner's go-ahead: `update public.club_settings set welcome_item =
+  'rhythm';`. Back out: set it to 'vision' (existing kits stay as they are).

@@ -18,7 +18,7 @@ import KitSteps from './KitSteps';
 import { clubResourceBySlug, MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { routes } from '../../routes';
 import { adminRpc, loadSession as loadAdminSession } from '../../lib/admin/session';
-import { welcomeIsRhythm, welcomeItemHref, welcomeItemName } from '../../lib/club/welcome-item';
+import { welcomeIsMonthly, welcomeIsRhythm, welcomeItemHref, welcomeItemName } from '../../lib/club/welcome-item';
 
 const show = (household: Household, sample: string | null) => {
   window.dispatchEvent(new CustomEvent('omc:club-preview-household', { detail: { household, sample } }));
@@ -193,14 +193,14 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
               <h1 id="kit-first" className="mt-1 font-serif text-[1.7rem] leading-tight text-warm-ink sm:text-[2rem]">{r?.title ?? 'Your first resource'}</h1>
               {r && <p className="mt-1 font-serif text-[1.1rem] italic text-warm-soft">{r.problem}. Already prepared{forKids}.</p>}
               <dl className="kit-first-facts max-sm:order-last">
-                <div><dt>In your Welcome Kit</dt><dd>Your printed {r?.title ?? 'resource'}, mailed together with your {welcomeItemName(me)} in one package.</dd></div>
+                <div><dt>In your Welcome Kit</dt><dd>Your printed {r?.title ?? 'resource'}, mailed together with {welcomeIsMonthly(me) ? 'our Family Meeting guide' : <>your {welcomeItemName(me)}</>} in one package.</dd></div>
                 {r?.welcome && <div><dt>How it helps</dt><dd>{r.welcome.helps}</dd></div>}
                 <div><dt>Your first step</dt><dd>{r?.welcome?.firstStep ?? 'Look it over with the kids this week and pick one thing to start with.'}</dd></div>
               </dl>
               <p className="mt-3 text-warm-soft">Everything below is filled in with your family’s names. Change anything that doesn’t fit; it saves as you go.</p>
               <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
                 <button type="button" className="btn-primary" disabled={confirming} onClick={confirm}>{confirming ? 'Saving…' : 'Looks good. Prepare my Welcome Kit'}</button>
-                <a className="underline underline-offset-4" href={ctx.href(welcomeItemHref(me))}>Back to my {welcomeIsRhythm(me) ? 'Family Rhythm' : 'print'}</a>
+                {!welcomeIsMonthly(me) && <a className="underline underline-offset-4" href={ctx.href(welcomeItemHref(me))}>Back to my {welcomeIsRhythm(me) ? 'Family Rhythm' : 'print'}</a>}
               </div>
             </div>
           ) : kit.readiness === 'needs_vision' || kit.readiness === 'needs_rhythm' ? (
@@ -208,7 +208,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
           ) : (
             <div role="status">
               <h1 id="kit-first" className="font-serif text-[1.7rem] leading-tight text-warm-ink sm:text-[2rem]"><span aria-hidden="true">✓ </span>It’s all set!</h1>
-              <p className="mt-2 max-w-2xl text-warm-ink">Your Welcome Kit is being prepared: your {welcomeItemName(me)} and your {r?.title ?? 'first resource'}, printed together and mailed to you in one package. You’ll see when it ships in your account.</p>
+              <p className="mt-2 max-w-2xl text-warm-ink">Your Welcome Kit is being prepared: {welcomeIsMonthly(me) ? <>your {r?.title ?? 'first resource'} and our Family Meeting guide</> : <>your {welcomeItemName(me)} and your {r?.title ?? 'first resource'}</>}, printed together and mailed to you in one package. You’ll see when it ships in your account.</p>
               <a className="btn-primary mt-4" href={routes.appClub}>Go to Club Home</a>
             </div>
           )}

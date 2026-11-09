@@ -71,7 +71,7 @@ interface Order {
   address: Record<string, string> | null;
   fulfillment_type: 'monthly_resource' | 'welcome_vision' | 'welcome_rhythm';
   /** Welcome Kits list: which personalized item the package carries. */
-  welcome_item?: 'welcome_vision' | 'welcome_rhythm';
+  welcome_item?: 'welcome_vision' | 'welcome_rhythm' | 'monthly_resource';
   batch: 'regular' | 'catch_up' | 'welcome' | 'welcome_kit';
   satisfies_month: string | null;
   first_paid_month: string | null;
@@ -372,8 +372,8 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
         <h2 className="label">Welcome Kits ({rows?.length ?? '…'})</h2>
         <button type="button" className="underline" onClick={csv}>Download approved kits (CSV, one row per package)</button>
       </div>
-      <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One package per new member: her Family Vision print and her first month’s resource, approved, printed and mailed together, outside the monthly cutoff. Three items: her Family Vision print, the standard Family Meeting guide (<a className="underline" href={routes.clubMeetingGuide}>print it</a>), and her first month’s resource. She approves her print and confirms her first resource herself (nothing is confirmed for her; reminders go from Emails). Once both are in, the kit is submitted: mail within two business days. Make both PDFs → Approve kit → Printed → Mailed. Nothing is marked automatically.</p>
-      {rows?.some((o) => o.fulfillment_type === 'welcome_rhythm') && (
+      <p className="mt-1 max-w-3xl text-[0.85rem] text-soft">One package per new member: her Family Vision print or Family Rhythm (none when her first month is May’s or August’s daily routine: that month is her Welcome win) and her first month’s resource, approved, printed and mailed together, outside the monthly cutoff. Three items: her Family Vision print, the standard Family Meeting guide (<a className="underline" href={routes.clubMeetingGuide}>print it</a>), and her first month’s resource. She approves her print and confirms her first resource herself (nothing is confirmed for her; reminders go from Emails). Once both are in, the kit is submitted: mail within two business days. Make both PDFs → Approve kit → Printed → Mailed. Nothing is marked automatically.</p>
+      {rows?.some((o) => o.fulfillment_type !== 'welcome_vision') && (
         <ul className="mt-2 max-w-3xl text-[0.8rem] text-soft" data-print-specs aria-label="Print specifications">
           {(['welcome_rhythm', 'meeting_guide', 'first_month'] as const).map((k) => <li key={k}>{specLine(WELCOME_PRINT_SPECS[k])}</li>)}
         </ul>
@@ -391,7 +391,10 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
                   <tr key={o.id} className="border-b border-rule align-top">
                     <td className="py-2">{o.display_name ?? o.email}<br /><span className="text-soft">{o.email}</span><br /><span className="text-soft">joined {day(o.enrolled_at)}</span></td>
                     <td>
-                      {o.fulfillment_type === 'welcome_rhythm' ? (
+                      {o.fulfillment_type === 'monthly_resource' ? (
+                        // 2d: her first month's routine is her Welcome win: no separate welcome print in this kit.
+                        <p className="text-soft">No separate welcome print: her first month's routine is her Welcome win (Family Rhythm digital only).</p>
+                      ) : o.fulfillment_type === 'welcome_rhythm' ? (
                         // Her Family Rhythm: the plan she approved is on the order; the print view prints exactly that.
                         <p><strong>Family Rhythm</strong> · {o.member_approved_at ? `approved ${day(o.member_approved_at)}` : 'not approved'}
                           {' · '}{o.pdf_status === 'ready' ? 'PDF ✓' : o.member_approved_at ? <a className="underline" href={printHref(o)!}>Print view</a> : 'PDF –'}</p>
@@ -430,7 +433,7 @@ function WelcomeKits({ session, onLoad }: AdminContext & { onLoad?: (rows: Order
 
 /** What's in one package, for the mail-house CSV. */
 const contents = (o: Order) =>
-  [o.fulfillment_type === 'welcome_rhythm' ? 'Family Rhythm' : `Family Vision print (${o.vision_value ?? '–'})`, o.first_month ? 'Family Meeting guide' : null,
+  [o.fulfillment_type === 'monthly_resource' ? null : o.fulfillment_type === 'welcome_rhythm' ? 'Family Rhythm' : `Family Vision print (${o.vision_value ?? '–'})`, o.first_month ? 'Family Meeting guide' : null,
     o.first_month ? `${month(o.first_month.resource_month)} ${clubResourceBySlug(o.first_month.kit_slug)?.title ?? o.first_month.kit_title ?? ''}`.trim() : null].filter(Boolean).join(' + ');
 /** Today's New York date ("2026-11-03"), to compare with a ship-by date. */
 const todayNy = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });

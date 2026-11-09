@@ -1428,6 +1428,56 @@ scenarios.welcomeRhythmKit = async (browser) => {
   sql(`update public.club_settings set welcome_item = 'vision'`);
 };
 
+// Phase 2d, switch on: her first month is May (Summer Day Rhythm), so May is her Welcome win: her kit is May and the
+// Family Meeting guide, with no Family Rhythm or Vision print, and one order for May. Her Family Rhythm stays digital.
+scenarios.welcomeOverlapKit = async (browser) => {
+  console.log('Welcome Kit when her first month is May (switch on): two pieces, one order, no welcome print');
+  freshDb();
+  sql(`update public.club_settings set welcome_item = 'rhythm'`);
+  sql(`update public.club_kits set status = 'scheduled' where slug = '2027-05-finish-the-school-year'`);
+  as.family();
+  as.profileDone();
+  // As billing leaves it for a May joiner: her first month is May, no welcome order (the rule), May's order in her kit.
+  sql(`delete from public.club_fulfillment_orders where user_id = '${USER.id}';
+       update public.club_households set first_paid_month = '2027-05-01' where owner_user_id = '${USER.id}';
+       insert into public.club_entitlements (user_id, household_id, resource_month, kind, membership_year, plan, source, note)
+         select '${USER.id}', h.id, '2027-05-01', k, 1, 'admin', 'admin', 'QA: May joiner' from public.club_households h, unnest(array['digital', 'physical']) k
+          where h.owner_user_id = '${USER.id}' on conflict do nothing;
+       insert into public.club_fulfillment_orders (user_id, household_id, resource_month, fulfillment_type, provider)
+         select '${USER.id}', h.id, '2027-05-01', 'welcome_vision', 'manual' from public.club_households h where h.owner_user_id = '${USER.id}';
+       insert into public.club_fulfillment_orders (entitlement_id, user_id, household_id, resource_month, kit_id, late, cutoff_at, provider)
+         select e.id, e.user_id, e.household_id, e.resource_month, k.id, false, public.club_mailing_cutoff_at(e.resource_month), 'manual'
+           from public.club_entitlements e join public.club_kits k on k.month = e.resource_month
+          where e.user_id = '${USER.id}' and e.kind = 'physical' and e.resource_month = '2027-05-01'`);
+  const orders = sql(`select string_agg(fulfillment_type || ':' || to_char(resource_month, 'YYYY-MM'), ',') from public.club_fulfillment_orders where user_id = '${USER.id}' and status <> 'canceled'`);
+  check('one order, for May; no welcome print order', orders === 'monthly_resource:2027-05', orders);
+  check('her Welcome Kit is May alone', sql(`select in_welcome_kit and kit_partner_id is null and kit_welcome_type = 'none' from public.club_fulfillment_queue where user_id = '${USER.id}'`) === 't');
+
+  const page = await newPage(browser, DESKTOP);
+  await page.goto(`${BASE}/club/welcome-kit`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  const text = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
+  check('kit page: two pieces, the guide and May', /of 2 ready/.test(text) && /Family Meeting Guide/.test(text) && /May Resource/.test(text), text.slice(0, 220));
+  check('kit page: no Family Rhythm or Vision card', !/Family Vision Print/.test(text) && (await page.locator('a[href^="/app/club/family-rhythm"]').count()) === 0);
+  check('kit page: her Family Rhythm is mentioned as hers in Club Home', /Family Rhythm is ready in Club Home/.test(text));
+  check('no script errors', page.errors.length === 0, page.errors.slice(0, 2).join(' | '));
+  await page.goto(`${BASE}/app/club/family-rhythm`, { waitUntil: 'networkidle' });
+  const ready = await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 }).then(() => true, () => false);
+  check('her Family Rhythm is still hers, digitally', ready);
+  await page.context().close();
+
+  const admin = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(admin);
+  await admin.goto(`${BASE}/admin/club`, { waitUntil: 'networkidle' });
+  await admin.waitForTimeout(1500);
+  await admin.locator('button, a', { hasText: 'Fulfillment' }).first().click().catch(() => undefined);
+  await admin.waitForTimeout(1500);
+  const adminText = await admin.locator('main').innerText();
+  check('admin: one Welcome Kit row, no separate welcome print', /No separate welcome print/.test(adminText));
+  await admin.context().close();
+  sql(`update public.club_settings set welcome_item = 'vision'`);
+};
+
 const names = ONLY ? ONLY.split(',') : Object.keys(scenarios).filter((n) => n !== 'months');
 const browser = await chromium.launch();
 try {

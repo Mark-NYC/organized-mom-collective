@@ -5,7 +5,7 @@
  * first month's resource, approved together and mailed in one package; `welcome.readiness` is the kit's.
  */
 import type { Membership, MembershipMonth } from './membership';
-import { welcomeIsRhythm } from './welcome-item';
+import { welcomeIsMonthly, welcomeIsRhythm } from './welcome-item';
 export { welcomeIsRhythm };
 import { routes } from '../../routes';
 import { memberPlanHref } from './plan/account';
@@ -213,8 +213,8 @@ export function kitItems(me: Membership, reviewed: boolean, title: (slug: string
   const firstStatus: KitItemStatus = submitted ? 'approved'
     : !first?.slug || w?.readiness === 'needs_resource' ? 'preparing'
     : reviewed ? 'approved' : 'needs_review';
-  return [
-    welcomeIsRhythm(me) ? {
+  // 2d: her first month is her Welcome win: no welcome item, just the guide and her first month.
+  const print: KitItem[] = welcomeIsMonthly(me) ? [] : [welcomeIsRhythm(me) ? {
       id: 'print', name: 'Your Family Rhythm', about: 'Two moments your family already shares, and everyone’s part in them. Yours to use today.',
       status: printApproved ? 'approved' : 'needs_review', href: kitStepHref(me, 'print'),
       action: printApproved ? (submitted ? 'View' : 'View or change') : 'Look it over',
@@ -222,7 +222,9 @@ export function kitItems(me: Membership, reviewed: boolean, title: (slug: string
       id: 'print', name: 'Family Vision Print', about: 'A watercolor keepsake with your family name and the value you chose.',
       status: printApproved ? 'approved' : 'needs_review', href: routes.clubFamilyVision,
       action: printApproved ? (submitted ? 'View' : 'View or change') : 'Make it yours',
-    },
+    }];
+  return [
+    ...print,
     {
       id: 'guide', name: 'Family Meeting Guide', about: 'A one-page guide to short, practical family meetings. The same for every family.',
       status: 'ready', href: routes.clubMeetingGuide, action: 'Preview',
@@ -264,6 +266,7 @@ export function kitText(me: Pick<Membership, 'welcome'>): string {
   const w = me.welcome;
   if (!w) return '';
   const item = welcomeIsRhythm(me) ? 'Family Rhythm' : 'print';
+  const approvedFirst = welcomeIsMonthly(me) ? '' : `Your ${item} is approved. `;
   if (w.status === 'mailed') return 'Your Welcome Kit is on its way.';
   if (w.status === 'printed') return 'Your Welcome Kit is printed and getting ready to mail.';
   if (w.status === 'approved') return 'Your Welcome Kit is ready for printing.';
@@ -274,8 +277,8 @@ export function kitText(me: Pick<Membership, 'welcome'>): string {
     mail_paused: 'Printed mailings are paused, so your Welcome Kit is waiting.',
     needs_vision: 'Your welcome print is ready for you to approve.',
     needs_rhythm: 'Your Family Rhythm is ready for you to look over and approve.',
-    needs_resource: `Your ${item} is approved. We’re finishing your first resource.`,
-    needs_confirmation: `Your ${item} is approved. Review your first resource, then prepare your Welcome Kit.`,
+    needs_resource: `${approvedFirst}We’re finishing your first resource.`,
+    needs_confirmation: `${approvedFirst}Review your first resource, then prepare your Welcome Kit.`,
     needs_pdf: 'Your package is getting ready. We aim to print and mail it within two business days.',
     ready: 'Your package is getting ready. We aim to print and mail it within two business days.',
     first_month_canceled: 'We’re looking at your Welcome Kit. Reply to any of our emails with questions.',

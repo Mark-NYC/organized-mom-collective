@@ -30,6 +30,12 @@ export interface ClubResource {
    * first, in her words. Written from the month's product doc; months without one show only the problem line.
    */
   welcome?: { helps: string; firstStep: string };
+  /**
+   * It already gives the family a daily rhythm. As a new member's first month it is her Welcome win: her Welcome Kit
+   * carries no separate Family Rhythm print (Phase 2d; the database's club_kits.establishes_daily_rhythm, set by
+   * scripts/generate-welcome-overlap-migration.py, must list the same kits: tests/club-welcome-overlap.test.ts).
+   */
+  dailyRhythm?: true;
 }
 
 export const clubResources: readonly ClubResource[] = [
@@ -45,10 +51,10 @@ export const clubResources: readonly ClubResource[] = [
   { slug: '2027-02-better-together', month: '2027-02', title: 'Family Laundry Guides', problem: 'Laundry the kids can own, step by step', component: 'february', preview: '/club/february-preview' },
   { slug: '2027-03-spring-clean-together', month: '2027-03', title: 'Our Family Rhythm', problem: 'Chores without chasing everyone', component: 'march', preview: '/club/march-preview' },
   { slug: '2027-04-everybody-helps-at-mealtime', month: '2027-04', title: 'Our Dinner Team', problem: 'Dinner isn’t just Mom’s job', component: 'april', preview: '/club/april-preview' },
-  { slug: '2027-05-finish-the-school-year', month: '2027-05', title: 'Our Summer Day Rhythm', problem: 'A rhythm kids can follow when school ends', component: 'may', preview: '/club/may-preview' },
+  { slug: '2027-05-finish-the-school-year', dailyRhythm: true, month: '2027-05', title: 'Our Summer Day Rhythm', problem: 'A rhythm kids can follow when school ends', component: 'may', preview: '/club/may-preview' },
   { slug: '2027-06-summer-with-a-plan', month: '2027-06', title: 'My Family’s Snack Station', problem: 'Snacks without a request every hour', component: 'june', preview: '/club/june-preview' },
   { slug: '2027-07-ready-to-go', month: '2027-07', title: 'What Can I Do Right Now?', problem: 'Ideas kids can start on their own', component: 'july', preview: '/club/july-preview' },
-  { slug: '2027-08-school-year', month: '2027-08', title: 'My School Day Routines', problem: 'Mornings and afternoons without constant reminders', component: 'august', preview: '/club/august-preview' },
+  { slug: '2027-08-school-year', dailyRhythm: true, month: '2027-08', title: 'My School Day Routines', problem: 'Mornings and afternoons without constant reminders', component: 'august', preview: '/club/august-preview' },
   { slug: '2027-09-a-week-everyone-can-see', month: '2027-09', title: 'Our Family Habit Cards', problem: 'One small school-day habit, without the reminders', component: 'september', preview: '/club/september-preview' },
   { slug: '2027-10-home-works-together', month: '2027-10', title: 'Our 5-Minute Reset', problem: 'A daily reset with a clear finish line', component: 'october', preview: '/club/october-preview' },
 ];

@@ -139,9 +139,10 @@ export interface MembershipMonth {
 export interface WelcomePrint {
   /**
    * Her Welcome Kit's personalized item: the Family Vision print, or her Family Rhythm once the owner switches new
-   * kits to it (club_settings.welcome_item). Absent from an older database: the Vision print.
+   * kits to it (club_settings.welcome_item). 'monthly': none; her first month's resource establishes a daily rhythm
+   * and is her Welcome win (Phase 2d). Absent from an older database: the Vision print.
    */
-  kind?: 'vision' | 'rhythm';
+  kind?: 'vision' | 'rhythm' | 'monthly';
   status: string;
   readiness: string;
   approved: boolean;

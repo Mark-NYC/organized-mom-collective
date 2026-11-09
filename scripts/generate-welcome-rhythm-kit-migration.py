@@ -22,8 +22,8 @@ def latest(name: str, kind: str = 'function') -> str:
     """The last definition of public.<name> in the migrations, from `create` to its closing `$$;` (or `;` for a view)."""
     found = None
     for f in sorted(MIG.glob('*.sql')):
-        if f == OUT:
-            continue
+        if f.name >= OUT.name:
+            continue  # only what comes before this migration (later ones may redefine the same objects)
         text = f.read_text()
         pat = (rf'create (or replace )?function public\.{name}\(.*?\$\$;' if kind == 'function'
                else rf'create (or replace )?view public\.{name} .*?;\n\n')
