@@ -1,8 +1,9 @@
 /**
  * Individually scheduled Day 2/6 marketing welcome emails.
- * TWO independent launch locks: WELCOME_DELIVERY_ENABLED=true AND
- * marketing_delivery_settings enabled+postal_address_verified+
- * broadcasts_coordinated. Defaults fail closed. Never use for broadcasts.
+ * Database-controlled launch lock: marketing_delivery_settings requires
+ * enabled+postal_address_verified+broadcasts_coordinated.
+ * The database dispatcher and atomic claim both independently enforce it.
+ * Defaults fail closed. Never use for broadcasts.
  *
  * Postgres dispatch only sends a 64-hex opaque token. The service-role RPC
  * atomically claims one job and reserves the recipient's NYC calendar day.
@@ -18,9 +19,6 @@ function errorCode(s: unknown): string {
 }
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return reply({error:"method_not_allowed"},405);
-  // This lock is intentionally separate from the database setting.
-  if (Deno.env.get("WELCOME_DELIVERY_ENABLED") !== "true")
-    return reply({status:"disabled"});
   const dbUrl = Deno.env.get("SUPABASE_URL");
   const dbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const resendKey = Deno.env.get("RESEND_MARKETING_API_KEY");
