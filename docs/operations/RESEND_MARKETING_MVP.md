@@ -142,3 +142,14 @@ No broadcasts or automated email sequences have been enabled. A real fresh opt-i
 - Post-check showed one existing contact record, original marketing consent still true, zero extra sync jobs for that contact, zero failed sync jobs. Resend confirmed the existing contact was still subscribed.
 - This verifies the **RPC/business logic**, not that the public website form's browser code, network request, and confirmation UI all work. A fresh, never-before-seen opt-in through the actual public form remains untested.
 - Did not send any marketing email. The two welcome-email drafts are available for review in `docs/operations/OMC_WELCOME_SEQUENCE_REVIEW_DRAFTS.md`; they are not in Resend or scheduled.
+
+### Welcome scheduling staged, not active (2026-11-09)
+
+- Applied migration `marketing_welcome_queue_hold_20261109`, source `supabase/migrations/20261109030000_marketing_welcome_queue_hold.sql`.
+- New `public.marketing_welcome_queue` is private (RLS enabled, no anon/authenticated table permissions), with one row per address and step (Day 2 and Day 6).
+- Net-new marketing opt-in enqueues two `held` records using first consent timestamp. Repeated downloads/opt-ins don't duplicate them. A switch from opt-in to no consent cancels pending steps.
+- **No delivery worker, API sender, or automatic launch is installed.** Status defaults to `held`; no sending can happen from the new queue.
+- Verified one synthetic opt-in generated exactly two held rows, repeat signup stayed at two, and opt-out cancelled both; all tests were rolled back.
+- Post-check: **zero real queue rows**; three historical opted-in subscribers were not enrolled; no QA rows remain.
+- Resend templates are still drafts: [Day 2](https://resend.com/templates/a70163c4-3c72-4cd8-9b89-17e089282af1) and [Day 6](https://resend.com/templates/105ee0e7-9078-4372-8ef3-4aa2cd3dedc2).
+- Before enabling sends: approve template content, replace the postal-address placeholder, finish a real browser signup test with a genuinely new opted-in address, implement a gated delivery worker with idempotency, suppression/recheck and one-marketing-email-per-day, then perform controlled delivery acceptance tests.
