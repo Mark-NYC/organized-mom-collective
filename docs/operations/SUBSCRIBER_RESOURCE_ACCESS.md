@@ -1,6 +1,6 @@
 # Subscriber Resource Access
 
-Built 2026-11-09 for Organized Mom Collective. No email is sent or broadcast scheduled by this feature.
+Built 2026-11-09 for Organized Mom Collective. This is the reusable **subscriber benefit layer** for the Clean Mama-informed Sunday Family Reset and Wednesday One Small Win strategy. Access is separate from email marketing consent; the feature itself does not send email or schedule broadcasts.
 
 ## What it does
 
@@ -40,6 +40,9 @@ Files:
 
 ### Newsletter drafts updated
 
+The first four Sunday drafts are part of the new **Sunday Family Reset** series. The ongoing OMC cadence is Sunday (shared family rhythm), Wednesday (One Small Win) and occasional purposeful campaigns, rather than copying Clean Mama's three-weekly-emails-plus-launches volume. See [email strategy](./OMC_EMAIL_MARKETING_GAME_PLAN.md) and [Sunday plan](./SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md).
+
+
 - Sunday Family Reset 01 `a042b85c-d216-4fc1-9a19-9caf8660ee4a`
 - Sunday Family Reset 02 `9a9acbdc-8150-4f0b-9ce3-bc3e9b7b4a37`
 - Sunday Family Reset 03 `cb0061d6-7faf-49fe-b823-ce338b9d5960`
@@ -62,3 +65,12 @@ Sunday 04 links to a Club offer, not a free gated guide, so it intentionally has
 4. One Small Win & Sunday newsletters **remain drafts/unscheduled** pending welcome-completion audience separation.
 
 The feature is implemented, but do not claim the end-to-end email-to-browser experience is live-verified until these checks are complete.
+
+## Ownership and ongoing maintenance
+
+- The marketing email team must use `{{{RESOURCE_PASS}}}` for **new free guide and generator links** where an already opted-in reader would otherwise be prompted for the same email. For public articles, product offers, Club account routes and directly accessible PDFs, a subscriber pass is not always needed.
+- Do not remove the existing `omc:tool-download-access:v1` behavior; it already grants access after the original capture on the same browser. Subscriber Access extends this to links clicked on other devices.
+- Add new newsletter draft IDs and personalized URL QA to the relevant Sunday or One Small Win MD before approving send.
+- Token lifecycle: 90-day pass, refreshed before expiry for active consented Resend contacts. Older links may expire on a new device; previously remembered browser access continues. Never reenable marketing mail from a free-resource access check.
+- This is not payment, authentication, Club access, nor protection for public static `/downloads/*.pdf` files. It merely avoids duplicate email capture.
+- The last blocker for the full editorial program is **newsletter segmentation excluding welcome-incomplete contacts**. This is separate from token validation and must be done before broadcast scheduling.
