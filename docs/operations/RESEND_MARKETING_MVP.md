@@ -94,3 +94,43 @@ The HTTP event is async and best-effort; failed jobs require explicit retry. Add
 - Tested two non-opt-in/suppressed synthetic signups and one consented synthetic signup inside transactions that were rolled back. **PASS**: non-opt-in not queued, suppressed address remained blocked and not queued, consented address queued. No QA email addresses were retained and pg_net dispatches in rolled-back transactions are not delivered.
 - No emails sent or scheduled. Old transactional `RESEND_API_KEY` unchanged.
 - **Still outstanding before calling this fully hands-off:** add failed-job retries and monitoring, test an actual newly opted-in production signup from the website, confirm physical mailing address and live resource links, and configure send automation only after approval.
+
+
+### Automatic retries installed and verified (2026-11-09)
+
+- Applied `marketing_sync_retries_20261109` to production and committed the equivalent source as `supabase/migrations/20261109020000_marketing_sync_retries.sql`.
+- Installed `pg_cron`. Job `omc-marketing-sync-retry` is **active** and runs every five minutes (`*/5 * * * *`).
+- A private `marketing_private.retry_sync_jobs()` function re-dispatches stalled `pending` jobs after three minutes and `failed` jobs after a bounded delay. It caps both Edge Function attempts and dispatch attempts at five, handles no more than thirty jobs per cycle and uses `FOR UPDATE SKIP LOCKED` to avoid double-dispatch across overlapping jobs.
+- Only contacts with a live opt-in and without a suppression are synced by the Edge Function. Failed dispatches never send a marketing email.
+- Verified cron job existence, active schedule, and no changes to the previously synced contact. Ran a synthetic failed job test **inside a transaction rolled back**; confirmed a retry was enqueued and the dispatch count incremented with no QA record retained and no outbound network request committed.
+
+#### Monitoring queries
+
+Run in the [Supabase SQL Editor](https://supabase.com/dashboard/project/uvqhmlqwmgnohhduttip/sql/new) to see current health:
+
+```sql
+select status, count(*) as contacts, max(attempts) as max_worker_attempts,
+       max(dispatch_attempts) as max_dispatch_attempts,
+       min(queued_at) as oldest_queued_at
+from public.marketing_sync_jobs
+group by status order by status;
+
+select email, status, attempts, dispatch_attempts, error_code, updated_at
+from public.marketing_sync_jobs
+where status in ('pending','failed') and queued_at < now() - interval '20 minutes'
+order by queued_at limit 50;
+
+select j.jobname, j.active, j.schedule, d.status, d.return_message, d.start_time
+from cron.job j
+left join lateral (
+  select status, return_message, start_time
+  from cron.job_run_details
+  where jobid = j.jobid
+  order by start_time desc limit 1
+) d on true
+where j.jobname = 'omc-marketing-sync-retry';
+```
+
+**Attention threshold:** Any `failed` or `pending` job older than twenty minutes needs investigation. A job that hits `attempts >= 5` or `dispatch_attempts >= 5` will stop retrying, by design. Check the error codes and credentials before manually re-enqueuing. **This phase provides scheduled recovery and inspectable failures, but not a push alert to the owner yet.**
+
+No broadcasts or automated email sequences have been enabled. A real fresh opt-in from the public signup form is still needed for full end-to-end production acceptance.
