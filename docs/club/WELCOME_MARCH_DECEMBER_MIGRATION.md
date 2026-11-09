@@ -339,7 +339,7 @@ Welcome Kit orders or approval, the 2d overlap rule, or historical March data (t
 - **3c**: March on the shared shell (account saving, approval, deadline, printing), Family Meeting, registry and copy;
   then retire `/app/club/march/spring-prep` (redirect, tabs removed) once the new tool is verified.
 
-#### Phase 3a log (2026-11-09): READY FOR REVIEW
+#### Phase 3a log (2026-11-09): READY FOR REVIEW, [#439](https://github.com/Mark-NYC/organized-mom-collective/pull/439)
 
 - Engine `src/lib/club/engines/march-spring-clean.ts` (pure; not wired to any page yet):
   - **Room:** from her step-6 priority (keeping the house picked up → living room, laundry → laundry area, dinner and
