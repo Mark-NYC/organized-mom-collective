@@ -14,7 +14,8 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   const dbUrl = Deno.env.get("SUPABASE_URL");
   const dbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const resendKey = Deno.env.get("RESEND_API_KEY");
+  // Use a separate marketing key. Never rotate the transactional email key to fix contact permissions.
+  const resendKey = Deno.env.get("RESEND_MARKETING_API_KEY") ?? Deno.env.get("RESEND_API_KEY");
   if (!dbUrl || !dbKey || !resendKey) return json({ error: "not_configured" }, 503);
   let token: unknown;
   try { token = (await req.json()).token; }
