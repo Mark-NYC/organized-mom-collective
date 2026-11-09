@@ -26,8 +26,7 @@ Deno.serve(async req => {
   // Suppressions are enforced by DB trigger. A second explicit filter makes
   // the safety contract visible here too.
   const query = new URL(`${dbUrl}/rest/v1/tool_email_contacts`);
-  query.searchParams.set('select', 'email,marketing_opt_in,marketing_suppressions(email)');
-  // Do not use embedding if foreign key unavailable: protected view below instead.
+  // The SQL suppression guard ensures marketing_opt_in is false for suppressed contacts.
   query.searchParams.set('select', 'email');
   query.searchParams.set('marketing_opt_in', 'eq.true');
   query.searchParams.set('order', 'email.asc');
