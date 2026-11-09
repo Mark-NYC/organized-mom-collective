@@ -46,6 +46,55 @@ function attribution() {
   return { p_source: safe('utm_source'), p_medium: safe('utm_medium'), p_campaign: safe('utm_campaign'), p_content: safe('utm_content') };
 }
 const DONE = 'omc:tool-download-access:v1';
+/**
+ * Existing site access is remembered by this same key.
+ * Email access is delivered as an opaque #omc_pass= fragment, not a query param.
+ * A server-verified pass unlocks ONLY free downloads on this browser.
+ * Never treat a URL token as a marketing opt-in.
+ */
+const PASS_PARAM = 'omc_pass';
+let resourcePassVerification: Promise<boolean> | undefined;
+function resourcePassFromHash(): string | null {
+  if (typeof window === 'undefined') return null;
+  const hash = window.location.hash.slice(1);
+  const token = new URLSearchParams(hash).get(PASS_PARAM);
+  return token && /^[0-9a-f]{64}$/.test(token) ? token : null;
+}
+function clearResourcePassFragment() {
+  const fragment = new URLSearchParams(window.location.hash.slice(1));
+  if (!fragment.has(PASS_PARAM)) return;
+  fragment.delete(PASS_PARAM);
+  const rest = fragment.toString();
+  window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + (rest ? '#' + rest : ''));
+}
+/** Validate before saving access, never store the raw bearer token. */
+export function recognizeSubscriberResourceAccess(): Promise<boolean> {
+  if (typeof window === 'undefined') return Promise.resolve(false);
+  if (resourcePassVerification) return resourcePassVerification;
+  const token = resourcePassFromHash();
+  if (!token) return Promise.resolve(false);
+  resourcePassVerification = (async () => {
+    try {
+      const response = await fetch('https://uvqhmlqwmgnohhduttip.supabase.co/functions/v1/subscriber-resource-access', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({token}),
+        signal:AbortSignal.timeout(10000),
+        cache:'no-store',
+      });
+      const result = response.ok ? await response.json() as {ok?:boolean} : {};
+      if (result.ok === true) {
+        unlocked = true;
+        try { localStorage.setItem(DONE, 'yes'); } catch { /* This visit still works. */ }
+        return true;
+      }
+      return false;
+    } catch { return false; }
+    finally { clearResourcePassFragment(); }
+  })();
+  return resourcePassVerification;
+}
+
 let unlocked = false;
 let active: Promise<boolean> | undefined;
 export function normalizeEmail(value: string) { return value.trim().toLowerCase(); }
@@ -79,11 +128,13 @@ function remembered() {
   try { return localStorage.getItem(DONE) === 'yes'; } catch { return false; }
 }
 /** A single successful signup per browser; the modal never opens for paid/member routes. */
-export function requireToolEmail(tool?: string): Promise<boolean> {
+export async function requireToolEmail(tool?: string): Promise<boolean> {
+  if (resourcePassVerification) await resourcePassVerification;
+  else if (resourcePassFromHash()) await recognizeSubscriberResourceAccess();
   const publicTool = tool ?? publicDownloadTool();
   const enabled = tool === 'responsibility-chart' ? responsibilityChartGateEnabled :
     publicTool === 'chore-chart' ? toolEmailGateEnabled : unifiedDownloadGateEnabled;
-  if (!enabled || !publicTool || remembered()) return Promise.resolve(true);
+  if (!enabled || !publicTool || remembered()) return true;
   if (active) return active;
   active = showDialog(publicTool).finally(() => { active = undefined; });
   return active;
