@@ -1,5 +1,12 @@
 # One Small Win: First Eight Email Drafts
 
+> **Current editorial plan (2026-11-09):** One Small Win is the **Wednesday** half of OMC's Clean Mama-informed ongoing email cadence; **Sunday Family Reset** is the other half. The eight usable One Small Win broadcasts are still **drafts and unscheduled**. Superseded/broken editor versions remain in Resend and must not be scheduled. The Sunday/Wednesday plan and audience launch blockers are in [OMC_EMAIL_MARKETING_GAME_PLAN.md](./OMC_EMAIL_MARKETING_GAME_PLAN.md) and [SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md](./SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md).
+>
+> **Subscriber Access:** One Small Win 05's optional routine-chart link has been changed in the usable Resend draft to `https://www.organizedmomcollective.com/routine-chart/#omc_pass={{{RESOURCE_PASS}}}`. This avoids a second email prompt after verification on the site. The complete email-to-browser click path still needs QA. One Small Win 07 can link directly to a public PDF without a token; Club and calendar product links should **not** use the resource pass. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md).
+>
+> **Audience rule:** Do **not** schedule broadcasts to the general opt-in segment while it still contains welcome-incomplete subscribers. The database daily ledger protects individual welcome sends but not Resend's audience-wide broadcasts.
+
+
 **Updated:** 2026-11-09  
 **Status:** Eight redesigned broadcasts are **drafts in Resend; NOT scheduled or sent**. The approved email design is charcoal #545454 square buttons when used, Georgia headlines, Montserrat body with fallbacks, warm ivory and soft accent colors.  
 **Series branding:** “One Small Win” belongs in the email header, **not in recurring subject-line prefixes**.  
