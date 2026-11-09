@@ -1,7 +1,7 @@
 # Resend email marketing foundation, November 9, 2026
 
 ## Status
-**Staged, no marketing messages enabled.** The existing transactional delivery and Club mail remain unchanged.
+**Contact sync trigger deployed but Resend credential check failed (401); no marketing messages enabled.** The existing transactional delivery and Club mail remain unchanged.
 This branch adds suppression persistence, verified Resend feedback ingestion, and an on-demand
 consent-only contact importer. It does not create a scheduled email sender.
 
@@ -45,3 +45,42 @@ One marketing email per recipient per day. No hard pitch on Day 8.
 - Track webhook event IDs for replay deduplication if processing grows beyond idempotent suppression.
 - Add Club and Stripe buyer audience qualification in a separate migration and confirm marketing consent source.
 - Build an email admin dashboard and scheduled Resend broadcasts after approval of copy and identity/permission checks.
+
+
+## Automatic signup synchronization (2026-11-09)
+
+**Deployed:** `supabase/migrations/20261109010000_marketing_signup_sync.sql` and `supabase/functions/resend-marketing-signup/index.ts` (active v2). This applies to every signup flow writing `tool_email_contacts`.
+
+- A new opted-in row or an explicit transition from not-opted-in to opted-in enqueues a one-time token and asynchronously calls the Edge Function via `pg_net`. Non-opted-in signups are never queued. Repeated opted-in downloads do not enqueue duplicates.
+- The Edge Function looks up the token using service-role credentials, rechecks the current consent and suppression table, and checks whether an existing Resend contact is unsubscribed. It never re-subscribes that contact.
+- It creates missing global Resend contacts and adds eligible contacts to the existing `OMC | Free Resource Opt-Ins` segment through Resend's contacts/segments API. It does **not send email**. Result status and error code are recorded in `public.marketing_sync_jobs`, which is private and RLS-enabled.
+- Existing transactional Resend credentials are preserved. The new function prefers a dedicated Supabase secret `RESEND_MARKETING_API_KEY`, falling back to `RESEND_API_KEY`. The dedicated key must have **full API access** to Resend's Contacts endpoints. A sending-only key is insufficient.
+
+### Verified test and current blocker
+
+A real existing opted-in contact was temporarily toggled off/on within one SQL transaction (ending in the original consent state). The trigger dispatched successfully; its Edge Function looked up the queued job and attempted Resend contact lookup. Resend returned `contact_lookup_401`. Thus **the complete end-to-end contact segment sync has NOT passed**. The likely cause is an outdated or sending-only `RESEND_API_KEY`, but the key's exact privileges are not readable through this connector.
+
+Current baseline after the test: **3 opted-in contacts and 4 non-opted-in contacts**. One failed sync job exists; no marketing emails were sent.
+
+### Required manual step
+
+In [Resend API Keys](https://resend.com/api-keys), create a key named `OMC Marketing Contact Sync` with **Full access**; securely set it in [Supabase Edge Function Secrets](https://supabase.com/dashboard/project/uvqhmlqwmgnohhduttip/settings/functions) as `RESEND_MARKETING_API_KEY`. Do **not** rotate or replace `RESEND_API_KEY`, which may still be used for transactional email. Do not paste the key into chat or GitHub.
+
+Then retry pending/failed job tokens from SQL using `net.http_post` (service-role/dashboard only):
+
+```sql
+select net.http_post(
+  url := 'https://uvqhmlqwmgnohhduttip.supabase.co/functions/v1/resend-marketing-signup',
+  body := jsonb_build_object('token', token),
+  headers := '{"Content-Type":"application/json"}'::jsonb,
+  timeout_milliseconds := 5000
+)
+from public.marketing_sync_jobs
+where status = 'failed' and attempts < 5;
+```
+
+Confirm `status='synced'` and segment membership in Resend. Next test a new opted-in signup, a non-opt-in signup, a suppressed repeat signup, and a duplicate existing contact. Verify that unsubscribe from Resend still produces a permanent Supabase suppression row. No sending automation should be enabled until these tests pass and approved email compliance checks finish.
+
+### Limitations before production scale
+
+The HTTP event is async and best-effort; failed jobs require explicit retry. Add scheduled retries or a safe job-recovery worker before relying on this without monitoring. The old `resend-contact-sync` batch importer is separate and has not been qualified as a segment-aware recovery path. Do not use it for live backfills without updating/testing its segment handling and Resend credential permissions.
