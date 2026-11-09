@@ -5,6 +5,82 @@ import {miniGuides} from './lib/kids-chores-mini-guides.mjs';
 const art=n=>'public/assets/icons/ofc/guides/responsibility/'+n+'.png';
 await mkdir('public/downloads',{recursive:true});
 for(const guide of miniGuides){
+ // Editorial edition 01: ages 4-5. Preserve one-page US Letter and existing OMC icons.
+ // The guide webpage retains all 18 chore ideas; the printable prioritizes two real jobs.
+ if(guide.slug==='chores-for-4-5-year-olds'){
+  const {pdf,palette:c,text,paragraph,rect,rule,icon}=await makeGuide(
+   'My First Responsibilities | Organized Mom Collective',
+   {runningTitle:'MY FIRST RESPONSIBILITIES'}
+  );
+  const p=pdf.addPage([612,792]);
+  rect(p,0,0,612,792,c.white);
+  // Quiet magazine-style masthead. No giant color blocks or rounded cards.
+  text(p,'ORGANIZED MOM COLLECTIVE',44,755,9,'bold');
+  text(p,'FAMILY PRINTABLES  /  AGES 4-5',402,755,8,'regular',c.muted);
+  rect(p,44,740,524,2,c.green);
+  text(p,'LITTLE HANDS. REAL HELP.',44,714,8.4,'bold',c.muted);
+  text(p,'My First',44,672,31,'serifBold');
+  text(p,'Responsibilities',44,636,31,'serifBold');
+  paragraph(p,'Two little jobs. One week to practice. A big first step in helping at home.',45,610,500,{size:10.25,leading:14.5});
+  // Feature a single existing hand-drawn illustration with a calm editorial sidebar.
+  rect(p,44,470,137,119,c.ivory);
+  await icon(p,art('hands'),64,482,98);
+  rect(p,204,477,3,98,c.blue);
+  text(p,'Start together',220,560,17,'serifBold');
+  paragraph(p,'At this age, the goal is learning to join in, not getting every job perfect.',220,536,337,{size:10,leading:15});
+  paragraph(p,'Show it, practice side by side, then let your child have a turn.',220,489,336,{size:10,leading:15});
+  // A short menu instead of three repetitive filled cards.
+  text(p,'CHOOSE TWO JOBS TO TRY',44,445,9.5,'bold');
+  text(p,'These are ideas, not a checklist to finish.',300,445,8.8,'regular',c.muted);
+  rule(p,44,435,524);
+  const left=[
+   'Shoes in their spot',
+   'Toys into a basket',
+   'Books back on the shelf',
+   'Pajamas into the hamper'
+  ];
+  const right=[
+   'Napkins on the table',
+   'Match clean socks',
+   'Water a plant with help',
+   'Bring a plate to the counter'
+  ];
+  for(let i=0;i<4;i++){
+   const y=411-i*25;
+   rect(p,47,y-2,10,10,c.white,c.rule);
+   text(p,left[i],66,y,9.5,'regular');
+   rect(p,307,y-2,10,10,c.white,c.rule);
+   text(p,right[i],327,y,9.5,'regular');
+  }
+  // The actual artifact is the weekly plan, given most of the bottom half.
+  rect(p,44,292,524,2,c.blue);
+  text(p,'Our week of practice',44,264,21,'serifBold');
+  text(p,'Name: __________________________',45,240,9.6);
+  text(p,'Week of: ___________________',349,240,9.6);
+  const days=['M','T','W','T','F','S','S'];
+  for(let j=0;j<2;j++){
+   const y=j===0?208:139;
+   text(p,j===0?'01  MY LITTLE JOB':'02  MY HELPING JOB',45,y,8.8,'bold');
+   text(p,'_______________________________',246,y,9);
+   text(p,'When we do it: ______________________________',45,y-20,9.2);
+   days.forEach((d,i)=>{
+    const x=282+i*40;
+    text(p,d,x+3,y-20,8,'bold',c.muted);
+    rect(p,x,y-43,14,14,c.white,c.rule);
+   });
+   rule(p,44,y-51,524);
+  }
+  rect(p,44,58,3,48,c.apricot);
+  text(p,'A LITTLE NOTE FOR GROWN-UPS',58,94,8.8,'bold');
+  paragraph(p,'Keep it short. Show what finished looks like, notice the effort, and practice again tomorrow. Grown-up help counts.',58,77,491,{size:8.7,leading:11});
+  rule(p,44,43,524);
+  text(p,'SMALL HABITS. SHARED RESPONSIBILITY.',44,27,8,'bold');
+  text(p,'organizedmomcollective.com',420,27,7.6,'regular',c.muted);
+  if(pdf.getPageCount()!==1)throw new Error('Expected one page for first responsibilities');
+  await writeFile('public/downloads/'+guide.slug+'.pdf',await pdf.save());
+  console.log('Generated premium editorial one-page printable:',guide.slug);
+  continue;
+ }
  const {pdf,palette:c,text,paragraph,rect,rule,icon}=await makeGuide(guide.title+' | Organized Mom Collective');
  const page=pdf.addPage([612,792]),accent=c.green;
  rect(page,0,0,612,792,c.white);
