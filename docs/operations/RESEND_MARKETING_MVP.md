@@ -134,3 +134,11 @@ where j.jobname = 'omc-marketing-sync-retry';
 **Attention threshold:** Any `failed` or `pending` job older than twenty minutes needs investigation. A job that hits `attempts >= 5` or `dispatch_attempts >= 5` will stop retrying, by design. Check the error codes and credentials before manually re-enqueuing. **This phase provides scheduled recovery and inspectable failures, but not a push alert to the owner yet.**
 
 No broadcasts or automated email sequences have been enabled. A real fresh opt-in from the public signup form is still needed for full end-to-end production acceptance.
+
+
+### Repeat opt-in signup test, 2026-11-09
+
+- With owner permission, called the same public `tool_email_signup_v2` RPC used by website tool flows for an **existing already-opted-in contact**. Returned `ok`.
+- Post-check showed one existing contact record, original marketing consent still true, zero extra sync jobs for that contact, zero failed sync jobs. Resend confirmed the existing contact was still subscribed.
+- This verifies the **RPC/business logic**, not that the public website form's browser code, network request, and confirmation UI all work. A fresh, never-before-seen opt-in through the actual public form remains untested.
+- Did not send any marketing email. The two welcome-email drafts are available for review in `docs/operations/OMC_WELCOME_SEQUENCE_REVIEW_DRAFTS.md`; they are not in Resend or scheduled.
