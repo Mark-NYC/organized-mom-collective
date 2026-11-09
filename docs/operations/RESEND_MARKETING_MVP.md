@@ -153,3 +153,11 @@ No broadcasts or automated email sequences have been enabled. A real fresh opt-i
 - Post-check: **zero real queue rows**; three historical opted-in subscribers were not enrolled; no QA rows remain.
 - Resend templates are still drafts: [Day 2](https://resend.com/templates/a70163c4-3c72-4cd8-9b89-17e089282af1) and [Day 6](https://resend.com/templates/105ee0e7-9078-4372-8ef3-4aa2cd3dedc2).
 - Before enabling sends: approve template content, replace the postal-address placeholder, finish a real browser signup test with a genuinely new opted-in address, implement a gated delivery worker with idempotency, suppression/recheck and one-marketing-email-per-day, then perform controlled delivery acceptance tests.
+
+### Welcome drip staging, 2026-11-09
+
+- Added `public.marketing_welcome_queue` with a unique `(email, step)` key, RLS, restricted access, and two status-`held` entries for net-new explicit marketing opt-ins, due 2 and 6 days after recorded consent.
+- Database trigger `marketing_welcome_signup` calls the private `marketing_private.stage_welcome_signup()` function. Existing subscribers and repeat downloads do not restart the sequence. Consent removal cancels held/ready/failed jobs, while the earlier permanent suppression guard continues to operate.
+- Applied to the production Supabase project and versioned in `supabase/migrations/20261109030000_marketing_welcome_queue_hold.sql`.
+- Verified within a rolled-back SQL transaction: 2 welcome jobs created, repeat signup stayed at 2, consent revocation cancelled both. After rollback: **0 welcome jobs**, **0 QA records**, **0 scheduled welcome sending jobs**.
+- **Not yet implemented:** sending worker, template publishing, sender physical address, per-recipient daily send cap, scheduled send times, delivery reconciliation, site browser-level fresh-signup test, and coordination with One Small Win broadcasts. Do not flip statuses to ready or publish templates before the owner approves sending.
