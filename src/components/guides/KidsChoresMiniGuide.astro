@@ -1,0 +1,56 @@
+---
+import {findMiniGuide, miniGuides} from '../../../scripts/lib/kids-chores-mini-guides.mjs';
+interface Props {slug:string}
+const {slug}=Astro.props;
+const guide=findMiniGuide(slug);
+if(!guide)throw new Error('Unknown mini guide: '+slug);
+const pdf='/downloads/'+guide.slug+'.pdf';
+const art=(name:string)=>'/assets/icons/ofc/guides/responsibility/'+name+'.png';
+const related=miniGuides.filter(g=>g.slug!==guide.slug);
+const noReminders=guide.slug==='kids-chores-without-reminders';
+---
+<div class="text-[#545454]">
+<section class="bg-[#FBF7F1] px-5 py-10 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
+<nav class="text-sm font-medium" aria-label="Breadcrumb"><a href="/guides/" class="underline underline-offset-4">Practical Guides</a><span aria-hidden="true" class="mx-2">/</span>{guide.short}</nav>
+<div class="mt-8 grid items-center gap-8 md:grid-cols-[1.2fr_.8fr]">
+<div>
+<p class="text-xs font-bold uppercase tracking-[.16em]">{guide.kicker}</p>
+<h1 class="mt-4 max-w-2xl font-serif text-[clamp(2.5rem,5.2vw,3.9rem)] leading-[1.1]">{guide.title}</h1>
+<p class="mt-5 max-w-xl text-lg leading-[1.7]">{guide.lead}</p>
+<p class="mt-3 max-w-xl text-sm leading-[1.8]">{guide.intro}</p>
+<div class="mt-7 flex flex-wrap gap-3"><a href={pdf} download class="inline-flex min-h-12 items-center bg-[#545454] px-6 py-3 text-sm font-bold text-white">Download one-page printable</a><a href="#ideas" class="inline-flex min-h-12 items-center border border-[#545454] px-5 py-3 text-sm font-bold">See the ideas</a></div>
+<p class="mt-3 text-xs text-[#6f6a65]">One US Letter page · Free resource</p>
+</div>
+<div class="mx-auto w-full max-w-[300px] border-t-[6px] p-7 sm:p-9" style={`border-color:${guide.accent};background:#fff`}>
+<img src={art(guide.sections[0].icon)} alt="" width="160" height="160" class="mx-auto size-32 object-contain"/>
+<p class="mt-6 text-center font-serif text-2xl">{noReminders?'One whole job. One clear owner.':guide.printableTitle}</p>
+<p class="mt-3 text-center text-sm leading-[1.6]">{guide.printableNote}</p>
+</div>
+</div></div></section>
+<section id="ideas" class="px-5 py-12 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
+<p class="text-xs font-bold uppercase tracking-[.16em]">01 · CHOOSE A STARTING POINT</p>
+<h2 class="mt-3 max-w-3xl font-serif text-3xl leading-tight sm:text-4xl">{noReminders?'What changes when we hand over the whole job?':'18 practical responsibilities to choose from'}</h2>
+<p class="mt-4 max-w-2xl text-sm leading-[1.8]">{noReminders?'Each part matters. A child needs more than a vague “help out” request.':'Choose only what fits your child’s current skills and daily rhythm. These are ideas, not a checklist they must complete.'}</p>
+<div class="mt-8 grid gap-4 md:grid-cols-3">{guide.sections.map((section,i)=><article class="border-t-[5px] bg-[#FBF7F1] p-5" style={`border-color:${['#CDDDE1','#D4DFC4','#F1D8A8'][i]}`}>
+<img src={art(section.icon)} width="62" height="62" alt="" loading="lazy" class="size-[62px] object-contain"/>
+<h3 class="mt-3 font-serif text-2xl">{section.title}</h3>
+<ul class="mt-5 space-y-3">{section.jobs.map(job=><li class="flex gap-2 text-sm leading-[1.6]"><span aria-hidden="true" class="shrink-0">□</span><span>{job}</span></li>)}</ul>
+</article>)}</div>
+<p class="mt-6 border-l-4 border-[#F1D8A8] bg-[#FBF7F1] p-5 text-sm leading-[1.7]"><strong>Keep it safe:</strong> {guide.safety}</p>
+</div></section>
+<section id="practice" class="bg-[#D4DFC4]/20 px-5 py-12 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
+<p class="text-xs font-bold uppercase tracking-[.16em]">02 · MAKE IT STICK</p><h2 class="mt-3 max-w-3xl font-serif text-3xl sm:text-4xl">{noReminders?'How to hand over the remembering':'How to introduce a new responsibility'}</h2>
+<div class="mt-8 grid gap-4 sm:grid-cols-2">{guide.steps.map(([name,detail,icon],i)=><article class="border-t-4 border-[#D4DFC4] bg-white p-5"><div class="flex items-center gap-3"><img src={art(icon)} alt="" loading="lazy" width="52" height="52" class="size-[52px] object-contain"/><span class="font-serif text-2xl text-[#6f6a65]">{String(i+1).padStart(2,'0')}</span></div><h3 class="mt-3 font-serif text-xl">{name}</h3><p class="mt-2 text-sm leading-[1.8]">{detail}</p></article>)}</div>
+<p class="mt-6 text-sm leading-[1.8]">For the bigger picture, see <a class="font-semibold underline underline-offset-4" href="/guides/family-responsibility-system/">The Family Responsibility System</a>.</p>
+</div></section>
+<section id="printable" class="px-5 py-12 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
+<p class="text-xs font-bold uppercase tracking-[.16em]">03 · PRINT AND PRACTICE</p><h2 class="mt-3 max-w-3xl font-serif text-3xl sm:text-4xl">{guide.printableTitle}</h2>
+<p class="mt-4 max-w-2xl text-sm leading-[1.8]">{guide.printableNote} {guide.starterNote}</p>
+<div class="mt-8 flex flex-wrap gap-3 border-t-[5px] bg-[#FBF7F1] p-6 sm:p-8" style={`border-color:${guide.accent}`}>
+<a href={pdf} download class="inline-flex min-h-12 items-center justify-center bg-[#545454] px-6 text-sm font-bold text-white">Download free one-page PDF</a>
+<a href={noReminders?'/family-responsibility-builder/':'/chore-chart/'} class="inline-flex min-h-12 items-center justify-center border border-[#545454] px-5 text-sm font-bold">{noReminders?'Build your family responsibility chart':'Personalize a chore chart'}</a>
+</div>
+<div class="mt-9 bg-[#CDDDE1]/30 p-6 sm:p-8"><h3 class="font-serif text-2xl">A family rhythm that lasts longer than one chart.</h3><p class="mt-3 max-w-2xl text-sm leading-[1.8]">Organized Family Club helps families practice simple responsibilities through monthly personalized tools, printed for your home.</p><a href="/club/" class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Explore Organized Family Club</a></div>
+<div class="mt-10"><h3 class="font-serif text-xl">More kids' responsibility resources</h3><div class="mt-4 grid gap-3 sm:grid-cols-2">{related.map(g=><a class="border border-[#ded8d2] bg-[#FBF7F1] p-4 text-sm font-semibold hover:underline" href={`/guides/${g.slug}/`}>{g.title}</a>)}<a class="border border-[#ded8d2] bg-[#FBF7F1] p-4 text-sm font-semibold hover:underline" href="/guides/chores-for-8-9-year-olds/">Chores for 8–9-Year-Olds</a></div></div>
+</div></section>
+</div>
