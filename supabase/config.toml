@@ -42,3 +42,11 @@ verify_jwt = false
 # Admin-only read of the configured Gelato calendar product variants.
 [functions.shop-gelato-product]
 verify_jwt = false
+
+# Resend marketing integration. Each endpoint authenticates requests itself.
+# The webhook verifies Svix signatures; the importer requires EMAIL_SYNC_SECRET.
+[functions.resend-marketing-webhook]
+verify_jwt = false
+
+[functions.resend-contact-sync]
+verify_jwt = false
