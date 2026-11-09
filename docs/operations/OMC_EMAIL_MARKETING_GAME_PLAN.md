@@ -76,6 +76,12 @@ These are the editorial queue. Titles, actual links, images and chronology must 
 
 The site may use different precise titles or URLs; do not manufacture live links. Each email should be useful without clicking. Link only to a confirmed matching page.
 
+## Direct links for existing subscribers
+
+For opted-in subscribers already on the email list, link **straight to the PDF** declared in `src/data/guides/guide-directory.ts` rather than returning them to another email-gated guide landing page. Use stable public `/downloads/*.pdf` URLs, verify live HTTP success and PDF content before sending, and avoid temporary storage links. Interactive tools can link to the generator, but the returning subscriber should not have to submit their email again. Club and product links may go to their offer pages.
+
+**First eight complete drafts with PDF CTA URLs:** [ONE_SMALL_WIN_FIRST_8_DRAFTS.md](./ONE_SMALL_WIN_FIRST_8_DRAFTS.md). This is the authoritative working copy for the first batch. Keep it updated as links and content are approved.
+
 ## 6. Draft structure for One Small Win
 
 **Subject:** One Small Win: [concrete result or tension]  
