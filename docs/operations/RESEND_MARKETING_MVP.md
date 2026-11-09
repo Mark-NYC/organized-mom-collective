@@ -215,3 +215,18 @@ Applied to production and committed `supabase/migrations/20261109070000_marketin
 QA ran in a rolled-back transaction: the Wednesday check passed; an explicit reservation on the current local date returned `broadcast_day`; removing it allowed the initial claim; a repeated claim was rejected. All QA data was rolled back. No email was sent.
 
 **Current planned next step:** Decide whether to maintain Wednesday broadcasts as a manual scheduling policy, or build a coordinated One Small Win sender. Then run the controlled end-to-end test to the approved test address after templates are published and sending is deliberately enabled under supervision. Do not enable welcome delivery on the strength of the calendar exclusion alone.
+
+
+### Guarded newsletter scheduler integrated, not activated (2026-11-09)
+
+Created and deployed `supabase/functions/resend-broadcast-scheduler/index.ts` (v2) and applied the versioned `supabase/migrations/20261109080000_marketing_broadcast_reservation_protocol.sql`.
+
+- Scheduler requires the **service-role authorization header**, an existing approved One Small Win broadcast ID, matching marketing segment, draft status, and future timestamp. An additional `BROADCAST_SCHEDULING_ENABLED=true` environment flag is required for non-dry-run scheduling. It has **not been enabled**.
+- A database reservation is written **before** invoking Resend's broadcast scheduling endpoint. The reservation blocks welcome emails on that NYC calendar date. If Resend is unavailable or scheduling is uncertain, the date remains blocked and a status/error is recorded for investigation.
+- Database reservation/record RPCs are executable by service_role only, not anon or authenticated. Production tests inside a rolled-back transaction passed: initial reservation, duplicate-date rejection, scheduled status, and uncertain-result fail-closed behavior. Unauthenticated request to Edge Function returned HTTP 401.
+- All 8 One Small Win editor documents now contain the business postal footer. **Critical rendering problem discovered:** Only two broadcasts (02 and 03) return rendered HTML and text from Resend. The other six retain TipTap editor text but the Resend get-broadcast response says plain text `(none)`; re-composing one did not restore the rendered body. Do not schedule those six until rendering is repaired and re-verified. Scheduler v2 explicitly checks for nonempty rendered HTML and text, mailing address, and unsubscribe placeholder and rejects any draft lacking them.
+- Current state: eight broadcasts **draft**, zero scheduled, zero database reservations, zero queue/ledger rows, `marketing_delivery_settings.enabled=false`, `broadcasts_coordinated=false`; no sends.
+- **Still not guaranteed:** A person clicking Send directly in Resend dashboard can bypass the reservation protocol; only campaigns scheduled through the integrated worker are covered. Publishing or scheduling must not begin until the owner agrees to the controlled process.
+- **Test-address delivery not performed:** A full-cycle welcome email test requires the two welcome templates to be published and the delivery locks selectively configured. The currently deployed worker is fail-closed and not capable of a test-only address bypass; do not enable production sending merely to test one mailbox.
+
+Recommended next operation: repair six broken rendered newsletters with owner approval if conversion to raw HTML is required, then add a dedicated one-recipient test mode that does not change production flags or send to the audience.
