@@ -7,7 +7,7 @@ rely on chat history. Started 2026-11-08 from `main` at `9d113b9`.
 | --- | --- | --- | --- |
 | 1 | Architecture audit and migration plan (this document) | COMPLETE (approved and merged 2026-11-08) | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
 | 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | READY FOR REVIEW (2a–2c merged; 2d in review; nothing applied to production) | see §12 |
-| 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 tested and verified) | – |
+| 3 | March becomes Spring Clean as a Team | IN PROGRESS (3a engine + guides → 3b printable + editor → 3c March integration) | see §12 |
 | 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE; D7–D9 deferred to Phase 4) | – |
 
 Statuses: NOT STARTED · IN PROGRESS · BLOCKED · READY FOR REVIEW · COMPLETE. COMPLETE means tested, merged and, where
@@ -325,6 +325,53 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 - [ ] March regression: `/app/club/march` unchanged (screens + print), `npm run test:club`, January regressions
 
 ### Phase 3: March, Spring Clean as a Team
+
+**Started 2026-11-09 from `main` at `b4ddb24` (2d merged; the Welcome switch stays OFF; no production change).**
+Owner brief: one room, thirty minutes, everyone has a part; a prepared, personalized spring-cleaning session, not a
+recurring chart. Isolation: Phase 3 never touches `/app/club/family-rhythm`, its engine, saved plans or print views,
+Welcome Kit orders or approval, the 2d overlap rule, or historical March data (the old March key
+`omc:club:march-chore-charts:v2` is left in place, unread by the new tool).
+
+- **3a** (branch `claude/march-spring-clean-3a`): recommendation engine `src/lib/club/engines/march-spring-clean.ts`
+  on `src/data/spring-cleaning.ts` (one library, no second one) and job-guide content for every job a plan can hold;
+  unit tests for safety, ownership, timing and recommendation quality. PR before any UI.
+- **3b**: the front/back printable (Our Family Spring Clean / How We Do Our Jobs), desktop editor, phone reference.
+- **3c**: March on the shared shell (account saving, approval, deadline, printing), Family Meeting, registry and copy;
+  then retire `/app/club/march/spring-prep` (redirect, tabs removed) once the new tool is verified.
+
+#### Phase 3a log (2026-11-09): READY FOR REVIEW, [#439](https://github.com/Mark-NYC/organized-mom-collective/pull/439)
+
+- Engine `src/lib/club/engines/march-spring-clean.ts` (pure; not wired to any page yet):
+  - **Room:** from her step-6 priority (keeping the house picked up → living room, laundry → laundry area, dinner and
+    evenings → kitchen, mornings or school stuff → entryway, bedtime → bedrooms), else the living room. She can pick any
+    of the library's 11 rooms or "another space".
+  - **Jobs:** the room's starting jobs, one per work phase first (clear, clean, floors and trash), each kept only if
+    the whole session still fits about 30 minutes (`MAX_MINUTES` 35) with people working side by side (the busiest
+    person's time, younger helpers' pace included) and the back can print it (`MAX_JOBS` 8). What doesn't fit waits;
+    an extra room job only for someone capable who'd otherwise have none; never filler.
+  - **Who:** the builder's own planner (`planRoom`) with two optional hooks added (the site builder passes neither, so
+    it's unchanged): `prefer` (whoever already takes care of that kind of job, step 3, or a child she wished it for,
+    step 4, when about as free) and `capacity` (children under six work about 15 minutes, one achievable job).
+    Grown-ups-only to grown-ups; no child below a job's suggested age by default; the holder leans last; one owner per
+    job, joint only when she sets it; a job nobody can safely do stays unassigned with the reason.
+  - **View:** room, honest minutes (`withinTime`), supplies, each person's jobs (stable ids, January colors), a start
+    sequence by phase, the room's one finish line, people with no part this time, validation issues, fingerprint.
+  - **Edits:** change room, owners (grown-ups-only refused for a child, with the reason), joint, remove, add (max 8),
+    replace (keeps the person when safe), start over, clean on load, saved-state guard.
+- Guides `src/data/club/spring-clean-guides.ts`: all 95 library jobs (GET READY / two or three steps / FINISHED WHEN /
+  safety where it matters) with an approved black-and-white icon each (March chore set or the Club icon library;
+  resolved through `marchIconArt`), and one finish line per room. Spring Prep's guidance (baseboards, winter gear,
+  donations) is carried into the matching jobs. Its two adult deep-clean tasks (vents, curtains) aren't library jobs
+  and stay in the cleaning companion's March project (`src/data/cleaning.ts`); nothing is duplicated.
+- Tests (`march-spring-clean.test.ts`, 42): every fixture family in every room; 300 generated households; phase
+  coverage and work order; a too-big project cut to fit and never claimed to fit; side-by-side timing; no filler and
+  people left free when a room has fewer jobs than people; the holder never the catch-all; children with achievable
+  parts; toddler-only, no-children, one adult + one child, teenagers-only (grown-ups-only jobs unassigned with the
+  reason), limited profile, existing and wished responsibilities, priority → room, sample families; every edit;
+  round trip with ids and colors; departures; determinism; guides complete, short, safe, no "help Mom", every icon
+  file present. Regressions: Family Rhythm + March snapshot 96 pass; full `vitest run` identical failures to current
+  `main` (54, none new); `npm run check` 0 errors.
+- Not yet: no page, printable or saving (3b, 3c). Nothing in production changes.
 
 - [ ] Brief: project choice rules (one room from `src/data/spring-cleaning.ts`, scaled to ~30 minutes, jobs ≤ people
       who can safely help, never filler), reuse of builder assignment rules and Spring Prep safety notes

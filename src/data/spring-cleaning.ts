@@ -242,7 +242,19 @@ export interface PlannedJob {
  * leaning last, then the less experienced); the plan then reads in work order. Jobs nobody here can do are listed
  * once, unassigned.
  */
-export function planRoom(jobs: readonly CleaningJob[], helpers: readonly Helper[], length: SessionLength): PlannedJob[] {
+export interface PlanOptions {
+  /**
+   * Someone who already takes care of this kind of job (the Club's family profile): they're chosen for it when they're
+   * about as free as anyone else (`PREFER_MINUTES`), never past their time or limits. The site's builder passes none.
+   */
+  prefer?: (job: CleaningJob, h: Helper) => boolean;
+  /** Most minutes this person works in a session (default: the whole session), e.g. less for the youngest helpers. */
+  capacity?: (h: Helper) => number;
+}
+/** How many minutes of head start "already takes care of this" is worth when choosing who does a job. */
+export const PREFER_MINUTES = 6;
+
+export function planRoom(jobs: readonly CleaningJob[], helpers: readonly Helper[], length: SessionLength, opts: PlanOptions = {}): PlannedJob[] {
   // Hand out first the jobs fewest people can do (so the one grown-up isn't used up on easy ones), then show the plan
   // in the order the work happens: clear, clean, floors.
   const able = (job: CleaningJob) => helpers.filter((h) => canDo(job, h)).length;
@@ -257,13 +269,13 @@ export function planRoom(jobs: readonly CleaningJob[], helpers: readonly Helper[
     for (const job of pending) {
       const fits = helpers
         .filter((h) => canDo(job, h))
-        .map((h) => ({ h, cost: job.minutes * paceFor(h), free: length - used.get(h.id)! }))
+        .map((h) => ({ h, cost: job.minutes * paceFor(h), used: used.get(h.id)!, free: Math.min(length, opts.capacity?.(h) ?? length) - used.get(h.id)! }))
         .filter((c) => c.cost <= c.free);
       if (!fits.length) {
         left.push(job);
         continue;
       }
-      const done = (c: (typeof fits)[number]) => length - c.free + (c.h.holder ? HOLDER_LEAN : 0);
+      const done = (c: (typeof fits)[number]) => c.used + (c.h.holder ? HOLDER_LEAN : 0) - (opts.prefer?.(job, c.h) ? PREFER_MINUTES : 0);
       fits.sort((a, b) => done(a) - done(b) || rank(a.h) - rank(b.h));
       const pick = fits[0];
       used.set(pick.h.id, used.get(pick.h.id)! + pick.cost);
