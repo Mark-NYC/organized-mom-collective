@@ -9,14 +9,14 @@ const json = (data: unknown, status=200) =>
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SEGMENT="7bf64eae-a8f7-4fb4-a18d-3578a2e1e557";
 const allowed=new Set([
- "0e1b9464-3c43-4c28-a917-7a4bb6472123",
+ "36761fdf-d316-4921-9c20-bdf44bce02fd",
  "71b315ae-e4b4-41d5-b2c1-f67769eb310b",
  "f754f259-ad49-450e-95fc-c490b5f38298",
- "71d5e3a8-511c-4e6a-b4bd-ff2a01f172cf",
- "6b2252e0-bfb7-4557-863c-e6cccb64e098",
- "c7cd24b9-f52e-4d13-9e75-745e08102eaa",
- "9e20b95f-d77a-4b69-be09-3b78316769af",
- "507efb45-222f-4d38-9b38-fec86ebd54b3",
+ "cb6b9c36-696c-4006-a039-93519616db73",
+ "5745766c-36c5-4ab1-a3c1-0becd37ba0a5",
+ "f821718f-f926-4b09-b3bf-baf17d5d89e6",
+ "ce4ae542-4759-438d-a422-077c35c582a8",
+ "fa2fb8e7-1305-449e-a0e6-816e99f259f3",
 ]);
 Deno.serve(async(req: Request)=>{
  if(req.method!=="POST")return json({error:"method_not_allowed"},405);
