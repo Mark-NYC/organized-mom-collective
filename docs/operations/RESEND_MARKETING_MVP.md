@@ -84,3 +84,13 @@ Confirm `status='synced'` and segment membership in Resend. Next test a new opte
 ### Limitations before production scale
 
 The HTTP event is async and best-effort; failed jobs require explicit retry. Add scheduled retries or a safe job-recovery worker before relying on this without monitoring. The old `resend-contact-sync` batch importer is separate and has not been qualified as a segment-aware recovery path. Do not use it for live backfills without updating/testing its segment handling and Resend credential permissions.
+
+
+### Credential replacement and verification (2026-11-09, later test)
+
+- Dedicated `RESEND_MARKETING_API_KEY` was set in Supabase by the owner. Replayed failed pg_net request ID 2.
+- `public.marketing_sync_jobs` transitioned from `failed/contact_lookup_401` to **`synced`**, attempts 2, no error.
+- Queried Resend segment `OMC | Free Resource Opt-Ins` (`7bf64eae-a8f7-4fb4-a18d-3578a2e1e557`): **3 contacts**, all not unsubscribed, matching the 3 consented Supabase records.
+- Tested two non-opt-in/suppressed synthetic signups and one consented synthetic signup inside transactions that were rolled back. **PASS**: non-opt-in not queued, suppressed address remained blocked and not queued, consented address queued. No QA email addresses were retained and pg_net dispatches in rolled-back transactions are not delivered.
+- No emails sent or scheduled. Old transactional `RESEND_API_KEY` unchanged.
+- **Still outstanding before calling this fully hands-off:** add failed-job retries and monitoring, test an actual newly opted-in production signup from the website, confirm physical mailing address and live resource links, and configure send automation only after approval.
