@@ -11,7 +11,7 @@ What the Club knows about a family so monthly printed resources, and later the M
 | 3 | Who already takes care of what (per area: “Owns it” / “Helps with it”) | `club_responsibilities`, `status = 'existing'` | No |
 | 4 | What the kids could take on (choices + custom, optional per kid) | `club_responsibilities`, `status = 'desired'` | No |
 | 5 | Where it's hard to stay on the same page | `club_households.challenges`, `challenge_note` | No |
-| 6 | One thing to stop managing alone: the family's first priority | `club_households.priority`, `priority_note` | No |
+| 6 | One thing to stop managing alone: the family's first priority (Bedtime added 2026-11-08, D5) | `club_households.priority`, `priority_note` | No |
 
 Migration: `supabase/migrations/20261109000000_club_family_profile.sql` (additive; **not applied** to the live project). Choices and ids: `src/data/club/family-profile.ts`. Types, steps, validation: `src/lib/club/family-profile.ts`. UI: `src/components/club/FamilySetup.tsx` (wizard and single-step edit), `FamilyProfileSummary.tsx` (on `/club/family`).
 

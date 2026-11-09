@@ -11,6 +11,7 @@ import { printPlan } from './proof';
 import { earlierCopyLink, PLAN_SAVE, saveText, type PlanSaveStatus } from './account';
 import { inWelcomeKit, PLAN_APPROVAL, PLAN_CHANGE, PLAN_WELCOME, PLAN_WELCOME_APPROVE, type PlanResource, type PlanResourceHost } from './resource';
 import { approvalDay, approvalState, planNow, readApproval, writeApproval } from './status';
+import { isWelcomeResource } from './resource';
 
 export interface PlanScreen<S> {
   resource(): PlanResource<S>;
@@ -118,12 +119,14 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
 
     const w = windowState();
     screen.dataset.window = w.phase;
-    $('[data-cp-window]').textContent = w.phase === 'closed' ? `${w.text}. You can still print a copy.` : w.text;
+    const evergreen = isWelcomeResource(root);
+    const member = root.dataset.planSource === 'account';
+    $('[data-cp-window]').textContent = evergreen ? 'Yours to keep. Change it or print it anytime.' : w.phase === 'closed' ? `${w.text}. You can still print a copy.` : w.text;
     const a = approval();
     const state = approvalState(a, r.fingerprint());
     screen.dataset.approval = state;
     $('[data-cp-approval-text]').textContent =
-      state === 'approved' ? `Approved ${approvalDay(a)} · ${root.dataset.planSource === 'account' ? 'on this device' : 'preview only'}` : state === 'changed' ? 'Changed since you approved' : 'Not approved yet';
+      state === 'approved' ? `Approved ${approvalDay(a)}${evergreen && member ? '' : ` · ${member ? 'on this device' : 'preview only'}`}` : state === 'changed' ? 'Changed since you approved' : 'Not approved yet';
     const primary = $<HTMLButtonElement>('[data-plan-primary]');
     const welcome = inWelcomeKit(root) && !copy && !locked;
     primary.textContent = copy ? 'Print this copy' : locked ? 'Print a copy' : welcome ? 'Approve for printing' : state === 'approved' ? '✓ Approved' : state === 'changed' ? 'Approve changes' : 'Approve this plan';
@@ -135,7 +138,9 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
 
     const sample = root.dataset.planSource === 'sample';
     // A member's plan saves to her account (./account.ts); approval is still this tab's check mark only.
-    $('[data-cp-foot]').replaceChildren(root.dataset.planSource === 'account'
+    $('[data-cp-foot]').replaceChildren(evergreen && member
+      ? `${saveText(root.dataset.planSave as PlanSaveStatus | undefined)} Your approval is saved with it.`
+      : root.dataset.planSource === 'account'
       ? `${saveText(root.dataset.planSave as PlanSaveStatus | undefined)} Approval stays on this device; nothing is mailed from here.`
       : (sample ? `${root.dataset.planLabel?.replace(/^the /, 'The ') ?? 'This family'} is a made-up sample family for this preview. ` : '')
         + 'Changes and approval stay in this browser tab for now. Nothing is saved to an account or mailed yet.', ...earlierCopyLink(root));
@@ -158,7 +163,7 @@ export function mountPlanScreen<S>(o: PlanScreenOptions<S>): PlanScreen<S> | nul
     }
     if (a && a.print === print) return;
     setApproval({ for: root.dataset.planFor ?? '', print, at: new Date().toISOString() });
-    toast('Approved in this preview. Nothing is mailed yet.', () => setApproval(a));
+    toast(isWelcomeResource(root) && root.dataset.planSource === 'account' ? 'Approved. It’s saved with your plan.' : 'Approved in this preview. Nothing is mailed yet.', () => setApproval(a));
   });
   $('[data-plan-copy]').addEventListener('click', () => {
     copySnapshot = structuredClone(resource().state());

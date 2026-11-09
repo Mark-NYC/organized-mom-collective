@@ -32,3 +32,9 @@ export type PlanResourceHost<S> = HTMLElement & { clubPlan?: PlanResource<S> };
 export const PLAN_WELCOME = 'club:plan-welcome';
 export const PLAN_WELCOME_APPROVE = 'club:plan-welcome-approve';
 export const inWelcomeKit = (root: HTMLElement) => root.hasAttribute('data-plan-welcome');
+/**
+ * The permanent Welcome resource (/app/club/family-rhythm, ClubPlanShell context="welcome"): not a month, so no
+ * editing deadline, no monthly Family Meeting, and her approval is kept on her account. Evergreen: nothing asks her to
+ * come back, check in or approve again.
+ */
+export const isWelcomeResource = (root: HTMLElement) => root.dataset.planContext === 'welcome';

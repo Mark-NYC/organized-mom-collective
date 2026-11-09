@@ -182,7 +182,9 @@ The one or two NEW habits get a pale March wash, bold words and a "New habit" ta
 Habits"; established jobs show plainly as context. Footer: "When the moment comes, we each know our part." **No
 rewards, points, streaks, percentages, checkboxes or tracking.**
 
-Rules: `src/lib/club/engines/march-family-rhythm.ts` (pure; cue → action → finish). Five shared moments (after
+Rules: `src/lib/club/engines/family-rhythm.ts`, the one Family Rhythm engine (March imports it through
+`march-family-rhythm.ts`; a plan's `month` sets the ages, none means March 2027; the Welcome resource reuses it:
+[WELCOME_MARCH_DECEMBER_MIGRATION.md](WELCOME_MARCH_DECEMBER_MIGRATION.md)) (pure; cue → action → finish). Five shared moments (after
 breakfast, before we head out, when we get home, after dinner, after brushing teeth), each with its own job library.
 Every job has to make sense at its moment (`fitsCue`): nothing that must happen before the cue, and no kitchen jobs at
 bedtime; her typed jobs are checked the same way and refused with the reason.
@@ -247,6 +249,20 @@ prepares the same sheet. The earlier March page, Spring Prep (`MarchSpringPrep.a
 `/app/club/march/spring-prep`; `MarchTabs.astro` links the two and keeps `?sample`. The kit page and
 `/club/march-preview` still describe Spring Prep. The prototype at `/app/club/family-chore-chart-prototype` is kept
 as the design reference.
+
+## The Welcome Family Rhythm (Phase 2b, not a month)
+
+`/app/club/family-rhythm`: every member's permanent Family Rhythm, whatever month she joins
+([WELCOME_MARCH_DECEMBER_MIGRATION.md](WELCOME_MARCH_DECEMBER_MIGRATION.md)). The same engine, sheet, editor, rail and
+phone view as March (`family-rhythm.ts`, `MarchFamilyRhythm.astro context="welcome"`, `FamilyRhythmDesktop.astro`,
+`MarchPlanMobile.astro tabs={false}`), on `ClubPlanShell context="welcome"`: `data-plan-context="welcome"`
+(`isWelcomeResource`), no kit, no editing deadline (the rail and screen say "Yours to keep"), no monthly Family Meeting,
+no Welcome Kit confirmation. The family loads with `loadKitHousehold(null, …)` (open with Club access or any month she
+held). Her plan saves through the same account bridge (`connectPlanAccount`) to `club_welcome_plans`, and her
+approval is stored there too (`setApprovalStore` in `status.ts`; `approve`/`unapprove` in `account.ts`), so it holds
+on every device; a saved change clears it. The plan state carries `context: 'welcome'` and the `month` its ages come
+from (the month she first opens it). Keys: `omc:club:welcome-family-rhythm:v1`, approval
+`omc:club:welcome-family-rhythm:approval`. Evergreen: no reminders, check-ins or reapproval.
 
 ## May
 

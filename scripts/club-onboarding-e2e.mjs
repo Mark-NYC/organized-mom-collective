@@ -1285,6 +1285,149 @@ scenarios.months = async (browser) => {
   await back.context().close();
 };
 
+// The Welcome Family Rhythm (/app/club/family-rhythm; docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 2b): every
+// member's, whatever month she holds; her edits and her approval on her account (club_welcome_plans), the same on
+// another device and her phone; no deadline, no reminders; March's saved plan never touched.
+const WELCOME_KEY = 'omc:club:welcome-family-rhythm:v1';
+const welcomeRow = (col) => sql(`select w.${col} from public.club_welcome_plans w join public.club_households h on h.id = w.household_id where h.owner_user_id = '${USER.id}'`) || null;
+async function openWelcome(page) {
+  await page.goto(`${BASE}/app/club/family-rhythm`, { waitUntil: 'networkidle' });
+  const ready = await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 }).then(() => true, () => false);
+  await page.waitForTimeout(900);
+  return ready;
+}
+scenarios.welcomeRhythm = async (browser) => {
+  console.log('The Welcome Family Rhythm: hers whatever month, saved and approved on her account, every device');
+  freshDb();
+  as.family();
+  const page = await newPage(browser, DESKTOP);
+  const ready = await openWelcome(page);
+  check('welcome rhythm: opens for a member with no month open yet', ready, ready ? '' : (await page.locator('main').innerText().catch(() => '')).slice(0, 160));
+  if (!ready) { await page.context().close(); return; }
+  const text = await page.locator('.club-plan').innerText();
+  check('welcome rhythm: prepared with her family', /Sofia|Mateo|Rivera/i.test(text));
+  check('welcome rhythm: no deadline, hers to keep', /Yours to keep/.test(text) && !/Print deadline/.test(text));
+  check('welcome rhythm: says it saves to her account', /Changes save to your account/.test(text));
+  check('welcome rhythm: no monthly meeting switch, no March tabs', !(await page.isVisible('[data-fm-view]')) && !(await page.isVisible('.mar-tabs')));
+  check('welcome rhythm: opening saves nothing', welcomeRow('revision') === null);
+  check('welcome rhythm: desktop, no sideways scrolling', await noSideScroll(page));
+
+  const marker = `Qwel${Date.now() % 1000}`;
+  await page.click('[data-cpd-edit]');
+  await page.locator('dialog[open] [role="tab"]', { hasText: 'Our moments' }).click();
+  const input = page.locator('dialog[open] input[type="text"], dialog[open] input:not([type])').first();
+  await input.fill(marker);
+  await input.press('Tab');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(2500);
+  const value = await tabValue(page, WELCOME_KEY);
+  const saved = sql(`select w.state -> ${lit(WELCOME_KEY)} ->> 'v' from public.club_welcome_plans w join public.club_households h on h.id = w.household_id where h.owner_user_id = '${USER.id}'`) || null;
+  check('welcome rhythm: an edit saves to her account', Boolean(value) && saved === value, `${String(saved).slice(0, 60)} vs ${String(value).slice(0, 60)}`);
+  const st = JSON.parse(value ?? '{}'); // the tab's { current, state }
+  check('welcome rhythm: saved as a Welcome plan with its month', st.state?.context === 'welcome' && /^\d{4}-\d{2}$/.test(st.state?.month ?? ''), JSON.stringify(st.state ?? {}).slice(0, 80));
+
+  await page.click('[data-cpd-approve]');
+  await page.waitForTimeout(1500);
+  const fp = await page.evaluate(() => document.querySelector('[data-mfr]').clubPlan.fingerprint());
+  check('welcome rhythm: approval saved on her account, against what prints', Boolean(welcomeRow('approved_at')) && welcomeRow('approved_fingerprint') === fp);
+  check('welcome rhythm: approving creates no order', sql(`select count(*) from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type not in ('monthly_resource', 'welcome_vision')`) === '0');
+  const pages = await printPdf(page, 'welcome-rhythm');
+  check('welcome rhythm: prints one Letter page', pages === 1, `${pages} pages`);
+  check('welcome rhythm: no script errors', page.errors.length === 0, page.errors.slice(0, 2).join(' | '));
+  const revision = welcomeRow('revision');
+  await page.context().close();
+
+  // Another device: her plan and her approval.
+  const again = await newPage(browser, DESKTOP);
+  await openWelcome(again);
+  check('welcome rhythm: same plan in a new browser', (await tabValue(again, WELCOME_KEY)) === value);
+  check('welcome rhythm: her words on the sheet', Boolean(await again.evaluate((m) => document.querySelector('.club-plan').innerText.includes(m), marker)));
+  check('welcome rhythm: approved on the other device too', /approved/i.test(await again.locator('[data-cpd-approve]').innerText()));
+  check('welcome rhythm: reopening doesn’t save again', welcomeRow('revision') === revision && Boolean(welcomeRow('approved_at')));
+  await again.context().close();
+
+  // Her phone: the same, approved; a change there clears the approval (she approves again only if she wants).
+  const phone = await newPage(browser, MOBILE);
+  check('welcome rhythm: phone opens with her family', (await openWelcome(phone)) && /Sofia|Mateo|Rivera/i.test(await phone.locator('.club-plan').innerText()));
+  check('welcome rhythm: phone shows it approved', /approved/i.test(await phone.locator('[data-plan-primary]').innerText()));
+  check('welcome rhythm: phone, no sideways scrolling', await noSideScroll(phone));
+  await phone.locator('[data-mrm-edit] button').first().click();
+  const pin = phone.locator('dialog[open] input[type="text"]:visible, dialog[open] input:not([type]):visible').first();
+  await pin.fill(`${marker}b`);
+  await pin.press('Tab');
+  await phone.evaluate(() => document.querySelector('dialog[open]')?.close());
+  await phone.waitForTimeout(2500);
+  check('welcome rhythm: a later change saves and clears the approval', Number(welcomeRow('revision')) > Number(revision) && welcomeRow('approved_at') === null);
+  check('welcome rhythm: and the phone offers approval again', /approve (this plan|changes)/i.test(await phone.locator('[data-plan-primary]').innerText()));
+  await shot(phone, 'welcome-rhythm-phone');
+  await phone.context().close();
+
+  // March's saved plan is its own: nothing written there, and Club Home links to her Family Rhythm.
+  check('welcome rhythm: March’s saved plan untouched', sql(`select count(*) from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '2027-03-spring-clean-together'`) === '0');
+  const home = await newPage(browser, DESKTOP);
+  await home.goto(`${BASE}/app/club`, { waitUntil: 'networkidle' });
+  await home.waitForTimeout(1200);
+  check('Club Home links to her Family Rhythm', await home.locator('a[href="/app/club/family-rhythm"]').count() > 0);
+  await home.context().close();
+};
+
+// The Welcome Kit carrying her Family Rhythm (Phase 2c), with the owner's switch on (club_settings.welcome_item =
+// 'rhythm'; it ships off). Her welcome order is created the way billing creates it, and the switch makes it a Family
+// Rhythm. The kit page names it, her Family Rhythm opens in Welcome Kit mode, approving it puts the plan she approved on
+// her order, and the owner's print view prints exactly that.
+scenarios.welcomeRhythmKit = async (browser) => {
+  console.log('The Welcome Kit with her Family Rhythm (switch on): kit page, approve for printing, owner print view');
+  freshDb();
+  sql(`update public.club_settings set welcome_item = 'rhythm'`);
+  sql(`delete from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_vision'`);
+  as.family();
+  as.profileDone();
+  sql(`insert into public.club_fulfillment_orders (user_id, household_id, resource_month, fulfillment_type, provider)
+       select '${USER.id}', h.id, date_trunc('month', now())::date, 'welcome_vision', 'manual' from public.club_households h where h.owner_user_id = '${USER.id}'`);
+  const rhythmOrder = () => sql(`select id from public.club_fulfillment_orders where user_id = '${USER.id}' and fulfillment_type = 'welcome_rhythm' and status <> 'canceled'`);
+  check('switch on: her welcome order is a Family Rhythm', Boolean(rhythmOrder()));
+
+  const page = await newPage(browser, DESKTOP);
+  await page.goto(`${BASE}/club/welcome-kit`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  const kitText = await page.locator('main').innerText();
+  check('kit page: Your Family Rhythm in place of the Vision print', /Your Family Rhythm/.test(kitText) && !/Family Vision Print/.test(kitText), kitText.replace(/\s+/g, ' ').slice(0, 200));
+  const link = page.locator('a[href="/app/club/family-rhythm?welcome=1"]').first();
+  check('kit page: it opens her Family Rhythm in Welcome Kit mode', await link.count() > 0);
+  await page.goto(`${BASE}/app/club/family-rhythm?welcome=1`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 }).catch(() => undefined);
+  await page.waitForTimeout(1500);
+  check('Welcome Kit mode: the step bar and "Approve for printing"', await page.isVisible('[data-welcome-rhythm-kit]') && /approve for printing/i.test(await page.locator('[data-cpd-approve]').innerText()));
+  await page.click('[data-cpd-approve]');
+  await page.waitForURL((u) => !u.pathname.startsWith('/app/club/family-rhythm'), { timeout: 15000 }).catch(() => undefined);
+  check('approving goes on to the next piece of her kit', !page.url().includes('/app/club/family-rhythm'), page.url());
+  const fp = sql(`select personalization ->> 'fingerprint' from public.club_fulfillment_orders where id = '${rhythmOrder()}'`);
+  check('the plan she approved is on her order, with her approval', Boolean(fp) && fp === welcomeRow('approved_fingerprint')
+    && Boolean(sql(`select member_approved_at from public.club_fulfillment_orders where id = '${rhythmOrder()}'`)));
+  check('no script errors', page.errors.length === 0, page.errors.slice(0, 2).join(' | '));
+  await page.context().close();
+
+  // The owner: the Welcome Kits list names it with the print specs, and its print view prints her approved plan.
+  const admin = await newPage(browser, DESKTOP, { auth: false });
+  await asAdmin(admin);
+  await admin.goto(`${BASE}/admin/club`, { waitUntil: 'networkidle' });
+  await admin.waitForTimeout(1500);
+  await admin.locator('button, a', { hasText: 'Fulfillment' }).first().click().catch(() => undefined);
+  await admin.waitForTimeout(1500);
+  const adminText = await admin.locator('main').innerText();
+  check('admin: the kit shows her Family Rhythm', /Family Rhythm/.test(adminText));
+  check('admin: print specs shown, marked not yet confirmed', /Premium uncoated \(target\)/.test(adminText) && /not yet confirmed with the printer/.test(adminText));
+  await admin.goto(`${BASE}/app/club/family-rhythm?fulfillment=${rhythmOrder()}`, { waitUntil: 'networkidle' });
+  const ok = await admin.waitForFunction(() => document.querySelector('.club-plan')?.dataset.planState === 'ready', null, { timeout: 15000 }).then(() => true, () => false);
+  await admin.waitForTimeout(1200);
+  check('print view: opens her approved plan', ok && /Rivera/i.test(await admin.locator('.club-plan').innerText()), ok ? '' : (await admin.locator('.club-plan').innerText().catch(() => '')).slice(0, 160));
+  check('print view: prints what she approved', ok && (await admin.evaluate(() => document.querySelector('[data-mfr]').clubPlan.fingerprint())) === fp);
+  const pages = ok ? await printPdf(admin, 'welcome-rhythm-print-view') : 0;
+  check('print view: one Letter page', pages === 1, `${pages}`);
+  await admin.context().close();
+  sql(`update public.club_settings set welcome_item = 'vision'`);
+};
+
 const names = ONLY ? ONLY.split(',') : Object.keys(scenarios).filter((n) => n !== 'months');
 const browser = await chromium.launch();
 try {

@@ -11,12 +11,26 @@ import { clubAccountsEnabled } from '../../../data/club/config';
 import { routes } from '../../../routes';
 import { getSession } from '../../account';
 import { loadKitHousehold, type KitHousehold } from '../kit-household';
-import { loadMembership, loadResource, saveResource, shortDate, type Membership } from '../membership';
+import { approveWelcomePlan, loadMembership, loadResource, loadWelcomePlan, saveResource, saveWelcomePlan, shortDate, unapproveWelcomePlan, type Membership } from '../membership';
 import { accountStore, clubHref, fromDb, sampleStore } from '../store';
 import { adminRpc, loadSession as loadAdminSession } from '../../admin/session';
 import { MEMBER_STORAGE_PREFIX } from '../../../data/club/resources';
 import { connectPlanAccount, PLAN_SAVE } from './account';
 import { planKey } from './storage';
+import { PLAN_APPROVAL, isWelcomeResource } from './resource';
+import { setApprovalStore, type Approval } from './status';
+
+/** The latest approval sent to her account (Welcome Family Rhythm), so a page can wait for it before leaving. */
+let lastApproval: Promise<void> = Promise.resolve();
+export const welcomeApprovalSettled = () => lastApproval;
+
+/** The Welcome Family Rhythm's approval key: on her account (setApprovalStore), never this tab, for a member. */
+export const WELCOME_APPROVAL_KEY = 'omc:club:welcome-family-rhythm:approval';
+const WELCOME_DENIED: [string, string, string, string] = [
+  'Your Family Rhythm comes with the Club',
+  'It’s prepared from your family profile when you join, and it’s yours to keep.',
+  'See the Club', routes.clubJoin,
+];
 
 export type ReadyFamily = Extract<KitHousehold, { status: 'ready' }>;
 export const PLAN_FAMILY_READY = 'club:plan-family-ready';
@@ -77,7 +91,7 @@ export const fulfillmentOrder = (search = typeof location === 'undefined' ? '' :
 };
 
 interface Bundle {
-  order: { id: string; kit_slug: string | null; display_name: string | null; email: string; resource_month: string; status: string; readiness: string; pdf_status: string; in_welcome_kit?: boolean };
+  order: { id: string; fulfillment_type?: string; kit_slug: string | null; display_name: string | null; email: string; resource_month: string; status: string; readiness: string; pdf_status: string; in_welcome_kit?: boolean };
   household: Parameters<typeof fromDb>[0];
   state: Record<string, { s: 'l' | 's'; v: string }> | null;
 }
@@ -107,7 +121,11 @@ async function startFulfillment(root: HTMLElement, order: string) {
   } catch (e) {
     return fail('We couldn’t load this mailing', (e as Error).message);
   }
-  if (b.order.kit_slug !== root.dataset.kitSlug) return fail('This mailing is for another month', `Order ${order} is ${b.order.kit_slug ?? 'not a monthly resource'}.`);
+  // The Welcome Family Rhythm prints the plan she approved, which the order keeps (club_admin_fulfillment_bundle).
+  if (isWelcomeResource(root) ? b.order.fulfillment_type !== 'welcome_rhythm' : b.order.kit_slug !== root.dataset.kitSlug) {
+    return fail('This mailing is for another resource', `Order ${order} is ${b.order.fulfillment_type === 'welcome_rhythm' ? 'a Family Rhythm' : b.order.kit_slug ?? 'not a monthly resource'}.`);
+  }
+  if (isWelcomeResource(root) && !b.state) return fail('She hasn’t approved her Family Rhythm yet', 'The print view shows the plan she approved, once she has.');
   // Her saved plan only: nothing from this browser's own tabs or previews.
   for (const store of [sessionStorage, localStorage]) {
     for (const k of Object.keys(store)) if (k.startsWith(MEMBER_STORAGE_PREFIX) || k === root.dataset.planKey) store.removeItem(k);
@@ -173,14 +191,16 @@ export function startPlanFamily(root: HTMLElement) {
   const gate = root.querySelector<HTMLElement>('[data-plan-gate]');
   const order = fulfillmentOrder();
   if (order) return startFulfillment(root, order);
-  return loadKitHousehold(root.dataset.kitSlug ?? '', location.search, {
+  const welcome = isWelcomeResource(root);
+  return loadKitHousehold(welcome ? null : root.dataset.kitSlug ?? '', location.search, {
     accountsEnabled: clubAccountsEnabled,
     hasSession: async () => Boolean(await getSession()),
     accountStore,
     sampleStore,
   }).then(async (result) => {
     if (result.status !== 'ready') {
-      const denied = result.status === 'denied' && result.source === 'account'
+      const denied = result.status === 'denied' && welcome ? WELCOME_DENIED
+        : result.status === 'denied' && result.source === 'account'
         ? deniedCopy(month, root.dataset.kitSlug ?? '', await loadMembership().catch(() => null))
         : undefined;
       if (gate) gateMessage(gate, month, result, denied);
@@ -191,7 +211,10 @@ export function startPlanFamily(root: HTMLElement) {
     // her account (./account.ts). Samples and previews stay in this tab.
     const slug = root.dataset.kitSlug;
     const key = root.dataset.planKey;
-    if (result.source === 'account' && slug && key) {
+    const planFor = planKey(result.sample, result.household.id);
+    if (result.source === 'account' && welcome && key) {
+      await connectWelcomeAccount(root, key, planFor);
+    } else if (result.source === 'account' && slug && key) {
       const account = await connectPlanAccount(slug, key, {
         load: loadResource,
         save: saveResource,
@@ -207,7 +230,7 @@ export function startPlanFamily(root: HTMLElement) {
       });
       if (account.earlierCopy) root.dataset.planEarlier = routes.clubResource(slug);
     }
-    root.dataset.planFor = planKey(result.sample, result.household.id);
+    root.dataset.planFor = planFor;
     root.dataset.planSource = result.source;
     root.dataset.planLabel = familyLabel(result);
     (root as FamilyRoot).planFamily = result;
@@ -219,5 +242,46 @@ export function startPlanFamily(root: HTMLElement) {
     root.dataset.planState = 'ready';
     window.dispatchEvent(new Event('resize'));
     return result;
+  });
+}
+
+/**
+ * The Welcome Family Rhythm on her account: her plan through club_welcome_plans (same bridge as a month), and her
+ * approval there too, so it holds on every device. Approving is asked once, for printing; nothing here reminds her.
+ */
+async function connectWelcomeAccount(root: HTMLElement, key: string, planFor: string) {
+  let approval: Approval | null = null;
+  const account = await connectPlanAccount('welcome-family-rhythm', key, {
+    load: loadWelcomePlan,
+    save: (_slug, state, revision) => saveWelcomePlan(state, revision),
+    approve: approveWelcomePlan,
+    unapprove: unapproveWelcomePlan,
+    storage: sessionStorage,
+    onUserAction: (cb) => {
+      const once = () => { cb(); for (const t of ACTIONS) document.removeEventListener(t, once, true); };
+      for (const t of ACTIONS) document.addEventListener(t, once, true);
+    },
+    onStatus: (status) => {
+      root.dataset.planSave = status;
+      root.dispatchEvent(new Event(PLAN_SAVE));
+    },
+    // A saved change clears her approval on the account; say so here too.
+    onSaved: () => { if (approval) { approval = null; root.dispatchEvent(new Event(PLAN_APPROVAL)); } },
+  });
+  if (account.approval) approval = { for: planFor, print: account.approval.print, at: account.approval.at };
+  setApprovalStore(WELCOME_APPROVAL_KEY, {
+    read: (f) => (approval && approval.for === f ? approval : null),
+    write: (a) => {
+      const before = approval;
+      approval = a;
+      const done = a ? account.approve(a.print) : account.unapprove();
+      lastApproval = done;
+      done.catch((e: Error) => {
+        approval = before;
+        root.dataset.planSave = e.message === 'conflict' ? 'conflict' : e.message === 'read_only' ? 'read' : 'error';
+        root.dispatchEvent(new Event(PLAN_SAVE));
+        root.dispatchEvent(new Event(PLAN_APPROVAL));
+      });
+    },
   });
 }

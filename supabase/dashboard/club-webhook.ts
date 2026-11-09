@@ -251,9 +251,20 @@ function clubStripeBlocked(deps) {
 }
 
 // supabase/functions/_shared/club/emails.ts
+async function welcomeItemOf(deps, userId) {
+  if (!userId) return "vision";
+  try {
+    return await deps.db.rpc("club_welcome_item_of", { p_user: userId }) === "rhythm" ? "rhythm" : "vision";
+  } catch {
+    return "vision";
+  }
+}
 var monthLabel = (isoMonth) => (/* @__PURE__ */ new Date(`${isoMonth.slice(0, 7)}-15T12:00:00Z`)).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
 var longDate = (iso2) => new Date(iso2).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
 var WELCOME_KIT = "Your first mailing is your Welcome Kit: a personalized Family Vision watercolor print for your wall, our gift, our one-page Family Meeting guide, and your family’s first monthly resource. Once you approve your print and your first resource, we print them together and mail them to your door in one package.";
+var WELCOME_KIT_RHYTHM = "Your first mailing is your Welcome Kit: your family’s personalized Family Rhythm, one page with two moments your family already shares and everyone’s part in them; our one-page Family Meeting guide; and your family’s first monthly resource. Your Family Rhythm is ready in your account as soon as you sign in. Once you approve it and your first resource, we print them together and mail them to your door in one package.";
+var kitText = (d) => d.welcomeItem === "rhythm" ? WELCOME_KIT_RHYTHM : WELCOME_KIT;
+var itemName = (d) => d.welcomeItem === "rhythm" ? "Family Rhythm" : "Family Vision print";
 var MONTH_PAGES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
 function toolUrl(siteUrl, slug, welcome = false) {
   const month = MONTH_PAGES[Number(slug.slice(5, 7)) - 1];
@@ -278,14 +289,14 @@ function renderClubEmail(kind, to, d, siteUrl) {
           title: "Welcome. You’re in.",
           blocks: [
             p(d.freeMonth ? `Thank you for joining. Your first month is free: your family’s personalized ${d.freeMonth} plan, printed and mailed to your door, on us.` : "Thank you for joining."),
-            p(WELCOME_KIT),
+            p(kitText(d)),
             p(`Your first $5.90 payment is on ${d.firstCharge}, then $5.90 a month. Cancel any time before then from your account and you won’t pay anything.`),
             panel(C.sage, C.sageRule, [
               panelTitle("Two minutes to get started"),
               steps([
                 "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
                 "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
-                "Approve your Family Vision print, look over your first resource, and we’ll prepare your Welcome Kit."
+                `Approve your ${itemName(d)}, look over your first resource, and we’ll prepare your Welcome Kit.`
               ]),
               button("Sign in to your account", login)
             ]),
@@ -301,13 +312,13 @@ function renderClubEmail(kind, to, d, siteUrl) {
         title: "Welcome. You’re in.",
         blocks: [
           p(d.plan === "annual" ? "Thank you for joining for the year. Your twelve monthly resources are in your account, with a printed mailing each month." : "Thank you for joining. Each paid month brings that month’s resource, prepared for your family, with a printed copy in the mail."),
-          p(WELCOME_KIT),
+          p(kitText(d)),
           panel(C.sage, C.sageRule, [
             panelTitle("Two minutes to get started"),
             steps([
               "Sign in with this email address. We’ll send a 6-digit code; there’s no password.",
               "Tell us who’s in your family: first names and the kids’ ages. That’s what we use to prepare everything.",
-              "Approve your Family Vision print, look over your first resource, and we’ll prepare your Welcome Kit."
+              `Approve your ${itemName(d)}, look over your first resource, and we’ll prepare your Welcome Kit.`
             ]),
             button("Sign in to your account", login)
           ]),
@@ -360,7 +371,7 @@ function renderClubEmail(kind, to, d, siteUrl) {
         eyebrow: "Your Welcome Kit",
         title: "Does your first resource look right?",
         blocks: [
-          p(`Your Family Vision print is approved. Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? "first"} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
+          p(`Your ${itemName(d)} is approved. Before we print your Welcome Kit, take a quick look at your ${d.monthLabel ?? "first"} resource. It’s already prepared with your family’s names; change anything that doesn’t fit, then confirm it.`),
           button("Take a look", d.kitSlug ? toolUrl(siteUrl, d.kitSlug, true) : dash),
           small("We print your Welcome Kit only after you confirm it, and aim to mail it within two business days.")
         ]
@@ -373,8 +384,8 @@ function renderClubEmail(kind, to, d, siteUrl) {
         eyebrow: "Welcome Kit submitted",
         title: "A Welcome Kit is ready to prepare",
         blocks: [
-          p(`${d.familyName ?? "A new member"}${d.memberEmail ? ` (${d.memberEmail})` : ""} approved her Family Vision print and her ${d.monthLabel ?? "first"} resource.`),
-          p(`Packing list: Family Vision print · Family Meeting guide (standard insert) · ${d.monthLabel ?? "first month"} resource.${d.shipBy ? ` Target: mail by ${d.shipBy} (two business days).` : ""}`),
+          p(`${d.familyName ?? "A new member"}${d.memberEmail ? ` (${d.memberEmail})` : ""} approved her ${itemName(d)} and her ${d.monthLabel ?? "first"} resource.`),
+          p(`Packing list: ${itemName(d)} · Family Meeting guide (standard insert) · ${d.monthLabel ?? "first month"} resource.${d.shipBy ? ` Target: mail by ${d.shipBy} (two business days).` : ""}`),
           button("Open Welcome Kits", `${siteUrl}/admin/club`),
           small("Make both PDFs, approve the kit, then mark it printed and mailed in /admin/club. Nothing is marked automatically.")
         ]
@@ -668,7 +679,8 @@ async function trialStarted(deps, sub, member) {
   await sendClubEmail(deps, `welcome:${member.userId}`, "welcome", member.userId, member.email, {
     plan: "monthly",
     freeMonth: freeMonth ? monthLabel(freeMonth) : null,
-    firstCharge: firstCharge ? longDate(new Date(firstCharge * 1e3).toISOString()) : null
+    firstCharge: firstCharge ? longDate(new Date(firstCharge * 1e3).toISOString()) : null,
+    welcomeItem: await welcomeItemOf(deps, member.userId)
   });
 }
 async function cardFingerprint(deps, sub) {
@@ -757,7 +769,8 @@ async function applyInvoice(deps, invoiceId, eventAt, failed) {
     const first = [...r.months].sort()[0];
     await sendClubEmail(deps, `welcome:${member.userId}`, "welcome", member.userId, member.email, {
       plan: paidPeriods(inv)[0]?.plan ?? null,
-      monthLabel: first ? monthLabel(first) : void 0
+      monthLabel: first ? monthLabel(first) : void 0,
+      welcomeItem: await welcomeItemOf(deps, member.userId)
     });
   }
   if (failed && inv.status !== "paid") {

@@ -44,12 +44,25 @@ export interface PlanAccountDeps {
   onStatus(status: PlanSaveStatus): void;
   /** Debounce before saving, ms. */
   wait?: number;
+  /**
+   * Her approval kept on her account (the Welcome resource). `approve` records it against the revision she's looking at
+   * (0: nothing saved yet, so `state` is saved with it) and returns the revision then saved; `unapprove` takes it back.
+   */
+  approve?(revision: number, fingerprint: string, state: ResourceVersion['state'] | null): Promise<number>;
+  unapprove?(revision: number): Promise<void>;
+  /** A change of hers was saved: the account cleared any approval. */
+  onSaved?(): void;
 }
 
 export interface PlanAccount {
   status: PlanSaveStatus;
   /** A plan for a different tool saved on her copy of this month: it stays there (null when there's none). */
   earlierCopy: boolean;
+  /** Her approval as loaded (approve/unapprove deps only). */
+  approval: { at: string; print: string } | null;
+  /** Record or take back her approval, after any change still waiting to save. Rejects with the account's reason. */
+  approve(fingerprint: string): Promise<void>;
+  unapprove(): Promise<void>;
   stop(): void;
 }
 
@@ -63,7 +76,8 @@ export function initialValue(state: ResourceVersion['state'], key: string, slug:
 
 export async function connectPlanAccount(slug: string, key: string, deps: PlanAccountDeps): Promise<PlanAccount> {
   const { storage } = deps;
-  const result: PlanAccount = { status: 'loading', earlierCopy: false, stop: () => undefined };
+  const unavailable = () => Promise.reject(new Error('unavailable'));
+  const result: PlanAccount = { status: 'loading', earlierCopy: false, approval: null, approve: unavailable, unapprove: unavailable, stop: () => undefined };
   const set = (s: PlanSaveStatus) => {
     result.status = s;
     deps.onStatus(s);
@@ -78,6 +92,8 @@ export async function connectPlanAccount(slug: string, key: string, deps: PlanAc
   }
   let saved = { ...res.state };
   let revision = res.revision;
+  const loaded = res as ResourceVersion & { approved_fingerprint?: string | null };
+  if (loaded.approved_at && loaded.approved_fingerprint) result.approval = { at: loaded.approved_at, print: loaded.approved_fingerprint };
   const copy = saved[memberStorageKey(slug)];
   result.earlierCopy = Boolean(copy && !SAME_TOOL_AS_COPY.has(slug) && !saved[key]);
 
@@ -109,6 +125,7 @@ export async function connectPlanAccount(slug: string, key: string, deps: PlanAc
       try {
         revision = await deps.save(slug, next, revision);
         saved = next;
+        deps.onSaved?.();
         set('saved');
       } catch (e) {
         const m = (e as Error).message;
@@ -129,6 +146,29 @@ export async function connectPlanAccount(slug: string, key: string, deps: PlanAc
     timer = setTimeout(flush, deps.wait ?? 900);
   };
   proto.setItem = patched;
+  if (deps.approve && deps.unapprove) {
+    const approveDep = deps.approve;
+    const unapproveDep = deps.unapprove;
+    const queued = (job: () => Promise<void>) => {
+      clearTimeout(timer);
+      flush();
+      const run = inFlight.then(() => { if (stopped) throw new Error(result.status === 'read' ? 'read_only' : 'conflict'); return job(); });
+      inFlight = run.catch(() => undefined);
+      return run;
+    };
+    result.approve = (fingerprint) => queued(async () => {
+      // Nothing saved yet (the prepared plan): the plan she approved is saved with her approval.
+      const value = storage.getItem(key);
+      const state = revision === 0 && value !== null ? { ...saved, [key]: { s: 's' as const, v: value } } : null;
+      revision = await approveDep(revision, fingerprint, state);
+      if (state) saved = state;
+      result.approval = { at: new Date().toISOString(), print: fingerprint };
+    });
+    result.unapprove = () => queued(async () => {
+      await unapproveDep(revision);
+      result.approval = null;
+    });
+  }
   // Leaving the page with a change still waiting: send it now.
   const leave = () => { clearTimeout(timer); flush(); };
   globalThis.addEventListener?.('pagehide', leave);

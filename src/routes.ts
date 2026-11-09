@@ -171,6 +171,8 @@ export const routes = {
   cleaning: '/app/cleaning',
   appClub: '/app/club',
   appClubMonths: '/app/club/months',
+  /** The Welcome Family Rhythm: every member's, whatever month she joins (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md). */
+  appClubFamilyRhythm: '/app/club/family-rhythm',
   appAccount: '/app/account',
   week: '/app/week',
   /** Old name for the Week page; redirects to `week`. */

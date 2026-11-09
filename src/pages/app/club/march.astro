@@ -1,17 +1,18 @@
 ---
 /** March Club kit in the app, on the shared Club plan shell (src/components/club/plan/,
  * docs/club/PLAN_ARCHITECTURE.md): Our Family Rhythm, one Letter page for the whole family (Spring Prep, March's
- * earlier resource, is its second tab at /app/club/march/spring-prep). Desktop (>= 1100px): the shared rail
- * (ClubPlanDesktop) beside the sheet. Below 1100px: the shared plan screen with the reference view (MarchPlanMobile).
- * The sheet and its editor live in MarchFamilyRhythm; the rules in src/lib/club/engines/march-family-rhythm.ts.
- * The storage and approval keys are the ones the earlier chore charts used, so saved plans carry over (migrated). */
+ * earlier resource, is its second tab at /app/club/march/spring-prep). Desktop (>= 1100px): the shared Family Rhythm
+ * rail (FamilyRhythmDesktop, also the Welcome resource's) beside the sheet. Below 1100px: the shared plan screen with
+ * the reference view (MarchPlanMobile). The sheet and its editor live in MarchFamilyRhythm; the rules in
+ * src/lib/club/engines/family-rhythm.ts. The storage and approval keys are the ones the earlier chore charts used, so
+ * saved plans carry over (migrated). */
 import AppLayout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import '../../../styles/club-marks.css';
 import MarchFamilyRhythm from '../../../components/club/MarchFamilyRhythm.astro';
 import MarchPlanMobile from '../../../components/club/MarchPlanMobile.astro';
 import MarchTabs from '../../../components/club/MarchTabs.astro';
-import ClubPlanDesktop from '../../../components/club/plan/ClubPlanDesktop.astro';
+import FamilyRhythmDesktop from '../../../components/club/FamilyRhythmDesktop.astro';
 import ClubPlanShell from '../../../components/club/plan/ClubPlanShell.astro';
 import { clubEditingDeadline } from '../../../lib/club/deadline';
 import { kits } from '../../../data/club/kits';
@@ -22,31 +23,10 @@ const storageKey = 'omc:club:march-chore-charts:v2';
 ---
 <AppLayout title="March Family Rhythm">
   <ClubPlanShell class="mch-plan family-brand" kitSlug={kit.slug} month="March" storageKey={storageKey}>
-    <ClubPlanDesktop slot="desktop" deadline={deadline} kicker="March · Kit preview" instructions={[
+    <FamilyRhythmDesktop slot="desktop" deadline={deadline} kicker="March · Kit preview" instructions={[
       'Two moments your family already shares each day, and everyone’s part in them. When the moment comes, each person knows their job, so nobody has to be the reminder.',
       'One or two new habits are marked for the family to practice; the rest is what you already do. Hang it where everyone passes.',
-    ]}>
-      <Fragment slot="title">Our Family <em>Rhythm</em></Fragment>
-      <div class="cpd-details">
-        <section class="cpd-block" aria-labelledby="mch-d-moments">
-          <p class="cpd-label" id="mch-d-moments">Our moments</p>
-          <dl class="cpd-rows" data-mch-d-moments></dl>
-          <button type="button" class="cpd-link" data-mch-d-open="moments">Change our moments</button>
-        </section>
-        <section class="cpd-block" aria-labelledby="mch-d-owners">
-          <p class="cpd-label" id="mch-d-owners">Who owns what</p>
-          <ul class="mch-d-people" data-mch-d-people></ul>
-          <button type="button" class="cpd-link" data-mch-d-open="owners">Change who owns what</button>
-        </section>
-        <section class="cpd-block" aria-labelledby="mch-d-habits">
-          <p class="cpd-label" id="mch-d-habits">This week, we’re practicing</p>
-          <ul class="mch-d-habits" data-mch-d-habits></ul>
-          <button type="button" class="cpd-link" data-mch-d-open="habits">Choose our new habits</button>
-          <button type="button" class="cpd-link" data-mch-d-restore hidden>Start over with the prepared plan</button>
-          <p class="cpd-hint" data-mch-d-restored role="status" tabindex="-1"></p>
-        </section>
-      </div>
-    </ClubPlanDesktop>
+    ]} />
     <div class="mch-proof" slot="printable" data-plan-proof-body>
       <div class="mch-scroll" data-plan-proof-scroll tabindex="0" role="region" aria-label="Printable preview">
         <div class="mch-tabs-desktop"><MarchTabs current="rhythm" /></div>
@@ -56,55 +36,3 @@ const storageKey = 'omc:club:march-chore-charts:v2';
     <MarchPlanMobile slot="mobile" deadline={deadline} />
   </ClubPlanShell>
 </AppLayout>
-<style is:global>
-.mch-tabs-desktop{display:none}
-@media screen and (min-width:1100px){.mch-tabs-desktop{display:block}}
-.mch-d-people,.mch-d-habits{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:4px;font-size:.88rem}
-.mch-d-people li{display:flex;align-items:baseline;gap:8px}
-.mch-d-people .mc-owner{flex:none}
-.mch-d-people span.mch-d-jobs{color:var(--color-warm-soft,#6e6461)}
-</style>
-<script>
-import { restorePlan, type RhythmPlanResource, type RhythmState } from '../../../lib/club/engines/march-family-rhythm';
-import { ownerTag } from '../../../lib/club/personalize/marks';
-import { mountPlanDesktop } from '../../../lib/club/plan/desktop';
-import { el } from '../../../lib/club/plan/dom';
-
-const root = document.querySelector<HTMLElement>('.mch-plan');
-const host = root?.querySelector<HTMLElement & { clubPlan?: RhythmPlanResource }>('[data-mfr]');
-if (root && host) {
-  const plan = () => host.clubPlan!;
-  const q = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
-  const restored = q('[data-mch-d-restored]');
-  let undo: RhythmState | null = null;
-  mountPlanDesktop<RhythmState>({
-    root,
-    host,
-    approvalKey: 'omc:preview:march-chore-charts:approval',
-    edit: () => plan().openEditor(),
-    lock: (on) => plan().setLocked(on),
-    render: (_r, locked) => {
-      const v = plan().view();
-      q('[data-mch-d-moments]').replaceChildren(...v.moments.filter((m) => m.enabled).map((m) =>
-        el('div', {}, el('dt', {}, m.title), el('dd', {}, `Cue: ${m.cue.toLowerCase()}`))));
-      // Who owns what: everyone's parts, so she sees the share at a glance (not everyone needs one in each moment).
-      q('[data-mch-d-people]').replaceChildren(...v.people.map((p) => {
-        const jobs = v.printed.flatMap((m) => m.rows.filter((r) => r.owners.some((o) => o.id === p.id)));
-        return el('li', {}, ownerTag(p.name, p.color), el('span', { class: 'mch-d-jobs' }, jobs.length ? jobs.map((r) => r.title).join(', ') : 'No part yet'));
-      }));
-      q('[data-mch-d-habits]').replaceChildren(...(v.habits.length ? v.habits.map((h) => el('li', {}, h.sentence)) : [el('li', {}, 'None chosen')]));
-      root.querySelectorAll<HTMLButtonElement>('[data-mch-d-open]').forEach((b) => { b.disabled = locked; });
-      q('[data-mch-d-restore]').hidden = locked || !v.changed;
-    },
-  });
-  root.querySelectorAll<HTMLButtonElement>('[data-mch-d-open]').forEach((b) => b.addEventListener('click', () => plan().openEditor(b.dataset.mchDOpen as 'moments' | 'owners' | 'habits')));
-  q('[data-mch-d-restore]').addEventListener('click', () => {
-    undo = structuredClone(plan().state());
-    plan().update((s) => restorePlan(s));
-    const u = el('button', { type: 'button', class: 'cpd-undo' }, 'Undo');
-    u.addEventListener('click', () => { if (undo) plan().replace(undo); undo = null; restored.textContent = 'Changes put back.'; });
-    restored.replaceChildren('The prepared plan is back. ', u);
-    restored.focus();
-  });
-}
-</script>

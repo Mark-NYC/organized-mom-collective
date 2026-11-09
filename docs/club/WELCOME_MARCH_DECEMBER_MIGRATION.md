@@ -5,10 +5,10 @@ rely on chat history. Started 2026-11-08 from `main` at `9d113b9`.
 
 | Phase | Scope | Status | PR |
 | --- | --- | --- | --- |
-| 1 | Architecture audit and migration plan (this document) | READY FOR REVIEW | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
-| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | NOT STARTED (D1–D4 approved; phased implementation pending) | – |
-| 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 COMPLETE, D5–D6) | – |
-| 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE, D7–D9) | – |
+| 1 | Architecture audit and migration plan (this document) | COMPLETE (approved and merged 2026-11-08) | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) |
+| 2 | Family Rhythm becomes the permanent Welcome resource and the Welcome Kit print | IN PROGRESS (2a → 2b → 2c → 2d, one PR each) | see §12 |
+| 3 | March becomes Spring Clean as a Team | NOT STARTED (needs Phase 2 tested and verified) | – |
+| 4 | Family Values moves to December 2027 | NOT STARTED (needs Phase 2 COMPLETE; D7–D9 deferred to Phase 4) | – |
 
 Statuses: NOT STARTED · IN PROGRESS · BLOCKED · READY FOR REVIEW · COMPLETE. COMPLETE means tested, merged and, where
 it touches the database or Edge Functions, applied with the owner's go-ahead.
@@ -43,6 +43,12 @@ Non-negotiables (from the brief and CLAUDE.md):
 8. Don't replace March until the Welcome resource is proven. Don't remove Family Values from the Welcome Kit until the
    Welcome Family Rhythm is proven.
 9. Separate PR per phase. Customer copy says "website" or "cleaning companion", never "app".
+10. **Permanent guardrails (owner, 2026-11-08):** no mailed Welcome Family Rhythm when the first fulfilled monthly
+    resource already gives the household a daily rhythm (May, August), and the Welcome Family Rhythm is evergreen, not
+    homework. Full wording in §11.1; implemented as 2d before any automated Welcome fulfillment.
+11. **Print assumptions are configurable (D6).** Target: premium uncoated, letter, flat. Stock, finish and sides for
+    each Welcome Kit item live in one config (2c), shown on the admin packing list and marked unvalidated until the
+    owner confirms them with the printer.
 
 ## 2. Current architecture (audited 2026-11-08)
 
@@ -244,8 +250,8 @@ Family Rhythm approval is server-side (like the Vision print, unlike today's dev
 ## 6. Printing and fulfillment implications
 
 - One Letter sheet replaces one Letter sheet, so the package's sheet count is unchanged (Rhythm 1 + guide 1 + January 2).
-- **Paper stock differs (D6):** the Vision print is a watercolor keepsake; the Rhythm is a working sheet. Confirm the
-  stock and whether it's "premium, flat" with whoever prints. No mail-house contract is documented in the repo.
+- **Paper stock (D6):** target premium uncoated, letter, flat; configurable and unvalidated until the owner confirms
+  it with the printer (§1 item 11). No mail-house contract is documented in the repo.
 - Print path is the owner's browser print view → Save as PDF → Mark PDF ready. Phase 2 must make
   `?fulfillment=<order>` work for `welcome_rhythm` and print the approved snapshot, verified one page per sheet
   (`tests/club-plan-print.test.ts`, `scripts/club-personalized-months-qa.mjs`).
@@ -269,7 +275,7 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 
 ## 8. Phase-by-phase checklist
 
-### Phase 1: audit (READY FOR REVIEW)
+### Phase 1: audit (COMPLETE)
 
 - [x] Trace signup → kit → print → fulfillment (§2.1)
 - [x] Audit March engine, page, phone view, editor, Spring Prep, kit config, builder (§2.3)
@@ -284,20 +290,36 @@ Phase 2 may land as one PR if 2a–2c stay reviewable; split if the diff passes 
 
 ### Phase 2: Welcome Family Rhythm
 
-- [ ] 2a Engine: `month` parameter (default `'2027-03'`); priority picks the default habit; March output unchanged
-      for every fixture (snapshot test before/after)
-- [ ] 2a Tests: Welcome month ages; small (1 adult), large (2 adults + 5 kids), no kids, teens only; individual,
+- [x] 2a Engine moved to `src/lib/club/engines/family-rhythm.ts` (`march-family-rhythm.ts` re-exports it). A plan's
+      ages come from `RhythmState.month` (optional, `YYYY-MM`, validated, saved with the plan, cleared by "start over");
+      absent = March 2027, so every March plan reads exactly as before. `monthOf`, `rhythmContext` exported. Snapshot of
+      March recorded before the move (`family-rhythm-march-snapshot.test.ts`, separate commit) and unchanged after
+- [x] 2b: `bedtime` in step 6 (D5; leads with the bedtime moment) and the priority-led default habit, only for plans
+      with `context: 'welcome'` (March unchanged: snapshot still passes)
+- [x] 2a Tests (`family-rhythm.test.ts`): Welcome month ages; small (1 adult), large (2 adults + 5 kids), no kids, teens only; individual,
       parallel and joint rows; colors stable across reorder/add; 300 generated households still pass `validatePlan`
-- [ ] 2b Shared components (re-exports), `context="welcome"` in `ClubPlanShell` (no deadline, no meeting tab, no
-      `kitSlug` entitlement), page `/app/club/family-rhythm`, `routes.ts`, `ClubNav`/Club Home link, README routes and keys
-- [ ] 2b Storage: `club_welcome_plans` migration + RPCs + `account.ts` backend; sample families tab-only
-- [ ] 2b Desktop 1100/1440 and phone 375/390/768: edit, save, reload, other device, approve, print one page
-- [ ] 2c `welcome_rhythm` type, snapshot, cutover switch, queue/readiness, admin actions, CSV, print view, reminders,
-      emails, onboarding branch, Welcome Kit hub card
-- [ ] 2c Tests: `supabase/tests/club-membership.sql` (new enrollment gets `welcome_rhythm`; existing `welcome_vision`
-      untouched; approve → snapshot; edit after approval clears; kit approved locks; reprint identical),
-      `tests/club-onboarding.test.ts`, `tests/club-billing-e2e.test.ts`, `scripts/club-onboarding-e2e.mjs`
-- [ ] Rehearsal on a production replay (`scripts/rehearse-club-rollout.sh`), rollback script, verify script
+- [x] 2b `ClubPlanShell context="welcome"` (no kit, deadline, meeting or Welcome Kit confirmation); March's rail
+      extracted to `FamilyRhythmDesktop.astro` and shared; `MarchFamilyRhythm` (`context`, `kicker`) and
+      `MarchPlanMobile` (`kicker`, `tabs`) props with March's defaults; page `/app/club/family-rhythm`;
+      `routes.appClubFamilyRhythm`; Club Home card + footer link (no prompts); README, PLAN_ARCHITECTURE, FAMILY_PROFILE
+- [x] 2b Storage: `20261121000000_club_welcome_plans.sql` (**not applied**) + get/save/approve/unapprove; the account
+      bridge with injected welcome RPCs and server approval (`setApprovalStore`); samples stay tab-only
+- [x] 2b Desktop 1440 and phone 390 (samples and a signed-in member): edit, save, reload, other device, phone,
+      approve, a later change clears approval, print one page. (375/768 not separately run.)
+- [x] 2c `welcome_rhythm` type, approved snapshot on the order, cutover switch (`club_settings.welcome_item`, ships
+      `'vision'`), queue/readiness (`needs_rhythm`), admin actions, CSV, print view, reminders, emails, onboarding
+      branch, Welcome Kit hub card, Welcome Kit mode on `/app/club/family-rhythm?welcome=1`, print specs config
+- [x] 2c Tests: `supabase/tests/club-welcome-rhythm-kit.sql` (switch off = today; switch on: new enrollment gets
+      `welcome_rhythm`, existing Vision orders untouched, no second order on retry; approve → snapshot; edit/undo after
+      approval clears; kit approved locks the mailing copy; reprint identical; refund cancels; switch back off),
+      `tests/club-onboarding.test.ts`, `tests/club-billing-e2e.test.ts` (38/38), e2e `--only=welcomeRhythmKit`
+- [ ] 2d Welcome overlap exception (§11.1 guardrail 1): classify by the first fulfilled monthly resource; no Rhythm
+      in the mailing for May/August; no duplicate welcome orders; pairing, readiness and email copy tested; digital
+      access kept. Before any automated Welcome fulfillment or cutover
+- [x] Rehearsal (local, all migrations): migrate → rollback → existing suites pass → re-apply → new suite passes →
+      rollback refuses once a Rhythm order exists. Production fingerprint (read-only): the 11 functions and the queue
+      view 2c regenerates are identical (md5 of normalized definitions) to the repository text they were generated
+      from. Not run: `scripts/rehearse-club-rollout.sh` against a production data replay (owner-run, needs a dump)
 - [ ] March regression: `/app/club/march` unchanged (screens + print), `npm run test:club`, January regressions
 
 ### Phase 3: March, Spring Clean as a Team
@@ -362,9 +384,9 @@ those jobs on the back. No daily chart. No overlap with the Welcome Family Rhyth
 New Welcome Kits contain no Family Values print. December 2027 offers it as keep-or-give within the agreed sheet
 count, alongside the Christmas Mission. Historical Vision orders still print.
 
-## 11. Open product decisions
+## 11. Product decisions
 
-Recommended option first. Phase 2 needs D1–D4.
+Options as proposed in Phase 1. The owner's decisions (2026-11-08) are in §11.1 and override the recommendations below.
 
 | # | Decision | Options | Recommendation |
 | --- | --- | --- | --- |
@@ -405,12 +427,109 @@ Recommended option first. Phase 2 needs D1–D4.
 
 | Phase | PR | Status | Notes |
 | --- | --- | --- | --- |
-| 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) (open) | READY FOR REVIEW | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
+| 1 | [#430](https://github.com/Mark-NYC/organized-mom-collective/pull/430) | COMPLETE (merged) | Docs only; no product code, schema or data changed. Production queried read-only (aggregates) |
+| 2a | [#432](https://github.com/Mark-NYC/organized-mom-collective/pull/432) (branch `claude/epic-noether-i7st9u`) | READY FOR REVIEW | Engine refactor |
+| 2b | [#434](https://github.com/Mark-NYC/organized-mom-collective/pull/434) (branch `claude/welcome-rhythm-2b`, stacked on 2a) | READY FOR REVIEW | Welcome page + storage |
+| 2c | [#435](https://github.com/Mark-NYC/organized-mom-collective/pull/435) (branch `claude/welcome-rhythm-2c`, stacked on 2b) | READY FOR REVIEW | Welcome Kit fulfillment behind a switch (off) |
 
 ### Phase 1 log (2026-11-08)
 
 - Completed: §2–§11.
 - Changed files: this document; a pointer in `docs/club/WELCOME_KIT.md`.
 - Tests: none needed (docs only).
-- Remaining: owner decisions D1–D9.
+- Owner review 2026-11-08: architecture approved; decisions and guardrails in §11.1.
 - Next phase depends on: approved D1–D4; a production fingerprint before any `create or replace` of kit functions.
+
+### Phase 2a log (2026-11-08)
+
+- Completed: engine moved to `family-rhythm.ts` with `month` on the state; old path re-exports; README and
+  PLAN_ARCHITECTURE point at the new file.
+- Changed files: `src/lib/club/engines/family-rhythm.ts` (moved from `march-family-rhythm.ts`), `march-family-rhythm.ts`
+  (re-export), `family-rhythm.test.ts`, `family-rhythm-march-snapshot.test.ts` + `__snapshots__/`, README,
+  PLAN_ARCHITECTURE, this tracker.
+- Tests: March snapshot (23 cases: every sample family, 12 fixture households, 120 generated households, an edit
+  sequence with a save round trip, the legacy chore-chart migration) recorded on the old engine, passing unchanged;
+  `family-rhythm.test.ts` 9 passed; `src/lib/club/engines` + `personalize` 201 passed; `npm run check` 0 errors;
+  `astro build` passes, and `/app/club/march` and `/app/club/march/spring-prep` HTML match `main`'s (only Astro's
+  random island uids differ). Full `vitest run`: 53 failures, every one also failing on `main` by name (main also
+  fails the known slow `club-edits` property test); no new failures. Pre-existing failures have grown since
+  `KNOWN_TEST_FAILURES.md` (42 on 2026-10-30) and aren't part of this project.
+- Decisions: the priority-led habit moved to 2b so 2a changes nothing March prints.
+- Next (2b): stacked on 2a.
+
+### Phase 2b log (2026-11-08)
+
+- Completed: the Welcome Family Rhythm at `/app/club/family-rhythm` for every member (Club access, or any month she
+  ever held: read only after access ends), saved and approved on her account; no deadline, monthly meeting or
+  reminders; bedtime priority; priority-led habit for Welcome plans only. Not yet in the Welcome Kit (2c) and not
+  shown as a step after onboarding (2c, with the kit hub card).
+- Changed files: migration `20261121000000_club_welcome_plans.sql`; `supabase/tests/club-welcome-plan.sql` (+ runner);
+  `family-rhythm.ts` (`context`, `welcomeMonth`, `PrepareOptions`, bedtime anchors); `family-profile.ts` (Bedtime);
+  `plan/status.ts` (approval stores), `plan/account.ts` (approve/unapprove/onSaved), `plan/family.ts` (Welcome branch),
+  `plan/resource.ts` (`isWelcomeResource`), `plan/desktop.ts` + `plan/screen.ts` (Welcome copy), `kit-household.ts`
+  (`slug: null`), `membership.ts` (RPC wrappers); `ClubPlanShell.astro`, `MarchFamilyRhythm.astro`,
+  `MarchPlanMobile.astro`, new `FamilyRhythmDesktop.astro`, `march.astro` (uses it), new
+  `src/pages/app/club/family-rhythm.astro`; `AppKitLibrary.tsx`; `routes.ts`; tests; e2e scenario; docs.
+- Tests: SQL `club-welcome-plan.sql` 39 checks + `admin-access`, `accounts-access`, `club-access`,
+  `club-membership`, `club-profile` all pass on a local database. (`npm run test:admin-sql` itself stops at the
+  pre-existing `20261102000000_shop_gelato_private_storage.sql` seed error on a fresh database, on `main` too; ran
+  the same files with a runner that reports that error and continues.) Unit: `family-rhythm.test.ts` 14,
+  `tests/club-welcome-plan.test.ts` 10, engines + personalize + plan-account + kit-household green; March snapshot
+  unchanged. Full `vitest run`: same failures as `main` by name, none new. `npm run check` 0 errors. Build: `january`,
+  `may`, `december`, `march/spring-prep` HTML identical to `main`; `march` identical except one script tag's
+  position (the rail is now a component). Browser (samples, 4 families × desktop/phone × both pages): 197 checks.
+  Signed-in e2e (`node scripts/club-onboarding-e2e.mjs --only=welcomeRhythm`): all pass (opens with no month,
+  saves, approval on account against what prints, another device, phone, a later change clears approval, prints one
+  page, March untouched, Club Home link). `--only=months` with `QA_MONTHS=march`: all pass. Default e2e: 379 ok,
+  3 failures in `familyColors`, which fail identically on `main`.
+- Remaining: nothing for 2b. Production: migration not applied (needs owner approval).
+- Decisions: approval is cleared by any saved change and shows as not approved (not "changed") on every device;
+  access = Club access to edit, read-only after access ends if she held a month or a Welcome Kit.
+- Next (2c): fulfillment: `welcome_rhythm` order type behind a cutover switch (off), approved snapshot on the order,
+  print view, queue/readiness/admin/CSV/emails, kit hub card, print config (requirement 11). Then 2d (overlap rule).
+
+### Phase 2c log (2026-11-08)
+
+- Completed: the Family Rhythm as the Welcome Kit's personalized item, end to end, **behind a switch that ships off**.
+  - Database (`20261122000000_club_welcome_rhythm_kit.sql`, **not applied**; generated by
+    `scripts/generate-welcome-rhythm-kit-migration.py` from the latest definitions with asserted replacements; rollback
+    `supabase/rollout/rollback-welcome-rhythm-kit.sql`): `club_settings.welcome_item` ('vision' | 'rhythm', default
+    'vision'); `welcome_rhythm` order type; a BEFORE INSERT trigger turns the billing functions' new welcome order into a
+    Rhythm order only while the switch is on, and never adds a second live welcome order of either kind (billing
+    functions unchanged); `club_rhythm_valid`; approve copies the approved plan onto the pending order, save/undo clear
+    it until the owner approves the kit; queue (`needs_rhythm`, `kit_welcome_type`), kit actions, welcome queue
+    (packing list, no plan payload), reminders (same two), owner email data, `club_me.welcome.kind`, admin member
+    lists, print bundle (the order's copy); `club_welcome_item_of` for emails.
+  - Edge Functions (bundles regenerated, **not deployed**): welcome email, kit reminders and the owner's kit-submitted
+    email name the item; they fall back to today's Vision wording if the database lacks the lookup.
+  - Site: `src/lib/club/welcome-item.ts`; onboarding (`kitItems`, `kitStepHref/Name`, `kitText`), kit hub and items,
+    Club Home package, member copy page, dashboard; `/app/club/family-rhythm?welcome=1` (`WelcomeRhythmKit`: step bar,
+    "Approve for printing", waits for the approval to save, then the next piece); owner print view
+    `/app/club/family-rhythm?fulfillment=<order>`; admin Welcome Kits row, readiness label, CSV, print specs
+    (`src/data/club/print-specs.ts`, all marked "not yet confirmed with the printer"). Public join copy is unchanged
+    until the switch is on.
+- Tests: SQL: all 7 suites pass (new `club-welcome-rhythm-kit.sql`). `tests/club-billing-e2e.test.ts` 38/38 with the
+  migration. Unit: onboarding + welcome-plan 31 pass; full `vitest run` same failures as `main`, none new.
+  `npm run check` 0 errors. e2e: `--only=welcomeRhythmKit` all pass (switch on: Rhythm order, kit page names it, Welcome
+  Kit mode, approval lands on the order, admin list + specs, print view prints exactly what she approved, one page);
+  `--only=welcomeRhythm` all pass; `--only=months` (March) all pass; default run 391 ok with the same 3 `familyColors`
+  failures as `main`.
+- Remaining before Phase 2 is COMPLETE: **2d** (overlap rule, below); owner applies `20261121` + `20261122` and deploys
+  `club-billing`, `club-admin`, `club-webhook` (in that order, functions after migrations); a production-replay
+  rehearsal; then the owner decides when to set `welcome_item = 'rhythm'`, with the public Club/join copy and privacy
+  wording updated in the same release. Not verified: an iPhone print; mail-house stock (D6).
+- Decisions: billing functions untouched (trigger instead); a change after approval clears the kit's approval only
+  until the owner approves the kit, after which the mailing copy is fixed and her own copy stays editable.
+- Activation runbook (owner only, in order): (1) apply `20261121000000_club_welcome_plans.sql`, (2) apply
+  `20261122000000_club_welcome_rhythm_kit.sql`, (3) deploy the three functions from `supabase/dashboard/`, (4) deploy
+  the site, (5) after 2d ships and the copy is updated: `update public.club_settings set welcome_item = 'rhythm';`.
+  Back out: `update public.club_settings set welcome_item = 'vision';` (existing Rhythm orders stay); full rollback
+  only while no Rhythm order exists.
+
+### Next: 2d, the Welcome overlap exception (not started)
+
+When her **first fulfilled monthly resource** already gives the household a daily rhythm (May: Our Summer Day; August:
+School Day Routines), her Welcome Kit carries no Family Rhythm print; she keeps it digitally. Classify by the kit's
+first month (`first_paid_month`), not the signup date, from one list in code. Open product question for the owner:
+what, if anything, takes the Rhythm's place in that kit (nothing; the Vision print; something else). Must cover order
+pairing (no welcome order, or none in the kit), readiness, the kit page, emails and tests, and land before the switch.

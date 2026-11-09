@@ -19,7 +19,14 @@ import WelcomeKitConfirm from './WelcomeKitConfirm';
 import { ClubNavForMembers } from '../ClubNav';
 
 interface Props {
-  kitSlug: string;
+  /** The month's kit. Not used by the Welcome resource (context="welcome"). */
+  kitSlug?: string;
+  /**
+   * 'month' (default): a month's plan page. 'welcome': the permanent Welcome Family Rhythm (/app/club/family-rhythm):
+   * no kit, no monthly Family Meeting, no Welcome Kit confirmation, no editing deadline; open to any member, her plan
+   * and approval saved to her account (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 2b).
+   */
+  context?: 'month' | 'welcome';
   /** "October": used in the gate's messages. */
   month: string;
   /** The printable's sides for the full-screen Front/Back switch (none for a single sheet). */
@@ -29,16 +36,17 @@ interface Props {
   /** The Monthly Tool / Family Meeting switch. Off for a month whose tool is the Family Meeting guide (January). */
   meeting?: boolean;
 }
-const { kitSlug, month, sides, storageKey, class: cls = '', meeting = true } = Astro.props;
-const kit = kitBySlug(kitSlug);
-if (!kit) throw new Error(`Unknown kit ${kitSlug}`);
+const { kitSlug, month, sides, storageKey, class: cls = '', meeting = true, context = 'month' } = Astro.props;
+const welcome = context === 'welcome';
+const kit = welcome ? null : kitBySlug(kitSlug ?? '');
+if (!welcome && !kit) throw new Error(`Unknown kit ${kitSlug}`);
 ---
 <!-- A signed-in member: the Club nav, and her Welcome Kit confirmation when this is her first month (both render nothing otherwise). -->
 <ClubNavForMembers client:only="react" />
-<WelcomeKitConfirm client:only="react" kitSlug={kitSlug} />
-<div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={kitSlug} data-plan-month={month} data-plan-key={storageKey}>
+{!welcome && <WelcomeKitConfirm client:only="react" kitSlug={kitSlug!} />}
+<div class={`club-plan ${cls}`.trim()} data-plan-state="loading" data-kit-slug={welcome ? undefined : kitSlug} data-plan-context={welcome ? 'welcome' : undefined} data-plan-month={month} data-plan-key={storageKey}>
   <ClubFamilyGate />
-  {meeting && <ClubFamilyMeeting kitMonth={kit.month} />}
+  {meeting && kit && <ClubFamilyMeeting kitMonth={kit.month} />}
   <slot name="desktop" />
   <ClubPrintableProof sides={sides}><slot name="printable" /></ClubPrintableProof>
   <slot name="mobile" />
