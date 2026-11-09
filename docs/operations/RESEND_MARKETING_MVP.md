@@ -199,3 +199,19 @@ No broadcasts or automated email sequences have been enabled. A real fresh opt-i
 The owner supplied the mailing address for the marketing footer. Both draft Resend welcome templates (Day 2: `a70163c4-3c72-4cd8-9b89-17e089282af1`; Day 6: `105ee0e7-9078-4372-8ef3-4aa2cd3dedc2`) were updated with the address in both HTML and plain text. Retrieved both saved templates: footer present twice (HTML and text), unsubscribe placeholder preserved, no old placeholder, and both remain drafts. The `marketing_delivery_settings.postal_address_verified` flag was set true, while `enabled=false` and `broadcasts_coordinated=false` remain unchanged.
 
 **Do not activate:** One Small Win overlap handling remains unverified. This DB address-verification flag only confirms footer presence, not legal assessment of postal-address use. No email sent.
+
+
+### One Small Win / welcome overlap exclusions (2026-11-09)
+
+The eight existing One Small Win broadcasts in Resend remain in **draft** status, with no scheduled or sent dates.
+
+Applied to production and committed `supabase/migrations/20261109070000_marketing_broadcast_day_guard.sql`:
+
+- **Provisional weekly newsletter day:** Wednesday in America/New_York is always reserved. Every welcome claim checks the date before reserving any recipient's daily send entry, and the five-minute dispatcher skips those dates.
+- **Explicit exceptions:** `public.marketing_broadcast_calendar(local_day, broadcast_id, title, status)` is a private RLS-protected reservation table. `reserved`, `scheduled`, or `sent` dates block welcome emails on that date. `cancelled` dates do not. If a newsletter needs a different day, reserve that day **before scheduling or sending the Resend broadcast**.
+- **Coordination limitation:** Resend's dashboard broadcasts are outside the database and can be sent manually on any date without inserting a calendar reservation. Thus the database cannot guarantee protection against an **unregistered off-cycle broadcast**. To claim stronger enforcement, route broadcast scheduling through an integrated sender/approval flow or require an operational process that records every broadcast date first. Keep `broadcasts_coordinated=false` until that process and end-to-end test are in place.
+- If a newsletter is ever sent in a different segment or via a custom email API, it must also honor the same recipient/day ledger to uphold the broader one-message-per-day policy.
+
+QA ran in a rolled-back transaction: the Wednesday check passed; an explicit reservation on the current local date returned `broadcast_day`; removing it allowed the initial claim; a repeated claim was rejected. All QA data was rolled back. No email was sent.
+
+**Current planned next step:** Decide whether to maintain Wednesday broadcasts as a manual scheduling policy, or build a coordinated One Small Win sender. Then run the controlled end-to-end test to the approved test address after templates are published and sending is deliberately enabled under supervision. Do not enable welcome delivery on the strength of the calendar exclusion alone.
