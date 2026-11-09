@@ -43,11 +43,17 @@ Deno.serve(async(req: Request)=>{
  if(!key)return json({error:"resend_key_unset"},503);
  const current=await fetch(`https://api.resend.com/broadcasts/${id}`,{headers:resendHeaders});
  if(!current.ok)return json({error:"broadcast_lookup_failed"},503);
- const broadcast=await current.json() as {status?:string,segment_id?:string,segmentId?:string,name?:string};
+ const broadcast=await current.json() as {status?:string,segment_id?:string,segmentId?:string,name?:string,html?:string|null,text?:string|null};
  if((broadcast.segment_id??broadcast.segmentId)!==SEGMENT)
    return json({error:"wrong_segment"},400);
  if(broadcast.status!=="draft")
    return json({error:"broadcast_not_draft"},409);
+ // Do not schedule an empty or non-compliant campaign, even when TipTap editor data exists.
+ const renderedBody=[broadcast.html??"",broadcast.text??""].join("\n");
+ if(!broadcast.html || broadcast.html.length<400 || !broadcast.text || broadcast.text.length<120)
+   return json({error:"broadcast_render_missing"},409);
+ if(!renderedBody.includes("14839 61st Road") || !renderedBody.includes("{{{RESEND_UNSUBSCRIBE_URL}}}"))
+   return json({error:"broadcast_footer_unverified"},409);
  if(dryRun)return json({status:"dry_run",broadcast_id:id,scheduled_at:new Date(when).toISOString(),local_day:sendDay,recipient_group:"opted_in_segment",would_send:false});
 
  if(Deno.env.get("BROADCAST_SCHEDULING_ENABLED")!=="true")
