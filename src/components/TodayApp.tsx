@@ -18,7 +18,12 @@ import { Tally, TaskList } from './TaskList';
 import { monthColor } from '../theme';
 
 export default function TodayApp() {
-  const [onboarded, setOnboardedState] = useState(isOnboarded);
+  // ?setup=1 reopens the family-meeting walkthrough without resetting cleaning progress.
+  // Fresh QR visitors still see it automatically on their first visit.
+  const [onboarded, setOnboardedState] = useState(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('setup') === '1') return false;
+    return isOnboarded();
+  });
   // iPhone Home Screen app, first launch: it has its own empty storage, so first pick up
   // the progress Safari left behind (see lib/install.ts) before deciding to show onboarding.
   const [ready, setReady] = useState(() => onboarded || !isStandalone());
@@ -43,7 +48,10 @@ export default function TodayApp() {
     const here = window.location.pathname + window.location.search + window.location.hash;
     const { source, cleaned } = takeSourceParam(here);
     if (source) setEntrySource(source);
-    if (cleaned !== here) window.history.replaceState(window.history.state, '', cleaned);
+    const url = new URL(cleaned, window.location.origin);
+    if (url.searchParams.get('setup') === '1') url.searchParams.delete('setup');
+    const finalPath = url.pathname + url.search + url.hash;
+    if (finalPath !== here) window.history.replaceState(window.history.state, '', finalPath);
   }, []);
 
   const finish = () => {
