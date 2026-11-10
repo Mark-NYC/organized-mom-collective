@@ -2,7 +2,7 @@
 
 > **Current editorial plan (2026-11-09):** One Small Win is the **Wednesday** half of OMC's Clean Mama-informed ongoing email cadence; **Sunday Family Reset** is the other half. The eight usable One Small Win broadcasts are still **drafts and unscheduled**. Superseded/broken editor versions remain in Resend and must not be scheduled. The Sunday/Wednesday plan and audience launch blockers are in [OMC_EMAIL_MARKETING_GAME_PLAN.md](./OMC_EMAIL_MARKETING_GAME_PLAN.md) and [SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md](./SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md).
 >
-> **Subscriber Access:** One Small Win 05's optional routine-chart link has been changed in the usable Resend draft to `https://www.organizedmomcollective.com/routine-chart/#omc_pass={{{RESOURCE_PASS}}}`. This avoids a second email prompt after verification on the site. The complete email-to-browser click path still needs QA. One Small Win 07 can link directly to a public PDF without a token; Club and calendar product links should **not** use the resource pass. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md).
+> **Subscriber Access:** One Small Win 05's optional routine-chart link has been changed in the usable Resend draft to `https://www.organizedmomcollective.com/routine-chart/#omc_pass={{{contact.RESOURCE_PASS}}}`. This avoids a second email prompt after verification on the site. The complete email-to-browser click path still needs QA. One Small Win 07 can link directly to a public PDF without a token; Club and calendar product links should **not** use the resource pass. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md).
 >
 > **Audience rule:** Do **not** schedule broadcasts to the general opt-in segment while it still contains welcome-incomplete subscribers. The database daily ledger protects individual welcome sends but not Resend's audience-wide broadcasts.
 
@@ -346,3 +346,12 @@ Organized Mom Collective
 - [ ] Confirm required footer, sender address, unsubscribe link, and opt-in eligibility.
 - [ ] Keep email-gated landing pages out of repeat subscriber flows; never infer marketing permission from a download alone.
 - [ ] User reviews all eight revised drafts, visual design and links before anything is sent.
+
+### Verified contact-property syntax and broadcast link, November 9, 2026
+
+**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
+
+**Resend drafts corrected and read back:** Sunday Family Reset 01–03 and One Small Win 05 now contain `{{{contact.RESOURCE_PASS}}}` in HTML and plain text, with zero old placeholders; all remain `draft`, assigned to `OMC | Newsletter Ready`. The 15-minute pass sync and Supabase token verifier are active. A fresh valid-token POST returned `200 {ok:true}` and invalid-token POST returned `200 {ok:false}`.
+
+**Final pending browser QA:** A human must open the delivered one-person test email in a fresh private browser and try a real PDF and generator download. Static production website deployment cannot be independently confirmed from the available connectors. Do not claim that the live site's popup behavior has been verified. Further schedule approval is still separate from testing.
+
