@@ -63,7 +63,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
  return <div ref={shellRef} className="cproto-shell" data-club-chrome>
   <header className="cproto-top">
    <div className="cproto-inner">
-    <a className="cproto-brand" href="/club" aria-label="Organized Family Club home"><img src="/images/club/organized-family-club-logo.png" alt="Organized Family Club" width={403} height={91} /></a>
+    <a className="cproto-brand" href="/club-2" aria-label="Family Meeting Club home"><img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width={2027} height={570} style={{width:180,maxWidth:"45vw",height:"auto",objectFit:"contain"}} /></a>
     <nav aria-label="Club">
      <button type="button" className={tab==='kits'?'cproto-active':''} onClick={()=>setTab('kits')}>Kits</button>
      <button type="button" className={tab==='family'?'cproto-active':''} onClick={()=>setTab('family')}>Family</button>
