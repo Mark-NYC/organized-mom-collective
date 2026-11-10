@@ -100,8 +100,8 @@ begin
      group by e.link_section) x
   ),
   'trends',(
-    select coalesce(jsonb_agg(jsonb_build_object('day',x.day,'signups',x.signups,'opt_ins',x.opt_ins) order by x.day),'[]'::jsonb)
-    from (select created_at::date day,count(*) signups,
+    select coalesce(jsonb_agg(jsonb_build_object('day',x.signup_day,'signups',x.signups,'opt_ins',x.opt_ins) order by x.signup_day),'[]'::jsonb)
+    from (select created_at::date as signup_day,count(*) as signups,
       count(*) filter(where marketing_opt_in=true) opt_ins
      from public.tool_email_contacts where created_at>=current_date-29
      group by created_at::date) x
