@@ -236,3 +236,7 @@ Schedule timezone is EST (UTC-5) on all listed dates. Resend sends to `OMC | New
 ## Email reporting shipped (November 10, 2026)
 
 Owner-only `/admin/email` page added to the existing admin Growth menu. It shows actual opt-ins, newsletter-ready contacts, welcome jobs, planned broadcasts, suppressions/unsubscribes, signed Resend provider deliveries/failures once received, and un-attributed Club/shop totals. It **does not** claim email clicks or conversions while the domain's click tracking and per-order attribution are unavailable. Existing GA4 tracks site visits, but no GA4 email UTM funnel was imported into the admin. See [EMAIL_REPORTING.md](./EMAIL_REPORTING.md) for exact metrics, safeguards and remaining browser/webhook QA.
+
+### Tagged editorial links, November 10, 2026
+
+One Small Win 04's Club URL, issue 05's routine-chart URL and issue 07's calendar URL now carry `utm_source=omc_email&utm_medium=email&utm_campaign=one_small_win_XX`; all three remain **unscheduled** drafts. The routine chart keeps `#omc_pass={{{contact.RESOURCE_PASS}}}` after the UTM query, preserving subscriber access. The owner-only email admin scorecard now counts **first-touch email-sourced free signups**, separate from total signups, while site traffic remains reviewable in GA4. The seven already scheduled broadcasts were left unchanged and are **not guaranteed** to have attribution tags. Do not call site totals email-attributed purchases. Details: [EMAIL_REPORTING.md](./EMAIL_REPORTING.md).
