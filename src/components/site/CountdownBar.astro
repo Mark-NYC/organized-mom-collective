@@ -2,10 +2,10 @@
 import { clubPrintMessages, clubPrintMobileMessages } from '../../lib/club-print-deadline';
 import { clubEnabled } from '../../data/club/config';
 import { clubCheckoutEnabled } from '../../lib/club/membership';
-// Your First Month FREE shows only where enrollment is open (as on /club).
+// Your First Month FREE shows only where enrollment is open (as on /club-2).
 const offer = clubEnabled() && clubCheckoutEnabled();
-const onClub = Astro.url.pathname.replace(/\/$/, '') === '/club';
-const href = onClub ? '#offer' : '/club';
+const onClub = Astro.url.pathname.replace(/\/$/, '') === '/club-2';
+const href = onClub ? '#offer' : '/club-2';
 const messages = clubPrintMessages(new Date(), offer);
 const mobileMessages = clubPrintMobileMessages(new Date(), offer);
 ---
