@@ -25,7 +25,7 @@ All four **currently use** the opted-in Free Resource Resend segment `7bf64eae-a
 
 ## Subscriber Access in these drafts
 
-- **Issues 01–03:** The free guide library link now uses `https://www.organizedmomcollective.com/guides/#omc_pass={{{RESOURCE_PASS}}}` in both HTML and plain text. Resend merges the subscriber-specific property at send time. The site should validate the pass and remember access without requiring another email form.
+- **Issues 01–03:** The free guide library link now uses `https://www.organizedmomcollective.com/guides/#omc_pass={{{contact.RESOURCE_PASS}}}` in both HTML and plain text. Resend merges the subscriber-specific property at send time. The site should validate the pass and remember access without requiring another email form.
 - **Issue 04:** The Club link is an offer page, not gated free content, so it **does not** carry the subscriber pass.
 - Three existing consented contacts have private passes synced to Resend; valid-pass and invalid-pass API checks passed. The actual Resend tracked-click -> deployed site -> fresh-browser experience is **still unverified**. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md).
 - Do not include the raw pass in logs, public pages, Pinterest pins, or any Club member authentication pathway.
@@ -62,9 +62,7 @@ The four Sunday drafts have been reassigned in Resend to `OMC | Newsletter Ready
 All four emails remain **draft**, unsent and unscheduled. The guarded broadcast scheduler was redeployed to require the new segment.
 
 
-## Blocking QA finding: personalized links are blank in Resend broadcasts
+## Resolved broadcast personalization (after QA)
 
-On November 9, 2026, the sender performed two controlled QA broadcasts to a segment containing only the owner. Resend delivered the messages, but `{{{RESOURCE_PASS}}}` was **empty** both in the URL and elsewhere in the body; an explicit fallback printed `MISSING` despite the contact property being stored. Click tracking is disabled. The earlier test that merely checked the draft HTML contained the placeholder was **not sufficient**. First three Sunday drafts use the affected link format.
-
-**Keep all Sunday drafts unscheduled.** Fix actual broadcast custom-field personalization or use an approved direct-public-PDF fallback before first send. Re-test on a real delivered message and then a clean browser. See [Subscriber Access live QA](./SUBSCRIBER_RESOURCE_ACCESS.md).
+Earlier one-person sends showed blank custom fields, because they used the unsupported top-level placeholder. That finding is **superseded** by delivered diagnosis using `{{{contact.RESOURCE_PASS}}}` and a successful one-person email containing a clickable, complete signed URL. Three Sunday drafts were corrected and read back as drafts. The only remaining Subscriber Access check is the **real production browser popup/download experience**; do not schedule until that and final audience/schedule approval are complete. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md).
 
