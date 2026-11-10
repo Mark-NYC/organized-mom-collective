@@ -14,6 +14,8 @@ type Report = {
   click_sections: { section:string; clicks:number }[];
   trends: { day:string; signups:number; opt_ins:number }[];
   upcoming: { date:string; title:string; status:string; scheduled_at:string }[];
+  email_conversions: {paid_shop_orders_30d:number;calendar_orders_30d:number;shop_net_revenue_30d_cents:number;club_enrollments_30d:number};
+  email_campaigns: {campaign:string;shop_orders:number;shop_revenue_cents:number;club_enrollments:number}[];
   business: { club_active:number; club_started_30d:number; paid_site_orders_30d:number };
 };
 
@@ -88,7 +90,27 @@ function EmailReportPage({session, signOut, databaseReady}: AdminContext) {
           <Metric title="Active paid Club subscriptions" value={report.business.club_active} detail="Site total, not attributed to email"/>
           <Metric title="Paid site orders · 30 days" value={report.business.paid_site_orders_30d} detail="Site total, not attributed to email"/>
         </div>
-        <p className="mt-4 text-[0.9rem] text-soft">Email click counts: unavailable while Resend click tracking is off. Email-sourced Club page visits can be explored in the existing Google Analytics 4 traffic acquisition report using email UTM tags. This admin view does not yet import GA4 sessions. Email conversion attribution is not yet available. Club subscriptions and orders are shown for business context only. No sales are credited to email without a tracked source.</p>
+        <h3 className="mt-6 text-[1rem] font-semibold">Email-associated checkouts · 30 days</h3>
+        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Metric title="Club enrollments" value={report.email_conversions.club_enrollments_30d} detail="Completed live enrollment; free trials included"/>
+          <Metric title="Calendar orders" value={report.email_conversions.calendar_orders_30d} detail="Paid live calendar orders"/>
+          <Metric title="All paid site orders" value={report.email_conversions.paid_shop_orders_30d} detail="Verified site purchases; includes calendars"/>
+          <Metric title="Net shop revenue" value={`${(report.email_conversions.shop_net_revenue_30d_cents/100).toFixed(2)}`} detail="Paid shop orders, after refunds"/>
+        </div>
+        {report.email_campaigns.length>0 && <div className="mt-4 overflow-x-auto rounded-[4px] border border-rule bg-white">
+          <table className="w-full min-w-[500px] text-left text-[0.875rem]">
+            <thead className="bg-band text-soft"><tr>
+              <th className="p-3">Email campaign</th><th className="p-3 text-right">Shop orders</th><th className="p-3 text-right">Net shop revenue</th><th className="p-3 text-right">Club enrollments</th>
+            </tr></thead>
+            <tbody>{report.email_campaigns.map(c=><tr key={c.campaign} className="border-t border-rule">
+              <td className="p-3">{c.campaign.replace(/_/g,' ')}</td>
+              <td className="p-3 text-right">{c.shop_orders}</td>
+              <td className="p-3 text-right">{`${(c.shop_revenue_cents/100).toFixed(2)}`}</td>
+              <td className="p-3 text-right">{c.club_enrollments}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>}
+        <p className="mt-4 text-[0.9rem] text-soft">Attribution is a 7-day last-email UTM touch in this browser, matched to a Stripe-verified checkout. It shows association, not proof that the email caused the sale. Club enrollments can be free trials, so they are not counted as paid revenue. Email click counts remain unavailable while Resend click tracking is off. Existing GA4 can show email-associated visits separately. Unattributed Club subscriptions and orders above are business totals, not credited to email.</p>
       </section>
       <section aria-labelledby="email-schedule">
         <h2 id="email-schedule" className="admin-section-heading">Upcoming newsletters</h2>
