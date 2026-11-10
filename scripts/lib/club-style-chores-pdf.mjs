@@ -15,28 +15,28 @@ const handDrawn=n=>'public/assets/icons/ofc/guides/responsibility/'+n+'.png';
 
 const ageGuides={
  'chores-for-4-5-year-olds':{
-   lines:['Chores for','4–5-Year-Olds'], subtitle:'First Responsibilities for Little Helpers',
+   lines:['Chores for','4-5-Year-Olds'], subtitle:'First Responsibilities for Little Helpers',
    intro:'Kids this age can join in with short, simple tasks. They need practice with a grown-up.',
    bullets:['Practice together','Choose 1–2 small jobs','Use one clear routine cue','Notice effort and progress'],
    labels:['My Things','Helping at Home','With a Grown-Up'], bottom:'My First Responsibilities',
    icons:['backpack','basket','hands']
  },
  'chores-for-6-7-year-olds':{
-   lines:['Chores for','6–7-Year-Olds'], subtitle:'Simple Daily Responsibilities for Growing Independence',
+   lines:['Chores for','6-7-Year-Olds'], subtitle:'Simple Daily Responsibilities for Growing Independence',
    intro:'Kids can begin remembering familiar jobs with visual cues and a predictable routine.',
    bullets:['Pick 2 useful jobs','Show what done means','Attach it to a routine','Review together each week'],
    labels:['Morning & Evening','After-School Reset','Family Contributions'],bottom:'My Daily Responsibilities',
    icons:['clock','backpack','dish']
  },
  'chores-for-8-9-year-olds':{
-   lines:['Chores for','8–9-Year-Olds'], subtitle:'Age-Appropriate Responsibilities for Growing Independence',
+   lines:['Chores for','8-9-Year-Olds'], subtitle:'Age-Appropriate Responsibilities for Growing Independence',
    intro:'Kids can take on multi-step routines and regular household jobs with teaching and support.',
    bullets:['Teach the task and show what done looks like','Choose 2–3 consistent responsibilities','Use a simple routine cue','Praise follow-through and effort'],
    labels:['Personal Responsibilities','Around the House','Family Contributions'],bottom:'My Weekly Responsibilities',
    icons:['backpack','basket','dish']
  },
  'chores-for-10-12-year-olds':{
-   lines:['Chores for','10–12-Year-Olds'], subtitle:'Growing Independence and Real Household Contribution',
+   lines:['Chores for','10-12-Year-Olds'], subtitle:'Growing Independence and Real Household Contribution',
    intro:'Preteens can begin owning complete responsibilities with clear expectations and support.',
    bullets:['Agree on the whole job','Teach safe skills first','Give room to own it','Review together weekly'],
    labels:['Personal Ownership','Shared Household Care','Meal & Family Team'],bottom:'My Responsibility Planner',
@@ -98,8 +98,10 @@ async function build(guide){
  design.bullets.forEach((item,i)=>{
    const y=568-i*17;
    bulletSquare(p,273,y-3,c.ink);
-   const rows=wrap(item,'regular',8.9,267);
-   if(rows.length>1)text(p,rows.join(' '),289,y,8.2); else text(p,item,289,y,8.9);
+   // Keep every bullet within the right panel. Never join wrapped lines back together.
+   const rows=wrap(item,'regular',8.5,266);
+   if(rows.length>2)throw new Error('Ownership bullet is too long: '+item);
+   rows.forEach((line,j)=>text(p,line,289,y-j*9,8.5));
  });
 
  // Three colored chore/action cards. All lists are editorial text, not flattened imagery.
@@ -110,14 +112,24 @@ async function build(guide){
  const data=noReminders?guide.sections:guide.sections;
  for(let i=0;i<3;i++){
   const x=43+i*178,w=169,cat=data[i];
-  rounded(p,x,209,w,250,14,cardTints[i]);
-  await icon(p,handDrawn(design.icons[i]),x+115,407,43);
-  const labelLines=wrap(design.labels[i],'serifBold',12.8,145);
-  labelLines.forEach((line,j)=>text(p,line,x+11,420-j*15,12.8,'serifBold'));
+  // Fixed, non-overlapping regions: heading on the left, illustration on the right,
+  // and six text rows below. This applies to all five PDFs.
+  rounded(p,x,203,w,256,14,cardTints[i]);
+  const headingX=x+10,headingTop=426,headingWidth=113;
+  const iconX=x+129,iconY=406,iconSize=29;
+  const labelLines=wrap(design.labels[i],'serifBold',12.1,headingWidth);
+  if(labelLines.length>3)throw new Error('Card heading overflows: '+design.labels[i]);
+  // Heading text is constrained to x+10 .. x+123; icon starts at x+129.
+  labelLines.forEach((line,j)=>text(p,line,headingX,headingTop-j*15,12.1,'serifBold'));
+  await icon(p,handDrawn(design.icons[i]),iconX,iconY,iconSize);
+  if(cat.jobs.length!==6)throw new Error('Expected six chore ideas: '+guide.slug);
   for(let j=0;j<cat.jobs.length;j++){
-    const y=365-j*25;
-    bulletSquare(p,x+12,y-1,c.ink);
-    linesInBox(p,cat.jobs[j],x+28,y+1,132,y-22,wrap,text,8.0,10);
+    const y=347-j*24;
+    bulletSquare(p,x+11,y-2,c.ink);
+    // Start below the heading, wrap within the column, and preserve row spacing.
+    const rows=wrap(cat.jobs[j],'regular',7.85,128);
+    if(rows.length>2)throw new Error('Chore label overflows: '+cat.jobs[j]);
+    rows.forEach((line,k)=>text(p,line,x+27,y-k*9.4,7.85));
   }
  }
 
@@ -156,5 +168,5 @@ export async function generateMiniClubChorePrintables(){
 }
 export async function generateEightClubChorePrintable(){
  await mkdir('public/downloads',{recursive:true});
- await build({slug:'chores-for-8-9-year-olds',title:'Chores for 8–9-Year-Olds',sections:eightCategories});
+ await build({slug:'chores-for-8-9-year-olds',title:'Chores for 8-9-Year-Olds',sections:eightCategories});
 }
