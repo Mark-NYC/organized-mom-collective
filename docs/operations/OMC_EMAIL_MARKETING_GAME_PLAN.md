@@ -202,3 +202,33 @@ Start with **weekly content production**, but enable sending only after explicit
 
 **Final pending browser QA:** A human must open the delivered one-person test email in a fresh private browser and try a real PDF and generator download. Static production website deployment cannot be independently confirmed from the available connectors. Do not claim that the live site's popup behavior has been verified. Further schedule approval is still separate from testing.
 
+
+## Approved weekly newsletter schedule, November 10, 2026
+
+The owner confirmed in a fresh private browser that the personalized subscriber guide link no longer prompts again for email. Earlier Resend delivered test emails verified `{{{contact.RESOURCE_PASS}}}` expands to the actual pass. This closes the outstanding human browser QA item for the guide path; a separate generator-specific visit has not been explicitly confirmed.
+
+**Scheduled in Resend and recorded in the Supabase marketing broadcast calendar** (each checked as status `scheduled`; no immediate sends):
+
+| Local send (America/New_York) | Series | Broadcast ID |
+| --- | --- | --- |
+| Sun Nov 15, 2026, 8:30 AM | Sunday Family Reset 01 | `a042b85c-d216-4fc1-9a19-9caf8660ee4a` |
+| Wed Nov 18, 2026, 9 AM | One Small Win 01 | `36761fdf-d316-4921-9c20-bdf44bce02fd` |
+| Sun Nov 22, 2026, 8:30 AM | Sunday Family Reset 02 | `9a9acbdc-8150-4f0b-9ce3-bc3e9b7b4a37` |
+| Wed Nov 25, 2026, 9 AM | One Small Win 02 | `71b315ae-e4b4-41d5-b2c1-f67769eb310b` |
+| Sun Nov 29, 2026, 8:30 AM | Sunday Family Reset 03 | `cb0061d6-7faf-49fe-b823-ce338b9d5960` |
+| Wed Dec 2, 2026, 9 AM | One Small Win 03 | `f754f259-ad49-450e-95fc-c490b5f38298` |
+| Sun Dec 6, 2026, 8:30 AM | Sunday Family Reset 04 | `c0570537-539b-4976-80fe-ebd30949b205` |
+
+**Remaining five Wednesdays beyond the 28-day protected scheduler horizon**, still drafts:
+
+| Intended local date, 9 AM | Draft |
+| --- | --- |
+| Dec 9, 2026 | `cb6b9c36-696c-4006-a039-93519616db73` |
+| Dec 16, 2026 | `5745766c-36c5-4ab1-a3c1-0becd37ba0a5` |
+| Dec 23, 2026 | `f821718f-f926-4b09-b3bf-baf17d5d89e6` |
+| Dec 30, 2026 | `ce4ae542-4759-438d-a422-077c35c582a8` |
+| Jan 6, 2027 | `fa2fb8e7-1305-449e-a0e6-816e99f259f3` |
+
+**Follow-through task:** ChatGPT automation `6af3131b85d88191a553f26bcc60e2b1`, titled `Finish OMC Newsletter Schedule`, checks daily starting Nov 11 to schedule the remaining five one by one as they enter the 28-day window. It is instructed to verify status and consented segment, reserve the Supabase local date before the Resend call, verify scheduled status, and stop on ambiguity rather than retry blindly. The task is not proof the future broadcasts have been scheduled; verify future run results and calendar rows.
+
+Schedule timezone is EST (UTC-5) on all listed dates. Resend sends to `OMC | Newsletter Ready` rather than the general opt-in segment. Welcome Day 2 and Day 6 emails remain live and blocked from overlapping reserved broadcast dates. The calendar records the seven dates above.
