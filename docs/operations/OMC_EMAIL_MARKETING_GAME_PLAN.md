@@ -193,3 +193,8 @@ Start with **weekly content production**, but enable sending only after explicit
 
 **Next:** Real personalized email-link / new-browser QA; genuine Day 6-to-audience handoff observation; reviewed broadcast scheduling. No editorial broadcasts were activated by audience separation.
 
+
+### Broadcast Subscriber Access blocker found in real QA (November 9, 2026)
+
+A one-recipient direct email with a server-populated URL was delivered successfully, but **two real test broadcasts** sent exclusively to the owner's opted-in Gmail yielded an **empty** `{{{RESOURCE_PASS}}}` property. An explicit fallback printed `MISSING` even though the property exists on the Resend contact. The sender domain has click tracking OFF, so tracking did not cause the failure. The planned Sunday 01–03 and One Small Win 05 personalised guide links currently would lose their token. **Do not schedule those broadcasts until broadcast property interpolation is fixed and delivered-message QA passes.** Full details and test campaign IDs are recorded in [SUBSCRIBER_RESOURCE_ACCESS.md](./SUBSCRIBER_RESOURCE_ACCESS.md). The welcome Day 2/Day 6 sequence remains live and unaffected.
+
