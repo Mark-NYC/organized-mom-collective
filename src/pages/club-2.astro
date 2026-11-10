@@ -4,6 +4,7 @@ import { BRAND_NAME } from '../config';
 import { monthColors } from '../theme';
 import { clubEnabled, CLUB_OFFER, CLUB_PROGRAM_START, clubFoundingOpen } from '../data/club/config';
 import { MARKER_COLORS } from '../data/club/family-colors';
+import { carouselPreviews } from '../data/club/carousel-previews';
 import { clubCheckoutEnabled } from '../lib/club/membership';
 import clubHeroUrl from '../../assets/icons/ofc/hero-family-pointing.jpeg?url';
 import clubBadgeUrl from '../../assets/icons/ofc/OFC-logo.webp?url';
@@ -129,6 +130,11 @@ const faqs = [
   : ['Can I subscribe or cancel right now?', 'Enrollment is not open yet. We are testing print fulfillment and billing. Pricing and cancellation terms will be confirmed before sign-up. You can ask about early access.']
 ];
 const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
+// Close-up image dimensions used by the remaining monthly kit gallery modal.
+const closeUp = (month: string) => {
+ const p = carouselPreviews.find(c => c.month === month)!;
+ return { ...p, style: `--r:${(p.height / p.width).toFixed(4)};--mx0:${p.mobile.x0};--mw:${(p.mobile.x1 - p.mobile.x0).toFixed(3)};--my0:${p.mobile.y0}` };
+};
 ---
 <PublicLayout fullTitle={`Organized Family Club · ${BRAND_NAME}`} description="A personalized family plan for one real challenge each month, built around your kids, their ages and your routines, printed and mailed to your door." indexable={false} chrome={false} width="full" tracking={false}>
 <div class="club">
