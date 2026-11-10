@@ -75,3 +75,7 @@ Implemented **first-touch email UTM reporting** and the first tagged editorial l
 
 **Live site caveat:** The protected admin report RPC was queried successfully as owner after the migration: three newsletter-ready, seven scheduled, zero first-touch email-source new contacts so far. A live website-browser render of `/admin/email` could not be independently established by available tools.
 
+
+## Verified checkout-based attribution added, November 10, 2026
+
+The owner-only report now includes 7-day last-email-UTM-associated **live paid shop orders**, **calendar paid orders**, **net shop revenue after refunds** and **completed live Club enrollments**, broken down by campaign. Club free trials are enrollments, not paid revenue. All totals join Stripe sessions to webhook-verified Supabase orders/subscriptions; simply opening checkout is not counted. This is association, not causation, and starts with new email-tagged sessions only. See [EMAIL_CHECKOUT_ATTRIBUTION.md](./EMAIL_CHECKOUT_ATTRIBUTION.md) for deployed code, RPCs, limitations and acceptance tests. No production newsletter schedules were changed.
