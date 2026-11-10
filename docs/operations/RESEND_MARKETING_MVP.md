@@ -296,7 +296,7 @@ The research sample from the owner's Clean Mama Gmail showed three recurring edi
 ### Access without repeat guide email capture
 
 - Existing same-browser access: `omc:tool-download-access:v1` in localStorage.
-- New cross-browser email-link access: Resend contact property `RESOURCE_PASS`, 64-hex per-subscriber pass renewed at expiry. In emails, link to free resources with `#omc_pass={{{RESOURCE_PASS}}}` rather than including an address in the URL.
+- New cross-browser email-link access: Resend contact property `RESOURCE_PASS`, 64-hex per-subscriber pass renewed at expiry. In emails, link to free resources with `#omc_pass={{{contact.RESOURCE_PASS}}}` rather than including an address in the URL.
 - SQL source mirror: `supabase/migrations/20261109090000_subscriber_resource_passes.sql`. Tables: `public.subscriber_resource_passes` and `public.subscriber_resource_pass_sync_jobs`, each RLS-protected and not granted to anon/authenticated. Private signup trigger and 15-minute `omc-resource-pass-sync` cron provision and update eligible opt-in passes.
 - Deployed Edge Functions: `resend-resource-pass-sync` (syncs contact property with consent/suppression/re-unsubscribe checks, **does not send mail**) and `subscriber-resource-access` (validates hashed pass + expiry; responds only `ok`).
 - Website: `src/lib/tool-email.ts` recognizes the fragment, verifies via POST, clears it from the browser address and reuses the existing remembered free-download state; `src/layouts/PublicLayout.astro` loads this path on public pages. This is not authorization for Club or paid/member resources. Static PDF files remain publicly reachable.
@@ -315,9 +315,13 @@ Eligibility requires explicit marketing opt-in, no suppression, and either a leg
 **Still not done:** First real automatic Day 6-to-newsletter segment handoff; personalized tracked email-to-browser resource access test; explicit approval and scheduling of Sunday/Wednesday issues. No broadcasts sent or scheduled. See [NEWSLETTER_AUDIENCE_HANDOFF.md](./NEWSLETTER_AUDIENCE_HANDOFF.md).
 
 
-## Subscriber access broadcast QA failure (2026-11-09)
+## Subscriber access broadcast variable correction (2026-11-09)
 
-Direct email `01a1c2fc-e8cb-7e9c-b7e5-45eeec529318` was delivered to the owner's test inbox with a server-populated valid URL. Two one-person QA broadcasts `39b72ad9-ce37-455f-b826-d00a990cf3fc` and `55d5438f-8c77-4817-bb88-6290c1267f9a` were also delivered. Resend substituted `{{{RESOURCE_PASS}}}` as the **empty string** even though the Resend contact has a populated string property and the property definition exists. The `|MISSING` fallback printed MISSING. Resend click tracking is OFF. The tests used the formerly empty General segment, renamed `OMC | QA Test Only` and filled with only the owner's consented contact. No general newsletters were sent.
+### Verified contact-property syntax and broadcast link, November 9, 2026
 
-**Hard launch block:** Sunday 01–03 and One Small Win 05 currently contain personalized guide URLs that fail in delivered Resend broadcasts. Do not schedule. See [SUBSCRIBER_RESOURCE_ACCESS.md](./SUBSCRIBER_RESOURCE_ACCESS.md). This does not alter the live welcome drip or the new Newsletter Ready audience.
+**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
+
+**Resend drafts corrected and read back:** Sunday Family Reset 01–03 and One Small Win 05 now contain `{{{contact.RESOURCE_PASS}}}` in HTML and plain text, with zero old placeholders; all remain `draft`, assigned to `OMC | Newsletter Ready`. The 15-minute pass sync and Supabase token verifier are active. A fresh valid-token POST returned `200 {ok:true}` and invalid-token POST returned `200 {ok:false}`.
+
+**Final pending browser QA:** A human must open the delivered one-person test email in a fresh private browser and try a real PDF and generator download. Static production website deployment cannot be independently confirmed from the available connectors. Do not claim that the live site's popup behavior has been verified. Further schedule approval is still separate from testing.
 
