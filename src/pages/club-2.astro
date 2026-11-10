@@ -176,23 +176,64 @@ const closeUp = (month: string) => {
  <p class="problem-punch">Even when everyone helps, <strong>you're still the one keeping the plan together.</strong></p>
 </section>
 
-<section class="real-club-materials container" id="weekly-meeting" aria-labelledby="meeting-rhythm-title">
- <div class="real-club-intro">
-  <p class="eyebrow">TWO SIMPLE PIECES, WORKING TOGETHER</p>
-  <h2 id="meeting-rhythm-title">A familiar weekly meeting. <em>A fresh focus each month.</em></h2>
-  <p>We prepare the plan. Your family takes it from there.</p>
+<section class="personalized-story container" id="weekly-meeting" aria-labelledby="personal-story-title">
+ <div class="ps-intro">
+  <p class="eyebrow">NOT A ONE-SIZE-FITS-ALL PRINTABLE</p>
+  <h2 id="personal-story-title">A plan made for <em>your actual family.</em></h2>
+  <p>See how the information a mom shares becomes a simple, personalized starting point.</p>
  </div>
- <div class="real-doc-pair exact-doc-pair">
-  <figure class="real-doc-item">
-   <img class="exact-document-image" src="/images/club/family-meeting-exact.webp" alt="Original Our Family Meeting guide, showing the four parts of a ten-minute weekly family meeting: Our Focus, Let's Talk, Everyone's Part, and Let's Practice." width="1500" height="1941" loading="lazy" decoding="async" />
-   <figcaption><strong>Your weekly Family Meeting</strong><span>Same simple ten-minute rhythm, every week.</span></figcaption>
-  </figure>
-  <figure class="real-doc-item">
-   <img class="exact-document-image" src="/images/club/family-focus-exact.webp" alt="Original January 2027 Rivera family focus printable, featuring Easier Evenings, personalized age-appropriate habits for Sofia and Mateo, and the words Notice, Choose, Practice, Grow." width="1500" height="1941" loading="lazy" decoding="async" />
-   <figcaption><strong>Your personalized monthly Family Focus</strong><span>Made for your kids, your goals, and your season.</span></figcaption>
-  </figure>
+ <div class="ps-demo" data-personal-story>
+  <div class="ps-demo-top">
+   <div class="ps-demo-family"><span class="ps-family-dot">R</span><div><strong>The Rivera Family</strong><small>Illustrative sample · January 2027</small></div></div>
+   <div class="ps-nav" role="group" aria-label="Explore the personalization example">
+    <button type="button" class="ps-tab" data-personal-tab="answers" aria-pressed="true">1. Their answers</button>
+    <button type="button" class="ps-tab" data-personal-tab="plan" aria-pressed="false">2. Their plan</button>
+   </div>
+  </div>
+  <div class="ps-step" data-personal-panel="answers">
+   <div class="ps-family-members" aria-label="Rivera family members">
+    <span><i style="background:#2B70B7">S</i>Sofia, 10</span>
+    <span><i style="background:#2F8359">M</i>Mateo, 7</span>
+    <span><i style="background:#B87B54">E</i>Elena, 4</span>
+    <span class="ps-adults">Ana &amp; Luis</span>
+   </div>
+   <div class="ps-answers">
+    <div><small>WHAT'S HARD</small><strong>Keeping up with routines and family plans</strong></div>
+    <div><small>WHAT MATTERS RIGHT NOW</small><strong>Easier evenings, especially before dinner</strong></div>
+    <div><small>WHAT THEY WANT TO BUILD</small><strong>More independence with school things and everyday jobs</strong></div>
+   </div>
+   <button class="ps-next" type="button" data-personal-next>See the plan we prepare <span aria-hidden="true">→</span></button>
+  </div>
+  <div class="ps-step" data-personal-panel="plan" hidden>
+   <div class="ps-focus"><small>JANUARY · OUR SHARED FOCUS</small><h3>Easier evenings</h3><p>Each person takes one small piece of the evening.</p></div>
+   <div class="ps-habits" aria-label="Two January habit suggestions personalized to the Rivera family">
+    <article class="ps-habit">
+     <div class="ps-who"><i style="background:#2B70B7">S</i><strong>Sofia, 10</strong></div>
+     <h4>School things ready</h4>
+     <p>Check tomorrow's supplies and pack the school bag.</p>
+     <small><b>WHEN</b> After homework or after dinner</small>
+    </article>
+    <article class="ps-habit">
+     <div class="ps-who"><i style="background:#2F8359">M</i><strong>Mateo, 7</strong></div>
+     <h4>Pajamas ready</h4>
+     <p>Put pajamas on the bed before bath time.</p>
+     <small><b>WHEN</b> After dinner or after the table is cleared</small>
+    </article>
+   </div>
+   <div class="ps-review"><span>She can <strong>keep, change, or skip</strong> each suggestion before printing.</span><a href="/app/club/january/?sample=rivera">Explore the January sample <span aria-hidden="true">→</span></a></div>
+  </div>
+  <p class="ps-disclaimer">This is a guided preview of the saved Rivera sample, not a live AI generation. The family chooses what to try.</p>
  </div>
- <p class="real-materials-caption">Actual January sample printables. Personalization and monthly themes vary by family.</p>
+ <div class="ps-meeting">
+  <div class="ps-meeting-copy"><p class="eyebrow">THEN BRING IT TO THE TABLE</p><h3>One simple family meeting. <em>Ten minutes a week.</em></h3></div>
+  <ol aria-label="The four parts of the weekly Family Meeting">
+   <li><small>2 MIN</small><strong>Our Focus</strong></li>
+   <li><small>3 MIN</small><strong>Let's Talk</strong></li>
+   <li><small>3 MIN</small><strong>Everyone's Part</strong></li>
+   <li><small>2 MIN</small><strong>Let's Practice</strong></li>
+  </ol>
+  <p>Same four parts every week. A new personalized focus every month.</p>
+ </div>
 </section>
 
 <section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-view="plan">
@@ -362,6 +403,18 @@ const closeUp = (month: string) => {
 </div>
 
 <script>
+ // This public preview uses fixed January Rivera sample data. Nothing is generated or saved here.
+ const personalStory = document.querySelector<HTMLElement>('[data-personal-story]');
+ if (personalStory) {
+   const controls = [...personalStory.querySelectorAll<HTMLButtonElement>('[data-personal-tab]')];
+   const panels = [...personalStory.querySelectorAll<HTMLElement>('[data-personal-panel]')];
+   const show = (step: string) => {
+     controls.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.personalTab === step)));
+     panels.forEach(panel => { panel.hidden = panel.dataset.personalPanel !== step; });
+   };
+   controls.forEach(button => button.addEventListener('click', () => show(button.dataset.personalTab!)));
+   personalStory.querySelector<HTMLButtonElement>('[data-personal-next]')?.addEventListener('click', () => show('plan'));
+ }
  // Sample-family tabs: click, or arrow keys / Home / End with roving tabindex (WAI-ARIA tabs, automatic activation).
  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-family-tab]')];
  const surface = document.querySelector<HTMLElement>('.demo-surface')!;
@@ -992,5 +1045,53 @@ const closeUp = (month: string) => {
 .exact-doc-pair { align-items:start; }
 .exact-document-image { display:block; width:100%; height:auto; aspect-ratio:1500 / 1941; background:#fff; box-shadow:0 10px 30px rgba(46,46,46,.09),0 0 0 1px #ebe8e3; }
 @media (max-width:760px) { .exact-doc-pair { max-width:min(100%,480px); } }
+
+/* Calm, interactive source-grounded January personalization demonstration. */
+.personalized-story { padding-block:clamp(3.25rem,6vw,6rem); }
+.ps-intro { max-width:700px; text-align:center; margin:0 auto 2rem; }
+.ps-intro h2 { font-family:Georgia,serif; font-weight:400; font-size:clamp(2rem,4vw,3.45rem); line-height:1.13; margin:.55rem 0 .85rem; }
+.ps-intro p:not(.eyebrow) { font-size:clamp(1rem,1.35vw,1.13rem); line-height:1.55; margin:0 auto; }
+.ps-demo { max-width:880px; margin:auto; border:1px solid #E3D9D0; border-radius:17px; background:#fff; padding:clamp(1.15rem,2.6vw,2rem); box-shadow:0 8px 24px #302d2710; }
+.ps-demo-top { display:flex; justify-content:space-between; align-items:center; gap:1.25rem; padding-bottom:1.1rem; border-bottom:1px solid #EDE7E0; margin-bottom:1.5rem; }
+.ps-demo-family { display:flex; align-items:center; gap:.7rem; }
+.ps-family-dot { display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#D4DFC4;color:#3D6671;font-weight:700;font-size:1.05rem; }
+.ps-demo-family strong,.ps-demo-family small { display:block; }
+.ps-demo-family strong { font-size:1.05rem; }
+.ps-demo-family small { color:#766D65; font-size:.76rem; margin-top:.15rem; }
+.ps-nav { display:flex;gap:.4rem;background:#FBF7F1;border-radius:9px;padding:.3rem; }
+.ps-nav button { border:0;border-radius:7px;background:transparent;color:#545454;font:600 .85rem/1.3 Montserrat,sans-serif;padding:.75rem .85rem;cursor:pointer; }
+.ps-nav button[aria-pressed="true"] { background:#D4DFC4;color:#344A3B; }
+.ps-nav button:focus-visible,.ps-next:focus-visible {outline:3px solid #3D6671;outline-offset:3px;}
+.ps-step[hidden] { display:none!important; }
+.ps-family-members { display:flex;align-items:center;justify-content:center;gap:1.1rem;flex-wrap:wrap;margin-bottom:1.5rem; }
+.ps-family-members span,.ps-who { display:inline-flex;align-items:center;gap:.45rem;font-size:.9rem;font-weight:600; }
+.ps-family-members i,.ps-who i { flex:0 0 27px;width:27px;height:27px;display:inline-grid;place-items:center;font-style:normal;color:#fff;border-radius:50%;font-size:.75rem; }
+.ps-family-members .ps-adults { font-weight:500; color:#6B645F; }
+.ps-answers { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:0 0 1.3rem; }
+.ps-answers > div { background:#FBF7F1;padding:1.2rem;border-radius:10px;min-height:138px;display:grid;align-content:start;gap:.75rem; }
+.ps-answers small,.ps-focus small { color:#3D6671;font-size:.7rem;font-weight:700;letter-spacing:.08em;line-height:1.5; }
+.ps-answers strong {font-size:1.01rem;line-height:1.35;}
+.ps-next { display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;min-height:46px;border-radius:7px;background:#3D6671;color:white;font-size:.95rem;font-weight:700;border:0;cursor:pointer; }
+.ps-focus { background:#E8F0F1;border-radius:10px;padding:1.4rem 1.6rem;margin-bottom:1rem; }
+.ps-focus h3 { font:400 clamp(1.7rem,2.8vw,2.4rem)/1.12 Georgia,serif;margin:.3rem 0;color:#3D6671; }
+.ps-focus p { margin:0;line-height:1.5; }
+.ps-habits { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem; }
+.ps-habit { border:1px solid #D5C5B8;background:#FBF7F1;border-radius:10px;padding:1.15rem;min-width:0; }
+.ps-habit h4 {font:400 clamp(1.3rem,2vw,1.65rem)/1.14 Georgia,serif;margin:.65rem 0 .45rem;}
+.ps-habit p {font-size:.93rem;line-height:1.45;margin:0 0 .75rem;}
+.ps-habit small {font-size:.77rem;line-height:1.45;color:#545454;}
+.ps-habit small b {color:#3D6671;margin-right:.2rem;}
+.ps-review {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-top:1.1rem;font-size:.85rem;line-height:1.4;}
+.ps-review a { text-decoration:underline;text-underline-offset:3px;font-weight:700;color:#3D6671; }
+.ps-disclaimer {color:#766D65;font-size:.72rem;line-height:1.4;text-align:center;margin:1.3rem 0 0;}
+.ps-meeting {max-width:880px;margin:clamp(3rem,5vw,5rem) auto 0;text-align:center;}
+.ps-meeting h3 {font:400 clamp(1.7rem,3vw,2.6rem)/1.2 Georgia,serif;margin:.5rem 0 1.5rem;}
+.ps-meeting ol {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;list-style:none;margin:0;padding:0;}
+.ps-meeting li {padding:1.15rem .45rem;border-radius:9px;background:#FBF7F1;display:grid;gap:.35rem;align-content:center;}
+.ps-meeting li small {font-size:.69rem;font-weight:700;color:#3D6671;letter-spacing:.06em;}
+.ps-meeting li strong {font:400 clamp(1.03rem,1.6vw,1.25rem)/1.25 Georgia,serif;}
+.ps-meeting > p {font-size:.91rem;color:#545454;margin:1rem 0 0;}
+@media(max-width:760px) { .ps-demo-top {align-items:stretch;flex-direction:column;}.ps-nav {align-self:stretch;}.ps-nav button {flex:1;} .ps-answers {grid-template-columns:1fr;gap:.5rem;} .ps-answers > div {min-height:0;padding:1rem;gap:.35rem;} .ps-habits {grid-template-columns:1fr;} }
+@media(max-width:450px) { .ps-family-members {gap:.7rem;justify-content:start;} .ps-meeting ol {grid-template-columns:repeat(2,minmax(0,1fr));}.ps-meeting li {min-height:74px;} .ps-review {display:grid;} }
 </style>
 </PublicLayout>
