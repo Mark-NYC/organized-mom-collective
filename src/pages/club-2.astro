@@ -180,52 +180,19 @@ const closeUp = (month: string) => {
  <div class="real-club-intro">
   <p class="eyebrow">TWO SIMPLE PIECES, WORKING TOGETHER</p>
   <h2 id="meeting-rhythm-title">A familiar weekly meeting. <em>A fresh focus each month.</em></h2>
-  <p>You don't have to invent the conversation. We give you the meeting rhythm and prepare a monthly focus for your actual family.</p>
+  <p>We prepare the plan. Your family takes it from there.</p>
  </div>
- <div class="real-doc-pair">
+ <div class="real-doc-pair exact-doc-pair">
   <figure class="real-doc-item">
-   <div class="real-doc-page meeting-doc" role="group" aria-label="Preview based on the Our Family Meeting guide">
-    <div class="doc-eyebrow">ORGANIZED FAMILY CLUB</div>
-    <div class="doc-title">Our Family Meeting</div>
-    <p class="doc-italic">Ten minutes, once a week, so everyone knows the plan and plays a part.</p>
-    <div class="doc-info-grid">
-     <div><b>WHEN</b><p>Once a week. Pick a time that already happens, like Sunday after lunch, and keep it.</p></div>
-     <div><b>HOW LONG</b><p>About ten minutes. Short enough for everyone to sit still.</p></div>
-     <div><b>WHO</b><p>Everyone who lives at home. Little ones can sit on a lap.</p></div>
-     <div><b>WHAT YOU NEED</b><p>This month's resource, plus your wall calendar if you have one.</p></div>
-    </div>
-    <h3>The four parts</h3>
-    <ol class="real-meeting-parts">
-     <li><span>2 min</span><div><b>Our Focus</b><p>Read this month's focus out loud.</p></div></li>
-     <li><span>3 min</span><div><b>Let's Talk</b><p>Everyone answers the meeting questions.</p></div></li>
-     <li><span>3 min</span><div><b>Everyone's Part</b><p>Choose one small thing each person can own.</p></div></li>
-     <li><span>2 min</span><div><b>Let's Practice</b><p>Try one part together before the week begins.</p></div></li>
-    </ol>
-    <div class="doc-bottom-note">Same simple rhythm, every week.</div>
-   </div>
-   <figcaption><strong>1. Your Family Meeting guide</strong><span>One familiar 10-minute rhythm to use every week.</span></figcaption>
+   <img class="exact-document-image" src="/images/club/family-meeting-exact.webp" alt="Original Our Family Meeting guide, showing the four parts of a ten-minute weekly family meeting: Our Focus, Let's Talk, Everyone's Part, and Let's Practice." width="1500" height="1941" loading="lazy" decoding="async" />
+   <figcaption><strong>Your weekly Family Meeting</strong><span>Same simple ten-minute rhythm, every week.</span></figcaption>
   </figure>
   <figure class="real-doc-item">
-   <div class="real-doc-page focus-doc" role="group" aria-label="Preview based on the Rivera family's Our Family Focus for January 2027">
-    <div class="doc-eyebrow">JANUARY 2027 · THE RIVERA FAMILY</div>
-    <div class="doc-title">Our Family Focus</div>
-    <div class="focus-doc-members"><span>Sofia</span><span>Mateo</span><span>Elena</span><span>Ana</span><span>Luis</span></div>
-    <p class="focus-doc-lede">January is about starting our Family Meeting, and using it to work on one thing together.</p>
-    <div class="focus-goal"><small>OUR SHARED FOCUS</small><strong>Easier evenings</strong><span>Each person takes one small piece of the evening.</span></div>
-    <h3>Small habits worth trying</h3>
-    <p class="focus-small-intro">To talk over and try, not assignments. One is plenty to start.</p>
-    <div class="focus-habits">
-     <div><div class="focus-person"><span>S</span><b>Sofia, 10</b></div><strong>School things ready</strong><p>Check tomorrow's supplies and pack the school bag.</p><small>WHEN · After homework or after dinner</small></div>
-     <div><div class="focus-person"><span>M</span><b>Mateo, 7</b></div><strong>Pajamas ready</strong><p>Put pajamas on the bed before bath time.</p><small>WHEN · After dinner or table cleared</small></div>
-    </div>
-    <h3>Our Words of the Week</h3>
-    <div class="focus-weeks"><span>Notice</span><span>Choose</span><span>Practice</span><span>Grow</span></div>
-    <p class="focus-doc-foot">Bring it to your Family Meeting: Talk about the focus · Choose what to try · Celebrate what works · Adjust what doesn't.</p>
-   </div>
-   <figcaption><strong>2. Your personalized monthly Family Focus</strong><span>Real names, ages, and habits that fit your family.</span></figcaption>
+   <img class="exact-document-image" src="/images/club/family-focus-exact.webp" alt="Original January 2027 Rivera family focus printable, featuring Easier Evenings, personalized age-appropriate habits for Sofia and Mateo, and the words Notice, Choose, Practice, Grow." width="1500" height="1941" loading="lazy" decoding="async" />
+   <figcaption><strong>Your personalized monthly Family Focus</strong><span>Made for your kids, your goals, and your season.</span></figcaption>
   </figure>
  </div>
- <p class="real-materials-caption">Shown: the actual January Rivera family example and the weekly meeting guide, presented in a simplified on-page preview.</p>
+ <p class="real-materials-caption">Actual January sample printables. Personalization and monthly themes vary by family.</p>
 </section>
 
 <section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-view="plan">
@@ -1021,5 +988,9 @@ const closeUp = (month: string) => {
 .real-materials-caption{text-align:center;margin:1.4rem auto 0;color:#6b6b6b;font-size:.78rem;max-width:650px;}
 @media(max-width:760px){.real-doc-pair{grid-template-columns:1fr;max-width:490px;gap:2.3rem;}.real-doc-page{font-size:clamp(.58rem,1.8vw,.8rem);padding:clamp(1.15rem,5vw,2.1rem);}.doc-title{font-size:clamp(1.85rem,6vw,2.6rem);}}
 @media(max-width:370px){.real-doc-page{font-size:.52rem;padding:.85rem;}.doc-title{font-size:1.6rem;}.doc-info-grid{padding:.6rem;}.real-meeting-parts{gap:.47rem;}}
+
+.exact-doc-pair { align-items:start; }
+.exact-document-image { display:block; width:100%; height:auto; aspect-ratio:1500 / 1941; background:#fff; box-shadow:0 10px 30px rgba(46,46,46,.09),0 0 0 1px #ebe8e3; }
+@media (max-width:760px) { .exact-doc-pair { max-width:min(100%,480px); } }
 </style>
 </PublicLayout>
