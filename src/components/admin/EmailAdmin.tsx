@@ -5,7 +5,7 @@ import { adminRpc } from '../../lib/admin/session';
 /** Owner-only email scorecard. Data comes from Supabase, not estimates or browser tracking. */
 type Report = {
   generated_at: string;
-  signups: { total:number; last_7d:number; last_30d:number; opted_in:number; opted_in_30d:number };
+  signups: { total:number; last_7d:number; last_30d:number; opted_in:number; opted_in_30d:number; email_sourced_30d:number };
   audience: { ready:number; sync_errors:number; pending:number };
   welcome: { sent_30d:number; held:number; failed:number; due:number };
   suppression: { all_time:number; last_30d:number; unsubscribed_30d:number };
@@ -84,11 +84,11 @@ function EmailReportPage({session, signOut, databaseReady}: AdminContext) {
       <section aria-labelledby="email-engagement">
         <h2 id="email-engagement" className="admin-section-heading">Engagement and sales</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <Metric title="Guide / product clicks" value="Not tracked" detail="Resend click tracking is currently off"/>
+          <Metric title="Email-origin free signups" value={report.signups.email_sourced_30d} detail="30 days · first recorded email UTM source"/>
           <Metric title="Active paid Club subscriptions" value={report.business.club_active} detail="Site total, not attributed to email"/>
           <Metric title="Paid site orders · 30 days" value={report.business.paid_site_orders_30d} detail="Site total, not attributed to email"/>
         </div>
-        <p className="mt-4 text-[0.9rem] text-soft">Email-sourced Club page visits can be explored in the existing Google Analytics 4 traffic acquisition report using email UTM tags. This admin view does not yet import GA4 sessions. Email conversion attribution is not yet available. Club subscriptions and orders are shown for business context only. No sales are credited to email without a tracked source.</p>
+        <p className="mt-4 text-[0.9rem] text-soft">Email click counts: unavailable while Resend click tracking is off. Email-sourced Club page visits can be explored in the existing Google Analytics 4 traffic acquisition report using email UTM tags. This admin view does not yet import GA4 sessions. Email conversion attribution is not yet available. Club subscriptions and orders are shown for business context only. No sales are credited to email without a tracked source.</p>
       </section>
       <section aria-labelledby="email-schedule">
         <h2 id="email-schedule" className="admin-section-heading">Upcoming newsletters</h2>
