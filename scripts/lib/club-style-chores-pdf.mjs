@@ -150,12 +150,11 @@ async function build(guide){
  await writeFile('public/downloads/'+name,bytes);
  console.log('Created '+name+' ('+bytes.length+' bytes, 1 page)');
 }
-export async function generateAllClubChorePrintables(){
+export async function generateMiniClubChorePrintables(){
  await mkdir('public/downloads',{recursive:true});
  for(const guide of miniGuides)await build(guide);
- const eight={
-  slug:'chores-for-8-9-year-olds',title:'Chores for 8–9-Year-Olds',
-  sections:eightCategories
- };
- await build(eight);
+}
+export async function generateEightClubChorePrintable(){
+ await mkdir('public/downloads',{recursive:true});
+ await build({slug:'chores-for-8-9-year-olds',title:'Chores for 8–9-Year-Olds',sections:eightCategories});
 }
