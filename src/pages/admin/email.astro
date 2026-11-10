@@ -1,0 +1,7 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import EmailAdmin from '../../components/admin/EmailAdmin';
+---
+<AdminLayout title="Email reporting" section="email">
+  <EmailAdmin client:only="react" />
+</AdminLayout>
