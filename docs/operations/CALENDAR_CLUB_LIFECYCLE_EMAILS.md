@@ -1,7 +1,7 @@
 # Calendar and Club lifecycle email sequences
 
 Updated: November 10, 2026
-Status: Four draft Resend templates created. **Not published, scheduled, or connected to automatic sending.** Production delivery must remain disabled until the trigger, opt-in and idempotency checks below are implemented and tested.
+Status: Four draft Resend templates created. **Production Supabase staging queue and two triggers deployed on November 10, 2026.** Jobs are created in held state only: no worker, cron dispatcher, or production send is activated. Existing customers are not backfilled. Production delivery must remain disabled until the remaining checks below are implemented and tested.
 
 ## Calendar buyer onboarding (site shop orders)
 
@@ -21,7 +21,7 @@ Status: Four draft Resend templates created. **Not published, scheduled, or conn
 ## Before production automation
 
 1. Publish the four approved templates; verify sender identity, actual mailing-address footer and unsubscribe handling appropriate to classification.
-2. Add a private, RLS-protected lifecycle send queue with unique `(journey, source_id, step)`, due dates, provider message IDs, and retry/uncertain states. Backfill must be opt-in and bounded, never retroactive unreviewed sending.
+2. **Done for staging:** A private, RLS-protected lifecycle queue with unique `(journey, source_id, step)`, due dates, provider message IDs, and retry/uncertain fields. New live, consented site-calendar delivered orders and Club activation events can stage held jobs. No historical backfill. Migration: `supabase/migrations/20261110030000_marketing_lifecycle_staging.sql`.
 3. Enqueue only from durable fulfillment and subscription state changes. Recheck source state at send time; cancellations, refunds, chargebacks and unsubscribes must block any promotional send. Verify marketing opt-in for promotional messages.
 4. Reuse Resend idempotency keys and the existing per-recipient send-day reservation approach so welcome and newsletter sends do not unexpectedly overlap. Marketing one-message-per-day applies to every path.
 5. Dry-run with controlled test records, then execute direct end-to-end acceptance of one delivered shop order and one activated Club subscription with no actual customer mail. Monitor response, provider events and retries.
@@ -34,3 +34,7 @@ These emails give one practical action and a single destination or reply. No art
 ## Tracking
 
 Record send eligibility, due date, delivered and failed events, suppression reason, unsubscribes, and responses when available. Use first-party UTM tags for actual relevant destination links, and do not claim open/click rates while Resend tracking is off. Attribution is not proof of incremental conversions.
+
+## November 10 staging verification
+
+The production migration applied successfully. Read-back confirmed exactly two enabled trigger definitions, RLS on, no SELECT rights for anon or authenticated roles, and zero queued jobs at deployment. The four Resend templates remain drafts. **No mail was sent.** This verifies schema installation only, not actual event-trigger behavior or end-to-end delivery. Before launch, investigate cases where customer/line-item metadata arrives after the triggering subscription/delivery update, and make qualification idempotent for eventual consistency. Implement actual send-time rechecks and send-day coordination separately.
