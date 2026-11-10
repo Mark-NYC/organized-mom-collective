@@ -43,8 +43,44 @@ Deno.serve(async req => {
   if (!secret || !url || !serviceKey) return json({ error: 'not_configured' }, 503);
   const raw = await req.text();
   if (!(await verify(raw, req, secret))) return json({ error: 'invalid_signature' }, 401);
-  let event: { type?: string; data?: { email?: string; unsubscribed?: boolean; to?: string | string[] } };
+  let event: { type?: string; created_at?: string; data?: { email?: string; unsubscribed?: boolean; to?: string | string[]; email_id?: string; broadcast_id?: string; click?: { link?: string; url?: string } } };
   try { event = JSON.parse(raw); } catch { return json({ error: 'invalid_json' }, 400); }
+  // Non-identifying marketing delivery and click analytics.
+  // The event ledger stores no email address or raw link (which can contain access tokens).
+  if (event.type?.startsWith('email.')) {
+    const id = req.headers.get('svix-id') ?? '';
+    const supported = new Set(['email.sent','email.delivered','email.delivery_delayed',
+      'email.failed','email.bounced','email.complained','email.clicked']);
+    if (supported.has(event.type) && id) {
+      let section: string | null = null;
+      if (event.type === 'email.clicked') {
+        const rawLink = event.data?.click?.link ?? event.data?.click?.url;
+        if (rawLink) {
+          try {
+            const path = new URL(rawLink).pathname.toLowerCase();
+            section = path.startsWith('/guides') || path.startsWith('/downloads') ? 'guides'
+              : /^(\\/chore-chart|\\/routine-chart|\\/family-responsibility-builder|\\/try-the-calendar)/.test(path) ? 'generators'
+              : path.startsWith('/club') ? 'club'
+              : path.startsWith('/calendar') ? 'calendar'
+              : path.startsWith('/shop') ? 'shop' : 'other';
+          } catch { section = null; }
+        }
+      }
+      // Analytics failures cannot stop unsubscribe/bounce suppression.
+      await fetch(`${url}/rest/v1/rpc/marketing_record_email_event`, {
+        method: 'POST',
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          p_event_id: id,
+          p_type: event.type,
+          p_email_id: event.data?.email_id ?? null,
+          p_broadcast_id: event.data?.broadcast_id ?? null,
+          p_event_at: event.created_at ?? new Date().toISOString(),
+          p_section: section,
+        }),
+      }).catch(() => undefined);
+    }
+  }
   let reason: string | undefined;
   let email: string | undefined;
   if (event.type === 'contact.updated' && event.data?.unsubscribed === true) {
