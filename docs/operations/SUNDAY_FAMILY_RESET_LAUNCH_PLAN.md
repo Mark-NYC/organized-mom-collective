@@ -61,3 +61,10 @@ The four Sunday drafts have been reassigned in Resend to `OMC | Newsletter Ready
 
 All four emails remain **draft**, unsent and unscheduled. The guarded broadcast scheduler was redeployed to require the new segment.
 
+
+## Blocking QA finding: personalized links are blank in Resend broadcasts
+
+On November 9, 2026, the sender performed two controlled QA broadcasts to a segment containing only the owner. Resend delivered the messages, but `{{{RESOURCE_PASS}}}` was **empty** both in the URL and elsewhere in the body; an explicit fallback printed `MISSING` despite the contact property being stored. Click tracking is disabled. The earlier test that merely checked the draft HTML contained the placeholder was **not sufficient**. First three Sunday drafts use the affected link format.
+
+**Keep all Sunday drafts unscheduled.** Fix actual broadcast custom-field personalization or use an approved direct-public-PDF fallback before first send. Re-test on a real delivered message and then a clean browser. See [Subscriber Access live QA](./SUBSCRIBER_RESOURCE_ACCESS.md).
+
