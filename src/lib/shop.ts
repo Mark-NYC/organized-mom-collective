@@ -12,6 +12,7 @@
  * security as a signed-in admin. Server side: supabase/functions/, supabase/SHOP.md.
  */
 import { toCsv } from './csv';
+import { readEmailCheckoutAttribution } from './email-checkout-attribution';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './supabase-config';
 
 const SUPABASE = SUPABASE_URL;
@@ -138,7 +139,7 @@ async function callCheckout(body: object): Promise<Response> {
 
 export async function startCheckout(items: { slug: string; quantity: number }[]): Promise<{ client_secret: string; session_id: string } | { error: CheckoutError }> {
   try {
-    const res = await callCheckout({ action: 'create', items });
+    const res = await callCheckout({ action: 'create', items, attribution: readEmailCheckoutAttribution() });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.client_secret) return data;
     const known: CheckoutError[] = [
