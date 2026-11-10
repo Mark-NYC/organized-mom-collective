@@ -5,6 +5,7 @@ import Nav from '../components/Nav.astro';
 import { calendarPath } from '../lib/companion';
 const calendar = calendarPath(Astro.url.pathname);
 const cleaningOnly = !calendar && /^\/app\/(cleaning|week|reorder|settings)\/?$/.test(Astro.url.pathname);
+const clubRoute = /^\/app\/club(?:\/|$)/.test(Astro.url.pathname);
 import { SITE_NAME } from '../config';
 import { ONBOARDED_KEY } from '../lib/storage';
 
@@ -52,6 +53,21 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     >Skip to content</a
   >
   <Nav />
+  {clubRoute && (
+    <div class="app-club-logo-strip" aria-label="Family Meeting Club">
+      <a href="/app/club" aria-label="Family Meeting Club home">
+        <img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width="2027" height="570" decoding="async" />
+      </a>
+    </div>
+  )}
+  <style is:global>
+    .app-club-logo-strip { display:flex; align-items:center; justify-content:center; padding:14px 20px 10px; background:#fffdfa; }
+    .app-club-logo-strip a { display:block; width:min(228px,62vw); }
+    .app-club-logo-strip img { display:block; width:100%; height:auto; }
+    html[data-club-header] .app-club-logo-strip { display:none; }
+    @media (max-width:640px) { .app-club-logo-strip { padding:10px 16px 6px; } .app-club-logo-strip a { width:min(176px,55vw); } }
+    @media print { .app-club-logo-strip { display:none!important; } }
+  </style>
   <script>
     import { initCompanionAccess } from '../lib/companion-access';
     void initCompanionAccess();
