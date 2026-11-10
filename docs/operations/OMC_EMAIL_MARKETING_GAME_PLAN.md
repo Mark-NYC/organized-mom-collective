@@ -232,3 +232,7 @@ The owner confirmed in a fresh private browser that the personalized subscriber 
 **Follow-through task:** ChatGPT automation `6af3131b85d88191a553f26bcc60e2b1`, titled `Finish OMC Newsletter Schedule`, checks daily starting Nov 11 to schedule the remaining five one by one as they enter the 28-day window. It is instructed to verify status and consented segment, reserve the Supabase local date before the Resend call, verify scheduled status, and stop on ambiguity rather than retry blindly. The task is not proof the future broadcasts have been scheduled; verify future run results and calendar rows.
 
 Schedule timezone is EST (UTC-5) on all listed dates. Resend sends to `OMC | Newsletter Ready` rather than the general opt-in segment. Welcome Day 2 and Day 6 emails remain live and blocked from overlapping reserved broadcast dates. The calendar records the seven dates above.
+
+## Email reporting shipped (November 10, 2026)
+
+Owner-only `/admin/email` page added to the existing admin Growth menu. It shows actual opt-ins, newsletter-ready contacts, welcome jobs, planned broadcasts, suppressions/unsubscribes, signed Resend provider deliveries/failures once received, and un-attributed Club/shop totals. It **does not** claim email clicks or conversions while the domain's click tracking and per-order attribution are unavailable. Existing GA4 tracks site visits, but no GA4 email UTM funnel was imported into the admin. See [EMAIL_REPORTING.md](./EMAIL_REPORTING.md) for exact metrics, safeguards and remaining browser/webhook QA.
