@@ -32,7 +32,7 @@ export function createCheckoutHandler(deps: ShopDeps): Handler {
       if (!cart) return json({ error: 'invalid_cart' }, 400, cors);
       const header = req.headers.get('x-shop-preview') ?? '';
       const preview = Boolean(deps.env.previewToken) && safeEqual(header, deps.env.previewToken);
-      const result = await create(deps, cart, clientIp(req), preview);
+      const result = await create(deps, cart, clientIp(req), preview, body.attribution);
       return json(result.body, result.status, cors);
     } catch (err) {
       console.error('shop-checkout', err);
@@ -41,7 +41,7 @@ export function createCheckoutHandler(deps: ShopDeps): Handler {
   };
 }
 
-async function create(deps: ShopDeps, cart: { slug: string; quantity: number }[], ip: string, preview: boolean) {
+async function create(deps: ShopDeps, cart: { slug: string; quantity: number }[], ip: string, preview: boolean, attribution?: unknown) {
   let order: ReservedOrder;
   try {
     // The database makes the final call (shop_create_order): preview only with a test key,
@@ -71,6 +71,17 @@ async function create(deps: ShopDeps, cart: { slug: string; quantity: number }[]
       `checkout:${order.order_id}`,
     );
     await deps.db.rpc('shop_attach_session', { p_order: order.order_id, p_session: session.id, p_livemode: session.livemode });
+    // Stripe session is now recorded by the shop. Attribution is advisory only.
+    if (attribution && typeof attribution === 'object') {
+      const touch=attribution as {campaign?:unknown;touched_at?:unknown};
+      if (typeof touch.campaign==='string' && typeof touch.touched_at==='string') {
+        try {
+          await deps.db.rpc('marketing_record_checkout_attribution',{
+            p_session:session.id,p_kind:'shop',p_campaign:touch.campaign,p_touched_at:touch.touched_at
+          });
+        } catch(err) { console.warn('shop-attribution-unavailable', (err as Error).message); }
+      }
+    }
     return { status: 200, body: { client_secret: session.client_secret, session_id: session.id } };
   } catch (err) {
     console.error('shop-checkout: could not open Stripe checkout', err);
