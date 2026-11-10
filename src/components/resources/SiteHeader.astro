@@ -50,12 +50,12 @@ const groupActive = (links: { href: string }[]) => links.some(link => isActive(l
           </div>
         </details>
       ))}
-      <a href="/club" aria-current={isActive('/club') ? 'page' : undefined} class:list={['inline-flex min-h-11 items-center whitespace-nowrap text-[0.7rem] font-semibold uppercase tracking-[0.12em] hover:text-ink', isActive('/club') ? 'text-ink' : 'text-muted']}>Family Club</a>
+      <a href="/club-2" aria-current={isActive('/club-2') ? 'page' : undefined} class:list={['inline-flex min-h-11 items-center whitespace-nowrap text-[0.7rem] font-semibold uppercase tracking-[0.12em] hover:text-ink', isActive('/club-2') ? 'text-ink' : 'text-muted']}>Family Club</a>
       <a href={routes.ourStory} aria-current={isActive(routes.ourStory) ? 'page' : undefined} class:list={['inline-flex min-h-11 items-center whitespace-nowrap text-[0.7rem] font-semibold uppercase tracking-[0.12em] hover:text-ink', isActive(routes.ourStory) ? 'text-ink' : 'text-muted']}>Our Story</a>
     </nav>
 
     <div class="flex items-center gap-2 sm:gap-3">
-      <a href="/club" data-cta="header-club" class="btn-primary hidden min-h-11 items-center justify-center px-5 text-center text-[0.7rem] lg:inline-flex">Explore the Club</a>
+      <a href="/club-2" data-cta="header-club" class="btn-primary hidden min-h-11 items-center justify-center px-5 text-center text-[0.7rem] lg:inline-flex">Explore the Club</a>
 
       <details class="site-menu relative lg:hidden">
         <summary aria-label="Toggle site menu" class="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center gap-1 px-1 text-[0.7rem] font-semibold uppercase tracking-wide [&::-webkit-details-marker]:hidden">
@@ -77,9 +77,9 @@ const groupActive = (links: { href: string }[]) => links.some(link => isActive(l
               </div>
             </details>
           ))}
-          <a href="/club" class="flex min-h-12 items-center border-b border-rule text-[0.82rem] font-semibold">Family Club</a>
+          <a href="/club-2" class="flex min-h-12 items-center border-b border-rule text-[0.82rem] font-semibold">Family Club</a>
           <a href={routes.ourStory} class="flex min-h-12 items-center border-b border-rule text-[0.82rem] font-semibold">Our Story</a>
-          <a href="/club" data-cta="header-menu-club" class="btn-primary mt-4 flex min-h-11 w-full items-center justify-center">Explore the Club</a>
+          <a href="/club-2" data-cta="header-menu-club" class="btn-primary mt-4 flex min-h-11 w-full items-center justify-center">Explore the Club</a>
           <a href={routes.clubLogin} class="mt-3 block py-2 text-center text-[0.8rem] text-muted">Already a member? Sign in</a>
         </nav>
       </details>
