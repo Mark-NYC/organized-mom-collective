@@ -4,7 +4,6 @@ import { BRAND_NAME } from '../config';
 import { monthColors } from '../theme';
 import { clubEnabled, CLUB_OFFER, CLUB_PROGRAM_START, clubFoundingOpen } from '../data/club/config';
 import { MARKER_COLORS } from '../data/club/family-colors';
-import { carouselPreviews, carouselSampleChildren } from '../data/club/carousel-previews';
 import { clubCheckoutEnabled } from '../lib/club/membership';
 import clubHeroUrl from '../../assets/icons/ofc/hero-family-pointing.jpeg?url';
 import clubBadgeUrl from '../../assets/icons/ofc/OFC-logo.webp?url';
@@ -130,22 +129,6 @@ const faqs = [
   : ['Can I subscribe or cancel right now?', 'Enrollment is not open yet. We are testing print fulfillment and billing. Pricing and cancellation terms will be confirmed before sign-up. You can ask about early access.']
 ];
 const ctaLabel = joinOpen ? 'Get My First Month Free' : 'See Club Membership';
-// The early product introduction: five real monthly tools (from kitPreviews), each with a short benefit label.
-const introLabels: Record<string, string> = {
- March: 'Share the chores without chasing',
- April: 'Make dinner a team job',
- May: 'Give summer days a rhythm',
- August: 'Get ready for school together',
- October: 'A daily reset everyone does',
-};
-// Phones show each tool as a close-up of the real printable for the Rivera sample family (src/data/club/carousel-previews.ts);
-// desktop keeps the flat lay of the product photos.
-const closeUp = (month: string) => {
- const p = carouselPreviews.find(c => c.month === month)!;
- return { ...p, style: `--r:${(p.height / p.width).toFixed(4)};--mx0:${p.mobile.x0};--mw:${(p.mobile.x1 - p.mobile.x0).toFixed(3)};--my0:${p.mobile.y0}` };
-};
-const sampleFamily = carouselSampleChildren();
-const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ...k, label: introLabels[k.month], close: closeUp(k.month) }));
 ---
 <PublicLayout fullTitle={`Organized Family Club · ${BRAND_NAME}`} description="A personalized family plan for one real challenge each month, built around your kids, their ages and your routines, printed and mailed to your door." indexable={false} chrome={false} width="full" tracking={false}>
 <div class="club">
@@ -157,7 +140,7 @@ const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ..
   <h1>Your family shouldn't depend on you <em>for everything.</em></h1>
   <p class="hero-sub">A family tool <em>planned for your family</em> and mailed to you every month.</p>
   <ul class="hero-includes" aria-label="What the membership includes"><li>A new family challenge each month</li><li>We do the planning</li><li>Your family shares the doing</li></ul>
-  <div class="hero-actions"><a class="primary cta-lime" href="#offer">{ctaLabel} <span aria-hidden="true">→</span></a><a class="text-cta" href="#what-arrives">See what arrives ↓</a></div>
+  <div class="hero-actions"><a class="primary cta-lime" href="#offer">{ctaLabel} <span aria-hidden="true">→</span></a><a class="text-cta" href="#families">See how it works ↓</a></div>
   <div class="hero-rating"><img src="data:image/png;base64,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" alt="4.9 out of 5 stars, 113 Organized Mom Collective reviews" width="350" height="35" loading="eager" /><span>Organized Mom Collective reviews</span></div>
  </div>
  <figure class="hero-photo"><img src={clubHeroUrl} alt="Family gathered around a kitchen table looking together at a printed family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
@@ -173,26 +156,6 @@ const introKits = kitPreviews.filter(k => k.month in introLabels).map(k => ({ ..
  <div class="problem-turn">
   <p class="problem-big">You don’t need more help with tasks. <em>You need someone to share the thinking.</em></p>
  </div>
-</section>
-
-<section class="product-intro" id="what-arrives" aria-labelledby="intro-title">
- <div class="container intro-head">
-  <p class="eyebrow">WHAT ARRIVES EACH MONTH</p>
-  <h2 id="intro-title">A new family challenge.<br/> A ready‑to‑use tool. <em>Every month.</em></h2>
- </div>
- <ul class="intro-spread" role="list" aria-label="Examples of monthly printed tools" tabindex="0">
-  {introKits.map(kit => <li class="intro-item">
-   <button class="intro-open" type="button" data-kit-open={kit.month} aria-label={`Look inside ${kit.month}: ${kit.title}`} aria-haspopup="dialog"></button>
-   <picture class="intro-pic" style={kit.close.style}>
-    <source media="(max-width: 700px)" srcset={kit.close.image} width={kit.close.width} height={kit.close.height} />
-    <img src={kit.image} alt={`${kit.month}: ${kit.description}, a printed Organized Family Club tool, shown for a sample family`} width="1080" height="1080" loading="lazy" decoding="async" />
-   </picture>
-   <p class="intro-month"><span style={{ backgroundColor: kit.color }}>{kit.month}</span></p>
-   <p class="intro-label">{kit.label}</p>
-  </li>)}
- </ul>
- <p class="intro-swipe">Shown for a sample family: {sampleFamily.children.map(c => `${c.name}, ${c.age}`).join(' · ')}. <span aria-hidden="true">Swipe for more.</span></p>
- <p class="intro-bridge">Each one made for your actual family. <em>Not a blank template.</em></p>
 </section>
 
 <section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-view="plan">
