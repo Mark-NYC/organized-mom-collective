@@ -20,13 +20,13 @@ import { monthColor } from '../theme';
 export default function TodayApp() {
   // ?setup=1 reopens the family-meeting walkthrough without resetting cleaning progress.
   // Fresh QR visitors still see it automatically on their first visit.
-  const [onboarded, setOnboardedState] = useState(() => {
-    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('setup') === '1') return false;
-    return isOnboarded();
-  });
+  const [forceSetup] = useState(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('setup') === '1'
+  );
+  const [onboarded, setOnboardedState] = useState(() => forceSetup ? false : isOnboarded());
   // iPhone Home Screen app, first launch: it has its own empty storage, so first pick up
   // the progress Safari left behind (see lib/install.ts) before deciding to show onboarding.
-  const [ready, setReady] = useState(() => onboarded || !isStandalone());
+  const [ready, setReady] = useState(() => forceSetup || onboarded || !isStandalone());
   useEffect(() => {
     if (ready) return;
     const done = () => {
