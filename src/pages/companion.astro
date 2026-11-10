@@ -59,7 +59,7 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
           <ShopButton label="Get the Calendar" to="product" cta="companion-hero" class="min-h-14 w-full px-8 sm:w-auto" />
         </div>
         <p class="mt-4 text-center text-[0.95rem] text-warm-soft sm:text-left">
-          Already have the calendar? <a href={routes.today} class="text-link text-warm-ink">Open the companion</a>
+          Already have the calendar? <a href="/app/calendar?setup=1" class="text-link text-warm-ink">Set it up with your family</a>
         </p>
       </div>
       <PhoneShot
@@ -174,10 +174,10 @@ const wrap = 'mx-auto max-w-6xl px-5 sm:px-8';
       <div class="flex flex-col rounded-[10px] bg-paper p-6 shadow-[0_20px_40px_-32px_rgba(77,69,68,0.5)] ring-1 ring-warm-rule sm:p-8">
         <h3 class="font-serif text-[1.5rem] leading-snug text-warm-ink">Have the calendar?</h3>
         <p class="mt-2 text-[1rem] leading-relaxed text-warm-soft">
-          Scan the QR code printed on your calendar with your phone’s camera. The companion opens on today, ready to go.
+          Scan the QR code on your calendar to start with a short family meeting. Everyone chooses a pen color, adds something of their own, and helps choose where to hang the calendar. Then open today’s cleaning tasks.
         </p>
         <div class="mt-auto pt-6">
-          <a href={routes.today} class="btn-secondary min-h-14 w-full border-warm-button px-8 text-warm-ink hover:bg-warm-button sm:w-auto">Open the Companion</a>
+          <a href="/app/calendar?setup=1" class="btn-secondary min-h-14 w-full border-warm-button px-8 text-warm-ink hover:bg-warm-button sm:w-auto">Set Up Your Family Calendar</a>
         </div>
       </div>
       <div class="flex flex-col rounded-[10px] bg-cream p-6 sm:p-8">
