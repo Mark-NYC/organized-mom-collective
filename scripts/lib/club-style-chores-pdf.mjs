@@ -73,10 +73,11 @@ async function build(guide){
  const {pdf,palette:c,text:standardText,wrap:standardWrap,icon}=await makeGuide(guide.title+' | Organized Mom Collective');
  // The website and PDF now share actual Montserrat body typography.
  // Use bundled local WOFF2 assets; no runtime network or system-font dependency.
+ // Do not subset: pdf-lib/fontkit's WOFF2 subset encoder can throw RangeError on save.
  pdf.registerFontkit(fontkit);
  const fontRoot='node_modules/@fontsource/montserrat/files/';
- const regular=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-400-normal.woff2'),{subset:true});
- const semibold=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-600-normal.woff2'),{subset:true});
+ const regular=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-400-normal.woff2'),{subset:false});
+ const semibold=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-600-normal.woff2'),{subset:false});
  const clean=v=>String(v).replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/[\u2013\u2014]/g,'-');
  const bodyFonts={regular,bold:semibold};
  const text=(page,value,x,y,size=10,font='regular',fill=c.ink)=>{
