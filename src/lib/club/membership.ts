@@ -5,6 +5,7 @@
  * question; nothing here is a security boundary. docs/club/MEMBERSHIP.md.
  */
 import { accountRpc, getSession } from '../account';
+import { readEmailCheckoutAttribution } from '../email-checkout-attribution';
 import { MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../supabase-config';
 import { CLUB_OFFER, CLUB_PROGRAM_START, clubFoundingOpen, rollingFirstCharge } from '../../data/club/config';
@@ -69,7 +70,7 @@ async function billing<T>(action: string, body: Record<string, unknown> = {}, si
 /** The owner's own test-mode checkout: /club/?test-checkout=1 (club-billing refuses test mode otherwise). */
 export const testCheckoutRequested = () => typeof location !== 'undefined' && new URLSearchParams(location.search).get('test-checkout') === '1';
 export const startCheckout = (plan: OfferedPlan, email?: string) =>
-  billing<{ url: string }>('checkout', { plan, ...(email ? { email } : {}), ...(testCheckoutRequested() ? { test_checkout: true } : {}) });
+  billing<{ url: string }>('checkout', { plan, attribution: readEmailCheckoutAttribution(), ...(email ? { email } : {}), ...(testCheckoutRequested() ? { test_checkout: true } : {}) });
 /** Whether the join page may show its checkout button: open, and in test mode only for /club/?test-checkout=1. */
 export async function checkoutOffered(): Promise<boolean> {
   try {
