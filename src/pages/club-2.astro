@@ -176,18 +176,56 @@ const closeUp = (month: string) => {
  <p class="problem-punch">Even when everyone helps, <strong>you're still the one keeping the plan together.</strong></p>
 </section>
 
-<section class="meeting-rhythm container visual-meeting" id="weekly-meeting" aria-labelledby="meeting-rhythm-title">
- <div class="meeting-rhythm-head">
-  <div><p class="eyebrow">A SIMPLE WEEKLY RHYTHM</p><h2 id="meeting-rhythm-title">What if everyone <em>knew their part?</em></h2><p>Ten minutes together to talk, plan, and give everyone a say. Your personalized guidance makes it easy to start.</p></div>
-  <div class="meeting-clock" aria-label="About ten minutes per week"><span class="clock-face"><svg viewBox="0 0 90 90" aria-hidden="true"><circle cx="45" cy="45" r="35" fill="none" stroke="currentColor" stroke-width="4"/><path d="M45 22v23l18 12" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="45" cy="45" r="3" fill="currentColor"/></svg></span><strong>10 minutes</strong><small>once a week</small></div>
+<section class="real-club-materials container" id="weekly-meeting" aria-labelledby="meeting-rhythm-title">
+ <div class="real-club-intro">
+  <p class="eyebrow">TWO SIMPLE PIECES, WORKING TOGETHER</p>
+  <h2 id="meeting-rhythm-title">A familiar weekly meeting. <em>A fresh focus each month.</em></h2>
+  <p>You don't have to invent the conversation. We give you the meeting rhythm and prepare a monthly focus for your actual family.</p>
  </div>
- <div class="meeting-visual" aria-label="A weekly meeting helps your family talk, plan, choose a step, and check in">
-  <div><span class="meeting-visual-icon">01</span><strong>Talk together</strong><small>What worked this week?</small></div>
-  <div><span class="meeting-visual-icon">02</span><strong>Look ahead</strong><small>What's coming up?</small></div>
-  <div><span class="meeting-visual-icon">03</span><strong>Choose a step</strong><small>What can each person own?</small></div>
-  <div><span class="meeting-visual-icon">04</span><strong>Check in</strong><small>Try it. Talk again next week.</small></div>
+ <div class="real-doc-pair">
+  <figure class="real-doc-item">
+   <div class="real-doc-page meeting-doc" role="group" aria-label="Preview based on the Our Family Meeting guide">
+    <div class="doc-eyebrow">ORGANIZED FAMILY CLUB</div>
+    <div class="doc-title">Our Family Meeting</div>
+    <p class="doc-italic">Ten minutes, once a week, so everyone knows the plan and plays a part.</p>
+    <div class="doc-info-grid">
+     <div><b>WHEN</b><p>Once a week. Pick a time that already happens, like Sunday after lunch, and keep it.</p></div>
+     <div><b>HOW LONG</b><p>About ten minutes. Short enough for everyone to sit still.</p></div>
+     <div><b>WHO</b><p>Everyone who lives at home. Little ones can sit on a lap.</p></div>
+     <div><b>WHAT YOU NEED</b><p>This month's resource, plus your wall calendar if you have one.</p></div>
+    </div>
+    <h3>The four parts</h3>
+    <ol class="real-meeting-parts">
+     <li><span>2 min</span><div><b>Our Focus</b><p>Read this month's focus out loud.</p></div></li>
+     <li><span>3 min</span><div><b>Let's Talk</b><p>Everyone answers the meeting questions.</p></div></li>
+     <li><span>3 min</span><div><b>Everyone's Part</b><p>Choose one small thing each person can own.</p></div></li>
+     <li><span>2 min</span><div><b>Let's Practice</b><p>Try one part together before the week begins.</p></div></li>
+    </ol>
+    <div class="doc-bottom-note">Same simple rhythm, every week.</div>
+   </div>
+   <figcaption><strong>1. Your Family Meeting guide</strong><span>One familiar 10-minute rhythm to use every week.</span></figcaption>
+  </figure>
+  <figure class="real-doc-item">
+   <div class="real-doc-page focus-doc" role="group" aria-label="Preview based on the Rivera family's Our Family Focus for January 2027">
+    <div class="doc-eyebrow">JANUARY 2027 · THE RIVERA FAMILY</div>
+    <div class="doc-title">Our Family Focus</div>
+    <div class="focus-doc-members"><span>Sofia</span><span>Mateo</span><span>Elena</span><span>Ana</span><span>Luis</span></div>
+    <p class="focus-doc-lede">January is about starting our Family Meeting, and using it to work on one thing together.</p>
+    <div class="focus-goal"><small>OUR SHARED FOCUS</small><strong>Easier evenings</strong><span>Each person takes one small piece of the evening.</span></div>
+    <h3>Small habits worth trying</h3>
+    <p class="focus-small-intro">To talk over and try, not assignments. One is plenty to start.</p>
+    <div class="focus-habits">
+     <div><div class="focus-person"><span>S</span><b>Sofia, 10</b></div><strong>School things ready</strong><p>Check tomorrow's supplies and pack the school bag.</p><small>WHEN · After homework or after dinner</small></div>
+     <div><div class="focus-person"><span>M</span><b>Mateo, 7</b></div><strong>Pajamas ready</strong><p>Put pajamas on the bed before bath time.</p><small>WHEN · After dinner or table cleared</small></div>
+    </div>
+    <h3>Our Words of the Week</h3>
+    <div class="focus-weeks"><span>Notice</span><span>Choose</span><span>Practice</span><span>Grow</span></div>
+    <p class="focus-doc-foot">Bring it to your Family Meeting: Talk about the focus · Choose what to try · Celebrate what works · Adjust what doesn't.</p>
+   </div>
+   <figcaption><strong>2. Your personalized monthly Family Focus</strong><span>Real names, ages, and habits that fit your family.</span></figcaption>
+  </figure>
  </div>
- <p class="meeting-visual-note">One familiar meeting rhythm. <strong>Fresh, personalized ideas every month.</strong></p>
+ <p class="real-materials-caption">Shown: the actual January Rivera family example and the weekly meeting guide, presented in a simplified on-page preview.</p>
 </section>
 
 <section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-view="plan">
@@ -940,5 +978,48 @@ const closeUp = (month: string) => {
 .offer-product-preview strong,.offer-product-preview span { display:block; }.offer-product-preview span { margin-top:.4rem; line-height:1.4; font-size:.93rem; }
 @media(max-width:800px){.hero-promise { grid-template-columns:repeat(3,minmax(0,1fr)); }.meeting-clock { flex-basis:130px; width:130px; height:130px; }.meeting-visual { grid-template-columns:repeat(2,minmax(0,1fr)); }.meeting-visual > div:nth-child(2)::after { display:none; } }
 @media(max-width:600px){.daily-moments { grid-template-columns:1fr; gap:.6rem; }.daily-moment { display:grid; grid-template-columns:100px minmax(0,1fr); align-items:center; text-align:left; column-gap:.8rem; padding:.6rem 1rem; }.moment-art { grid-row:span 2; height:82px; }.daily-moment .moment-quote { margin:0; }.daily-moment > span { align-self:start; }.meeting-rhythm-head { align-items:flex-start; gap:.8rem; }.meeting-clock { flex:0 0 95px; width:95px; height:95px; }.clock-face svg { width:30px; height:30px; }.meeting-clock strong { font-size:.9rem; }.meeting-clock small { font-size:.7rem; }.meeting-visual { gap:.6rem; }.meeting-visual > div { padding:1rem .6rem; }.meeting-visual strong { font-size:1.05rem; }.meeting-visual small { font-size:.78rem; }.personal-proof { gap:.35rem; }.personal-proof > div { padding:.65rem .45rem; }.personal-proof strong { font-size:.74rem; }.proof-label { font-size:.6rem; }.shift-compare { grid-template-columns:1fr; gap:.7rem; }.growth-roadmap { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.3rem; }.growth-roadmap > div { padding:.5rem .2rem; }.growth-roadmap img { width:45px; height:45px; }.growth-roadmap span { font-size:.69rem; }.hero-promise span { padding:.6rem .35rem; font-size:.7rem; }.hero-promise b { font-size:.82rem; } }
+
+/* Two real source-based print previews. Keep the interaction quiet: products first, little chrome. */
+.real-club-materials { padding-block:clamp(3.5rem,7vw,6.5rem); }
+.real-club-intro { max-width:740px; margin:0 auto 2.3rem; text-align:center; }
+.real-club-intro h2 {font-family:Georgia,serif;font-weight:400;font-size:clamp(2rem,4vw,3.55rem);line-height:1.14;margin:.6rem 0 1rem;}
+.real-club-intro p:not(.eyebrow){font-size:clamp(1rem,1.45vw,1.14rem);line-height:1.55;margin:0 auto;max-width:630px;}
+.real-doc-pair { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(1.5rem,4vw,4rem);align-items:start;max-width:1060px;margin:auto; }
+.real-doc-item{margin:0;min-width:0;}
+.real-doc-page{aspect-ratio:8.5/11;background:#fff;color:#545454;padding:clamp(1rem,2.8vw,2.3rem);box-shadow:0 10px 30px rgba(46,46,46,.1),0 0 0 1px #ece9e4;font-family:Montserrat,sans-serif;font-size:clamp(.48rem,.8vw,.72rem);line-height:1.35;overflow:hidden;}
+.real-doc-page p{margin:.22rem 0 .55rem;}
+.doc-eyebrow {font-size:.78em;letter-spacing:.16em;color:#6E826E;font-weight:700;margin-bottom:1.05rem;}
+.doc-title{font-family:Georgia,serif;font-size:clamp(1.5rem,3vw,2.5rem);line-height:1.05;color:#343f37;margin-bottom:.35rem;}
+.doc-italic{font-family:Georgia,serif;font-style:italic;color:#6f8370;font-size:1.35em;line-height:1.35;}
+.doc-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem 1.2rem;background:#EAF0E9;border-radius:7px;padding:1.1rem;margin:1.3rem 0 1.1rem;}
+.doc-info-grid b{display:block;color:#4A6658;font-size:.88em;letter-spacing:.055em;}.doc-info-grid p{font-size:.93em;line-height:1.32;margin:.23rem 0 0;}
+.real-doc-page h3{font-family:Georgia,serif;font-weight:400;font-size:1.7em;margin:.9rem 0 .65rem;color:#323b34;}
+.real-meeting-parts{list-style:none;padding:0;margin:0;display:grid;gap:.78rem;}
+.real-meeting-parts li{display:flex;gap:.78rem;align-items:flex-start;min-width:0;}
+.real-meeting-parts li>span{white-space:nowrap;border-radius:99px;background:#E8D2D6;font-size:.9em;font-weight:700;padding:.48em .6em;}
+.real-meeting-parts b{font-size:1.1em;}.real-meeting-parts p{margin:.14rem 0;line-height:1.35;}
+.doc-bottom-note{font-size:.9em;padding-top:.85rem;margin-top:1rem;border-top:1px solid #D4DFC4;color:#6a766c;}
+.focus-doc .doc-title{margin-bottom:.4rem;}
+.focus-doc-members{display:flex;flex-wrap:wrap;gap:.28rem;justify-content:flex-end;font-weight:600;font-size:.79em;}
+.focus-doc-members span{background:#F0F4EF;padding:.28rem .36rem;border-radius:5px;}
+.focus-doc-lede{font-size:1em;margin:1rem 0!important;}
+.focus-goal{padding:.9rem 1rem;background:#DCE8EA;border-radius:7px;display:grid;gap:.23rem;margin:1rem 0 1.1rem;}
+.focus-goal small{font-weight:700;letter-spacing:.07em;color:#3D6671;}
+.focus-goal strong{font-family:Georgia,serif;font-size:1.85em;font-weight:400;color:#3D6671;}
+.focus-small-intro{color:#707070;font-size:.95em;}
+.focus-habits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;margin:1rem 0;}
+.focus-habits>div{background:#F7F9F6;border-radius:7px;padding:.55rem;min-width:0;}
+.focus-person{display:flex;align-items:center;gap:.32rem;font-size:.93em;margin-bottom:.45rem;}
+.focus-person span{display:grid;place-items:center;background:#D4DFC4;width:21px;height:21px;border-radius:50%;font-size:.9em;}
+.focus-habits strong{font-size:1.05em;}.focus-habits p{line-height:1.4;}.focus-habits small{font-size:.78em;line-height:1.3;color:#3D6671;display:block;}
+.focus-weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.4rem;}
+.focus-weeks span{background:#DCE8EA;padding:.55rem .25rem;text-align:center;font-size:.95em;font-weight:700;}
+.focus-doc-foot{margin-top:1rem!important;padding-top:.75rem;border-top:1px solid #D4DFC4;font-size:.88em;line-height:1.4;}
+.real-doc-item figcaption{margin:1.2rem auto 0;max-width:440px;text-align:center;display:grid;gap:.35rem;}
+.real-doc-item figcaption strong{font-family:Georgia,serif;font-size:clamp(1.1rem,1.7vw,1.4rem);font-weight:400;line-height:1.3;}
+.real-doc-item figcaption span{font-size:.92rem;line-height:1.4;color:#545454;}
+.real-materials-caption{text-align:center;margin:1.4rem auto 0;color:#6b6b6b;font-size:.78rem;max-width:650px;}
+@media(max-width:760px){.real-doc-pair{grid-template-columns:1fr;max-width:490px;gap:2.3rem;}.real-doc-page{font-size:clamp(.58rem,1.8vw,.8rem);padding:clamp(1.15rem,5vw,2.1rem);}.doc-title{font-size:clamp(1.85rem,6vw,2.6rem);}}
+@media(max-width:370px){.real-doc-page{font-size:.52rem;padding:.85rem;}.doc-title{font-size:1.6rem;}.doc-info-grid{padding:.6rem;}.real-meeting-parts{gap:.47rem;}}
 </style>
 </PublicLayout>
