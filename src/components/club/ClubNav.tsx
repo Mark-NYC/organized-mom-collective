@@ -77,7 +77,7 @@ function ClubHeader({ current }: { current?: ClubNavItem | null }): ReactElement
   }, [open]);
 
   const brand = (
-    <a href={routes.appClub} aria-label="Organized Family Club home" className="flex min-w-0 flex-none items-center py-1"><img src="/images/club/organized-family-club-logo.png" alt="Organized Family Club" width={403} height={91} className="block h-auto w-[93px] max-w-[42vw] object-contain object-left sm:w-[117px]" /></a>
+    <a href={routes.appClub} aria-label="Family Meeting Club home" className="flex min-w-0 flex-none items-center py-1"><img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width={2027} height={570} className="block h-auto w-[154px] max-w-[49vw] object-contain object-left sm:w-[195px]" /></a>
   );
 
   if (journey && journey !== 'done') {

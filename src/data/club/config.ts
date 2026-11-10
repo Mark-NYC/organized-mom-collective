@@ -17,7 +17,7 @@ export const clubEnabled = () => import.meta.env.PUBLIC_CLUB_ENABLED === 'true' 
 /** Real sign-in for the Club: the flag plus customer accounts. */
 export const clubAccountsEnabled = () => clubEnabled() && accountsEnabled();
 
-export const CLUB_NAME = 'Organized Family Club';
+export const CLUB_NAME = 'Family Meeting Club';
 
 /**
  * Your First Month FREE. The monthly resources are the 2027 program. A household that joins before it (a founding
