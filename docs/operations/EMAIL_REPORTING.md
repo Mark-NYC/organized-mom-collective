@@ -54,3 +54,24 @@ Check scheduled-to-sent reconciliation in `marketing_broadcast_calendar`, and wh
 For upgrades: first add safe UTM campaign tracking into GA4, then test Resend click tracking with the private guide link, and only then add per-campaign clicks, site visits and attributed orders.
 
 **Verified active webhook subscription read-back (2026-11-10):** `contact.updated`, `email.bounced`, `email.complained`, `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.failed`. `email.clicked` was requested but is not currently in Resend's returned subscription list. It is deliberately treated as unavailable, not zero. Domain click tracking remains off.
+
+
+## Campaign attribution phase 1 (November 10, 2026)
+
+Implemented **first-touch email UTM reporting** and the first tagged editorial links:
+
+- `utm_source=omc_email`, `utm_medium=email`, `utm_campaign=one_small_win_04` on the **Club** link in One Small Win 04.
+- `utm_source=omc_email`, `utm_medium=email`, `utm_campaign=one_small_win_05` on the **routine chart** link in One Small Win 05. **Important URL order:** the UTM query appears *before* `#omc_pass={{{contact.RESOURCE_PASS}}}`. That preserves both site campaign attribution and subscriber resource access.
+- `utm_source=omc_email`, `utm_medium=email`, `utm_campaign=one_small_win_07` on the **calendar** link in One Small Win 07.
+- One Small Win 07 also links to a public static PDF. No GA4 campaign data should be expected for a PDF fetched directly since no tracked webpage executes.
+- One Small Win 06 and 08 have no website link, so no extra UTM was invented.
+- Three updated Resend broadcasts were verified as **draft**, correctly in Newsletter Ready, with the email resource token syntax preserved. No previously scheduled Sunday or Wednesday emails were edited.
+- Added `email_sourced_30d` to the owner-only reporting SQL, counting new free-tool contacts whose *first recorded* source is `omc_email` and medium is `email`. This is **not** overall newsletter click-through, nor direct Club conversion attribution.
+- Migrations: `supabase/migrations/20261110022000_email_campaign_source_metric.sql`. Admin UI: `src/components/admin/EmailAdmin.tsx`.
+
+**Limitation:** The seven already scheduled Nov 15–Dec 6 broadcasts were not changed and may not include campaign UTMs. The next opportunity for measurable GA4-tagged editorial visits is the later unscheduled draft campaigns. All new future editorial messages should add `utm_source=omc_email&utm_medium=email&utm_campaign=<stable-series-and-issue>` to normal website links, retaining any security token in the fragment. Link parameters must be HTML-escaped only inside attributes, not double-escaped.
+
+**GA4 verification:** In the existing Google Analytics property `G-VGJK1B4TJ6`, look at Acquisition > Traffic acquisition using session source/medium `omc_email / email` and inspect session campaign per issue. This reports *visits*, not clicks from the inbox, and is not yet imported into the admin. Test tagged URLs with a new private browser; do not assume page reporting or purchase attribution works until observed.
+
+**Live site caveat:** The protected admin report RPC was queried successfully as owner after the migration: three newsletter-ready, seven scheduled, zero first-touch email-source new contacts so far. A live website-browser render of `/admin/email` could not be independently established by available tools.
+
