@@ -5,7 +5,7 @@
 **Product:** 2027 Family Wall Calendar  
 **Order date:** November 1, 2026  
 **Status:** Delivered; customer requested 2026 calendar pages; Staples pickup order placed (pickup not independently confirmed)  
-**Visibility:** Internal research. Do not publicly share the customer's name, order details, location, or message screenshot without permission.
+**Quote permission:** On November 9, 2026, the founder reported that Kevin gave permission to quote him on the website. Permission is recorded from the founder's report; exact wording/scope of Kevin's consent was not independently reviewed. Use a short accurate quote without exposing order details, private messages, or the screenshot itself.
 
 ## The story
 
@@ -25,6 +25,14 @@ The product did not have a preprinted 2026 edition. The founders decided to crea
 4. **Repeated request:** A separate early buyer, Raquel (Customer Story 002), also asked for November and December 2026 pages.
 5. **Service opportunity:** A thoughtful, low-cost local print solution may build customer goodwill.
 
+## Approved website testimonial candidate
+
+> “We love the layout and would like to get good use out of it now”
+
+**Attribution:** Kevin, calendar customer (subject to whether his permission included use of his first name). The excerpt removes the casual “lol” and is presented without changing the meaning. If exact verbatim quotation is required, use: “We love the layout and would like to get good use out of it now lol”.
+
+**Context:** This is enthusiasm on receipt, not a claim of long-term product results. Do not present it as a five-star review or imply he has already used the November–December extras.
+
 ## Product and marketing implications
 
 - Test a free “Start Now” printable companion for buyers of future-dated calendars.
@@ -38,7 +46,8 @@ The product did not have a preprinted 2026 edition. The founders decided to crea
 - [ ] Confirm whether the buyer picked up the pages.
 - [ ] Ask how the calendar layout works in practice after use.
 - [ ] Invite an honest, optional Etsy review separately from the goodwill gift.
-- [ ] Obtain consent before using personal messages or identifiers in public marketing.
+- [x] Founder reports that Kevin granted permission to quote him on the site (November 9, 2026).
+- [ ] Confirm whether the permission covers identifying him by first name or displaying a screenshot before doing either.
 
 ## Evidence
 
