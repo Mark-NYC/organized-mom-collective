@@ -1,0 +1,154 @@
+begin;
+create or replace function public.admin_email_reporting()
+returns jsonb language plpgsql stable security definer set search_path='' as $$
+declare v jsonb;
+begin
+ if not public.is_admin('owner') then raise exception 'forbidden' using errcode='42501';end if;
+ select jsonb_build_object(
+  'generated_at',now(),
+  'signups',(
+   select jsonb_build_object(
+    'total',count(*),
+    'last_7d',count(*) filter(where created_at>=now()-interval '7 days'),
+    'last_30d',count(*) filter(where created_at>=now()-interval '30 days'),
+    'opted_in',count(*) filter(where marketing_opt_in=true),
+    'opted_in_30d',count(*) filter(where marketing_opt_in=true and marketing_opt_in_at>=now()-interval '30 days'),
+    'email_sourced_30d',count(*) filter(where created_at>=now()-interval '30 days' and first_utm_source='omc_email' and first_utm_medium='email')
+   ) from public.tool_email_contacts
+  ),
+  'audience',(
+   select jsonb_build_object(
+    'ready',count(*) filter(where desired and in_segment and status='synced'),
+    'sync_errors',count(*) filter(where status='failed'),
+    'pending',count(*) filter(where status in ('pending','processing'))
+   ) from public.marketing_newsletter_membership
+  ),
+  'welcome',(
+   select jsonb_build_object(
+    'sent_30d',count(*) filter(where status='sent' and sent_at>=now()-interval '30 days'),
+    'held',count(*) filter(where status='held'),
+    'failed',count(*) filter(where status='failed'),
+    'due',count(*) filter(where due_at<=now() and status in ('held','ready','sending'))
+   ) from public.marketing_welcome_queue
+  ),
+  'suppression',(
+   select jsonb_build_object(
+    'all_time',count(*),
+    'last_30d',count(*) filter(where created_at>=now()-interval '30 days'),
+    'unsubscribed_30d',count(*) filter(where reason='unsubscribed' and created_at>=now()-interval '30 days')
+   ) from public.marketing_suppressions
+  ),
+  'broadcast',(
+   select jsonb_build_object(
+    'scheduled',count(*) filter(where status='scheduled' and scheduled_at>now()),
+    'sent_30d',count(*) filter(where status='sent' and scheduled_at>=now()-interval '30 days'),
+    'reserved',count(*) filter(where status='reserved')
+   ) from public.marketing_broadcast_calendar
+  ),
+  'delivery',(
+   select jsonb_build_object(
+    'delivered_30d',count(distinct e.provider_email_id) filter(where e.event_type='email.delivered' and e.event_at>=now()-interval '30 days'),
+    'failed_30d',count(distinct e.provider_email_id) filter(where e.event_type in ('email.failed','email.bounced') and e.event_at>=now()-interval '30 days'),
+    'clicked_30d',count(distinct e.provider_email_id) filter(where e.event_type='email.clicked' and e.event_at>=now()-interval '30 days'),
+    'click_events_30d',count(*) filter(where e.event_type='email.clicked' and e.event_at>=now()-interval '30 days')
+   ) from public.marketing_email_events e
+   where (e.broadcast_id is not null and exists
+    (select 1 from public.marketing_broadcast_calendar b where b.broadcast_id=e.broadcast_id))
+    or (e.provider_email_id is not null and exists
+    (select 1 from public.marketing_welcome_queue w where w.provider_message_id=e.provider_email_id))
+  ),
+  'click_sections',(
+   select coalesce(jsonb_agg(jsonb_build_object('section',x.link_section,'clicks',x.clicks)
+    order by x.clicks desc),'[]'::jsonb)
+   from (select e.link_section,count(*) as clicks from public.marketing_email_events e
+     where e.event_type='email.clicked' and e.link_section is not null and e.event_at>=now()-interval '30 days'
+       and exists(select 1 from public.marketing_broadcast_calendar b where b.broadcast_id=e.broadcast_id)
+     group by e.link_section) x
+  ),
+  'trends',(
+    select coalesce(jsonb_agg(jsonb_build_object('day',x.signup_day,'signups',x.signups,'opt_ins',x.opt_ins) order by x.signup_day),'[]'::jsonb)
+    from (select created_at::date as signup_day,count(*) as signups,
+      count(*) filter(where marketing_opt_in=true) opt_ins
+     from public.tool_email_contacts where created_at>=current_date-29
+     group by created_at::date) x
+  ),
+  'upcoming',(
+   select coalesce(jsonb_agg(jsonb_build_object('date',local_day,'title',title,'status',status,'scheduled_at',scheduled_at) order by local_day),'[]'::jsonb)
+   from public.marketing_broadcast_calendar where status in ('scheduled','reserved') and scheduled_at>=now()
+  ),
+  'email_conversions',(
+    select jsonb_build_object(
+      'paid_shop_orders_30d',(
+       select count(*) from public.marketing_checkout_attribution a
+        join public.shop_orders o on o.stripe_session_id=a.stripe_session_id
+        where a.checkout_kind='shop' and o.livemode=true
+          and o.payment_status in ('paid','partially_refunded','refunded')
+          and o.paid_at>=now()-interval '30 days'
+      ),
+      'calendar_orders_30d',(
+       select count(*) from public.marketing_checkout_attribution a
+        join public.shop_orders o on o.stripe_session_id=a.stripe_session_id
+        where a.checkout_kind='shop' and o.livemode=true
+          and o.payment_status in ('paid','partially_refunded','refunded')
+          and o.paid_at>=now()-interval '30 days'
+          and exists(select 1 from public.shop_order_items i
+            where i.order_id=o.id and i.product_slug in
+             ('family-schedule-calendar-2027','calendar-52-week','calendar-26-week'))
+      ),
+      'shop_net_revenue_30d_cents',(
+       select coalesce(sum(greatest(0,o.total_cents-o.refunded_cents)),0)
+       from public.marketing_checkout_attribution a
+        join public.shop_orders o on o.stripe_session_id=a.stripe_session_id
+        where a.checkout_kind='shop' and o.livemode=true
+         and o.payment_status in ('paid','partially_refunded','refunded')
+         and o.paid_at>=now()-interval '30 days'
+      ),
+      'club_enrollments_30d',(
+       select count(*) from public.marketing_checkout_attribution a
+        join public.club_checkout_sessions s on s.stripe_session_id=a.stripe_session_id
+        where a.checkout_kind='club' and s.livemode=true and s.status='complete'
+         and s.created_at>=now()-interval '30 days'
+         and exists(select 1 from public.club_subscriptions sub
+          where sub.stripe_customer_id=s.stripe_customer_id and sub.livemode=true)
+      )
+    )
+  ),
+  'email_campaigns',(
+   select coalesce(jsonb_agg(jsonb_build_object('campaign',d.campaign,'shop_orders',d.shop_orders,
+         'shop_revenue_cents',d.shop_revenue_cents,'club_enrollments',d.club_enrollments)
+       order by d.shop_revenue_cents desc,d.club_enrollments desc,d.campaign),'[]'::jsonb)
+   from (
+    select a.campaign,
+       count(*) filter(where a.checkout_kind='shop' and o.livemode=true
+         and o.payment_status in ('paid','partially_refunded','refunded') and o.paid_at>=now()-interval '30 days') as shop_orders,
+       coalesce(sum(greatest(0,o.total_cents-o.refunded_cents)) filter(where a.checkout_kind='shop' and o.livemode=true
+         and o.payment_status in ('paid','partially_refunded','refunded') and o.paid_at>=now()-interval '30 days'),0) as shop_revenue_cents,
+       count(*) filter(where a.checkout_kind='club' and s.livemode=true and s.status='complete'
+         and s.created_at>=now()-interval '30 days'
+         and exists(select 1 from public.club_subscriptions sub where sub.stripe_customer_id=s.stripe_customer_id and sub.livemode=true)
+       ) as club_enrollments
+    from public.marketing_checkout_attribution a
+    left join public.shop_orders o on o.stripe_session_id=a.stripe_session_id and a.checkout_kind='shop'
+    left join public.club_checkout_sessions s on s.stripe_session_id=a.stripe_session_id and a.checkout_kind='club'
+    where a.created_at>=now()-interval '35 days'
+    group by a.campaign
+   ) d
+  ),
+  'business',(
+   select jsonb_build_object('club_active',coalesce((select count(*) from public.club_subscriptions
+      where livemode=true and status in ('active','trialing')),0),
+     'club_started_30d',coalesce((select count(*) from public.club_subscriptions
+      where livemode=true and started_at>=now()-interval '30 days'),0),
+     'paid_site_orders_30d',coalesce((select count(*) from public.shop_orders
+      where livemode=true and payment_status in ('paid','partially_refunded','refunded')
+        and paid_at>=now()-interval '30 days'),0))
+  )
+ ) into v;
+ return v;
+end $$;
+
+
+
+revoke all on function public.admin_email_reporting() from public,anon,authenticated;
+grant execute on function public.admin_email_reporting() to authenticated;
+commit;
