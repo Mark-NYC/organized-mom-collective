@@ -11,12 +11,12 @@ Someone opening an OMC newsletter can use the free guides and free generators wi
 Append the subscriber-specific Resend contact property to the **fragment**, not the query:
 
 ```text
-https://www.organizedmomcollective.com/guides/#omc_pass={{{RESOURCE_PASS}}}
-https://www.organizedmomcollective.com/routine-chart/#omc_pass={{{RESOURCE_PASS}}}
-https://www.organizedmomcollective.com/guides/family-laundry-system/#omc_pass={{{RESOURCE_PASS}}}
+https://www.organizedmomcollective.com/guides/#omc_pass={{{contact.RESOURCE_PASS}}}
+https://www.organizedmomcollective.com/routine-chart/#omc_pass={{{contact.RESOURCE_PASS}}}
+https://www.organizedmomcollective.com/guides/family-laundry-system/#omc_pass={{{contact.RESOURCE_PASS}}}
 ```
 
-`RESOURCE_PASS` is the custom **string** Resend contact property (created November 9, 2026). It must be merged by Resend when sending to a contact, not copied as a literal token or an email address. Do not use these links on non-personalized public web pages. Do not use the pass for access to `/club`, `/app`, `/account`, paid products, private APIs, or any personal data.
+`contact.RESOURCE_PASS` resolves the custom **string** Resend contact property (created November 9, 2026). It must be merged by Resend when sending to a contact, not copied as a literal token or an email address. Do not use these links on non-personalized public web pages. Do not use the pass for access to `/club`, `/app`, `/account`, paid products, private APIs, or any personal data.
 
 The fragment is handled by website JavaScript and is not included in a standard HTTP request to the website. Client code POSTs the token to the resource-pass verification Edge Function, strips the fragment using `history.replaceState`, then remembers access in the existing `omc:tool-download-access:v1` localStorage key. **Raw token is not stored in the browser's localStorage.** If the pass is invalid, expired, or the endpoint is unavailable, the normal email gate remains available. Same-browser access already existed before this work.
 
@@ -55,11 +55,11 @@ Sunday 04 links to a Club offer, not a free gated guide, so it intentionally has
 - Production three eligible contacts provisioned with 90-day access passes; all three Resend sync jobs marked `synced` on first attempt.
 - Resend contact readback verified `RESOURCE_PASS` is populated (do not log or display the raw value).
 - HTTP via pg_net tested a valid pass: `200 {ok:true}`; invalid token: `200 {ok:false}`.
-- Three Sunday broadcasts verified `{{{RESOURCE_PASS}}}` appears in HTML and plain text, status `draft`, and physical address/unsubscribe placeholders remain intact.
+- Three Sunday broadcasts verified `{{{contact.RESOURCE_PASS}}}` appears in HTML and plain text, status `draft`, and physical address/unsubscribe placeholders remain intact.
 
 ### Still to verify before scheduling
 
-1. A real personalized **Resend broadcast** preview/delivery to an opted-in test contact: ensure Resend actually substitutes `{{{RESOURCE_PASS}}}` in the tracked link and retains the fragment after any click-tracking redirects. A direct API contact-property check is not proof of this step.
+1. A real personalized **Resend broadcast** preview/delivery to an opted-in test contact: ensure Resend actually substitutes `{{{contact.RESOURCE_PASS}}}` in the tracked link and retains the fragment after any click-tracking redirects. A direct API contact-property check is not proof of this step.
 2. Actual production web deployment of the `src/` commits, with browser smoke test on a clean private browser: newsletter click → no email dialog on PDF and generator download; invalid pass → ordinary dialog; cross-device behavior.
 3. Test consent-free download, an unsubscribed reader's previously granted access, and that Club/paid routes never become accessible via a resource pass.
 4. One Small Win & Sunday newsletters **remain drafts/unscheduled** pending welcome-completion audience separation.
@@ -68,7 +68,7 @@ The feature is implemented, but do not claim the end-to-end email-to-browser exp
 
 ## Ownership and ongoing maintenance
 
-- The marketing email team must use `{{{RESOURCE_PASS}}}` for **new free guide and generator links** where an already opted-in reader would otherwise be prompted for the same email. For public articles, product offers, Club account routes and directly accessible PDFs, a subscriber pass is not always needed.
+- The marketing email team must use `{{{contact.RESOURCE_PASS}}}` for **new free guide and generator links** where an already opted-in reader would otherwise be prompted for the same email. For public articles, product offers, Club account routes and directly accessible PDFs, a subscriber pass is not always needed.
 - Do not remove the existing `omc:tool-download-access:v1` behavior; it already grants access after the original capture on the same browser. Subscriber Access extends this to links clicked on other devices.
 - Add new newsletter draft IDs and personalized URL QA to the relevant Sunday or One Small Win MD before approving send.
 - Token lifecycle: 90-day pass, refreshed before expiry for active consented Resend contacts. Older links may expire on a new device; previously remembered browser access continues. Never reenable marketing mail from a free-resource access check.
@@ -80,13 +80,13 @@ The feature is implemented, but do not claim the end-to-end email-to-browser exp
 
 - Single-recipient direct email `01a1c2fc-e8cb-7e9c-b7e5-45eeec529318` was delivered to the owner's opted-in Gmail with manually populated access links.
 - Because the free Resend plan permits three segments, the existing **empty** General segment was renamed `OMC | QA Test Only`; it contained **exactly one** opted-in recipient for every test broadcast. No subscriber newsletters were scheduled.
-- Test broadcasts `39b72ad9-ce37-455f-b826-d00a990cf3fc` and `55d5438f-8c77-4817-bb88-6290c1267f9a` proved the initial plain `{{{RESOURCE_PASS}}}` was replaced by an empty string (fallback `MISSING`). Resend contact storage itself was correct.
+- Test broadcasts `39b72ad9-ce37-455f-b826-d00a990cf3fc` and `55d5438f-8c77-4817-bb88-6290c1267f9a` proved the initial plain `{{{contact.RESOURCE_PASS}}}` was replaced by an empty string (fallback `MISSING`). Resend contact storage itself was correct.
 - Diagnostic broadcast `223a8a98-881f-435f-a74c-3ecfdc4cf339` proved the supported custom field is `{{{contact.RESOURCE_PASS}}}`; all other tried forms were absent.
 - Final QA broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was received in Gmail with the full valid pass inside a **clickable guide URL**. No placeholder remained. Resend sender domain click tracking was off. The live website browser visit still requires manual verification.
 
 ### Verified contact-property syntax and broadcast link, November 9, 2026
 
-**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
+**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{contact.RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
 
 **Resend drafts corrected and read back:** Sunday Family Reset 01–03 and One Small Win 05 now contain `{{{contact.RESOURCE_PASS}}}` in HTML and plain text, with zero old placeholders; all remain `draft`, assigned to `OMC | Newsletter Ready`. The 15-minute pass sync and Supabase token verifier are active. A fresh valid-token POST returned `200 {ok:true}` and invalid-token POST returned `200 {ok:false}`.
 
