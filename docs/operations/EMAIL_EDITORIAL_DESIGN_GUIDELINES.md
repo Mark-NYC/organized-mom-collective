@@ -21,3 +21,11 @@ The owner's Oct–Nov 2026 inbox sample showed Clean Mama's recurring "Routine R
 
 ## Scope and safe updates
 Only modify unscheduled editable Resend newsletter drafts. Never cancel scheduled broadcasts simply to restyle them. Avoid changing email contents, destination URLs, segmentation, delivery times, opt-in, suppression, or Day 2/Day 6 welcome automation as part of a typography pass. For each edited draft, read back HTML/text to confirm unsub link, personalized passes, recipient segment, and CTA destination. When approved emails are sent, use verified performance rather than invented click uplift to refine the style.
+
+## Applied to existing future Resend drafts, November 10, 2026
+
+All **17 unscheduled draft newsletters** (One Small Win 04–12 and Sunday Family Reset 05–12) were edited in Resend using the existing raw HTML/plain-text content. Each draft has one carefully selected short key sentence or phrase emphasized using deep slate `#3D6671` and bold weight. Where a site URL existed, its existing editorial CTA was restyled into a clear padded, high-contrast deep slate link (`#3D6671` background, white copy), preserving the exact destination, existing UTM query and any `#omc_pass={{{contact.RESOURCE_PASS}}}` fragment. Emails without a link remain useful stand-alone messages rather than gaining irrelevant CTAs.
+
+Formatting is restrained: one primary linked CTA per ordinary editorial email when possible, not multiple promotional blocks. The original subject line, sender, segment, scheduled date, actual editorial substance and the mandatory unsubscribe footer were not changed. The seven broadcasts already scheduled in Resend were intentionally left untouched because Resend forbids editing them without canceling the schedule.
+
+The styling is based on the screenshot observation, not a claim of measured uplift. Check mobile Gmail and Outlook rendering on one test campaign before changing the templates for future sends. As future drafts are created, apply these same guidelines from the start.
