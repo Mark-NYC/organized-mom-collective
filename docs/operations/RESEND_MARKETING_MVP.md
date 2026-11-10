@@ -314,3 +314,10 @@ Eligibility requires explicit marketing opt-in, no suppression, and either a leg
 
 **Still not done:** First real automatic Day 6-to-newsletter segment handoff; personalized tracked email-to-browser resource access test; explicit approval and scheduling of Sunday/Wednesday issues. No broadcasts sent or scheduled. See [NEWSLETTER_AUDIENCE_HANDOFF.md](./NEWSLETTER_AUDIENCE_HANDOFF.md).
 
+
+## Subscriber access broadcast QA failure (2026-11-09)
+
+Direct email `01a1c2fc-e8cb-7e9c-b7e5-45eeec529318` was delivered to the owner's test inbox with a server-populated valid URL. Two one-person QA broadcasts `39b72ad9-ce37-455f-b826-d00a990cf3fc` and `55d5438f-8c77-4817-bb88-6290c1267f9a` were also delivered. Resend substituted `{{{RESOURCE_PASS}}}` as the **empty string** even though the Resend contact has a populated string property and the property definition exists. The `|MISSING` fallback printed MISSING. Resend click tracking is OFF. The tests used the formerly empty General segment, renamed `OMC | QA Test Only` and filled with only the owner's consented contact. No general newsletters were sent.
+
+**Hard launch block:** Sunday 01–03 and One Small Win 05 currently contain personalized guide URLs that fail in delivered Resend broadcasts. Do not schedule. See [SUBSCRIBER_RESOURCE_ACCESS.md](./SUBSCRIBER_RESOURCE_ACCESS.md). This does not alter the live welcome drip or the new Newsletter Ready audience.
+
