@@ -80,13 +80,13 @@ The feature is implemented, but do not claim the end-to-end email-to-browser exp
 
 - Single-recipient direct email `01a1c2fc-e8cb-7e9c-b7e5-45eeec529318` was delivered to the owner's opted-in Gmail with manually populated access links.
 - Because the free Resend plan permits three segments, the existing **empty** General segment was renamed `OMC | QA Test Only`; it contained **exactly one** opted-in recipient for every test broadcast. No subscriber newsletters were scheduled.
-- Test broadcasts `39b72ad9-ce37-455f-b826-d00a990cf3fc` and `55d5438f-8c77-4817-bb88-6290c1267f9a` proved the initial plain `{{{contact.RESOURCE_PASS}}}` was replaced by an empty string (fallback `MISSING`). Resend contact storage itself was correct.
+- Test broadcasts `39b72ad9-ce37-455f-b826-d00a990cf3fc` and `55d5438f-8c77-4817-bb88-6290c1267f9a` proved the initial plain `{{{RESOURCE_PASS}}}` was replaced by an empty string (fallback `MISSING`). Resend contact storage itself was correct.
 - Diagnostic broadcast `223a8a98-881f-435f-a74c-3ecfdc4cf339` proved the supported custom field is `{{{contact.RESOURCE_PASS}}}`; all other tried forms were absent.
 - Final QA broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was received in Gmail with the full valid pass inside a **clickable guide URL**. No placeholder remained. Resend sender domain click tracking was off. The live website browser visit still requires manual verification.
 
 ### Verified contact-property syntax and broadcast link, November 9, 2026
 
-**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{contact.RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
+**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
 
 **Resend drafts corrected and read back:** Sunday Family Reset 01–03 and One Small Win 05 now contain `{{{contact.RESOURCE_PASS}}}` in HTML and plain text, with zero old placeholders; all remain `draft`, assigned to `OMC | Newsletter Ready`. The 15-minute pass sync and Supabase token verifier are active. A fresh valid-token POST returned `200 {ok:true}` and invalid-token POST returned `200 {ok:false}`.
 
