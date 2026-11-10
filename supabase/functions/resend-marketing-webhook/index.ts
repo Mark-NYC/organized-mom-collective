@@ -59,7 +59,7 @@ Deno.serve(async req => {
           try {
             const path = new URL(rawLink).pathname.toLowerCase();
             section = path.startsWith('/guides') || path.startsWith('/downloads') ? 'guides'
-              : /^(\\/chore-chart|\\/routine-chart|\\/family-responsibility-builder|\\/try-the-calendar)/.test(path) ? 'generators'
+              : ['/chore-chart','/routine-chart','/family-responsibility-builder','/try-the-calendar'].some(prefix => path.startsWith(prefix)) ? 'generators'
               : path.startsWith('/club') ? 'club'
               : path.startsWith('/calendar') ? 'calendar'
               : path.startsWith('/shop') ? 'shop' : 'other';
