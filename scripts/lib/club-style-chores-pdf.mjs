@@ -3,7 +3,8 @@
  * Source copy stays in the guide content modules; no flattened AI images in downloadable PDFs.
  * US Letter portrait, selectable vector text, existing transparent hand-drawn illustration assets.
  */
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import fontkit from '@pdf-lib/fontkit';
 import {makeGuide,color} from './omc-guide-pdf.mjs';
 import {miniGuides} from './kids-chores-mini-guides.mjs';
 import {categories as eightCategories} from './chores-8-9-content.mjs';
@@ -69,17 +70,36 @@ function linesInBox(p,s,x,top,w,h,wrap,text,size=8.6,leading=10.9){
  rows.forEach((row,j)=>text(p,row,x,top-j*leading,size));
 }
 async function build(guide){
- const {pdf,palette:c,text,wrap,paragraph,icon,rule}=await makeGuide(guide.title+' | Organized Mom Collective');
+ const {pdf,palette:c,text:standardText,wrap:standardWrap,icon}=await makeGuide(guide.title+' | Organized Mom Collective');
+ // The website and PDF now share actual Montserrat body typography.
+ // Use bundled local WOFF2 assets; no runtime network or system-font dependency.
+ pdf.registerFontkit(fontkit);
+ const fontRoot='node_modules/@fontsource/montserrat/files/';
+ const regular=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-400-normal.woff2'),{subset:true});
+ const semibold=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-600-normal.woff2'),{subset:true});
+ const clean=v=>String(v).replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/[\u2013\u2014]/g,'-');
+ const bodyFonts={regular,bold:semibold};
+ const text=(page,value,x,y,size=10,font='regular',fill=c.ink)=>{
+   if(!bodyFonts[font])return standardText(page,value,x,y,size,font,fill);
+   page.drawText(clean(value),{x,y,size,font:bodyFonts[font],color:fill});
+ };
+ const wrap=(value,font='regular',size=10,max=300)=>{
+   if(!bodyFonts[font])return standardWrap(value,font,size,max);
+   const lines=[];let line='';
+   for(const word of clean(value).split(/\s+/)){
+     const next=line?line+' '+word:word;
+     if(line&&bodyFonts[font].widthOfTextAtSize(next,size)>max){lines.push(line);line=word;}else line=next;
+   }
+   if(line)lines.push(line);return lines;
+ };
  const p=pdf.addPage([612,792]);
  const design=ageGuides[guide.slug];
  const noReminders=guide.slug==='kids-chores-without-reminders';
  if(!design)throw new Error('No approved design: '+guide.slug);
  p.drawRectangle({x:0,y:0,width:612,height:792,color:c.white});
 
- // Quiet masthead and large high-contrast Georgia-like serif typography.
- p.drawLine({start:{x:205,y:765},end:{x:246,y:765},thickness:.55,color:c.ink});
- p.drawLine({start:{x:465,y:765},end:{x:506,y:765},thickness:.55,color:c.ink});
- text(p,'ORGANIZED MOM COLLECTIVE',256,759,10,'serif');
+ // Leave the top margin clean; avoid the off-center brand masthead.
+ // Keep the existing large serif title and Club-style section design.
  const titleSize=noReminders?29:35;
  text(p,design.lines[0],43,707,titleSize,'serifBold');
  text(p,design.lines[1],43,671,titleSize,'serifBold');
@@ -91,17 +111,17 @@ async function build(guide){
  rounded(p,43,507,205,111,13,paleGreen);
  rounded(p,260,507,309,111,13,paleBlush);
  text(p,noReminders?"WHY REMINDERS DON'T STICK":'AT THIS AGE...',56,593,noReminders?11.4:13.0,'serifBold');
- const introLines=wrap(design.intro,'regular',9.6,177);
+ const introLines=wrap(design.intro,'regular',9.8,177);
  if(introLines.length>5)throw new Error('Intro overflows for '+guide.slug);
- introLines.forEach((l,i)=>text(p,l,56,571-i*13.2,9.6));
+ introLines.forEach((l,i)=>text(p,l,56,571-i*13.5,9.8));
  text(p,noReminders?'HOW TO HAND OFF A JOB':'HOW TO BUILD OWNERSHIP',272,591,13.5,'serifBold');
  design.bullets.forEach((item,i)=>{
    const y=568-i*17;
    bulletSquare(p,273,y-3,c.ink);
    // Keep every bullet within the right panel. Never join wrapped lines back together.
-   const rows=wrap(item,'regular',8.5,266);
+   const rows=wrap(item,'regular',9.0,266);
    if(rows.length>2)throw new Error('Ownership bullet is too long: '+item);
-   rows.forEach((line,j)=>text(p,line,289,y-j*9,8.5));
+   rows.forEach((line,j)=>text(p,line,289,y-j*10,9.0));
  });
 
  // Three colored chore/action cards. All lists are editorial text, not flattened imagery.
@@ -124,12 +144,12 @@ async function build(guide){
   await icon(p,handDrawn(design.icons[i]),iconX,iconY,iconSize);
   if(cat.jobs.length!==6)throw new Error('Expected six chore ideas: '+guide.slug);
   for(let j=0;j<cat.jobs.length;j++){
-    const y=347-j*24;
+    const y=371-j*25;
     bulletSquare(p,x+11,y-2,c.ink);
-    // Start below the heading, wrap within the column, and preserve row spacing.
-    const rows=wrap(cat.jobs[j],'regular',7.85,128);
+    // Start shortly below the heading/icon block. Montserrat rows use a 25pt rhythm.
+    const rows=wrap(cat.jobs[j],'regular',8.35,128);
     if(rows.length>2)throw new Error('Chore label overflows: '+cat.jobs[j]);
-    rows.forEach((line,k)=>text(p,line,x+27,y-k*9.4,7.85));
+    rows.forEach((line,k)=>text(p,line,x+27,y-k*10.2,8.35));
   }
  }
 
