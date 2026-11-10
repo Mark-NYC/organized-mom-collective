@@ -82,6 +82,10 @@ const monthHexes = monthColors.map((m) => m.hex);
       pintrk('track', 'pagevisit');
     </script>}
     <!-- end Pinterest Tag -->
+    {tracking && <script>
+      import { captureEmailCheckoutAttribution } from '../lib/email-checkout-attribution';
+      captureEmailCheckoutAttribution(location.search);
+    </script>}
     <slot name="head" />
   </head>
   <body class="min-h-dvh">
