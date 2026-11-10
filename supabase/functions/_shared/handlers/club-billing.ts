@@ -181,6 +181,19 @@ async function checkout(deps: ClubDeps, req: Request, body: Record<string, unkno
   await deps.db.rpc('club_checkout_record', {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1000).toISOString() },
   });
+  // First-party campaign metadata is never used for membership access or billing.
+  const attribution=body.attribution;
+  if (attribution && typeof attribution==='object') {
+    const touch=attribution as {campaign?:unknown;touched_at?:unknown};
+    if(typeof touch.campaign==='string'&&typeof touch.touched_at==='string'){
+      try {
+        await deps.db.rpc('marketing_record_checkout_attribution',{
+          p_session:session.id,p_kind:'club',p_campaign:touch.campaign,p_touched_at:touch.touched_at
+        });
+      }catch(err){console.warn('club-attribution-unavailable',(err as Error).message);}
+    }
+  }
+
   return { url: session.url };
 }
 
