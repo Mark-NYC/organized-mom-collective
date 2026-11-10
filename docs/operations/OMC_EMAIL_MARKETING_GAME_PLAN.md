@@ -53,7 +53,7 @@ Our repeatable editorial franchises are **Sunday Family Reset** and **One Small 
 - **Day 2 / Day 6:** Published, tested welcome templates and automated Supabase delivery **enabled for new explicit opt-ins**. No historical opt-in backfill. See [welcome copy](./OMC_WELCOME_SEQUENCE_REVIEW_DRAFTS.md) and [technical state](./RESEND_MARKETING_MVP.md).
 - **Sunday:** Four branded **draft** broadcasts, intended Nov 15 / 22 / 29 / Dec 6. See [Sunday rollout](./SUNDAY_FAMILY_RESET_LAUNCH_PLAN.md).
 - **Wednesday:** Eight usable One Small Win **draft** broadcasts. See [first eight copy](./ONE_SMALL_WIN_FIRST_8_DRAFTS.md). Broken superseded editor drafts exist in Resend and must not be scheduled.
-- **Subscriber Access:** Three existing opted-in contacts now have token properties synced to Resend; free resource links in Sunday 01–03 and One Small Win 05 carry `#omc_pass={{{RESOURCE_PASS}}}`. Valid/invalid token API QA passed. The browser deploy, click tracking, and actual cross-device journey have **not** passed end-to-end QA. See [Subscriber Access runbook](./SUBSCRIBER_RESOURCE_ACCESS.md).
+- **Subscriber Access:** Three existing opted-in contacts now have token properties synced to Resend; free resource links in Sunday 01–03 and One Small Win 05 carry `#omc_pass={{{contact.RESOURCE_PASS}}}`. Valid/invalid token API QA passed. The browser deploy, click tracking, and actual cross-device journey have **not** passed end-to-end QA. See [Subscriber Access runbook](./SUBSCRIBER_RESOURCE_ACCESS.md).
 - **Unsent audiences (resolved for drafts):** All 12 usable broadcasts now target a separate `OMC | Newsletter Ready` audience. SQL simulation and initial provider sync passed; real new-subscriber Day 6 handoff and the personalized link still need full end-to-end QA before scheduling.
 - **Resend controls:** Reserve broadcast dates in Supabase before Resend scheduling. The scheduler remains locked; the direct Resend dashboard can bypass it, so off-cycle sends must not bypass reservation and suppression checks.
 
@@ -112,7 +112,7 @@ The site may use different precise titles or URLs; do not manufacture live links
 
 ## Subscriber resource links
 
-Existing browser downloads already remember access locally. For opted-in readers on another device, use the private `RESOURCE_PASS` Resend contact property in a fragment link, e.g. `https://www.organizedmomcollective.com/guides/#omc_pass={{{RESOURCE_PASS}}}`. The public site verifies this token and grants remembered access to **free** guide and generator downloads without asking for the email again. Never expose email addresses or private/member access in these URLs. Do not add tokens to public Pinterest links. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md) for expiration, verification and outstanding live tests.
+Existing browser downloads already remember access locally. For opted-in readers on another device, use the private `RESOURCE_PASS` Resend contact property in a fragment link, e.g. `https://www.organizedmomcollective.com/guides/#omc_pass={{{contact.RESOURCE_PASS}}}`. The public site verifies this token and grants remembered access to **free** guide and generator downloads without asking for the email again. Never expose email addresses or private/member access in these URLs. Do not add tokens to public Pinterest links. See [Subscriber Access](./SUBSCRIBER_RESOURCE_ACCESS.md) for expiration, verification and outstanding live tests.
 
 Direct public `/downloads/*.pdf` links remain a simple alternative for a specific file (these assets are public). However, when referring readers to an interactive generator or guide library, prefer a tested Subscriber Access URL so they can browse further without repeated capture.
 
@@ -194,7 +194,11 @@ Start with **weekly content production**, but enable sending only after explicit
 **Next:** Real personalized email-link / new-browser QA; genuine Day 6-to-audience handoff observation; reviewed broadcast scheduling. No editorial broadcasts were activated by audience separation.
 
 
-### Broadcast Subscriber Access blocker found in real QA (November 9, 2026)
+### Verified contact-property syntax and broadcast link, November 9, 2026
 
-A one-recipient direct email with a server-populated URL was delivered successfully, but **two real test broadcasts** sent exclusively to the owner's opted-in Gmail yielded an **empty** `{{{RESOURCE_PASS}}}` property. An explicit fallback printed `MISSING` even though the property exists on the Resend contact. The sender domain has click tracking OFF, so tracking did not cause the failure. The planned Sunday 01–03 and One Small Win 05 personalised guide links currently would lose their token. **Do not schedule those broadcasts until broadcast property interpolation is fixed and delivered-message QA passes.** Full details and test campaign IDs are recorded in [SUBSCRIBER_RESOURCE_ACCESS.md](./SUBSCRIBER_RESOURCE_ACCESS.md). The welcome Day 2/Day 6 sequence remains live and unaffected.
+**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
+
+**Resend drafts corrected and read back:** Sunday Family Reset 01–03 and One Small Win 05 now contain `{{{contact.RESOURCE_PASS}}}` in HTML and plain text, with zero old placeholders; all remain `draft`, assigned to `OMC | Newsletter Ready`. The 15-minute pass sync and Supabase token verifier are active. A fresh valid-token POST returned `200 {ok:true}` and invalid-token POST returned `200 {ok:false}`.
+
+**Final pending browser QA:** A human must open the delivered one-person test email in a fresh private browser and try a real PDF and generator download. Static production website deployment cannot be independently confirmed from the available connectors. Do not claim that the live site's popup behavior has been verified. Further schedule approval is still separate from testing.
 
