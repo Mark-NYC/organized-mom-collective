@@ -125,6 +125,7 @@ function OverviewPage({ session, signOut, databaseReady }: AdminContext) {
             <div className="mt-4 flex flex-wrap gap-3 text-[0.9rem]">
               <a className="text-link" href="/admin/club?tab=fulfillment">Club print & mailing queue</a>
               <a className="text-link" href="/admin/pins">Pinterest queue</a>
+              <a className="text-link" href="/admin/email">Email reporting</a>
               <a className="text-link" href="/admin/pages">Site pages & funnels</a>
             </div>
           </section>
