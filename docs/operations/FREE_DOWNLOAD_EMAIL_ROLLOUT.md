@@ -9,7 +9,7 @@
 - PDF links from `/guides/<slug>` and `/resources/<slug>` use the same gate when clicked normally (links to static files under `/downloads/`). Custom export buttons still need explicit wiring if they do not use `src/lib/printable.ts`. The standalone free Family Meeting Agenda print button now uses the gate.
 - First-touch UTM source/medium/campaign/content are recorded for **new signup submissions** after v2 is deployed. This does not backfill historical visitors.
 - Access is remembered in localStorage, so the modal is not repeatedly shown. This does NOT imply the visitor consented to promotional email.
-- **Subscriber Access:** Already opted-in readers may also arrive via an email URL fragment `#omc_pass={{{RESOURCE_PASS}}}`. The browser verifies the pass with an Edge Function, removes the fragment and reuses the same localStorage key. A fragment pass does not require another signup and does not imply a new marketing opt-in. Access is limited to the **free-resource download gate**, not paid member rights.
+- **Subscriber Access:** Already opted-in readers may also arrive via an email URL fragment `#omc_pass={{{contact.RESOURCE_PASS}}}`. The browser verifies the pass with an Edge Function, removes the fragment and reuses the same localStorage key. A fragment pass does not require another signup and does not imply a new marketing opt-in. Access is limited to the **free-resource download gate**, not paid member rights.
 
 ## Deployment order (important)
 1. Apply `supabase/migrations/20261106000000_unified_free_download_capture.sql` in the correct Supabase project.
@@ -60,3 +60,12 @@
 - Static files under /downloads are publicly addressable. The email dialog is a convenience gate on the download interaction, **not** access control for direct URLs.
 - If the unified feature flag or Supabase URL/anon key is missing, no modal will appear even when the route is wired; verify deployment variables and rerun build after toggling.
 - For newly added free tools, update both `publicPrintablePaths` and the Supabase v2 RPC allowlist in a new migration. For new guides and articles, `guide-<slug>` routes are automatically supported by the existing v2 pattern.
+
+### Verified contact-property syntax and broadcast link, November 9, 2026
+
+**Resolved:** Resend's broadcast interpolation for custom contact properties uses `{{{contact.RESOURCE_PASS}}}`, **not** `{{{RESOURCE_PASS}}}`. The latter rendered blank even though the contact property exists. A diagnostic one-person broadcast confirmed `{{{contact.RESOURCE_PASS}}}` expands to the actual 64-character pass. A subsequent one-person broadcast `55bec597-3270-4e9a-8c05-c410dca2a15f` was delivered to Gmail with a complete clickable `/guides/#omc_pass=<64-hex-pass>` URL. Domain click tracking was disabled during this test. No production newsletter was sent.
+
+**Resend drafts corrected and read back:** Sunday Family Reset 01–03 and One Small Win 05 now contain `{{{contact.RESOURCE_PASS}}}` in HTML and plain text, with zero old placeholders; all remain `draft`, assigned to `OMC | Newsletter Ready`. The 15-minute pass sync and Supabase token verifier are active. A fresh valid-token POST returned `200 {ok:true}` and invalid-token POST returned `200 {ok:false}`.
+
+**Final pending browser QA:** A human must open the delivered one-person test email in a fresh private browser and try a real PDF and generator download. Static production website deployment cannot be independently confirmed from the available connectors. Do not claim that the live site's popup behavior has been verified. Further schedule approval is still separate from testing.
+
