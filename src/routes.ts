@@ -56,7 +56,7 @@
  *           /admin/pages        Pages & Funnels (page inventory)
  *           /admin/orders       order, inventory and shipping dashboard
  *           /admin/settings     admin access, integrations, page inventory token, audit log
- *   CLUB    /club#offer (the offer button → Stripe Checkout; /club/join redirects there), /club/login, /club/welcome (after checkout: sign in, family, address),
+ *   CLUB    /club-2 (public membership landing; offer button → Stripe Checkout), /club/login, /club/welcome (after checkout: sign in, family, address),
  *           /club/dashboard, /club/family, /club/resources/<slug> (her month), /club/kits/<slug>, /club/tools/<tool>
  *                               Organized Family Club member pages (noindex; a "not available" notice unless
  *                               PUBLIC_CLUB_ENABLED; docs/club/MEMBERSHIP.md)
@@ -73,7 +73,7 @@ export const routes = {
   /** Organized Family Club member pages (behind PUBLIC_CLUB_ENABLED; never linked from public pages). */
   clubStart: '/club/start',
   /** The offer on the Club landing page: its button opens Stripe Checkout. */
-  clubJoin: '/club#offer',
+  clubJoin: '/club-2',
   clubLogin: '/club/login',
   clubWelcome: '/club/welcome',
   clubWelcomeKit: '/club/welcome-kit',
