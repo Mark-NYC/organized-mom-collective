@@ -1,7 +1,7 @@
 # Calendar and Club lifecycle email sequences
 
 Updated: November 10, 2026
-Status: Four Resend drafts updated with the Mark & Meg signature. **Production Supabase staging queue, guarded claim/finish RPCs, and the delivery Edge Function deployed on November 10, 2026.** Jobs stay held and the delivery launch gate is disabled; no cron dispatcher or live send is activated. Existing customers are not backfilled. Production delivery must remain disabled until the remaining checks below are implemented and tested.
+Status: **LIVE for new eligible events as of November 10, 2026.** Four Resend templates published with the Mark & Meg signature, verified business address, unsubscribe footer, and verified sender. Supabase staging triggers, worker, guarded claim/finish RPCs, promotion function and every-ten-minute cron are deployed. No historical backfill.
 
 ## Calendar buyer onboarding (site shop orders)
 
@@ -46,3 +46,15 @@ The production migration applied successfully. Read-back confirmed exactly two e
 - Launch remains **OFF**: `enabled=false`, `approved_templates=false`, `deliverability_verified=false`. The four templates remain **draft**; no lifecycle cron exists. SQL read-back showed `queued_jobs=0`, `pending_sends=0`, and the guarded dispatcher returned `0` while disabled.
 - Security advisor surfaced RLS-without-policy info for the new two tables, as intended for service-only tables with revoked anon/authenticated access. See https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy .
 - **Outstanding:** Verify postal address/unsubscribe compliance, test with synthetic customer records and test provider delivery, check that Club customer/entitlement rows arrive before activation trigger, confirm calendar order item availability at delivery transition, and handle race cases where these records become eligible after the original trigger. Explicitly approve and schedule only after acceptance. Current content is short lifecycle coaching; do not misclassify it as operational receipts to bypass opt-in.
+
+
+## November 10 launch acceptance and state
+
+- Resend's organizedmomcollective.com domain was verified, sending enabled. Open and click tracking remain disabled.
+- All four HTML/plain-text templates read back with `Mark & Meg / Creators of the Organized Mom Collective`, `14839 61st Road, Flushing, NY 11367`, and `{{{RESEND_UNSUBSCRIBE_URL}}}`; sender `Organized Mom Collective <hello@organizedmomcollective.com>`. All four templates published successfully.
+- Migration `supabase/migrations/20261110032000_marketing_lifecycle_promote_dispatch.sql` installed the held-to-ready promotion function and `omc-lifecycle-coaching-dispatch` cron every ten minutes.
+- Before launch: with all settings false, guarded dispatcher returned disabled and zero sends. Synthetic fake claim in a transaction with temporary enabled flags returned `blocked` (no consent), then transaction was rolled back. No real recipient was involved.
+- Launch: verified lifecycle queue empty, then set all three `marketing_lifecycle_settings` gates true. Read-back: `enabled=true`, `approved_templates=true`, `deliverability_verified=true`. Manual dispatch returned `{"status":"running","promoted":0,"dispatched":0}`; cron active. Lifecycle queue remains zero; no emails were sent during activation.
+- Only **new eligible events** are staged. Two older shop orders marked delivered were not backfilled. Existing Club subscriptions were all test-mode (0 live). Check provider delivery and ledger on the first real eligible future event; end-to-end real-provider delivery not yet observed.
+- Current constraints: calendar follow-up depends on exact `delivered_at` and explicit marketing opt-in; Etsy orders are not integrated. Club activation requires live subscription/customer data and later active entitlement at claim time. If customer records or entitlements are committed out of order, triggering can miss staging. Review or implement bounded event reconciliation for any such cases; do not backfill historical customers silently.
+- Production sending can be stopped immediately using `update public.marketing_lifecycle_settings set enabled=false where id=1`. The cron and worker continue to refuse dispatch while disabled. Never use the provider directly as a workaround for missing consent.
