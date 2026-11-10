@@ -117,10 +117,10 @@ async function build(guide){
   rounded(p,x,203,w,256,14,cardTints[i]);
   const headingX=x+10,headingTop=426,headingWidth=113;
   const iconX=x+129,iconY=406,iconSize=29;
-  const labelLines=wrap(design.labels[i],'serifBold',12.1,headingWidth);
+  const labelLines=wrap(design.labels[i],'serifBold',12.8,headingWidth);
   if(labelLines.length>3)throw new Error('Card heading overflows: '+design.labels[i]);
   // Heading text is constrained to x+10 .. x+123; icon starts at x+129.
-  labelLines.forEach((line,j)=>text(p,line,headingX,headingTop-j*15,12.1,'serifBold'));
+  labelLines.forEach((line,j)=>text(p,line,headingX,headingTop-j*15,12.8,'serifBold'));
   await icon(p,handDrawn(design.icons[i]),iconX,iconY,iconSize);
   if(cat.jobs.length!==6)throw new Error('Expected six chore ideas: '+guide.slug);
   for(let j=0;j<cat.jobs.length;j++){
