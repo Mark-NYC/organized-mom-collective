@@ -74,3 +74,20 @@ The feature is implemented, but do not claim the end-to-end email-to-browser exp
 - Token lifecycle: 90-day pass, refreshed before expiry for active consented Resend contacts. Older links may expire on a new device; previously remembered browser access continues. Never reenable marketing mail from a free-resource access check.
 - This is not payment, authentication, Club access, nor protection for public static `/downloads/*.pdf` files. It merely avoids duplicate email capture.
 - The last blocker for the full editorial program is **newsletter segmentation excluding welcome-incomplete contacts**. This is separate from token validation and must be done before broadcast scheduling.
+
+
+## Live inbox QA result, November 9, 2026 (IMPORTANT: BROADCAST BLOCKER)
+
+**Single-recipient transactional send:** Resend email `01a1c2fc-e8cb-7e9c-b7e5-45eeec529318` was sent to the owner's known opted-in test mailbox. Resend confirmed `delivered`, Gmail received it in Inbox. The URL was pre-populated with the actual stored access token by the sender, and Gmail rendered both the guide-library and routine-chart URL with valid 64-character passes. This proves direct per-recipient URLs can be delivered; it **does not** prove the Resend broadcast variable.
+
+**Actual one-recipient broadcast test:** Resend Free segment limit was reached at 3 segments. The pre-existing empty `General` segment (`c0fadb44-194b-4fef-b812-fd5654aa8489`) was renamed `OMC | QA Test Only`. Only the owner's opted-in contact was added; `list_contacts` confirmed **exactly one recipient** before sending.
+
+- QA broadcast `39b72ad9-ce37-455f-b826-d00a990cf3fc`, subject `[TEST] Verify personalized subscriber access link`, was sent to that single-recipient QA audience. Gmail received it, but rendered the URL as `/guides/#omc_pass=` with an **empty** pass.
+- Diagnostic QA broadcast `55d5438f-8c77-4817-bb88-6290c1267f9a` was also sent to the same one-person QA audience. Gmail received it. `{{{FIRST_NAME|friend}}}` resolved to `friend`, but `{{{RESOURCE_PASS|MISSING}}}` resolved to `MISSING` and `{{{RESOURCE_PASS}}}` resolved to an **empty string** in text **as well as links**. The HTML URL again ended in `#omc_pass=`.
+- Resend `get_contact` confirms that the same contact has `RESOURCE_PASS` populated, and `list_contact_properties` confirms a string property of that key exists. Thus contact storage and sync are fine, but **Resend broadcast substitution does not currently expose this property to the outgoing campaign**. This is not caused by the hash fragment or URL sanitization.
+- Resend sender domain `organizedmomcollective.com` has **Click Tracking: false**, so no tracking redirect was involved in this failed test.
+- No scheduled Sunday/Wednesday production newsletters were sent, scheduled, or enabled. The two test broadcasts were QA-only to one opted-in contact.
+
+**Do not send the 3 Sunday drafts or One Small Win 05 with `{{{RESOURCE_PASS}}}` links yet.** A broadcast will produce an empty pass and the website will show the original email gate. The earlier statement that personalized broadcast links were "verified" referred only to the placeholder being present in the draft and is superseded by this live test.
+
+**Required next fix:** Establish a Resend-supported syntax or delivery method that renders existing custom contact properties during broadcast sends (the publisher documentation describes this feature, but the observed API-send behavior fails). Then retest with the one-person QA segment, inspect the actual delivered MIME/links, test fresh-browser gate behavior, and only afterward schedule customer newsletters. If impossible, choose an explicit fallback such as direct static PDF links for linked free resources, keeping interactive generator limitations transparent. Never quietly include addresses in URLs or bypass paid authorization.
