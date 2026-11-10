@@ -8,7 +8,7 @@ type Report = {
   signups: { total:number; last_7d:number; last_30d:number; opted_in:number; opted_in_30d:number };
   audience: { ready:number; sync_errors:number; pending:number };
   welcome: { sent_30d:number; held:number; failed:number; due:number };
-  suppression: { all_time:number; last_30d:number };
+  suppression: { all_time:number; last_30d:number; unsubscribed_30d:number };
   broadcast: { scheduled:number; sent_30d:number; reserved:number };
   delivery: { delivered_30d:number; failed_30d:number; clicked_30d:number; click_events_30d:number };
   click_sections: { section:string; clicks:number }[];
@@ -50,7 +50,7 @@ function EmailReportPage({session, signOut, databaseReady}: AdminContext) {
           <Metric title="New contacts · 30 days" value={report.signups.last_30d} detail={`${report.signups.last_7d} in the last 7 days`}/>
           <Metric title="Marketing opt-ins" value={report.signups.opted_in} detail={`${report.signups.opted_in_30d} opted in over 30 days`}/>
           <Metric title="Newsletter ready" value={report.audience.ready} detail="Completed welcome or legacy opt-in"/>
-          <Metric title="Suppressions · 30 days" value={report.suppression.last_30d} detail={`${report.suppression.all_time} all time`}/>
+          <Metric title="Unsubscribes · 30 days" value={report.suppression.unsubscribed_30d} detail={`${report.suppression.last_30d} all suppressions in 30 days`}/>
         </div>
       </section>
       <section aria-labelledby="email-delivery">
@@ -88,7 +88,7 @@ function EmailReportPage({session, signOut, databaseReady}: AdminContext) {
           <Metric title="Active paid Club subscriptions" value={report.business.club_active} detail="Site total, not attributed to email"/>
           <Metric title="Paid site orders · 30 days" value={report.business.paid_site_orders_30d} detail="Site total, not attributed to email"/>
         </div>
-        <p className="mt-4 text-[0.9rem] text-soft">Email conversion attribution is not yet available. Club subscriptions and orders are shown for business context only. No sales are credited to email without a tracked source.</p>
+        <p className="mt-4 text-[0.9rem] text-soft">Email-sourced Club page visits can be explored in the existing Google Analytics 4 traffic acquisition report using email UTM tags. This admin view does not yet import GA4 sessions. Email conversion attribution is not yet available. Club subscriptions and orders are shown for business context only. No sales are credited to email without a tracked source.</p>
       </section>
       <section aria-labelledby="email-schedule">
         <h2 id="email-schedule" className="admin-section-heading">Upcoming newsletters</h2>
