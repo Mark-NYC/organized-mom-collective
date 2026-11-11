@@ -49,6 +49,7 @@
 <script>
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { choreLineIconForText } from '../../data/chore-line-icons';
+import { toolEvent } from '../../lib/tool-engagement';
 
 type Detail = {name: string; age: string; chores: string[]};
 const section=document.querySelector<HTMLElement>('[data-first-week]');
@@ -114,7 +115,7 @@ window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
  const detail=(e as CustomEvent<Detail>).detail;
  if(!detail||!Array.isArray(detail.chores))return;
  current={name:String(detail.name||'').slice(0,24),age:String(detail.age||'').slice(0,60),chores:detail.chores.map(x=>String(x).slice(0,100))};
- if(section){sync();section.showModal();void refreshPreview();}
+ if(section){sync();if(!section.open)section.showModal();toolEvent('tool_plan_preview','chore-chart');void refreshPreview();}
 }) as EventListener);
 challenge?.addEventListener('change',()=>{sync();void refreshPreview();});
 
@@ -230,6 +231,7 @@ download?.addEventListener('click',()=>{
  link.download=(p.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'family')+'-first-week-plan.pdf';
  document.body.appendChild(link);link.click();link.remove();
  if(message)message.textContent='Saved! Bring it to your next family meeting.';
+ toolEvent('tool_plan_download','chore-chart');
  window.dispatchEvent(new CustomEvent('omc:chore-companion-downloaded',{detail:{source:'chore-chart'}}));
 });
 
