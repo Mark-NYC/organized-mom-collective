@@ -3,7 +3,7 @@
  * No personal names, chores, notes or other form content is sent.
  * Uses existing analytics vendors when present; otherwise the event remains in dataLayer.
  */
-export type ToolAction = 'tool_start' | 'tool_first_action' | 'tool_download_click' | 'tool_related_click';
+export type ToolAction = 'tool_start' | 'tool_first_action' | 'tool_download_click' | 'tool_related_click' | 'tool_plan_preview' | 'tool_plan_download';
 export function toolEvent(action: ToolAction, tool: string, source = 'tool_page') {
   if (typeof window === 'undefined') return;
   const detail = { event: action, tool_id: tool, source, page_path: location.pathname };
