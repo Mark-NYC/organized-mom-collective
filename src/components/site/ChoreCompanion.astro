@@ -22,7 +22,7 @@
   </div>
 </dialog>
 <style>
-.first-week{position:fixed;inset:12px;margin:auto;width:min(1080px,calc(100vw - 24px));max-width:1080px;max-height:calc(100dvh - 24px);overflow-y:auto;border:1px solid #ddd5cb;border-radius:13px;background:#FBF7F1;color:#545454;padding:26px 24px;box-shadow:0 24px 90px #0005}
+.first-week{position:fixed;inset:12px;margin:auto;width:min(850px,calc(100vw - 24px));max-width:850px;max-height:calc(100dvh - 24px);overflow-y:auto;border:1px solid #ddd5cb;border-radius:13px;background:#FBF7F1;color:#545454;padding:26px 24px;box-shadow:0 24px 90px #0005}
 .first-week::backdrop{background:rgba(35,34,32,.72)}
 .fw-inner{max-width:980px;margin:auto}
 .fw-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
@@ -30,8 +30,8 @@
 .fw-eyebrow{font:700 11px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#647c69;margin:0 0 6px}
 .first-week h2{font:400 clamp(24px,3vw,34px)/1.15 Georgia,serif;margin:0 0 8px}
 .fw-intro{max-width:720px;line-height:1.5;font-size:14px;margin:0 0 16px}
-.fw-body{display:grid;grid-template-columns:minmax(225px,.62fr) minmax(0,1fr);gap:24px;align-items:start}
-.fw-controls{display:grid;gap:12px;align-content:start}
+.fw-body{display:flex;flex-direction:column-reverse;gap:14px;align-items:center}
+.fw-controls{display:grid;gap:12px;align-content:start;width:min(100%,720px)}
 .fw-controls label{font-weight:700;font-size:14px}
 .fw-controls label span{font-weight:400;color:#777}
 .fw-controls select{min-height:48px;border:1px solid #c8c3bd;padding:10px 12px;border-radius:7px;color:#545454;background:white;font:inherit;width:100%}
@@ -40,7 +40,7 @@
 .fw-button:disabled{opacity:.55;cursor:wait}
 .fw-open{font-size:13px;color:#3D6671;text-decoration:underline;text-underline-offset:3px}
 .fw-open[hidden]{display:none}
-.fw-preview{position:relative;background:white;padding:8px;border:1px solid #e4ddd4;min-height:390px;max-height:72dvh;box-shadow:0 7px 24px #3331}
+.fw-preview{position:relative;background:white;padding:8px;border:1px solid #e4ddd4;min-height:390px;max-height:72dvh;box-shadow:0 7px 24px #3331;width:min(100%,720px)}
 .fw-preview iframe{width:100%;height:min(69dvh,750px);min-height:390px;border:0;background:white}
 .fw-loading{position:absolute;inset:20px;display:grid;place-items:center;text-align:center;background:white;color:#777}
 .fw-loading[hidden]{display:none}
