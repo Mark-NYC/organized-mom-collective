@@ -5,7 +5,6 @@
  * One US Letter sheet, selectable text, standalone printable, no tabletop imagery.
  */
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
-import sharp from 'sharp';
 import fontkit from '@pdf-lib/fontkit';
 import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
 
@@ -18,6 +17,7 @@ const C={ivory:hex('#FBF7F1'),charcoal:hex('#545454'),peach:hex('#D8B79F'),leaf:
 // Do not crop the finished reference-card layout: that cut off the tops/bottoms
 // of the artwork and occasionally brought original captions into the PDF.
 // The standalone uploaded PNGs are small but their complete art is preserved.
+// All nine artwork files are used as-is. No image processing is involved.
 const artDir='public/assets/responsibility-cards/illustrations/';
 const artFile=n=>artDir+'My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) ('+n+').png';
 const jobs=[
@@ -27,9 +27,8 @@ const jobs=[
  {title:'Help with laundry',image:artFile(13)},
  {title:'Wipe the counters',image:artFile(14)},
  {title:'Tidy the entryway',image:artFile(15)},
- // The finished collection currently supplies one standalone backpack/reset
- // image for these two related jobs. Preserve it rather than cropping either.
- {title:'After-school reset',image:artFile(16)},
+ // A collection basket represents the after-school reset without repeating the backpack art.
+ {title:'After-school reset',image:artFile(10)},
  {title:'Clean my floor',image:artFile(18)},
  {title:'Tidy the bathroom',image:artFile(20)}
 ];
@@ -97,23 +96,29 @@ async function main(){
  drawCentered(p,'CHOOSE WHAT YOU WANT TO PRACTICE',semibold,9.5,306,691.8);
 
  // Three columns by three rows. Cards echo the printed deck with peach outlines,
- // deliberately roomy illustration crops and handwritten labels.
+ // full original standalone icons and handwritten labels.
  const left=42,cellW=168,gap=12,cellH=140;
  const tops=[676,524,372];
  const embedded=[];
  for(const item of jobs){
   const bytes=await readFile(item.image);
-  const metadata=await sharp(bytes).metadata();
-  if(metadata.format!=='png'||!metadata.hasAlpha||!metadata.width||!metadata.height)
-    throw new Error('Expected a complete transparent PNG for '+item.title);
-  // Embed the entire source image. No extract(), trim(), resize(), or clipping.
+  // Validate the actual uploaded PNG bytes, not a processed derivative.
+  // PNG signature + IHDR dimensions + RGBA color type (6).
+  const pngSignature=[137,80,78,71,13,10,26,10];
+  if(pngSignature.some((value,i)=>bytes[i]!==value)||
+     bytes.toString('ascii',12,16)!=='IHDR'||
+     bytes[25]!==6||
+     bytes.readUInt32BE(16)<1||
+     bytes.readUInt32BE(20)<1)
+    throw new Error('Expected original complete RGBA PNG: '+item.image);
+  // Embed the original uploaded file. No cropping, trimming or resampling.
   embedded.push(await pdf.embedPng(bytes));
  }
  jobs.forEach((job,i)=>{
   const col=i%3,row=Math.floor(i/3),x=left+col*(cellW+gap),y=tops[row]-cellH;
   pill(p,x,y,cellW,cellH,13,C.ivory,C.peach);
   const im=embedded[i];
-  // Fit the ENTIRE source image into a padded illustration zone. The zone ends
+  // Fit the ENTIRE unmodified source image into a padded illustration zone. The zone ends
   // above the label area and stays inside the rounded card on every side.
   const artArea={x:x+22,y:y+47,w:cellW-44,h:70};
   const scale=Math.min(artArea.w/im.width,artArea.h/im.height);
