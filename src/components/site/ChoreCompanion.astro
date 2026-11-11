@@ -52,7 +52,7 @@ import { choreLineIconForText } from '../../data/chore-line-icons';
 import { toolEvent } from '../../lib/tool-engagement';
 
 type Detail = {name: string; age: string; chores: string[]};
-const section=document.querySelector<HTMLElement>('[data-first-week]');
+const section=document.querySelector<HTMLDialogElement>('[data-first-week]');
 const challenge=section?.querySelector<HTMLSelectElement>('[data-fw-challenge]');
 const download=section?.querySelector<HTMLButtonElement>('[data-fw-download]');
 const message=section?.querySelector<HTMLElement>('[data-fw-message]');
