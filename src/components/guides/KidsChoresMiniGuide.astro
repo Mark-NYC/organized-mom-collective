@@ -1,5 +1,6 @@
 ---
 import {findMiniGuide, miniGuides} from '../../../scripts/lib/kids-chores-mini-guides.mjs';
+import {ageCardGuides, higherQualityIcon} from '../../../scripts/lib/age-chore-card-config.mjs';
 interface Props {slug:string}
 const {slug}=Astro.props;
 const guide=findMiniGuide(slug);
@@ -8,6 +9,7 @@ const pdf='/downloads/'+guide.slug+'.pdf';
 const art=(name:string)=>'/assets/icons/ofc/guides/responsibility/'+name+'.png';
 const related=miniGuides.filter(g=>g.slug!==guide.slug);
 const noReminders=guide.slug==='kids-chores-without-reminders';
+const ageCards=ageCardGuides[slug as keyof typeof ageCardGuides];
 ---
 <div class="text-[#545454]">
 <section class="bg-[#FBF7F1] px-5 py-10 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
@@ -22,17 +24,27 @@ const noReminders=guide.slug==='kids-chores-without-reminders';
 <p class="mt-3 text-xs text-[#6f6a65]">One US Letter page · Free resource</p>
 </div>
 <div class="mx-auto w-full max-w-[300px] border-t-[6px] p-7 sm:p-9" style={`border-color:${guide.accent};background:#fff`}>
-<img src={art(guide.sections[0].icon)} alt="" width="160" height="160" class="mx-auto size-32 object-contain"/>
+{ageCards ? <div class="grid grid-cols-3 gap-3">{ageCards.jobs.slice(0,6).map(job=><img src={higherQualityIcon(job.image)} alt={job.title} width="96" height="96" loading="eager" class="aspect-square w-full object-contain"/>)}</div> : <img src={art(guide.sections[0].icon)} alt="" width="160" height="160" class="mx-auto size-32 object-contain"/>}
 <p class="mt-6 text-center font-serif text-2xl">{noReminders?'One whole job. One clear owner.':guide.printableTitle}</p>
-<p class="mt-3 text-center text-sm leading-[1.6]">{guide.printableNote}</p>
+<p class="mt-3 text-center text-sm leading-[1.6]">{ageCards?ageCards.subtitle:guide.printableNote}</p>
 </div>
 </div></div></section>
+{ageCards && <section aria-labelledby="age-card-chores-title" class="bg-white px-5 py-12 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
+<p class="text-xs font-bold uppercase tracking-[.16em]">PICTURE THE POSSIBILITIES</p>
+<h2 id="age-card-chores-title" class="mt-3 max-w-3xl font-serif text-3xl sm:text-4xl">Nine responsibilities to practice.</h2>
+<p class="mt-4 max-w-2xl leading-[1.8]">These are the same illustrated jobs in the free printable. Start with one or two, practice together, and build confidence.</p>
+<div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
+{ageCards.jobs.map(job=><article class="flex min-w-0 flex-col items-center justify-center rounded-2xl border-2 border-[#D8B79F] bg-[#FBF7F1] px-3 py-5 text-center sm:px-6 sm:py-7">
+<img src={higherQualityIcon(job.image)} alt="" width="110" height="110" loading="lazy" class="h-24 w-full max-w-[110px] object-contain sm:h-28 sm:max-w-[128px]"/>
+<h3 class="mt-3 text-sm font-semibold leading-snug sm:text-base">{job.title}</h3>
+</article>)}
+</div></div></section>}
 <section id="ideas" class="px-5 py-12 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
 <p class="text-xs font-bold uppercase tracking-[.16em]">01 · CHOOSE A STARTING POINT</p>
 <h2 class="mt-3 max-w-3xl font-serif text-3xl leading-tight sm:text-4xl">{noReminders?'What changes when we hand over the whole job?':'18 practical responsibilities to choose from'}</h2>
 <p class="mt-4 max-w-2xl text-sm leading-[1.8]">{noReminders?'Each part matters. A child needs more than a vague “help out” request.':'Choose only what fits your child’s current skills and daily rhythm. These are ideas, not a checklist they must complete.'}</p>
 <div class="mt-8 grid gap-4 md:grid-cols-3">{guide.sections.map((section,i)=><article class="border-t-[5px] bg-[#FBF7F1] p-5" style={`border-color:${['#CDDDE1','#D4DFC4','#F1D8A8'][i]}`}>
-<img src={art(section.icon)} width="62" height="62" alt="" loading="lazy" class="size-[62px] object-contain"/>
+<img src={ageCards?higherQualityIcon(ageCards.categoryIcons[i]):art(section.icon)} width="80" height="80" alt="" loading="lazy" class="size-20 object-contain"/>
 <h3 class="mt-3 font-serif text-2xl">{section.title}</h3>
 <ul class="mt-5 space-y-3">{section.jobs.map(job=><li class="flex gap-2 text-sm leading-[1.6]"><span aria-hidden="true" class="shrink-0">□</span><span>{job}</span></li>)}</ul>
 </article>)}</div>
