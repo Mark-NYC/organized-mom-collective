@@ -56,7 +56,12 @@ function pill(page,x,y,w,h,r,fill,stroke=null){
  }
 }
 function drawCentered(page,text,font,size,cx,y,color=C.charcoal){
- const w=font.widthOfTextAtSize(text,size);page.drawText(text,{x:cx-w/2,y,size,font,color});
+ // Some embedded WOFF2 fonts encode the 'fl' ligature as an incorrect glyph (Þ).
+ // Split that pair across text runs so the PDF renders and extracts 'floor' correctly.
+ const runs=text.split(/(?<=f)(?=l)/);
+ const widths=runs.map(run=>font.widthOfTextAtSize(run,size));
+ let x=cx-widths.reduce((a,b)=>a+b,0)/2;
+ runs.forEach((run,i)=>{page.drawText(run,{x,y,size,font,color});x+=widths[i];});
 }
 function wrap(text,font,size,maxWidth){
  let line='',lines=[];
@@ -111,9 +116,15 @@ async function main(){
   const col=i%3,row=Math.floor(i/3),x=left+col*(cellW+gap),y=tops[row]-cellH;
   pill(p,x,y,cellW,cellH,13,C.ivory,C.peach);
   const im=embedded[i];
-  const maxW=114,maxH=94;const scale=Math.min(maxW/im.width,maxH/im.height);
+  // Fit the ENTIRE source image into a padded illustration zone. The zone ends
+  // above the label area and stays inside the rounded card on every side.
+  const artArea={x:x+22,y:y+47,w:cellW-44,h:70};
+  const scale=Math.min(artArea.w/im.width,artArea.h/im.height,1);
   const iw=im.width*scale,ih=im.height*scale;
-  p.drawImage(im,{x:x+(cellW-iw)/2,y:y+35+(maxH-ih)/2,width:iw,height:ih});
+  const imageX=artArea.x+(artArea.w-iw)/2,imageY=artArea.y+(artArea.h-ih)/2;
+  if(imageX<x+16||imageX+iw>x+cellW-16||imageY<y+40||imageY+ih>y+cellH-14)
+   throw new Error('Illustration would clip its tile: '+job.title);
+  p.drawImage(im,{x:imageX,y:imageY,width:iw,height:ih});
   const rows=wrap(job.title,handwritten,11.1,cellW-20);
   if(rows.length>2)throw new Error('Job label would overflow tile: '+job.title);
   rows.forEach((line,j)=>drawCentered(p,line,handwritten,11.1,x+cellW/2,y+24-j*12.5));
