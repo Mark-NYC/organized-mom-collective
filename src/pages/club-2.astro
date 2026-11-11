@@ -172,7 +172,26 @@ const closeUp = (month: string) => {
   <div class="product-system">
    <div class="product-stack" aria-label="Example of a personalized printed family resource with a digital Family Meeting focus">
     <div class="product-print">
-     <img src={carouselPreviews.find(k => k.month === 'August')!.image} alt="Actual August Rivera sample printable showing Sofia’s personalized morning and after-school routine" width="1080" height="1080" loading="lazy" decoding="async"/>
+     <div class="rivera-routine-sheet" role="group" aria-label="The Rivera Family after-school routine, based on the August personalized resource">
+      <div class="rivera-sheet-brand"><span></span><strong>♡ ORGANIZED<br/>family CLUB</strong><span></span></div>
+      <div class="rivera-sheet-head">
+       <p class="rivera-family">The Rivera Family</p>
+       <h3>After-School Routine</h3>
+       <p class="rivera-subtitle">Home, reset, then free time.</p>
+       <div class="rivera-children"><span>● SOFIA</span><span>● MATEO</span><span>● ELENA</span></div>
+      </div>
+      <div class="rivera-sheet-instruction">Check the chart. Do the next thing.</div>
+      <div class="rivera-routine-rows">
+       <div class="rivera-routine-row tone-peach"><span class="rr-number">01</span><img src="/images/club/august-v3/sneakers.png" alt="" loading="lazy"/><span class="rr-action">Shoes &amp; coat away</span><span class="rr-note">When I walk in the door</span></div>
+       <div class="rivera-routine-row tone-sage"><span class="rr-number">02</span><img src="/images/club/august-v3/backpack.png" alt="" loading="lazy"/><span class="rr-action">Unpack backpack &amp; lunch box</span></div>
+       <div class="rivera-routine-row tone-rose"><span class="rr-number">03</span><img src="/images/club/august-v3/washing-hands.png" alt="" loading="lazy"/><span class="rr-action">Wash hands</span></div>
+       <div class="rivera-routine-row tone-mint"><span class="rr-number">04</span><img src="/images/club/august-v3/yogurt-cup.png" alt="" loading="lazy"/><span class="rr-action">Have a snack</span></div>
+       <div class="rivera-routine-row tone-blue"><span class="rr-number">05</span><img src="/images/club/august-v3/book.png" alt="" loading="lazy"/><span class="rr-action">Homework or reading</span></div>
+       <div class="rivera-routine-row tone-cream"><span class="rr-number">06</span><img src="/images/club/august-v3/backpack.png" alt="" loading="lazy"/><span class="rr-action">Pack my soccer bag <small>● SOFIA</small></span><span class="rr-note">On Tue &amp; Thu</span></div>
+       <div class="rivera-routine-row tone-lavender"><span class="rr-number">07</span><img src="/images/club/august-v3/school-bus.png" alt="" loading="lazy"/><span class="rr-action">Free play</span></div>
+      </div>
+      <div class="rivera-finished"><strong>Ready for free time!</strong><span>HOME, UNPACKED AND RESET.</span></div>
+     </div>
     </div>
     <div class="club-phone-wrap">
      <div class="club-phone" role="img" aria-label="Illustrative August Family Meeting focus for the Rivera family: discuss school mornings, choose each child’s part, and practice one step">
@@ -192,7 +211,7 @@ const closeUp = (month: string) => {
       </div>
      </div>
     </div>
-    <span class="mockup-caption">Real Rivera August printable · illustrative phone focus</span>
+    <span class="mockup-caption">Rivera August routine example · illustrative phone focus</span>
    </div>
    <div class="product-system-copy">
     <div class="product-feature">
@@ -441,6 +460,37 @@ const closeUp = (month: string) => {
 @media(max-width:960px){.product-system{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.product-feature{grid-template-columns:42px 1fr;gap:12px}.product-feature-icon{width:42px;height:42px}.product-feature-icon svg{width:27px;height:27px}.product-system-copy{gap:20px}.club-phone-meeting{gap:3px;margin-top:8px}.club-phone-meeting>div{padding:4px}}
 @media(max-width:750px){.product-system{grid-template-columns:1fr;gap:24px}.product-stack{max-width:470px;padding-right:22%;padding-bottom:30px}.club-phone-wrap{width:39%}.club-phone-brand{font-size:7px}.club-phone-date{font-size:7px}.club-phone-title{font-size:18px}.club-phone-subtitle{font-size:9px}.club-phone-meeting b{font-size:8px}.club-phone-meeting small{font-size:7px}.club-phone-bottom{font-size:7px}.product-feature h3{font-size:1.45rem}.product-system-copy{max-width:570px;margin:auto}}
 @media(max-width:390px){.products-surface{padding-inline:12px}.club-phone-wrap{width:42%}.club-phone{border-width:4px;border-radius:22px}.club-phone-screen{border-radius:15px;padding:18px 5px 5px}.club-phone-notch{top:5px;height:8px}.club-phone-meeting{gap:2px;margin-top:6px}.club-phone-meeting>div{grid-template-columns:13px 1fr;gap:2px;padding:3px}.club-phone-meeting>div span{font-size:5px}.club-phone-meeting b{font-size:6px}.club-phone-meeting small{font-size:5px}.club-phone-date{margin-top:7px;font-size:5px}.club-phone-title{font-size:13px}.club-phone-subtitle{font-size:7px}.club-phone-brand{font-size:5px}.club-phone-bottom{font-size:5px;padding:3px}.mockup-caption{font-size:.58rem}.product-feature{grid-template-columns:39px 1fr;gap:10px}}
+
+
+/* Faithful, readable on-page rendering of the Rivera after-school sheet supplied for the August example. */
+.rivera-routine-sheet{background:#fff;padding:clamp(10px,1.4vw,24px);box-shadow:0 6px 18px #515c4c1d;color:#344038;aspect-ratio:1170/1471;font-family:"Georgia Pro",Georgia,serif;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.rivera-sheet-brand{display:flex;justify-content:center;align-items:center;gap:9px;padding:3% 0 4%;font:800 clamp(5px,.57vw,8px)/1.12 Montserrat,sans-serif;letter-spacing:.035em;text-align:center;color:#666}
+.rivera-sheet-brand>span{height:1px;background:#c6c6c6;flex:1}
+.rivera-sheet-head{background:#E6EDE0;padding:4%}
+.rivera-family{font:italic clamp(8px,1.12vw,15px)/1.2 Georgia,serif;color:#728570}
+.rivera-sheet-head h3{font:400 clamp(16px,2.75vw,37px)/1.05 Georgia,serif;letter-spacing:-.03em;margin:2px 0 4px}
+.rivera-subtitle{font:italic clamp(7px,1vw,14px)/1.2 Georgia,serif;color:#7b8a76}
+.rivera-children{display:flex;gap:10px;margin-top:5px;font:800 clamp(5px,.7vw,10px) Montserrat,sans-serif}
+.rivera-children span:nth-child(1){color:#316ea6}.rivera-children span:nth-child(2){color:#34896b}.rivera-children span:nth-child(3){color:#8052ae}
+.rivera-sheet-instruction{font:800 clamp(6px,.79vw,11px) Montserrat,sans-serif;letter-spacing:.06em;text-align:center;padding:3% 0}
+.rivera-routine-rows{display:grid;gap:5px;flex:1;min-height:0;grid-template-rows:repeat(7,minmax(0,1fr))}
+.rivera-routine-row{display:grid;grid-template-columns:12% 14% minmax(0,1fr) auto;gap:4%;align-items:center;min-height:0;border-radius:7px;overflow:hidden;padding:0 2% 0 0;background:#F4E8DC}
+.rr-number{height:100%;display:grid;place-items:center;background:#ead6c6;font:italic clamp(10px,1.5vw,22px) Georgia,serif;color:#917658}
+.rivera-routine-row img{width:100%;max-width:60px;max-height:65%;height:auto;object-fit:contain;justify-self:center}
+.rr-action{font:400 clamp(9px,1.45vw,20px)/1.18 Georgia,serif;color:#354036}
+.rr-action small{display:block;font:800 clamp(5px,.65vw,9px) Montserrat,sans-serif;color:#316ea6;padding-top:3px}
+.rr-note{background:white;border-radius:7px;padding:6px;font:700 clamp(5px,.65vw,9px)/1.25 Montserrat,sans-serif;text-align:center;max-width:78px}
+.tone-sage{background:#E8EDE6}.tone-sage .rr-number{background:#D8E6D4;color:#627d60}
+.tone-rose{background:#F3E5E1}.tone-rose .rr-number{background:#E8CDC7;color:#9c706c}
+.tone-mint{background:#E4EBE4}.tone-mint .rr-number{background:#D5E3D6;color:#657f68}
+.tone-blue{background:#E8EDF2}.tone-blue .rr-number{background:#D7E1EB;color:#6684a2}
+.tone-cream{background:#F4EBD7}.tone-cream .rr-number{background:#EADCB9;color:#92805d}
+.tone-lavender{background:#EAE6EF}.tone-lavender .rr-number{background:#DBD5E5;color:#81739b}
+.rivera-finished{background:#E2EADD;border-radius:7px;text-align:center;padding:2%;display:flex;flex-direction:column;justify-content:center}
+.rivera-finished strong{font:italic clamp(10px,1.7vw,24px)/1.12 Georgia,serif}
+.rivera-finished span{font:800 clamp(5px,.65vw,9px) Montserrat,sans-serif;letter-spacing:.1em;color:#6f8568}
+@media(max-width:750px){.rivera-sheet-head h3{font-size:clamp(18px,4.8vw,30px)}.rr-action{font-size:clamp(9px,2.3vw,16px)}.rr-number{font-size:clamp(12px,2.5vw,19px)}.rivera-finished strong{font-size:clamp(13px,3vw,20px)}.rivera-sheet-brand{font-size:7px}.rivera-children{font-size:7px}}
+@media(max-width:390px){.rivera-sheet-head h3{font-size:19px}.rr-action{font-size:9px}.rr-number{font-size:11px}.rr-note{font-size:5px;padding:3px}.rivera-routine-rows{gap:3px}}
 
 </style>
 </PublicLayout>
