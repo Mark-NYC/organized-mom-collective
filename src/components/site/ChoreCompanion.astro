@@ -1,0 +1,184 @@
+<!-- Optional companion to the PUBLIC chore chart. No second email gate or hidden paywall. -->
+<section id="chore-companion" class="first-week" data-first-week hidden aria-labelledby="fw-title">
+  <div class="fw-inner">
+    <p class="fw-eyebrow">A little something extra, free</p>
+    <h2 id="fw-title">Your first week, made simpler.</h2>
+    <p class="fw-intro" data-fw-intro>We've made a companion plan from the chart you created. Use it to help your child begin taking ownership.</p>
+    <div class="fw-body">
+      <div class="fw-controls">
+        <label for="fw-challenge">What's the hardest part about chores right now? <span>(optional)</span></label>
+        <select id="fw-challenge" data-fw-challenge>
+          <option value="reminders">I have to keep reminding them</option>
+          <option value="resistance">My child resists or complains</option>
+          <option value="followthrough">We start strong but don't stick with it</option>
+          <option value="expectations">I'm unsure what to expect at this age</option>
+        </select>
+        <p class="fw-note">No more questions or email needed. Your chart is already downloaded.</p>
+        <button type="button" class="fw-button" data-fw-download>Download the free first-week plan (PDF)</button>
+        <p class="fw-message" data-fw-message role="status" aria-live="polite"></p>
+      </div>
+      <div class="fw-preview" aria-label="Preview of personalized first week plan">
+        <div class="fw-preview-head">
+          <span>ORGANIZED MOM COLLECTIVE</span>
+          <strong data-fw-name>My First Week Plan</strong>
+          <small data-fw-age>Made just for your child</small>
+        </div>
+        <div class="fw-preview-focus">
+          <small>THIS WEEK'S FOCUS</small>
+          <strong data-fw-focus>Start small, then practice together.</strong>
+        </div>
+        <div class="fw-preview-job"><small>CHOOSE ONE TO START</small><strong data-fw-job>One responsibility from your chart</strong></div>
+        <p data-fw-tip>Choose when you'll practice it together. Your plan will include simple family meeting prompts.</p>
+        <div class="fw-preview-footer">A LITTLE START FOR THE WHOLE FAMILY</div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+.first-week{background:#FBF7F1;color:#545454;padding:44px 20px 56px}
+.first-week[hidden]{display:none}
+.fw-inner{max-width:1000px;margin:auto}
+.fw-eyebrow{font:700 11px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#647c69;margin:0 0 8px}
+.first-week h2{font:400 clamp(28px,4vw,40px)/1.15 Georgia,serif;margin:0 0 10px}
+.fw-intro{max-width:700px;line-height:1.65;margin:0 0 25px}
+.fw-body{display:grid;grid-template-columns:1fr 0.9fr;gap:32px;align-items:center}
+.fw-controls{display:grid;gap:12px;align-content:start}
+.fw-controls label{font-weight:700;font-size:14px}
+.fw-controls label span{font-weight:400;color:#777}
+.fw-controls select{min-height:50px;border:1px solid #c8c3bd;padding:10px 14px;border-radius:7px;color:#545454;background:white;font:inherit;width:100%}
+.fw-note,.fw-message{font-size:12px;color:#74706a;margin:0}
+.fw-button{border:0;border-radius:7px;background:#545454;color:white;min-height:52px;padding:14px 16px;text-align:center;cursor:pointer;font:700 14px Montserrat,sans-serif}
+.fw-button:disabled{opacity:.55;cursor:wait}
+.fw-preview{background:white;padding:22px;box-shadow:0 7px 24px #3331;border:1px solid #e4ddd4;display:grid;gap:14px;max-width:370px;width:100%;justify-self:center}
+.fw-preview-head{display:grid;gap:5px;border-bottom:2px solid #CDDDE1;padding-bottom:12px}
+.fw-preview-head span,.fw-preview-head small,.fw-preview-focus small,.fw-preview-job small{font:700 9px Montserrat,sans-serif;letter-spacing:.12em;color:#64717a}
+.fw-preview-head strong{font:400 26px/1.1 Georgia,serif;color:#3f3b39}
+.fw-preview-focus{border-radius:6px;background:#CDDDE1;padding:14px;display:grid;gap:8px}
+.fw-preview-focus strong{font:400 20px Georgia,serif}
+.fw-preview-job{padding:12px 0;border-bottom:1px solid #D5C5B8;display:grid;gap:6px}
+.fw-preview-job strong{font:400 16px Georgia,serif}
+.fw-preview p{font-size:12px;line-height:1.6;margin:0}
+.fw-preview-footer{text-align:right;color:#999;font:700 9px Montserrat,sans-serif;letter-spacing:.1em}
+@media(max-width:720px){.fw-body{grid-template-columns:1fr;gap:24px}.fw-preview{justify-self:start}.first-week{padding:35px 18px}}
+</style>
+<script>
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+
+type Detail = {name: string; age: string; chores: string[]};
+const section=document.querySelector<HTMLElement>('[data-first-week]');
+const challenge=section?.querySelector<HTMLSelectElement>('[data-fw-challenge]');
+const download=section?.querySelector<HTMLButtonElement>('[data-fw-download]');
+const message=section?.querySelector<HTMLElement>('[data-fw-message]');
+let current:Detail|null=null;
+const challenges:Record<string,{focus:string;tip:string;action:string;question:string}>={
+ reminders:{focus:'Give the job a cue, not another reminder.',tip:'Connect this job to something your child already does every day.',action:'Practice the sequence together, then point to the chart instead of repeating instructions.',question:'What helped you remember on your own?'},
+ resistance:{focus:'Let your child choose where to begin.',tip:'Offer ownership of one small job, not a long list of demands.',action:'Ask which selected chore feels manageable first, then demonstrate it together.',question:'What would make this job easier to own?'},
+ followthrough:{focus:'Make one small job part of the daily rhythm.',tip:'Start with one repeated cue before adding more tasks.',action:'Choose a daily moment, practice for one week, and revisit the plan together.',question:'Which part of our plan worked this week?'},
+ expectations:{focus:'Practice independence one step at a time.',tip:'Age ranges are guides. Start with a job your child can learn with help.',action:'Show the job, do it together, then invite your child to try a little more independently.',question:'What can you do on your own, and where would you like help?'}
+};
+const safe=(s:string)=>s.normalize('NFKD').replace(/[^\x20-\x7E]/g, c=>c==='’'||c==='‘'?"'":c==='–'||c==='—'?'-':'').trim();
+const shorten=(s:string,n=95)=>s.length>n?s.slice(0,n-3).trimEnd()+'...':s;
+function plan(){
+ const d=current!;
+ const challengeInfo=challenges[challenge?.value??'reminders']||challenges.reminders;
+ const name=safe(d.name)||'Your child';
+ const chores=d.chores.map(safe).filter(Boolean);
+ const primary=shorten(chores[0]||'Choose one job from the chore chart',70);
+ const secondary=chores.length>1?shorten(chores[1],70):'Keep practicing the first job';
+ return {name,age:safe(d.age)||'Age-appropriate',primary,secondary,...challengeInfo};
+}
+function sync(){
+ if(!section||!current)return;
+ const p=plan();
+ const put=(selector:string,value:string)=>{const el=section.querySelector<HTMLElement>(selector);if(el)el.textContent=value;};
+ put('[data-fw-intro]',`Your chart is downloaded. Here's a free plan to help ${p.name} actually use it. It starts with the responsibilities you selected.`);
+ put('[data-fw-name]',`${p.name}'s First Week Plan`);
+ put('[data-fw-age]',p.age);
+ put('[data-fw-focus]',p.focus);
+ put('[data-fw-job]',p.primary);
+ put('[data-fw-tip]',p.tip);
+}
+window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
+ const detail=(e as CustomEvent<Detail>).detail;
+ if(!detail||!Array.isArray(detail.chores))return;
+ current={name:String(detail.name||'').slice(0,24),age:String(detail.age||'').slice(0,60),chores:detail.chores.map(x=>String(x).slice(0,100))};
+ if(section){section.hidden=false;sync();section.scrollIntoView({behavior:'smooth',block:'start'});}
+}) as EventListener);
+challenge?.addEventListener('change',sync);
+
+download?.addEventListener('click',async()=>{
+ if(!current||!download)return;
+ const p=plan();
+ download.disabled=true;
+ if(message)message.textContent='Preparing your printable...';
+ try{
+  const pdf=await PDFDocument.create();
+  const page=pdf.addPage([612,792]);
+  const serif=await pdf.embedFont(StandardFonts.TimesRoman);
+  const serifBold=await pdf.embedFont(StandardFonts.TimesRomanBold);
+  const sans=await pdf.embedFont(StandardFonts.Helvetica);
+  const bold=await pdf.embedFont(StandardFonts.HelveticaBold);
+  const ink=rgb(.33,.33,.33),muted=rgb(.44,.42,.41),blue=rgb(.804,.867,.882),ivory=rgb(.984,.969,.945),line=rgb(.835,.773,.722),slate=rgb(.24,.40,.44);
+  const draw=(s:string,x:number,y:number,size=11,font=sans,color=ink)=>page.drawText(safe(s),{x,y,size,font,color});
+  function wrapped(s:string,maxWidth:number,font= sans,size=11){
+   const words=safe(s).split(/\s+/).filter(Boolean),lines:string[]=[];let row='';
+   for(const word of words){const t=row?row+' '+word:word;if(font.widthOfTextAtSize(t,size)>maxWidth&&row){lines.push(row);row=word;}else row=t;}
+   if(row)lines.push(row);
+   return lines;
+  }
+  const paragraph=(s:string,x:number,y:number,width:number,size=11,font=sans,color=ink,leading=15)=>{
+   for(const line of wrapped(s,width,font,size)){draw(line,x,y,size,font,color);y-=leading;}return y;
+  };
+  const box=(x:number,y:number,w:number,h:number,color=ivory,border?:typeof line)=>{
+   page.drawRectangle({x,y,width:w,height:h,color,borderColor:border,borderWidth:border?1:0});
+  };
+  const heading=(s:string,x:number,y:number)=>draw(s,x,y,16,serifBold,ink);
+  // Reuses January Family Focus's visual hierarchy: editorial heading, tinted focus,
+  // habit experiment cards, meeting prompt, and a quiet bottom section.
+  draw('ORGANIZED MOM COLLECTIVE  /  A FREE FAMILY MEETING RESOURCE',42,753,8,bold,slate);
+  draw(`${p.name}'s First Week Plan`,42,711,27,serif,ink);
+  draw(`${p.age}  |  A small start with the chore chart you made`,42,689,10,sans,muted);
+  page.drawLine({start:{x:42,y:676},end:{x:570,y:676},thickness:2,color:blue});
+  box(42,567,528,94,blue);
+  draw('THIS WEEK\'S FOCUS',56,640,9,bold,slate);
+  let y=paragraph(p.focus,56,612,492,19,serif,ink,23);
+  paragraph(p.tip,56,Math.min(587,y-1),492,10,sans,muted,13);
+  heading('One or two responsibilities worth trying',42,539);
+  draw('Pick one to start. A second job can wait until the first feels familiar.',42,519,10,sans,muted);
+  box(42,364,254,139,ivory,line);
+  box(308,364,262,139,ivory,line);
+  draw('START HERE',55,482,9,bold,slate);
+  y=paragraph(p.primary,55,458,228,15,serifBold,ink,18);
+  draw('WHEN',55,Math.min(415,y-10),9,bold,slate);
+  paragraph('Choose a repeatable moment that already happens each day.',55,394,225,10,sans,ink,13);
+  draw('ADD LATER',321,482,9,bold,slate);
+  y=paragraph(p.secondary,321,458,230,15,serifBold,ink,18);
+  draw('OWNERSHIP',321,Math.min(415,y-10),9,bold,slate);
+  paragraph('Show it, try it together, then hand over one step.',321,394,230,10,sans,ink,13);
+  heading('Try this at your family meeting',42,334);
+  draw('A simple four-part rhythm',42,315,10,sans,muted);
+  const parts=[
+   ['1. CONNECT','Share one good thing from your week.'],
+   ['2. LOOK BACK',p.question],
+   ['3. LOOK UP','Read a short Bible story or share what your family values.'],
+   ['4. LOOK AHEAD',`Ask ${p.name} which job to practice and when. Agree to try it for one week.`]
+  ];
+  let cursor=288;
+  for(const [a,b] of parts){draw(a,48,cursor,9,bold,slate);cursor=paragraph(b,161,cursor,395,10,sans,ink,13)-9;}
+  // Replaces January's Words of the Week with the Club continuation.
+  box(42,77,528,96,ivory,line);
+  draw('KEEP GROWING TOGETHER',56,151,9,bold,slate);
+  let footer=paragraph('A chart is a start. The Family Meeting Club helps your family build responsibility, connection and healthy rhythms with personalized printed tools delivered every month.',56,132,498,10,sans,ink,13);
+  draw('Explore: organizedmomcollective.com/club-2/',56,Math.max(90,footer-3),10,bold,slate);
+  draw('Made for your family  |  organizedmomcollective.com',42,51,8,sans,muted);
+  const bytes=await pdf.save();
+  const blob=new Blob([new Uint8Array(bytes)],{type:'application/pdf'});
+  const url=URL.createObjectURL(blob);const link=document.createElement('a');
+  link.href=url;link.download=(p.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'family')+'-first-week-plan.pdf';
+  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
+  if(message)message.textContent='Your one-page plan is ready. Try it together this week.';
+  window.dispatchEvent(new CustomEvent('omc:chore-companion-downloaded',{detail:{source:'chore-chart'}}));
+ }catch(error){if(message)message.textContent='We could not make the PDF. Please try again.';console.error(error);}
+ finally{download.disabled=false;}
+});
+</script>
