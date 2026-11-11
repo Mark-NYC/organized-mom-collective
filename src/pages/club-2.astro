@@ -569,5 +569,19 @@ const closeUp = (month: string) => {
  .club-phone-meeting small{font-size:7px}
 }
 
+/* Keep a visible print-and-phone overlap on mobile, without covering the routine steps.
+   The phone partly crosses the paper's lower-right margin and hangs beneath it. */
+@media(max-width:750px){
+ .product-stack{padding:10px 11% 155px 0;overflow:visible}
+ .product-print{width:100%}
+ .club-phone-wrap{position:absolute;top:auto;bottom:60px;right:-1%;width:42%;max-width:188px;margin:0;z-index:3}
+ .mockup-caption{position:absolute;bottom:10px;left:0;right:0;margin:0;text-align:left}
+}
+@media(max-width:390px){
+ .product-stack{padding-right:12%;padding-bottom:140px}
+ .club-phone-wrap{right:-1%;bottom:54px;width:43%;max-width:170px;margin:0}
+ .mockup-caption{font-size:.59rem}
+}
+
 </style>
 </PublicLayout>
