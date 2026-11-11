@@ -157,19 +157,13 @@ section?.querySelector<HTMLButtonElement>('[data-fw-reveal]')?.addEventListener(
  section.dataset.phase='plan';
  section.setAttribute('aria-labelledby','fw-title');
  toolEvent('tool_plan_preview','chore-chart');
- void refreshPreview();
+ sync();
+ section.scrollTop=0;
 });
 
 const challenge=section?.querySelector<HTMLSelectElement>('[data-fw-challenge]');
-const download=section?.querySelector<HTMLButtonElement>('[data-fw-download]');
+const downloads=Array.from(section?.querySelectorAll<HTMLButtonElement>('[data-fw-download]')??[]);
 const message=section?.querySelector<HTMLElement>('[data-fw-message]');
-const iframe=section?.querySelector<HTMLIFrameElement>('[data-fw-pdf]');
-const loading=section?.querySelector<HTMLElement>('[data-fw-loading]');
-const openLink=section?.querySelector<HTMLAnchorElement>('[data-fw-open]');
-let previewUrl:string|null=null;
-let generation=0;
-section?.querySelector<HTMLButtonElement>('[data-fw-close]')?.addEventListener('click',()=>section?.close());
-section?.addEventListener('cancel',()=>{ /* Let the visitor close the preview and keep the chart. */ });
 let current:Detail|null=null;
 const challenges:Record<string,{focus:string;tip:string;action:string;question:string}>={
  reminders:{focus:'Give the job a cue, not another reminder.',tip:'Connect this job to something your child already does every day.',action:'Practice the sequence together, then point to the chart instead of repeating instructions.',question:'What helped you remember on your own?'},
@@ -211,12 +205,27 @@ function sync(){
  if(!section||!current)return;
  const p=plan();
  const put=(selector:string,value:string)=>{const el=section.querySelector<HTMLElement>(selector);if(el)el.textContent=value;};
- put('[data-fw-intro]',`Your chart is downloaded. Here's a free plan to help ${p.name} actually use it. It starts with the responsibilities you selected.`);
- put('[data-fw-name]',`${p.name}'s First Week Plan`);
- put('[data-fw-age]',p.age);
+ put('[data-fw-title]',`${p.name}'s First Week Plan`);
+ put('[data-fw-intro]',`Made for ${p.name} (${p.age}) from the chores you chose. Pick one small experiment to try together this week.`);
  put('[data-fw-focus]',p.focus);
- put('[data-fw-job]',p.primary);
- put('[data-fw-tip]',p.ageSupport);
+ put('[data-fw-support]',p.ageSupport);
+ put('[data-fw-primary]',p.primary);
+ put('[data-fw-secondary]',p.secondary);
+ put('[data-fw-cue]',p.cue);
+ put('[data-fw-primary-owner]',p.action);
+ put('[data-fw-action]',p.action);
+ put('[data-fw-question]',p.question);
+ put('[data-fw-lookahead]',`Ask ${p.name} which job to practice and when. Agree to try it for one week.`);
+ const chores=current.chores.map(safe).filter(Boolean);
+ const secondCard=section.querySelector<HTMLElement>('[data-fw-second-card]');
+ if(secondCard)secondCard.hidden=chores.length<2;
+ for(const [selector,chore] of [['[data-fw-primary-icon]',p.primary],['[data-fw-secondary-icon]',p.secondary]] as const){
+  const icon=section.querySelector<HTMLImageElement>(selector);
+  if(!icon)continue;
+  const url=choreLineIconForText(chore);
+  icon.hidden=!url;
+  if(url)icon.src=url;else icon.removeAttribute('src');
+ }
 }
 window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
  const detail=(e as CustomEvent<Detail>).detail;
@@ -224,7 +233,7 @@ window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
  current={name:String(detail.name||'').slice(0,24),age:String(detail.age||'').slice(0,60),chores:detail.chores.map(x=>String(x).slice(0,100))};
  if(section){sync();section.dataset.phase='gift';section.setAttribute('aria-labelledby','fw-gift-title');const giftName=section.querySelector<HTMLElement>('[data-fw-gift-name]');if(giftName)giftName.textContent=String(current.name||'your child').trim().split(/\s+/)[0]||'your child';if(!section.open)section.showModal();giftConfetti();}
 }) as EventListener);
-challenge?.addEventListener('change',()=>{sync();void refreshPreview();});
+challenge?.addEventListener('change',()=>{sync();if(message)message.textContent='Your printable will reflect this change.';});
 
 async function generatePdf():Promise<Uint8Array>{
  const p=plan();
@@ -308,38 +317,30 @@ async function generatePdf():Promise<Uint8Array>{
   draw('Made for your family  |  organizedmomcollective.com',42,51,8,sans,muted);
   return await pdf.save();
 }
-async function refreshPreview(){
- if(!current||!section)return;
- const task=++generation;
- if(loading){loading.hidden=false;loading.textContent='Preparing your personalized plan…';}
- if(download)download.disabled=true;
+// The digital plan is rendered immediately. The PDF is generated only on request,
+ // using the same plan() data so its content matches what Mom just read.
+downloads.forEach(button=>button.addEventListener('click',async()=>{
+ if(!current)return;
+ downloads.forEach(b=>{b.disabled=true;b.textContent='Preparing your PDF…';});
  if(message)message.textContent='';
- try {
+ try{
+  const p=plan();
   const bytes=await generatePdf();
-  if(task!==generation)return;
   const blob=new Blob([new Uint8Array(bytes)],{type:'application/pdf'});
   const url=URL.createObjectURL(blob);
-  const old=previewUrl;previewUrl=url;
-  if(iframe)iframe.src=url+'#toolbar=0&navpanes=0';
-  if(openLink){openLink.href=url;openLink.hidden=false;}
-  if(old)setTimeout(()=>URL.revokeObjectURL(old),10000);
-  if(loading)loading.hidden=true;
-  if(download)download.disabled=false;
- } catch(error){
-  console.error('First-week preview failed',error);
-  if(task===generation){if(loading)loading.textContent='Preview unavailable. Please try again.';if(message)message.textContent='Could not prepare the plan. Change the option above to retry.';}
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=(p.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'family')+'-first-week-plan.pdf';
+  document.body.appendChild(link);link.click();link.remove();
+  window.setTimeout(()=>URL.revokeObjectURL(url),30000);
+  if(message)message.textContent='Your plan is saved. Bring it to your next family meeting!';
+  toolEvent('tool_plan_download','chore-chart');
+  window.dispatchEvent(new CustomEvent('omc:chore-companion-downloaded',{detail:{source:'chore-chart'}}));
+ }catch(error){
+  console.error('First-week PDF download failed',error);
+  if(message)message.textContent='Could not prepare the PDF. Please try again.';
+ }finally{
+  downloads.forEach(b=>{b.disabled=false;b.textContent=b===downloads[0]?'↓ Download my plan (PDF)':'↓ Download my personalized plan (PDF)';});
  }
-}
-download?.addEventListener('click',()=>{
- if(!current||!previewUrl)return;
- const p=plan();
- const link=document.createElement('a');
- link.href=previewUrl;
- link.download=(p.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'family')+'-first-week-plan.pdf';
- document.body.appendChild(link);link.click();link.remove();
- if(message)message.textContent='Saved! Bring it to your next family meeting.';
- toolEvent('tool_plan_download','chore-chart');
- window.dispatchEvent(new CustomEvent('omc:chore-companion-downloaded',{detail:{source:'chore-chart'}}));
-});
-
+}));
 </script>
