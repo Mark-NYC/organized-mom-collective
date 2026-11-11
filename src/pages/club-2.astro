@@ -583,5 +583,42 @@ const closeUp = (month: string) => {
  .mockup-caption{font-size:.59rem}
 }
 
+
+/* Keep the landing-page printable at actual US Letter proportions on all screens. */
+.rivera-routine-sheet{aspect-ratio:8.5/11;min-height:0}
+@media(max-width:750px){
+ .rivera-routine-sheet{
+  aspect-ratio:8.5/11;
+  min-height:0;
+  height:auto;
+  padding:clamp(8px,2.3vw,14px);
+  gap:clamp(2px,.7vw,5px);
+ }
+ .rivera-sheet-brand{padding:1.5% 0 2.3%;font-size:clamp(5px,1.45vw,8px)}
+ .rivera-sheet-head{padding:3.3%}
+ .rivera-family{font-size:clamp(8px,2.5vw,12px)}
+ .rivera-sheet-head h3{font-size:clamp(17px,5.2vw,29px);line-height:1.04}
+ .rivera-subtitle{font-size:clamp(7px,2.2vw,11px)}
+ .rivera-children{font-size:clamp(6px,1.8vw,9px);gap:6px}
+ .rivera-sheet-instruction{padding:1% 0;font-size:clamp(6px,1.7vw,9px)}
+ .rivera-routine-rows{flex:1;min-height:0;grid-template-rows:repeat(7,minmax(0,1fr));grid-auto-rows:unset;gap:clamp(2px,.9vw,5px)}
+ .rivera-routine-row{min-height:0;overflow:hidden;border-radius:5px}
+ .rivera-routine-row img{max-height:75%;max-width:34px}
+ .rr-number{min-height:0;height:100%;font-size:clamp(10px,3vw,17px)}
+ .rr-action{font-size:clamp(8px,2.8vw,14px);line-height:1.1}
+ .rr-action small{font-size:clamp(5px,1.5vw,8px);padding-top:2px}
+ .rr-note{padding:3px;max-width:64px;font-size:clamp(5px,1.45vw,8px)}
+ .rivera-finished{min-height:0;padding:1.3%}
+ .rivera-finished strong{font-size:clamp(11px,3.5vw,18px)}
+ .rivera-finished span{font-size:clamp(5px,1.45vw,8px)}
+}
+@media(max-width:390px){
+ .rivera-routine-sheet{aspect-ratio:8.5/11;min-height:0;padding:8px}
+ .rivera-sheet-head h3{font-size:clamp(16px,5.1vw,20px)}
+ .rr-action{font-size:clamp(8px,2.75vw,11px)}
+ .rr-number{font-size:clamp(9px,3vw,12px)}
+ .rr-note{font-size:clamp(5px,1.35vw,7px)}
+}
+
 </style>
 </PublicLayout>
