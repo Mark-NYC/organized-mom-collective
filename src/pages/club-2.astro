@@ -167,7 +167,8 @@ const closeUp = (month: string) => {
   <div class="product-intro">
    <p class="eyebrow">PRINTED + DIGITAL · INCLUDED EVERY MONTH</p>
    <h2 id="what-heading">Here's what you get <em>every month.</em></h2>
-   <p>See how a printed morning routine and a matching Family Meeting focus work together for the Rivera family.</p>
+   <p>See how a printed after-school routine and a matching Family Meeting focus work together for the Rivera family.</p>
+   <p class="personalization-intro">Not just their name at the top. Their ages, activities, and everyday challenges shape the plan.</p>
   </div>
   <div class="product-system">
    <div class="product-stack" aria-label="Example of a personalized printed family resource with a digital Family Meeting focus">
@@ -187,7 +188,7 @@ const closeUp = (month: string) => {
        <div class="rivera-routine-row tone-rose"><span class="rr-number">03</span><img src="/images/club/august-v3/washing-hands.png" alt="" loading="lazy"/><span class="rr-action">Wash hands</span></div>
        <div class="rivera-routine-row tone-mint"><span class="rr-number">04</span><img src="/images/club/august-v3/yogurt-cup.png" alt="" loading="lazy"/><span class="rr-action">Have a snack</span></div>
        <div class="rivera-routine-row tone-blue"><span class="rr-number">05</span><img src="/images/club/august-v3/book.png" alt="" loading="lazy"/><span class="rr-action">Homework or reading</span></div>
-       <div class="rivera-routine-row tone-cream"><span class="rr-number">06</span><img src="/images/club/august-v3/backpack.png" alt="" loading="lazy"/><span class="rr-action">Pack my soccer bag <small>● SOFIA</small></span><span class="rr-note">On Tue &amp; Thu</span></div>
+       <div class="rivera-routine-row tone-cream soccer-row"><span class="rr-number">06</span><img src="/images/club/august-v3/backpack.png" alt="" loading="lazy"/><span class="rr-action">Pack my soccer bag <small>● SOFIA</small></span><span class="rr-note">On Tue &amp; Thu</span></div>
        <div class="rivera-routine-row tone-lavender"><span class="rr-number">07</span><img src="/images/club/august-v3/school-bus.png" alt="" loading="lazy"/><span class="rr-action">Free play</span></div>
       </div>
       <div class="rivera-finished"><strong>Ready for free time!</strong><span>HOME, UNPACKED AND RESET.</span></div>
@@ -210,6 +211,17 @@ const closeUp = (month: string) => {
        <div class="club-phone-bottom">TRY ONE THING THIS WEEK</div>
       </div>
      </div>
+    </div>
+    <div class="personalization-build" aria-label="How the Rivera family's details become their personalized plan">
+     <p class="personalization-kicker">MADE FROM THEIR REAL LIFE</p>
+     <div class="personalization-chips" aria-hidden="true">
+      <div class="personalization-chip chip-1"><span>Kids</span><strong>Sofia, Mateo, Elena</strong><i>✓</i></div>
+      <div class="personalization-chip chip-2"><span>Ages</span><strong>10, 7, 4</strong><i>✓</i></div>
+      <div class="personalization-chip chip-3"><span>Challenge</span><strong>Rushed afternoons</strong><i>✓</i></div>
+      <div class="personalization-chip chip-4"><span>Activities</span><strong>Soccer Tue &amp; Thu</strong><i>✓</i></div>
+      <div class="personalization-chip chip-5"><span>Goal</span><strong>Less reminding</strong><i>✓</i></div>
+     </div>
+     <div class="personalization-proof"><span>AND THEIR PLAN INCLUDES</span><strong>Pack my soccer bag · Sofia · Tue &amp; Thu</strong></div>
     </div>
     <span class="mockup-caption">Rivera August routine example · illustrative phone focus</span>
    </div>
@@ -491,6 +503,38 @@ const closeUp = (month: string) => {
 .rivera-finished span{font:800 clamp(5px,.65vw,9px) Montserrat,sans-serif;letter-spacing:.1em;color:#6f8568}
 @media(max-width:750px){.rivera-sheet-head h3{font-size:clamp(18px,4.8vw,30px)}.rr-action{font-size:clamp(9px,2.3vw,16px)}.rr-number{font-size:clamp(12px,2.5vw,19px)}.rivera-finished strong{font-size:clamp(13px,3vw,20px)}.rivera-sheet-brand{font-size:7px}.rivera-children{font-size:7px}}
 @media(max-width:390px){.rivera-sheet-head h3{font-size:19px}.rr-action{font-size:9px}.rr-number{font-size:11px}.rr-note{font-size:5px;padding:3px}.rivera-routine-rows{gap:3px}}
+
+
+/* Small, deliberately staged personalization proof. The print and phone remain visible. */
+.product-stack{padding-bottom:0}
+.personalization-build{position:relative;z-index:4;margin:22px 0 20px;max-width:100%}
+.personalization-kicker{margin:0 0 10px!important;font:800 .64rem/1.3 Montserrat,sans-serif;letter-spacing:.11em;color:#5b7554}
+.personalization-intro{margin:10px auto 0!important;color:#64795d;font-size:.86rem!important;max-width:650px}
+.personalization-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.personalization-chip{display:flex;align-items:center;flex-wrap:wrap;gap:3px 7px;min-width:0;padding:8px 10px;border:1px solid #dedfd4;border-radius:10px;background:#fff;box-shadow:0 5px 15px #31412d13;opacity:0;transform:translateY(7px);will-change:opacity,transform}
+.personalization-chip span{flex-basis:100%;color:#758770;font-size:.64rem;line-height:1.2;text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+.personalization-chip strong{font-size:.77rem;line-height:1.32;font-weight:650;min-width:0}
+.personalization-chip i{font-size:.77rem;font-weight:800;font-style:normal;color:#557f57;margin-left:auto}
+.personalization-proof{background:#fff7e9;border:1px solid #ead7b4;border-left:3px solid #b98b56;border-radius:0 10px 10px 0;margin-top:12px;padding:10px 12px;opacity:0;transform:translateY(6px);animation:personalization-outcome 12s ease-in-out infinite}
+.personalization-proof span{display:block;font-size:.6rem;letter-spacing:.08em;font-weight:800;color:#8c6b44;margin-bottom:3px}
+.personalization-proof strong{font:italic 1rem/1.35 Georgia,serif;color:#445c43}
+.soccer-row{position:relative;isolation:isolate}
+.soccer-row::after{content:"";position:absolute;inset:1px;border:2px solid #719c68;border-radius:8px;box-shadow:0 0 0 4px #cfe7ba9c;pointer-events:none;opacity:0;animation:personalization-highlight 12s ease-in-out infinite}
+@keyframes personalization-outcome{0%,47%{opacity:0;transform:translateY(6px)}55%,85%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(6px)}}
+@keyframes personalization-highlight{0%,47%{opacity:0}55%,85%{opacity:1}94%,100%{opacity:0}}
+.chip-1{animation:personalization-chip-1 12s ease-in-out infinite}
+@keyframes personalization-chip-1{0%,5%{opacity:0;transform:translateY(7px)}10%,85%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(7px)}}
+.chip-2{animation:personalization-chip-2 12s ease-in-out infinite}
+@keyframes personalization-chip-2{0%,13%{opacity:0;transform:translateY(7px)}18%,85%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(7px)}}
+.chip-3{animation:personalization-chip-3 12s ease-in-out infinite}
+@keyframes personalization-chip-3{0%,21%{opacity:0;transform:translateY(7px)}26%,85%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(7px)}}
+.chip-4{animation:personalization-chip-4 12s ease-in-out infinite}
+@keyframes personalization-chip-4{0%,29%{opacity:0;transform:translateY(7px)}34%,85%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(7px)}}
+.chip-5{animation:personalization-chip-5 12s ease-in-out infinite}
+@keyframes personalization-chip-5{0%,37%{opacity:0;transform:translateY(7px)}42%,85%{opacity:1;transform:translateY(0)}94%,100%{opacity:0;transform:translateY(7px)}}
+@media(max-width:750px){.personalization-build{margin-top:18px}.personalization-chip strong{font-size:.72rem}}
+@media(max-width:390px){.personalization-chips{grid-template-columns:1fr 1fr;gap:5px}.personalization-chip{padding:7px}.personalization-chip strong{font-size:.65rem}.personalization-proof strong{font-size:.88rem}}
+@media(prefers-reduced-motion:reduce){.personalization-chip,.personalization-proof,.soccer-row::after{animation:none!important;opacity:1!important;transform:none!important;will-change:auto}}
 
 </style>
 </PublicLayout>
