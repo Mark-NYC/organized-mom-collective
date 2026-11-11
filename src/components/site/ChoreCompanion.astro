@@ -13,7 +13,7 @@
           <option value="followthrough">We start strong but don't stick with it</option>
           <option value="expectations">I'm unsure what to expect at this age</option>
         </select>
-        <p class="fw-note">No more questions or email needed. Your chart is ready. No second email is needed.</p>
+        <p class="fw-note">Your chart is ready. This extra plan is free, with no second email required.</p>
         <button type="button" class="fw-button" data-fw-download>Save my plan</button><a class="fw-open" data-fw-open href="#" target="_blank" rel="noopener" hidden>Open full-size PDF preview</a>
         <p class="fw-message" data-fw-message role="status" aria-live="polite"></p>
       </div>
@@ -89,7 +89,7 @@ function plan(){
  const chores=d.chores.map(safe).filter(Boolean);
  const primary=shorten(chores[0]||'Choose one job from the chore chart',70);
  const secondary=chores.length>1?shorten(chores[1],70):'Keep practicing the first job';
- // The chart stores an age BAND. Tailor support to that band without pretending to know an exact age.
+ // Modern charts store exact ages; legacy charts store age bands. Tailor support without overclaiming.
  const ageNumber=Number((d.age.match(/\d+/)||[])[0]||0);
  const ageSupport=ageNumber>0&&ageNumber<=5
    ? 'For younger children: show each step, do it together, and keep the practice short.'
@@ -204,7 +204,7 @@ async function generatePdf():Promise<Uint8Array>{
 async function refreshPreview(){
  if(!current||!section)return;
  const task=++generation;
- if(loading)loading.hidden=false;
+ if(loading){loading.hidden=false;loading.textContent='Preparing your personalized plan…';}
  if(download)download.disabled=true;
  if(message)message.textContent='';
  try {
