@@ -8,6 +8,7 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import ChoreChart from '../components/site/ChoreChart.astro';
 import OriginalChoreChart from '../components/site/OriginalChoreChart.astro';
+import ChoreCompanion from '../components/site/ChoreCompanion.astro';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
 
@@ -70,6 +71,7 @@ const jsonLd = [
       </OriginalChoreChart>
     </div>
   </div>
+  <ChoreCompanion />
   <style>
     .cc-version-shell[data-version="new"] [data-chart-original],
     .cc-version-shell[data-version="original"] [data-chart-modern] { display:none!important; }
