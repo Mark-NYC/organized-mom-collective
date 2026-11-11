@@ -71,6 +71,16 @@ const challenges:Record<string,{focus:string;tip:string;action:string;question:s
 };
 const safe=(s:string)=>s.normalize('NFKD').replace(/[^\x20-\x7E]/g, c=>c==='’'||c==='‘'?"'":c==='–'||c==='—'?'-':'').trim();
 const shorten=(s:string,n=95)=>s.length>n?s.slice(0,n-3).trimEnd()+'...':s;
+function cueFor(job:string){
+ const x=job.toLowerCase();
+ if(/bed|pajama|teeth|dress|hair/.test(x))return 'After getting dressed or before bedtime, practice this together.';
+ if(/backpack|shoe|coat|school/.test(x))return 'Right when you get home, put belongings in their place.';
+ if(/dish|table|counter|kitchen/.test(x))return 'After the next family meal, practice the job together.';
+ if(/toy|tidy|room|floor/.test(x))return 'Before your usual evening wind-down, do a quick reset.';
+ if(/laundry|trash|vacuum/.test(x))return 'Choose a weekend time and do the first round together.';
+ if(/pet/.test(x))return 'Tie this to an existing family morning or evening routine.';
+ return 'Pick a moment already in your day, and do the first try together.';
+}
 function plan(){
  const d=current!;
  const challengeInfo=challenges[challenge?.value??'reminders']||challenges.reminders;
@@ -79,7 +89,7 @@ function plan(){
  const primary=shorten(chores[0]||'Choose one job from the chore chart',70);
  const secondary=chores.length>1?shorten(chores[1],70):'Keep practicing the first job';
  // The chart stores an age BAND. Tailor support to that band without pretending to know an exact age.
- const ageNumber=Number((d.age.match(/\\d+/)||[])[0]||0);
+ const ageNumber=Number((d.age.match(/\d+/)||[])[0]||0);
  const ageSupport=ageNumber>0&&ageNumber<=5
    ? 'For younger children: show each step, do it together, and keep the practice short.'
    : ageNumber>=6&&ageNumber<=9
@@ -87,7 +97,7 @@ function plan(){
      : ageNumber>=10
        ? 'For older children: invite your child to choose the timing and define what finished looks like.'
        : 'Start together and adjust how much help is needed, instead of assuming independence on day one.';
- return {name,age:safe(d.age)||'Age-appropriate',primary,secondary,ageSupport,...challengeInfo};
+ return {name,age:safe(d.age)||'Age-appropriate',primary,secondary,ageSupport,cue:cueFor(primary),...challengeInfo};
 }
 function sync(){
  if(!section||!current)return;
@@ -131,6 +141,21 @@ async function generatePdf():Promise<Uint8Array>{
    page.drawRectangle({x,y,width:w,height:h,color,borderColor:border,borderWidth:border?1:0});
   };
   const heading=(s:string,x:number,y:number)=>draw(s,x,y,16,serifBold,ink);
+  async function drawIcon(text:string,x:number,y:number,size=34){
+   const src=choreLineIconForText(text);
+   if(!src)return;
+   try{
+    const image=new Image(); image.decoding='async'; image.src=src;
+    await image.decode();
+    const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
+    const ctx=canvas.getContext('2d');if(!ctx)return;
+    const ratio=Math.min(108/image.naturalWidth,108/image.naturalHeight);
+    const width=image.naturalWidth*ratio,height=image.naturalHeight*ratio;
+    ctx.drawImage(image,(128-width)/2,(128-height)/2,width,height);
+    const png=await pdf.embedPng(canvas.toDataURL('image/png'));
+    page.drawImage(png,{x,y,width:size,height:size});
+   }catch(error){console.warn('Optional chore illustration unavailable',error);}
+  }
   // Reuses January Family Focus's visual hierarchy: editorial heading, tinted focus,
   // habit experiment cards, meeting prompt, and a quiet bottom section.
   draw('ORGANIZED MOM COLLECTIVE  /  A FREE FAMILY MEETING RESOURCE',42,753,8,bold,slate);
@@ -148,11 +173,13 @@ async function generatePdf():Promise<Uint8Array>{
   box(42,364,254,139,ivory,line);
   box(308,364,262,139,ivory,line);
   draw('START HERE',55,482,9,bold,slate);
-  y=paragraph(p.primary,55,458,228,15,serifBold,ink,18);
+  await drawIcon(p.primary,248,451,33);
+  y=paragraph(p.primary,55,458,187,15,serifBold,ink,18);
   draw('WHEN',55,Math.min(415,y-10),9,bold,slate);
-  paragraph('Choose a repeatable moment that already happens each day.',55,394,225,10,sans,ink,13);
+  paragraph(p.cue,55,394,225,10,sans,ink,13);
   draw('ADD LATER',321,482,9,bold,slate);
-  y=paragraph(p.secondary,321,458,230,15,serifBold,ink,18);
+  await drawIcon(p.secondary,523,451,33);
+  y=paragraph(p.secondary,321,458,192,15,serifBold,ink,18);
   draw('OWNERSHIP',321,Math.min(415,y-10),9,bold,slate);
   paragraph(p.action,321,398,230,9.5,sans,ink,12);
   heading('Try this at your family meeting',42,334);
