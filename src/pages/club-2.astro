@@ -138,142 +138,101 @@ const closeUp = (month: string) => {
  return { ...p, style: `--r:${(p.height / p.width).toFixed(4)};--mx0:${p.mobile.x0};--mw:${(p.mobile.x1 - p.mobile.x0).toFixed(3)};--my0:${p.mobile.y0}` };
 };
 ---
-<PublicLayout fullTitle={`Family Meeting Club · ${BRAND_NAME}`} description="One weekly family meeting. More hands helping. Fewer reminders. Personalized monthly guidance, printed and mailed to your family." indexable={false} chrome={false} width="full" tracking={false}>
-<div class="club">
-<main>
 
-<section class="hero inset" id="start"><div class="surface hero-inner">
- <div class="hero-copy">
+<PublicLayout fullTitle={`Family Meeting Club · ${BRAND_NAME}`} description="A personalized printed family resource every month, plus a simple weekly meeting guide to help your family do its part." indexable={false} chrome={false} width="full" tracking={false}>
+<div class="club">
+<header class="ofc-nav">
+ <div class="ofc-nav-inner">
+  <a class="brand" href="/" aria-label="Organized Mom Collective home">
+   <img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="Family Meeting Club by Organized Mom Collective" width="2027" height="570"/>
+  </a>
+  <nav aria-label="Club navigation"><a href="#what-you-get">What You Get</a><a href="#how-it-works">How It Works</a><a href="#monthly-topics">Monthly Topics</a><a href="#faq">FAQ</a></nav>
+  <a class="button nav-cta" href="#offer">{ctaLabel}</a>
+ </div>
+</header>
+<main>
+<section class="ofc-hero" id="start">
+ <div class="ofc-hero-copy">
   <p class="eyebrow">FAMILY MEETING CLUB</p>
   <h1>Your family shouldn't depend on you <em>for everything.</em></h1>
-  <p class="hero-sub">One weekly meeting. <em>More hands helping. Fewer reminders.</em></p>
-  <p class="storybrand-hero-note">Personalized family plans, prepared for you and mailed to your door.</p>
-  
-  <div class="hero-actions"><a class="primary cta-lime" href="#offer">{ctaLabel} <span aria-hidden="true">→</span></a><a class="text-cta" href="#how-it-works">See how it works ↓</a></div>
-  
+  <p class="hero-explain">One personalized family resource mailed every month. One simple weekly meeting to help everyone do their part.</p>
+  <a class="button hero-cta" href="#offer">{ctaLabel} <span aria-hidden="true">→</span></a>
+  <p class="hero-terms">{joinOpen ? 'Your first month is free. $5.90/month after. Cancel anytime.' : 'Enrollment opens soon. $5.90/month is the proposed price.'}</p>
  </div>
- <figure class="hero-photo"><img src={clubHeroUrl} alt="Family gathered around a kitchen table looking together at a printed family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
- <div class="hero-seam-badge" aria-hidden="true"><img src={clubBadgeUrl} alt="" width="120" height="120" loading="eager" /></div>
-</div></section>
+ <div class="ofc-hero-visual"><img src={clubHeroUrl} width="1200" height="900" alt="Family gathered around the table with their family plan" loading="eager" fetchpriority="high"/></div>
+</section>
 
+<section class="ofc-products" id="what-you-get" aria-labelledby="what-heading">
+ <div class="products-surface">
+  <h2 id="what-heading">Here's what you get <em>every month.</em></h2>
+  <div class="products-grid">
+   <article class="product-piece">
+    <div class="paper-image"><img src={kitPreviews.find(k => k.month === 'March')!.image} alt="Example of the March family chore chart resource" width="1080" height="1080" loading="lazy"/></div>
+    <div class="piece-copy"><span class="pill">A PERSONALIZED FAMILY RESOURCE</span><h3>One problem. One ready-to-use tool.</h3><p>Chores, laundry, dinner, or summer routines, with your family's names, ages, and responsibilities worked in. Printed and mailed to you.</p></div>
+   </article>
+   <div class="product-plus" aria-hidden="true">+</div>
+   <article class="product-piece">
+    <div class="paper-image paper-blue"><img src={kitPreviews.find(k => k.month === 'January')!.image} alt="Example of the January Family Meeting printed resource" width="1080" height="1080" loading="lazy"/></div>
+    <div class="piece-copy"><span class="pill">A WEEKLY FAMILY MEETING GUIDE</span><h3>Ten minutes to put it to work.</h3><p>Four simple parts to help everyone talk, choose one thing to try, and take responsibility together.</p></div>
+   </article>
+  </div>
+  <p class="products-foot">Made for your family. No blank pages to figure out.</p>
+ </div>
+</section>
 
-
-
-<section class="ofc-band ofc-problem" aria-labelledby="ofc-problem-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">SOUND FAMILIAR?</p><h2 id="ofc-problem-title">You're not just doing everything. <em>You're remembering everything.</em></h2></div>
-  <div class="ofc-problem-right">
-   <div class="ofc-mom-cards">
-    <div class="ofc-mom-card"><span class="ofc-card-emoji" aria-hidden="true">💧</span><strong>“Mom, where's my water bottle?”</strong><small>Five minutes before leaving.</small></div>
-    <div class="ofc-mom-card"><span class="ofc-card-emoji" aria-hidden="true">🍽️</span><strong>“What's for dinner?”</strong><small>Again. From everyone.</small></div>
-    <div class="ofc-mom-card"><span class="ofc-card-emoji" aria-hidden="true">🎒</span><strong>“Who's taking me to practice?”</strong><small>With the whole week to juggle.</small></div>
-   </div>
-   <p class="ofc-takeaway">Even when everyone helps, you're still the one keeping track of it all.</p>
+<section class="ofc-how" id="how-it-works" aria-labelledby="how-heading">
+ <div class="container">
+  <h2 id="how-heading">A simple way to get <em>everyone involved.</em></h2>
+  <div class="steps">
+   <article><span class="step-number">1</span><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><rect x="9" y="19" width="46" height="35" rx="5"/><path d="M9 27h46M20 9v16M44 9v16M20 38h8m8 0h8M20 46h8"/></svg></div><h3>Get your monthly resource.</h3><p>We personalize it, print it, and mail it to your door.</p></article>
+   <article><span class="step-number">2</span><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><circle cx="21" cy="20" r="7"/><circle cx="43" cy="20" r="7"/><circle cx="32" cy="12" r="7"/><path d="M7 48c1-12 10-18 19-15m31 15c-1-12-10-18-19-15M19 49c1-12 7-18 13-18s12 6 13 18"/></svg></div><h3>Meet for 10 minutes each week.</h3><p>Talk, plan, and pick one small thing to try together.</p></article>
+   <article><span class="step-number">3</span><div class="step-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><rect x="13" y="12" width="38" height="42" rx="5"/><path d="m21 32 8 8 17-19"/></svg></div><h3>See your family take on more.</h3><p>Little by little, everyone learns to do their part, with fewer reminders from you.</p></article>
   </div>
  </div>
 </section>
 
-<section class="ofc-band ofc-outcome" aria-labelledby="ofc-outcome-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">WHAT COULD CHANGE</p><h2 id="ofc-outcome-title">Imagine not having to remind everyone. <em>All. Day. Long.</em></h2></div>
-  <div>
-   <div class="ofc-before-after">
-    <div class="ofc-compare-card is-before"><span class="ofc-card-tag">TODAY</span><p>Mom remembers the schedule.</p><p>Mom reminds everyone.</p><p>Kids wait to be told.</p></div>
-    <span class="ofc-compare-arrow" aria-hidden="true">→</span>
-    <div class="ofc-compare-card is-after"><span class="ofc-card-tag">WHERE WE'RE HEADED</span><p>Everyone can see what's coming.</p><p>Everyone knows their part.</p><p>Kids start taking initiative.</p></div>
-   </div>
-   <p class="ofc-takeaway">Not perfectly. Not overnight. But little by little, you start hearing <strong>“I've got it.”</strong></p>
+<section class="ofc-months" id="monthly-topics" aria-labelledby="months-heading">
+ <div class="months-layout container">
+  <div class="months-intro"><h2 id="months-heading">One family challenge <em>each month.</em></h2><p>Practical, real-life tools that help your family handle more together.</p></div>
+  <div class="months-cards">
+   {[
+     {month:months[0],description:"Get everyone on the same page."},
+     {month:months[1],description:"Laundry isn't all on you."},
+     {month:months[2],description:"Chores without the nagging."},
+     {month:months[3],description:"Dinner isn't all on you."},
+     {month:months[4],description:"Summer days without constant questions."}
+   ].map(({month,description},i)=><div class="month-card"><span class="month-name">{month.month}</span><p>{description}</p><img src={month.icon} alt="" loading="lazy" width="92" height="92"/></div>)}
   </div>
  </div>
 </section>
 
-<section class="ofc-band ofc-personal" id="sample-plan" aria-labelledby="ofc-personal-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">MADE FOR YOUR FAMILY</p><h2 id="ofc-personal-title">Your kids. Your schedules. <em>Your actual life.</em></h2><p>Tell us who's in your family and what's hard right now. We prepare a plan with names, ages, and realistic responsibilities already worked in.</p></div>
-  <div class="ofc-personal-flow">
-   <div class="ofc-personal-input"><span class="ofc-card-tag">THEIR ANSWERS</span><strong>The Rivera family</strong><span>Sofia, 10</span><span>Mateo, 7</span><span>Elena, 4</span><small>Hard right now: busy evenings</small></div>
-   <span class="ofc-compare-arrow" aria-hidden="true">→</span>
-   <div class="ofc-personal-output"><span class="ofc-card-tag">THEIR PLAN</span><strong>Our family's focus</strong><p>Easier evenings</p><div><span>Sofia</span><small>Get tomorrow's school things ready</small></div><div><span>Mateo</span><small>Put pajamas out before bath</small></div><div><span>Everyone</span><small>Choose one small thing to practice</small></div></div>
-   <a class="ofc-link" href="/app/club/january/?sample=rivera">See the sample family plan <span aria-hidden="true">→</span></a>
+<section class="ofc-founder" aria-labelledby="founder-heading">
+ <div class="container founder-layout">
+  <img class="founder-photo" src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" width="460" height="460" loading="lazy"/>
+  <div class="founder-copy"><h2 id="founder-heading">Hi, I'm Megan.</h2><p>We created Family Meeting Club because we want our kids to grow into capable people, without Mom having to manage every little thing along the way.</p><p>You don't need another parenting project. You need an easy way to get everyone involved.</p><p class="signature">Megan <span>Co-creator, Organized Mom Collective</span></p></div>
+ </div>
+</section>
+
+<section class="ofc-offer" id="offer" aria-labelledby="offer-heading">
+ <div class="container offer-layout">
+  <div class="offer-summary"><p class="eyebrow">YOUR MEMBERSHIP</p><h2 id="offer-heading">Ready to lighten <em>your mental load?</em></h2><p>One personalized resource mailed every month, plus a simple weekly meeting guide.</p><ul><li>Prepared using your family's details</li><li>Printed and mailed to your door</li><li>Digital access to review and reprint</li></ul></div>
+  <div class="price-card"><img class="club-brand-wordmark" src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width="2027" height="570" loading="lazy" decoding="async" /><h3>{joinOpen ? CLUB_OFFER : 'One simple monthly delivery.'}</h3>{joinOpen && <p class="offer-free-summary">{founding ? "January’s plan and your Family Vision welcome print are free." : "Your first personalized printed plan is free."}</p>}<div class="founding-price-label">FOUNDING FAMILY PRICE</div><div class="price">$5.90 <span>/ month</span></div><p class="founding-price-lock">✓ Keep your $5.90 rate while subscribed.</p>{joinOpen ? <><p class="fineprint">{founding ? `First charge: ${CLUB_PROGRAM_START.foundingFirstCharge}. Cancel before then and pay nothing.` : 'First charge one month after joining. Cancel anytime.'}</p><button type="button" class="primary" id="club-checkout" hidden>Get My First Month Free →</button><div data-checkout-closed><p class="fineprint" data-checkout-checking>Checking enrollment…</p><a class="primary" href="/support" hidden>Ask About Early Access →</a></div><p class="checkout-error" id="club-checkout-error" role="alert" hidden></p><small>Secure checkout with Stripe.</small><small class="block mt-1" data-household-disclosure>{founding ? 'One free first month per household. A household that already had one starts January 1, 2027, with $5.90 charged that day.' : 'One free first month per household. A household that already had one is charged $5.90 today.'}</small></> : <><p class="fineprint">Proposed pricing. Enrollment isn't open yet while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask.</small></>}</div>
+ </div>
+</section>
+
+<section class="ofc-faq" id="faq" aria-labelledby="faq-heading">
+ <div class="container faq-layout">
+  <h2 id="faq-heading">A few quick <em>questions.</em></h2>
+  <div class="faq-list">
+   {faqs.filter(([q])=>['How is this different from printables or a chore chart?','How much time does it take?','Will this work with young kids?','Is this another app I need to manage?','Do I need a printer or your wall calendar?','Can I subscribe or cancel right now?'].includes(q)).map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}
   </div>
  </div>
 </section>
-
-<section class="ofc-band ofc-meeting" id="how-it-works" aria-labelledby="ofc-meeting-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">START SMALL</p><h2 id="ofc-meeting-title">Ten minutes together. <em>One small thing to try.</em></h2></div>
-  <div>
-   <div class="ofc-meeting-steps">
-    <div><span class="ofc-step-icon" aria-hidden="true">◎</span><strong>Our Focus</strong><small>What matters this week?</small></div>
-    <div><span class="ofc-step-icon" aria-hidden="true">☏</span><strong>Let's Talk</strong><small>What's working? What's hard?</small></div>
-    <div><span class="ofc-step-icon" aria-hidden="true">✓</span><strong>Everyone's Part</strong><small>Who can take responsibility?</small></div>
-    <div><span class="ofc-step-icon" aria-hidden="true">✳</span><strong>Let's Practice</strong><small>How will we do it?</small></div>
-   </div>
-   <p class="ofc-takeaway">Choose one thing someone else can start taking responsibility for this week.</p>
-  </div>
- </div>
-</section>
-
-<section class="ofc-band ofc-ease" aria-labelledby="ofc-ease-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">LESS WORK FOR MOM</p><h2 id="ofc-ease-title">We make the plan. <em>You don't start from scratch.</em></h2></div>
-  <div class="ofc-ease-content">
-   <div class="ofc-ease-points"><div><span aria-hidden="true">✕</span>No searching for another chore chart.</div><div><span aria-hidden="true">✕</span>No blank worksheets to fill in.</div><div><span aria-hidden="true">✕</span>No new app to manage every day.</div></div>
-   <p class="ofc-ease-conclusion">We prepare the plan. Your family brings it to the table. <strong>Less planning for you. More ownership for them.</strong></p>
-  </div>
- </div>
-</section>
-
-<section class="ofc-band ofc-months" id="months" aria-labelledby="ofc-months-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">A LITTLE AT A TIME</p><h2 id="ofc-months-title">One little change this month. <em>Another next month.</em></h2></div>
-  <div class="ofc-months-content">
-   <div class="ofc-month-grid">
-    <div><span>JANUARY</span><img src={months[0].icon} alt="" loading="lazy"/><p>Everyone starts looking ahead together.</p></div>
-    <div><span>FEBRUARY</span><img src={months[1].icon} alt="" loading="lazy"/><p>Kids learn to handle their laundry.</p></div>
-    <div><span>MARCH</span><img src={months[2].icon} alt="" loading="lazy"/><p>Everyone knows which cleaning jobs are theirs.</p></div>
-    <div><span>APRIL</span><img src={months[3].icon} alt="" loading="lazy"/><p>Dinner isn't all on you.</p></div>
-    <div><span>MAY</span><img src={months[4].icon} alt="" loading="lazy"/><p>Kids know what to do next on summer days.</p></div>
-   </div>
-   <p class="ofc-month-foot">A new, personalized resource each month, with a fresh focus for your family.</p>
-  </div>
- </div>
-</section>
-
-<section class="ofc-band ofc-founder" aria-labelledby="ofc-founder-title">
- <div class="container ofc-founder-inner">
-  <img src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" width="460" height="460" loading="lazy"/>
-  <div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2 id="ofc-founder-title">From our family <em>to yours.</em></h2><p>Hi, I'm Megan. The missing shoes. The forgotten backpack. The questions that always come back to Mom.</p><p>We created Family Meeting Club because you don't need another parenting project. You need a simple way to get everyone involved.</p><strong>Megan <small>Co-creator, Organized Mom Collective</small></strong></div>
- </div>
-</section>
-
-<section class="ofc-band ofc-offer" id="offer" aria-labelledby="ofc-offer-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">THE CLUB</p><h2 id="ofc-offer-title">A little less on your plate <em>starts here.</em></h2></div>
-  <div class="ofc-offer-content">
-   <div class="ofc-included"><p class="ofc-offer-strap">One small monthly delivery. Made for your family.</p><ul><li>A personalized printed family resource mailed each month</li><li>A ready-to-use weekly Family Meeting guide</li><li>Plans matched to your kids' ages, routines, and challenges</li><li>Digital access to review, adjust, or reprint</li></ul></div>
-   <div class="price-card"><img class="club-brand-wordmark" src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width="2027" height="570" loading="lazy" decoding="async" /><h3>{joinOpen ? CLUB_OFFER : 'One simple monthly delivery.'}</h3>{joinOpen && <p class="offer-free-summary">{founding ? "January’s plan and your Family Vision welcome print are free." : "Your first personalized printed plan is free."}</p>}<div class="founding-price-label">FOUNDING FAMILY PRICE</div><div class="price">$5.90 <span>/ month</span></div><p class="founding-price-lock">✓ Keep your $5.90 rate while subscribed.</p>{joinOpen ? <><p class="fineprint">{founding ? `First charge: ${CLUB_PROGRAM_START.foundingFirstCharge}. Cancel before then and pay nothing.` : 'First charge one month after joining. Cancel anytime.'}</p><button type="button" class="primary" id="club-checkout" hidden>Get My First Month Free →</button><div data-checkout-closed><p class="fineprint" data-checkout-checking>Checking enrollment…</p><a class="primary" href="/support" hidden>Ask About Early Access →</a></div><p class="checkout-error" id="club-checkout-error" role="alert" hidden></p><small>Secure checkout with Stripe.</small><small class="block mt-1" data-household-disclosure>{founding ? 'One free first month per household. A household that already had one starts January 1, 2027, with $5.90 charged that day.' : 'One free first month per household. A household that already had one is charged $5.90 today.'}</small></> : <><p class="fineprint">Proposed pricing. Enrollment isn't open yet while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask.</small></>}</div>
-  </div>
- </div>
-</section>
-
-<section class="ofc-band ofc-faq" id="faq" aria-labelledby="ofc-faq-title">
- <div class="container ofc-split">
-  <div class="ofc-section-heading"><p class="eyebrow">GOOD QUESTIONS</p><h2 id="ofc-faq-title">A few questions <em>before you start.</em></h2></div>
-  <div class="ofc-faq-list">
-   {faqs.slice(0, 8).map(([question, answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}
-  </div>
- </div>
-</section>
-
-<section class="ofc-closing inset"><div class="ofc-closing-inner">
- <h2>You don't have to be <em>everyone's reminder.</em></h2>
- <p>One weekly meeting. More hands helping. Fewer reminders.</p>
- <a href="#offer" class="primary">{ctaLabel} →</a>
-</div></section>
 </main>
+
 <footer class="footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>
 </div>
+
 
 <script>
  // The offer button opens Stripe Checkout directly: Stripe collects her email, card and mailing address.
@@ -307,676 +266,110 @@ const closeUp = (month: string) => {
  // Back from Stripe (the page restored from the back/forward cache): the button works again.
  addEventListener('pageshow', (e) => { if (e.persisted) resetCheckout(); });
 </script>
+
 <style>
-/* Club landing (/club-2): the /club palette, type and inset gray surfaces, in one stylesheet. */
-.club{--ink:#4d4544;--muted:#6e6461;--line:#e7ddd4;--gray:#f1f2f2;--sage-ink:#697d65;--rose:#b77b82;--rose-ink:#955b63;--lime:#c2f6aa;--dark:#545454;color:var(--ink);background:#fff;font-family:'Montserrat Variable',Montserrat,sans-serif;line-height:1.55}
+.club{--ink:#4e4a47;--sage:#657c5f;--sage-light:#D4DFC4;--sky:#CDDDE1;--blush:#E8D2D6;--peach:#F1D8A8;--ivory:#FBF7F1;--rose:#D8B79F;box-sizing:border-box;background:#fff;color:var(--ink);font:400 15px/1.5 'Montserrat Variable',Montserrat,sans-serif}
 .club *{box-sizing:border-box}
-.club h1,.club h2,.club h3,.club blockquote{font-family:"Georgia Pro",Georgia,serif;font-weight:400;letter-spacing:-.025em;line-height:1.12;margin:0}
-.club h2{font-size:clamp(2rem,3vw,3.25rem);text-wrap:balance}
-.club h3{font-size:1.55rem}
-.club h1 em,.club h2 em{font-style:italic;font-weight:400;color:var(--sage-ink)}
+.club [hidden]{display:none!important}
+.club h1,.club h2,.club h3{font-family:"Georgia Pro",Georgia,serif;font-weight:400;letter-spacing:-.025em;line-height:1.12}
+.club h2{font-size:clamp(2rem,3.1vw,3.35rem);margin:0}
+.club h2 em,.club h1 em{font-weight:400;font-style:italic}
+.club h3{margin:0;font-size:clamp(1.2rem,1.6vw,1.55rem)}
 .club p{margin:0}
 .club a{color:inherit}
-.club [hidden]{display:none!important}
-.container{max-width:1200px;margin:0 auto;padding-inline:24px}
-.eyebrow{font-size:.68rem;letter-spacing:.11em;font-weight:750;color:var(--rose-ink);margin-bottom:14px!important}
-.primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:15px 26px;border:0;border-radius:2px;background:var(--dark);color:#fff!important;text-decoration:none;font-size:.95rem;font-weight:750;cursor:pointer;transition:background .15s}
-.primary:hover{background:#3d3834}
-.primary:focus-visible,.text-cta:focus-visible,.family-tabs button:focus-visible,.phone-screen:focus-visible,.faq summary:focus-visible{outline:3px solid #6f8f6a;outline-offset:3px}
-.cta-lime{background:var(--lime);color:#303831!important}
-.cta-lime:hover,.cta-lime:focus-visible{background:#a9e991}
-.text-cta{font-size:.86rem;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:4px}
-.inset{padding:28px clamp(16px,2.4vw,36px) 46px}
-.surface{max-width:1504px;margin-inline:auto;background:var(--gray)}
-
-/* Hero: copy left, full-bleed family photo right (as /club). */
-.hero{padding-top:28px}
-.hero-inner{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:clamp(540px,43vw,700px)}
-.hero-copy{align-self:center;padding:clamp(38px,5.4vw,90px)}
-.hero h1{font-size:clamp(2.35rem,3.15vw,3.8rem);line-height:1.1;margin:0 0 20px}
-.hero h1 em{color:var(--rose-ink)}
-.hero-sub{font:400 clamp(1.3rem,1.75vw,1.65rem)/1.35 Georgia,serif;color:var(--ink);max-width:520px}
-.hero-sub em{font-style:italic;color:var(--sage-ink)}
-.hero-seam-badge{position:absolute;z-index:5;left:50%;top:24px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;width:124px;height:124px;padding:7px;border-radius:50%;background:var(--gray);pointer-events:none}
-.hero-seam-badge img{width:66.6667%;height:66.6667%;object-fit:contain;border-radius:50%}
-.hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-top:28px}
-.hero-actions .primary{min-height:58px;padding:17px 30px;font-size:1rem}
-.hero-rating{display:flex;flex-wrap:wrap;align-items:center;gap:8px 13px;margin-top:16px}
-.hero-rating img{width:clamp(130px,12.67vw,159px);height:auto;display:block}
-.hero-rating span{font-size:.69rem;color:var(--muted)}
-.hero-photo{position:relative;margin:0;overflow:hidden}
-.hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-
-/* Problem: the mental load, then the turn to shared thinking. */
-.problem{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(32px,6vw,96px);align-items:end;padding-top:clamp(56px,7vw,100px);padding-bottom:clamp(56px,7vw,96px)}
-.problem h2{margin-bottom:20px}
-.problem-copy>p:last-child{font-size:1.05rem;line-height:1.75;color:var(--muted);max-width:560px}
-.problem-turn{border-top:1px solid var(--rose);padding-top:24px}
-.problem-big{font:400 clamp(1.4rem,2.1vw,1.9rem)/1.3 Georgia,serif;margin-bottom:16px!important}
-.problem-big em{color:var(--rose-ink)}
-.problem-turn>p:last-child{line-height:1.75;color:var(--muted)}
-
-/* Product introduction: real monthly tools laid out like prints on a table. */
-.product-intro{padding-bottom:clamp(48px,6vw,88px)}
-.intro-head{max-width:860px;text-align:center}
-.intro-head h2{margin-bottom:16px}
-.intro-head>p:last-child{font-size:1.02rem;line-height:1.7;color:var(--muted);max-width:720px;margin-inline:auto}
-.intro-spread{list-style:none;display:flex;justify-content:center;max-width:1360px;margin:36px auto 0;padding:clamp(28px,3vw,44px) clamp(16px,3vw,48px) clamp(20px,2.4vw,32px);background:#f6f3ee}
-.intro-item{flex:1 1 0;min-width:0;margin:0 -1.4%;text-align:center;position:relative}
-.intro-open{position:absolute;inset:0;z-index:2;width:100%;border:0;background:transparent;cursor:zoom-in}
-.intro-open:focus-visible{outline:3px solid #6f8f6a;outline-offset:2px}
-.intro-item:hover .intro-label{text-decoration:underline;text-underline-offset:4px}
-.intro-pic{display:block}
-.intro-item img{display:block;width:100%;height:auto;aspect-ratio:1;mix-blend-mode:multiply}
-.intro-item:nth-child(1) img{transform:rotate(-2.5deg) translateY(14px) scale(1.1)}
-.intro-item:nth-child(2) img{transform:rotate(1.5deg) scale(1.1)}
-.intro-item:nth-child(3) img{transform:rotate(-1deg) translateY(20px) scale(1.1)}
-.intro-item:nth-child(4) img{transform:rotate(2deg) translateY(4px) scale(1.1)}
-.intro-item:nth-child(5) img{transform:rotate(-1.8deg) translateY(12px) scale(1.1)}
-.intro-month{margin-top:10px!important}
-.intro-month span{display:inline-block;padding:4px 10px;font-size:.6rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:#354f42}
-.intro-label{font:400 clamp(1.05rem,1.35vw,1.3rem)/1.3 Georgia,serif;color:var(--ink);margin:8px auto 0!important;max-width:15ch}
-.intro-swipe{display:none}
-.intro-bridge{text-wrap:balance;max-width:820px;margin:34px auto 0!important;padding-inline:24px;text-align:center;font:400 clamp(1.5rem,2.3vw,2.1rem)/1.3 Georgia,serif;color:var(--ink)}
-.intro-bridge em{color:var(--rose-ink)}
-.intro-spread:focus-visible{outline:3px solid #6f8f6a;outline-offset:-3px}
-
-/* Hero: what the membership includes, in one compact line. */
-.hero-includes{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.76rem;font-weight:700;color:#526b54}
-.hero-includes li{display:flex;align-items:center;gap:7px}
-.hero-includes li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--rose)}
-
-/* The demo: three families, the phone Family Meeting plan beside the real May page (side by side, locked in). */
-.demo{padding-top:0}
-.demo-surface{position:relative;padding:clamp(40px,5vw,80px) clamp(18px,4vw,64px) clamp(32px,4vw,56px)}
-.demo-head{max-width:820px;margin:0 auto;text-align:center}
-.demo-head h2{margin-bottom:16px}
-.demo-head>p:not(.eyebrow){font-size:1.02rem;line-height:1.7;color:var(--muted)}
-.demo-head>p.demo-sub{font:400 clamp(1.3rem,1.8vw,1.6rem)/1.35 Georgia,serif;color:var(--ink)}
-.tabs-label{margin:30px auto 10px!important;text-align:center;font-size:.68rem;font-weight:750;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
-.family-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:820px;margin:0 auto 36px}
-.family-tabs button{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;min-height:64px;padding:12px 16px;border:1px solid #d9d9d4;border-radius:2px;background:#fff;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s}
-.family-tabs button:hover{border-color:#9aab8f}
-.family-tabs button[aria-selected=true]{border-color:var(--dark);box-shadow:inset 0 -3px 0 var(--dark)}
-.tab-dots{grid-row:1/3;display:flex}
-.tab-dots i{width:12px;height:12px;border-radius:50%;border:2px solid #fff;margin-left:-4px}
-.tab-dots i:first-child{margin-left:0}
-.family-tabs strong{font-size:.88rem}
-.family-tabs small{font-size:.72rem;color:var(--muted)}
-.family-panel{display:grid;grid-template-columns:1fr;gap:44px;max-width:1180px;margin:0 auto}
-.family-panel:not([hidden]){animation:panel-in .35s ease-out}
-@keyframes panel-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
-.stage{min-width:0;display:grid;grid-template-columns:minmax(250px,320px) minmax(0,640px);grid-template-areas:"plabel slabel" "phone sheet";justify-content:center;align-items:center;column-gap:clamp(36px,5.5vw,96px);row-gap:20px}
-.stage-label{align-self:end;justify-self:center;display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:750;color:var(--ink)}
-.stage-label b{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:#dfe7d8;color:#3f5a40;font-size:.8rem}
-.stage-label-plan{grid-area:plabel}
-.stage-label-print{grid-area:slabel}
-.demo-included{display:flex;align-items:center;justify-content:center;margin:-16px auto 0!important;font-size:.92rem;font-weight:700;color:var(--ink)}
-.sheet{grid-area:sheet;container-type:inline-size;width:100%;max-width:640px;background:#fff;border:1px solid #e2e7df;box-shadow:0 2px 4px #0000000a,0 24px 50px -20px #3c463540;padding:clamp(14px,4.4%,38px) clamp(14px,5.6%,48px) clamp(10px,2.8%,23px);color:#464e44;display:flex;flex-direction:column}
-.sheet-head{background:#e4eddc;border-top:max(5px,1.1cqw) solid #cbdcbf;padding:2.4cqw 3.4cqw 2.6cqw}
-.sheet-head>span{font-size:clamp(7px,1.25cqw,10px);letter-spacing:.15em;font-weight:700;color:#526849}
-.sheet-head h3{font:400 clamp(26px,6.1cqw,50px)/1.1 Georgia,serif;color:#3f5a40;margin:1.2cqw 0 .8cqw;letter-spacing:-.01em}
-.sheet-head h3 em{font-style:normal}
-.sheet-head p{font:italic clamp(12px,2.1cqw,17px) Georgia,serif;color:#587052}
-.sheet-family{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 12px;margin:2.3cqw 0 1.5cqw;font-size:clamp(8px,1.25cqw,10px);font-weight:700;letter-spacing:.12em;color:#687866}
-.sheet-people{display:flex;flex-wrap:wrap;gap:3px 10px;letter-spacing:.04em}
-.sheet-people span,.sheet-name{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-.sheet-people i,.sheet-name i{width:clamp(7px,1.1cqw,9px);height:clamp(7px,1.1cqw,9px);border-radius:50%;flex:none}
-.sheet-name{font-weight:700;color:#4d564b}
-.sheet-rows{display:flex;flex-direction:column;gap:max(5px,1cqw)}
-.sheet-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:max(8px,1.5cqw);min-height:max(50px,10.5cqw);padding:.6cqw 2cqw .6cqw .9cqw;border:1px solid #e4e8e0;border-radius:max(6px,1.1cqw);background:linear-gradient(90deg,var(--tint) 0%,#fff 88%)}
-.sheet-icon{width:max(38px,8.6cqw);height:max(38px,8.6cqw);border-radius:max(5px,1cqw);background:var(--tint);display:flex;align-items:center;justify-content:center}
-.sheet-icon img{width:86%;height:86%;object-fit:contain;mix-blend-mode:multiply}
-.sheet-copy{min-width:0}
-.sheet-copy strong{display:block;font:400 clamp(14px,2.9cqw,24px)/1.1 Georgia,serif;color:#455644;margin-bottom:.6cqw}
-.sheet-copy>span{display:block;font-size:clamp(10.5px,1.95cqw,13px);line-height:1.45;color:#5d685b}
-.sheet-time{font-size:clamp(15px,3.6cqw,29px);font-weight:800;letter-spacing:-.05em;color:#577350;font-variant-numeric:tabular-nums;text-align:right}
-.sheet-rule{background:#edf3e9;border-radius:max(5px,.9cqw);margin-top:2cqw;padding:1.8cqw;text-align:center}
-.sheet-rule span{display:block;font-size:clamp(7px,1.1cqw,9px);letter-spacing:.13em;font-weight:700;color:#687c61}
-.sheet-rule strong{display:block;font:400 clamp(14px,2.7cqw,22px) Georgia,serif;color:#3e5e3f;margin:.6cqw 0}
-.sheet-rule p{font-size:clamp(9px,1.35cqw,11px);color:#647960}
-.sheet-foot{display:flex;justify-content:space-between;border-top:1px solid #dfe6dc;margin-top:2.4cqw;padding-top:1.1cqw;font-size:clamp(7px,1.1cqw,9px);letter-spacing:.1em;font-weight:700;color:#687964}
-
-.phone{grid-area:phone;position:relative;justify-self:center;width:100%;max-width:320px;height:clamp(600px,50vw,730px);padding:10px;border-radius:44px;background:linear-gradient(145deg,#3a3a3c,#1c1c1e 40%,#2c2c2e);box-shadow:0 0 0 1.5px #545456,0 30px 60px -18px #1f2a2080,0 12px 24px -12px #00000059}
-.phone::before,.phone::after{content:"";position:absolute;width:3px;border-radius:2px;background:#2c2c2e}
-.phone::before{left:-3px;top:110px;height:54px;box-shadow:0 70px 0 #2c2c2e}
-.phone::after{right:-3px;top:150px;height:80px}
-.phone-screen{position:relative;height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;border-radius:35px;background:#fbfaf7;padding:0 16px 34px;color:#433c3b;-webkit-mask-image:linear-gradient(#000 calc(100% - 34px),transparent);mask-image:linear-gradient(#000 calc(100% - 34px),transparent)}
-.phone-screen::-webkit-scrollbar{display:none}
-.phone-status{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;margin:0 -16px 6px;padding:12px 22px 8px;background:#fbfaf7;font-size:11px;font-weight:700}
-.phone-island{width:76px;height:22px;border-radius:12px;background:#111}
-.phone-icons{display:flex;gap:3px;align-items:flex-end}
-.phone-icons i{width:3px;background:#433c3b;border-radius:1px}
-.phone-icons i:nth-child(1){height:5px}.phone-icons i:nth-child(2){height:8px}.phone-icons i:nth-child(3){width:16px;height:8px;border-radius:2px;margin-left:3px}
-.phone-kicker{font-size:8.5px;font-weight:800;letter-spacing:.14em;color:var(--rose-ink)}
-.phone-screen h3{font-size:23px;margin:4px 0 9px;color:#3e3736}
-.phone-people{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:5px}
-.phone-people li{display:inline-flex;align-items:center;gap:5px;padding:3px 8px 3px 6px;border:1px solid #e4e0da;border-radius:20px;background:#fff;font-size:10.5px;font-weight:650}
-.phone-people i,.phone-parts i{width:9px;height:9px;border-radius:50%;flex:none}
-.phone-adults i{background:#fff;border:1.5px solid #8a8580}
-.phone-card{background:#fff;border:1px solid #ece8e2;border-radius:10px;padding:9px 11px;margin-bottom:7px}
-.phone-card>span{display:block;font-size:8px;font-weight:800;letter-spacing:.13em;color:#7a8d74;margin-bottom:4px}
-.phone-card p{font-size:11.5px;line-height:1.45}
-.phone-goal{background:#eef4ea;border-color:#dce7d6}
-.phone-goal strong{display:block;font:400 15px/1.25 Georgia,serif;color:#3f5a40;margin-bottom:2px}
-.phone-parts{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.phone-parts li{display:grid;grid-template-columns:9px 1fr;gap:7px;align-items:start}
-.phone-parts i{margin-top:4px}
-.phone-parts p{font-size:11px;line-height:1.42}
-.phone-parts b{font-weight:750;margin-right:2px}
-.phone-talk p{font:italic 12.5px/1.4 Georgia,serif;color:#4d4544}
-.phone-review{display:flex;gap:6px;margin-top:9px}
-.phone-review span{flex:1;text-align:center;font-size:10px;font-weight:750;padding:8px 4px;border:1px solid #d6d2cc;border-radius:6px;background:#fff}
-.phone-review .phone-approve{background:var(--lime);border-color:var(--lime);color:#2f4630}
-
-.why .eyebrow{color:var(--sage-ink)}
-.why{max-width:1040px;width:100%;margin:0 auto}
-.why .eyebrow{text-align:center}
-.why ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px}
-.why ul li{display:grid;gap:3px;align-content:start;padding:14px 0;border-top:1px solid #d6d6d0}
-.why ul li b{font:400 1.2rem/1.25 Georgia,serif;color:var(--ink)}
-.why ul li span{font-size:.88rem;line-height:1.55;color:var(--muted)}
-.why ul li span::before{content:"→ ";color:var(--rose)}
-.demo-disclaimer{max-width:760px;margin:32px auto 0!important;text-align:center;font-size:.72rem;line-height:1.5;color:var(--muted)}
-
-/* How it works */
-.how{padding-top:clamp(56px,7vw,100px);padding-bottom:clamp(56px,7vw,96px)}
-.how h2{max-width:820px}
-.steps{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px}
-.steps li{display:flex;flex-direction:column}
-.steps b{font:italic 1.8rem Georgia,serif;color:var(--sage-ink);margin-top:18px}
-.steps h3{margin:6px 0 6px;font-size:clamp(1.4rem,1.8vw,1.7rem)}
-.steps p{line-height:1.6;color:var(--muted)}
-.step-visual{height:190px;background:var(--gray);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;overflow:hidden}
-.sv-kicker{font-size:.6rem;font-weight:800;letter-spacing:.13em;color:#7a8d74}
-.sv-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px 4px 8px;border:1px solid #e4e0da;border-radius:20px;background:#fff;font-size:.78rem;font-weight:650}
-.sv-chip i{width:9px;height:9px;border-radius:50%}
-.sv-tags{display:flex;gap:6px;margin-top:4px}
-.sv-tags span{font-size:.66rem;font-weight:700;padding:3px 8px;background:#e4e8df;color:#4d5a4b}
-.step-review strong{display:block;max-width:240px;padding:12px 16px;background:#eef4ea;border:1px solid #dce7d6;border-radius:8px;font:400 1.15rem/1.25 Georgia,serif;color:#3f5a40;text-align:center}
-.sv-buttons{display:flex;gap:6px}
-.sv-buttons span{font-size:.72rem;font-weight:750;padding:7px 14px;border:1px solid #d6d2cc;border-radius:6px;background:#fff}
-.sv-buttons .sv-keep{background:var(--lime);border-color:var(--lime);color:#2f4630}
-.step-mail{padding:0;background:#f6f3ee}
-.step-mail{justify-content:flex-start}
-.step-mail img{width:86%;height:auto;margin-top:6%;mix-blend-mode:multiply;transform:rotate(-2deg)}
-
-/* What changes (inside How it works) */
-.change-title{margin-top:clamp(56px,7vw,88px)!important;font-size:clamp(1.9rem,2.8vw,2.8rem)}
-.change-title em{font-style:italic;color:var(--sage-ink)}
-.change-table{margin-top:22px;border-top:1px solid var(--line)}
-.change-table>div{display:grid;grid-template-columns:180px minmax(0,1fr) minmax(0,1fr);gap:24px;padding:18px 0;border-bottom:1px solid var(--line);align-items:baseline}
-.change-head{font-size:.68rem;letter-spacing:.11em;font-weight:750;text-transform:uppercase;color:var(--muted)}
-.change-head span:last-child{color:var(--sage-ink)}
-.change-table b{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
-.change-table span[role=cell]:nth-child(2){color:var(--muted)}
-.change-table span[role=cell]:nth-child(3){font:400 1.25rem/1.35 Georgia,serif;color:var(--ink)}
-.change-note{margin-top:20px!important;font-size:.88rem;color:var(--muted)}
-
-/* Monthly resources gallery and its full-screen previews */
-.kit-gallery{padding-top:clamp(48px,6vw,80px);padding-bottom:clamp(48px,6vw,88px);text-align:center}
-.kit-gallery h2{max-width:850px;margin-inline:auto}
-.kit-gallery-intro{max-width:720px;margin:16px auto 30px!important;color:var(--muted);line-height:1.7}
-.kit-gallery-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:26px 14px}
-.kit-gallery-item{position:relative;margin:0;min-width:0;display:flex;flex-direction:column}
-.kit-gallery-item img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain}
-.kit-gallery-item figcaption{padding:10px 4px 0}
-.kit-gallery-month{display:inline-block;padding:5px 10px;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#354f42}
-.kit-gallery-item h3{margin:9px 0 0;font-size:clamp(.98rem,1.2vw,1.15rem);line-height:1.3;color:#303030}
-.kit-gallery-open{position:absolute;inset:0;z-index:1;width:100%;border:0;background:transparent;cursor:zoom-in;border-radius:4px}
-.kit-gallery-open:focus-visible{outline:3px solid #354f42;outline-offset:5px}
-.kit-gallery-zoom{position:absolute;top:8px;right:8px;background:#fff;padding:4px 7px;border:1px solid #ddd;color:var(--dark);font-size:.62rem;border-radius:2px}
-.kit-show-all{display:none}
-.kit-gallery-note{margin:28px auto 0!important;font-size:.76rem;color:var(--muted)}
-.kit-fullscreen{position:fixed;inset:0;width:100%;max-width:none;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:#fff;color:#303030;overflow-y:auto;overscroll-behavior:contain}
-.kit-fullscreen::backdrop{background:#fff}
-.kit-fullscreen-close{position:fixed;top:max(14px,env(safe-area-inset-top));right:max(18px,env(safe-area-inset-right));z-index:2;display:grid;place-items:center;width:48px;height:48px;border:1px solid #ddd;border-radius:50%;background:#fff;color:#303030;font:32px/1 Arial,sans-serif;cursor:pointer}
-.kit-fullscreen-content{max-width:880px;margin:0 auto;padding:76px 24px 56px;text-align:center}
-.kit-fullscreen-month{display:inline-block;padding:7px 15px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#354f42}
-.kit-fullscreen h2{font:400 clamp(1.65rem,4vw,2.5rem)/1.2 Georgia,serif;margin:18px auto 12px;max-width:740px}
-.kit-image-stage{min-width:0;position:relative}
-.kit-fullscreen-image{display:block;width:100%;max-width:760px;height:auto;margin:0 auto;object-fit:contain}
-.kit-zoom-hint{display:none}
-.kit-fullscreen-copy{max-width:620px;margin:24px auto 0;text-align:left;font-size:1rem;line-height:1.75;color:var(--dark)}
-.kit-personal{margin-top:28px;padding:clamp(22px,4vw,32px);background:var(--kit-tint);border-top:3px solid var(--kit-accent);border-radius:3px}
-.kit-fullscreen-copy .kit-personal h3{margin:0 0 22px;font-size:clamp(1.5rem,3vw,1.85rem);line-height:1.2}
-.kit-personal h3 span{color:#62665e}
-.kit-personal-benefits{margin:0;display:grid;gap:14px}
-.kit-personal-benefits div{display:grid;grid-template-columns:112px 1fr;gap:14px;font-size:.9rem;line-height:1.5}
-.kit-personal-benefits dt{font-weight:700;color:#303030}
-.kit-personal-benefits dd{margin:0}
-.kit-personal-example{margin:0 0 26px!important;padding:0 0 24px;border-bottom:1px solid #30303020;font-family:Georgia,serif;font-size:clamp(1.35rem,3.2vw,1.8rem);line-height:1.4;color:#303030}
-.kit-personal-caption{margin:9px 0 0!important;font-size:.7rem;line-height:1.5;color:#696969}
-@media(min-width:960px){
- .kit-fullscreen-content{height:100dvh;max-width:1440px;padding:20px 64px 24px 36px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:32px;align-items:start}
- .kit-fullscreen-month{grid-column:1/-1;justify-self:center;margin:0;padding:5px 12px;font-size:.68rem}
- .kit-fullscreen-content>h2{grid-column:1/-1;font-size:clamp(1.5rem,2.5vw,2.1rem);margin:10px auto 18px}
- .kit-image-stage{grid-column:1;grid-row:3;height:100%;overflow:hidden}
- .kit-image-stage .kit-fullscreen-image{width:100%;height:100%;max-height:100%;max-width:none}
- .kit-fullscreen-copy{grid-column:2;grid-row:3;max-width:none;margin:0;font-size:.9rem;line-height:1.45}
- .kit-personal{margin-top:16px;padding:18px 20px}
- .kit-personal-example{font-size:clamp(1.1rem,1.7vw,1.4rem);line-height:1.3;margin-bottom:16px!important;padding-bottom:16px}
- .kit-fullscreen-copy .kit-personal h3{font-size:1.3rem;margin-bottom:14px}
- .kit-personal-benefits{gap:10px}
- .kit-personal-benefits div{font-size:.82rem;line-height:1.4;grid-template-columns:95px 1fr;gap:10px}
-}
-@media(min-width:960px) and (hover:hover) and (pointer:fine){
- .kit-image-stage{cursor:zoom-in}
- .kit-image-stage .kit-fullscreen-image{transform-origin:var(--zoom-x,50%) var(--zoom-y,50%)}
- .kit-image-stage:hover .kit-fullscreen-image{transform:scale(2)}
- .kit-zoom-hint{display:block;position:absolute;bottom:8px;left:50%;transform:translateX(-50%);padding:5px 10px;border-radius:3px;background:#ffffffed;color:var(--dark);font-size:.68rem;pointer-events:none}
- .kit-image-stage:hover .kit-zoom-hint{opacity:0}
-}
-
-/* Founder */
-.founder-layout{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:clamp(30px,5vw,65px);padding:clamp(36px,5vw,80px) clamp(22px,4vw,64px)}
-.founder-layout img{display:block;width:100%;max-height:480px;object-fit:cover}
-.founder-layout h2{margin-bottom:22px}
-.founder-layout p:not(.eyebrow){margin-bottom:16px!important;line-height:1.78;color:var(--muted)}
-.signature{font:1.35rem Georgia,serif}
-.founder-review{margin-top:26px;padding-top:20px;border-top:1px solid #d6d6d0}
-.founder-review blockquote{font-style:italic;font-size:1.35rem;margin-bottom:6px}
-.founder-review p{font-size:.74rem!important;margin:0!important}
-
-/* Offer and price card (logic unchanged from /club) */
-.offer-band{padding-top:0}
-.offer-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(30px,5vw,80px);align-items:center;padding:clamp(36px,5vw,80px) clamp(22px,4vw,64px)}
-.offer-copy h2{font-size:clamp(2.2rem,3.4vw,3.6rem);margin-bottom:26px}
-.offer-copy h2 em{color:var(--rose-ink)}
-.offer-details{list-style:none;margin:0;padding:0;display:grid;gap:13px;font-size:.95rem;font-weight:650;color:var(--dark)}
-.offer-details li{display:flex;align-items:center}
-.lime-check{display:inline-flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;margin-right:10px;border-radius:50%;background:var(--lime);color:#34513d;font-style:normal;font-weight:800;line-height:1}
-.price-card{background:#fff;padding:35px;border:1px solid #e2e2df;border-radius:4px;box-shadow:0 22px 45px -37px #4d45446b}
-.price-card h3{margin:5px 0 16px}
-.price{font-family:Georgia,serif;font-size:3.3rem;line-height:1;color:var(--dark)}
-.price>span:last-child{font-family:Montserrat,Arial,sans-serif;font-size:.87rem;color:var(--muted)}
-.founding-price-label{display:inline-block;margin:10px 0 14px;padding:7px 11px;background:#d4dfc4;color:#3e503a;font-size:.68rem;letter-spacing:.09em;font-weight:800;border-radius:3px}
-.price .founding-price-was{display:inline-flex;margin-right:12px;vertical-align:middle;font-family:Montserrat,Arial,sans-serif}
-.price .founding-price-was del{font-size:1.12rem;color:#888;text-decoration-thickness:1.5px}
-.founding-price-lock{font-size:.85rem;line-height:1.55;font-weight:700;color:#486443;margin:15px 0 0!important}
-.offer-free-summary{font-size:.85rem;color:var(--muted);line-height:1.5;margin:0 0 12px!important}
-.fineprint{font-size:.77rem;color:var(--muted);margin:22px 0!important}
-.price-card .primary{width:100%}
-.price-card .primary:disabled{cursor:wait}
-.price-card small{display:block;margin-top:10px;text-align:center;color:var(--muted);font-size:.72rem}
-.checkout-error{margin-top:12px!important;text-align:center;color:#96666b;font-size:.82rem}
-
-/* FAQ */
-.faq{background:#fbf7f1;padding:clamp(56px,7vw,95px) 0}
-.faq-layout{display:grid;grid-template-columns:.65fr 1.35fr;gap:70px}
-.faq-items details{border-bottom:1px solid #e0d8cd;padding:20px 0}
-.faq-items summary{display:flex;justify-content:space-between;gap:20px;cursor:pointer;font-weight:750;list-style:none}
-.faq-items summary::-webkit-details-marker{display:none}
-.faq-items details[open] summary span{transform:rotate(45deg)}
-.faq-items summary span{transition:transform .15s}
-.faq-items details p{color:var(--muted);font-size:.94rem;line-height:1.7;padding-top:14px}
-
-/* Closing */
-.closing{padding-top:28px}
-.closing-inner{padding:clamp(48px,6vw,88px) 24px;text-align:center}
-.closing h2{max-width:800px;margin:0 auto}
-.closing p{font:1.25rem Georgia,serif;color:var(--ink);margin:18px auto 26px!important}
-.footer{background:var(--dark);color:#fff;padding:24px;display:flex;justify-content:space-between;gap:20px;font-size:.78rem}
-.footer a{color:#fff}
-
-@media(max-width:1000px){.kit-gallery-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:850px){
- .hero-inner{display:flex;flex-direction:column;min-height:0}
- .hero-inner{--photo-h:clamp(220px,45vw,380px)}
- .hero-photo{order:-1;height:var(--photo-h)}
- .hero-copy{padding:60px clamp(24px,5vw,40px) clamp(24px,5vw,40px)}
- .hero-seam-badge{top:var(--photo-h);transform:translate(-50%,-50%);width:96px;height:96px;padding:0}
- .hero-seam-badge img{width:82%;height:82%}
- .problem,.offer-layout,.founder-layout,.faq-layout{grid-template-columns:1fr}
- .faq-layout{gap:24px}
- .steps{grid-template-columns:1fr;gap:26px}
-}
-/* Phones */
-@media(max-width:700px){
- .inset{padding:12px 12px 28px}
- .hero{padding-top:12px}
- .hero-inner{--photo-h:clamp(190px,52vw,260px)}
- .hero-photo img{object-position:center 60%}
- .hero-copy{padding:52px 20px 26px}
- .hero-seam-badge{width:76px;height:76px}
- .hero-sub{font-size:1.28rem}
- .hero h1{font-size:clamp(29px,7.7vw,34px);line-height:1.12;margin-bottom:16px}
- .hero-actions{display:grid;gap:14px;margin-top:22px}
- .hero-actions .primary{width:100%;min-height:56px}
- .text-cta{justify-self:center}
- .hero-rating{justify-content:center}
- .hero-rating img{width:140px}
- .demo-surface{padding:36px 12px 28px}
- .demo-head{text-align:left;padding-inline:6px}
- .family-tabs{gap:6px;margin:24px 0 22px}
- .family-tabs button{grid-template-columns:1fr;justify-items:center;text-align:center;row-gap:3px;padding:10px 4px;min-height:74px}
- .tab-dots{grid-row:auto}
- .family-tabs strong{font-size:.76rem;line-height:1.2}
- .family-tabs small{font-size:.62rem;line-height:1.25}
- .why{padding-inline:6px}
- .change-table>div{grid-template-columns:1fr 1fr;gap:6px 16px}
- .change-table b{grid-column:1/-1}
- .change-head{display:none!important}
- .change-table span[role=cell]:nth-child(2)::before{content:"Today: ";font-weight:700}
- .change-table span[role=cell]:nth-child(3){font-size:1.08rem}
- .kit-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}
- .kit-gallery:not(.show-all) .kit-more{display:none}
- .kit-gallery:not(.show-all) .kit-show-all{display:inline-flex;margin-top:26px;min-height:48px;padding:12px 22px;border:1px solid var(--dark);border-radius:2px;background:#fff;font:inherit;font-size:.9rem;font-weight:750;color:var(--ink);cursor:pointer}
- .kit-show-all:focus-visible{outline:3px solid #6f8f6a;outline-offset:3px}
- .price-card{padding:26px 20px}
- .footer{flex-direction:column;align-items:center;text-align:center}
-}
-
-.view-tabs{display:none}
-.view-tabs button:focus-visible{outline:3px solid #6f8f6a;outline-offset:2px}
-
-/* Mobile and tablet: one preview at a time behind two tabs; never overlapping. */
-@media(max-width:960px){
- .view-tabs{display:grid;grid-template-columns:1fr 1fr;max-width:640px;margin:0 auto 20px;border-bottom:1px solid #cfcfc9}
- .view-tabs button{min-height:48px;margin-bottom:-1px;padding:12px 6px;border:0;border-bottom:3px solid transparent;background:none;font:inherit;font-size:.84rem;font-weight:750;line-height:1.25;color:var(--muted);cursor:pointer}
- .view-tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--dark)}
- .family-panel{max-width:640px}
- .stage{display:block}
- .stage-label{justify-content:flex-start;margin:0 0 18px!important}
- .demo-surface[data-view=plan] :is(.sheet,.stage-label-print),.demo-surface[data-view=print] :is(.phone,.stage-label-plan){display:none}
- .why ul{grid-template-columns:1fr}
- .why .eyebrow{text-align:left}
- .demo-included{justify-content:flex-start;font-size:.85rem;margin:0!important;padding-inline:6px}
- .sheet{max-width:none}
- .phone{width:min(100%,390px);max-width:none;height:auto;margin:0 auto}
- .phone-screen{height:auto;min-height:600px;overflow:visible;-webkit-mask-image:none;mask-image:none;padding-bottom:22px}
- .phone-status{position:static}
- .phone-kicker{font-size:9.5px}
- .phone-screen h3{font-size:24px}
- .phone-people li{font-size:12px;padding:4px 10px 4px 7px}
- .phone-card{padding:11px 13px;margin-bottom:9px}
- .phone-card>span{font-size:9px}
- .phone-card p,.phone-parts p{font-size:13px;line-height:1.5}
- .phone-goal strong{font-size:17px}
- .phone-talk p{font-size:14.5px}
- .phone-review span{font-size:12px;padding:10px 4px}
-}
-@media(max-width:700px){
- .intro-head{text-align:left}
- .intro-spread{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;margin:26px 12px 0;padding:22px 16px 18px;scrollbar-width:thin}
- .intro-spread{margin:26px 0 0;padding:20px 16px 16px;gap:12px;scroll-padding-inline:16px}
- .intro-item{flex:0 0 86%;margin:0;scroll-snap-align:center}
- /* The phone crop of the real sheet: x0-x1 fills the frame width, y0 is the top of the window. */
- .intro-pic{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;container-type:size;background:#fff;border:1px solid #e2e2dc;box-shadow:0 12px 26px -20px #30383173}
- .intro-pic img{position:absolute;max-width:none;aspect-ratio:auto;mix-blend-mode:normal;transform:none!important;width:calc(100cqw / var(--mw));height:auto;
-  left:clamp(calc(100cqw - 100cqw / var(--mw)),calc(-100cqw / var(--mw) * var(--mx0)),0px);
-  top:min(clamp(calc(100cqh - 100cqw / var(--mw) * var(--r)),calc(-100cqw / var(--mw) * var(--r) * var(--my0)),0px),max(calc((100cqh - 100cqw / var(--mw) * var(--r)) / 2),0px))}
- .intro-month{margin-top:14px!important}
- .intro-label{font-size:1.25rem}
- .step-visual{height:170px}
- .intro-swipe{display:block;margin:10px 24px 0!important;font-size:.74rem;line-height:1.5;color:var(--muted)}
- .intro-bridge{text-align:left;margin-top:24px!important}
- .hero-includes{font-size:.76rem;gap:6px 14px}
-}
-@media(max-width:400px){
- .phone{padding:7px;border-radius:38px}
- .phone-screen{border-radius:32px;padding-inline:13px}
- .phone-status{margin-inline:-13px}
- .view-tabs button{font-size:.78rem}
-}
-@media(prefers-reduced-motion:reduce){.club *,.kit-fullscreen *{transition:none!important;animation:none!important;scroll-behavior:auto!important}.kit-image-stage:hover .kit-fullscreen-image{transform:none!important}}
-
-.storybrand-hero-note { max-width: 37rem; line-height: 1.65; margin: .6rem 0 1rem; font-size: clamp(.98rem, 1.25vw, 1.12rem); color: #545454; }
-.meeting-rhythm { padding-top: clamp(3.5rem, 7vw, 6rem); padding-bottom: clamp(3.5rem, 7vw, 6rem); }
-.meeting-rhythm h2 { max-width: 900px; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.12; font-weight: 400; }
-.meeting-rhythm-intro { max-width: 760px; line-height: 1.7; font-size: clamp(1rem, 1.4vw, 1.18rem); margin: 1.35rem 0 2.2rem; }
-.meeting-rhythm-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2.5vw, 2.5rem); }
-.meeting-rhythm-grid > div { padding: 1.6rem; border-radius: 1rem; background: #FBF7F1; }
-.meeting-rhythm-number { color: #3D6671; font-weight: 700; letter-spacing: .08em; font-size: .85rem; }
-.meeting-rhythm-grid h3 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(1.35rem, 2vw, 1.8rem); margin: .7rem 0; }
-.meeting-rhythm-grid p { margin: 0; line-height: 1.6; }
-.meeting-rhythm-foot { font-weight: 600; margin-top: 1.6rem; color: #3D6671; }
-@media (max-width: 700px) { .meeting-rhythm-grid { grid-template-columns: 1fr; gap: .75rem; } .meeting-rhythm-grid > div { padding: 1.2rem 1.35rem; } .meeting-rhythm-intro { margin-bottom: 1.5rem; } }
-
-/* Visual-first StoryBrand, using existing kit artwork and intentionally small inline diagrams. */
-.hero-promise { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.7rem; margin:1.15rem 0 1.5rem; max-width:39rem; }
-.hero-promise span { padding:.8rem .65rem; background:#FBF7F1; border:1px solid #E5DED3; border-radius:11px; font-size:.8rem; line-height:1.35; text-align:center; }
-.hero-promise b { display:block; font-size:1rem; color:#3D6671; margin-bottom:.2rem; }
-.visual-problem { padding-block:clamp(3rem,6vw,5rem); }
-.visual-problem h2 { max-width:850px; }
-.daily-moments { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin:2rem 0 1.5rem; }
-.daily-moment { min-width:0; background:#FBF7F1; border-radius:18px; padding:1.2rem 1.15rem 1.35rem; text-align:center; border:1px solid #EAE2D8; }
-.moment-art { height:110px; display:flex; justify-content:center; align-items:center; color:#545454; }
-.moment-art svg { max-height:100%; max-width:190px; }
-.moment-water { background:radial-gradient(ellipse,#CDDDE155 5%,transparent 70%); }
-.moment-dinner { background:radial-gradient(ellipse,#F1D8A855 5%,transparent 70%); }
-.moment-practice { background:radial-gradient(ellipse,#D4DFC455 5%,transparent 70%); }
-.daily-moment .moment-quote { font-family:Georgia,serif; font-size:clamp(1.1rem,1.7vw,1.45rem); line-height:1.27; margin:.55rem 0 .5rem; }
-.daily-moment > span { color:#665F5A; font-size:.9rem; }
-.problem-punch { font-size:clamp(1rem,1.6vw,1.25rem); margin:1.1rem 0 0; text-align:center; }
-.meeting-rhythm-head { display:flex; align-items:center; justify-content:space-between; gap:2.5rem; }
-.meeting-rhythm-head > div:first-child { flex:1; }
-.meeting-rhythm-head p:not(.eyebrow) { max-width:620px; line-height:1.5; }
-.meeting-clock { flex:0 0 175px; border-radius:100%; width:175px; height:175px; background:#CDDDE1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:.1rem; transform:rotate(5deg); color:#3D6671; }
-.clock-face svg { width:54px; height:54px; }
-.meeting-clock strong { font-family:Georgia,serif; font-size:1.35rem; }.meeting-clock small { font-size:.82rem; }
-.meeting-visual { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; margin-top:2rem; counter-reset:meeting; }
-.meeting-visual > div { min-width:0; position:relative; padding:1.4rem 1rem; border:1px solid #d9e2da; border-radius:16px; background:#FBF7F1; text-align:center; }
-.meeting-visual > div:not(:last-child)::after { content:"›"; position:absolute; top:50%; right:-.81rem; transform:translateY(-50%); font-size:1.8rem; color:#3D6671; z-index:2; }
-.meeting-visual-icon { display:inline-grid; place-items:center; width:45px; height:45px; border-radius:50%; background:#D4DFC4; color:#3D6671; font-weight:700; margin-bottom:.7rem; }
-.meeting-visual strong,.meeting-visual small { display:block; }.meeting-visual strong { font-family:Georgia,serif; font-size:1.25rem; margin-bottom:.4rem; }.meeting-visual small { line-height:1.35; font-size:.85rem; color:#545454; }
-.meeting-visual-note { text-align:center; margin-top:1.3rem; line-height:1.45; }
-.personal-proof { display:flex; align-items:center; justify-content:center; gap:1rem; max-width:760px; margin:1.5rem auto 2rem; }
-.personal-proof > div { flex:1; min-width:0; padding:1rem; border:1px solid #D5C5B8; border-radius:12px; background:#FBF7F1; text-align:center; }
-.personal-proof strong,.personal-proof .proof-label { display:block; }.proof-label { font-size:.7rem; letter-spacing:.09em; color:#3D6671; font-weight:700; margin-bottom:.4rem; }.personal-proof strong { font-size:.9rem; line-height:1.4; }.proof-arrow { font-size:1.5rem; color:#3D6671; }
-.responsibility-shift { margin-top:clamp(3rem,5vw,5rem); }
-.shift-compare { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.1rem; margin-top:1.5rem; }
-.shift-before,.shift-after { border-radius:18px; padding:1.5rem; background:#FBF7F1; border:1px solid #E5DCD0; }
-.shift-after { background:#EAF0E4; border-color:#CCDCC2; }
-.shift-heading { font-size:.8rem; font-weight:700; letter-spacing:.09em; color:#3D6671; margin:0 0 1.2rem; }
-.shift-before > div,.shift-after > div { display:flex; align-items:center; gap:.8rem; margin:0 0 1rem; line-height:1.4; }
-.shift-symbol { flex:0 0 34px; width:34px; height:34px; display:grid; place-items:center; border-radius:50%; background:#E8D2D6; font-weight:700; color:#545454; }.shift-after .shift-symbol { background:#D4DFC4; color:#3D6671; }
-.shift-caption { text-align:center; margin-top:1rem; font-size:.95rem; }
-.growth-roadmap { display:flex; align-items:stretch; justify-content:space-between; gap:.7rem; margin:1.5rem 0 2rem; }
-.growth-roadmap > div { flex:1; min-width:0; text-align:center; display:grid; justify-items:center; align-content:start; gap:.55rem; border-radius:14px; padding:.85rem .5rem; background:#FBF7F1; }
-.growth-roadmap img { width:74px; height:74px; object-fit:contain; }.growth-roadmap span { font-weight:700; font-size:.82rem; }
-.offer-product-preview { display:flex; align-items:center; gap:1rem; margin:1.25rem 0; }
-.offer-product-preview img { width:min(45%,190px); height:auto; border-radius:10px; box-shadow:0 6px 20px #00000016; }
-.offer-product-preview strong,.offer-product-preview span { display:block; }.offer-product-preview span { margin-top:.4rem; line-height:1.4; font-size:.93rem; }
-@media(max-width:800px){.hero-promise { grid-template-columns:repeat(3,minmax(0,1fr)); }.meeting-clock { flex-basis:130px; width:130px; height:130px; }.meeting-visual { grid-template-columns:repeat(2,minmax(0,1fr)); }.meeting-visual > div:nth-child(2)::after { display:none; } }
-@media(max-width:600px){.daily-moments { grid-template-columns:1fr; gap:.6rem; }.daily-moment { display:grid; grid-template-columns:100px minmax(0,1fr); align-items:center; text-align:left; column-gap:.8rem; padding:.6rem 1rem; }.moment-art { grid-row:span 2; height:82px; }.daily-moment .moment-quote { margin:0; }.daily-moment > span { align-self:start; }.meeting-rhythm-head { align-items:flex-start; gap:.8rem; }.meeting-clock { flex:0 0 95px; width:95px; height:95px; }.clock-face svg { width:30px; height:30px; }.meeting-clock strong { font-size:.9rem; }.meeting-clock small { font-size:.7rem; }.meeting-visual { gap:.6rem; }.meeting-visual > div { padding:1rem .6rem; }.meeting-visual strong { font-size:1.05rem; }.meeting-visual small { font-size:.78rem; }.personal-proof { gap:.35rem; }.personal-proof > div { padding:.65rem .45rem; }.personal-proof strong { font-size:.74rem; }.proof-label { font-size:.6rem; }.shift-compare { grid-template-columns:1fr; gap:.7rem; }.growth-roadmap { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.3rem; }.growth-roadmap > div { padding:.5rem .2rem; }.growth-roadmap img { width:45px; height:45px; }.growth-roadmap span { font-size:.69rem; }.hero-promise span { padding:.6rem .35rem; font-size:.7rem; }.hero-promise b { font-size:.82rem; } }
-
-/* Two real source-based print previews. Keep the interaction quiet: products first, little chrome. */
-.real-club-materials { padding-block:clamp(3.5rem,7vw,6.5rem); }
-.real-club-intro { max-width:740px; margin:0 auto 2.3rem; text-align:center; }
-.real-club-intro h2 {font-family:Georgia,serif;font-weight:400;font-size:clamp(2rem,4vw,3.55rem);line-height:1.14;margin:.6rem 0 1rem;}
-.real-club-intro p:not(.eyebrow){font-size:clamp(1rem,1.45vw,1.14rem);line-height:1.55;margin:0 auto;max-width:630px;}
-.real-doc-pair { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(1.5rem,4vw,4rem);align-items:start;max-width:1060px;margin:auto; }
-.real-doc-item{margin:0;min-width:0;}
-.real-doc-page{aspect-ratio:8.5/11;background:#fff;color:#545454;padding:clamp(1rem,2.8vw,2.3rem);box-shadow:0 10px 30px rgba(46,46,46,.1),0 0 0 1px #ece9e4;font-family:Montserrat,sans-serif;font-size:clamp(.48rem,.8vw,.72rem);line-height:1.35;overflow:hidden;}
-.real-doc-page p{margin:.22rem 0 .55rem;}
-.doc-eyebrow {font-size:.78em;letter-spacing:.16em;color:#6E826E;font-weight:700;margin-bottom:1.05rem;}
-.doc-title{font-family:Georgia,serif;font-size:clamp(1.5rem,3vw,2.5rem);line-height:1.05;color:#343f37;margin-bottom:.35rem;}
-.doc-italic{font-family:Georgia,serif;font-style:italic;color:#6f8370;font-size:1.35em;line-height:1.35;}
-.doc-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem 1.2rem;background:#EAF0E9;border-radius:7px;padding:1.1rem;margin:1.3rem 0 1.1rem;}
-.doc-info-grid b{display:block;color:#4A6658;font-size:.88em;letter-spacing:.055em;}.doc-info-grid p{font-size:.93em;line-height:1.32;margin:.23rem 0 0;}
-.real-doc-page h3{font-family:Georgia,serif;font-weight:400;font-size:1.7em;margin:.9rem 0 .65rem;color:#323b34;}
-.real-meeting-parts{list-style:none;padding:0;margin:0;display:grid;gap:.78rem;}
-.real-meeting-parts li{display:flex;gap:.78rem;align-items:flex-start;min-width:0;}
-.real-meeting-parts li>span{white-space:nowrap;border-radius:99px;background:#E8D2D6;font-size:.9em;font-weight:700;padding:.48em .6em;}
-.real-meeting-parts b{font-size:1.1em;}.real-meeting-parts p{margin:.14rem 0;line-height:1.35;}
-.doc-bottom-note{font-size:.9em;padding-top:.85rem;margin-top:1rem;border-top:1px solid #D4DFC4;color:#6a766c;}
-.focus-doc .doc-title{margin-bottom:.4rem;}
-.focus-doc-members{display:flex;flex-wrap:wrap;gap:.28rem;justify-content:flex-end;font-weight:600;font-size:.79em;}
-.focus-doc-members span{background:#F0F4EF;padding:.28rem .36rem;border-radius:5px;}
-.focus-doc-lede{font-size:1em;margin:1rem 0!important;}
-.focus-goal{padding:.9rem 1rem;background:#DCE8EA;border-radius:7px;display:grid;gap:.23rem;margin:1rem 0 1.1rem;}
-.focus-goal small{font-weight:700;letter-spacing:.07em;color:#3D6671;}
-.focus-goal strong{font-family:Georgia,serif;font-size:1.85em;font-weight:400;color:#3D6671;}
-.focus-small-intro{color:#707070;font-size:.95em;}
-.focus-habits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;margin:1rem 0;}
-.focus-habits>div{background:#F7F9F6;border-radius:7px;padding:.55rem;min-width:0;}
-.focus-person{display:flex;align-items:center;gap:.32rem;font-size:.93em;margin-bottom:.45rem;}
-.focus-person span{display:grid;place-items:center;background:#D4DFC4;width:21px;height:21px;border-radius:50%;font-size:.9em;}
-.focus-habits strong{font-size:1.05em;}.focus-habits p{line-height:1.4;}.focus-habits small{font-size:.78em;line-height:1.3;color:#3D6671;display:block;}
-.focus-weeks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.4rem;}
-.focus-weeks span{background:#DCE8EA;padding:.55rem .25rem;text-align:center;font-size:.95em;font-weight:700;}
-.focus-doc-foot{margin-top:1rem!important;padding-top:.75rem;border-top:1px solid #D4DFC4;font-size:.88em;line-height:1.4;}
-.real-doc-item figcaption{margin:1.2rem auto 0;max-width:440px;text-align:center;display:grid;gap:.35rem;}
-.real-doc-item figcaption strong{font-family:Georgia,serif;font-size:clamp(1.1rem,1.7vw,1.4rem);font-weight:400;line-height:1.3;}
-.real-doc-item figcaption span{font-size:.92rem;line-height:1.4;color:#545454;}
-.real-materials-caption{text-align:center;margin:1.4rem auto 0;color:#6b6b6b;font-size:.78rem;max-width:650px;}
-@media(max-width:760px){.real-doc-pair{grid-template-columns:1fr;max-width:490px;gap:2.3rem;}.real-doc-page{font-size:clamp(.58rem,1.8vw,.8rem);padding:clamp(1.15rem,5vw,2.1rem);}.doc-title{font-size:clamp(1.85rem,6vw,2.6rem);}}
-@media(max-width:370px){.real-doc-page{font-size:.52rem;padding:.85rem;}.doc-title{font-size:1.6rem;}.doc-info-grid{padding:.6rem;}.real-meeting-parts{gap:.47rem;}}
-
-.exact-doc-pair { align-items:start; }
-.exact-document-image { display:block; width:100%; height:auto; aspect-ratio:1500 / 1941; background:#fff; box-shadow:0 10px 30px rgba(46,46,46,.09),0 0 0 1px #ebe8e3; }
-@media (max-width:760px) { .exact-doc-pair { max-width:min(100%,480px); } }
-
-/* Calm, interactive source-grounded January personalization demonstration. */
-.personalized-story { padding-block:clamp(3.25rem,6vw,6rem); }
-.ps-intro { max-width:700px; text-align:center; margin:0 auto 2rem; }
-.ps-intro h2 { font-family:Georgia,serif; font-weight:400; font-size:clamp(2rem,4vw,3.45rem); line-height:1.13; margin:.55rem 0 .85rem; }
-.ps-intro p:not(.eyebrow) { font-size:clamp(1rem,1.35vw,1.13rem); line-height:1.55; margin:0 auto; }
-.ps-demo { max-width:880px; margin:auto; border:1px solid #E3D9D0; border-radius:17px; background:#fff; padding:clamp(1.15rem,2.6vw,2rem); box-shadow:0 8px 24px #302d2710; }
-.ps-demo-top { display:flex; justify-content:space-between; align-items:center; gap:1.25rem; padding-bottom:1.1rem; border-bottom:1px solid #EDE7E0; margin-bottom:1.5rem; }
-.ps-demo-family { display:flex; align-items:center; gap:.7rem; }
-.ps-family-dot { display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#D4DFC4;color:#3D6671;font-weight:700;font-size:1.05rem; }
-.ps-demo-family strong,.ps-demo-family small { display:block; }
-.ps-demo-family strong { font-size:1.05rem; }
-.ps-demo-family small { color:#766D65; font-size:.76rem; margin-top:.15rem; }
-.ps-nav { display:flex;gap:.4rem;background:#FBF7F1;border-radius:9px;padding:.3rem; }
-.ps-nav button { border:0;border-radius:7px;background:transparent;color:#545454;font:600 .85rem/1.3 Montserrat,sans-serif;padding:.75rem .85rem;cursor:pointer; }
-.ps-nav button[aria-pressed="true"] { background:#D4DFC4;color:#344A3B; }
-.ps-nav button:focus-visible,.ps-next:focus-visible {outline:3px solid #3D6671;outline-offset:3px;}
-.ps-step[hidden] { display:none!important; }
-.ps-family-members { display:flex;align-items:center;justify-content:center;gap:1.1rem;flex-wrap:wrap;margin-bottom:1.5rem; }
-.ps-family-members span,.ps-who { display:inline-flex;align-items:center;gap:.45rem;font-size:.9rem;font-weight:600; }
-.ps-family-members i,.ps-who i { flex:0 0 27px;width:27px;height:27px;display:inline-grid;place-items:center;font-style:normal;color:#fff;border-radius:50%;font-size:.75rem; }
-.ps-family-members .ps-adults { font-weight:500; color:#6B645F; }
-.ps-answers { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:0 0 1.3rem; }
-.ps-answers > div { background:#FBF7F1;padding:1.2rem;border-radius:10px;min-height:138px;display:grid;align-content:start;gap:.75rem; }
-.ps-answers small,.ps-focus small { color:#3D6671;font-size:.7rem;font-weight:700;letter-spacing:.08em;line-height:1.5; }
-.ps-answers strong {font-size:1.01rem;line-height:1.35;}
-.ps-next { display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;min-height:46px;border-radius:7px;background:#3D6671;color:white;font-size:.95rem;font-weight:700;border:0;cursor:pointer; }
-.ps-focus { background:#E8F0F1;border-radius:10px;padding:1.4rem 1.6rem;margin-bottom:1rem; }
-.ps-focus h3 { font:400 clamp(1.7rem,2.8vw,2.4rem)/1.12 Georgia,serif;margin:.3rem 0;color:#3D6671; }
-.ps-focus p { margin:0;line-height:1.5; }
-.ps-habits { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem; }
-.ps-habit { border:1px solid #D5C5B8;background:#FBF7F1;border-radius:10px;padding:1.15rem;min-width:0; }
-.ps-habit h4 {font:400 clamp(1.3rem,2vw,1.65rem)/1.14 Georgia,serif;margin:.65rem 0 .45rem;}
-.ps-habit p {font-size:.93rem;line-height:1.45;margin:0 0 .75rem;}
-.ps-habit small {font-size:.77rem;line-height:1.45;color:#545454;}
-.ps-habit small b {color:#3D6671;margin-right:.2rem;}
-.ps-review {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-top:1.1rem;font-size:.85rem;line-height:1.4;}
-.ps-review a { text-decoration:underline;text-underline-offset:3px;font-weight:700;color:#3D6671; }
-.ps-disclaimer {color:#766D65;font-size:.72rem;line-height:1.4;text-align:center;margin:1.3rem 0 0;}
-.ps-meeting {max-width:880px;margin:clamp(3rem,5vw,5rem) auto 0;text-align:center;}
-.ps-meeting h3 {font:400 clamp(1.7rem,3vw,2.6rem)/1.2 Georgia,serif;margin:.5rem 0 1.5rem;}
-.ps-meeting ol {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;list-style:none;margin:0;padding:0;}
-.ps-meeting li {padding:1.15rem .45rem;border-radius:9px;background:#FBF7F1;display:grid;gap:.35rem;align-content:center;}
-.ps-meeting li small {font-size:.69rem;font-weight:700;color:#3D6671;letter-spacing:.06em;}
-.ps-meeting li strong {font:400 clamp(1.03rem,1.6vw,1.25rem)/1.25 Georgia,serif;}
-.ps-meeting > p {font-size:.91rem;color:#545454;margin:1rem 0 0;}
-@media(max-width:760px) { .ps-demo-top {align-items:stretch;flex-direction:column;}.ps-nav {align-self:stretch;}.ps-nav button {flex:1;} .ps-answers {grid-template-columns:1fr;gap:.5rem;} .ps-answers > div {min-height:0;padding:1rem;gap:.35rem;} .ps-habits {grid-template-columns:1fr;} }
-@media(max-width:450px) { .ps-family-members {gap:.7rem;justify-content:start;} .ps-meeting ol {grid-template-columns:repeat(2,minmax(0,1fr));}.ps-meeting li {min-height:74px;} .ps-review {display:grid;} }
-.club-brand-wordmark { display:block; width:min(100%,250px); height:auto; margin:0 0 1.1rem; object-fit:contain; object-position:left; }
-
-/* Outcome, speed and ease: concise, visual-first value story. */
-.outcome { padding-bottom:clamp(3rem,5vw,5rem); }
-.outcome .responsibility-shift { margin-top:0; }
-.outcome .change-title { max-width:850px; }
-.first-win { padding-block:clamp(3rem,6vw,5.5rem); }
-.first-win-heading { max-width:750px; margin:0 auto 1.8rem; text-align:center; }
-.first-win-heading h2 { margin:.5rem 0 1rem; }
-.first-win-heading > p:last-child { color:#545454; margin:0 auto; max-width:620px; }
-.first-win-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
-.first-win-steps > div { background:#FBF7F1; border:1px solid #E5DCD0; border-radius:15px; padding:1.4rem 1rem; display:grid; justify-items:center; align-content:center; gap:.55rem; text-align:center; }
-.first-win-icon { display:grid; place-items:center; width:44px; height:44px; border-radius:50%; background:#D4DFC4; color:#3D6671; font-size:.85rem; font-weight:750; }
-.first-win-steps strong { font:400 clamp(1.03rem,1.6vw,1.3rem)/1.2 Georgia,serif; }
-.first-win-steps small { font-size:.83rem; line-height:1.45; color:#545454; }
-.how-relief { max-width:670px; margin:1rem auto 2rem; text-align:center; color:#545454; }
-@media(max-width:600px) { .first-win-steps { grid-template-columns:1fr; gap:.6rem; } .first-win-steps > div { grid-template-columns:44px 1fr; column-gap:.9rem; justify-items:start; text-align:left; padding:.85rem 1rem; } .first-win-icon { grid-row:span 2; } .first-win-steps strong { align-self:end; } .first-win-steps small { align-self:start; } .outcome .shift-before,.outcome .shift-after { padding:1rem; } }
-
-/* Visual-first 2026 club-2 rebuild; keep established hero and checkout behavior. */
-.club{background:#FBF7F1;color:#545454;--ink:#545454;--sage-ink:#607653;--rose-ink:#8c666c;--lime:#D4DFC4;--gray:#F7F5F0}
-.hero{background:#FBF7F1}
-.hero-inner{background:#F7F5F0}
-.hero h1{font-size:clamp(2.4rem,3.35vw,4rem)}
-.hero .storybrand-hero-note{max-width:480px;margin-top:1rem;line-height:1.65;font-size:.95rem}
-.hero .cta-lime,.ofc-closing .primary,.ofc-offer .primary{border-radius:9px;background:#728765;color:#fff!important}
-.hero .cta-lime:hover,.ofc-closing .primary:hover,.ofc-offer .primary:hover{background:#566e4c}
-.ofc-band{padding:clamp(52px,6vw,88px) 0}
-.ofc-split{display:grid;grid-template-columns:minmax(245px,.75fr) minmax(0,1.75fr);gap:clamp(24px,4.5vw,80px);align-items:center}
-.ofc-section-heading h2{font-size:clamp(1.9rem,2.75vw,3.05rem)}
-.ofc-section-heading>p:last-child:not(.eyebrow){max-width:390px;margin-top:1.2rem;line-height:1.7;font-size:.95rem}
-.ofc-band .eyebrow{color:#718263}
-.ofc-problem,.ofc-personal,.ofc-ease,.ofc-founder,.ofc-faq{background:#FBF7F1}
-.ofc-outcome,.ofc-months{background:#EDF1E8}
-.ofc-meeting,.ofc-offer{background:#EAF0F0}
-.ofc-mom-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.ofc-mom-card{background:#fff;border:1px solid #E8E0D8;border-radius:16px;padding:22px 14px;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
-.ofc-card-emoji{font-size:2rem;line-height:1.2}
-.ofc-mom-card strong{font:400 clamp(1.04rem,1.45vw,1.32rem)/1.35 Georgia,serif}
-.ofc-mom-card small{font-size:.73rem;color:#777}
-.ofc-takeaway{text-align:center;font:italic clamp(.96rem,1.3vw,1.1rem)/1.55 Georgia,serif;margin-top:24px!important}
-.ofc-before-after{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:15px}
-.ofc-compare-card{border-radius:15px;padding:24px 22px;min-height:228px;background:#fff;border:1px solid #E6DDD5}
-.ofc-compare-card.is-after{background:#F8FCF4;border-color:#C8D7BD}
-.ofc-card-tag{display:inline-block;font:800 .66rem/1.3 Montserrat,sans-serif;letter-spacing:.08em;color:#566e4c;background:#D4DFC4;border-radius:20px;padding:6px 12px;margin-bottom:15px}
-.is-before .ofc-card-tag{background:#E8D2D6;color:#81565B}
-.ofc-compare-card p{font-size:.86rem;line-height:1.6;padding:6px 0}
-.ofc-compare-card p:before{content:"✕";color:#B77B82;font-weight:800;margin-right:10px}
-.ofc-compare-card.is-after p:before{content:"✓";color:#64855D}
-.ofc-compare-arrow{font:400 2rem Georgia,serif;color:#728765}
-.ofc-personal-flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.15fr);gap:14px;align-items:center}
-.ofc-personal-input,.ofc-personal-output{min-height:274px;padding:20px;border-radius:16px;display:flex;flex-direction:column;gap:10px}
-.ofc-personal-input{background:#CDDDE1}.ofc-personal-output{background:#E5ECDD}
-.ofc-personal-input strong,.ofc-personal-output strong{font:400 1.35rem Georgia,serif}
-.ofc-personal-input>span:not(.ofc-card-tag){padding:8px 12px;border-radius:20px;background:#fff;font-size:.84rem;font-weight:700}
-.ofc-personal-input small{font-size:.75rem}
-.ofc-personal-output>p{font:italic 1.05rem Georgia,serif}
-.ofc-personal-output>div{background:#fff;border-radius:7px;padding:8px 10px;display:flex;flex-direction:column;gap:3px}
-.ofc-personal-output>div span{font-size:.8rem;font-weight:800}.ofc-personal-output>div small{font-size:.7rem}
-.ofc-personal-flow>.ofc-link{grid-column:1/-1;text-align:right}
-.ofc-link{color:#526f4b!important;font-size:.83rem;font-weight:800;text-underline-offset:4px}
-.ofc-meeting-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.ofc-meeting-steps>div{border:1px solid #DFE3D8;border-radius:14px;background:#FBF7F1;padding:20px 8px;display:grid;justify-items:center;align-content:center;gap:9px;text-align:center;min-height:170px}
-.ofc-meeting-steps>div:nth-child(2){background:#F3F8FA}.ofc-meeting-steps>div:nth-child(3){background:#FCF2DF}.ofc-meeting-steps>div:nth-child(4){background:#F8E9EA}
-.ofc-step-icon{font-size:1.75rem;color:#728765}
-.ofc-meeting-steps strong{font:400 clamp(1.05rem,1.25vw,1.2rem)/1.25 Georgia,serif}
-.ofc-meeting-steps small{font-size:.73rem;line-height:1.5}
-.ofc-ease-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.ofc-ease-points>div{display:flex;align-items:center;gap:12px;padding:16px;border-radius:12px;background:#F4F2EE;font-size:.85rem;line-height:1.5}
-.ofc-ease-points span{display:grid;place-items:center;flex:0 0 32px;height:32px;background:#E8D2D6;border-radius:50%;font-weight:800;color:#8D6265}
-.ofc-ease-conclusion{background:#F1D8A8;border-radius:30px;padding:12px 18px;margin-top:20px!important;text-align:center;font-size:.86rem;line-height:1.5}
-.ofc-month-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
-.ofc-month-grid>div{background:#FBF7F1;border:1px solid #E3DDD2;border-radius:12px;overflow:hidden;padding:0 10px 18px;text-align:center}
-.ofc-month-grid span{display:block;border-radius:0 0 9px 9px;padding:8px 2px;background:#CDDDE1;font-size:.66rem;font-weight:800;letter-spacing:.04em}
-.ofc-month-grid>div:nth-child(2) span{background:#E8D2D6}.ofc-month-grid>div:nth-child(3) span{background:#D4DFC4}.ofc-month-grid>div:nth-child(4) span{background:#F1D8A8}
-.ofc-month-grid img{display:block;width:68px;height:68px;object-fit:contain;margin:14px auto}
-.ofc-month-grid p{font-size:.77rem;line-height:1.45}
-.ofc-month-foot{text-align:right;margin-top:18px!important;font-size:.82rem}
-.ofc-founder-inner{display:grid;grid-template-columns:minmax(180px,.7fr) minmax(0,1.3fr);gap:clamp(30px,5vw,75px);align-items:center}
-.ofc-founder-inner>img{width:100%;max-height:300px;object-fit:cover;border-radius:16px}
-.ofc-founder-inner h2{margin-bottom:20px}
-.ofc-founder-inner p:not(.eyebrow){max-width:650px;line-height:1.7;margin-bottom:12px}
-.ofc-founder-inner strong{display:block;font:italic 1.5rem Georgia,serif;margin-top:12px}
-.ofc-founder-inner small{font:500 .74rem Montserrat,sans-serif;margin-left:8px}
-.ofc-offer-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(255px,.9fr);gap:24px;align-items:start}
-.ofc-included{padding:14px 0}
-.ofc-offer-strap{font:400 1.4rem Georgia,serif;line-height:1.3;margin-bottom:20px!important}
-.ofc-included ul{list-style:none;padding:0;margin:0}
-.ofc-included li{font-size:.86rem;line-height:1.5;padding:9px 0 9px 29px;position:relative}
-.ofc-included li::before{content:"✓";position:absolute;left:0;font-weight:800;color:#587b51}
-.ofc-offer .price-card{max-width:none}
-.ofc-faq-list details{border:1px solid #E5DDD3;background:#fff;border-radius:10px;margin-bottom:9px;overflow:hidden}
-.ofc-faq-list summary{padding:14px 20px;font-size:.88rem;font-weight:750;display:flex;justify-content:space-between;gap:14px;cursor:pointer;list-style:none}
-.ofc-faq-list details[open] summary span{transform:rotate(45deg)}
-.ofc-faq-list details>p{padding:0 20px 17px;font-size:.84rem;line-height:1.6;color:#665f5a}
-.ofc-closing{background:#FBF7F1;padding-top:18px}
-.ofc-closing-inner{max-width:1504px;margin:auto;background:#D4DFC4;border-radius:20px;padding:clamp(44px,6vw,75px) 24px;text-align:center}
-.ofc-closing h2{font-size:clamp(2rem,3vw,3.25rem);margin-bottom:14px}
-.ofc-closing p{margin-bottom:24px}
-@media(max-width:1000px){.ofc-split{grid-template-columns:minmax(200px,.85fr) minmax(0,1.65fr);gap:24px}.ofc-offer-content{grid-template-columns:1fr}.ofc-month-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:700px){.ofc-split,.ofc-founder-inner{grid-template-columns:1fr}.ofc-section-heading{max-width:550px}.ofc-mom-cards{gap:7px}.ofc-mom-card{padding:15px 7px;min-height:168px}.ofc-mom-card strong{font-size:.94rem}.ofc-mom-card small{font-size:.66rem}.ofc-card-emoji{font-size:1.6rem}.ofc-before-after{gap:7px}.ofc-compare-card{padding:17px 12px;min-height:218px}.ofc-compare-card p{font-size:.76rem}.ofc-compare-arrow{font-size:1.35rem}.ofc-personal-flow{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}.ofc-personal-input,.ofc-personal-output{padding:13px 10px}.ofc-personal-output>div small{font-size:.63rem}.ofc-meeting-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.ofc-ease-points{grid-template-columns:1fr}.ofc-ease-points>div{padding:12px}.ofc-month-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ofc-founder-inner>img{max-width:320px;max-height:270px}.ofc-founder-inner small{display:block;margin:4px 0 0}.ofc-offer-content{gap:0}}
-@media(max-width:360px){.ofc-mom-cards{grid-template-columns:1fr}.ofc-mom-card{min-height:110px}.ofc-before-after{grid-template-columns:1fr}.ofc-compare-arrow{transform:rotate(90deg);justify-self:center}.ofc-personal-flow{grid-template-columns:1fr}.ofc-personal-flow>.ofc-compare-arrow{justify-self:center;transform:rotate(90deg)}}
-
+.club .container{width:min(1240px,calc(100% - 64px));margin-inline:auto}
+.club .eyebrow{font-size:.73rem;letter-spacing:.13em;font-weight:800;margin-bottom:16px}
+.club .button,.club .primary{display:inline-flex;justify-content:center;align-items:center;gap:9px;border:0;background:#5c7857;border-radius:12px;padding:15px 25px;color:#fff!important;text-decoration:none;font-size:.95rem;font-weight:750;cursor:pointer;line-height:1.2}
+.club .button:hover,.club .primary:hover{background:#486343}
+.club :is(a,button,summary):focus-visible{outline:3px solid #3D6671;outline-offset:4px}
+.ofc-nav{background:#fff;border-bottom:1px solid #ebe5df}
+.ofc-nav-inner{max-width:1390px;margin:auto;display:flex;align-items:center;gap:30px;justify-content:space-between;padding:14px 32px}
+.ofc-nav .brand img{width:205px;height:auto;display:block}
+.ofc-nav nav{display:flex;gap:clamp(14px,2vw,33px);align-items:center}
+.ofc-nav nav a{font-size:.82rem;font-weight:600;text-decoration:none}
+.ofc-nav nav a:hover{text-decoration:underline;text-underline-offset:5px}
+.ofc-nav .nav-cta{padding:13px 20px;border-radius:24px;font-size:.78rem;white-space:nowrap}
+.ofc-hero{display:grid;grid-template-columns:1fr 1.02fr;min-height:550px;background:var(--ivory)}
+.ofc-hero-copy{padding:clamp(45px,6vw,100px) clamp(32px,5.5vw,92px);align-self:center;max-width:760px;margin-left:auto}
+.ofc-hero h1{font-size:clamp(2.65rem,4.35vw,5rem);line-height:1.075;margin:0 0 28px}
+.ofc-hero h1 em{position:relative;z-index:0}
+.ofc-hero h1 em::after{content:"";position:absolute;z-index:-1;left:2%;bottom:.02em;width:100%;height:.22em;border-radius:50%;background:#f2d5c4;transform:rotate(-2deg)}
+.hero-explain{max-width:500px;font-size:clamp(1.06rem,1.5vw,1.35rem);line-height:1.45;margin-bottom:27px!important}
+.hero-terms{font-size:.75rem;margin-top:12px!important}
+.ofc-hero-visual{position:relative;min-height:510px;overflow:hidden}
+.ofc-hero-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ofc-products{padding:28px 20px 0}
+.products-surface{background:#EBEEE4;border-radius:24px;padding:clamp(30px,4vw,58px) clamp(20px,3.7vw,65px) 24px;max-width:1504px;margin:auto}
+.products-surface>h2{text-align:center;margin-bottom:38px}
+.products-grid{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:10px;align-items:center}
+.product-piece{display:grid;grid-template-columns:minmax(150px,.9fr) minmax(180px,1.1fr);gap:20px;align-items:center}
+.paper-image{background:#F8F5EE;border-radius:18px;padding:12px;transform:rotate(-3deg);box-shadow:0 9px 26px #4d5a4920}
+.paper-blue{transform:rotate(3deg);background:#edf1f2}
+.paper-image img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain}
+.product-plus{width:44px;height:44px;background:#7f986f;border-radius:50%;display:grid;place-items:center;color:white;font-size:2rem;font-weight:500}
+.pill{display:inline-block;background:#D7DCC9;border-radius:12px;padding:8px 13px;font-size:.7rem;font-weight:800;letter-spacing:.04em;margin-bottom:16px}
+.piece-copy h3{margin-bottom:10px}
+.piece-copy p{max-width:300px;font-size:.91rem;line-height:1.58}
+.products-foot{text-align:center;margin-top:34px!important;font:italic 1.1rem Georgia,serif}
+.ofc-how{padding:clamp(65px,7vw,105px) 0}
+.ofc-how h2{text-align:center;margin-bottom:45px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(25px,5vw,95px);list-style:none;margin:0;padding:0}
+.steps article{text-align:center;position:relative;padding:0 15px}
+.step-number{display:grid;place-items:center;margin:0 auto 4px;width:34px;height:34px;border-radius:50%;background:#D9A88F;color:#fff;font:700 1.25rem Georgia,serif}
+.step-icon svg{display:block;margin:0 auto 13px;width:74px;height:74px;stroke:#526d56;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.steps h3{max-width:280px;margin:0 auto 10px;font-weight:600;font-size:clamp(1.25rem,1.6vw,1.65rem)}
+.steps p{max-width:275px;margin:auto;font-size:.9rem;line-height:1.55}
+.steps article:not(:last-child)::after{content:"→";font:400 2.3rem Georgia,serif;position:absolute;right:-14%;top:40%;color:#4d6d52}
+.ofc-months{padding:48px 0;background:#FBEEE8}
+.months-layout{display:grid;grid-template-columns:235px 1fr;gap:35px;align-items:center}
+.months-intro h2{margin-bottom:17px}
+.months-intro p{font-size:.96rem;line-height:1.6}
+.months-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.month-card{background:#fffdfa;border-radius:14px;min-height:232px;overflow:hidden;text-align:center;padding:0 8px 14px;box-shadow:0 3px 14px #a7847130;display:flex;flex-direction:column;align-items:center}
+.month-name{display:block;width:100%;padding:11px 4px;border-radius:0 0 12px 12px;background:var(--sage-light);font-style:italic;font-family:Georgia,serif;font-size:1.06rem}
+.month-card:nth-child(2) .month-name{background:#DDE8EC}
+.month-card:nth-child(3) .month-name{background:#F1D8C7}
+.month-card:nth-child(4) .month-name{background:#F8E4BD}
+.month-card:nth-child(5) .month-name{background:#DDE3D1}
+.month-card p{margin:14px 0 10px;font-size:.86rem;line-height:1.4;font-weight:650;flex:1}
+.month-card img{display:block;width:72px;height:72px;object-fit:contain}
+.ofc-founder{padding:60px 0 42px}
+.founder-layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:42px;align-items:center}
+.founder-photo{width:240px;height:240px;object-fit:cover;border-radius:50%}
+.founder-copy h2{font-size:clamp(1.9rem,2.5vw,2.8rem);margin:0 0 12px}
+.founder-copy p{font-size:.96rem;max-width:820px;line-height:1.6;margin-bottom:8px}
+.signature{font:italic 1.6rem Georgia,serif;margin-top:12px!important}
+.signature span{font:500 .7rem Montserrat,sans-serif;padding-left:10px}
+.ofc-offer{padding:30px 0 60px}
+.offer-layout{display:grid;grid-template-columns:1fr 1fr;gap:38px;align-items:center;background:#F6E9E1;border-radius:24px;padding:clamp(24px,4vw,58px)}
+.offer-summary h2{margin:0 0 20px}
+.offer-summary>p:not(.eyebrow){font-size:1.03rem;line-height:1.55}
+.offer-summary ul{padding:0;margin:20px 0 0;list-style:none}
+.offer-summary li{padding:7px 0 7px 26px;position:relative}
+.offer-summary li::before{content:"✓";font-weight:800;color:#5C7857;position:absolute;left:0}
+.price-card{background:#fffefa;padding:30px;border-radius:18px;box-shadow:0 7px 20px #927b6b1d;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.price-card .club-brand-wordmark{width:200px;max-width:100%;height:auto;margin-bottom:4px}
+.price-card h3{font-size:1.25rem}
+.price-card .offer-free-summary{font-weight:750;background:#FAE6B8;padding:9px 12px;border-radius:16px}
+.price-card .founding-price-label{font-size:.67rem;letter-spacing:.08em;font-weight:750;color:#7c8069}
+.price-card .price{font:700 2.2rem Georgia,serif}
+.price-card .price span{font:500 .9rem Montserrat,sans-serif}
+.price-card .founding-price-lock{font-size:.76rem;font-weight:650}
+.price-card .fineprint{font-size:.79rem;line-height:1.5}
+.price-card .primary{width:100%;margin-top:8px}
+.price-card small{font-size:.67rem;line-height:1.5}
+.checkout-error{color:#B84040;font-size:.84rem}
+.ofc-faq{padding:30px 0 80px;background:#FBF7F1}
+.faq-layout{display:grid;grid-template-columns:300px 1fr;gap:35px}
+.faq-list details{background:#fff;border:1px solid #E6DED4;border-radius:10px;margin-bottom:8px}
+.faq-list summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:13px 18px;gap:16px;font-weight:700;font-size:.87rem;cursor:pointer}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary span{font-size:1.25rem}
+.faq-list details[open] summary span{transform:rotate(45deg)}
+.faq-list details p{padding:0 18px 18px;font-size:.85rem;line-height:1.7}
+.footer{padding:28px 32px;display:flex;justify-content:space-between;gap:20px;font-size:.73rem;background:#fff}
+@media(max-width:1150px){.product-piece{grid-template-columns:1fr;gap:18px}.paper-image{width:min(100%,240px);margin:auto}.products-grid{align-items:start}.products-surface{padding-inline:30px}.months-layout{grid-template-columns:1fr}.months-intro{max-width:660px}}
+@media(max-width:780px){.ofc-nav-inner{padding:12px 18px;gap:10px}.ofc-nav .brand img{width:165px}.ofc-nav nav{display:none}.ofc-nav .nav-cta{padding:11px 12px;font-size:.7rem}.ofc-hero{grid-template-columns:1fr}.ofc-hero-copy{margin:0;max-width:none;padding:45px 24px 34px}.ofc-hero h1{max-width:680px;font-size:clamp(2.7rem,8vw,4.6rem)}.ofc-hero-visual{min-height:300px}.club .container{width:min(100% - 36px,1240px)}.products-grid{grid-template-columns:1fr;gap:20px}.product-piece{grid-template-columns:40% 1fr;gap:17px}.product-plus{margin:auto}.paper-image{width:100%}.steps{gap:20px}.steps article:not(:last-child)::after{display:none}.months-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.offer-layout{grid-template-columns:1fr}.faq-layout{grid-template-columns:1fr}.founder-layout{grid-template-columns:175px 1fr;gap:25px}.founder-photo{width:175px;height:175px}}
+@media(max-width:560px){.ofc-nav .brand img{width:145px}.ofc-hero-visual{min-height:250px}.products-surface{padding:32px 15px 22px}.products-surface>h2{margin-bottom:24px}.product-piece{grid-template-columns:1fr;text-align:center}.paper-image{max-width:260px}.piece-copy p{max-width:380px;margin:auto}.steps{grid-template-columns:1fr;gap:32px}.steps article{padding:0 4px}.steps h3{max-width:340px}.months-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.month-card{min-height:215px}.founder-layout{grid-template-columns:1fr;text-align:center}.founder-photo{margin:auto}.signature span{display:block;padding-left:0}.offer-layout{padding:24px 15px}.price-card{padding:20px}.footer{flex-wrap:wrap;justify-content:center;text-align:center}.ofc-products{padding-inline:10px}}
 </style>
 </PublicLayout>
