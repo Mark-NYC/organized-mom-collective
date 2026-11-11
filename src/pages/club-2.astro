@@ -523,5 +523,51 @@ const closeUp = (month: string) => {
 .soccer-row::after{content:"";position:absolute;inset:1px;border:2px solid #719c68;border-radius:8px;box-shadow:0 0 0 4px #cfe7ba9c;pointer-events:none;opacity:0;animation:rivera-soccer-emphasis 15s linear infinite}
 @keyframes rivera-soccer-emphasis{0%,53%{opacity:0}58%,85%{opacity:1}93%,100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.reveal-field,.soccer-row::after{animation:none!important;opacity:1!important}}
+
+/* On phones, keep the full printed routine readable and put the phone below it.
+   The small overlap is decorative; it must not obscure any routine steps. */
+@media(max-width:750px){
+ .product-stack{width:100%;max-width:480px;padding:10px 0 0;margin-inline:auto}
+ .product-print{width:100%;transform:rotate(-1deg)}
+ .rivera-routine-sheet{aspect-ratio:auto;min-height:490px;padding:clamp(12px,3.4vw,22px);gap:7px}
+ .rivera-sheet-brand{font-size:8px;padding:8px 0 11px}
+ .rivera-sheet-head{padding:12px}
+ .rivera-sheet-head h3{font-size:clamp(22px,6vw,32px);white-space:normal;line-height:1.08}
+ .rivera-family{font-size:12px}
+ .rivera-subtitle{font-size:11px}
+ .rivera-children{font-size:9px;gap:8px;flex-wrap:wrap}
+ .rivera-sheet-instruction{font-size:9px;padding:7px 0 5px}
+ .rivera-routine-rows{flex:none;grid-template-rows:none;grid-auto-rows:minmax(43px,auto);gap:6px}
+ .rivera-routine-row{grid-template-columns:12% 13% minmax(0,1fr) auto;column-gap:2.5%;min-height:43px;overflow:visible}
+ .rivera-routine-row img{width:100%;max-height:31px;max-width:38px;min-width:0}
+ .rr-number{font-size:17px;min-height:43px}
+ .rr-action{font-size:clamp(11px,3.15vw,16px);line-height:1.13;overflow-wrap:break-word}
+ .rr-action small{font-size:8px;padding-top:3px}
+ .rr-note{max-width:74px;padding:4px;font-size:clamp(6px,1.7vw,9px);line-height:1.2}
+ .rivera-finished{min-height:45px;padding:6px}
+ .rivera-finished strong{font-size:18px}
+ .rivera-finished span{font-size:7px}
+ .club-phone-wrap{position:relative;right:auto;bottom:auto;margin:-20px 4% 0 auto;width:min(48%,196px);max-width:196px;z-index:2}
+ .club-phone-brand{font-size:7px}
+ .club-phone-date{font-size:7px}
+ .club-phone-title{font-size:17px}
+ .club-phone-subtitle{font-size:9px}
+ .club-phone-meeting b{font-size:9px}
+ .club-phone-meeting small{font-size:8px}
+ .club-phone-bottom{font-size:7px}
+ .mockup-caption{position:static;display:block;margin-top:10px;text-align:center;font-size:.7rem}
+}
+@media(max-width:390px){
+ .rivera-routine-sheet{min-height:470px;padding:10px}
+ .rivera-sheet-head h3{font-size:22px}
+ .rivera-routine-row{grid-template-columns:12% 12% minmax(0,1fr) auto;column-gap:2%}
+ .rr-action{font-size:11px}
+ .rr-note{max-width:61px;font-size:6px}
+ .club-phone-wrap{width:53%;margin-top:-12px}
+ .club-phone-title{font-size:15px}
+ .club-phone-meeting b{font-size:8px}
+ .club-phone-meeting small{font-size:7px}
+}
+
 </style>
 </PublicLayout>
