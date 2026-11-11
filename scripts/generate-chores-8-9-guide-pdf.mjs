@@ -90,7 +90,7 @@ async function main(){
  const p=pdf.addPage(LETTER);p.drawRectangle({x:0,y:0,width:612,height:792,color:C.ivory});
 
  // Clean reference-card-like header.
- drawCentered(p,'CHORES FOR 8-9-YEAR-OLDS',serif,25,306,747);
+ drawCentered(p,'CHORES FOR 8-9 YEAR-OLDS',serif,25,306,747);
  drawCentered(p,'Pick a few jobs. Practice them together. Start owning the work.',regular,9.3,306,722);
  pill(p,42,688,528,17,8.5,C.leaf);
  drawCentered(p,'CHOOSE WHAT YOU WANT TO PRACTICE',semibold,9.5,306,691.8);
