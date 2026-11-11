@@ -261,7 +261,7 @@ const closeUp = (month: string) => {
  <div class="container ofc-split">
   <div class="ofc-section-heading"><p class="eyebrow">GOOD QUESTIONS</p><h2 id="ofc-faq-title">A few questions <em>before you start.</em></h2></div>
   <div class="ofc-faq-list">
-   ${faqs.slice(0, 8).map(([question, answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}
+   {faqs.slice(0, 8).map(([question, answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}
   </div>
  </div>
 </section>
