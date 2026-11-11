@@ -1,6 +1,23 @@
 <!-- Personalized companion preview appears after the chart email gate and successful download. -->
-<dialog id="chore-companion" class="first-week" data-first-week aria-labelledby="fw-title">
-  <div class="fw-inner">
+<dialog id="chore-companion" class="first-week" data-first-week data-phase="gift" aria-labelledby="fw-gift-title">
+  <div class="fw-gift" data-fw-gift>
+    <button type="button" class="fw-gift-close" data-fw-dismiss aria-label="Close gift">×</button>
+    <div class="fw-confetti" data-fw-confetti aria-hidden="true"></div>
+    <div class="fw-gift-art" aria-hidden="true">
+      <svg viewBox="0 0 100 100" width="84" height="84" fill="none" stroke="#545454" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M17 43h66v43H17zM12 35h76v13H12zM48 35v51M52 35v51"/>
+        <path d="M49 34C17 32 22 12 36 14c12 2 15 20 15 20s3-23 17-21c15 3 11 24-16 21"/>
+        <path d="M12 20l-4-7M86 18l5-7M8 62l-6 3M91 62l6 3"/>
+      </svg>
+    </div>
+    <p class="fw-gift-kicker">YOUR CHORE CHART IS DOWNLOADED</p>
+    <h2 id="fw-gift-title">One more thing, just for <span data-fw-gift-name>your child</span>.</h2>
+    <p class="fw-gift-description">We made you a <strong>free personalized First Week Plan</strong> to help turn the chores you picked into a rhythm your child can actually own.</p>
+    <p class="fw-gift-detail">Made from your child's age and chores. Yours to keep. No second email.</p>
+    <button type="button" class="fw-gift-button" data-fw-reveal>Open my free gift</button>
+    <button type="button" class="fw-gift-dismiss" data-fw-dismiss>No thanks, just my chart</button>
+  </div>
+  <div class="fw-inner" data-fw-plan>
     <div class="fw-top"><p class="fw-eyebrow">Your free companion plan is ready</p><button type="button" class="fw-close" data-fw-close aria-label="Close plan preview">×</button></div>
     <h2 id="fw-title">A first-week plan made for your child.</h2>
     <p class="fw-intro" data-fw-intro>We've made a companion plan from the chart you created. Use it to help your child begin taking ownership.</p>
@@ -24,6 +41,23 @@
 <style>
 .first-week{position:fixed;inset:12px;margin:auto;width:min(850px,calc(100vw - 24px));max-width:850px;max-height:calc(100dvh - 24px);overflow-y:auto;border:1px solid #ddd5cb;border-radius:13px;background:#FBF7F1;color:#545454;padding:26px 24px;box-shadow:0 24px 90px #0005}
 .first-week::backdrop{background:rgba(35,34,32,.72)}
+.first-week[data-phase="gift"]{width:min(480px,calc(100vw - 28px));padding:0;max-height:calc(100dvh - 28px);overflow:hidden}
+.first-week[data-phase="gift"] .fw-inner{display:none}
+.first-week[data-phase="plan"] .fw-gift{display:none}
+.fw-gift{isolation:isolate;position:relative;text-align:center;background:#FBF7F1;padding:52px 31px 34px;display:flex;flex-direction:column;align-items:center;gap:13px;overflow:hidden}
+.fw-gift-close{position:absolute;right:10px;top:8px;border:0;background:none;color:#545454;font-size:29px;width:44px;height:44px;cursor:pointer;z-index:2}
+.fw-gift-art{position:relative;z-index:1;width:112px;height:112px;border-radius:50%;background:#D4DFC4;display:grid;place-items:center;margin:0 0 6px}
+.fw-gift-kicker{position:relative;z-index:1;font:700 10px Montserrat,sans-serif;letter-spacing:.16em;color:#526C5B;margin:0}
+.fw-gift h2{position:relative;z-index:1;font:400 clamp(28px,6vw,37px)/1.12 Georgia,serif;margin:0;color:#3f3b39}
+.fw-gift-description{position:relative;z-index:1;max-width:350px;font:400 15px/1.6 Montserrat,sans-serif;margin:0}
+.fw-gift-detail{position:relative;z-index:1;font-size:12px;color:#76716b;line-height:1.5;margin:0}
+.fw-gift-button{position:relative;z-index:1;margin-top:10px;background:#545454;border:0;border-radius:7px;color:#fff;padding:16px 22px;min-height:52px;width:100%;font:700 14px Montserrat,sans-serif;cursor:pointer}
+.fw-gift-dismiss{position:relative;z-index:1;background:none;border:0;color:#777;text-decoration:underline;text-underline-offset:3px;min-height:38px;cursor:pointer;font-size:12px}
+.fw-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.fw-confetti-piece{position:absolute;top:-16px;width:8px;height:13px;opacity:0;animation:fw-fall 1500ms ease-out forwards;transform:translate3d(0,0,0) rotate(0deg)}
+@keyframes fw-fall{0%{opacity:0;transform:translate3d(0,-20px,0) rotate(0)}12%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate3d(var(--fw-drift),360px,0) rotate(var(--fw-spin))}}
+@media(prefers-reduced-motion:reduce){.fw-confetti-piece{animation:none;display:none}}
+
 .fw-inner{max-width:980px;margin:auto}
 .fw-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .fw-close{border:0;background:none;color:#545454;min-width:44px;min-height:44px;font-size:32px;cursor:pointer}
@@ -53,6 +87,31 @@ import { toolEvent } from '../../lib/tool-engagement';
 
 type Detail = {name: string; age: string; chores: string[]};
 const section=document.querySelector<HTMLDialogElement>('[data-first-week]');
+function giftConfetti(){
+ const field=section?.querySelector<HTMLElement>('[data-fw-confetti]');
+ if(!field||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ field.replaceChildren();
+ const colors=['#CDDDE1','#D4DFC4','#F1D8A8','#E8D2D6','#D8B79F','#BBCBC4'];
+ for(let i=0;i<25;i++){
+  const piece=document.createElement('span');piece.className='fw-confetti-piece';
+  piece.style.left=((i*47+13)%100)+'%';
+  piece.style.backgroundColor=colors[i%colors.length];
+  piece.style.animationDelay=((i*71)%380)+'ms';
+  piece.style.setProperty('--fw-drift',(((i*37)%130)-65)+'px');
+  piece.style.setProperty('--fw-spin',((i%2?-1:1)*(200+(i*37)%500))+'deg');
+  field.append(piece);
+ }
+ window.setTimeout(()=>field.replaceChildren(),2150);
+}
+section?.querySelectorAll<HTMLButtonElement>('[data-fw-dismiss]').forEach(button=>button.addEventListener('click',()=>section?.close()));
+section?.querySelector<HTMLButtonElement>('[data-fw-reveal]')?.addEventListener('click',()=>{
+ if(!section)return;
+ section.dataset.phase='plan';
+ section.setAttribute('aria-labelledby','fw-title');
+ toolEvent('tool_plan_preview','chore-chart');
+ void refreshPreview();
+});
+
 const challenge=section?.querySelector<HTMLSelectElement>('[data-fw-challenge]');
 const download=section?.querySelector<HTMLButtonElement>('[data-fw-download]');
 const message=section?.querySelector<HTMLElement>('[data-fw-message]');
@@ -115,7 +174,7 @@ window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
  const detail=(e as CustomEvent<Detail>).detail;
  if(!detail||!Array.isArray(detail.chores))return;
  current={name:String(detail.name||'').slice(0,24),age:String(detail.age||'').slice(0,60),chores:detail.chores.map(x=>String(x).slice(0,100))};
- if(section){sync();if(!section.open)section.showModal();toolEvent('tool_plan_preview','chore-chart');void refreshPreview();}
+ if(section){sync();section.dataset.phase='gift';section.setAttribute('aria-labelledby','fw-gift-title');const giftName=section.querySelector<HTMLElement>('[data-fw-gift-name]');if(giftName)giftName.textContent=String(current.name||'your child').trim().split(/\s+/)[0]||'your child';if(!section.open)section.showModal();giftConfetti();}
 }) as EventListener);
 challenge?.addEventListener('change',()=>{sync();void refreshPreview();});
 
