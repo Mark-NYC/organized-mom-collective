@@ -103,3 +103,14 @@ Use a **private Supabase Storage bucket** (example: `gelato-print-files`) for th
 When an authorized admin submits a draft order, the backend should create a limited-lifetime signed download URL server-side and pass it to Gelato. Confirm the expiry window is long enough for Gelato's file ingestion. Do not log or return the signed URL to frontend clients. Do not submit an order until the function is updated to support signed URLs and tested. Existing `shop-gelato-draft` is NOT compatible with private storage as written because it reads `print_file_url` directly.
 
 Keep mapping disabled and site product stock zero until private bucket upload, signed URL support, sample validation, and end-to-end tests are complete.
+
+## Safe private-file connection test (admin)
+
+The `/admin/orders/` screen now has a **Test Gelato Connection** button. It calls standalone Edge Function `shop-gelato-health`. Before testing:
+
+1. Merge the PR, then deploy `supabase/functions/shop-gelato-health/index.ts` as a new Edge Function named `shop-gelato-health` through Supabase Dashboard.
+2. Turn off the gateway's legacy Verify JWT option for this function, matching `shop-gelato-product`. The handler itself validates the authenticated administrator with `shop_is_admin_user`.
+3. Redeploy the updated `shop-gelato-draft` function too, since its signed URL handling was corrected.
+4. Open `https://www.organizedmomcollective.com/admin/orders/`, sign in as an admin and press **Test Gelato Connection**.
+
+This **does not** create orders, call Gelato's order API, release production, enable product mappings, change checkout or expose signed URLs. It checks the mapped product, that the bucket is private, successful signing of the mapped PDF path, and that the first bytes of the short-lived private download read `%PDF-`. A pass proves Supabase can privately serve the PDF, **not** that Gelato accepts or ingests the PDF. Keep the product inactive, stock 0, mapping disabled until an approved draft-order validation.
