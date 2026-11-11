@@ -85,7 +85,16 @@ function plan(){
  const chores=d.chores.map(safe).filter(Boolean);
  const primary=shorten(chores[0]||'Choose one job from the chore chart',70);
  const secondary=chores.length>1?shorten(chores[1],70):'Keep practicing the first job';
- return {name,age:safe(d.age)||'Age-appropriate',primary,secondary,...challengeInfo};
+ // The chart stores an age BAND. Tailor support to that band without pretending to know an exact age.
+ const ageNumber=Number((d.age.match(/\\d+/)||[])[0]||0);
+ const ageSupport=ageNumber>0&&ageNumber<=5
+   ? 'For younger children: show each step, do it together, and keep the practice short.'
+   : ageNumber>=6&&ageNumber<=9
+     ? 'For elementary ages: agree on a clear cue, let your child try, then check in without hovering.'
+     : ageNumber>=10
+       ? 'For older children: invite your child to choose the timing and define what finished looks like.'
+       : 'Start together and adjust how much help is needed, instead of assuming independence on day one.';
+ return {name,age:safe(d.age)||'Age-appropriate',primary,secondary,ageSupport,...challengeInfo};
 }
 function sync(){
  if(!section||!current)return;
@@ -96,7 +105,7 @@ function sync(){
  put('[data-fw-age]',p.age);
  put('[data-fw-focus]',p.focus);
  put('[data-fw-job]',p.primary);
- put('[data-fw-tip]',p.tip);
+ put('[data-fw-tip]',p.ageSupport);
 }
 window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
  const detail=(e as CustomEvent<Detail>).detail;
@@ -142,7 +151,7 @@ download?.addEventListener('click',async()=>{
   box(42,567,528,94,blue);
   draw('THIS WEEK\'S FOCUS',56,640,9,bold,slate);
   let y=paragraph(p.focus,56,612,492,19,serif,ink,23);
-  paragraph(p.tip,56,Math.min(587,y-1),492,10,sans,muted,13);
+  paragraph(p.ageSupport,56,Math.min(587,y-1),492,10,sans,muted,13);
   heading('One or two responsibilities worth trying',42,539);
   draw('Pick one to start. A second job can wait until the first feels familiar.',42,519,10,sans,muted);
   box(42,364,254,139,ivory,line);
@@ -154,7 +163,7 @@ download?.addEventListener('click',async()=>{
   draw('ADD LATER',321,482,9,bold,slate);
   y=paragraph(p.secondary,321,458,230,15,serifBold,ink,18);
   draw('OWNERSHIP',321,Math.min(415,y-10),9,bold,slate);
-  paragraph('Show it, try it together, then hand over one step.',321,394,230,10,sans,ink,13);
+  paragraph(p.action,321,394,230,10,sans,ink,13);
   heading('Try this at your family meeting',42,334);
   draw('A simple four-part rhythm',42,315,10,sans,muted);
   const parts=[
