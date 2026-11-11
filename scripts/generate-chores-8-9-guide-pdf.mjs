@@ -15,19 +15,25 @@ const LETTER=[612,792];
 const hex=(s)=>{const q=s.replace('#','');return rgb(parseInt(q.slice(0,2),16)/255,parseInt(q.slice(2,4),16)/255,parseInt(q.slice(4,6),16)/255)};
 const C={ivory:hex('#FBF7F1'),charcoal:hex('#545454'),peach:hex('#D8B79F'),leaf:hex('#D4DFC4'),blue:hex('#CDDDE1'),blush:hex('#E8D2D6'),white:rgb(1,1,1),rule:hex('#D5C5B8')};
 
-// Original finished age-reference sheet is 1275 x 1875.
-// Crops isolate the illustration, excluding the original printed chore labels.
+// The finished age-reference sheet contains BOTH illustration artwork and printed
+// captions. Crop only the artwork bands. Do not let a crop extend into source captions.
+// Source file: 1275x1875 px. All coordinates are based on that fixed original.
 const jobs=[
- {title:'Pack my backpack',x:155,y:210,w:235,h:224},
- {title:'Tidy my desk',x:397,y:210,w:235,h:224},
- {title:'Clear the table',x:637,y:210,w:235,h:224},
- {title:'Help with laundry',x:881,y:210,w:235,h:224},
- {title:'Wipe the counters',x:155,y:556,w:235,h:224},
- {title:'Tidy the entryway',x:397,y:556,w:235,h:224},
- {title:'After-school reset',x:637,y:556,w:235,h:224},
- {title:'Clean my floor',x:155,y:1235,w:235,h:224},
- {title:'Tidy the bathroom',x:637,y:1235,w:235,h:224}
+ {title:'Pack my backpack',x:155,y:215,w:235,h:200,band:0},
+ {title:'Tidy my desk',x:397,y:215,w:235,h:200,band:0},
+ {title:'Clear the table',x:637,y:215,w:235,h:200,band:0},
+ {title:'Help with laundry',x:881,y:215,w:235,h:200,band:0},
+ {title:'Wipe the counters',x:155,y:568,w:235,h:180,band:1},
+ {title:'Tidy the entryway',x:397,y:568,w:235,h:180,band:1},
+ {title:'After-school reset',x:637,y:568,w:235,h:180,band:1},
+ {title:'Clean my floor',x:155,y:1210,w:235,h:175,band:2},
+ {title:'Tidy the bathroom',x:637,y:1210,w:235,h:175,band:2}
 ];
+const sourceCaptionStarts=[435,775,1400];
+function assertArtOnly(item){
+ if(item.y+item.h>=sourceCaptionStarts[item.band])
+   throw new Error('Artwork crop includes original caption for '+item.title);
+}
 
 function pill(page,x,y,w,h,r,fill,stroke=null){
  page.drawRectangle({x:x+r,y,width:w-2*r,height:h,color:fill});
@@ -95,6 +101,7 @@ async function main(){
  const tops=[676,524,372];
  const embedded=[];
  for(const item of jobs){
+  assertArtOnly(item);
   const bytes=await sharp(source).extract({left:item.x,top:item.y,width:item.w,height:item.h})
    .resize(320,305,{fit:'contain',background:{r:251,g:247,b:241,alpha:1}})
    .png().toBuffer();
