@@ -1,7 +1,7 @@
 /**
  * Responsibility Cards edition: ages 8–9 printable.
  * Nine complete transparent illustrations are embedded without cropping.
- * This prioritizes intact art over upscaling a cut-off reference-card crop.
+ * Uses the higher-quality originals from the dedicated illustration folder.
  * One US Letter sheet, selectable text, standalone printable, no tabletop imagery.
  */
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
@@ -13,24 +13,20 @@ const LETTER=[612,792];
 const hex=(s)=>{const q=s.replace('#','');return rgb(parseInt(q.slice(0,2),16)/255,parseInt(q.slice(2,4),16)/255,parseInt(q.slice(4,6),16)/255)};
 const C={ivory:hex('#FBF7F1'),charcoal:hex('#545454'),peach:hex('#D8B79F'),leaf:hex('#D4DFC4'),blue:hex('#CDDDE1'),blush:hex('#E8D2D6'),white:rgb(1,1,1),rule:hex('#D5C5B8')};
 
-// Use the ORIGINAL, COMPLETE, TRANSPARENT responsibility-card illustrations.
-// Do not crop the finished reference-card layout: that cut off the tops/bottoms
-// of the artwork and occasionally brought original captions into the PDF.
-// The standalone uploaded PNGs are small but their complete art is preserved.
-// All nine artwork files are used as-is. No image processing is involved.
-const artDir='public/assets/responsibility-cards/illustrations/';
+// Use ONLY the matching higher-resolution source illustrations uploaded in
+// higher-quality/. Every file is embedded intact with no crop, trim, or resampling.
+const artDir='public/assets/responsibility-cards/illustrations/higher-quality/';
 const artFile=n=>artDir+'My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) ('+n+').png';
 const jobs=[
- {title:'Pack my backpack',image:artFile(16)},
- {title:'Tidy my desk',image:artFile(11)},
- {title:'Clear the table',image:artFile(12)},
- {title:'Help with laundry',image:artFile(13)},
- {title:'Wipe the counters',image:artFile(14)},
- {title:'Tidy the entryway',image:artFile(15)},
- // A collection basket represents the after-school reset without repeating the backpack art.
- {title:'After-school reset',image:artFile(10)},
- {title:'Clean my floor',image:artFile(18)},
- {title:'Tidy the bathroom',image:artFile(20)}
+ {title:'Pack my backpack',image:artFile(25)},
+ {title:'Tidy my desk',image:artFile(31)},
+ {title:'Clear the table',image:artFile(34)},
+ {title:'Help with laundry',image:artFile(35)},
+ {title:'Wipe the counters',image:artFile(36)},
+ {title:'Tidy the entryway',image:artFile(39)},
+ {title:'After-school reset',image:artFile(27)},
+ {title:'Clean my floor',image:artFile(32)},
+ {title:'Tidy the bathroom',image:artFile(40)}
 ];
 
 function pill(page,x,y,w,h,r,fill,stroke=null){
@@ -111,7 +107,7 @@ async function main(){
      bytes.readUInt32BE(16)<1||
      bytes.readUInt32BE(20)<1)
     throw new Error('Expected original complete RGBA PNG: '+item.image);
-  // Embed the original uploaded file. No cropping, trimming or resampling.
+  // Embed the higher-quality original uploaded file. No cropping, trimming or resampling.
   embedded.push(await pdf.embedPng(bytes));
  }
  jobs.forEach((job,i)=>{
