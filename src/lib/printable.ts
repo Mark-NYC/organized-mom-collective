@@ -57,7 +57,7 @@ export async function downloadPng(
   root: HTMLElement,
   opts: { filename: string; width: number; height?: number; layoutHost: HTMLElement; exportClass: string; button: HTMLButtonElement },
 ) {
-  if (!await requireToolEmail()) return;
+  if (!await requireToolEmail()) return false;
   const { button, layoutHost, exportClass, width } = opts;
   const label = button.textContent;
   const dates = fieldsIn(root).filter((el): el is HTMLInputElement => el instanceof HTMLInputElement && el.type === 'date');
@@ -92,9 +92,11 @@ export async function downloadPng(
     link.download = opts.filename;
     link.href = dataUrl;
     link.click();
+    return true;
   } catch (error) {
     console.error('PNG export failed', error);
     alert('Sorry, the download didn’t work. Please try again.');
+    return false;
   } finally {
     dates.forEach((el, i) => {
       el.type = 'date';
