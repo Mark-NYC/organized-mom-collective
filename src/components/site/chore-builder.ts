@@ -221,8 +221,8 @@ export function initChoreBuilder(host: HTMLElement) {
     const previous=sheet.style.transform;
     sheet.style.transform='none';
     try{
-      await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});
-      if (host.closest('[data-chart-modern]')) {
+      const downloaded=await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});
+      if (downloaded && host.closest('[data-chart-modern]')) {
         window.dispatchEvent(new CustomEvent('omc:chore-chart-downloaded',{detail:{
           name:state.name, age:String(state.age), chores:state.jobs.map(job=>job.title.trim()).filter(Boolean),
         }}));
