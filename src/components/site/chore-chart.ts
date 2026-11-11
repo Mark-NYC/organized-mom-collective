@@ -262,5 +262,13 @@ export function initChoreChart(host: HTMLElement, handoff?: ToolHandoff | null) 
       button,
     });
     hinted.forEach((el) => (el.placeholder = 'Reward'));
+    // A free, optional companion plan is offered only after the chart download completes.
+    if (host.closest('[data-chart-modern]')) {
+      window.dispatchEvent(new CustomEvent('omc:chore-chart-downloaded', { detail: {
+        name: nameInput.value.trim(),
+        age: sets[ageField.value as AgeGroup]?.label ?? '',
+        chores: rowFields.map(input => input.value.trim()).filter(Boolean),
+      } }));
+    }
   });
 }
