@@ -1,0 +1,182 @@
+{
+  "note": "Descriptive aliases for original approved card illustrations. Original filenames are not changed. The uploaded small PNGs are about 70px wide (except collection art); use sparingly for print until higher resolution source is supplied.",
+  "sourcePattern": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (N).png; N=0 has no numeric suffix",
+  "items": [
+    {
+      "id": 0,
+      "slug": "wash-hands",
+      "description": "Hands washing at sink with soap",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 1,
+      "slug": "put-toys-away",
+      "description": "Teddy bear and toys in storage box",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (1).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 2,
+      "slug": "comb-hair",
+      "description": "Hairbrush and comb",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (2).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 3,
+      "slug": "brush-teeth",
+      "description": "Toothbrushes in cup",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (3).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 4,
+      "slug": "put-clothes-away",
+      "description": "Folded clothing assortment",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (4).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 5,
+      "slug": "put-pajamas-away",
+      "description": "Pajama set",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (5).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 6,
+      "slug": "make-bed",
+      "description": "Made bed",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (6).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 7,
+      "slug": "organize-belongings",
+      "description": "Two fabric storage bins with belongings",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (7).png",
+      "role": "individual",
+      "confidence": "verify"
+    },
+    {
+      "id": 8,
+      "slug": "set-table",
+      "description": "Plate and cutlery",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (8).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 9,
+      "slug": "feed-pet",
+      "description": "Pet food bowl",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (9).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 10,
+      "slug": "gather-items-in-basket",
+      "description": "Basket containing mixed belongings",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (10).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 11,
+      "slug": "tidy-desk",
+      "description": "Desk with stationery and books",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (11).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 12,
+      "slug": "clear-table",
+      "description": "Hands carrying plate and cup",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (12).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 13,
+      "slug": "help-with-laundry",
+      "description": "Laundry basket filled with clothes",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (13).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 14,
+      "slug": "wipe-counter",
+      "description": "Hand wiping kitchen worktop",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (14).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 15,
+      "slug": "put-shoes-coat-backpack-away",
+      "description": "Backpack, shoes, and outerwear",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (15).png",
+      "role": "individual",
+      "confidence": "verify"
+    },
+    {
+      "id": 16,
+      "slug": "pack-backpack",
+      "description": "Backpack with notebook",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (16).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 17,
+      "slug": "gather-items-in-basket-alt",
+      "description": "Basket containing mixed belongings; very similar to item 10",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (17).png",
+      "role": "alternate",
+      "confidence": "verify"
+    },
+    {
+      "id": 18,
+      "slug": "sweep-floor",
+      "description": "Broom and dustpan",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (18).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 19,
+      "slug": "take-out-trash",
+      "description": "Trash can and bag",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (19).png",
+      "role": "individual",
+      "confidence": "high"
+    },
+    {
+      "id": 20,
+      "slug": "clean-sink",
+      "description": "Bathroom sink and cloth",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (20).png",
+      "role": "individual",
+      "confidence": "verify"
+    },
+    {
+      "id": 21,
+      "slug": "family-responsibilities-collection",
+      "description": "Large mixed responsibilities illustration with backpack, shoes, broom, watering can, towel",
+      "filename": "My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) (21).png",
+      "role": "collection",
+      "confidence": "high"
+    }
+  ]
+}
