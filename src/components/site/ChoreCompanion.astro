@@ -48,12 +48,20 @@
 </style>
 <script>
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { choreLineIconForText } from '../../data/chore-line-icons';
 
 type Detail = {name: string; age: string; chores: string[]};
 const section=document.querySelector<HTMLElement>('[data-first-week]');
 const challenge=section?.querySelector<HTMLSelectElement>('[data-fw-challenge]');
 const download=section?.querySelector<HTMLButtonElement>('[data-fw-download]');
 const message=section?.querySelector<HTMLElement>('[data-fw-message]');
+const iframe=section?.querySelector<HTMLIFrameElement>('[data-fw-pdf]');
+const loading=section?.querySelector<HTMLElement>('[data-fw-loading]');
+const openLink=section?.querySelector<HTMLAnchorElement>('[data-fw-open]');
+let previewUrl:string|null=null;
+let generation=0;
+section?.querySelector<HTMLButtonElement>('[data-fw-close]')?.addEventListener('click',()=>section?.close());
+section?.addEventListener('cancel',()=>{ /* Let the visitor close the preview and keep the chart. */ });
 let current:Detail|null=null;
 const challenges:Record<string,{focus:string;tip:string;action:string;question:string}>={
  reminders:{focus:'Give the job a cue, not another reminder.',tip:'Connect this job to something your child already does every day.',action:'Practice the sequence together, then point to the chart instead of repeating instructions.',question:'What helped you remember on your own?'},
@@ -96,16 +104,12 @@ window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
  const detail=(e as CustomEvent<Detail>).detail;
  if(!detail||!Array.isArray(detail.chores))return;
  current={name:String(detail.name||'').slice(0,24),age:String(detail.age||'').slice(0,60),chores:detail.chores.map(x=>String(x).slice(0,100))};
- if(section){section.hidden=false;sync();section.scrollIntoView({behavior:'smooth',block:'start'});}
+ if(section){sync();section.showModal();void refreshPreview();}
 }) as EventListener);
-challenge?.addEventListener('change',sync);
+challenge?.addEventListener('change',()=>{sync();void refreshPreview();});
 
-download?.addEventListener('click',async()=>{
- if(!current||!download)return;
+async function generatePdf():Promise<Uint8Array>{
  const p=plan();
- download.disabled=true;
- if(message)message.textContent='Preparing your printable...';
- try{
   const pdf=await PDFDocument.create();
   const page=pdf.addPage([612,792]);
   const serif=await pdf.embedFont(StandardFonts.TimesRoman);
@@ -167,14 +171,39 @@ download?.addEventListener('click',async()=>{
   let footer=paragraph('A chart is a start. The Family Meeting Club helps your family build responsibility, connection and healthy rhythms with personalized printed tools delivered every month.',56,132,498,10,sans,ink,13);
   draw('Explore: organizedmomcollective.com/club-2/',56,Math.max(90,footer-3),10,bold,slate);
   draw('Made for your family  |  organizedmomcollective.com',42,51,8,sans,muted);
-  const bytes=await pdf.save();
+  return await pdf.save();
+}
+async function refreshPreview(){
+ if(!current||!section)return;
+ const task=++generation;
+ if(loading)loading.hidden=false;
+ if(download)download.disabled=true;
+ if(message)message.textContent='';
+ try {
+  const bytes=await generatePdf();
+  if(task!==generation)return;
   const blob=new Blob([new Uint8Array(bytes)],{type:'application/pdf'});
-  const url=URL.createObjectURL(blob);const link=document.createElement('a');
-  link.href=url;link.download=(p.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'family')+'-first-week-plan.pdf';
-  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);
-  if(message)message.textContent='Your one-page plan is ready. Try it together this week.';
-  window.dispatchEvent(new CustomEvent('omc:chore-companion-downloaded',{detail:{source:'chore-chart'}}));
- }catch(error){if(message)message.textContent='We could not make the PDF. Please try again.';console.error(error);}
- finally{download.disabled=false;}
+  const url=URL.createObjectURL(blob);
+  const old=previewUrl;previewUrl=url;
+  if(iframe)iframe.src=url+'#toolbar=0&navpanes=0';
+  if(openLink){openLink.href=url;openLink.hidden=false;}
+  if(old)setTimeout(()=>URL.revokeObjectURL(old),10000);
+  if(loading)loading.hidden=true;
+  if(download)download.disabled=false;
+ } catch(error){
+  console.error('First-week preview failed',error);
+  if(task===generation){if(loading)loading.textContent='Preview unavailable. Please try again.';if(message)message.textContent='Could not prepare the plan. Change the option above to retry.';}
+ }
+}
+download?.addEventListener('click',()=>{
+ if(!current||!previewUrl)return;
+ const p=plan();
+ const link=document.createElement('a');
+ link.href=previewUrl;
+ link.download=(p.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'family')+'-first-week-plan.pdf';
+ document.body.appendChild(link);link.click();link.remove();
+ if(message)message.textContent='Saved! Bring it to your next family meeting.';
+ window.dispatchEvent(new CustomEvent('omc:chore-companion-downloaded',{detail:{source:'chore-chart'}}));
 });
+
 </script>
