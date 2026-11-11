@@ -164,19 +164,48 @@ const closeUp = (month: string) => {
 
 <section class="ofc-products" id="what-you-get" aria-labelledby="what-heading">
  <div class="products-surface">
-  <h2 id="what-heading">Here's what you get <em>every month.</em></h2>
-  <div class="products-grid">
-   <article class="product-piece">
-    <div class="paper-image"><img src={kitPreviews.find(k => k.month === 'March')!.image} alt="Example of the March family chore chart resource" width="1080" height="1080" loading="lazy"/></div>
-    <div class="piece-copy"><span class="pill">A PERSONALIZED FAMILY RESOURCE</span><h3>One problem. One ready-to-use tool.</h3><p>Chores, laundry, dinner, or summer routines, with your family's names, ages, and responsibilities worked in. Printed and mailed to you.</p></div>
-   </article>
-   <div class="product-plus" aria-hidden="true">+</div>
-   <article class="product-piece">
-    <div class="paper-image paper-blue"><img src={kitPreviews.find(k => k.month === 'January')!.image} alt="Example of the January Family Meeting printed resource" width="1080" height="1080" loading="lazy"/></div>
-    <div class="piece-copy"><span class="pill">A WEEKLY FAMILY MEETING GUIDE</span><h3>Ten minutes to put it to work.</h3><p>Four simple parts to help everyone talk, choose one thing to try, and take responsibility together.</p></div>
-   </article>
+  <div class="product-intro">
+   <p class="eyebrow">PRINTED + DIGITAL · INCLUDED EVERY MONTH</p>
+   <h2 id="what-heading">Here's what you get <em>every month.</em></h2>
+   <p>A printed family resource in the mail. A personalized Family Meeting focus on your phone.</p>
   </div>
-  <p class="products-foot">Made for your family. No blank pages to figure out.</p>
+  <div class="product-system">
+   <div class="product-stack" aria-label="Example of a personalized printed family resource with a digital Family Meeting focus">
+    <div class="product-print">
+     <img src={kitPreviews.find(k => k.month === 'March')!.image} alt="Illustrative March family chore chart, showing the kind of resource mailed each month" width="1080" height="1080" loading="lazy" decoding="async"/>
+    </div>
+    <div class="club-phone-wrap">
+     <div class="club-phone" role="img" aria-label="Illustrative phone preview: March family meeting focus, share the cleaning, discuss which jobs each person can own">
+      <div class="club-phone-notch"></div>
+      <div class="club-phone-screen">
+       <div class="club-phone-brand">FAMILY MEETING CLUB</div>
+       <div class="club-phone-date">MARCH · FAMILY FOCUS</div>
+       <div class="club-phone-title">Let's share the cleaning.</div>
+       <div class="club-phone-subtitle">One small step, together.</div>
+       <div class="club-phone-meeting">
+        <div><span>01</span><p><b>Our Focus</b><small>Everyone owns a part.</small></p></div>
+        <div><span>02</span><p><b>Let's Talk</b><small>Which job could each of us handle?</small></p></div>
+        <div><span>03</span><p><b>Everyone's Part</b><small>Choose a job and when to do it.</small></p></div>
+        <div><span>04</span><p><b>Let's Practice</b><small>Show what “finished” looks like.</small></p></div>
+       </div>
+       <div class="club-phone-bottom">TRY ONE THING THIS WEEK</div>
+      </div>
+     </div>
+    </div>
+    <span class="mockup-caption">Illustrative March resource + meeting focus</span>
+   </div>
+   <div class="product-system-copy">
+    <div class="product-feature">
+     <div class="product-feature-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="6" width="28" height="36" rx="2"/><path d="M17 16h14M17 23h14M17 30h10"/></svg></div>
+     <div><h3>A personalized printed resource</h3><p>A chore chart, laundry guide, dinner plan, or summer routine with your family's names, ages, and responsibilities already worked in. Mailed monthly, with Megan's note and simple instructions on the back.</p></div>
+    </div>
+    <div class="product-feature">
+     <div class="product-feature-icon phone-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><rect x="13" y="4" width="22" height="40" rx="5"/><path d="M21 10h6M21 37h6M18 19l3 3 8-8M18 29h12"/></svg></div>
+     <div><h3>A digital Family Meeting focus</h3><p>Personalized prompts for your weekly meetings, so everyone can talk about that month's challenge, choose one thing to try, and put the printed tool to use.</p></div>
+    </div>
+    <p class="product-bottom-line">One helps your family see the plan.<br/><strong>One helps your family put it into practice.</strong></p>
+   </div>
+  </div>
  </div>
 </section>
 
@@ -371,5 +400,47 @@ const closeUp = (month: string) => {
 @media(max-width:1150px){.product-piece{grid-template-columns:1fr;gap:18px}.paper-image{width:min(100%,240px);margin:auto}.products-grid{align-items:start}.products-surface{padding-inline:30px}.months-layout{grid-template-columns:1fr}.months-intro{max-width:660px}}
 @media(max-width:780px){.ofc-nav-inner{padding:12px 18px;gap:10px}.ofc-nav .brand img{width:165px}.ofc-nav nav{display:none}.ofc-nav .nav-cta{padding:11px 12px;font-size:.7rem}.ofc-hero{grid-template-columns:1fr}.ofc-hero-copy{margin:0;max-width:none;padding:45px 24px 34px}.ofc-hero h1{max-width:680px;font-size:clamp(2.7rem,8vw,4.6rem)}.ofc-hero-visual{min-height:300px}.club .container{width:min(100% - 36px,1240px)}.products-grid{grid-template-columns:1fr;gap:20px}.product-piece{grid-template-columns:40% 1fr;gap:17px}.product-plus{margin:auto}.paper-image{width:100%}.steps{gap:20px}.steps article:not(:last-child)::after{display:none}.months-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.offer-layout{grid-template-columns:1fr}.faq-layout{grid-template-columns:1fr}.founder-layout{grid-template-columns:175px 1fr;gap:25px}.founder-photo{width:175px;height:175px}}
 @media(max-width:560px){.ofc-nav .brand img{width:145px}.ofc-hero-visual{min-height:250px}.products-surface{padding:32px 15px 22px}.products-surface>h2{margin-bottom:24px}.product-piece{grid-template-columns:1fr;text-align:center}.paper-image{max-width:260px}.piece-copy p{max-width:380px;margin:auto}.steps{grid-template-columns:1fr;gap:32px}.steps article{padding:0 4px}.steps h3{max-width:340px}.months-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.month-card{min-height:215px}.founder-layout{grid-template-columns:1fr;text-align:center}.founder-photo{margin:auto}.signature span{display:block;padding-left:0}.offer-layout{padding:24px 15px}.price-card{padding:20px}.footer{flex-wrap:wrap;justify-content:center;text-align:center}.ofc-products{padding-inline:10px}}
+
+/* /calendar-inspired overlapping print + phone: one cohesive monthly product system. */
+.ofc-products{padding:30px 20px 0}
+.products-surface{background:#EDF1E8;border-radius:24px;padding:clamp(28px,3.7vw,56px) clamp(22px,4.4vw,72px);max-width:1504px;margin:auto}
+.product-intro{text-align:center;max-width:850px;margin:0 auto 22px}
+.product-intro .eyebrow{color:#728765;margin-bottom:12px}
+.product-intro h2{margin-bottom:14px}
+.product-intro>p:last-child{font-size:clamp(.98rem,1.3vw,1.12rem);line-height:1.55}
+.product-system{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);gap:clamp(32px,5.5vw,82px);align-items:center}
+.product-stack{position:relative;width:100%;max-width:560px;padding:18px 22% 34px 2%;margin-inline:auto}
+.product-print{position:relative;width:100%;transform:rotate(-3deg);filter:drop-shadow(0 12px 20px #33452e26)}
+.product-print img{display:block;width:100%;height:auto;object-fit:contain}
+.club-phone-wrap{position:absolute;right:0;bottom:30px;width:39%;max-width:220px;z-index:2;filter:drop-shadow(0 15px 19px #2a34283a)}
+.club-phone{border:6px solid #353938;border-radius:29px;background:#353938;padding:3px;box-shadow:inset 0 0 0 2px #737977;aspect-ratio:9/18.8;position:relative;overflow:hidden}
+.club-phone-notch{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:33%;height:12px;background:#353938;border-radius:0 0 10px 10px;z-index:3}
+.club-phone-screen{height:100%;border-radius:20px;background:#FBF7F1;padding:clamp(24px,3vw,35px) 8px 9px;overflow:hidden;color:#545454;display:flex;flex-direction:column}
+.club-phone-brand{text-align:center;font-size:clamp(5px,.6vw,8px);font-weight:800;letter-spacing:.08em;color:#5E7259}
+.club-phone-date{font-size:clamp(5px,.65vw,8px);letter-spacing:.07em;font-weight:800;color:#88776b;margin-top:12px}
+.club-phone-title{font:400 clamp(12px,1.35vw,19px)/1.08 Georgia,serif;margin-top:5px}
+.club-phone-subtitle{font:italic clamp(6px,.75vw,10px) Georgia,serif;color:#7E8775;margin-top:4px}
+.club-phone-meeting{display:grid;gap:5px;margin-top:12px}
+.club-phone-meeting>div{display:grid;grid-template-columns:19px minmax(0,1fr);gap:4px;padding:6px 5px;background:#fff;border-radius:5px;align-items:start}
+.club-phone-meeting>div:nth-child(1){background:#E6EEDC}
+.club-phone-meeting>div:nth-child(3){background:#F5E5CB}
+.club-phone-meeting>div span{font-size:7px;color:#6C8562;font-weight:800}
+.club-phone-meeting b{display:block;font-size:clamp(6px,.72vw,9px);line-height:1.2}
+.club-phone-meeting small{display:block;font-size:clamp(5px,.63vw,8px);line-height:1.24;margin-top:3px}
+.club-phone-bottom{font-size:clamp(5px,.65vw,8px);text-align:center;margin-top:auto;padding:8px 2px 3px;color:#53714D;font-weight:800;letter-spacing:.04em}
+.mockup-caption{position:absolute;left:1%;bottom:5px;font-size:.67rem;color:#586a57}
+.product-system-copy{display:grid;gap:27px;align-content:center}
+.product-feature{display:grid;grid-template-columns:53px minmax(0,1fr);gap:18px;align-items:start}
+.product-feature-icon{width:52px;height:52px;border-radius:13px;background:#F3D7C9;display:grid;place-items:center}
+.product-feature-icon.phone-icon{background:#CDDDE1}
+.product-feature-icon svg{width:31px;height:31px;stroke:#545454;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.product-feature h3{font-size:clamp(1.3rem,1.8vw,1.65rem);margin:1px 0 9px}
+.product-feature p{font-size:.92rem;line-height:1.64;max-width:430px}
+.product-bottom-line{margin:0!important;padding:15px 18px;background:#F8F5EE;border-left:3px solid #8CA47D;border-radius:0 12px 12px 0;font:italic clamp(1.05rem,1.45vw,1.3rem)/1.38 Georgia,serif}
+.product-bottom-line strong{font-weight:600}
+@media(max-width:960px){.product-system{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.product-feature{grid-template-columns:42px 1fr;gap:12px}.product-feature-icon{width:42px;height:42px}.product-feature-icon svg{width:27px;height:27px}.product-system-copy{gap:20px}.club-phone-meeting{gap:3px;margin-top:8px}.club-phone-meeting>div{padding:4px}}
+@media(max-width:750px){.product-system{grid-template-columns:1fr;gap:24px}.product-stack{max-width:470px;padding-right:22%;padding-bottom:30px}.club-phone-wrap{width:39%}.club-phone-brand{font-size:7px}.club-phone-date{font-size:7px}.club-phone-title{font-size:18px}.club-phone-subtitle{font-size:9px}.club-phone-meeting b{font-size:8px}.club-phone-meeting small{font-size:7px}.club-phone-bottom{font-size:7px}.product-feature h3{font-size:1.45rem}.product-system-copy{max-width:570px;margin:auto}}
+@media(max-width:390px){.products-surface{padding-inline:12px}.club-phone-wrap{width:42%}.club-phone{border-width:4px;border-radius:22px}.club-phone-screen{border-radius:15px;padding:18px 5px 5px}.club-phone-notch{top:5px;height:8px}.club-phone-meeting{gap:2px;margin-top:6px}.club-phone-meeting>div{grid-template-columns:13px 1fr;gap:2px;padding:3px}.club-phone-meeting>div span{font-size:5px}.club-phone-meeting b{font-size:6px}.club-phone-meeting small{font-size:5px}.club-phone-date{margin-top:7px;font-size:5px}.club-phone-title{font-size:13px}.club-phone-subtitle{font-size:7px}.club-phone-brand{font-size:5px}.club-phone-bottom{font-size:5px;padding:3px}.mockup-caption{font-size:.58rem}.product-feature{grid-template-columns:39px 1fr;gap:10px}}
+
 </style>
 </PublicLayout>
