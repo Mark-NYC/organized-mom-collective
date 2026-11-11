@@ -220,7 +220,14 @@ export function initChoreBuilder(host: HTMLElement) {
     // Export the original full-size sheet, never the scaled mobile presentation.
     const previous=sheet.style.transform;
     sheet.style.transform='none';
-    try{await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});}
+    try{
+      await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});
+      if (host.closest('[data-chart-modern]')) {
+        window.dispatchEvent(new CustomEvent('omc:chore-chart-downloaded',{detail:{
+          name:state.name, age:String(state.age), chores:state.jobs.map(job=>job.title.trim()).filter(Boolean),
+        }}));
+      }
+    }
     finally{sheet.style.transform=previous;schedulePreview();}
   }));
   const closeZoom=()=>{zoom.hidden=true;zoomStage.replaceChildren();document.body.style.overflow='';$<HTMLButtonElement>('[data-cb-zoom-open]').focus();};
