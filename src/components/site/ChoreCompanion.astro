@@ -145,7 +145,9 @@ download?.addEventListener('click',async()=>{
   // Reuses January Family Focus's visual hierarchy: editorial heading, tinted focus,
   // habit experiment cards, meeting prompt, and a quiet bottom section.
   draw('ORGANIZED MOM COLLECTIVE  /  A FREE FAMILY MEETING RESOURCE',42,753,8,bold,slate);
-  draw(`${p.name}'s First Week Plan`,42,711,27,serif,ink);
+  const title=`${p.name}'s First Week Plan`;
+  const titleSize=Math.min(27, 522/serif.widthOfTextAtSize(safe(title),1));
+  draw(title,42,711,titleSize,serif,ink);
   draw(`${p.age}  |  A small start with the chore chart you made`,42,689,10,sans,muted);
   page.drawLine({start:{x:42,y:676},end:{x:570,y:676},thickness:2,color:blue});
   box(42,567,528,94,blue);
@@ -163,7 +165,7 @@ download?.addEventListener('click',async()=>{
   draw('ADD LATER',321,482,9,bold,slate);
   y=paragraph(p.secondary,321,458,230,15,serifBold,ink,18);
   draw('OWNERSHIP',321,Math.min(415,y-10),9,bold,slate);
-  paragraph(p.action,321,394,230,10,sans,ink,13);
+  paragraph(p.action,321,398,230,9.5,sans,ink,12);
   heading('Try this at your family meeting',42,334);
   draw('A simple four-part rhythm',42,315,10,sans,muted);
   const parts=[
