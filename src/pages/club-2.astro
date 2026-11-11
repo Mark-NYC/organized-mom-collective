@@ -142,277 +142,117 @@ const closeUp = (month: string) => {
 <div class="club">
 <main>
 
-<section class="hero inset" id="start"><div class="surface hero-inner">
- <div class="hero-copy">
-  <p class="eyebrow">FAMILY MEETING CLUB</p>
-  <h1>Your family shouldn't depend on you <em>for everything.</em></h1>
-  <p class="hero-sub">One weekly meeting. <em>More hands helping. Fewer reminders.</em></p>
-  <p class="storybrand-hero-note">From “Where's my water bottle?” to “Who's taking me to practice?” You shouldn't have to keep it all in your head. <strong>We make the family plan. You work through it together.</strong></p>
-  <div class="hero-promise" aria-label="How Family Meeting Club helps"><span><b>10 min</b> together each week</span><span><b>Made for you</b> and your kids</span><span><b>At your door</b> every month</span></div>
-  <div class="hero-actions"><a class="primary cta-lime" href="#offer">{ctaLabel} <span aria-hidden="true">→</span></a><a class="text-cta" href="#families">See how it works ↓</a></div>
-  <div class="hero-rating"><img src="data:image/png;base64,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" alt="4.9 out of 5 stars, 113 Organized Mom Collective reviews" width="350" height="35" loading="eager" /><span>Reviews of Organized Mom Collective products, not the Club</span></div>
- </div>
- <figure class="hero-photo"><img src={clubHeroUrl} alt="Family gathered around a kitchen table looking together at a printed family plan" width="1200" height="900" loading="eager" fetchpriority="high" /></figure>
- <div class="hero-seam-badge" aria-hidden="true"><img src={clubBadgeUrl} alt="" width="120" height="120" loading="eager" /></div>
-</div></section>
 
-<section class="problem container visual-problem" aria-labelledby="problem-title">
- <p class="eyebrow">SOUND FAMILIAR?</p>
- <h2 id="problem-title">You're not just doing everything. <em>You're remembering everything.</em></h2>
- <div class="daily-moments" aria-label="Everyday things Mom is asked to keep track of">
-  <article class="daily-moment">
-   <div class="moment-art moment-water" aria-hidden="true"><svg viewBox="0 0 180 108" role="img"><path d="M18 90h145M61 91V33q0-8 8-8h38q8 0 8 8v58M72 25V14h32v11M78 14V8h21v6M73 49h30M73 58h30M73 67h30" fill="none" stroke="currentColor" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M116 38q21-9 32 7" fill="none" stroke="#D8B79F" stroke-width="5" stroke-linecap="round"/></svg></div>
-   <p class="moment-quote">“Mom, where's my water bottle?”</p><span>Five minutes before leaving.</span>
-  </article>
-  <article class="daily-moment">
-   <div class="moment-art moment-dinner" aria-hidden="true"><svg viewBox="0 0 180 108"><path d="M20 88h141M40 88V44h98v44M54 44q1-23 35-23t35 23M61 63h57M73 76h33" fill="none" stroke="currentColor" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M82 18q-9-8 0-15M101 18q-9-8 0-15" fill="none" stroke="#D8B79F" stroke-width="4" stroke-linecap="round"/></svg></div>
-   <p class="moment-quote">“What's for dinner?”</p><span>Again. From everyone.</span>
-  </article>
-  <article class="daily-moment">
-   <div class="moment-art moment-practice" aria-hidden="true"><svg viewBox="0 0 180 108"><path d="M23 87h132M49 82l10-47h66l11 47H49ZM60 35V23q0-9 12-9h39q12 0 12 9v12M75 35v47M110 35v47M49 59h87" fill="none" stroke="currentColor" stroke-width="3.8" stroke-linejoin="round"/><circle cx="141" cy="42" r="14" fill="none" stroke="#D8B79F" stroke-width="4"/><path d="M133 33l16 17M151 33l-19 19" stroke="#D8B79F" stroke-width="3"/></svg></div>
-   <p class="moment-quote">“Who's driving me to practice?”</p><span>With the whole week to juggle.</span>
-  </article>
- </div>
- <p class="problem-punch">Even when everyone helps, <strong>you're still the one keeping the plan together.</strong></p>
-</section>
 
-<section class="outcome container" aria-labelledby="change-title">
- <div class="responsibility-shift" aria-labelledby="change-title">
-  <p class="eyebrow">THE FAMILY YOU'RE BUILDING</p>
-  <h2 class="change-title" id="change-title">From “Mom, what do I do?” <em>to “I've got it.”</em></h2>
-  <div class="shift-compare">
-   <div class="shift-before"><p class="shift-heading">TODAY</p><div><span class="shift-symbol" aria-hidden="true">?</span><strong>Mom remembers the schedule.</strong></div><div><span class="shift-symbol" aria-hidden="true">?</span><strong>Mom reminds everyone.</strong></div><div><span class="shift-symbol" aria-hidden="true">?</span><strong>Kids wait to be told.</strong></div></div>
-   <div class="shift-after"><p class="shift-heading">WHERE WE'RE HEADED</p><div><span class="shift-symbol" aria-hidden="true">✓</span><strong>Everyone can see what's coming.</strong></div><div><span class="shift-symbol" aria-hidden="true">✓</span><strong>Everyone knows their part.</strong></div><div><span class="shift-symbol" aria-hidden="true">✓</span><strong>Kids start taking initiative.</strong></div></div>
-  </div>
-  <p class="shift-caption">One shared plan. One small responsibility at a time.</p>
- </div>
-</section>
-
-<section class="personalized-story container" id="weekly-meeting" aria-labelledby="personal-story-title">
- <div class="ps-intro">
-  <p class="eyebrow">NOT A ONE-SIZE-FITS-ALL PRINTABLE</p>
-  <h2 id="personal-story-title">A plan made for <em>your actual family.</em></h2>
-  <p>See how the information a mom shares becomes a simple, personalized starting point.</p>
- </div>
- <div class="ps-demo" data-personal-story>
-  <div class="ps-demo-top">
-   <div class="ps-demo-family"><span class="ps-family-dot">R</span><div><strong>The Rivera Family</strong><small>Illustrative sample · January 2027</small></div></div>
-   <div class="ps-nav" role="group" aria-label="Explore the personalization example">
-    <button type="button" class="ps-tab" data-personal-tab="answers" aria-pressed="true">1. Their answers</button>
-    <button type="button" class="ps-tab" data-personal-tab="plan" aria-pressed="false">2. Their plan</button>
+<section class="ofc-band ofc-problem" aria-labelledby="ofc-problem-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">SOUND FAMILIAR?</p><h2 id="ofc-problem-title">You're not just doing everything. <em>You're remembering everything.</em></h2></div>
+  <div class="ofc-problem-right">
+   <div class="ofc-mom-cards">
+    <div class="ofc-mom-card"><span class="ofc-card-emoji" aria-hidden="true">💧</span><strong>“Mom, where's my water bottle?”</strong><small>Five minutes before leaving.</small></div>
+    <div class="ofc-mom-card"><span class="ofc-card-emoji" aria-hidden="true">🍽️</span><strong>“What's for dinner?”</strong><small>Again. From everyone.</small></div>
+    <div class="ofc-mom-card"><span class="ofc-card-emoji" aria-hidden="true">🎒</span><strong>“Who's taking me to practice?”</strong><small>With the whole week to juggle.</small></div>
    </div>
+   <p class="ofc-takeaway">Even when everyone helps, you're still the one keeping track of it all.</p>
   </div>
-  <div class="ps-step" data-personal-panel="answers">
-   <div class="ps-family-members" aria-label="Rivera family members">
-    <span><i style="background:#2B70B7">S</i>Sofia, 10</span>
-    <span><i style="background:#2F8359">M</i>Mateo, 7</span>
-    <span><i style="background:#B87B54">E</i>Elena, 4</span>
-    <span class="ps-adults">Ana &amp; Luis</span>
-   </div>
-   <div class="ps-answers">
-    <div><small>WHAT'S HARD</small><strong>Keeping up with routines and family plans</strong></div>
-    <div><small>WHAT MATTERS RIGHT NOW</small><strong>Easier evenings, especially before dinner</strong></div>
-    <div><small>WHAT THEY WANT TO BUILD</small><strong>More independence with school things and everyday jobs</strong></div>
-   </div>
-   <button class="ps-next" type="button" data-personal-next>See the plan we prepare <span aria-hidden="true">→</span></button>
-  </div>
-  <div class="ps-step" data-personal-panel="plan" hidden>
-   <div class="ps-focus"><small>JANUARY · OUR SHARED FOCUS</small><h3>Easier evenings</h3><p>Each person takes one small piece of the evening.</p></div>
-   <div class="ps-habits" aria-label="Two January habit suggestions personalized to the Rivera family">
-    <article class="ps-habit">
-     <div class="ps-who"><i style="background:#2B70B7">S</i><strong>Sofia, 10</strong></div>
-     <h4>School things ready</h4>
-     <p>Check tomorrow's supplies and pack the school bag.</p>
-     <small><b>WHEN</b> After homework or after dinner</small>
-    </article>
-    <article class="ps-habit">
-     <div class="ps-who"><i style="background:#2F8359">M</i><strong>Mateo, 7</strong></div>
-     <h4>Pajamas ready</h4>
-     <p>Put pajamas on the bed before bath time.</p>
-     <small><b>WHEN</b> After dinner or after the table is cleared</small>
-    </article>
-   </div>
-   <div class="ps-review"><span>She can <strong>keep, change, or skip</strong> each suggestion before printing.</span><a href="/app/club/january/?sample=rivera">Explore the January sample <span aria-hidden="true">→</span></a></div>
-  </div>
-  <p class="ps-disclaimer">This is a guided preview of the saved Rivera sample, not a live AI generation. The family chooses what to try.</p>
- </div>
- <div class="ps-meeting">
-  <div class="ps-meeting-copy"><p class="eyebrow">THEN BRING IT TO THE TABLE</p><h3>One simple family meeting. <em>Ten minutes a week.</em></h3></div>
-  <ol aria-label="The four parts of the weekly Family Meeting">
-   <li><small>2 MIN</small><strong>Our Focus</strong></li>
-   <li><small>3 MIN</small><strong>Let's Talk</strong></li>
-   <li><small>3 MIN</small><strong>Everyone's Part</strong></li>
-   <li><small>2 MIN</small><strong>Let's Practice</strong></li>
-  </ol>
-  <p>Same four parts every week. A new personalized focus every month.</p>
  </div>
 </section>
 
-<section class="demo inset" id="families" aria-labelledby="demo-title"><div class="surface demo-surface" data-view="plan">
- <div class="demo-head">
-  <p class="eyebrow">MADE FOR YOUR REAL FAMILY</p>
-  <h2 id="demo-title">See what <em>personalized</em> actually looks like.</h2>
-  <p class="demo-sub">Three sample families. Different ages and routines. Different plans.</p>
-  <div class="personal-proof" aria-label="How personalization works"><div><span class="proof-label">YOU TELL US</span><strong>Names · Ages · Routines · What's hard</strong></div><span class="proof-arrow" aria-hidden="true">→</span><div><span class="proof-label">WE PREPARE</span><strong>Meeting guidance + printed resource</strong></div></div>
- </div>
- <p class="tabs-label" aria-hidden="true">Choose a family</p>
- <div class="family-tabs" role="tablist" aria-label="Choose a sample family">
-  {families.map((f, i) => <button type="button" role="tab" id={`family-tab-${f.id}`} aria-controls={`family-panel-${f.id}`} aria-selected={i === 1 ? 'true' : 'false'} tabindex={i === 1 ? 0 : -1} data-family-tab>
-   <span class="tab-dots" aria-hidden="true">{f.kids.map((_, k) => <i style={`background:${MARKER_COLORS[k].hex}`}></i>)}</span>
-   <strong>{f.tab}</strong><small>{f.summary}</small>
-  </button>)}
- </div>
- <div class="view-tabs" role="tablist" aria-label="Choose which part of the plan to preview">
-  <button type="button" role="tab" id="view-tab-plan" aria-selected="true" tabindex="0" aria-controls={`phone-${families[1].id}`} data-view-tab="plan">Family Meeting Plan</button>
-  <button type="button" role="tab" id="view-tab-print" aria-selected="false" tabindex="-1" aria-controls={`sheet-${families[1].id}`} data-view-tab="print">Printed Monthly Tool</button>
- </div>
- {families.map((f, i) => <div class="family-panel" id={`family-panel-${f.id}`} role="tabpanel" aria-labelledby={`family-tab-${f.id}`} hidden={i !== 1}>
-  <div class="stage" aria-label={`Illustrative ${f.family} Family Meeting plan on a phone, and their printed Our Summer Day page`}>
-   <p class="stage-label stage-label-plan"><b>1</b> Family plan on your phone</p>
-   <p class="stage-label stage-label-print"><b>2</b> Personalized tool in your mailbox</p>
-   <article class="sheet" id={`sheet-${f.id}`} aria-label={`${f.family}: printed Our Summer Day page`}>
-    <div class="sheet-head"><span>FAMILY MEETING CLUB · MAY 2027</span><h3>Our <em>Summer Day</em></h3><p>A little structure. Plenty of freedom.</p></div>
-    <div class="sheet-family"><span>{f.family.replace('The ', '').toUpperCase()}’S SUMMER RHYTHM</span><span class="sheet-people">{f.kids.map((k, n) => <span><i style={`background:${MARKER_COLORS[n].hex}`}></i>{k.name}</span>)}</span></div>
-    <div class="sheet-rows">
-     {blocks.map(([title, icon, tint], r) => <div class="sheet-row" style={`--tint:${tint}`}>
-      <span class="sheet-icon"><img src={`/images/club/icon-library/${icon}.png`} alt="" width="70" height="70" loading="lazy" /></span>
-      <span class="sheet-copy"><strong>{title}</strong><span>{withDots(f, f.rows[r][1]).map(s => s.color ? <b class="sheet-name"><i style={`background:${s.color}`}></i>{s.part}</b> : s.part)}</span></span>
-      <span class="sheet-time">{f.rows[r][0]}</span>
-     </div>)}
-    </div>
-    <div class="sheet-rule"><span>OUR SUMMER RULE</span><strong>{f.rule[0]}</strong><p>{f.rule[1]}</p></div>
-    <footer class="sheet-foot"><span>FAMILY MEETING CLUB</span><span>{f.dayLabel} · MAY</span></footer>
-   </article>
-   <div class="phone" id={`phone-${f.id}`}>
-    <div class="phone-screen" role="region" tabindex="0" aria-label={`${f.family} Family Meeting plan`}>
-     <div class="phone-status" aria-hidden="true"><span>9:41</span><span class="phone-island"></span><span class="phone-icons"><i></i><i></i><i></i></span></div>
-     <p class="phone-kicker">MAY · FAMILY MEETING PLAN</p>
-     <h3>{f.family}</h3>
-     <ul class="phone-people" aria-label="Family members">
-      {f.kids.map((k, n) => <li><i style={`background:${MARKER_COLORS[n].hex}`}></i>{k.name}, {k.age}</li>)}
-      <li class="phone-adults"><i></i>Mom &amp; Dad</li>
-     </ul>
-     <div class="phone-card phone-challenge"><span>THIS MONTH’S CHALLENGE</span><p>{f.challenge}</p></div>
-     <div class="phone-card phone-goal"><span>OUR SHARED GOAL</span><strong>{f.goal}</strong><p>{f.goalNote}</p></div>
-     <div class="phone-card"><span>EVERYONE’S PART</span>
-      <ul class="phone-parts">{f.kids.map((k, n) => <li><i style={`background:${MARKER_COLORS[n].hex}`}></i><p><b>{k.name}</b> {k.part}</p></li>)}<li class="phone-adults"><i></i><p><b>Grown-ups</b> {f.adults}</p></li></ul>
-     </div>
-     <div class="phone-card phone-talk"><span>TALK ABOUT IT</span><p>“{f.talk}”</p></div>
-     <div class="phone-review" aria-hidden="true"><span>Make changes</span><span class="phone-approve">Approve for print ✓</span></div>
-    </div>
+<section class="ofc-band ofc-outcome" aria-labelledby="ofc-outcome-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">WHAT COULD CHANGE</p><h2 id="ofc-outcome-title">Imagine not having to remind everyone. <em>All. Day. Long.</em></h2></div>
+  <div>
+   <div class="ofc-before-after">
+    <div class="ofc-compare-card is-before"><span class="ofc-card-tag">TODAY</span><p>Mom remembers the schedule.</p><p>Mom reminds everyone.</p><p>Kids wait to be told.</p></div>
+    <span class="ofc-compare-arrow" aria-hidden="true">→</span>
+    <div class="ofc-compare-card is-after"><span class="ofc-card-tag">WHERE WE'RE HEADED</span><p>Everyone can see what's coming.</p><p>Everyone knows their part.</p><p>Kids start taking initiative.</p></div>
    </div>
-  </div>
-  <p class="demo-included"><i class="lime-check" aria-hidden="true">✓</i> Both included in one membership.</p>
-  <aside class="why" aria-label={`Why the ${f.family} plan looks like this`}>
-   <p class="eyebrow">WHY THEIR PLAN LOOKS LIKE THIS</p>
-   <ul>{f.why.map(([fact, result]) => <li><b>{fact}</b><span>{result}</span></li>)}</ul>
-  </aside>
- </div>)}
- <p class="demo-disclaimer">Sample families. Illustrative mockups in the real May tool’s design, not customer results.</p>
-</div></section>
-
-<section class="first-win container" id="first-win" aria-labelledby="first-win-title">
- <div class="first-win-heading">
-  <p class="eyebrow">START SMALL. START SOON.</p>
-  <h2 id="first-win-title">Your first family meeting takes <em>10 minutes.</em></h2>
-  <p>Use your digital plan before the printed one arrives. One conversation. One responsibility to try together.</p>
- </div>
- <div class="first-win-steps" aria-label="Your first family meeting">
-  <div><span class="first-win-icon" aria-hidden="true">01</span><strong>See your plan</strong><small>Prepared around your family.</small></div>
-  <div><span class="first-win-icon" aria-hidden="true">02</span><strong>Gather for 10 minutes</strong><small>Four simple parts. Everyone joins in.</small></div>
-  <div><span class="first-win-icon" aria-hidden="true">03</span><strong>Choose one small step</strong><small>Each person knows what to try.</small></div>
- </div>
-</section>
-
-<section class="how container" id="how" aria-labelledby="how-title">
- <p class="eyebrow">THREE SIMPLE STEPS</p>
- <h2 id="how-title">We do the planning. <em>You grow together.</em></h2>
-  <p class="how-relief">No blank worksheets to fill in. No daily app to manage. Just a ready-to-use plan and a short weekly rhythm.</p>
- <ol class="steps">
-  <li>
-   <div class="step-visual step-family" aria-hidden="true"><span class="sv-kicker">OUR FAMILY</span>{families[1].kids.map((k, n) => <span class="sv-chip"><i style={`background:${MARKER_COLORS[n].hex}`}></i>{k.name}, {k.age}</span>)}<span class="sv-tags"><span>Camp</span><span>Soccer</span><span>Dance</span></span></div>
-   <b>1</b><h3>Tell us about your family.</h3><p>Your kids, your routines, and what’s hard right now.</p>
-  </li>
-  <li>
-   <div class="step-visual step-review" aria-hidden="true"><span class="sv-kicker">OUR SHARED GOAL</span><strong>{families[1].goal}</strong><span class="sv-buttons"><span class="sv-keep">Keep it</span><span>Change it</span></span></div>
-   <b>2</b><h3>We make it personal.</h3><p>Review your plan. We print and mail it.</p>
-  </li>
-  <li>
-   <div class="step-visual step-mail" aria-hidden="true"><img src={kitPreviews.find(k => k.month === 'May')!.image} alt="" width="1080" height="1080" loading="lazy" decoding="async" /></div>
-   <b>3</b><h3>Meet. Then grow.</h3><p>Ten minutes together. Everyone takes a part.</p>
-  </li>
- </ol>
-
-</section>
-
-<section class="kit-gallery container" aria-labelledby="kit-gallery-title">
- <p class="eyebrow">EXPLORE THE MEMBERSHIP</p>
- <h2 id="kit-gallery-title">The meeting stays simple. <em>Your family keeps growing.</em></h2>
- <p class="kit-gallery-intro">New challenges. Growing kids. A plan that keeps up.</p>
- <div class="growth-roadmap" aria-label="Examples of monthly ways your family can grow">
-  <div><img src={months.find(m => m.month === 'January')!.icon} alt="" loading="lazy"/><span>Meet together</span></div>
-  <div><img src={months.find(m => m.month === 'March')!.icon} alt="" loading="lazy"/><span>Share chores</span></div>
-  <div><img src={months.find(m => m.month === 'April')!.icon} alt="" loading="lazy"/><span>Help with dinner</span></div>
-  <div><img src={months.find(m => m.month === 'August')!.icon} alt="" loading="lazy"/><span>Own routines</span></div>
- </div>
- <div class="kit-gallery-grid" id="kit-gallery-grid">{kitPreviews.map((kit, i) => <figure class={`kit-gallery-item${i >= 6 ? ' kit-more' : ''}`}>
-  <button class="kit-gallery-open" type="button" data-kit-open={kit.month} aria-label={`View ${kit.month}: ${kit.title}`} aria-haspopup="dialog"><span class="kit-gallery-zoom" aria-hidden="true">View +</span></button>
-  <img src={kit.image} alt={`${kit.month}: ${kit.description}, Organized Family Club printed tool preview`} width="1080" height="1080" loading="lazy" decoding="async" />
-  <figcaption><span class="kit-gallery-month" style={{ backgroundColor: kit.color }}>{kit.month}</span><h3>{kit.title}</h3></figcaption>
- </figure>)}</div>
- <button type="button" class="kit-show-all" aria-expanded="false" aria-controls="kit-gallery-grid" data-kit-show-all>See all {kitPreviews.length} months</button>
-</section>
-{kitPreviews.map(kit => <dialog class="kit-fullscreen" id={`kit-preview-${kit.month}`} aria-labelledby={`kit-title-${kit.month}`}>
- <button class="kit-fullscreen-close" type="button" aria-label="Close resource preview">×</button>
- <div class="kit-fullscreen-content">
-  <p class="kit-fullscreen-month" style={{ backgroundColor: kit.color }}>{kit.month}</p>
-  <h2 id={`kit-title-${kit.month}`}>{kit.title}</h2>
-  <div class="kit-image-stage"><picture><source media="(max-width: 700px)" srcset={closeUp(kit.month).image} width={closeUp(kit.month).width} height={closeUp(kit.month).height} /><img class="kit-fullscreen-image" src={kit.image} alt={`${kit.month}: ${kit.description}`} width="1080" height="1080" loading="lazy" decoding="async" /></picture><span class="kit-zoom-hint" aria-hidden="true">Hover to magnify</span></div>
-  <div class="kit-fullscreen-copy"><p>{kitDetails[kit.month].relief}</p>
-   <section class="kit-personal" style={{ '--kit-tint': `${kit.color}40`, '--kit-accent': kit.color }} aria-labelledby={`kit-personal-title-${kit.month}`}>
-    <p class="kit-personal-example">{kitDetails[kit.month].example}</p>
-    <h3 id={`kit-personal-title-${kit.month}`}>Made for your family.<br/><span>Less planning for you.</span></h3>
-    <dl class="kit-personal-benefits">
-     <div><dt>Their names</dt><dd>{kit.month === 'December' ? "Cards personalized with your children’s names make giving feel like their own project." : "Everyone sees their own part."}</dd></div>
-     <div><dt>Their abilities</dt><dd>{kit.month === 'December' ? "Draw, write a poem, or share a letter, according to their ages and abilities." : "Steps fit their ages and what they can handle."}</dd></div>
-     <div><dt>{kit.month === 'December' ? 'Your values' : 'Your needs'}</dt><dd>{kit.month === 'December' ? "A ready-to-use way to help your kids notice and encourage others." : "The plan fits the routine you need help with."}</dd></div>
-    </dl>
-    <p class="kit-personal-caption">Illustrative example. Your plan is prepared for your household.</p>
-   </section>
+   <p class="ofc-takeaway">Not perfectly. Not overnight. But little by little, you start hearing <strong>“I've got it.”</strong></p>
   </div>
  </div>
-</dialog>)}
+</section>
 
-<section class="founder inset"><div class="surface founder-layout">
- <img src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" loading="lazy" width="460" height="460"/>
- <div>
-  <p class="eyebrow">FROM OUR FAMILY TO YOURS</p>
-  <h2>When every little thing <em>comes back to Mom.</em></h2>
-  <p>Hi, I'm Megan. The shoes. The rides. The reminders. All those little things add up. We created Family Meeting Club so you don't have to plan every next step alone, and your kids get room to grow.</p>
-  <strong class="signature">Megan</strong>
-  <div class="founder-review"><blockquote>“This calendar is life changing. Quite literally!”</blockquote><p>Raquel · 5-star Etsy review of our wall calendar, not Club membership.</p></div>
+<section class="ofc-band ofc-personal" id="sample-plan" aria-labelledby="ofc-personal-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">MADE FOR YOUR FAMILY</p><h2 id="ofc-personal-title">Your kids. Your schedules. <em>Your actual life.</em></h2><p>Tell us who's in your family and what's hard right now. We prepare a plan with names, ages, and realistic responsibilities already worked in.</p></div>
+  <div class="ofc-personal-flow">
+   <div class="ofc-personal-input"><span class="ofc-card-tag">THEIR ANSWERS</span><strong>The Rivera family</strong><span>Sofia, 10</span><span>Mateo, 7</span><span>Elena, 4</span><small>Hard right now: busy evenings</small></div>
+   <span class="ofc-compare-arrow" aria-hidden="true">→</span>
+   <div class="ofc-personal-output"><span class="ofc-card-tag">THEIR PLAN</span><strong>Our family's focus</strong><p>Easier evenings</p><div><span>Sofia</span><small>Get tomorrow's school things ready</small></div><div><span>Mateo</span><small>Put pajamas out before bath</small></div><div><span>Everyone</span><small>Choose one small thing to practice</small></div></div>
+   <a class="ofc-link" href="/app/club/january/?sample=rivera">See the sample family plan <span aria-hidden="true">→</span></a>
+  </div>
  </div>
-</div></section>
+</section>
 
-<section class="offer-band inset" id="offer"><div class="surface offer-layout">
- <div class="offer-copy">
-  <p class="eyebrow">WHAT YOU GET</p>
-  <h2>A plan made for your family. <em>Delivered to your door.</em></h2>
-  <div class="offer-product-preview"><img src={kitPreviews.find(k => k.month === 'May')!.image} alt="Illustrative sample printed family summer routine resource" width="1080" height="1080" loading="lazy"/><div><strong>Real printed resources.</strong><span>Plus your personalized weekly meeting guidance, ready to review online.</span></div></div>
-  <ul class="offer-details">
-   <li><i class="lime-check" aria-hidden="true">✓</i> A new personalized printed resource every month</li>
-   <li><i class="lime-check" aria-hidden="true">✓</i> Ideas made for your kids’ ages, routines, and needs</li>
-   <li><i class="lime-check" aria-hidden="true">✓</i> Review or adjust your plan before it prints</li>
-   <li><i class="lime-check" aria-hidden="true">✓</i> A ready-to-use weekly Family Meeting plan</li>
-  </ul>
+<section class="ofc-band ofc-meeting" id="how-it-works" aria-labelledby="ofc-meeting-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">START SMALL</p><h2 id="ofc-meeting-title">Ten minutes together. <em>One small thing to try.</em></h2></div>
+  <div>
+   <div class="ofc-meeting-steps">
+    <div><span class="ofc-step-icon" aria-hidden="true">◎</span><strong>Our Focus</strong><small>What matters this week?</small></div>
+    <div><span class="ofc-step-icon" aria-hidden="true">☏</span><strong>Let's Talk</strong><small>What's working? What's hard?</small></div>
+    <div><span class="ofc-step-icon" aria-hidden="true">✓</span><strong>Everyone's Part</strong><small>Who can take responsibility?</small></div>
+    <div><span class="ofc-step-icon" aria-hidden="true">✳</span><strong>Let's Practice</strong><small>How will we do it?</small></div>
+   </div>
+   <p class="ofc-takeaway">Choose one thing someone else can start taking responsibility for this week.</p>
+  </div>
  </div>
- <div class="price-card"><img class="club-brand-wordmark" src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width="2027" height="570" loading="lazy" decoding="async" /><h3>{joinOpen ? CLUB_OFFER : 'One simple monthly delivery.'}</h3>{joinOpen && <p class="offer-free-summary">{founding ? "January’s plan and your Family Vision welcome print are free." : "Your first personalized printed plan is free."}</p>}<div class="founding-price-label">FOUNDING FAMILY PRICE</div><div class="price"><span class="founding-price-was"><del>$7.90</del></span>$5.90 <span>/ month</span></div><p class="founding-price-lock">✓ Keep your $5.90 rate while subscribed.</p>{joinOpen ? <><p class="fineprint">{founding ? `First charge: ${CLUB_PROGRAM_START.foundingFirstCharge}. Cancel before then and pay nothing.` : 'First charge one month after joining. Cancel anytime.'}</p><button type="button" class="primary" id="club-checkout" hidden>Get My First Month Free →</button><div data-checkout-closed><p class="fineprint" data-checkout-checking>Checking enrollment…</p><a class="primary" href="/support" hidden>Ask About Early Access →</a></div><p class="checkout-error" id="club-checkout-error" role="alert" hidden></p><small>Secure checkout with Stripe.</small><small class="block mt-1" data-household-disclosure>{founding ? 'One free first month per household. A household that already had one starts January 1, 2027, with $5.90 charged that day.' : 'One free first month per household. A household that already had one is charged $5.90 today.'}</small></> : <><p class="fineprint">Proposed pricing. Enrollment isn't open yet while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask.</small></>}</div>
-</div></section>
+</section>
 
-<section class="faq" id="faq"><div class="container faq-layout"><div><p class="eyebrow">GOOD QUESTIONS</p><h2>A few things you might be wondering.</h2></div><div class="faq-items">{faqs.map(([question, answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></div></section>
+<section class="ofc-band ofc-ease" aria-labelledby="ofc-ease-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">LESS WORK FOR MOM</p><h2 id="ofc-ease-title">We make the plan. <em>You don't start from scratch.</em></h2></div>
+  <div class="ofc-ease-content">
+   <div class="ofc-ease-points"><div><span aria-hidden="true">✕</span>No searching for another chore chart.</div><div><span aria-hidden="true">✕</span>No blank worksheets to fill in.</div><div><span aria-hidden="true">✕</span>No new app to manage every day.</div></div>
+   <p class="ofc-ease-conclusion">We prepare the plan. Your family brings it to the table. <strong>Less planning for you. More ownership for them.</strong></p>
+  </div>
+ </div>
+</section>
 
-<section class="closing inset"><div class="surface closing-inner">
- <h2>You don't have to <em>figure it all out yourself.</em></h2>
+<section class="ofc-band ofc-months" id="months" aria-labelledby="ofc-months-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">A LITTLE AT A TIME</p><h2 id="ofc-months-title">One little change this month. <em>Another next month.</em></h2></div>
+  <div class="ofc-months-content">
+   <div class="ofc-month-grid">
+    <div><span>JANUARY</span><img src={months[0].icon} alt="" loading="lazy"/><p>Everyone starts looking ahead together.</p></div>
+    <div><span>FEBRUARY</span><img src={months[1].icon} alt="" loading="lazy"/><p>Kids learn to handle their laundry.</p></div>
+    <div><span>MARCH</span><img src={months[2].icon} alt="" loading="lazy"/><p>Everyone knows which cleaning jobs are theirs.</p></div>
+    <div><span>APRIL</span><img src={months[3].icon} alt="" loading="lazy"/><p>Dinner isn't all on you.</p></div>
+    <div><span>MAY</span><img src={months[4].icon} alt="" loading="lazy"/><p>Kids know what to do next on summer days.</p></div>
+   </div>
+   <p class="ofc-month-foot">A new, personalized resource each month. <a class="ofc-link" href="/app/club/">Explore the monthly plans →</a></p>
+  </div>
+ </div>
+</section>
+
+<section class="ofc-band ofc-founder" aria-labelledby="ofc-founder-title">
+ <div class="container ofc-founder-inner">
+  <img src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" width="460" height="460" loading="lazy"/>
+  <div><p class="eyebrow">FROM OUR FAMILY TO YOURS</p><h2 id="ofc-founder-title">From our family <em>to yours.</em></h2><p>Hi, I'm Megan. The missing shoes. The forgotten backpack. The questions that always come back to Mom.</p><p>We created Family Meeting Club because you don't need another parenting project. You need a simple way to get everyone involved.</p><strong>Megan <small>Co-creator, Organized Mom Collective</small></strong></div>
+ </div>
+</section>
+
+<section class="ofc-band ofc-offer" id="offer" aria-labelledby="ofc-offer-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">THE CLUB</p><h2 id="ofc-offer-title">A little less on your plate <em>starts here.</em></h2></div>
+  <div class="ofc-offer-content">
+   <div class="ofc-included"><p class="ofc-offer-strap">One small monthly delivery. Made for your family.</p><ul><li>A personalized printed family resource mailed each month</li><li>A ready-to-use weekly Family Meeting guide</li><li>Plans matched to your kids' ages, routines, and challenges</li><li>Digital access to review, adjust, or reprint</li></ul></div>
+   <div class="price-card"><img class="club-brand-wordmark" src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width="2027" height="570" loading="lazy" decoding="async" /><h3>{joinOpen ? CLUB_OFFER : 'One simple monthly delivery.'}</h3>{joinOpen && <p class="offer-free-summary">{founding ? "January’s plan and your Family Vision welcome print are free." : "Your first personalized printed plan is free."}</p>}<div class="founding-price-label">FOUNDING FAMILY PRICE</div><div class="price">$5.90 <span>/ month</span></div><p class="founding-price-lock">✓ Keep your $5.90 rate while subscribed.</p>{joinOpen ? <><p class="fineprint">{founding ? `First charge: ${CLUB_PROGRAM_START.foundingFirstCharge}. Cancel before then and pay nothing.` : 'First charge one month after joining. Cancel anytime.'}</p><button type="button" class="primary" id="club-checkout" hidden>Get My First Month Free →</button><div data-checkout-closed><p class="fineprint" data-checkout-checking>Checking enrollment…</p><a class="primary" href="/support" hidden>Ask About Early Access →</a></div><p class="checkout-error" id="club-checkout-error" role="alert" hidden></p><small>Secure checkout with Stripe.</small><small class="block mt-1" data-household-disclosure>{founding ? 'One free first month per household. A household that already had one starts January 1, 2027, with $5.90 charged that day.' : 'One free first month per household. A household that already had one is charged $5.90 today.'}</small></> : <><p class="fineprint">Proposed pricing. Enrollment isn't open yet while printing, fulfillment, and billing are tested.</p><a class="primary" href="/support">Ask About Early Access →</a><small>No payment required to ask.</small></>}</div>
+  </div>
+ </div>
+</section>
+
+<section class="ofc-band ofc-faq" id="faq" aria-labelledby="ofc-faq-title">
+ <div class="container ofc-split">
+  <div class="ofc-section-heading"><p class="eyebrow">GOOD QUESTIONS</p><h2 id="ofc-faq-title">A few questions <em>before you start.</em></h2></div>
+  <div class="ofc-faq-list">
+   ${faqs.slice(0, 8).map(([question, answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}
+  </div>
+ </div>
+</section>
+
+<section class="ofc-closing inset"><div class="ofc-closing-inner">
+ <h2>You don't have to be <em>everyone's reminder.</em></h2>
  <p>One weekly meeting. More hands helping. Fewer reminders.</p>
  <a href="#offer" class="primary">{ctaLabel} →</a>
 </div></section>
@@ -420,95 +260,6 @@ const closeUp = (month: string) => {
 <footer class="footer"><a href="/">Organized Mom Collective</a><span>© {new Date().getFullYear()} Organized Mom Collective</span><a href="/support">Support</a></footer>
 </div>
 
-<script>
- // This public preview uses fixed January Rivera sample data. Nothing is generated or saved here.
- const personalStory = document.querySelector<HTMLElement>('[data-personal-story]');
- if (personalStory) {
-   const controls = [...personalStory.querySelectorAll<HTMLButtonElement>('[data-personal-tab]')];
-   const panels = [...personalStory.querySelectorAll<HTMLElement>('[data-personal-panel]')];
-   const show = (step: string) => {
-     controls.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.personalTab === step)));
-     panels.forEach(panel => { panel.hidden = panel.dataset.personalPanel !== step; });
-   };
-   controls.forEach(button => button.addEventListener('click', () => show(button.dataset.personalTab!)));
-   personalStory.querySelector<HTMLButtonElement>('[data-personal-next]')?.addEventListener('click', () => show('plan'));
- }
- // Sample-family tabs: click, or arrow keys / Home / End with roving tabindex (WAI-ARIA tabs, automatic activation).
- const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-family-tab]')];
- const surface = document.querySelector<HTMLElement>('.demo-surface')!;
- const viewTabs = [...document.querySelectorAll<HTMLButtonElement>('[data-view-tab]')];
-
- // Mobile: one preview at a time (Family Meeting Plan | Printed Monthly Tool); kept when the family changes.
- const showView = (tab: HTMLButtonElement, focus = false) => {
-  viewTabs.forEach(v => { const on = v === tab; v.setAttribute('aria-selected', String(on)); v.tabIndex = on ? 0 : -1; });
-  surface.dataset.view = tab.dataset.viewTab;
-  if (focus) tab.focus();
- };
- viewTabs.forEach((tab, i) => {
-  tab.addEventListener('click', () => showView(tab));
-  tab.addEventListener('keydown', e => {
-   const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: viewTabs.length - 1 }[e.key];
-   if (next === undefined) return;
-   e.preventDefault();
-   showView(viewTabs[(next + viewTabs.length) % viewTabs.length], true);
-  });
- });
-
- const select = (tab: HTMLButtonElement, focus = false) => {
-  tabs.forEach(t => {
-   const on = t === tab;
-   t.setAttribute('aria-selected', String(on));
-   t.tabIndex = on ? 0 : -1;
-   const panel = document.getElementById(t.getAttribute('aria-controls')!);
-   if (panel) panel.hidden = !on;
-  });
-  const id = tab.id.replace('family-tab-', '');
-  viewTabs.forEach(v => v.setAttribute('aria-controls', `${v.dataset.viewTab === 'plan' ? 'phone' : 'sheet'}-${id}`));
-  if (focus) tab.focus();
- };
- tabs.forEach((tab, i) => {
-  tab.addEventListener('click', () => select(tab));
-  tab.addEventListener('keydown', e => {
-   const next = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
-   if (next === undefined) return;
-   e.preventDefault();
-   select(tabs[(next + tabs.length) % tabs.length], true);
-  });
- });
-
- // Mobile gallery: six months first, the rest on request.
- document.querySelector<HTMLButtonElement>('[data-kit-show-all]')?.addEventListener('click', e => {
-  const button = e.currentTarget as HTMLButtonElement;
-  button.closest('.kit-gallery')?.classList.add('show-all');
-  button.setAttribute('aria-expanded', 'true');
-  button.hidden = true;
- });
-
- // Month previews: full-screen dialog, with hover magnify on desktop.
- document.querySelectorAll<HTMLElement>('.kit-image-stage').forEach(stage => {
-  stage.addEventListener('pointermove', event => {
-   if (event.pointerType !== 'mouse') return;
-   const bounds = stage.getBoundingClientRect();
-   stage.style.setProperty('--zoom-x', ((event.clientX - bounds.left) / bounds.width * 100) + '%');
-   stage.style.setProperty('--zoom-y', ((event.clientY - bounds.top) / bounds.height * 100) + '%');
-  });
- });
- let previousOverflow = '';
- document.querySelectorAll<HTMLButtonElement>('[data-kit-open]').forEach(button => {
-  button.addEventListener('click', () => {
-   const dialog = document.getElementById(`kit-preview-${button.dataset.kitOpen}`) as HTMLDialogElement | null;
-   if (!dialog) return;
-   previousOverflow = document.body.style.overflow;
-   document.body.style.overflow = 'hidden';
-   dialog.showModal();
-   dialog.scrollTop = 0;
-  });
- });
- document.querySelectorAll<HTMLDialogElement>('.kit-fullscreen').forEach(dialog => {
-  dialog.querySelector('button')?.addEventListener('click', () => dialog.close());
-  dialog.addEventListener('close', () => { document.body.style.overflow = previousOverflow; });
- });
-</script>
 <script>
  // The offer button opens Stripe Checkout directly: Stripe collects her email, card and mailing address.
  import { billingErrorText, checkoutOffered, startCheckout } from '../lib/club/membership';
@@ -541,7 +292,6 @@ const closeUp = (month: string) => {
  // Back from Stripe (the page restored from the back/forward cache): the button works again.
  addEventListener('pageshow', (e) => { if (e.persisted) resetCheckout(); });
 </script>
-
 <style>
 /* Club landing (/club-2): the /club palette, type and inset gray surfaces, in one stylesheet. */
 .club{--ink:#4d4544;--muted:#6e6461;--line:#e7ddd4;--gray:#f1f2f2;--sage-ink:#697d65;--rose:#b77b82;--rose-ink:#955b63;--lime:#c2f6aa;--dark:#545454;color:var(--ink);background:#fff;font-family:'Montserrat Variable',Montserrat,sans-serif;line-height:1.55}
@@ -1128,5 +878,90 @@ const closeUp = (month: string) => {
 .first-win-steps small { font-size:.83rem; line-height:1.45; color:#545454; }
 .how-relief { max-width:670px; margin:1rem auto 2rem; text-align:center; color:#545454; }
 @media(max-width:600px) { .first-win-steps { grid-template-columns:1fr; gap:.6rem; } .first-win-steps > div { grid-template-columns:44px 1fr; column-gap:.9rem; justify-items:start; text-align:left; padding:.85rem 1rem; } .first-win-icon { grid-row:span 2; } .first-win-steps strong { align-self:end; } .first-win-steps small { align-self:start; } .outcome .shift-before,.outcome .shift-after { padding:1rem; } }
+
+/* Visual-first 2026 club-2 rebuild; keep established hero and checkout behavior. */
+.club{background:#FBF7F1;color:#545454;--ink:#545454;--sage-ink:#607653;--rose-ink:#8c666c;--lime:#D4DFC4;--gray:#F7F5F0}
+.hero{background:#FBF7F1}
+.hero-inner{background:#F7F5F0}
+.hero h1{font-size:clamp(2.4rem,3.35vw,4rem)}
+.hero .storybrand-hero-note{max-width:480px;margin-top:1rem;line-height:1.65;font-size:.95rem}
+.hero .cta-lime,.ofc-closing .primary,.ofc-offer .primary{border-radius:9px;background:#728765;color:#fff!important}
+.hero .cta-lime:hover,.ofc-closing .primary:hover,.ofc-offer .primary:hover{background:#566e4c}
+.ofc-band{padding:clamp(52px,6vw,88px) 0}
+.ofc-split{display:grid;grid-template-columns:minmax(245px,.75fr) minmax(0,1.75fr);gap:clamp(24px,4.5vw,80px);align-items:center}
+.ofc-section-heading h2{font-size:clamp(1.9rem,2.75vw,3.05rem)}
+.ofc-section-heading>p:last-child:not(.eyebrow){max-width:390px;margin-top:1.2rem;line-height:1.7;font-size:.95rem}
+.ofc-band .eyebrow{color:#718263}
+.ofc-problem,.ofc-personal,.ofc-ease,.ofc-founder,.ofc-faq{background:#FBF7F1}
+.ofc-outcome,.ofc-months{background:#EDF1E8}
+.ofc-meeting,.ofc-offer{background:#EAF0F0}
+.ofc-mom-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ofc-mom-card{background:#fff;border:1px solid #E8E0D8;border-radius:16px;padding:22px 14px;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.ofc-card-emoji{font-size:2rem;line-height:1.2}
+.ofc-mom-card strong{font:400 clamp(1.04rem,1.45vw,1.32rem)/1.35 Georgia,serif}
+.ofc-mom-card small{font-size:.73rem;color:#777}
+.ofc-takeaway{text-align:center;font:italic clamp(.96rem,1.3vw,1.1rem)/1.55 Georgia,serif;margin-top:24px!important}
+.ofc-before-after{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:15px}
+.ofc-compare-card{border-radius:15px;padding:24px 22px;min-height:228px;background:#fff;border:1px solid #E6DDD5}
+.ofc-compare-card.is-after{background:#F8FCF4;border-color:#C8D7BD}
+.ofc-card-tag{display:inline-block;font:800 .66rem/1.3 Montserrat,sans-serif;letter-spacing:.08em;color:#566e4c;background:#D4DFC4;border-radius:20px;padding:6px 12px;margin-bottom:15px}
+.is-before .ofc-card-tag{background:#E8D2D6;color:#81565B}
+.ofc-compare-card p{font-size:.86rem;line-height:1.6;padding:6px 0}
+.ofc-compare-card p:before{content:"✕";color:#B77B82;font-weight:800;margin-right:10px}
+.ofc-compare-card.is-after p:before{content:"✓";color:#64855D}
+.ofc-compare-arrow{font:400 2rem Georgia,serif;color:#728765}
+.ofc-personal-flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.15fr);gap:14px;align-items:center}
+.ofc-personal-input,.ofc-personal-output{min-height:274px;padding:20px;border-radius:16px;display:flex;flex-direction:column;gap:10px}
+.ofc-personal-input{background:#CDDDE1}.ofc-personal-output{background:#E5ECDD}
+.ofc-personal-input strong,.ofc-personal-output strong{font:400 1.35rem Georgia,serif}
+.ofc-personal-input>span:not(.ofc-card-tag){padding:8px 12px;border-radius:20px;background:#fff;font-size:.84rem;font-weight:700}
+.ofc-personal-input small{font-size:.75rem}
+.ofc-personal-output>p{font:italic 1.05rem Georgia,serif}
+.ofc-personal-output>div{background:#fff;border-radius:7px;padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+.ofc-personal-output>div span{font-size:.8rem;font-weight:800}.ofc-personal-output>div small{font-size:.7rem}
+.ofc-personal-flow>.ofc-link{grid-column:1/-1;text-align:right}
+.ofc-link{color:#526f4b!important;font-size:.83rem;font-weight:800;text-underline-offset:4px}
+.ofc-meeting-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ofc-meeting-steps>div{border:1px solid #DFE3D8;border-radius:14px;background:#FBF7F1;padding:20px 8px;display:grid;justify-items:center;align-content:center;gap:9px;text-align:center;min-height:170px}
+.ofc-meeting-steps>div:nth-child(2){background:#F3F8FA}.ofc-meeting-steps>div:nth-child(3){background:#FCF2DF}.ofc-meeting-steps>div:nth-child(4){background:#F8E9EA}
+.ofc-step-icon{font-size:1.75rem;color:#728765}
+.ofc-meeting-steps strong{font:400 clamp(1.05rem,1.25vw,1.2rem)/1.25 Georgia,serif}
+.ofc-meeting-steps small{font-size:.73rem;line-height:1.5}
+.ofc-ease-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ofc-ease-points>div{display:flex;align-items:center;gap:12px;padding:16px;border-radius:12px;background:#F4F2EE;font-size:.85rem;line-height:1.5}
+.ofc-ease-points span{display:grid;place-items:center;flex:0 0 32px;height:32px;background:#E8D2D6;border-radius:50%;font-weight:800;color:#8D6265}
+.ofc-ease-conclusion{background:#F1D8A8;border-radius:30px;padding:12px 18px;margin-top:20px!important;text-align:center;font-size:.86rem;line-height:1.5}
+.ofc-month-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ofc-month-grid>div{background:#FBF7F1;border:1px solid #E3DDD2;border-radius:12px;overflow:hidden;padding:0 10px 18px;text-align:center}
+.ofc-month-grid span{display:block;border-radius:0 0 9px 9px;padding:8px 2px;background:#CDDDE1;font-size:.66rem;font-weight:800;letter-spacing:.04em}
+.ofc-month-grid>div:nth-child(2) span{background:#E8D2D6}.ofc-month-grid>div:nth-child(3) span{background:#D4DFC4}.ofc-month-grid>div:nth-child(4) span{background:#F1D8A8}
+.ofc-month-grid img{display:block;width:68px;height:68px;object-fit:contain;margin:14px auto}
+.ofc-month-grid p{font-size:.77rem;line-height:1.45}
+.ofc-month-foot{text-align:right;margin-top:18px!important;font-size:.82rem}
+.ofc-founder-inner{display:grid;grid-template-columns:minmax(180px,.7fr) minmax(0,1.3fr);gap:clamp(30px,5vw,75px);align-items:center}
+.ofc-founder-inner>img{width:100%;max-height:300px;object-fit:cover;border-radius:16px}
+.ofc-founder-inner h2{margin-bottom:20px}
+.ofc-founder-inner p:not(.eyebrow){max-width:650px;line-height:1.7;margin-bottom:12px}
+.ofc-founder-inner strong{display:block;font:italic 1.5rem Georgia,serif;margin-top:12px}
+.ofc-founder-inner small{font:500 .74rem Montserrat,sans-serif;margin-left:8px}
+.ofc-offer-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(255px,.9fr);gap:24px;align-items:start}
+.ofc-included{padding:14px 0}
+.ofc-offer-strap{font:400 1.4rem Georgia,serif;line-height:1.3;margin-bottom:20px!important}
+.ofc-included ul{list-style:none;padding:0;margin:0}
+.ofc-included li{font-size:.86rem;line-height:1.5;padding:9px 0 9px 29px;position:relative}
+.ofc-included li::before{content:"✓";position:absolute;left:0;font-weight:800;color:#587b51}
+.ofc-offer .price-card{max-width:none}
+.ofc-faq-list details{border:1px solid #E5DDD3;background:#fff;border-radius:10px;margin-bottom:9px;overflow:hidden}
+.ofc-faq-list summary{padding:14px 20px;font-size:.88rem;font-weight:750;display:flex;justify-content:space-between;gap:14px;cursor:pointer;list-style:none}
+.ofc-faq-list details[open] summary span{transform:rotate(45deg)}
+.ofc-faq-list details>p{padding:0 20px 17px;font-size:.84rem;line-height:1.6;color:#665f5a}
+.ofc-closing{background:#FBF7F1;padding-top:18px}
+.ofc-closing-inner{max-width:1504px;margin:auto;background:#D4DFC4;border-radius:20px;padding:clamp(44px,6vw,75px) 24px;text-align:center}
+.ofc-closing h2{font-size:clamp(2rem,3vw,3.25rem);margin-bottom:14px}
+.ofc-closing p{margin-bottom:24px}
+@media(max-width:1000px){.ofc-split{grid-template-columns:minmax(200px,.85fr) minmax(0,1.65fr);gap:24px}.ofc-offer-content{grid-template-columns:1fr}.ofc-month-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.ofc-split,.ofc-founder-inner{grid-template-columns:1fr}.ofc-section-heading{max-width:550px}.ofc-mom-cards{gap:7px}.ofc-mom-card{padding:15px 7px;min-height:168px}.ofc-mom-card strong{font-size:.94rem}.ofc-mom-card small{font-size:.66rem}.ofc-card-emoji{font-size:1.6rem}.ofc-before-after{gap:7px}.ofc-compare-card{padding:17px 12px;min-height:218px}.ofc-compare-card p{font-size:.76rem}.ofc-compare-arrow{font-size:1.35rem}.ofc-personal-flow{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}.ofc-personal-input,.ofc-personal-output{padding:13px 10px}.ofc-personal-output>div small{font-size:.63rem}.ofc-meeting-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.ofc-ease-points{grid-template-columns:1fr}.ofc-ease-points>div{padding:12px}.ofc-month-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ofc-founder-inner>img{max-width:320px;max-height:270px}.ofc-founder-inner small{display:block;margin:4px 0 0}.ofc-offer-content{gap:0}}
+@media(max-width:360px){.ofc-mom-cards{grid-template-columns:1fr}.ofc-mom-card{min-height:110px}.ofc-before-after{grid-template-columns:1fr}.ofc-compare-arrow{transform:rotate(90deg);justify-self:center}.ofc-personal-flow{grid-template-columns:1fr}.ofc-personal-flow>.ofc-compare-arrow{justify-self:center;transform:rotate(90deg)}}
+
 </style>
 </PublicLayout>
