@@ -1,7 +1,7 @@
 /**
  * Responsibility Cards edition: ages 8–9 printable.
- * Nine illustrations are cropped at build time from the approved high-resolution
- * age-reference card (4.png), not upscaled from the 70px thumbnail icons.
+ * Nine complete transparent illustrations are embedded without cropping.
+ * This prioritizes intact art over upscaling a cut-off reference-card crop.
  * One US Letter sheet, selectable text, standalone printable, no tabletop imagery.
  */
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
@@ -10,30 +10,29 @@ import fontkit from '@pdf-lib/fontkit';
 import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
 
 const OUTPUT='public/downloads/chores-for-8-9-year-olds.pdf';
-const SOURCE='public/assets/responsibility-cards/illustrations/4.png';
 const LETTER=[612,792];
 const hex=(s)=>{const q=s.replace('#','');return rgb(parseInt(q.slice(0,2),16)/255,parseInt(q.slice(2,4),16)/255,parseInt(q.slice(4,6),16)/255)};
 const C={ivory:hex('#FBF7F1'),charcoal:hex('#545454'),peach:hex('#D8B79F'),leaf:hex('#D4DFC4'),blue:hex('#CDDDE1'),blush:hex('#E8D2D6'),white:rgb(1,1,1),rule:hex('#D5C5B8')};
 
-// The finished age-reference sheet contains BOTH illustration artwork and printed
-// captions. Crop only the artwork bands. Do not let a crop extend into source captions.
-// Source file: 1275x1875 px. All coordinates are based on that fixed original.
+// Use the ORIGINAL, COMPLETE, TRANSPARENT responsibility-card illustrations.
+// Do not crop the finished reference-card layout: that cut off the tops/bottoms
+// of the artwork and occasionally brought original captions into the PDF.
+// The standalone uploaded PNGs are small but their complete art is preserved.
+const artDir='public/assets/responsibility-cards/illustrations/';
+const artFile=n=>artDir+'My Responsibility Cards - 4x6 inches (4.25 x 6.25 in) ('+n+').png';
 const jobs=[
- {title:'Pack my backpack',x:155,y:215,w:235,h:200,band:0},
- {title:'Tidy my desk',x:397,y:215,w:235,h:200,band:0},
- {title:'Clear the table',x:637,y:215,w:235,h:200,band:0},
- {title:'Help with laundry',x:881,y:215,w:235,h:200,band:0},
- {title:'Wipe the counters',x:155,y:568,w:235,h:180,band:1},
- {title:'Tidy the entryway',x:397,y:568,w:235,h:180,band:1},
- {title:'After-school reset',x:637,y:568,w:235,h:180,band:1},
- {title:'Clean my floor',x:155,y:1210,w:235,h:175,band:2},
- {title:'Tidy the bathroom',x:637,y:1210,w:235,h:175,band:2}
+ {title:'Pack my backpack',image:artFile(16)},
+ {title:'Tidy my desk',image:artFile(11)},
+ {title:'Clear the table',image:artFile(12)},
+ {title:'Help with laundry',image:artFile(13)},
+ {title:'Wipe the counters',image:artFile(14)},
+ {title:'Tidy the entryway',image:artFile(15)},
+ // The finished collection currently supplies one standalone backpack/reset
+ // image for these two related jobs. Preserve it rather than cropping either.
+ {title:'After-school reset',image:artFile(16)},
+ {title:'Clean my floor',image:artFile(18)},
+ {title:'Tidy the bathroom',image:artFile(20)}
 ];
-const sourceCaptionStarts=[435,775,1400];
-function assertArtOnly(item){
- if(item.y+item.h>=sourceCaptionStarts[item.band])
-   throw new Error('Artwork crop includes original caption for '+item.title);
-}
 
 function pill(page,x,y,w,h,r,fill,stroke=null){
  page.drawRectangle({x:x+r,y,width:w-2*r,height:h,color:fill});
@@ -89,9 +88,6 @@ async function main(){
   handwritten=await pdf.embedFont(await readFile('node_modules/@fontsource/kalam/files/kalam-latin-400-normal.woff2'),{subset:false});
  }catch{ // Montserrat fallback preserves build if optional handwriting font is missing.
  }
- const source=await readFile(SOURCE);
- const meta=await sharp(source).metadata();
- if(meta.width!==1275||meta.height!==1875)throw new Error('Reference card image dimensions changed; review illustration crops before building.');
  const p=pdf.addPage(LETTER);p.drawRectangle({x:0,y:0,width:612,height:792,color:C.ivory});
 
  // Clean reference-card-like header.
@@ -106,10 +102,11 @@ async function main(){
  const tops=[676,524,372];
  const embedded=[];
  for(const item of jobs){
-  assertArtOnly(item);
-  const bytes=await sharp(source).extract({left:item.x,top:item.y,width:item.w,height:item.h})
-   .resize(320,305,{fit:'contain',background:{r:251,g:247,b:241,alpha:1}})
-   .png().toBuffer();
+  const bytes=await readFile(item.image);
+  const metadata=await sharp(bytes).metadata();
+  if(metadata.format!=='png'||!metadata.hasAlpha||!metadata.width||!metadata.height)
+    throw new Error('Expected a complete transparent PNG for '+item.title);
+  // Embed the entire source image. No extract(), trim(), resize(), or clipping.
   embedded.push(await pdf.embedPng(bytes));
  }
  jobs.forEach((job,i)=>{
@@ -119,7 +116,7 @@ async function main(){
   // Fit the ENTIRE source image into a padded illustration zone. The zone ends
   // above the label area and stays inside the rounded card on every side.
   const artArea={x:x+22,y:y+47,w:cellW-44,h:70};
-  const scale=Math.min(artArea.w/im.width,artArea.h/im.height,1);
+  const scale=Math.min(artArea.w/im.width,artArea.h/im.height);
   const iw=im.width*scale,ih=im.height*scale;
   const imageX=artArea.x+(artArea.w-iw)/2,imageY=artArea.y+(artArea.h-ih)/2;
   if(imageX<x+16||imageX+iw>x+cellW-16||imageY<y+40||imageY+ih>y+cellH-14)
