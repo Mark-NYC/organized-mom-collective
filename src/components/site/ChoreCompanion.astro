@@ -1,8 +1,8 @@
-<!-- Optional companion to the PUBLIC chore chart. No second email gate or hidden paywall. -->
-<section id="chore-companion" class="first-week" data-first-week hidden aria-labelledby="fw-title">
+<!-- Personalized companion preview appears after the chart email gate and successful download. -->
+<dialog id="chore-companion" class="first-week" data-first-week aria-labelledby="fw-title">
   <div class="fw-inner">
-    <p class="fw-eyebrow">A little something extra, free</p>
-    <h2 id="fw-title">Your first week, made simpler.</h2>
+    <div class="fw-top"><p class="fw-eyebrow">Your free companion plan is ready</p><button type="button" class="fw-close" data-fw-close aria-label="Close plan preview">×</button></div>
+    <h2 id="fw-title">A first-week plan made for your child.</h2>
     <p class="fw-intro" data-fw-intro>We've made a companion plan from the chart you created. Use it to help your child begin taking ownership.</p>
     <div class="fw-body">
       <div class="fw-controls">
@@ -13,53 +13,38 @@
           <option value="followthrough">We start strong but don't stick with it</option>
           <option value="expectations">I'm unsure what to expect at this age</option>
         </select>
-        <p class="fw-note">No more questions or email needed. Your chart is already downloaded.</p>
-        <button type="button" class="fw-button" data-fw-download>Download the free first-week plan (PDF)</button>
+        <p class="fw-note">No more questions or email needed. Your chart is ready. No second email is needed.</p>
+        <button type="button" class="fw-button" data-fw-download>Save my plan</button><a class="fw-open" data-fw-open href="#" target="_blank" rel="noopener" hidden>Open full-size PDF preview</a>
         <p class="fw-message" data-fw-message role="status" aria-live="polite"></p>
       </div>
-      <div class="fw-preview" aria-label="Preview of personalized first week plan">
-        <div class="fw-preview-head">
-          <span>ORGANIZED MOM COLLECTIVE</span>
-          <strong data-fw-name>My First Week Plan</strong>
-          <small data-fw-age>Made just for your child</small>
-        </div>
-        <div class="fw-preview-focus">
-          <small>THIS WEEK'S FOCUS</small>
-          <strong data-fw-focus>Start small, then practice together.</strong>
-        </div>
-        <div class="fw-preview-job"><small>CHOOSE ONE TO START</small><strong data-fw-job>One responsibility from your chart</strong></div>
-        <p data-fw-tip>Choose when you'll practice it together. Your plan will include simple family meeting prompts.</p>
-        <div class="fw-preview-footer">A LITTLE START FOR THE WHOLE FAMILY</div>
-      </div>
+      <div class="fw-preview" aria-label="Live PDF preview"><iframe data-fw-pdf title="Your personalized printable PDF" loading="eager"></iframe><p class="fw-loading" data-fw-loading role="status">Preparing your personalized plan…</p></div>
     </div>
   </div>
-</section>
+</dialog>
 <style>
-.first-week{background:#FBF7F1;color:#545454;padding:44px 20px 56px}
-.first-week[hidden]{display:none}
-.fw-inner{max-width:1000px;margin:auto}
-.fw-eyebrow{font:700 11px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#647c69;margin:0 0 8px}
-.first-week h2{font:400 clamp(28px,4vw,40px)/1.15 Georgia,serif;margin:0 0 10px}
-.fw-intro{max-width:700px;line-height:1.65;margin:0 0 25px}
-.fw-body{display:grid;grid-template-columns:1fr 0.9fr;gap:32px;align-items:center}
+.first-week{position:fixed;inset:12px;margin:auto;width:min(1080px,calc(100vw - 24px));max-width:1080px;max-height:calc(100dvh - 24px);overflow-y:auto;border:1px solid #ddd5cb;border-radius:13px;background:#FBF7F1;color:#545454;padding:26px 24px;box-shadow:0 24px 90px #0005}
+.first-week::backdrop{background:rgba(35,34,32,.72)}
+.fw-inner{max-width:980px;margin:auto}
+.fw-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.fw-close{border:0;background:none;color:#545454;min-width:44px;min-height:44px;font-size:32px;cursor:pointer}
+.fw-eyebrow{font:700 11px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#647c69;margin:0 0 6px}
+.first-week h2{font:400 clamp(24px,3vw,34px)/1.15 Georgia,serif;margin:0 0 8px}
+.fw-intro{max-width:720px;line-height:1.5;font-size:14px;margin:0 0 16px}
+.fw-body{display:grid;grid-template-columns:minmax(225px,.62fr) minmax(0,1fr);gap:24px;align-items:start}
 .fw-controls{display:grid;gap:12px;align-content:start}
 .fw-controls label{font-weight:700;font-size:14px}
 .fw-controls label span{font-weight:400;color:#777}
-.fw-controls select{min-height:50px;border:1px solid #c8c3bd;padding:10px 14px;border-radius:7px;color:#545454;background:white;font:inherit;width:100%}
-.fw-note,.fw-message{font-size:12px;color:#74706a;margin:0}
+.fw-controls select{min-height:48px;border:1px solid #c8c3bd;padding:10px 12px;border-radius:7px;color:#545454;background:white;font:inherit;width:100%}
+.fw-note,.fw-message{font-size:12px;color:#74706a;margin:0;line-height:1.5}
 .fw-button{border:0;border-radius:7px;background:#545454;color:white;min-height:52px;padding:14px 16px;text-align:center;cursor:pointer;font:700 14px Montserrat,sans-serif}
 .fw-button:disabled{opacity:.55;cursor:wait}
-.fw-preview{background:white;padding:22px;box-shadow:0 7px 24px #3331;border:1px solid #e4ddd4;display:grid;gap:14px;max-width:370px;width:100%;justify-self:center}
-.fw-preview-head{display:grid;gap:5px;border-bottom:2px solid #CDDDE1;padding-bottom:12px}
-.fw-preview-head span,.fw-preview-head small,.fw-preview-focus small,.fw-preview-job small{font:700 9px Montserrat,sans-serif;letter-spacing:.12em;color:#64717a}
-.fw-preview-head strong{font:400 26px/1.1 Georgia,serif;color:#3f3b39}
-.fw-preview-focus{border-radius:6px;background:#CDDDE1;padding:14px;display:grid;gap:8px}
-.fw-preview-focus strong{font:400 20px Georgia,serif}
-.fw-preview-job{padding:12px 0;border-bottom:1px solid #D5C5B8;display:grid;gap:6px}
-.fw-preview-job strong{font:400 16px Georgia,serif}
-.fw-preview p{font-size:12px;line-height:1.6;margin:0}
-.fw-preview-footer{text-align:right;color:#999;font:700 9px Montserrat,sans-serif;letter-spacing:.1em}
-@media(max-width:720px){.fw-body{grid-template-columns:1fr;gap:24px}.fw-preview{justify-self:start}.first-week{padding:35px 18px}}
+.fw-open{font-size:13px;color:#3D6671;text-decoration:underline;text-underline-offset:3px}
+.fw-open[hidden]{display:none}
+.fw-preview{position:relative;background:white;padding:8px;border:1px solid #e4ddd4;min-height:390px;max-height:72dvh;box-shadow:0 7px 24px #3331}
+.fw-preview iframe{width:100%;height:min(69dvh,750px);min-height:390px;border:0;background:white}
+.fw-loading{position:absolute;inset:20px;display:grid;place-items:center;text-align:center;background:white;color:#777}
+.fw-loading[hidden]{display:none}
+@media(max-width:720px){.first-week{padding:15px 12px;max-height:calc(100dvh - 12px)}.fw-body{display:flex;flex-direction:column-reverse;gap:16px}.fw-controls{width:100%}.fw-preview{width:100%;max-height:53dvh;min-height:260px}.fw-preview iframe{height:49dvh;min-height:260px}.fw-note{display:none}.fw-button{position:sticky;bottom:0;width:100%}.fw-intro{font-size:13px}}
 </style>
 <script>
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
