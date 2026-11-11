@@ -9,7 +9,7 @@ const pdf='/downloads/'+guide.slug+'.pdf';
 const art=(name:string)=>'/assets/icons/ofc/guides/responsibility/'+name+'.png';
 const related=miniGuides.filter(g=>g.slug!==guide.slug);
 const noReminders=guide.slug==='kids-chores-without-reminders';
-const ageCards=ageCardGuides[slug];
+const ageCards=ageCardGuides[slug as keyof typeof ageCardGuides];
 ---
 <div class="text-[#545454]">
 <section class="bg-[#FBF7F1] px-5 py-10 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
