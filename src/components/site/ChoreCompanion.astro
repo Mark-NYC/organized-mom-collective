@@ -18,11 +18,46 @@
     <button type="button" class="fw-gift-dismiss" data-fw-dismiss>No thanks, just my chart</button>
   </div>
   <div class="fw-inner" data-fw-plan>
-    <div class="fw-top"><p class="fw-eyebrow">Your free companion plan is ready</p><button type="button" class="fw-close" data-fw-close aria-label="Close plan preview">×</button></div>
-    <h2 id="fw-title">A first-week plan made for your child.</h2>
-    <p class="fw-intro" data-fw-intro>We've made a companion plan from the chart you created. Use it to help your child begin taking ownership.</p>
-    <div class="fw-body">
-      <div class="fw-controls">
+    <div class="fw-top"><p class="fw-eyebrow">A GIFT FROM ORGANIZED MOM COLLECTIVE</p><button type="button" class="fw-close" data-fw-close aria-label="Close personalized plan">×</button></div>
+    <header class="fw-digital-head">
+      <p class="fw-kicker">YOUR PERSONALIZED FAMILY FOCUS</p>
+      <h2 id="fw-title" data-fw-title>Your First Week Plan</h2>
+      <p class="fw-intro" data-fw-intro>One small way to help your child start owning a responsibility.</p>
+      <div class="fw-action-row"><button type="button" class="fw-button fw-download" data-fw-download>↓ Download my plan (PDF)</button><small>Free, one-page printable</small></div>
+    </header>
+    <div class="fw-digital">
+      <section class="fw-focus" aria-labelledby="fw-focus-h">
+        <p class="fw-section-label">This week's focus</p>
+        <h3 id="fw-focus-h" data-fw-focus></h3>
+        <p data-fw-support></p>
+      </section>
+      <section class="fw-digital-section" aria-labelledby="fw-habits-h">
+        <h3 id="fw-habits-h">Small habits worth trying</h3>
+        <p class="fw-help">Start with one. Invite your child to help choose what works.</p>
+        <div class="fw-habit-grid">
+          <article class="fw-habit">
+            <div class="fw-habit-head"><div><p class="fw-section-label">Start here</p><h4 data-fw-primary></h4></div><img data-fw-primary-icon alt="" hidden /></div>
+            <p><b>When:</b> <span data-fw-cue></span></p>
+            <p><b>Ownership:</b> <span data-fw-primary-owner></span></p>
+          </article>
+          <article class="fw-habit" data-fw-second-card>
+            <div class="fw-habit-head"><div><p class="fw-section-label">Add later</p><h4 data-fw-secondary></h4></div><img data-fw-secondary-icon alt="" hidden /></div>
+            <p><b>Help:</b> <span data-fw-action></span></p>
+          </article>
+        </div>
+      </section>
+      <section class="fw-digital-section fw-meeting" aria-labelledby="fw-meeting-h">
+        <h3 id="fw-meeting-h">Try this at your Family Meeting</h3>
+        <p class="fw-help">A simple four-part rhythm to decide together what to try this week.</p>
+        <ol class="fw-meeting-list">
+          <li><b>1. Connect</b><span>Share one good thing from your week.</span></li>
+          <li><b>2. Look back</b><span data-fw-question></span></li>
+          <li><b>3. Look up</b><span>Read a short Bible story or share what your family values.</span></li>
+          <li><b>4. Look ahead</b><span data-fw-lookahead></span></li>
+        </ol>
+      </section>
+      <section class="fw-adjust" aria-labelledby="fw-adjust-h">
+        <h3 id="fw-adjust-h">Make this fit your family</h3>
         <label for="fw-challenge">What's the hardest part about chores right now? <span>(optional)</span></label>
         <select id="fw-challenge" data-fw-challenge>
           <option value="reminders">I have to keep reminding them</option>
@@ -30,55 +65,68 @@
           <option value="followthrough">We start strong but don't stick with it</option>
           <option value="expectations">I'm unsure what to expect at this age</option>
         </select>
-        <p class="fw-note">Your chart is ready. This extra plan is free, with no second email required.</p>
-        <button type="button" class="fw-button" data-fw-download>Save my plan</button><a class="fw-open" data-fw-open href="#" target="_blank" rel="noopener" hidden>Open full-size PDF preview</a>
-        <p class="fw-message" data-fw-message role="status" aria-live="polite"></p>
-      </div>
-      <div class="fw-preview" aria-label="Live PDF preview"><iframe data-fw-pdf title="Your personalized printable PDF" loading="eager"></iframe><p class="fw-loading" data-fw-loading role="status">Preparing your personalized plan…</p></div>
+        <p class="fw-help">Your focus and printable update when you change this.</p>
+      </section>
+      <section class="fw-continuation" aria-labelledby="fw-continuation-h">
+        <p class="fw-section-label">Keep growing together</p>
+        <h3 id="fw-continuation-h">One good week is a start.</h3>
+        <p>The Family Meeting Club helps you build responsibility, connection and healthy rhythms with personalized printed tools mailed every month.</p>
+        <a href="/club-2/?utm_source=chore_chart&utm_medium=free_plan&utm_campaign=first_week_gift" data-cta="chore-first-week" >See the Family Meeting Club →</a>
+      </section>
     </div>
+    <footer class="fw-bottom">
+      <button type="button" class="fw-button fw-download" data-fw-download>↓ Download my personalized plan (PDF)</button>
+      <p class="fw-message" data-fw-message role="status" aria-live="polite"></p>
+    </footer>
   </div>
 </dialog>
 <style>
 .first-week{position:fixed;inset:12px;margin:auto;width:min(850px,calc(100vw - 24px));max-width:850px;max-height:calc(100dvh - 24px);overflow-y:auto;border:1px solid #ddd5cb;border-radius:13px;background:#FBF7F1;color:#545454;padding:26px 24px;box-shadow:0 24px 90px #0005}
 .first-week::backdrop{background:rgba(35,34,32,.72)}
 .first-week[data-phase="gift"]{width:min(480px,calc(100vw - 28px));padding:0;max-height:calc(100dvh - 28px);overflow:hidden}
-.first-week[data-phase="gift"] .fw-inner{display:none}
-.first-week[data-phase="plan"] .fw-gift{display:none}
-.fw-gift{isolation:isolate;position:relative;text-align:center;background:#FBF7F1;padding:52px 31px 34px;display:flex;flex-direction:column;align-items:center;gap:13px;overflow:hidden}
-.fw-gift-close{position:absolute;right:10px;top:8px;border:0;background:none;color:#545454;font-size:29px;width:44px;height:44px;cursor:pointer;z-index:2}
-.fw-gift-art{position:relative;z-index:1;width:112px;height:112px;border-radius:50%;background:#D4DFC4;display:grid;place-items:center;margin:0 0 6px}
-.fw-gift-kicker{position:relative;z-index:1;font:700 10px Montserrat,sans-serif;letter-spacing:.16em;color:#526C5B;margin:0}
-.fw-gift h2{position:relative;z-index:1;font:400 clamp(28px,6vw,37px)/1.12 Georgia,serif;margin:0;color:#3f3b39}
-.fw-gift-description{position:relative;z-index:1;max-width:350px;font:400 15px/1.6 Montserrat,sans-serif;margin:0}
-.fw-gift-detail{position:relative;z-index:1;font-size:12px;color:#76716b;line-height:1.5;margin:0}
-.fw-gift-button{position:relative;z-index:1;margin-top:10px;background:#545454;border:0;border-radius:7px;color:#fff;padding:16px 22px;min-height:52px;width:100%;font:700 14px Montserrat,sans-serif;cursor:pointer}
-.fw-gift-dismiss{position:relative;z-index:1;background:none;border:0;color:#777;text-decoration:underline;text-underline-offset:3px;min-height:38px;cursor:pointer;font-size:12px}
-.fw-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
-.fw-confetti-piece{position:absolute;top:-16px;width:8px;height:13px;opacity:0;animation:fw-fall 1500ms ease-out forwards;transform:translate3d(0,0,0) rotate(0deg)}
-@keyframes fw-fall{0%{opacity:0;transform:translate3d(0,-20px,0) rotate(0)}12%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate3d(var(--fw-drift),360px,0) rotate(var(--fw-spin))}}
-@media(prefers-reduced-motion:reduce){.fw-confetti-piece{animation:none;display:none}}
-
-.fw-inner{max-width:980px;margin:auto}
-.fw-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.first-week[data-phase="gift"] .fw-inner{max-width:780px;margin:auto;display:grid;gap:18px}
+.fw-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .fw-close{border:0;background:none;color:#545454;min-width:44px;min-height:44px;font-size:32px;cursor:pointer}
-.fw-eyebrow{font:700 11px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#647c69;margin:0 0 6px}
-.first-week h2{font:400 clamp(24px,3vw,34px)/1.15 Georgia,serif;margin:0 0 8px}
-.fw-intro{max-width:720px;line-height:1.5;font-size:14px;margin:0 0 16px}
-.fw-body{display:flex;flex-direction:column-reverse;gap:14px;align-items:center}
-.fw-controls{display:grid;gap:12px;align-content:start;width:min(100%,720px)}
-.fw-controls label{font-weight:700;font-size:14px}
-.fw-controls label span{font-weight:400;color:#777}
-.fw-controls select{min-height:48px;border:1px solid #c8c3bd;padding:10px 12px;border-radius:7px;color:#545454;background:white;font:inherit;width:100%}
-.fw-note,.fw-message{font-size:12px;color:#74706a;margin:0;line-height:1.5}
-.fw-button{border:0;border-radius:7px;background:#545454;color:white;min-height:52px;padding:14px 16px;text-align:center;cursor:pointer;font:700 14px Montserrat,sans-serif}
+.fw-eyebrow,.fw-kicker,.fw-section-label{font:700 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#3D6671;margin:0}
+.fw-kicker{margin:0 0 9px}
+.fw-digital-head{padding:8px 0 16px;border-bottom:1px solid #D5C5B8}
+.fw-digital-head h2{font:400 clamp(29px,5vw,43px)/1.12 Georgia,serif;color:#3f3b39;margin:0 0 10px}
+.fw-intro{font:400 15px/1.5 Montserrat,sans-serif;margin:0 0 18px}
+.fw-action-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fw-action-row small{color:#777;font-size:12px}
+.fw-button{border:0;border-radius:7px;background:#545454;color:white;min-height:50px;padding:13px 18px;text-align:center;cursor:pointer;font:700 14px Montserrat,sans-serif}
 .fw-button:disabled{opacity:.55;cursor:wait}
-.fw-open{font-size:13px;color:#3D6671;text-decoration:underline;text-underline-offset:3px}
-.fw-open[hidden]{display:none}
-.fw-preview{position:relative;background:white;padding:8px;border:1px solid #e4ddd4;min-height:390px;max-height:72dvh;box-shadow:0 7px 24px #3331;width:min(100%,720px)}
-.fw-preview iframe{width:100%;height:min(69dvh,750px);min-height:390px;border:0;background:white}
-.fw-loading{position:absolute;inset:20px;display:grid;place-items:center;text-align:center;background:white;color:#777}
-.fw-loading[hidden]{display:none}
-@media(max-width:720px){.first-week{padding:15px 12px;max-height:calc(100dvh - 12px)}.fw-body{display:flex;flex-direction:column-reverse;gap:16px}.fw-controls{width:100%}.fw-preview{width:100%;max-height:53dvh;min-height:260px}.fw-preview iframe{height:49dvh;min-height:260px}.fw-note{display:none}.fw-button{position:sticky;bottom:0;width:100%}.fw-intro{font-size:13px}}
+.fw-digital{display:grid;gap:26px}
+.fw-digital h3{font:400 clamp(23px,4vw,29px)/1.2 Georgia,serif;margin:0;color:#3f3b39}
+.fw-digital p{line-height:1.55}
+.fw-focus{padding:22px;background:#CDDDE1;border-radius:9px;display:grid;gap:9px}
+.fw-focus h3{font-size:clamp(25px,5vw,34px)}
+.fw-focus p{margin:0}
+.fw-digital-section{display:grid;gap:10px}
+.fw-help{color:#777;margin:0;font-size:13px}
+.fw-habit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fw-habit{border:1px solid #D5C5B8;background:white;border-radius:9px;padding:17px;display:grid;gap:9px}
+.fw-habit-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fw-habit-head h4{font:400 21px/1.2 Georgia,serif;margin:7px 0 0;overflow-wrap:anywhere}
+.fw-habit-head img{width:61px;height:61px;object-fit:contain;flex:none}
+.fw-habit-head img[hidden],.fw-habit[hidden]{display:none}
+.fw-habit p{font-size:13px;margin:0}
+.fw-habit b{color:#3D6671}
+.fw-meeting-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.fw-meeting-list li{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;background:#fff;border:1px solid #e7e0d7;border-radius:7px;padding:12px 15px;font-size:13px;line-height:1.5}
+.fw-meeting-list b{color:#3D6671}
+.fw-adjust{background:white;border:1px solid #D5C5B8;border-radius:9px;padding:18px;display:grid;gap:10px}
+.fw-adjust h3{font-size:23px}
+.fw-adjust label{font-weight:700;font-size:13px}
+.fw-adjust label span{font-weight:400;color:#777}
+.fw-adjust select{width:100%;min-height:48px;border:1px solid #c8c3bd;padding:10px 12px;border-radius:7px;background:white;font:inherit;color:#545454}
+.fw-continuation{border-radius:9px;background:#D4DFC4;padding:20px;display:grid;gap:8px}
+.fw-continuation p{margin:0}
+.fw-continuation a{font-weight:700;color:#3D6671;text-decoration:underline;text-underline-offset:4px;font-size:14px}
+.fw-bottom{padding-top:14px;border-top:1px solid #D5C5B8;display:grid;justify-items:center;gap:7px}
+.fw-bottom .fw-button{width:min(100%,440px)}
+.fw-message{font-size:12px;color:#647c69;min-height:18px;text-align:center;margin:0}
+@media(max-width:720px){.first-week{padding:16px 14px;max-height:calc(100dvh - 12px)}.fw-inner{gap:13px}.fw-digital{gap:22px}.fw-focus{padding:17px}.fw-habit-grid{grid-template-columns:1fr}.fw-meeting-list li{grid-template-columns:1fr;gap:3px}.fw-digital-head h2{font-size:31px}.fw-action-row .fw-button{width:100%}.fw-bottom{position:sticky;bottom:-16px;background:#FBF7F1;padding:12px 0 16px}}
 </style>
 <script>
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
