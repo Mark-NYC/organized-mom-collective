@@ -263,7 +263,7 @@ export function initChoreChart(host: HTMLElement, handoff?: ToolHandoff | null) 
     });
     hinted.forEach((el) => (el.placeholder = 'Reward'));
     // A free, optional companion plan is offered only after the chart download completes.
-    if (host.closest('[data-chart-modern]')) {
+    if (host.closest('[data-chart-original]')) {
       window.dispatchEvent(new CustomEvent('omc:chore-chart-downloaded', { detail: {
         name: nameInput.value.trim(),
         age: sets[ageField.value as AgeGroup]?.label ?? '',
