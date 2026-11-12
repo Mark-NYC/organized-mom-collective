@@ -453,11 +453,11 @@ const closeUp = (month: string) => {
 
 
 /* Rivera personalization story: phone fills first, makes one small pulse,
-   then the completed printed resource takes focus. 18 seconds, looping. */
+   then the completed printed resource takes focus. 15 seconds, looping. */
 .personalization-intro{margin:10px auto 0!important;color:#64795d;font-size:.86rem!important;max-width:650px}
 .rivera-actual-print{
  opacity:.44;
- animation:rivera-paper-focus 18s ease-in-out infinite;
+ animation:rivera-paper-focus 15s ease-in-out infinite;
 }
 @keyframes rivera-paper-focus{
  0%,37%{opacity:.44}
@@ -466,7 +466,7 @@ const closeUp = (month: string) => {
 }
 
 .product-print>.club-phone-wrap{
- animation:rivera-phone-pulse 18s ease-in-out infinite;
+ animation:rivera-phone-pulse 15s ease-in-out infinite;
  will-change:transform;
 }
 @keyframes rivera-phone-pulse{
@@ -477,7 +477,7 @@ const closeUp = (month: string) => {
 .club-phone{opacity:1;}
 .club-phone .reveal-field{
  opacity:0;
- animation-duration:18s;
+ animation-duration:15s;
  animation-timing-function:ease-in-out;
  animation-iteration-count:infinite;
 }
