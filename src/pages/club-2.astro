@@ -620,5 +620,19 @@ const closeUp = (month: string) => {
  .rr-note{font-size:clamp(5px,1.35vw,7px)}
 }
 
+
+/* Keep the phone connected to the letter-size paper without covering printable rows.
+   Reserve its height below the paper; the overlap is only at the bottom edge. */
+@media(max-width:750px){
+ .product-stack{padding-bottom:clamp(255px,76vw,315px)}
+ .club-phone-wrap{width:42%;max-width:188px;right:0;bottom:34px}
+ .mockup-caption{bottom:8px}
+}
+@media(max-width:390px){
+ .product-stack{padding-bottom:clamp(245px,78vw,285px)}
+ .club-phone-wrap{width:43%;max-width:170px;right:0;bottom:30px}
+ .mockup-caption{bottom:8px}
+}
+
 </style>
 </PublicLayout>
