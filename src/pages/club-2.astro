@@ -173,26 +173,15 @@ const closeUp = (month: string) => {
   <div class="product-system">
    <div class="product-stack" aria-label="Example of a personalized printed family resource with a digital Family Meeting focus">
     <div class="product-print">
-     <div class="rivera-routine-sheet" role="group" aria-label="The Rivera Family after-school routine, based on the August personalized resource">
-      <div class="rivera-sheet-brand"><span></span><strong>♡ ORGANIZED<br/>family CLUB</strong><span></span></div>
-      <div class="rivera-sheet-head">
-       <p class="rivera-family reveal-field reveal-1">The Rivera Family</p>
-       <h3>After-School Routine</h3>
-       <p class="rivera-subtitle">Home, reset, then free time.</p>
-       <div class="rivera-children"><span class="reveal-field reveal-2">● SOFIA</span><span class="reveal-field reveal-3">● MATEO</span><span class="reveal-field reveal-4">● ELENA</span></div>
-      </div>
-      <div class="rivera-sheet-instruction">Check the chart. Do the next thing.</div>
-      <div class="rivera-routine-rows">
-       <div class="rivera-routine-row tone-peach"><span class="rr-number">01</span><img src="/images/club/august-v3/sneakers.png" alt="" loading="lazy"/><span class="rr-action reveal-field reveal-5">Shoes &amp; coat away</span><span class="rr-note reveal-field reveal-5">When I walk in the door</span></div>
-       <div class="rivera-routine-row tone-sage"><span class="rr-number">02</span><img src="/images/club/august-v3/backpack.png" alt="" loading="lazy"/><span class="rr-action reveal-field reveal-6">Unpack backpack &amp; lunch box</span></div>
-       <div class="rivera-routine-row tone-rose"><span class="rr-number">03</span><img src="/images/club/august-v3/washing-hands.png" alt="" loading="lazy"/><span class="rr-action reveal-field reveal-7">Wash hands</span></div>
-       <div class="rivera-routine-row tone-mint"><span class="rr-number">04</span><img src="/images/club/august-v3/yogurt-cup.png" alt="" loading="lazy"/><span class="rr-action reveal-field reveal-8">Have a snack</span></div>
-       <div class="rivera-routine-row tone-blue"><span class="rr-number">05</span><img src="/images/club/august-v3/book.png" alt="" loading="lazy"/><span class="rr-action reveal-field reveal-9">Homework or reading</span></div>
-       <div class="rivera-routine-row tone-cream soccer-row"><span class="rr-number">06</span><img src="/images/club/august-v3/backpack.png" alt="" loading="lazy"/><span class="rr-action reveal-field reveal-10">Pack my soccer bag <small>● SOFIA</small></span><span class="rr-note reveal-field reveal-10">On Tue &amp; Thu</span></div>
-       <div class="rivera-routine-row tone-lavender"><span class="rr-number">07</span><img src="/images/club/august-v3/school-bus.png" alt="" loading="lazy"/><span class="rr-action reveal-field reveal-11">Free play</span></div>
-      </div>
-      <div class="rivera-finished"><strong>Ready for free time!</strong><span>HOME, UNPACKED AND RESET.</span></div>
-     </div>
+     <img
+      class="rivera-actual-print"
+      src="/images/club/rivera-after-school-demo.webp"
+      width="420"
+      height="528"
+      alt="The Rivera family’s complete August after-school routine, showing seven illustrated steps and Sofia’s Tuesday and Thursday soccer bag responsibility."
+      decoding="async"
+      loading="lazy"
+     />
     <div class="club-phone-wrap">
      <div class="club-phone" role="img" aria-label="Illustrative August Family Meeting focus for the Rivera family: discuss after-school routines, share responsibilities, and practice one step">
       <div class="club-phone-notch"></div>
@@ -217,7 +206,7 @@ const closeUp = (month: string) => {
    <div class="product-system-copy">
     <div class="product-feature">
      <div class="product-feature-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><rect x="10" y="6" width="28" height="36" rx="2"/><path d="M17 16h14M17 23h14M17 30h10"/></svg></div>
-     <div><h3>A personalized printed resource</h3><p>See how the Rivera family’s August routine fills in as an example. Each month, we prepare a practical resource for your family, print it, and mail it with Megan’s note and how-to instructions on the back.</p></div>
+     <div><h3>A personalized printed resource</h3><p>See the Rivera family’s finished August routine come into focus as an example. Each month, we prepare a practical resource for your family, print it, and mail it with Megan’s note and how-to instructions on the back.</p></div>
     </div>
     <div class="product-feature">
      <div class="product-feature-icon phone-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><rect x="13" y="4" width="22" height="40" rx="5"/><path d="M21 10h6M21 37h6M18 19l3 3 8-8M18 29h12"/></svg></div>
@@ -463,41 +452,10 @@ const closeUp = (month: string) => {
 @media(max-width:390px){.products-surface{padding-inline:12px}.club-phone-wrap{width:42%}.club-phone{border-width:4px;border-radius:22px}.club-phone-screen{border-radius:15px;padding:18px 5px 5px}.club-phone-notch{top:5px;height:8px}.club-phone-meeting{gap:2px;margin-top:6px}.club-phone-meeting>div{grid-template-columns:13px 1fr;gap:2px;padding:3px}.club-phone-meeting>div span{font-size:5px}.club-phone-meeting b{font-size:6px}.club-phone-meeting small{font-size:5px}.club-phone-date{margin-top:7px;font-size:5px}.club-phone-title{font-size:13px}.club-phone-subtitle{font-size:7px}.club-phone-brand{font-size:5px}.club-phone-bottom{font-size:5px;padding:3px}.mockup-caption{font-size:.58rem}.product-feature{grid-template-columns:39px 1fr;gap:10px}}
 
 
-/* Faithful, readable on-page rendering of the Rivera after-school sheet supplied for the August example. */
-.rivera-routine-sheet{background:#fff;padding:clamp(10px,1.4vw,24px);box-shadow:0 6px 18px #515c4c1d;color:#344038;aspect-ratio:1170/1471;font-family:"Georgia Pro",Georgia,serif;display:flex;flex-direction:column;gap:6px;overflow:hidden}
-.rivera-sheet-brand{display:flex;justify-content:center;align-items:center;gap:9px;padding:3% 0 4%;font:800 clamp(5px,.57vw,8px)/1.12 Montserrat,sans-serif;letter-spacing:.035em;text-align:center;color:#666}
-.rivera-sheet-brand>span{height:1px;background:#c6c6c6;flex:1}
-.rivera-sheet-head{background:#E6EDE0;padding:4%}
-.rivera-family{font:italic clamp(8px,1.12vw,15px)/1.2 Georgia,serif;color:#728570}
-.rivera-sheet-head h3{font:400 clamp(16px,2.75vw,37px)/1.05 Georgia,serif;letter-spacing:-.03em;margin:2px 0 4px}
-.rivera-subtitle{font:italic clamp(7px,1vw,14px)/1.2 Georgia,serif;color:#7b8a76}
-.rivera-children{display:flex;gap:10px;margin-top:5px;font:800 clamp(5px,.7vw,10px) Montserrat,sans-serif}
-.rivera-children span:nth-child(1){color:#316ea6}.rivera-children span:nth-child(2){color:#34896b}.rivera-children span:nth-child(3){color:#8052ae}
-.rivera-sheet-instruction{font:800 clamp(6px,.79vw,11px) Montserrat,sans-serif;letter-spacing:.06em;text-align:center;padding:3% 0}
-.rivera-routine-rows{display:grid;gap:5px;flex:1;min-height:0;grid-template-rows:repeat(7,minmax(0,1fr))}
-.rivera-routine-row{display:grid;grid-template-columns:12% 14% minmax(0,1fr) auto;gap:4%;align-items:center;min-height:0;border-radius:7px;overflow:hidden;padding:0 2% 0 0;background:#F4E8DC}
-.rr-number{height:100%;display:grid;place-items:center;background:#ead6c6;font:italic clamp(10px,1.5vw,22px) Georgia,serif;color:#917658}
-.rivera-routine-row img{width:100%;max-width:60px;max-height:65%;height:auto;object-fit:contain;justify-self:center}
-.rr-action{font:400 clamp(9px,1.45vw,20px)/1.18 Georgia,serif;color:#354036}
-.rr-action small{display:block;font:800 clamp(5px,.65vw,9px) Montserrat,sans-serif;color:#316ea6;padding-top:3px}
-.rr-note{background:white;border-radius:7px;padding:6px;font:700 clamp(5px,.65vw,9px)/1.25 Montserrat,sans-serif;text-align:center;max-width:78px}
-.tone-sage{background:#E8EDE6}.tone-sage .rr-number{background:#D8E6D4;color:#627d60}
-.tone-rose{background:#F3E5E1}.tone-rose .rr-number{background:#E8CDC7;color:#9c706c}
-.tone-mint{background:#E4EBE4}.tone-mint .rr-number{background:#D5E3D6;color:#657f68}
-.tone-blue{background:#E8EDF2}.tone-blue .rr-number{background:#D7E1EB;color:#6684a2}
-.tone-cream{background:#F4EBD7}.tone-cream .rr-number{background:#EADCB9;color:#92805d}
-.tone-lavender{background:#EAE6EF}.tone-lavender .rr-number{background:#DBD5E5;color:#81739b}
-.rivera-finished{background:#E2EADD;border-radius:7px;text-align:center;padding:2%;display:flex;flex-direction:column;justify-content:center}
-.rivera-finished strong{font:italic clamp(10px,1.7vw,24px)/1.12 Georgia,serif}
-.rivera-finished span{font:800 clamp(5px,.65vw,9px) Montserrat,sans-serif;letter-spacing:.1em;color:#6f8568}
-@media(max-width:750px){.rivera-sheet-head h3{font-size:clamp(18px,4.8vw,30px)}.rr-action{font-size:clamp(9px,2.3vw,16px)}.rr-number{font-size:clamp(12px,2.5vw,19px)}.rivera-finished strong{font-size:clamp(13px,3vw,20px)}.rivera-sheet-brand{font-size:7px}.rivera-children{font-size:7px}}
-@media(max-width:390px){.rivera-sheet-head h3{font-size:19px}.rr-action{font-size:9px}.rr-number{font-size:11px}.rr-note{font-size:5px;padding:3px}.rivera-routine-rows{gap:3px}}
-
-
 /* Rivera personalization story: phone fills first, makes one small pulse,
    then the completed printed resource takes focus. 18 seconds, looping. */
 .personalization-intro{margin:10px auto 0!important;color:#64795d;font-size:.86rem!important;max-width:650px}
-.rivera-routine-sheet{
+.rivera-actual-print{
  opacity:.44;
  animation:rivera-paper-focus 18s ease-in-out infinite;
 }
@@ -506,7 +464,7 @@ const closeUp = (month: string) => {
  45%,94%{opacity:1}
  99%,100%{opacity:.44}
 }
-.rivera-routine-sheet .reveal-field{opacity:1;animation:none}
+
 .product-print>.club-phone-wrap{
  animation:rivera-phone-pulse 18s ease-in-out infinite;
  will-change:transform;
@@ -567,13 +525,13 @@ const closeUp = (month: string) => {
  99%,100%{opacity:0}
 }
 .soccer-row{position:relative;isolation:isolate}
-.soccer-row::after{display:none}
+
 /* On phones, keep the full printed routine readable and put the phone below it.
    The small overlap is decorative; it must not obscure any routine steps. */
 @media(max-width:750px){
  .product-stack{width:100%;max-width:480px;padding:10px 0 0;margin-inline:auto}
  .product-print{width:100%;transform:rotate(-1deg)}
- .rivera-routine-sheet{aspect-ratio:auto;min-height:490px;padding:clamp(12px,3.4vw,22px);gap:7px}
+ .rivera-actual-print{aspect-ratio:auto;min-height:490px;padding:clamp(12px,3.4vw,22px);gap:7px}
  .rivera-sheet-brand{font-size:8px;padding:8px 0 11px}
  .rivera-sheet-head{padding:12px}
  .rivera-sheet-head h3{font-size:clamp(22px,6vw,32px);white-space:normal;line-height:1.08}
@@ -602,7 +560,7 @@ const closeUp = (month: string) => {
  .mockup-caption{position:static;display:block;margin-top:10px;text-align:center;font-size:.7rem}
 }
 @media(max-width:390px){
- .rivera-routine-sheet{min-height:470px;padding:10px}
+ .rivera-actual-print{min-height:470px;padding:10px}
  .rivera-sheet-head h3{font-size:22px}
  .rivera-routine-row{grid-template-columns:12% 12% minmax(0,1fr) auto;column-gap:2%}
  .rr-action{font-size:11px}
@@ -629,9 +587,9 @@ const closeUp = (month: string) => {
 
 
 /* Keep the landing-page printable at actual US Letter proportions on all screens. */
-.rivera-routine-sheet{aspect-ratio:8.5/11;min-height:0}
+.rivera-actual-print{aspect-ratio:8.5/11;min-height:0}
 @media(max-width:750px){
- .rivera-routine-sheet{
+ .rivera-actual-print{
   aspect-ratio:8.5/11;
   min-height:0;
   height:auto;
@@ -657,7 +615,7 @@ const closeUp = (month: string) => {
  .rivera-finished span{font-size:clamp(5px,1.45vw,8px)}
 }
 @media(max-width:390px){
- .rivera-routine-sheet{aspect-ratio:8.5/11;min-height:0;padding:8px}
+ .rivera-actual-print{aspect-ratio:8.5/11;min-height:0;padding:8px}
  .rivera-sheet-head h3{font-size:clamp(16px,5.1vw,20px)}
  .rr-action{font-size:clamp(8px,2.75vw,11px)}
  .rr-number{font-size:clamp(9px,3vw,12px)}
@@ -765,7 +723,7 @@ const closeUp = (month: string) => {
 
 /* Static, fully readable example for reduced motion and unsupported animations. */
 @media(prefers-reduced-motion:reduce){
- .rivera-routine-sheet,.rivera-routine-sheet .reveal-field,
+ .rivera-actual-print,
  .club-phone,.club-phone .reveal-field,
  .product-print>.club-phone-wrap,.soccer-row::after{
   animation:none!important;opacity:1!important;transform:none!important;will-change:auto!important;
@@ -805,6 +763,10 @@ const closeUp = (month: string) => {
  .club-phone-meeting small{font-size:6.5px;line-height:1.12}
  .club-phone-bottom{font-size:5.5px;padding:3px 0 1px}
 }
+
+/* The real Rivera printable image fades in as one complete finished page. */
+.rivera-actual-print{display:block;width:100%;height:auto;aspect-ratio:8.5/11;object-fit:contain;background:#fff;animation:rivera-paper-focus 18s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.rivera-actual-print{animation:none!important;opacity:1!important}}
 
 </style>
 </PublicLayout>
