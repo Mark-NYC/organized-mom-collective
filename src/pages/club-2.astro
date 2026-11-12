@@ -506,15 +506,7 @@ const closeUp = (month: string) => {
  45%,94%{opacity:1}
  99%,100%{opacity:.44}
 }
-.rivera-routine-sheet .reveal-field{
- opacity:0;
- animation:rivera-paper-complete 18s ease-in-out infinite;
-}
-@keyframes rivera-paper-complete{
- 0%,38%{opacity:0}
- 46%,94%{opacity:1}
- 99%,100%{opacity:0}
-}
+.rivera-routine-sheet .reveal-field{opacity:1;animation:none}
 .product-print>.club-phone-wrap{
  animation:rivera-phone-pulse 18s ease-in-out infinite;
  will-change:transform;
@@ -575,17 +567,7 @@ const closeUp = (month: string) => {
  99%,100%{opacity:0}
 }
 .soccer-row{position:relative;isolation:isolate}
-.soccer-row::after{
- content:"";position:absolute;inset:1px;border:2px solid #719c68;
- border-radius:8px;box-shadow:0 0 0 4px #cfe7ba9c;
- pointer-events:none;opacity:0;
- animation:rivera-soccer-emphasis 18s ease-in-out infinite;
-}
-@keyframes rivera-soccer-emphasis{
- 0%,45%{opacity:0}
- 51%,92%{opacity:1}
- 98%,100%{opacity:0}
-}
+.soccer-row::after{display:none}
 /* On phones, keep the full printed routine readable and put the phone below it.
    The small overlap is decorative; it must not obscure any routine steps. */
 @media(max-width:750px){
