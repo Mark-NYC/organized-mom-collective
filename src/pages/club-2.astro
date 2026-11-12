@@ -524,14 +524,7 @@ const closeUp = (month: string) => {
  34%{transform:scale(1.065)}
  37%,100%{transform:scale(1)}
 }
-.club-phone{
- animation:rivera-phone-focus 18s ease-in-out infinite;
-}
-@keyframes rivera-phone-focus{
- 0%,38%{opacity:1}
- 47%,94%{opacity:.83}
- 99%,100%{opacity:1}
-}
+.club-phone{opacity:1;}
 .club-phone .reveal-field{
  opacity:0;
  animation-duration:18s;
@@ -795,6 +788,40 @@ const closeUp = (month: string) => {
  .product-print>.club-phone-wrap,.soccer-row::after{
   animation:none!important;opacity:1!important;transform:none!important;will-change:auto!important;
  }
+}
+
+
+/* Phone stays fully opaque; pack the on-screen meeting UI into its actual frame. */
+.club-phone{opacity:1;box-sizing:border-box;display:flex;flex-direction:column}
+.club-phone-screen{box-sizing:border-box;min-height:0;min-width:0;width:100%;flex:1}
+.club-phone-meeting>div p{min-width:0;margin:0}
+.club-phone-meeting>div small{overflow-wrap:break-word}
+@media(max-width:750px){
+ .club-phone{border-width:5px;border-radius:25px;padding:2px}
+ .club-phone-notch{top:6px;height:10px}
+ .club-phone-screen{border-radius:18px;padding:clamp(20px,5.3vw,28px) 6px 5px}
+ .club-phone-brand{font-size:clamp(6px,1.55vw,7px);line-height:1.15}
+ .club-phone-date{font-size:clamp(6px,1.75vw,7.5px);margin-top:8px;line-height:1.15}
+ .club-phone-title{font-size:clamp(12px,4.15vw,17px);line-height:1.06;margin-top:5px}
+ .club-phone-subtitle{font-size:clamp(7px,2vw,9px);line-height:1.1;margin-top:3px}
+ .club-phone-meeting{grid-template-columns:minmax(0,1fr);gap:3px;margin-top:8px;min-height:0}
+ .club-phone-meeting>div{grid-template-columns:14px minmax(0,1fr);gap:3px;padding:4px;border-radius:5px}
+ .club-phone-meeting>div span{font-size:6px}
+ .club-phone-meeting b{font-size:clamp(7px,2.15vw,9px);line-height:1.12}
+ .club-phone-meeting small{font-size:clamp(6px,1.85vw,7.8px);line-height:1.14;margin-top:2px}
+ .club-phone-bottom{font-size:clamp(5px,1.6vw,7px);line-height:1.1;padding:5px 1px 2px;letter-spacing:.025em}
+}
+@media(max-width:390px){
+ .club-phone{border-width:4px;border-radius:22px;padding:2px}
+ .club-phone-screen{border-radius:15px;padding:19px 5px 4px}
+ .club-phone-date{margin-top:7px;font-size:6px}
+ .club-phone-title{font-size:clamp(12px,3.85vw,15px);margin-top:4px}
+ .club-phone-subtitle{font-size:7px}
+ .club-phone-meeting{gap:2px;margin-top:7px}
+ .club-phone-meeting>div{grid-template-columns:12px minmax(0,1fr);gap:3px;padding:3px}
+ .club-phone-meeting b{font-size:7px}
+ .club-phone-meeting small{font-size:6.5px;line-height:1.12}
+ .club-phone-bottom{font-size:5.5px;padding:3px 0 1px}
 }
 
 </style>
