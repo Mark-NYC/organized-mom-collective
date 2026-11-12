@@ -17,7 +17,7 @@ Source of truth: [OMC_CHORE_CHART_100_PIN_QUEUE.csv](./OMC_CHORE_CHART_100_PIN_Q
 
 ## Destination rule
 
-All 100 pins currently target the verified live generator: https://organizedmomcollective.com/chore-chart/ . Replace individual destinations with the relevant *verified live* age-specific guide URLs once those are checked. Never invent guide paths. Avoid multiple identical destination links within the same Pinterest bulk-upload batch; use legitimate resource URLs or approved unique content anchors or tracking parameters as needed. Do not schedule until destination QA is complete.
+85 age-specific pins now link directly to the four verified live guides: /guides/chores-for-4-5-year-olds/, /guides/chores-for-6-7-year-olds/, /guides/chores-for-8-9-year-olds/, and /guides/chores-for-10-12-year-olds/. The 15 general pins target /chore-chart/. Use actual one-page PDF printables and approved high-quality illustrations, not invented previews. Avoid multiple identical destination links within the same Pinterest bulk-upload batch; use legitimate resource URLs or approved unique content anchors or tracking parameters as needed. Do not schedule until destination QA is complete.
 
 ## Creative and publishing rules
 
@@ -31,7 +31,7 @@ All 100 pins currently target the verified live generator: https://organizedmomc
 
 ## Workflow
 
-1. Confirm the live 4–5, 6–7, 8–9 and 10–12 guide pages and swap destinations where better than the general chart generator.
+1. Age-guide destinations verified and updated in the CSV (85 pins). Download exact PDF and approved higher-quality illustrations for image creation.
 2. Produce pin images with the CSV filename field, using OMC supplied assets; inspect legibility and illustration clipping.
 3. Mark READY after image QA, verify destination links, write accessible alt text and check duplicates.
 4. Assign dates based on the existing Pinterest calendar, then export a Pinterest-compatible upload CSV. Keep this planning CSV separate from the final uploader format.
