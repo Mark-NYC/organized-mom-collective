@@ -5,7 +5,6 @@
  * One US Letter sheet, selectable text, standalone printable, no tabletop imagery.
  */
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
-import fontkit from '@pdf-lib/fontkit';
 import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
 
 const OUTPUT='public/downloads/chores-for-8-9-year-olds.pdf';
@@ -70,19 +69,15 @@ function box(page,x,y,n=13){
  page.drawRectangle({x,y,width:n,height:n,color:C.white,borderColor:C.charcoal,borderWidth:0.85});
 }
 async function main(){
- const pdf=await PDFDocument.create();pdf.registerFontkit(fontkit);
+ const pdf=await PDFDocument.create();
  pdf.setTitle('Chores for 8-9-Year-Olds | Responsibility Cards Companion');
  pdf.setAuthor('Organized Mom Collective');
- const fontBase='node_modules/@fontsource/montserrat/files/';
- // Keep full font: fontkit WOFF2 subsetting previously failed in Cloudflare.
- const regular=await pdf.embedFont(await readFile(fontBase+'montserrat-latin-400-normal.woff2'),{subset:false});
- const semibold=await pdf.embedFont(await readFile(fontBase+'montserrat-latin-600-normal.woff2'),{subset:false});
+ // Standard PDF fonts avoid WOFF2/CID font rendering glitches in iOS PDFKit.
+ // The same generated PDF is downloaded on phones and desktops.
+ const regular=await pdf.embedFont(StandardFonts.Helvetica);
+ const semibold=await pdf.embedFont(StandardFonts.HelveticaBold);
  const serif=await pdf.embedFont(StandardFonts.TimesRomanBold);
- let handwritten=semibold;
- try{
-  handwritten=await pdf.embedFont(await readFile('node_modules/@fontsource/kalam/files/kalam-latin-400-normal.woff2'),{subset:false});
- }catch{ // Montserrat fallback preserves build if optional handwriting font is missing.
- }
+ const handwritten=await pdf.embedFont(StandardFonts.HelveticaBold);
  const p=pdf.addPage(LETTER);p.drawRectangle({x:0,y:0,width:612,height:792,color:C.ivory});
 
  // Clean reference-card-like header.
