@@ -494,36 +494,105 @@ const closeUp = (month: string) => {
 @media(max-width:390px){.rivera-sheet-head h3{font-size:19px}.rr-action{font-size:9px}.rr-number{font-size:11px}.rr-note{font-size:5px;padding:3px}.rivera-routine-rows{gap:3px}}
 
 
-/* The plan fills in on the paper and phone themselves, not in detached cards. */
+/* Rivera personalization story: phone fills first, makes one small pulse,
+   then the completed printed resource takes focus. 18 seconds, looping. */
 .personalization-intro{margin:10px auto 0!important;color:#64795d;font-size:.86rem!important;max-width:650px}
-.reveal-field{opacity:0;animation:rivera-fill 15s linear infinite;animation-fill-mode:both}
-.reveal-1{animation-name:rivera-fill-1}
-@keyframes rivera-fill-1{0%,3.0%{opacity:0} 5.7%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-2{animation-name:rivera-fill-2}
-@keyframes rivera-fill-2{0%,8.3%{opacity:0} 11.0%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-3{animation-name:rivera-fill-3}
-@keyframes rivera-fill-3{0%,13.6%{opacity:0} 16.3%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-4{animation-name:rivera-fill-4}
-@keyframes rivera-fill-4{0%,18.9%{opacity:0} 21.6%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-5{animation-name:rivera-fill-5}
-@keyframes rivera-fill-5{0%,24.2%{opacity:0} 26.9%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-6{animation-name:rivera-fill-6}
-@keyframes rivera-fill-6{0%,29.5%{opacity:0} 32.2%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-7{animation-name:rivera-fill-7}
-@keyframes rivera-fill-7{0%,34.8%{opacity:0} 37.5%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-8{animation-name:rivera-fill-8}
-@keyframes rivera-fill-8{0%,40.1%{opacity:0} 42.8%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-9{animation-name:rivera-fill-9}
-@keyframes rivera-fill-9{0%,45.4%{opacity:0} 48.1%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-10{animation-name:rivera-fill-10}
-@keyframes rivera-fill-10{0%,50.7%{opacity:0} 53.4%,93%{opacity:1} 98%,100%{opacity:0}}
-.reveal-11{animation-name:rivera-fill-11}
-@keyframes rivera-fill-11{0%,56.0%{opacity:0} 58.7%,93%{opacity:1} 98%,100%{opacity:0}}
+.rivera-routine-sheet{
+ opacity:.44;
+ animation:rivera-paper-focus 18s ease-in-out infinite;
+}
+@keyframes rivera-paper-focus{
+ 0%,37%{opacity:.44}
+ 45%,94%{opacity:1}
+ 99%,100%{opacity:.44}
+}
+.rivera-routine-sheet .reveal-field{
+ opacity:0;
+ animation:rivera-paper-complete 18s ease-in-out infinite;
+}
+@keyframes rivera-paper-complete{
+ 0%,38%{opacity:0}
+ 46%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
+.product-print>.club-phone-wrap{
+ animation:rivera-phone-pulse 18s ease-in-out infinite;
+ will-change:transform;
+}
+@keyframes rivera-phone-pulse{
+ 0%,31%{transform:scale(1)}
+ 34%{transform:scale(1.065)}
+ 37%,100%{transform:scale(1)}
+}
+.club-phone{
+ animation:rivera-phone-focus 18s ease-in-out infinite;
+}
+@keyframes rivera-phone-focus{
+ 0%,38%{opacity:1}
+ 47%,94%{opacity:.83}
+ 99%,100%{opacity:1}
+}
+.club-phone .reveal-field{
+ opacity:0;
+ animation-duration:18s;
+ animation-timing-function:ease-in-out;
+ animation-iteration-count:infinite;
+}
+/* The dates, goal, children and four meeting prompts appear inside the phone. */
+.club-phone .reveal-2{animation-name:rivera-phone-step-2}
+@keyframes rivera-phone-step-2{
+ 0%,2%{opacity:0}
+ 5%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
+.club-phone .reveal-4{animation-name:rivera-phone-step-4}
+@keyframes rivera-phone-step-4{
+ 0%,6%{opacity:0}
+ 9%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
+.club-phone .reveal-5{animation-name:rivera-phone-step-5}
+@keyframes rivera-phone-step-5{
+ 0%,10%{opacity:0}
+ 13%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
+.club-phone .reveal-6{animation-name:rivera-phone-step-6}
+@keyframes rivera-phone-step-6{
+ 0%,14%{opacity:0}
+ 17%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
+.club-phone .reveal-7{animation-name:rivera-phone-step-7}
+@keyframes rivera-phone-step-7{
+ 0%,18%{opacity:0}
+ 21%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
+.club-phone .reveal-9{animation-name:rivera-phone-step-9}
+@keyframes rivera-phone-step-9{
+ 0%,22%{opacity:0}
+ 25%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
+.club-phone .reveal-11{animation-name:rivera-phone-step-11}
+@keyframes rivera-phone-step-11{
+ 0%,26%{opacity:0}
+ 29%,94%{opacity:1}
+ 99%,100%{opacity:0}
+}
 .soccer-row{position:relative;isolation:isolate}
-.soccer-row::after{content:"";position:absolute;inset:1px;border:2px solid #719c68;border-radius:8px;box-shadow:0 0 0 4px #cfe7ba9c;pointer-events:none;opacity:0;animation:rivera-soccer-emphasis 15s linear infinite}
-@keyframes rivera-soccer-emphasis{0%,53%{opacity:0}58%,85%{opacity:1}93%,100%{opacity:0}}
-@media(prefers-reduced-motion:reduce){.reveal-field,.soccer-row::after{animation:none!important;opacity:1!important}}
-
+.soccer-row::after{
+ content:"";position:absolute;inset:1px;border:2px solid #719c68;
+ border-radius:8px;box-shadow:0 0 0 4px #cfe7ba9c;
+ pointer-events:none;opacity:0;
+ animation:rivera-soccer-emphasis 18s ease-in-out infinite;
+}
+@keyframes rivera-soccer-emphasis{
+ 0%,45%{opacity:0}
+ 51%,92%{opacity:1}
+ 98%,100%{opacity:0}
+}
 /* On phones, keep the full printed routine readable and put the phone below it.
    The small overlap is decorative; it must not obscure any routine steps. */
 @media(max-width:750px){
@@ -716,6 +785,16 @@ const closeUp = (month: string) => {
  .product-print>.club-phone-wrap{top:22%;right:-29%;width:50%;transform:none}
  .mockup-caption{font-size:.6rem}
  .soccer-row .rr-action{font-size:clamp(8px,2.5vw,11px)}
+}
+
+
+/* Static, fully readable example for reduced motion and unsupported animations. */
+@media(prefers-reduced-motion:reduce){
+ .rivera-routine-sheet,.rivera-routine-sheet .reveal-field,
+ .club-phone,.club-phone .reveal-field,
+ .product-print>.club-phone-wrap,.soccer-row::after{
+  animation:none!important;opacity:1!important;transform:none!important;will-change:auto!important;
+ }
 }
 
 </style>
