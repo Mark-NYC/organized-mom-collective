@@ -662,5 +662,61 @@ const closeUp = (month: string) => {
  .soccer-row .rr-action{font-size:clamp(8px,2.6vw,11px)}
 }
 
+
+/* Product duo: upright US-letter sheet breaks the green panel on the left;
+   upright phone floats at the sheet's middle-right and clears the featured row. */
+.products-surface,.product-system,.product-stack,.product-print{overflow:visible}
+.product-stack{
+ width:100%;
+ max-width:620px;
+ margin-inline:0;
+ padding:16px 0 82px;
+}
+.product-print{
+ width:80%;
+ margin-left:-25px;
+ transform:none;
+ overflow:visible;
+}
+.product-print>.club-phone-wrap{
+ position:absolute;
+ top:25%;
+ right:-49%;
+ bottom:auto;
+ width:50%;
+ max-width:none;
+ margin:0;
+ transform:none;
+ transform-origin:center;
+ z-index:3;
+}
+.mockup-caption{position:absolute;bottom:10px;left:0;right:0}
+@media(min-width:751px){
+ .product-stack{padding:18px 0 80px}
+ .product-print{width:80%;margin-left:-28px;transform:none}
+ .product-print>.club-phone-wrap{top:25%;right:-49%;width:50%;transform:none}
+}
+@media(max-width:750px){
+ .products-surface{overflow:visible}
+ .product-stack{width:100%;max-width:480px;padding:8px 0 105px;margin-inline:auto;overflow:visible}
+ .product-print{width:82%;margin-left:-24px;transform:none}
+ .product-print>.club-phone-wrap{
+  position:absolute;top:23%;right:-49%;bottom:auto;
+  width:50%;max-width:none;margin:0;transform:none;
+ }
+ .mockup-caption{position:absolute;bottom:10px;left:0;right:0;margin:0;text-align:left}
+ /* Make all three pieces of the highlighted row fit with no clipped badge. */
+ .soccer-row{grid-template-columns:12% 12% minmax(0,1fr) 22%;column-gap:1.5%}
+ .soccer-row .rr-action{min-width:0;line-height:1.12;font-size:clamp(8px,2.55vw,13px)}
+ .soccer-row .rr-note{min-width:0;max-width:none;width:100%;justify-self:stretch;padding:2px;font-size:clamp(5px,1.28vw,8px);line-height:1.13}
+}
+@media(max-width:390px){
+ .product-stack{padding:8px 0 92px}
+ .product-print{width:83%;margin-left:-20px}
+ .product-print>.club-phone-wrap{top:22%;right:-49%;width:50%;transform:none}
+ .mockup-caption{font-size:.6rem}
+ .soccer-row .rr-action{font-size:clamp(8px,2.5vw,11px)}
+}
+
 </style>
 </PublicLayout>
