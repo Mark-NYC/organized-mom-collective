@@ -18,12 +18,12 @@
     <button type="button" class="fw-gift-dismiss" data-fw-dismiss>No thanks, just my chart</button>
   </div>
   <div class="fw-inner" data-fw-plan>
-    <div class="fw-top"><p class="fw-eyebrow">A GIFT FROM ORGANIZED MOM COLLECTIVE</p><button type="button" class="fw-close" data-fw-close aria-label="Close personalized plan">×</button></div>
+    <div class="fw-top"><p class="fw-eyebrow">YOUR CHORE CHART IS DOWNLOADED ✓</p><button type="button" class="fw-close" data-fw-close aria-label="Close personalized plan">×</button></div>
     <header class="fw-digital-head">
-      <p class="fw-kicker">YOUR PERSONALIZED FAMILY FOCUS</p>
+      <p class="fw-kicker">A FREE GIFT FROM ORGANIZED MOM COLLECTIVE</p>
       <h2 id="fw-title" data-fw-title>Your First Week Plan</h2>
       <p class="fw-intro" data-fw-intro>One small way to help your child start owning a responsibility.</p>
-      <div class="fw-action-row"><button type="button" class="fw-button fw-download" data-fw-download>↓ Download my plan (PDF)</button><small>Free, one-page printable</small></div>
+      <div class="fw-action-row"><button type="button" class="fw-button fw-download" data-fw-download>↓ Save my plan (PDF)</button><small>Free, one-page printable</small></div>
     </header>
     <div class="fw-digital">
       <section class="fw-focus" aria-labelledby="fw-focus-h">
@@ -75,7 +75,7 @@
       </section>
     </div>
     <footer class="fw-bottom">
-      <button type="button" class="fw-button fw-download" data-fw-download>↓ Download my personalized plan (PDF)</button>
+      <button type="button" class="fw-button fw-download" data-fw-download>↓ Save my personalized plan (PDF)</button>
       <p class="fw-message" data-fw-message role="status" aria-live="polite"></p>
     </footer>
   </div>
@@ -127,6 +127,19 @@
 .fw-bottom .fw-button{width:min(100%,440px)}
 .fw-message{font-size:12px;color:#647c69;min-height:18px;text-align:center;margin:0}
 @media(max-width:720px){.first-week{padding:16px 14px;max-height:calc(100dvh - 12px)}.fw-inner{gap:13px}.fw-digital{gap:22px}.fw-focus{padding:17px}.fw-habit-grid{grid-template-columns:1fr}.fw-meeting-list li{grid-template-columns:1fr;gap:3px}.fw-digital-head h2{font-size:31px}.fw-action-row .fw-button{width:100%}.fw-bottom{position:sticky;bottom:-16px;background:#FBF7F1;padding:12px 0 16px}}
+
+/* Keep the personalized gift as ONE experience, never stack two panels. */
+.first-week[data-phase="plan"]{box-sizing:border-box;width:min(820px,calc(100vw - 32px));max-width:820px;max-height:calc(100dvh - 32px);padding:28px 32px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.first-week[data-phase="plan"] .fw-gift{display:none!important}
+.first-week[data-phase="plan"] .fw-inner{display:grid!important;gap:20px;width:100%;min-width:0;max-width:100%;margin:0 auto}
+.first-week .fw-inner,.first-week .fw-inner *{box-sizing:border-box}
+.first-week .fw-inner p,.first-week .fw-inner h2,.first-week .fw-inner h3,.first-week .fw-inner h4{overflow-wrap:break-word}
+.first-week .fw-inner button{font-family:Montserrat,sans-serif;white-space:normal}
+.first-week .fw-inner .fw-download{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#545454!important;color:#fff!important;border-radius:8px!important;font-weight:700!important;text-decoration:none!important}
+.first-week .fw-inner .fw-eyebrow{line-height:1.5}
+.first-week .fw-inner .fw-digital-head h2{font-size:clamp(29px,4.5vw,43px);line-height:1.12}
+.first-week .fw-inner .fw-top,.first-week .fw-inner .fw-action-row{min-width:0}
+@media(max-width:720px){.first-week[data-phase="plan"]{width:calc(100vw - 12px);max-height:calc(100dvh - 12px);padding:18px 16px}.first-week[data-phase="plan"] .fw-inner{gap:16px}.first-week .fw-inner .fw-action-row{display:grid;grid-template-columns:1fr}.first-week .fw-inner .fw-action-row small{text-align:center}.first-week .fw-inner .fw-meeting-list li{grid-template-columns:1fr}}
 </style>
 <script>
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
@@ -231,7 +244,7 @@ window.addEventListener('omc:chore-chart-downloaded',((e:Event)=>{
  const detail=(e as CustomEvent<Detail>).detail;
  if(!detail||!Array.isArray(detail.chores))return;
  current={name:String(detail.name||'').slice(0,24),age:String(detail.age||'').slice(0,60),chores:detail.chores.map(x=>String(x).slice(0,100))};
- if(section){sync();section.dataset.phase='gift';section.setAttribute('aria-labelledby','fw-gift-title');const giftName=section.querySelector<HTMLElement>('[data-fw-gift-name]');if(giftName)giftName.textContent=String(current.name||'your child').trim().split(/\s+/)[0]||'your child';if(!section.open)section.showModal();giftConfetti();}
+ if(section){sync();section.dataset.phase='plan';section.setAttribute('aria-labelledby','fw-title');section.scrollTop=0;const giftName=section.querySelector<HTMLElement>('[data-fw-gift-name]');if(giftName)giftName.textContent=String(current.name||'your child').trim().split(/\s+/)[0]||'your child';if(!section.open)section.showModal();giftConfetti();}
 }) as EventListener);
 challenge?.addEventListener('change',()=>{sync();if(message)message.textContent='Your printable will reflect this change.';});
 
@@ -340,7 +353,7 @@ downloads.forEach(button=>button.addEventListener('click',async()=>{
   console.error('First-week PDF download failed',error);
   if(message)message.textContent='Could not prepare the PDF. Please try again.';
  }finally{
-  downloads.forEach(b=>{b.disabled=false;b.textContent=b===downloads[0]?'↓ Download my plan (PDF)':'↓ Download my personalized plan (PDF)';});
+  downloads.forEach(b=>{b.disabled=false;b.textContent=b===downloads[0]?'↓ Save my plan (PDF)':'↓ Save my personalized plan (PDF)';});
  }
 }));
 </script>
