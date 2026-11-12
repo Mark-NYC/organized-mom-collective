@@ -193,7 +193,6 @@ const closeUp = (month: string) => {
       </div>
       <div class="rivera-finished"><strong>Ready for free time!</strong><span>HOME, UNPACKED AND RESET.</span></div>
      </div>
-    </div>
     <div class="club-phone-wrap">
      <div class="club-phone" role="img" aria-label="Illustrative August Family Meeting focus for the Rivera family: discuss after-school routines, share responsibilities, and practice one step">
       <div class="club-phone-notch"></div>
@@ -211,6 +210,7 @@ const closeUp = (month: string) => {
        <div class="club-phone-bottom">TRY ONE THING THIS WEEK</div>
       </div>
      </div>
+    </div>
     </div>
     <span class="mockup-caption">Rivera August routine example · illustrative meeting focus</span>
    </div>
@@ -632,6 +632,34 @@ const closeUp = (month: string) => {
  .product-stack{padding-bottom:clamp(245px,78vw,285px)}
  .club-phone-wrap{width:43%;max-width:170px;right:0;bottom:30px}
  .mockup-caption{bottom:8px}
+}
+
+
+/* Phone placement is now anchored to the PAPER, not the stack's padded height.
+   A tilted corner overlap cannot obscure row 06 and its Sofia/Tue-Thu detail. */
+.product-print{overflow:visible}
+.product-print>.club-phone-wrap{
+ position:absolute;z-index:3;top:85%;bottom:auto;right:-22%;
+ width:49%;max-width:none;margin:0;
+ transform:rotate(12deg);transform-origin:center top;
+}
+@media(min-width:751px){
+ .product-print>.club-phone-wrap{top:58%;right:-26%;width:47%;transform:rotate(10deg)}
+}
+@media(max-width:750px){
+ .product-stack{padding:10px 18% clamp(230px,65vw,310px) 0;overflow:visible}
+ .product-print>.club-phone-wrap{top:87%;right:-21%;bottom:auto;width:49%;max-width:none;margin:0;transform:rotate(12deg)}
+ .mockup-caption{position:absolute;left:0;right:0;bottom:8px}
+ /* Make the entire personalized soccer assignment fit on the highlighted row. */
+ .soccer-row{grid-template-columns:12% 12% minmax(0,1fr) 20%;column-gap:2%}
+ .soccer-row .rr-action{min-width:0;overflow-wrap:normal;line-height:1.05;font-size:clamp(8px,2.55vw,13px)}
+ .soccer-row .rr-note{display:block;justify-self:stretch;max-width:none;padding:3px 2px;white-space:normal;line-height:1.12;font-size:clamp(5px,1.3vw,8px)}
+ .soccer-row .rr-action small{line-height:1.05}
+}
+@media(max-width:390px){
+ .product-stack{padding-right:18%;padding-bottom:clamp(215px,69vw,285px)}
+ .product-print>.club-phone-wrap{top:87%;right:-21%;width:49%;transform:rotate(12deg)}
+ .soccer-row .rr-action{font-size:clamp(8px,2.6vw,11px)}
 }
 
 </style>
