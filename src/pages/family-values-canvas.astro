@@ -1,7 +1,7 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 ---
-<PublicLayout title="Personalized Family Values Canvas | Organized Mom Collective" description="Create a beautiful personalized family values canvas with your family's name and five meaningful values." width="full">
+<PublicLayout title="Personalized Family Values Canvas | Organized Mom Collective" description="Create a beautiful personalized family values canvas with your family's name and six meaningful values." width="full">
 <main class="bg-paper text-warm-ink">
 <section class="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:py-20">
 <p class="label text-warm-soft">PERSONALIZED WALL ART · ORGANIZED MOM COLLECTIVE</p>
@@ -9,21 +9,17 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 <p class="mt-4 max-w-2xl text-lg leading-8 text-warm-soft">Choose six values that tell your family's story. See them come to life in a timeless canvas design made for your home.</p>
 <div class="mt-10 grid gap-10 lg:grid-cols-[1.12fr_.88fr] lg:items-start">
 <div class="rounded-lg bg-[#e9e6df] p-5 sm:p-10">
-<div id="canvas-preview" class="reference-canvas relative mx-auto aspect-[3/4] max-w-[490px] overflow-hidden border-[12px] border-[#70482d] bg-[#fffefa] px-6 py-8 text-center shadow-xl sm:px-10 sm:py-10" aria-label="Live preview of your personalized family values art">
-<div class="pointer-events-none absolute inset-[7px] border-[5px] border-[#261c17]"></div>
-<div class="relative flex h-full min-h-0 flex-col py-3">
-<div id="preview-header" class="shrink-0">
-<h2 id="preview-name" class="reference-script break-words text-[clamp(2.5rem,7vw,4.3rem)] leading-[.95] text-[#333333]">Anderson</h2>
-<p class="reference-caps mt-3 text-[clamp(.72rem,2.4vw,1.3rem)]">FAMILY VALUES</p>
-<div class="mx-auto mt-4 h-px w-full bg-[#666]"></div>
-</div>
-<div id="preview-values" class="flex min-h-0 flex-1 flex-col justify-evenly gap-1 overflow-hidden py-3"></div>
-<div id="preview-footer" class="shrink-0">
-<div class="mx-auto mb-3 h-px w-full bg-[#666]"></div>
-<p id="preview-established" class="reference-caps text-[clamp(.55rem,1.5vw,.85rem)]">ESTABLISHED 2020</p>
-</div>
-</div>
-</div>
+<svg id="canvas-preview" class="reference-canvas mx-auto block w-full max-w-[490px]" viewBox="0 0 480 600" role="img" aria-label="Live preview of your personalized family values art">
+<rect width="480" height="640" fill="#70482d"/>
+<rect x="16" y="16" width="448" height="608" fill="#fffefa" id="canvas-paper"/>
+<rect x="24" y="24" width="432" height="592" fill="none" stroke="#261c17" stroke-width="5" id="canvas-border"/>
+<text id="preview-name" x="240" y="87" text-anchor="middle" class="reference-script">Anderson</text>
+<text id="preview-heading" x="240" y="120" text-anchor="middle" class="reference-caps">FAMILY VALUES</text>
+<path id="preview-top-rule" d="M52 143H428" stroke="#666"/>
+<g id="preview-values" text-anchor="middle"></g>
+<path id="preview-bottom-rule" d="M52 552H428" stroke="#666"/>
+<text id="preview-established" x="240" y="575" text-anchor="middle" class="reference-caps">ESTABLISHED 2020</text>
+</svg>
 <p class="mt-4 text-center text-xs text-warm-soft">Digital design preview. Actual print colors and texture may vary.</p>
 </div>
 <div class="rounded-lg border border-warm-rule bg-white p-6 sm:p-8">
@@ -58,13 +54,10 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 @import url('https://fonts.googleapis.com/css2?family=Allura&family=Alex+Brush&family=Caveat:wght@400;600&family=Courgette&family=Dancing+Script:wght@400;600&family=Great+Vibes&family=Kaushan+Script&family=Marck+Script&family=Parisienne&family=Sacramento&family=Amatic+SC&family=Josefin+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display&family=Roboto+Slab&family=Special+Elite&family=Libre+Baskerville&family=Barlow+Condensed:wght@400;700&family=Raleway:wght@400;700&display=swap');
 .reference-script{font-family:'Allura','Brush Script MT',cursive;font-weight:400}
 .reference-caps{font-family:'Montserrat Variable',Montserrat,sans-serif;letter-spacing:.18em;font-weight:400;color:#353535}
-.reference-canvas #preview-values > div{flex:0 1 auto;min-height:0;padding-block:1px}
-.reference-canvas #preview-values p{margin-block:0;overflow-wrap:anywhere}
-.reference-canvas #preview-values .reference-script{line-height:1.22}
-.reference-canvas #preview-values .reference-caps{line-height:1.35;letter-spacing:.08em}
-.reference-canvas #preview-name{line-height:1.2}
+.reference-canvas text{fill:#333333}.reference-canvas #preview-values .reference-caps{letter-spacing:.08em}
 .reference-canvas{box-shadow:inset 0 0 0 2px #a17c55,0 15px 35px #342a2226}
 
+#values-form label:has(input:focus-visible){outline:2px solid #545454;outline-offset:3px}
 .font-option-script-1{font-family:'Kaushan Script',cursive}.font-option-script-2{font-family:'Sacramento',cursive}.font-option-script-3{font-family:'Dancing Script',cursive}.font-option-script-4{font-family:'Great Vibes',cursive}.font-option-script-5{font-family:'Courgette',cursive}.font-option-script-6{font-family:'Marck Script',cursive}.font-option-script-7{font-family:'Allura',cursive}.font-option-script-8{font-family:'Alex Brush',cursive}.font-option-script-9{font-family:'Parisienne',cursive}.font-option-script-10{font-family:'Caveat',cursive;font-weight:600}
 .font-option-secondary-11{font-family:'Special Elite',serif}.font-option-secondary-12{font-family:'Libre Baskerville',serif}.font-option-secondary-13{font-family:'Oswald',sans-serif;font-weight:700}.font-option-secondary-14{font-family:'Raleway',sans-serif;font-weight:400}.font-option-secondary-15{font-family:'Josefin Sans',sans-serif}.font-option-secondary-16{font-family:'Special Elite',serif}.font-option-secondary-17{font-family:'Barlow Condensed',sans-serif}.font-option-secondary-18{font-family:'Amatic SC',sans-serif}.font-option-secondary-19{font-family:'Josefin Sans',sans-serif;font-weight:400}.font-option-secondary-20{font-family:'Raleway',sans-serif;font-weight:700}
 </style>
@@ -74,46 +67,66 @@ const nameNode=document.querySelector<HTMLElement>('#preview-name');
 const valuesNode=document.querySelector<HTMLElement>('#preview-values');
 const yearNode=document.querySelector<HTMLElement>('#preview-established');
 function data(){const fd=new FormData(form!);return {family:String(fd.get('familyName')||'').trim(),values:fd.getAll('value').map(v=>String(v).trim()),descriptions:fd.getAll('description').map(v=>String(v).trim()),established:String(fd.get('established')||'').trim(),size:String(fd.get('size')||'16×20'),scriptFont:String(fd.get('scriptFont')||'1'),secondaryFont:String(fd.get('secondaryFont')||'14')}}
-function update(){if(!nameNode||!valuesNode||!yearNode)return;const d=data();nameNode.textContent=d.family||'Your Family';nameNode.className='reference-script font-option-script-'+d.scriptFont+' break-words text-[clamp(2.5rem,7vw,4.3rem)] leading-[.95] text-[#333333]';document.querySelectorAll<HTMLElement>('.reference-caps').forEach(el=>{el.className=el.className.replace(/font-option-secondary-\d+/g,'').trim()+' font-option-secondary-'+d.secondaryFont});yearNode.textContent=d.established?'ESTABLISHED '+d.established:'';valuesNode.replaceChildren(...d.values.map((v,i)=>{const section=document.createElement('div');section.className='min-w-0';const title=document.createElement('p');title.className='reference-script font-option-script-'+d.scriptFont+' break-words text-[clamp(1.8rem,5vw,3.15rem)] leading-[.9] text-[#333]';title.textContent=v||'Your value';const desc=document.createElement('p');desc.className='reference-caps font-option-secondary-'+d.secondaryFont+' mt-1 break-words text-[clamp(.42rem,1.3vw,.7rem)] leading-snug';desc.textContent=d.descriptions[i]||'Your family meaning';section.append(title,desc);return section}))}
-let layoutRevision=0;
-function fitPreview(){
- const canvas=document.querySelector<HTMLElement>('#canvas-preview');
- const header=document.querySelector<HTMLElement>('#preview-header');
- const footer=document.querySelector<HTMLElement>('#preview-footer');
- if(!canvas||!header||!footer||!valuesNode||!nameNode)return;
- const blocks=Array.from(valuesNode.children) as HTMLElement[];
- const titles=blocks.map(el=>el.firstElementChild as HTMLElement);
- const descriptions=blocks.map(el=>el.lastElementChild as HTMLElement);
- const innerWidth=Math.max(100,canvas.clientWidth-92);
- const innerHeight=Math.max(200,canvas.clientHeight-100);
- // Scale all text against the actual canvas width, not the browser viewport.
- let nameSize=Math.min(64,innerWidth*.135);
- nameNode.style.fontSize=nameSize+'px';
- for(let n=0;n<16&&nameNode.scrollWidth>innerWidth;n++){nameSize*=.91;nameNode.style.fontSize=nameSize+'px'}
- const headerHeight=header.getBoundingClientRect().height;
- const footerHeight=footer.getBoundingClientRect().height;
- const available=Math.max(100,innerHeight-headerHeight-footerHeight-12);
- let titleSize=Math.min(45,innerWidth*.105,available/blocks.length*.52);
- let descSize=Math.min(11,innerWidth*.026,available/blocks.length*.19);
- for(let attempt=0;attempt<35;attempt++){
-  titles.forEach(t=>t.style.fontSize=titleSize+'px');
-  descriptions.forEach(t=>t.style.fontSize=descSize+'px');
-  const needed=blocks.reduce((sum,b)=>sum+b.scrollHeight,0)+Math.max(0,blocks.length-1)*4+12;
-  const tooWide=blocks.some(b=>b.scrollWidth>valuesNode.clientWidth+1);
-  if(needed<=available&&!tooWide)break;
-  titleSize*=.94;descSize*=.96;
- }
+const svgNS='http://www.w3.org/2000/svg';
+function update(){
+ if(!nameNode||!valuesNode||!yearNode)return;
+ const d=data();
+ const height=d.size==='12×16'?640:600;
+ const canvas=document.querySelector('#canvas-preview')!;
+ canvas.setAttribute('viewBox',`0 0 480 ${height}`);
+ document.querySelector('#canvas-paper')!.setAttribute('height',String(height-32));
+ document.querySelector('#canvas-border')!.setAttribute('height',String(height-48));
+ nameNode.textContent=d.family||'Your Family';
+ nameNode.setAttribute('class','reference-script font-option-script-'+d.scriptFont);
+ document.querySelectorAll('.reference-caps').forEach(el=>el.setAttribute('class','reference-caps font-option-secondary-'+d.secondaryFont));
+ yearNode.textContent=d.established?'ESTABLISHED '+d.established:'';
+ yearNode.setAttribute('y',String(height-47));
+ document.querySelector('#preview-bottom-rule')!.setAttribute('d',`M52 ${height-70}H428`);
+ valuesNode.replaceChildren(...d.values.map((v,i)=>{
+  const group=document.createElementNS(svgNS,'g');
+  const y=184+i*(height-299)/5;
+  const title=document.createElementNS(svgNS,'text');
+  title.setAttribute('x','240');title.setAttribute('y',String(y));
+  title.setAttribute('class','reference-script font-option-script-'+d.scriptFont);
+  title.textContent=v||'Your value';
+  const desc=document.createElementNS(svgNS,'text');
+  desc.setAttribute('x','240');desc.setAttribute('y',String(y+24));
+  desc.setAttribute('class','reference-caps font-option-secondary-'+d.secondaryFont);
+  desc.textContent=d.descriptions[i]||'Your family meaning';
+  group.append(title,desc);return group;
+ }));
 }
+function fitText(el:SVGTextElement,size:number,maxWidth:number,maxHeight=40,centerY?:number){
+ el.style.fontSize=size+'px';
+ const width=el.getComputedTextLength();
+ if(width>maxWidth)el.style.fontSize=(size*maxWidth/width)+'px';
+ const box=el.getBBox();
+ if(box.height>maxHeight)el.style.fontSize=(parseFloat(el.style.fontSize)*maxHeight/box.height)+'px';
+ if(centerY!==undefined){const b=el.getBBox();el.setAttribute('y',String(Number(el.getAttribute('y'))+centerY-b.y-b.height/2))}
+}
+function fitPreview(){
+ fitText(nameNode as unknown as SVGTextElement,50,360,55,70);
+ fitText(document.querySelector<SVGTextElement>('#preview-heading')!,17,360,22,120);
+ fitText(yearNode as unknown as SVGTextElement,10,350);
+ const titles=Array.from(document.querySelectorAll<SVGTextElement>('#preview-values .reference-script'));
+ // One shared title size keeps short and long values visually balanced.
+ titles.forEach(el=>fitText(el,34,350,32));
+ const size=Math.min(...titles.map(el=>parseFloat(el.style.fontSize)));
+ titles.forEach((el,i)=>{el.style.fontSize=size+'px';const center=184+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;const b=el.getBBox();el.setAttribute('y',String(Number(el.getAttribute('y'))+center-b.y-b.height/2))});
+ document.querySelectorAll<SVGTextElement>('#preview-values .reference-caps').forEach((el,i)=>{const center=214+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;fitText(el,11,350,16,center)});
+}
+let layoutRevision=0;
 function scheduleFit(){
  const revision=++layoutRevision;
- requestAnimationFrame(()=>{if(revision===layoutRevision)fitPreview()});
- // Font swaps can change glyph metrics after initial layout.
+ fitPreview();
  document.fonts.ready.then(()=>{if(revision===layoutRevision)requestAnimationFrame(fitPreview)});
 }
+document.fonts.addEventListener('loadingdone',scheduleFit);
+form?.addEventListener('submit',event=>event.preventDefault());
 form?.addEventListener('input',()=>{update();scheduleFit()});
 form?.addEventListener('change',()=>{update();scheduleFit()});
-new ResizeObserver(scheduleFit).observe(document.querySelector('#canvas-preview')!);
 
-document.querySelector('#save-design')?.addEventListener('click',()=>{if(!form?.reportValidity())return;const d=data();const lines=d.values.map((v,i)=>`${i+1}. ${v}: ${d.descriptions[i]}`).join('\n');const blob=new Blob([`Organized Mom Collective | Family Values Canvas\nFamily: ${d.family}\nValues:\n${lines}\nEstablished: ${d.established}\nCanvas size: ${d.size} inches\nScript style: ${d.scriptFont}\nSecondary style: ${d.secondaryFont}\n\nDesign details only. Not a print-ready file or order.\n`],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='family-values-canvas-design.txt';a.click();URL.revokeObjectURL(url);const status=document.querySelector('#save-status');if(status)status.textContent='Your design details have been downloaded.'});
+
+document.querySelector('#save-design')?.addEventListener('click',()=>{if(!form?.reportValidity())return;const d=data();const lines=d.values.map((v,i)=>`${i+1}. ${v}: ${d.descriptions[i]}`).join('\n');const blob=new Blob([`Organized Mom Collective | Family Values Canvas\nFamily: ${d.family}\nValues:\n${lines}\nEstablished: ${d.established}\nCanvas size: ${d.size} inches\nScript style: ${d.scriptFont}\nSecondary style: ${d.secondaryFont}\n\nDesign details only. Not a print-ready file or order.\n`],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='family-values-canvas-design.txt';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);const status=document.querySelector('#save-status');if(status)status.textContent='Your design details have been downloaded.'});
 update();scheduleFit();
 </script>
