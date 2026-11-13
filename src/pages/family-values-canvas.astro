@@ -110,8 +110,8 @@ function scheduleFit(){
  // Font swaps can change glyph metrics after initial layout.
  document.fonts.ready.then(()=>{if(revision===layoutRevision)requestAnimationFrame(fitPreview)});
 }
-form?.addEventListener('input',()=>{scheduleFit()});
-form?.addEventListener('change',()=>{scheduleFit()});
+form?.addEventListener('input',()=>{update();scheduleFit()});
+form?.addEventListener('change',()=>{update();scheduleFit()});
 new ResizeObserver(scheduleFit).observe(document.querySelector('#canvas-preview')!);
 
 document.querySelector('#save-design')?.addEventListener('click',()=>{if(!form?.reportValidity())return;const d=data();const lines=d.values.map((v,i)=>`${i+1}. ${v}: ${d.descriptions[i]}`).join('\n');const blob=new Blob([`Organized Mom Collective | Family Values Canvas\nFamily: ${d.family}\nValues:\n${lines}\nEstablished: ${d.established}\nCanvas size: ${d.size} inches\nScript style: ${d.scriptFont}\nSecondary style: ${d.secondaryFont}\n\nDesign details only. Not a print-ready file or order.\n`],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='family-values-canvas-design.txt';a.click();URL.revokeObjectURL(url);const status=document.querySelector('#save-status');if(status)status.textContent='Your design details have been downloaded.'});
