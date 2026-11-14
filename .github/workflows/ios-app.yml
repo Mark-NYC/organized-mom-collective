@@ -52,7 +52,7 @@ jobs:
   ios-simulator:
     needs: web-shell
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -72,6 +72,46 @@ jobs:
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tail -n 40
           test "${PIPESTATUS[0]}" -eq 0
+      - name: Pick an iPhone simulator and boot it
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          d = json.load(sys.stdin)["devices"]
+          phones = [(rt, x) for rt, xs in d.items() if "iOS" in rt for x in xs if re.match(r"iPhone \d+( Pro)?$", x["name"])]
+          phones.sort(key=lambda p: (p[0], p[1]["name"]))
+          rt, dev = phones[-1]
+          print(dev["udid"]); print(dev["name"], rt, file=sys.stderr)')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+      - name: Launch and interaction test on the iPhone simulator (XCUITest)
+        run: |
+          set -o pipefail
+          xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build -resultBundlePath build/ui-tests.xcresult \
+            CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|\*\* TEST" 
+      - name: Export the simulator screenshots
+        if: always()
+        run: |
+          mkdir -p simulator-screens
+          xcrun xcresulttool export attachments --path build/ui-tests.xcresult --output-path simulator-screens || true
+          xcrun simctl io "${{ steps.sim.outputs.udid }}" screenshot simulator-screens/zz-final-state.png || true
+          ls -la simulator-screens
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simulator-screens
+          path: simulator-screens/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-tests-xcresult
+          path: build/ui-tests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         with:
           name: ios-simulator-app

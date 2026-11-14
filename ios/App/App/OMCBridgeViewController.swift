@@ -1,5 +1,6 @@
 import Capacitor
 import UIKit
+import WebKit
 
 /// Serves the Astro site's folder pages from the app bundle (docs/ios/OMC_APP_ROADMAP.md → 2.1).
 ///
@@ -35,4 +36,20 @@ class OMCBridgeViewController: CAPBridgeViewController {
     override open func router() -> Router {
         OMCRouter()
     }
+
+    #if DEBUG
+    /// Simulator test only (ios/App/AppUITests): `-OMCResetWebStorageForTesting` wipes the web view's own storage, the
+    /// way iOS can under storage pressure, then reloads. The page must come back from the native copy
+    /// (src/lib/native/durable-storage.ts). Compiled out of Release builds.
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        guard ProcessInfo.processInfo.arguments.contains("-OMCResetWebStorageForTesting") else { return }
+        WKWebsiteDataStore.default().removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            modifiedSince: .distantPast
+        ) { [weak self] in
+            self?.webView?.reload()
+        }
+    }
+    #endif
 }
