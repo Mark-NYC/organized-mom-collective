@@ -126,7 +126,7 @@ function fitPreview(){
  titles.forEach(el=>fitText(el,36,374,41));
  const size=Math.min(...titles.map(el=>parseFloat(el.style.fontSize)));
  titles.forEach((el,i)=>{el.style.fontSize=size+'px';const center=184+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;const b=el.getBBox();el.setAttribute('y',String(Number(el.getAttribute('y'))+center-b.y-b.height/2))});
- document.querySelectorAll<SVGTextElement>('#preview-values .reference-caps').forEach((el,i)=>{const center=206+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;fitText(el,15,374,21,center)});
+ document.querySelectorAll<SVGTextElement>('#preview-values .reference-caps').forEach((el,i)=>{const center=214+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;fitText(el,15,374,21,center)});
 }
 let layoutRevision=0;
 function scheduleFit(){
