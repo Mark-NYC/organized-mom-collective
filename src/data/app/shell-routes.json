@@ -6,7 +6,7 @@
     "^/app/(cleaning|week|settings|account|coaching|tidy)$",
     "^/app/calendar(/(week|settings))?$",
     "^/app/club(/.*)?$",
-    "^/club/(login|welcome|welcome-kit|family|family-vision|family-meeting-guide|start)$",
+    "^/club/(login|invite|welcome|welcome-kit|family|family-vision|family-meeting-guide|start)$",
     "^/club/(resources|kits|tools)/[a-z0-9-]+$"
   ],
   "neverInclude": [

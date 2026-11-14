@@ -9,6 +9,8 @@
  *
  * Family data never goes into localStorage or account_saves.
  */
+import { pinMemberColors, unpinned } from '../household/colors';
+import { memberColors } from '../../data/club/family-colors';
 import type { ToolPaletteId } from '../../data/tool-palettes';
 import { resolveToolPalette } from '../../data/tool-palettes';
 import { kits } from '../../data/club/kits';
@@ -57,6 +59,18 @@ export interface HouseholdInput {
   displayName?: string;
   preferences: HouseholdPreferences;
   members: MemberInput[];
+  /**
+   * The profile_version this edit started from. With it, a save that the other adult beat is refused
+   * (StaleProfileError) instead of overwriting their change (docs/ios/HOUSEHOLD_ARCHITECTURE.md).
+   */
+  expectedVersion?: number;
+}
+
+/** The other adult changed the family since this copy was loaded: reload it and make the change again. */
+export class StaleProfileError extends Error {
+  constructor() {
+    super('stale_profile');
+  }
 }
 
 /** Steps 5 and 6: both answers travel together; `step` says which one she just answered or skipped. */
@@ -159,23 +173,51 @@ export const accountStore: ClubStore = {
     return r ? fromDb(r) : null;
   },
   async saveHousehold(input) {
-    const save = (preferences: typeof input.preferences) => accountRpc<DbHousehold>('club_household_save', {
-      p_display_name: input.displayName ?? null,
-      p_preferences: preferences,
-      p_members: toDbMembers(input.members),
-    });
+    // One color per person for good: pin everyone's color from the family as it is now, before this change
+    // (src/lib/household/colors.ts). Her explicit choices in input.preferences.colors win.
+    const before = await accountRpc<DbHousehold | null>('club_household').then((r) => (r ? fromDb(r) : null)).catch(() => null);
+    const sentColors = ((input.preferences as { colors?: Record<string, string> }).colors) ?? {};
+    const existingIds = input.members.map((m) => m.id).filter((id): id is string => Boolean(id));
+    const pinned = pinMemberColors(before, existingIds, sentColors);
+    const withPins = (Object.keys(pinned).length ? { ...input.preferences, colors: pinned } : input.preferences) as typeof input.preferences;
+
+    // household_save checks the version (two adults); a database without 20261124 doesn't have it yet.
+    let versioned = input.expectedVersion !== undefined;
+    const save = async (preferences: typeof input.preferences, members = input.members) => {
+      const args = { p_display_name: input.displayName ?? null, p_preferences: preferences, p_members: toDbMembers(members) };
+      if (versioned) {
+        try {
+          return await accountRpc<DbHousehold>('household_save', { p_expected_version: input.expectedVersion, ...args });
+        } catch (e) {
+          if ((e as Error).message === 'stale_profile') throw new StaleProfileError();
+          if (!/household_save|PGRST202|404|function/i.test((e as Error).message)) throw e;
+          versioned = false;
+        }
+      }
+      return accountRpc<DbHousehold>('club_household_save', args);
+    };
     // A database without 20261120 (member colors) or 20261113 (illustration style) refuses that key. Drop the newest
     // unknown key first, one at a time, so nothing the database does accept is lost; her family still saves.
-    let prefs = { ...(input.preferences as Record<string, unknown>) };
+    let prefs = { ...(withPins as Record<string, unknown>) };
     let dropped: string[] = [];
     for (;;) {
       try {
-        const saved = fromDb(await save(prefs as typeof input.preferences));
+        let saved = fromDb(await save(prefs as typeof input.preferences));
         // Her color choices are hers: never dropped quietly. The rest is saved; the page tells her the colors weren't.
         if (dropped.includes('colors')) throw new ColorsNotSavedError(saved);
+        // Someone new just got an id: pin the color they're being shown, so nobody's color moves later.
+        const fresh = unpinned(saved);
+        if (fresh.length) {
+          const shown = memberColors(saved);
+          const colors = { ...((saved.preferences as { colors?: Record<string, string> }).colors ?? {}) };
+          for (const id of fresh) colors[id] = shown[id].id;
+          versioned = false; // the version just moved because of our own save
+          saved = fromDb(await save({ ...saved.preferences, colors } as typeof input.preferences,
+            saved.members.filter((m) => !m.archived).map((m) => ({ ...m }))));
+        }
         return saved;
       } catch (e) {
-        if (e instanceof ColorsNotSavedError) throw e;
+        if (e instanceof ColorsNotSavedError || e instanceof StaleProfileError) throw e;
         const next = ['colors', 'icon_style'].find((k) => k in prefs);
         if ((e as Error).message !== 'invalid' || !next) throw e;
         const { [next]: _gone, ...rest } = prefs;

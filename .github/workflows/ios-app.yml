@@ -8,10 +8,10 @@
 name: iPhone app
 on:
   pull_request:
-    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   push:
     branches: ['claude/**']
-    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   workflow_dispatch:
 concurrency:
   group: ios-app-${{ github.ref }}
@@ -48,6 +48,27 @@ jobs:
           name: app-www
           path: app-www/
           retention-days: 7
+
+  household-db:
+    # Household, partner and (later) calendar database tests on a throwaway Postgres service. Never a real project.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Household database tests
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+        run: bash scripts/test-household-sql.sh
 
   ios-simulator:
     needs: web-shell

@@ -1,0 +1,12 @@
+---
+/**
+ * /club/invite?code=…: accept a partner invitation to share a household (docs/ios/HOUSEHOLD_ARCHITECTURE.md).
+ * Noindex, never linked, behind PUBLIC_CLUB_ENABLED like every /club page (in the iPhone app bundle, on).
+ */
+import ClubLayout from '../../layouts/ClubLayout.astro';
+import JoinHousehold from '../../components/household/JoinHousehold';
+---
+
+<ClubLayout title="Join your family">
+  <JoinHousehold client:only="react" />
+</ClubLayout>

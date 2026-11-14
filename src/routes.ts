@@ -75,6 +75,8 @@ export const routes = {
   /** The offer on the Club landing page: its button opens Stripe Checkout. */
   clubJoin: '/club-2',
   clubLogin: '/club/login',
+  /** A partner's invitation (src/lib/household/api.ts): sign in with the invited email, join the household. */
+  householdJoin: '/club/invite',
   clubWelcome: '/club/welcome',
   clubWelcomeKit: '/club/welcome-kit',
   clubDashboard: '/club/dashboard',
