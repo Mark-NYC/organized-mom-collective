@@ -14,7 +14,7 @@ const pairings = [
 <h1 class="mt-4 max-w-3xl font-serif text-[clamp(2.5rem,5vw,4.4rem)] leading-tight">Your family. Your values. Beautifully displayed.</h1>
 <p class="mt-4 max-w-2xl text-lg leading-8 text-warm-soft">Choose six values that tell your family's story. See them come to life in a timeless canvas design made for your home.</p>
 <div class="mt-10 grid gap-10 lg:grid-cols-[1.12fr_.88fr] lg:items-start">
-<div>
+<div class="values-preview-panel">
 <div class="values-room relative mx-auto w-full overflow-hidden">
 <img src="/images/shop/family-values-room.webp" width="896" height="1200" alt="Light oak frame on an ivory wall above an oak console" class="block h-auto w-full" fetchpriority="high" />
 <svg id="canvas-preview" class="reference-canvas" viewBox="0 0 480 630" role="img" aria-label="Live preview of your personalized family values art">
@@ -34,7 +34,7 @@ const pairings = [
 <form id="values-form" class="mt-7 space-y-5">
 <div><label for="family-name" class="mb-2 block text-sm font-semibold">Family name</label><input id="family-name" name="familyName" maxlength="40" value="Anderson" required class="w-full rounded-md border border-warm-rule bg-paper px-4 py-3 focus:outline-2 focus:outline-[#8ca69a]" /></div>
 <fieldset><legend class="mb-3 text-sm font-semibold">Your six family values</legend><div class="grid gap-3 sm:grid-cols-2">
-{[['Love','We make room for each other'],['Honesty','We tell the truth, even when it’s hard'],['Gratitude','We notice the good and say thank you'],['Kindness','We look for ways to help'],['Grace','We forgive and try again'],['Joy','We make time to laugh together']].map(([v,desc],i)=><div class="sm:col-span-2 grid gap-2 sm:grid-cols-2"><div><label class="mb-1 block text-xs text-warm-soft" for={`value-${i}`}>Value {i+1}</label><input id={`value-${i}`} name="value" maxlength="22" value={v} required class="w-full rounded-md border border-warm-rule bg-paper px-3 py-3 focus:outline-2 focus:outline-[#8ca69a]"/></div><div><label class="mb-1 block text-xs text-warm-soft" for={`desc-${i}`}>Short meaning</label><input id={`desc-${i}`} name="description" maxlength="52" value={desc} required class="w-full rounded-md border border-warm-rule bg-paper px-3 py-3 focus:outline-2 focus:outline-[#8ca69a]"/></div></div>)}
+{[['Love','We make room for each other'],['Honesty','We tell the truth, even when it’s hard'],['Gratitude','We notice the good and say thank you'],['Kindness','We look for ways to help'],['Grace','We forgive and try again'],['Joy','We make time to laugh together']].map(([v,desc],i)=><div class="sm:col-span-2 grid gap-2"><div><label class="mb-1 block text-xs text-warm-soft" for={`value-${i}`}>Value {i+1}</label><input id={`value-${i}`} name="value" maxlength="22" value={v} required class="w-full rounded-md border border-warm-rule bg-paper px-3 py-3 focus:outline-2 focus:outline-[#8ca69a]"/></div><div><label class="mb-1 block text-xs text-warm-soft" for={`desc-${i}`}>Short meaning</label><textarea id={`desc-${i}`} name="description" maxlength="52" rows="2" required class="w-full resize-y rounded-md border border-warm-rule bg-paper px-3 py-3 leading-6 focus:outline-2 focus:outline-[#8ca69a]">{desc}</textarea></div></div>)}
 </div></fieldset>
 <fieldset class="border-t border-warm-rule pt-5"><legend class="mb-3 text-sm font-semibold">Choose your style</legend>
 <p class="mb-4 text-xs leading-5 text-warm-soft">Four thoughtfully paired styles. Choose the one that feels like your family.</p>
@@ -63,6 +63,8 @@ const pairings = [
 .reference-canvas text{fill:#545454}.reference-canvas #preview-values .reference-caps{letter-spacing:0}.reference-value{font-weight:400;letter-spacing:0}
 .reference-canvas{position:absolute;left:18.527%;top:14.417%;width:62.946%;height:61.667%;overflow:hidden}
 .values-room{max-width:640px}
+.values-preview-panel{min-width:0;width:100%}
+@media(min-width:1024px){.values-preview-panel{position:sticky;top:24px;justify-self:center;max-width:min(100%,calc((100dvh - 110px)*.746667))}}
 
 #values-form label:has(input:focus-visible){outline:2px solid #545454;outline-offset:3px}
 .font-option-script-3{font-family:'Dancing Script',cursive}.font-option-script-4{font-family:'Great Vibes',cursive}.font-option-script-7{font-family:'Allura',cursive}.font-option-script-9{font-family:'Parisienne',cursive}
@@ -121,10 +123,10 @@ function fitPreview(){
  fitText(yearNode as unknown as SVGTextElement,10,350);
  const titles=Array.from(document.querySelectorAll<SVGTextElement>('#preview-values .reference-value'));
  // One shared title size keeps short and long values visually balanced.
- titles.forEach(el=>fitText(el,30,374,34));
+ titles.forEach(el=>fitText(el,36,374,41));
  const size=Math.min(...titles.map(el=>parseFloat(el.style.fontSize)));
  titles.forEach((el,i)=>{el.style.fontSize=size+'px';const center=184+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;const b=el.getBBox();el.setAttribute('y',String(Number(el.getAttribute('y'))+center-b.y-b.height/2))});
- document.querySelectorAll<SVGTextElement>('#preview-values .reference-caps').forEach((el,i)=>{const center=206+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;fitText(el,13,374,18,center)});
+ document.querySelectorAll<SVGTextElement>('#preview-values .reference-caps').forEach((el,i)=>{const center=206+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;fitText(el,15,374,21,center)});
 }
 let layoutRevision=0;
 function scheduleFit(){
