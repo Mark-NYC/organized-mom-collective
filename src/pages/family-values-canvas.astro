@@ -14,17 +14,18 @@ const pairings = [
 <h1 class="mt-4 max-w-3xl font-serif text-[clamp(2.5rem,5vw,4.4rem)] leading-tight">Your family. Your values. Beautifully displayed.</h1>
 <p class="mt-4 max-w-2xl text-lg leading-8 text-warm-soft">Choose six values that tell your family's story. See them come to life in a timeless canvas design made for your home.</p>
 <div class="mt-10 grid gap-10 lg:grid-cols-[1.12fr_.88fr] lg:items-start">
-<div class="rounded-lg bg-[#e9e6df] p-5 sm:p-10">
-<svg id="canvas-preview" class="reference-canvas mx-auto block w-full max-w-[490px]" viewBox="0 0 480 600" role="img" aria-label="Live preview of your personalized family values art">
-<rect id="preview-frame" width="480" height="640" fill="url(#oak)"/><defs><linearGradient id="oak" x2="1" y2=".3"><stop stop-color="#b89365"/><stop offset=".45" stop-color="#d0ad7e"/><stop offset="1" stop-color="#b58d5f"/></linearGradient></defs>
-<rect x="9" y="9" width="462" height="622" fill="#FBF7F1" id="canvas-paper"/>
+<div>
+<div class="values-room relative mx-auto w-full overflow-hidden">
+<img src="/images/shop/family-values-room.webp" width="896" height="1200" alt="Light oak frame on an ivory wall above an oak console" class="block h-auto w-full" fetchpriority="high" />
+<svg id="canvas-preview" class="reference-canvas" viewBox="0 0 480 630" role="img" aria-label="Live preview of your personalized family values art">
 <text id="preview-name" x="240" y="87" text-anchor="middle" class="reference-script">Anderson</text>
 <text id="preview-heading" x="240" y="120" text-anchor="middle" class="reference-caps">FAMILY VALUES</text>
 <path id="preview-top-rule" d="M215 143H265" stroke="#666"/>
 <g id="preview-values" text-anchor="middle"></g>
 <text id="preview-established" x="240" y="575" text-anchor="middle" class="reference-caps">THIS IS WHO WE ARE</text>
 </svg>
-<p class="mt-4 text-center text-xs text-warm-soft">Digital design preview. Actual print colors and texture may vary.</p>
+</div>
+<p class="mt-4 text-center text-xs text-warm-soft">Room mockup for illustration. Final proportions follow your selected print size; frame and finish are not yet confirmed.</p>
 </div>
 <div class="rounded-lg border border-warm-rule bg-white p-6 sm:p-8">
 <p class="label text-warm-soft">MAKE IT YOURS</p>
@@ -60,7 +61,8 @@ const pairings = [
 .reference-script{font-family:'Great Vibes','Brush Script MT',cursive;font-weight:400}
 .reference-caps{font-family:'Libre Baskerville',serif;letter-spacing:.18em;font-weight:400;color:#353535}
 .reference-canvas text{fill:#545454}.reference-canvas #preview-values .reference-caps{letter-spacing:0}.reference-value{font-weight:400;letter-spacing:0}
-.reference-canvas{box-shadow:inset 0 0 0 2px #a17c55,0 15px 35px #342a2226}
+.reference-canvas{position:absolute;left:18.527%;top:14.417%;width:62.946%;height:61.667%;overflow:hidden}
+.values-room{max-width:640px}
 
 #values-form label:has(input:focus-visible){outline:2px solid #545454;outline-offset:3px}
 .font-option-script-3{font-family:'Dancing Script',cursive}.font-option-script-4{font-family:'Great Vibes',cursive}.font-option-script-7{font-family:'Allura',cursive}.font-option-script-9{font-family:'Parisienne',cursive}
@@ -80,17 +82,17 @@ const svgNS='http://www.w3.org/2000/svg';
 function update(){
  if(!nameNode||!valuesNode||!yearNode)return;
  const d=data();
- const height=d.size==='12×16'?640:600;
+ // Match the photographed opening; never stretch text when changing print size.
+ const height=630;
  const canvas=document.querySelector('#canvas-preview')!;
  canvas.setAttribute('viewBox',`0 0 480 ${height}`);
- document.querySelector('#canvas-paper')!.setAttribute('height',String(height-18));
- document.querySelector('#preview-frame')!.setAttribute('height',String(height));
+
  nameNode.textContent=d.family||'Your Family';
  nameNode.setAttribute('class','reference-script font-option-script-'+d.scriptFont);
  document.querySelectorAll('.reference-caps').forEach(el=>el.setAttribute('class','reference-caps font-option-secondary-'+d.secondaryFont));
  yearNode.textContent=d.established?'ESTABLISHED '+d.established:'THIS IS WHO WE ARE';
  yearNode.setAttribute('y',String(height-47));
- 
+
  valuesNode.replaceChildren(...d.values.map((v,i)=>{
   const group=document.createElementNS(svgNS,'g');
   const y=184+i*(height-299)/5;
@@ -114,7 +116,7 @@ function fitText(el:SVGTextElement,size:number,maxWidth:number,maxHeight=40,cent
  if(centerY!==undefined){const b=el.getBBox();el.setAttribute('y',String(Number(el.getAttribute('y'))+centerY-b.y-b.height/2))}
 }
 function fitPreview(){
- fitText(nameNode as unknown as SVGTextElement,64,388,72,65);
+ fitText(nameNode as unknown as SVGTextElement,80,388,80,65);
  fitText(document.querySelector<SVGTextElement>('#preview-heading')!,14,360,22,120);
  fitText(yearNode as unknown as SVGTextElement,10,350);
  const titles=Array.from(document.querySelectorAll<SVGTextElement>('#preview-values .reference-value'));
@@ -122,7 +124,7 @@ function fitPreview(){
  titles.forEach(el=>fitText(el,30,374,34));
  const size=Math.min(...titles.map(el=>parseFloat(el.style.fontSize)));
  titles.forEach((el,i)=>{el.style.fontSize=size+'px';const center=184+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;const b=el.getBBox();el.setAttribute('y',String(Number(el.getAttribute('y'))+center-b.y-b.height/2))});
- document.querySelectorAll<SVGTextElement>('#preview-values .reference-caps').forEach((el,i)=>{const center=214+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;fitText(el,13,374,18,center)});
+ document.querySelectorAll<SVGTextElement>('#preview-values .reference-caps').forEach((el,i)=>{const center=206+i*(Number(document.querySelector('#canvas-preview')!.getAttribute('viewBox')!.split(' ')[3])-299)/5;fitText(el,13,374,18,center)});
 }
 let layoutRevision=0;
 function scheduleFit(){
