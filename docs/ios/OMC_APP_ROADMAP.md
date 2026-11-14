@@ -305,6 +305,14 @@ Website: unchanged except the member area's header logo (`/app/club…` on the w
 one; now one Family Meeting Club logo) and the renamed Club strings on member pages, which aren't public (Club pages are
 switched off in production).
 
+**CI after the fixes:** run [43651090530](https://github.com/Mark-NYC/organized-mom-collective/actions/runs/43651090530)
+green (no new unit-test failures; smoke test over all 70 bundled pages at iPhone and iPad widths; iOS Simulator
+`BUILD SUCCEEDED`). **Watch:** the run before it (43650433729) failed once on `tests/club-edits.test.ts` → the
+200-run property test, which passes alone (~3 s) and in the full suite locally on 1, 2 and 4 cores, and passed in the
+next CI run with no code change. Likely the default 5 s per-test timeout under runner load, not proven: the error
+detail was cut off. It is not on the known-failures list; `scripts/compare-test-failures.mjs` now prints each new
+failure's full error block, so a recurrence shows the cause.
+
 ### What still blocks TestFlight (Milestone 2)
 
 | Blocker | Who |
