@@ -243,7 +243,7 @@ export default function ChartEditor({ store, kit, printable, items, household, s
             checklist={printable.content?.items ?? []} intro={printable.content?.intro ?? ''} />
         ) : printable.component === 'LaunchChecklist' ? (
           <ResponsibilityChart doc={printable.id} title={printable.title} familyName={familyName} month={kit.month} people={chartPeople} rows={resolved.rows} palette={palette} preview={preview}
-            orientation="portrait" checkboxes chip={chipText} promise="Every task has one owner" footer={[`Organized Family Club · ${kit.theme}`, 'Tick it off when it’s done']} />
+            orientation="portrait" checkboxes chip={chipText} promise="Every task has one owner" footer={[`Family Meeting Club · ${kit.theme}`, 'Tick it off when it’s done']} />
         ) : (
           <ResponsibilityChart doc={printable.id} title="Our Family Team" familyName={familyName} month={kit.month} people={chartPeople} rows={resolved.rows} palette={palette} preview={preview} />
         )}

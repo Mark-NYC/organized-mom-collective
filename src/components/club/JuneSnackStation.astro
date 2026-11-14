@@ -10,10 +10,10 @@ const initialFridge=STARTER.fridge;
 const initialPantry=STARTER.pantry;
 ---
 <div class="jss" data-jss-key={storageKey} data-jss-plan={planMode ? "" : undefined}>
- {!planMode && <header class="jss-intro"><a href="/club">← Organized Family Club</a><p class="jss-overline">ORGANIZED FAMILY CLUB · JUNE 2027</p><h1>The snacks are handled. <em>By the kids.</em></h1><p>One visual station, prepared for your family, so kids can see what they may choose—and put things away when they're done.</p></header>}
+ {!planMode && <header class="jss-intro"><a href="/club">← Family Meeting Club</a><p class="jss-overline">FAMILY MEETING CLUB · JUNE 2027</p><h1>The snacks are handled. <em>By the kids.</em></h1><p>One visual station, prepared for your family, so kids can see what they may choose—and put things away when they're done.</p></header>}
  <div class={planMode ? "jss-plan" : "jss-layout"}>
   {!planMode && <aside class="jss-editor" aria-label="Prepared June snack station">
-   <div class="jss-editor-head"><p class="jss-overline">ORGANIZED FAMILY CLUB · JUNE 2027</p><h2>The snacks are handled. <em>By the kids.</em></h2><button type="button" class="jss-text-button" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
+   <div class="jss-editor-head"><p class="jss-overline">FAMILY MEETING CLUB · JUNE 2027</p><h2>The snacks are handled. <em>By the kids.</em></h2><button type="button" class="jss-text-button" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
    <div class="jss-prepared" id="june-edit-controls"><span class="jss-overline">YOUR FAMILY'S PREPARED STATION</span><strong>Ready for the fridge.</strong><p>Eight illustrated snack choices, already prepared. Review safe foods, then let your kids choose and clean up.</p>
     <div class="jss-summary-row"><span>Snack choices</span><b data-jss-summary-count>8 foods</b></div>
     <div class="jss-summary-row"><span>Snack rule</span><b data-jss-summary-rule>One from each side</b></div>
@@ -27,7 +27,7 @@ const initialPantry=STARTER.pantry;
    </div>
   </aside>}
   <dialog class="jss-dialog" data-vision-dialog aria-labelledby="jss-vision-title">
-   <div class="jss-dialog-top"><div><span class="jss-overline">ORGANIZED FAMILY CLUB · JUNE</span><h2 id="jss-vision-title">Why this matters</h2></div><button type="button" class="jss-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <div class="jss-dialog-top"><div><span class="jss-overline">FAMILY MEETING CLUB · JUNE</span><h2 id="jss-vision-title">Why this matters</h2></div><button type="button" class="jss-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>Kids need to know which snacks they can get without asking Mom each time. This station gives them clearly pictured choices and a simple cleanup reminder, so Mom doesn't have to be the snack decision-maker all day.</p>
    <button type="button" class="jss-dialog-done" data-close-dialog>Back to our plan</button>
   </dialog>
@@ -75,7 +75,7 @@ const initialPantry=STARTER.pantry;
 
    <div class="jss-stage" data-jss-stage>
     <article class="jss-sheet" data-jss-sheet data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
-     <div class="jss-sheet-head"><span>ORGANIZED FAMILY CLUB · JUNE 2027</span><h2>I can make <em data-jss-edit="headline" contenteditable="true" role="textbox" aria-label="Edit snack station heading">my own snack!</em></h2><p data-jss-edit="subtitle" contenteditable="true" role="textbox" aria-label="Edit subtitle">Pick it. Enjoy it. Put it away.</p></div>
+     <div class="jss-sheet-head"><span>FAMILY MEETING CLUB · JUNE 2027</span><h2>I can make <em data-jss-edit="headline" contenteditable="true" role="textbox" aria-label="Edit snack station heading">my own snack!</em></h2><p data-jss-edit="subtitle" contenteditable="true" role="textbox" aria-label="Edit subtitle">Pick it. Enjoy it. Put it away.</p></div>
      <div class="jss-family" data-jss-family>OUR FAMILY'S SNACK STATION</div>
      <div class="jss-level-lines" data-jss-level-lines aria-label="Snack responsibilities"></div>
      <div class="jss-instruction"><span>MY SNACK RULE</span><strong data-jss-rule-text data-jss-edit="rule" contenteditable="true" role="textbox" aria-label="Edit snack rule">Choose one from each side.</strong></div>
@@ -92,7 +92,7 @@ const initialPantry=STARTER.pantry;
       </section>
      </div>
      <div class="jss-done"><span>AND WHEN I'M DONE…</span><strong data-jss-reset-text data-jss-edit="cleanup" contenteditable="true" role="textbox" aria-label="Edit cleanup reminder">Put food away · Bring dishes to the sink</strong></div>
-     <div class="jss-footer"><span>OUR FAMILY KNOWS THE PLAN</span><span>ORGANIZED FAMILY CLUB · JUNE</span></div>
+     <div class="jss-footer"><span>OUR FAMILY KNOWS THE PLAN</span><span>FAMILY MEETING CLUB · JUNE</span></div>
     </article>
    </div>
 

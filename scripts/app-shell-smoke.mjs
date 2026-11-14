@@ -87,8 +87,9 @@ async function visit(ctx, path, shot) {
 
 console.log(`app-shell smoke test on ${base}`);
 const web = await newContext(false);
+const native = await newContext(true);
 
-// Pages a member moves between.
+// Pages a member moves between (screenshots).
 const PAGES = [
   ['/', null],
   ['/app', '01-today'],
@@ -96,10 +97,61 @@ const PAGES = [
   ['/app/club/months', null],
   ['/app/club/january', '04-club-january'],
   ['/app/account', '05-account'],
+  ['/app/account?demo=1', '05b-account-demo'],
   ['/club/login', '06-club-login'],
+  ['/club/family', '08-club-family'],
   ['/app/calendar', null],
 ];
 for (const [p, shot] of PAGES) await (await visit(web, p, shot)).close();
+
+// Every bundled page: a visible way back to Today (the app has no back button), no old Club branding, and no made-up
+// family outside the explicit demo. At iPhone width, and at iPad width for the tab bar.
+const manifest = JSON.parse(readFileSync(join(ROOT, 'shell-manifest.json'), 'utf8'));
+const OLD_BRAND = /Organized Family Club|ORGANIZED FAMILY CLUB|organized-family-club-logo/i;
+const ipad = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
+let checked = 0;
+for (const p of manifest.pages) {
+  for (const [ctx, label] of [[web, 'iPhone'], [ipad, 'iPad']]) {
+    const page = await ctx.newPage();
+    await page.goto(base + p, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(250);
+    const today = page.locator('[data-app-tabbar] a[href="/app"]');
+    // The cleaning companion's one-time first-run screen hides the app chrome on purpose; it must offer a way forward.
+    const onboarding = await page.evaluate(() => document.documentElement.classList.contains('needs-onboarding'));
+    if (onboarding) {
+      if (!(await page.locator('[role="dialog"] .btn-primary').isVisible().catch(() => false))) fail(`${p} (${label}): first-run screen with no way forward`);
+    } else if (!(await today.isVisible().catch(() => false))) fail(`${p} (${label}): no visible Today tab`);
+    if (label === 'iPhone') {
+      const html = await page.content();
+      if (OLD_BRAND.test(html)) fail(`${p}: old "Organized Family Club" branding: ${html.match(OLD_BRAND)[0]}`);
+      if (/Rivera/.test(await page.locator('body').innerText()) && !/demo=1|sample=/.test(p)) fail(`${p}: shows the made-up Rivera family outside the demo`);
+    }
+    await page.close();
+  }
+  checked++;
+}
+console.log(`  ✓ ${checked} bundled pages checked for a Today tab (iPhone + iPad), old branding and sample families`);
+await ipad.close();
+
+// The Club back link ("← Family Meeting Club", href /club) stays in the app: Club Home, not the sales page.
+{
+  const page = await native.newPage();
+  await page.goto(base + '/app/club/january', { waitUntil: 'networkidle' });
+  await page.evaluate(() => {
+    const a = document.createElement('a');
+    a.href = '/club';
+    a.id = 'smoke-club';
+    a.textContent = '← Family Meeting Club';
+    document.querySelector('main')?.prepend(a);
+  });
+  const popup = page.waitForEvent('popup', { timeout: 1500 }).catch(() => null);
+  await page.click('#smoke-club');
+  await page.waitForLoadState('networkidle');
+  if (await popup) fail('/club back link left the app');
+  else if (new URL(page.url()).pathname.replace(/\/$/, '') !== '/app/club') fail(`/club back link opened ${page.url()}`);
+  else console.log('  ✓ /club back link opens Club Home in the app');
+  await page.close();
+}
 
 // Root opens Today.
 {
@@ -110,7 +162,6 @@ for (const [p, shot] of PAGES) await (await visit(web, p, shot)).close();
 }
 
 // Calendar owners: unlock, then cleaning works and a checkmark survives a reload (native context: the card is app-only UI).
-const native = await newContext(true);
 {
   const page = await visit(native, '/app', '02-today-native');
   const button = page.locator('[data-calendar-unlock-button]');

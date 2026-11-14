@@ -259,7 +259,7 @@ if (root) {
  const createPage=(level:Level,names:string[],view:LaundryView)=>{
   const paper=element('article','laundry-paper '+(level==='older'?'laundry-older-paper':'laundry-young-paper'));
   paper.setAttribute('aria-label',level==='young'?'Younger kids laundry guide':'Older kids laundry guide');
-  const header=element('header','paper-header');header.append(element('span','', 'ORGANIZED FAMILY CLUB · FEBRUARY'),element('span','',level==='young'?'MY CLOTHES':'MY LAUNDRY'));paper.append(header);
+  const header=element('header','paper-header');header.append(element('span','', 'FAMILY MEETING CLUB · FEBRUARY'),element('span','',level==='young'?'MY CLOTHES':'MY LAUNDRY'));paper.append(header);
   const top=element('div','paper-top');const head=element('div');head.append(element('span','paper-eyebrow',label.toUpperCase()+' FAMILY'));
   const h2=element('h2');h2.append(document.createTextNode(level==='young'?'My Clothes, ':'I Can Do '));const em=element('em','',level==='young'?'My Job.':'My Laundry.');h2.append(em);head.append(h2);
   head.append(element('p','',level==='young'?'Care for what you wear. Every day.':'From dirty clothes to clean drawers. Follow the steps and ask for help when needed.'));
@@ -291,7 +291,7 @@ if (root) {
   }
   const call=element('div','paper-callout');call.append(element('span','',level==='young'?'YOUR FINISH LINE':'DONE MEANS DONE'),element('strong','',level==='young'?'Clean clothes go home.':'Washed. Dried. Put away.'),element('p','',machineLine(level,view.operatorName)));paper.append(call);
   const note=element('div','megan-note');note.append(element('span','','A NOTE FROM MEGAN'),element('p','',level==='young'?'Even small jobs count. When everyone cares for their clothes, the whole family has less to manage.':'Learning to handle your own laundry takes practice. Keep the steps nearby until they become second nature.'));paper.append(note);
-  const foot=element('footer','paper-footer');foot.append(element('span','','ORGANIZED FAMILY CLUB'),element('span','','FEBRUARY · LAUNDRY OWNERSHIP'));paper.append(foot);
+  const foot=element('footer','paper-footer');foot.append(element('span','','FAMILY MEETING CLUB'),element('span','','FEBRUARY · LAUNDRY OWNERSHIP'));paper.append(foot);
   return paper;
  };
  const editor = q<HTMLDialogElement>('[data-lg-editor]');

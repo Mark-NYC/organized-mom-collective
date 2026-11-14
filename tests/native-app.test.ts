@@ -34,6 +34,12 @@ describe('classifyLink', () => {
     expect(classifyLink('https://www.organizedmomcollective.com/app/club/may?view=meeting', HERE)).toEqual({ kind: 'in-app', href: '/app/club/may?view=meeting' });
     expect(classifyLink('https://organizedmomcollective.com/club/login', HERE)).toEqual({ kind: 'in-app', href: '/club/login' });
   });
+  it('sends a member back to Club Home, never to the Club sales page', () => {
+    expect(classifyLink('/club', HERE)).toEqual({ kind: 'in-app', href: '/app/club' });
+    expect(classifyLink('/club/', HERE)).toEqual({ kind: 'in-app', href: '/app/club' });
+    expect(classifyLink('https://www.organizedmomcollective.com/club#offer', HERE)).toEqual({ kind: 'in-app', href: '/app/club#offer' });
+    expect(classifyLink('/club/dashboard', HERE).kind).toBe('website');
+  });
   it('sends other sites out', () => {
     expect(classifyLink('https://www.etsy.com/listing/1', HERE)).toEqual({ kind: 'external', url: 'https://www.etsy.com/listing/1' });
   });

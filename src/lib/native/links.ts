@@ -9,6 +9,7 @@ import shell from '../../data/app/shell-routes.json';
 export const SITE = shell.site;
 const include = shell.include.map((p) => new RegExp(p));
 const never = shell.neverInclude.map((p) => new RegExp(p));
+const rewrites = shell.inAppRewrites as Record<string, string>;
 const SITE_HOSTS = new Set(['www.organizedmomcollective.com', 'organizedmomcollective.com']);
 
 /** "/app/cleaning/" → "/app/cleaning"; "/" stays "/". */
@@ -44,6 +45,8 @@ export function classifyLink(href: string, here: string): LinkAction {
   const site = /^https?:$/.test(url.protocol) && SITE_HOSTS.has(url.hostname);
   if (!ours && !site) return /^https?:$/.test(url.protocol) ? { kind: 'external', url: url.href } : { kind: 'default' };
   const rest = url.search + url.hash;
+  const rewrite = rewrites[normalizePath(url.pathname)];
+  if (rewrite) return { kind: 'in-app', href: rewrite + url.hash };
   if (inShell(url.pathname)) return ours ? { kind: 'default' } : { kind: 'in-app', href: normalizePath(url.pathname) + rest };
   return { kind: 'website', url: SITE + normalizePath(url.pathname) + rest };
 }

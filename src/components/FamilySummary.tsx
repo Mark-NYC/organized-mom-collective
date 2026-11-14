@@ -1,6 +1,11 @@
 /**
- * /app/account's family panel. A signed-in Club member sees her own family (from her account) with links to My Family
- * and Account & Billing; anyone else sees the fictional sample family, clearly labeled as a preview.
+ * /app/account's family panel.
+ * - A signed-in Family Meeting Club member sees her own family (from her account), with My Family, Club Home and
+ *   Account & Billing.
+ * - Anyone else sees a plain state: sign in (when sign-in is on), or that a member's family shows here. Never made-up
+ *   people: a fictional family in someone's Account reads as somebody else's data.
+ * - The fictional sample family only in an explicit demo, `/app/account?demo=1`, labeled as one (development,
+ *   previews, screenshots).
  */
 import { useEffect, useState } from 'react';
 import { appPreviewFamily } from '../lib/app-family';
@@ -12,21 +17,24 @@ import { accountStore } from '../lib/club/store';
 import { routes } from '../routes';
 
 export default function FamilySummary() {
-  const [family, setFamily] = useState<{ household: Household | null; mine: boolean } | undefined>(undefined);
+  const [family, setFamily] = useState<Family | undefined>(undefined);
   useEffect(() => {
-    const sample = () => appPreviewFamily().then((h) => setFamily({ household: h, mine: false }), () => setFamily({ household: null, mine: false }));
-    if (!clubAccountsEnabled()) return void sample();
+    if (new URLSearchParams(location.search).get('demo') === '1') {
+      appPreviewFamily().then((h) => setFamily({ state: 'demo', household: h }), () => setFamily({ state: 'demo', household: null }));
+      return;
+    }
+    if (!clubAccountsEnabled()) return void setFamily({ state: 'no-sign-in', household: null });
     getSession().then(async (s) => {
-      if (!s) return sample();
+      if (!s) return setFamily({ state: 'signed-out', household: null });
       const me = await loadMembership();
-      if (!me.member && !me.grant) return sample();
-      setFamily({ household: await accountStore.household(), mine: true });
-    }).catch(sample);
+      if (!me.member && !me.grant) return setFamily({ state: 'not-member', household: null });
+      setFamily({ state: 'member', household: await accountStore.household() });
+    }).catch(() => setFamily({ state: 'unavailable', household: null }));
   }, []);
   if (family === undefined) return <p className="mt-6 text-warm-soft">Loading your family…</p>;
   const month = monthOf(new Date());
-  const { household, mine } = family;
-  if (mine) {
+  const { household, state } = family;
+  if (state === 'member') {
     return (
       <section className="family-panel mt-6" data-account-family="member">
         <p className="label">YOUR FAMILY</p>
@@ -40,20 +48,38 @@ export default function FamilySummary() {
       </section>
     );
   }
+  if (state === 'demo') {
+    return (
+      <>
+        <div className="family-note mt-8" data-account-family="demo"><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm leading-relaxed">You opened the demo (<code>?demo=1</code>). The people below are made up, to show how a family's details look. <a href={routes.appAccount} className="underline">Leave the demo</a>.</p></div>
+        {household ? (
+          <section className="family-panel mt-6">
+            <p className="label">DEMO FAMILY</p>
+            <h2 className="family-panel-title mt-4">{household.displayName ?? 'Our family'}</h2>
+            <Members household={household} month={month} />
+          </section>
+        ) : <p className="mt-6 text-warm-soft">Demo family unavailable.</p>}
+      </>
+    );
+  }
+  const copy: Record<Exclude<Family['state'], 'member' | 'demo'>, { title: string; body: string; signIn: boolean }> = {
+    'signed-out': { title: 'Sign in to see your family', body: 'Family Meeting Club members: sign in with the email you joined with. We’ll send a 6-digit code; there’s no password.', signIn: true },
+    'not-member': { title: 'Your family shows here once you’re a member', body: 'You’re signed in, but this account doesn’t have a Family Meeting Club membership. A member’s family (names, ages and roles, used by every monthly plan) appears here.', signIn: false },
+    'no-sign-in': { title: 'Your family', body: 'A Family Meeting Club member’s family (names, ages and roles, used by every monthly plan) appears here once she signs in.', signIn: false },
+    unavailable: { title: 'We couldn’t load your family', body: 'Check your connection and open this page again. Nothing you saved is lost.', signIn: false },
+  };
+  const c = copy[state];
   return (
-    <>
-      <div className="family-note mt-8" data-account-family="sample"><strong className="text-sm">Sample family · Preview only</strong><p className="mt-1 text-sm leading-relaxed">The people shown here are fictional. They are not your account, your purchase history, or saved customer details. Club members: <a href="/club/login" className="underline">sign in</a> to see your own family.</p></div>
-      {household ? (
-        <section className="family-panel mt-6">
-          <p className="label">FAMILY PROFILE · SAMPLE ONLY</p>
-          <h2 className="family-panel-title mt-4">{household.displayName ?? 'Our family'}</h2>
-          <Members household={household} month={month} />
-          <p className="mt-4 text-xs text-warm-soft">Read from the existing Club sample store. This is not your personal account.</p>
-        </section>
-      ) : <p className="mt-6 text-warm-soft">Family preview unavailable.</p>}
-    </>
+    <section className="family-panel mt-8" data-account-family={state}>
+      <p className="label">YOUR FAMILY</p>
+      <h2 className="family-panel-title mt-4">{c.title}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-warm-soft">{c.body}</p>
+      {c.signIn && <a href={routes.clubLogin} className="family-action mt-6">Sign in</a>}
+    </section>
   );
 }
+
+type Family = { state: 'member' | 'demo' | 'signed-out' | 'not-member' | 'no-sign-in' | 'unavailable'; household: Household | null };
 
 function Members({ household, month }: { household: Household; month: string }) {
   return (

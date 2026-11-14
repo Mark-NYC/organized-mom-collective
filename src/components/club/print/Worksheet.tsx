@@ -28,7 +28,7 @@ function Sheet({ doc, title, familyName, month, palette, preview, children }: Ba
         {familyName} · {monthLabel(month)}
       </div>
       {children}
-      <div className="club-sheet-foot">Organized Family Club · {monthLabel(month)}</div>
+      <div className="club-sheet-foot">Family Meeting Club · {monthLabel(month)}</div>
     </div>
   );
 }

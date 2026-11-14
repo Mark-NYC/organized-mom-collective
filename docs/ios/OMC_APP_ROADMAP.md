@@ -273,15 +273,37 @@ CI run [43648076479](https://github.com/Mark-NYC/organized-mom-collective/action
   an iPhone. Routing, storage and safe areas are verified only in Chromium so far.
 
 Screenshot review: Today, Cleaning and Account render cleanly at 393 px, and the tab bar is right (Cleaning shows only
-after unlock). Problems found in screens Milestone 1 didn't change, to fix before TestFlight:
+after unlock). Three problems found in screens Milestone 1 hadn't changed. **All fixed 2026-11-14** (below); the app
+icon and splash are still Capacitor's placeholders.
 
-1. **`/club/login` has no app tab bar.** Its header links only to Club pages, and the app has no browser back button,
-   so you can't get back to Today from it. Give ClubLayout pages a way back to Today in the app.
-2. **Two logos on Club pages**: "Organized family Club" in the top bar and "The Family Meeting Club" under it. This is
-   the open naming decision.
-3. **Account shows the fictional Rivera family when signed out.** It's labeled as a sample, but in an app it reads as
-   someone else's data. Show a sign-in prompt instead.
-4. The iOS app icon and splash screen are still Capacitor's placeholders.
+#### UX fixes (2026-11-14)
+
+1. **One brand: the Family Meeting Club.** The app header uses the Family Meeting Club logo (the old "Organized Family
+   Club" logo file is no longer used anywhere in the app); the duplicate logo strip under it is gone. Every visible
+   "Organized Family Club" in the member app, the Club member pages and the member printables now reads "Family Meeting
+   Club" (116 strings in 58 files; code comments untouched). In the app, the printables' "← Family Meeting Club" back
+   link (`/club`, the sales page on the website) opens Club Home (`inAppRewrites` in `src/data/app/shell-routes.json`).
+   **Left for the owner, not changed:** the public website (the footer link "Organized Family Club" → `/club-2`, the
+   twelve guide pages, two articles, the chaos quiz, `/club-3`, the chore chart and family meeting agenda pages), the
+   unpublished `/privacy` draft (legal text, owner approves), and the Club's emails and admin in Supabase Edge Functions
+   (`supabase/functions/_shared/club/emails.ts` and friends: a server change needs a redeploy).
+2. **No dead ends.** One tab bar component (`src/components/AppTabBar.astro`) on every app screen: all `/app` pages
+   (Nav.astro) and, in the app build, every Club page (ClubLayout, plus the `/club/resources/*` and
+   `/club/family-vision` pages that render through PublicLayout). In the app it's always Today · Cleaning · Club ·
+   Account, visible at every width (on iPad a member's Club header replaces the top bar that held those links), and the
+   QR copy's "Calendar" tab (the reorder sales page) isn't used. The signed-out Club header's logo and "Your months"
+   go to Club Home and Monthly Resources in the app, not to billing on the website. The smoke test now opens **every**
+   bundled page at iPhone and iPad widths and fails on a missing Today tab (the cleaning companion's one-time first-run
+   screen, which hides the chrome on purpose, must show its own way forward instead).
+3. **No made-up family outside a demo.** Account shows a signed-in member's own family; anyone else sees "Sign in to see
+   your family" (or, signed in without a membership, that a member's family shows there). The fictional Rivera family
+   appears only at `/app/account?demo=1`, under "Demo · Not a real family". Today's cleaning card no longer prints a
+   sample family name. The internal `/app/club/family-chore-chart-prototype` page (hard-coded Rivera) is left out of the
+   app. The smoke test fails if "Rivera" appears on any bundled page outside an explicit demo.
+
+Website: unchanged except the member area's header logo (`/app/club…` on the website showed the old logo plus the new
+one; now one Family Meeting Club logo) and the renamed Club strings on member pages, which aren't public (Club pages are
+switched off in production).
 
 ### What still blocks TestFlight (Milestone 2)
 
@@ -291,7 +313,6 @@ after unlock). Problems found in screens Milestone 1 didn't change, to fix befor
 | Bundle ID `com.organizedmomcollective.app` registered; App Store Connect app record | Owner |
 | App Store Connect API key (Issuer ID, Key ID, `.p8`) as GitHub secrets, then a signed archive + upload job | Owner → then CI |
 | Real app icon and splash from the brand files | Design |
-| The three navigation and content problems above | Code |
 | Sign-in inside the app: add `capacitor://localhost` to `CLUB_ALLOWED_ORIGINS` (Edge Function secret) and test the code email | Owner approves, then test |
 | A test member: Stripe **test mode** checkout or an admin grant, so the Club has something to open | Owner |
 | `/privacy` published (App Store requires a privacy policy URL; the Club already needs it before launch) | Owner |

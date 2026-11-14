@@ -20,10 +20,10 @@ const blocks=[
 ---
 <div class="msr" data-msr-key={storageKey} data-msr-plan={planMode ? "true" : undefined}>
  {/* planMode: the Club plan page (/app/club/may) brings the layout and rail; this keeps the dialogs and the sheet. */}
- {!planMode && <header class="msr-intro"><a href="/club">← Organized Family Club</a><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h1>Less reminding. <em>More summer freedom.</em></h1><p>A picture-led rhythm kids can check for themselves, prepared for your family and ready for the refrigerator.</p></header>}
+ {!planMode && <header class="msr-intro"><a href="/club">← Family Meeting Club</a><p class="msr-label">FAMILY MEETING CLUB · MAY 2027</p><h1>Less reminding. <em>More summer freedom.</em></h1><p>A picture-led rhythm kids can check for themselves, prepared for your family and ready for the refrigerator.</p></header>}
  <div class={planMode ? "msr-plan" : "msr-layout"}>
   {!planMode && <aside class="msr-editor" aria-label="Prepared May summer rhythm">
-   <div class="msr-editor-head"><p class="msr-label">ORGANIZED FAMILY CLUB · MAY 2027</p><h2>Less reminding. <em>More summer freedom.</em></h2><button type="button" class="msr-vision-button" data-open-vision>Why this matters <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></button></div>
+   <div class="msr-editor-head"><p class="msr-label">FAMILY MEETING CLUB · MAY 2027</p><h2>Less reminding. <em>More summer freedom.</em></h2><button type="button" class="msr-vision-button" data-open-vision>Why this matters <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg></button></div>
    <div class="msr-prepared" id="may-edit-controls">
     <span class="msr-label">YOUR FAMILY'S PREPARED RHYTHM</span>
     <strong>Our Summer Day</strong>
@@ -43,7 +43,7 @@ const blocks=[
    </div>
   </aside>}
   <dialog class="msr-dialog msr-vision-dialog" data-vision-dialog aria-labelledby="msr-vision-title">
-   <div class="msr-dialog-top"><div><span class="msr-label">ORGANIZED FAMILY CLUB · MAY</span><h2 id="msr-vision-title">Why this matters</h2></div><button type="button" class="msr-dialog-close" data-close-modal aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <div class="msr-dialog-top"><div><span class="msr-label">FAMILY MEETING CLUB · MAY</span><h2 id="msr-vision-title">Why this matters</h2></div><button type="button" class="msr-dialog-close" data-close-modal aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>When school ends, the daily structure disappears, and Mom becomes the one everyone asks what to do next. This illustrated rhythm gives children a simple place to look for their next activity while keeping the day flexible. We've prepared realistic anchors and activity ideas, so Mom doesn't have to invent and announce the plan all summer long.</p>
    <button type="button" class="msr-dialog-done" data-close-modal>Back to our plan</button>
   </dialog>
@@ -57,7 +57,7 @@ const blocks=[
    {!planMode && <button type="button" class="msr-floating-edit" data-open-editor aria-label="Make changes to your plan"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg><span>MAKE CHANGES</span></button>}
    
    <div class="msr-stage" data-stage><article class="msr-sheet" data-sheet data-plan-sheet={planMode ? "sheet" : undefined} data-plan-sheet-end={planMode ? "" : undefined}>
-    <div class="msr-sheet-head"><span>ORGANIZED FAMILY CLUB · MAY 2027</span><h2>Our <em>Summer Day</em></h2><p>A little structure. Plenty of freedom.</p></div>
+    <div class="msr-sheet-head"><span>FAMILY MEETING CLUB · MAY 2027</span><h2>Our <em>Summer Day</em></h2><p>A little structure. Plenty of freedom.</p></div>
     <div class="msr-family"><span data-family>OUR FAMILY'S SUMMER RHYTHM</span><span data-day-label>A DAY AT HOME</span></div>
     <div class="msr-rows" data-print-rows>
      {blocks.map((b,i)=><div class="msr-row" data-rhythm-key={b.key} style={'--msr-tint:'+b.tint}>
@@ -68,7 +68,7 @@ const blocks=[
      </div>)}
     </div>
     <div class="msr-rule"><span>OUR SUMMER RULE</span><strong>Check the rhythm before asking what’s next.</strong><p>Our plans can change. We can still find what's next.</p></div>
-    <footer class="msr-foot"><span>ORGANIZED FAMILY CLUB</span><span>OUR SUMMER DAY · MAY</span></footer>
+    <footer class="msr-foot"><span>FAMILY MEETING CLUB</span><span>OUR SUMMER DAY · MAY</span></footer>
    </article></div>
    
   </section>

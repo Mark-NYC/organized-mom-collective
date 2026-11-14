@@ -11,7 +11,7 @@ import '../../styles/club-marks.css';
 interface Props { deadline: string; approvalKey: string }
 const { deadline, approvalKey } = Astro.props;
 ---
-<ClubPlanScreen deadline={deadline} kicker="March · Organized Family Club" sheets={['front', 'back']} previewNote="Two sides: the plan, then how we do our jobs" hero={false}>
+<ClubPlanScreen deadline={deadline} kicker="March · Family Meeting Club" sheets={['front', 'back']} previewNote="Two sides: the plan, then how we do our jobs" hero={false}>
   <Fragment slot="title">Spring Clean <em>as a Team</em></Fragment>
   <div class="scm" data-scm data-scm-approval={approvalKey}>
     <section class="scm-project" data-scm-project></section>

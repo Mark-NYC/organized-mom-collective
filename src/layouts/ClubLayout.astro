@@ -10,6 +10,7 @@ import BaseLayout from './BaseLayout.astro';
 import { clubEnabled, CLUB_NAME } from '../data/club/config';
 import '@fontsource/kalam/latin-700.css';
 import '../styles/club.css';
+import AppTabBar from '../components/AppTabBar.astro';
 
 interface Props {
   title: string;
@@ -37,6 +38,7 @@ const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
       )
     }
   </div>
+  {appShell && enabled && <AppTabBar club />}
   {appShell && <script>import '../lib/native/init';</script>}
   {appShell && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); }</style>}
 </BaseLayout>

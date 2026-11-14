@@ -1,5 +1,5 @@
 {
-  "$comment": "Pages bundled into the iPhone app (docs/ios/OMC_APP_ROADMAP.md). Read by scripts/build-app-shell.mjs (what to copy) and src/lib/native/links.ts (what stays in the app; everything else opens on the website). Patterns match a path without a trailing slash. Never add public sales pages, checkout, billing (/club/dashboard), admin or the Club offer (/club).",
+  "$comment": "Pages bundled into the iPhone app (docs/ios/OMC_APP_ROADMAP.md). Read by scripts/build-app-shell.mjs (what to copy) and src/lib/native/links.ts (what stays in the app; everything else opens on the website). Patterns match a path without a trailing slash. Never add public sales pages, checkout, billing (/club/dashboard), admin or the Club offer (/club). inAppRewrites: website pages whose in-app equivalent is a bundled page (the Club's sales page \u2192 Club Home), so a member's back link never leaves the app.",
   "site": "https://www.organizedmomcollective.com",
   "include": [
     "^/app$",
@@ -23,6 +23,10 @@
     "^/admin",
     "^/shop",
     "^/calendar",
-    "^/download"
-  ]
+    "^/download",
+    "^/app/club/family-chore-chart-prototype"
+  ],
+  "inAppRewrites": {
+    "/club": "/app/club"
+  }
 }

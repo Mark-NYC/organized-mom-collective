@@ -202,7 +202,7 @@ export function LetterSheets({ doc, kit, preview, recipient }: { doc: string; ki
   );
   const head = (
     <div className="club-letter-head">
-      <span>Organized Family Club</span>
+      <span>Family Meeting Club</span>
       <span>{month}</span>
     </div>
   );
@@ -402,7 +402,7 @@ export function ActionSheet({ doc, kit, palette, preview, fill }: { doc: string;
       <p className="club-action-sheet-note">
         {action.kind === 'countdown' ? 'Write these dates on your family wall calendar so everyone can see what’s coming.' : kit.mailer.calendarNote}
       </p>
-      <div className="club-sheet-foot">Organized Family Club · {monthLabel(kit.month)}</div>
+      <div className="club-sheet-foot">Family Meeting Club · {monthLabel(kit.month)}</div>
     </div>
   );
 }

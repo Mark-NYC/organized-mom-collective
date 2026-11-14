@@ -114,7 +114,7 @@ function steps(text:string|null):string[] {
 function front(m:Metrics,d:WorksheetData):Page {
  const g=new Draw(m);
  g.rect(X0,39,52,4,COLORS.blue);
- g.label(X0,59,'November 2026  ·  Organized Family Club',{size:7});
+ g.label(X0,59,'November 2026  ·  Family Meeting Club',{size:7});
  g.label(X0,94,d.familyName??'Our family',{size:7});
  g.block(X0,137,d.planTitle??'Our Family Ownership Plan','serifBoldItalic',{width:W,maxLines:2,size:31,min:23,lead:1.15,color:COLORS.heading});
  g.block(X0,165,d.planGoal??'Everyone owns a part. Everyone knows what finished means.','sans',{width:W,maxLines:2,size:9.5,min:8.5,lead:1.2,color:COLORS.soft});
@@ -139,7 +139,7 @@ function front(m:Metrics,d:WorksheetData):Page {
 function back(m:Metrics,d:WorksheetData):Page {
  const g=new Draw(m);
  g.rect(X0,39,52,4,COLORS.blue);
- g.label(X0,59,'November 2026  ·  Organized Family Club',{size:7});
+ g.label(X0,59,'November 2026  ·  Family Meeting Club',{size:7});
  g.label(X0,103,'A little less to carry');
  g.text(X0,148,'How we hand it over','serifBoldItalic',32,{color:COLORS.heading});
  g.block(X0,188,'Show the plan to everyone who will own a part. Agree on what finished means, and where things belong. Then let each person take the lead.','serif',{width:W,maxLines:3,size:14,min:12,lead:1.45});
