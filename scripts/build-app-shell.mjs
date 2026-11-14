@@ -100,7 +100,9 @@ for (const u of keep) {
 }
 writeFileSync(
   join(OUT, 'index.html'),
-  '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Organized Mom</title><script>location.replace("/app")</script></head><body style="background:#fffdfa"></body></html>\n',
+  // The app starts on /app (capacitor.config.ts -> server.appStartPath); this page only catches an unknown address,
+  // and is never blank: a visible link if the redirect doesn't happen.
+  '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Organized Mom</title><meta http-equiv="refresh" content="1;url=/app"><script>location.replace("/app")</script></head><body style="background:#fffdfa;color:#4d4544;font-family:-apple-system,system-ui,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0"><a href="/app" style="color:#4d4544;font-size:17px">Opening Today…</a></body></html>\n',
 );
 
 // 4. Checks.

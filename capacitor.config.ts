@@ -9,6 +9,8 @@ const config: CapacitorConfig = {
   appId: 'com.organizedmomcollective.app',
   appName: 'Organized Mom',
   webDir: 'app-www',
+  // Open straight on Today (/app -> app/index.html via OMCRouter), not through the root redirect page.
+  server: { appStartPath: 'app' },
   ios: {
     // Pages handle the notch and home bar themselves (viewport-fit=cover + env(safe-area-inset-*)).
     contentInset: 'never',

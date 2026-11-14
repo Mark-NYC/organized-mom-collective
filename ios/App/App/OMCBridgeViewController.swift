@@ -11,23 +11,32 @@ struct OMCRouter: Router {
     var basePath: String = ""
 
     func route(for path: String) -> String {
+        let resolved = resolve(path)
+        #if DEBUG
+        NSLog("OMCRouter %@ -> %@ (base %@)", path, resolved, basePath)
+        #endif
+        return resolved
+    }
+
+    private func resolve(_ path: String) -> String {
         let fallback = basePath + "/index.html"
         let url = URL(fileURLWithPath: path)
         guard url.pathExtension.isEmpty else { return contained(basePath + path) ?? fallback }
         var trimmed = path
         while trimmed.count > 1 && trimmed.hasSuffix("/") { trimmed.removeLast() }
         if trimmed == "/" || trimmed.isEmpty { return fallback }
-        if let page = contained(basePath + trimmed + "/index.html"), FileManager.default.fileExists(atPath: page) {
+        let page = basePath + trimmed + "/index.html"
+        if contained(page) != nil, FileManager.default.fileExists(atPath: page) {
             return page
         }
         return fallback
     }
 
-    /// The standardized file path, or nil if it points outside the bundled web folder.
+    /// The path, if it stays inside the bundled web folder (no `..` escapes); nil otherwise.
     private func contained(_ candidate: String) -> String? {
         let resolved = URL(fileURLWithPath: candidate).standardizedFileURL.path
         let root = URL(fileURLWithPath: basePath).standardizedFileURL.path
-        return resolved == root || resolved.hasPrefix(root + "/") ? resolved : nil
+        return resolved == root || resolved.hasPrefix(root + "/") ? candidate : nil
     }
 }
 
@@ -45,9 +54,10 @@ class OMCBridgeViewController: CAPBridgeViewController {
         super.viewDidLoad()
         guard ProcessInfo.processInfo.arguments.contains("-OMCResetWebStorageForTesting") else { return }
         WKWebsiteDataStore.default().removeData(
-            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            ofTypes: [WKWebsiteDataTypeLocalStorage, WKWebsiteDataTypeSessionStorage, WKWebsiteDataTypeIndexedDBDatabases],
             modifiedSince: .distantPast
         ) { [weak self] in
+            NSLog("OMCTest web storage wiped; reloading %@", self?.webView?.url?.absoluteString ?? "(no url)")
             self?.webView?.reload()
         }
     }

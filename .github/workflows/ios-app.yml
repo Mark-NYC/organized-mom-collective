@@ -113,6 +113,11 @@ jobs:
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
             -derivedDataPath build -resultBundlePath build/ui-tests.xcresult \
             CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|\*\* TEST" 
+      - name: App log from the simulator (router decisions, page console, load errors)
+        if: always()
+        run: |
+          xcrun simctl spawn "${{ steps.sim.outputs.udid }}" log show --last 20m --style compact \
+            --predicate 'process == "App"' | grep -E "OMCRouter|OMCTest|⚡️|rror" | tail -n 200 || true
       - name: Export the simulator screenshots
         if: always()
         run: |
