@@ -6,10 +6,17 @@
  * shrink. Usage: node scripts/compare-test-failures.mjs
  */
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { closeSync, mkdtempSync, openSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-const r = spawnSync('npx', ['vitest', 'run'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-const out = (r.stdout ?? '') + (r.stderr ?? '');
+// vitest writes straight to a file: no pipe buffer limit, and nothing it prints is lost.
+const logPath = join(mkdtempSync(join(tmpdir(), 'vitest-')), 'out.txt');
+const fd = openSync(logPath, 'w');
+const r = spawnSync('npx', ['vitest', 'run', '--reporter=default'], { stdio: ['ignore', fd, fd], env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' } });
+closeSync(fd);
+const out = readFileSync(logPath, 'utf8').replace(/\x1b\[[0-9;]*m/g, '');
+const showTail = () => console.error(`\n--- last 60 lines of vitest output (exit ${r.status}${r.error ? ', ' + r.error.message : ''}) ---\n` + out.split('\n').slice(-60).join('\n'));
 const failed = new Set(
   out
     .split('\n')
@@ -21,10 +28,15 @@ const summary = out.split('\n').find((l) => /^\s+Tests\s+\d/.test(l))?.trim();
 const added = [...failed].filter((t) => !known.has(t));
 const fixed = [...known].filter((t) => !failed.has(t));
 console.log(summary ?? '(no vitest summary)');
+if (!summary) {
+  console.error('vitest did not report a result; nothing can be compared.');
+  showTail();
+  process.exit(1);
+}
 if (fixed.length) console.log(`\nNow passing (remove from tests/known-failures.txt):\n  ${fixed.join('\n  ')}`);
 if (added.length) {
   console.error(`\nNEW failures (not in tests/known-failures.txt):\n  ${added.join('\n  ')}`);
+  showTail();
   process.exit(1);
 }
-if (!summary) process.exit(1);
 console.log(`\nNo new failures (${failed.size} known).`);
