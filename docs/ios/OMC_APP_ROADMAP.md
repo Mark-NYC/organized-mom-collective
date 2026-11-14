@@ -255,3 +255,45 @@ npm run test:app-shell   # serves app-www/ like the iOS router and drives it at 
 
 The Xcode build runs in CI on macOS (`ios-app.yml`); download the simulator `.app` artifact or, from M2, install the
 TestFlight build on an iPhone.
+
+### Milestone 1 results (2026-11-14)
+
+CI run [43648076479](https://github.com/Mark-NYC/organized-mom-collective/actions/runs/43648076479), commit `be73a33`:
+
+- **Unit tests:** 55 failed + 1 file that fails to load, 1077 passed, 107 skipped. All 56 failures are the pre-existing
+  ones in `tests/known-failures.txt`, matched by name; none new. (The first run, 43647192708, failed because
+  vitest's output never reached the comparison script, which then misreported every known failure as passing. The
+  list wasn't stale; the script now writes vitest's output to a file and fails loudly if it can't read a result.)
+- **App bundle:** 71 member pages, 766 files, 39.9 MB; 178 website pages left out; no tracker, secret or sales page.
+- **iPhone-size smoke test:** all pages load with no script errors, missing files or horizontal overflow; unlock →
+  cleaning → checkmark survives reload; `/shop` opens on the website.
+- **iOS Simulator build (macos-15, unsigned):** `BUILD SUCCEEDED`. The binary contains `OMCRouter` and
+  `OMCBridgeViewController`, the compiled storyboard instantiates `App.OMCBridgeViewController`, and the app holds
+  the member bundle and the App, Browser and Preferences plugins. **Not run yet:** launching it on a simulator or
+  an iPhone. Routing, storage and safe areas are verified only in Chromium so far.
+
+Screenshot review: Today, Cleaning and Account render cleanly at 393 px, and the tab bar is right (Cleaning shows only
+after unlock). Problems found in screens Milestone 1 didn't change, to fix before TestFlight:
+
+1. **`/club/login` has no app tab bar.** Its header links only to Club pages, and the app has no browser back button,
+   so you can't get back to Today from it. Give ClubLayout pages a way back to Today in the app.
+2. **Two logos on Club pages**: "Organized family Club" in the top bar and "The Family Meeting Club" under it. This is
+   the open naming decision.
+3. **Account shows the fictional Rivera family when signed out.** It's labeled as a sample, but in an app it reads as
+   someone else's data. Show a sign-in prompt instead.
+4. The iOS app icon and splash screen are still Capacitor's placeholders.
+
+### What still blocks TestFlight (Milestone 2)
+
+| Blocker | Who |
+| --- | --- |
+| Apple Developer Program membership ($99/yr; an organization needs a D-U-N-S number) | Owner |
+| Bundle ID `com.organizedmomcollective.app` registered; App Store Connect app record | Owner |
+| App Store Connect API key (Issuer ID, Key ID, `.p8`) as GitHub secrets, then a signed archive + upload job | Owner → then CI |
+| Real app icon and splash from the brand files | Design |
+| The three navigation and content problems above | Code |
+| Sign-in inside the app: add `capacitor://localhost` to `CLUB_ALLOWED_ORIGINS` (Edge Function secret) and test the code email | Owner approves, then test |
+| A test member: Stripe **test mode** checkout or an admin grant, so the Club has something to open | Owner |
+| `/privacy` published (App Store requires a privacy policy URL; the Club already needs it before launch) | Owner |
+| Privacy manifest check (UserDefaults via Preferences) and App Store privacy answers | Code + owner |
+| First real-device pass: routing, storage that survives an app restart, safe areas, sticky headers on plan pages, swipe-back | Owner's iPhone via TestFlight |
