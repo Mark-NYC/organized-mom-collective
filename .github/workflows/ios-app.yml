@@ -8,10 +8,10 @@
 name: iPhone app
 on:
   pull_request:
-    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   push:
     branches: ['claude/**']
-    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   workflow_dispatch:
 concurrency:
   group: ios-app-${{ github.ref }}
