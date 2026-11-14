@@ -133,6 +133,60 @@ for (const p of manifest.pages) {
 console.log(`  ✓ ${checked} bundled pages checked for a Today tab (iPhone + iPad), old branding and sample families`);
 await ipad.close();
 
+// Family calendar: works with no account (saved on this phone), survives a reload; in the labeled demo family, a
+// weekly event for Mon and Wed with a person and who's handling it shows on both days with that person's color; deleting
+// just one day of a repeat leaves the other.
+{
+  const page = await web.newPage();
+  await page.goto(base + '/app/family-calendar', { waitUntil: 'networkidle' });
+  const monday = page.locator('[data-calendar-day]').nth(1);
+  const mondayDate = await monday.getAttribute('data-calendar-day');
+  await monday.locator('button.cal-add').click();
+  await page.fill('[data-event-sheet] [data-field="title"]', 'Dentist');
+  await page.uncheck('[data-event-sheet] input[type="checkbox"]').catch(() => {});
+  await page.fill('[data-event-sheet] [data-field="start"]', '15:30');
+  await page.click('[data-save-event]');
+  if (!(await page.locator(`[data-calendar-day="${mondayDate}"] [data-calendar-event="Dentist"]`).isVisible())) fail('calendar: a new event doesn\'t show on its day');
+  await page.reload({ waitUntil: 'networkidle' });
+  if (!(await page.locator(`[data-calendar-day="${mondayDate}"] [data-calendar-event="Dentist"]`).isVisible())) fail('calendar: event lost after reload');
+  else console.log('  ✓ calendar: add with no account, still there after reload');
+  const status = await page.getAttribute('[data-sync-status]', 'data-sync-status');
+  if (status !== 'local') fail(`calendar: expected the "saved on this phone" status, got ${status}`);
+  await page.screenshot({ path: join(OUT, '09-calendar.png') });
+  await page.close();
+}
+{
+  const page = await web.newPage();
+  await page.goto(base + '/app/family-calendar?demo=1', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  if (!(await page.locator('[data-calendar-demo]').isVisible())) fail('calendar demo: not labeled as a demo');
+  const days = page.locator('[data-calendar-day]');
+  const mon = await days.nth(1).getAttribute('data-calendar-day');
+  const wed = await days.nth(3).getAttribute('data-calendar-day');
+  await days.nth(1).locator('button.cal-add').click();
+  await page.fill('[data-event-sheet] [data-field="title"]', 'Swim practice');
+  await page.fill('[data-event-sheet] [data-field="start"]', '16:15');
+  await page.selectOption('[data-event-sheet] [data-field="repeat"]', 'weekly');
+  await page.click('[data-event-sheet] button[aria-pressed]:has-text("Wed")');
+  await page.click('[data-member-chip="Sofia"]');
+  await page.selectOption('[data-event-sheet] [data-field="owner"]', { label: 'Luis' });
+  await page.screenshot({ path: join(OUT, '10-calendar-add-sheet.png') });
+  await page.click('[data-save-event]');
+  const onMon = page.locator(`[data-calendar-day="${mon}"] [data-calendar-event="Swim practice"]`);
+  const onWed = page.locator(`[data-calendar-day="${wed}"] [data-calendar-event="Swim practice"]`);
+  if (!(await onMon.isVisible()) || !(await onWed.isVisible())) fail('calendar: weekly Mon+Wed event missing a day');
+  else if (!/Sofia/.test(await onMon.innerText()) || !/Luis handles it/.test(await onMon.innerText())) fail('calendar: person or "handles it" missing');
+  else console.log('  ✓ calendar: weekly on Mon and Wed, with Sofia and who handles it');
+  await page.screenshot({ path: join(OUT, '11-calendar-demo-week.png'), fullPage: true });
+  await onWed.click();
+  await page.click('text=Delete…');
+  await page.click('[data-delete-choices] button:first-child'); // "Just Wed …"
+  if (await onWed.isVisible()) fail('calendar: skipping one day of a repeat left it there');
+  else if (!(await onMon.isVisible())) fail('calendar: skipping one day removed the whole repeat');
+  else console.log('  ✓ calendar: delete just one day of a repeat');
+  await page.close();
+}
+
 // The Club back link ("← Family Meeting Club", href /club) stays in the app: Club Home, not the sales page.
 {
   const page = await native.newPage();

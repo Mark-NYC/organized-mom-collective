@@ -7,7 +7,7 @@ const HERE = 'capacitor://localhost/app';
 
 describe('app bundle allowlist (src/data/app/shell-routes.json)', () => {
   it('bundles the member experience', () => {
-    for (const p of ['/app', '/app/', '/app/cleaning', '/app/week', '/app/settings', '/app/account', '/app/calendar', '/app/calendar/week', '/app/club', '/app/club/january', '/app/club/march/spring-prep', '/club/login', '/club/welcome', '/club/welcome-kit', '/club/family', '/club/resources/2027-01-fresh-start-together', '/club/tools/routine-chart'])
+    for (const p of ['/app', '/app/', '/app/cleaning', '/app/family-calendar', '/club/invite', '/app/week', '/app/settings', '/app/account', '/app/calendar', '/app/calendar/week', '/app/club', '/app/club/january', '/app/club/march/spring-prep', '/club/login', '/club/welcome', '/club/welcome-kit', '/club/family', '/club/resources/2027-01-fresh-start-together', '/club/tools/routine-chart'])
       expect(inShell(p), p).toBe(true);
   });
   it('never bundles shopping, billing, admin or public pages', () => {
@@ -111,10 +111,11 @@ describe('durable storage', () => {
 });
 
 describe('app features', () => {
-  it('shows only live areas; Calendar, Inbox and Sunday Setup stay hidden until their milestones', () => {
+  it('shows only live areas; the Inbox stays hidden until its milestone', () => {
     const live = visibleFeatures().map((f) => f.id);
-    expect(live).toEqual(['today', 'cleaning', 'club', 'family']);
-    for (const id of ['calendar', 'inbox', 'sunday-setup']) expect(APP_FEATURES.find((f) => f.id === id)?.status).toBe('planned');
+    expect(live).toEqual(['today', 'cleaning', 'club', 'family', 'calendar']);
+    // Google Calendar import and the AI Family Inbox are future milestones: registered, never shown.
+    for (const id of ['inbox']) expect(APP_FEATURES.find((f) => f.id === id)?.status).toBe('planned');
   });
   it('planned areas never reuse the printed QR route /app/calendar', () => {
     for (const f of APP_FEATURES) expect(f.href.startsWith('/app/calendar')).toBe(false);

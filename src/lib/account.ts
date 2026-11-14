@@ -57,8 +57,9 @@ export function syncableKey(key: string): boolean {
   return (
     key.length <= 120 &&
     /^omc:[a-z0-9][a-z0-9._-]*(:[a-z0-9][a-z0-9._-]*)*$/.test(key) &&
-    // Club data lives in its own tables (supabase/migrations/20261023000000_club_core.sql), never in saves.
-    !/^omc:(v1|account|tool-download-access|club[a-z0-9._-]*)(:|$)/.test(key)
+    // Club data lives in its own tables (supabase/migrations/20261023000000_club_core.sql), never in saves; so do the
+    // family calendar (calendar_events) and household state (docs/ios/HOUSEHOLD_ARCHITECTURE.md).
+    !/^omc:(v1|account|tool-download-access|club[a-z0-9._-]*|calendar|household|sunday-setup|app)(:|$)/.test(key)
   );
 }
 

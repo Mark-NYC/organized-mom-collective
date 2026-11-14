@@ -24,6 +24,13 @@ const items = calendar ? [
   { href: '/app/calendar/week', label: 'Week', glyph: '▦' },
   { href: '/app/calendar/reorder', label: 'Calendar', glyph: '⌂' },
   { href: '/app/calendar/settings', label: 'Settings', glyph: '◯' },
+] : appShell ? [
+  // The app: one unified family system. Calendar is free (src/data/app/features.ts).
+  { href: '/app', label: 'Today', glyph: '⌂' },
+  { href: '/app/family-calendar', label: 'Calendar', glyph: '▤' },
+  { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
+  { href: '/app/club', label: 'Club', glyph: '▦' },
+  { href: '/app/account', label: 'Account', glyph: '◯' },
 ] : [
   { href: '/app', label: 'Today', glyph: '⌂' },
   { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },

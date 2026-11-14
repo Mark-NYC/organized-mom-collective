@@ -3,7 +3,7 @@
   "site": "https://www.organizedmomcollective.com",
   "include": [
     "^/app$",
-    "^/app/(cleaning|week|settings|account|coaching|tidy)$",
+    "^/app/(cleaning|week|settings|account|coaching|tidy|family-calendar|sunday-setup)$",
     "^/app/calendar(/(week|settings))?$",
     "^/app/club(/.*)?$",
     "^/club/(login|invite|welcome|welcome-kit|family|family-vision|family-meeting-guide|start)$",
