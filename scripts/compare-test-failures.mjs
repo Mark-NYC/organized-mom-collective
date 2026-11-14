@@ -36,6 +36,14 @@ if (!summary) {
 if (fixed.length) console.log(`\nNow passing (remove from tests/known-failures.txt):\n  ${fixed.join('\n  ')}`);
 if (added.length) {
   console.error(`\nNEW failures (not in tests/known-failures.txt):\n  ${added.join('\n  ')}`);
+  // Each new failure's own error block from vitest's "Failed Tests" section (the last FAIL line for that name).
+  const lines = out.split('\n');
+  for (const name of added) {
+    const at = lines.findLastIndex((l) => l.startsWith(' FAIL ') && l.includes(name));
+    if (at < 0) continue;
+    const end = lines.findIndex((l, i) => i > at && /^⎯{5,}/.test(l));
+    console.error(`\n--- ${name} ---\n` + lines.slice(at, end > at ? end : at + 60).join('\n'));
+  }
   showTail();
   process.exit(1);
 }
