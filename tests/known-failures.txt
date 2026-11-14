@@ -1,0 +1,56 @@
+tests/club-august.test.ts > August: one letter, one action, one tool > asks one family question on the back of the letter
+tests/club-august.test.ts > August: one letter, one action, one tool > has a 150–200 word letter, still a draft for Megan, so the kit can’t be scheduled yet
+tests/club-august.test.ts > August: one letter, one action, one tool > has exactly the six countdown lines, with an optional helper blank instead of assignments
+tests/club-august.test.ts > August: one letter, one action, one tool > is the theme and subtitle the owner set
+tests/club-august.test.ts > August: one letter, one action, one tool > passes every kit check, beside November
+tests/club-august.test.ts > August: one letter, one action, one tool > prints the countdown and the letter, and nothing from the first draft: no launch plan, command center, overview or item sets
+tests/club-august.test.ts > August: the tool is the site’s routine chart > the letter’s example is the routine chart’s own morning starter, with its illustrations
+tests/club-countdown.test.ts
+tests/club-january.test.ts > January: one letter, one reset, one optional habit builder > asks for the family’s one thing, offering the habit builder’s own areas, a plan on step 2 and a start day on step 4
+tests/club-january.test.ts > January: one letter, one reset, one optional habit builder > has exactly the five steps, no dates, no per-step assignments
+tests/club-january.test.ts > January: one letter, one reset, one optional habit builder > passes every kit check and sits in month order
+tests/club-january.test.ts > January: one letter, one reset, one optional habit builder > prints the plan and the letter, like the other three-part kits
+tests/club-january.test.ts > January: one letter, one reset, one optional habit builder > saves the one thing, plan and start day, checks in a week later, and never schedules anything else
+tests/club-january.test.ts > January: one letter, one reset, one optional habit builder > works for a family that joins late in January, or opens it later: no date is assumed
+tests/club-january.test.ts > January: the letter and the mailer > is a 150–200 word draft for Megan, greets by name when known, asks the family question, and picks one thing
+tests/club-january.test.ts > January: the letter and the mailer > puts the three principles, one example, the question, the QR code and the calendar note on the back
+tests/club-january.test.ts > January: the tool is the Family Habit Builder > copies one habit as plain text with the reflection, and its card has no scoring
+tests/club-january.test.ts > January: the tool is the Family Habit Builder > is a site tool the Club hosts for the whole family, with its first names
+tests/club-july.test.ts > July: one letter, one outing, one optional packing tool > has exactly the five steps, where and when above them, and the outing choices the builder knows
+tests/club-july.test.ts > July: one letter, one outing, one optional packing tool > passes every kit check and sits in month order
+tests/club-july.test.ts > July: the Family Packing & Independence Builder > is a site tool the Club hosts with the family, separate from the month’s copy, and leaves the travel checklist alone
+tests/club-july.test.ts > July: the letter and the mailer > is a 150–200 word draft for Megan, with the question, and no guilt, blame or vacation assumption
+tests/club-july.test.ts > July: the letter and the mailer > puts the guide by age, Pack Check Unpack, the question, the builder, the gear note and the calendar note on the back
+tests/club-june.test.ts > June: one letter, four decisions, two optional tools > has the four decisions, each with a line to write the family’s answer, and nothing scheduled
+tests/club-june.test.ts > June: one letter, four decisions, two optional tools > offers two independent tools, the site’s own, with the June names and buttons
+tests/club-june.test.ts > June: one letter, four decisions, two optional tools > passes every kit check and sits in month order
+tests/club-june.test.ts > June: the letter and the mailer > is a 150–200 word draft for Megan, with the question, and no guilt, anti-screen talk or stay-at-home assumption
+tests/club-june.test.ts > June: the letter and the mailer > puts the principles, the boredom card, the gear tip, both tools under one QR code and the calendar note on the back
+tests/club-kits.test.ts > club kits: every kit is sound > passes every check
+tests/club-march.test.ts > March: one letter, one room, one optional cleaning plan > has exactly the five steps, the space and when written above them, optional helpers, and nothing scheduled
+tests/club-march.test.ts > March: one letter, one room, one optional cleaning plan > passes every kit check and sits in month order
+tests/club-march.test.ts > March: one letter, one room, one optional cleaning plan > prints the reset and the letter, with a leafy stem
+tests/club-march.test.ts > March: the Family Spring Cleaning Builder > is a site tool the Club hosts with the family’s names and ages, separate from the month’s copy
+tests/club-march.test.ts > March: the letter and the mailer > puts the field guide, the optional decluttering ideas, the question, the builder and the calendar note on the back
+tests/club-may.test.ts > May: one letter, five closeout steps, one optional plan > has exactly the five steps with their sentences, optional helpers, no dates, and a start-anywhere note
+tests/club-may.test.ts > May: one letter, five closeout steps, one optional plan > passes every kit check and sits in month order
+tests/club-may.test.ts > May: the School Year Wrap-Up Builder > is a site tool the Club hosts with the family’s names and ages, using August’s date logic
+tests/club-may.test.ts > May: the letter and the mailer > is a 150–200 word draft for Megan, with the question, and no guilt, blame or invented story
+tests/club-may.test.ts > May: the letter and the mailer > points its QR code at this kit’s own page, and is seeded as a draft
+tests/club-may.test.ts > May: the letter and the mailer > puts the three principles, the Five Favorites Rule, the reflection keepsake, the builder and the calendar note on the back
+tests/club-october.test.ts > October doesn’t change August or November > keeps their shapes
+tests/club-october.test.ts > October: the tool is the site’s chore chart > prints ownership, not helping, on every chore chart
+tests/club-print-deadline.test.ts > Club print deadline in Eastern time > counts down to January’s print run before the program starts, never a November or December kit
+tests/club-september.test.ts > September: one letter, one meeting, one optional guide > has the five meeting steps with their minutes, 15 in all, and a line for the meeting day and time
+tests/club-september.test.ts > September: one letter, one meeting, one optional guide > passes every kit check and sits in month order
+tests/club-september.test.ts > September: the Family Weekly Reset Builder > is a site tool the Club hosts with the family, separate from the month’s copy and from the paid Weekly Reset System
+tests/club-september.test.ts > September: the letter and the mailer > is a 150–200 word draft for Megan, with the question, and no guilt, blame or two-parent assumption
+tests/email-checkout-attribution.test.ts > email checkout attribution > captures only an approved email campaign with no pass or email address saved
+tests/logic.test.ts > routing > keeps the QR entry point and app routes stable
+tests/shop.test.ts > launch guards > every seeded product has its email picture (public/email/<slug>.jpg)
+tests/shop.test.ts > launch guards > only the offer pages, the calendar options and the mug page link to the website checkout, and only in shop-enabled builds
+tests/shop.test.ts > paste-ready dashboard function files > exist for all five functions and are up to date with the sources (run `npm run build:functions`)
+tests/tool-sharing.test.ts > one routine chart > every page with a chore chart uses the same component, and the public page keeps its email step
+tests/worksheet.test.ts > worksheet PDF > is exactly two US Letter pages, with metadata and print settings
+tests/worksheet.test.ts > worksheet normalize > blank fields become null (a line to write on)
+tests/worksheet.test.ts > worksheet normalize > makes safe file names

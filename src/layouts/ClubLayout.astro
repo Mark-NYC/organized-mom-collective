@@ -17,6 +17,8 @@ interface Props {
 
 const { title } = Astro.props;
 const enabled = clubEnabled();
+// iPhone app bundle only (npm run build:app; docs/ios/OMC_APP_ROADMAP.md).
+const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 ---
 
 <BaseLayout title={`${title} · ${CLUB_NAME}`} description={`${CLUB_NAME} member pages.`} robots="noindex" tracking={false}>
@@ -35,4 +37,6 @@ const enabled = clubEnabled();
       )
     }
   </div>
+  {appShell && <script>import '../lib/native/init';</script>}
+  {appShell && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); }</style>}
 </BaseLayout>

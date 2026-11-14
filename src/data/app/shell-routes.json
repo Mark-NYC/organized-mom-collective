@@ -1,0 +1,28 @@
+{
+  "$comment": "Pages bundled into the iPhone app (docs/ios/OMC_APP_ROADMAP.md). Read by scripts/build-app-shell.mjs (what to copy) and src/lib/native/links.ts (what stays in the app; everything else opens on the website). Patterns match a path without a trailing slash. Never add public sales pages, checkout, billing (/club/dashboard), admin or the Club offer (/club).",
+  "site": "https://www.organizedmomcollective.com",
+  "include": [
+    "^/app$",
+    "^/app/(cleaning|week|settings|account|coaching|tidy)$",
+    "^/app/calendar(/(week|settings))?$",
+    "^/app/club(/.*)?$",
+    "^/club/(login|welcome|welcome-kit|family|family-vision|family-meeting-guide|start)$",
+    "^/club/(resources|kits|tools)/[a-z0-9-]+$"
+  ],
+  "neverInclude": [
+    "^/$",
+    "^/club$",
+    "^/club/dashboard",
+    "^/club/join",
+    "^/club/.*-preview$",
+    "^/club/worksheet-generator",
+    "^/club-[0-9]",
+    "^/app/reorder",
+    "^/app/calendar/reorder",
+    "^/checkout",
+    "^/admin",
+    "^/shop",
+    "^/calendar",
+    "^/download"
+  ]
+}

@@ -1,0 +1,79 @@
+# iPhone app checks (docs/ios/OMC_APP_ROADMAP.md → 6). Builds nothing for the website and deploys nothing.
+#
+# web-shell (Linux): no new unit-test failures (compared by name with tests/known-failures.txt), the app bundle
+#   (npm run build:app → app-www/, which fails on a leaked page, tracking tag or secret), and the iPhone-size smoke
+#   test with screenshots.
+# ios-simulator (macOS): `cap sync ios` + an unsigned Simulator build of ios/App, so Swift and project changes are
+#   compiled on every change without a Mac. Signing and TestFlight come in Milestone 2 (Apple account needed).
+name: iPhone app
+on:
+  pull_request:
+    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+  push:
+    branches: ['claude/**']
+    paths: ['src/**', 'ios/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+  workflow_dispatch:
+concurrency:
+  group: ios-app-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  web-shell:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Unit tests (no new failures)
+        run: node scripts/compare-test-failures.mjs
+      - name: Build the app bundle
+        run: npm run build:app
+      - name: Install Chromium for the smoke test
+        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+      - name: iPhone-size smoke test
+        run: npm run test:app-shell
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-shell-screenshots
+          path: app-shell-smoke/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-www
+          path: app-www/
+          retention-days: 7
+
+  ios-simulator:
+    needs: web-shell
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-www
+          path: app-www/
+      - name: Copy the bundle into the Xcode project
+        run: npx cap sync ios
+      - name: Build for the iOS Simulator (unsigned)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tail -n 40
+          test "${PIPESTATUS[0]}" -eq 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-app
+          path: build/Build/Products/Debug-iphonesimulator/App.app
+          retention-days: 7

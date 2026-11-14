@@ -28,3 +28,8 @@ public/images/club/july/
 
 # Generated transparent WebPs for illustrated family tools
 assets/icons/ofc/tool-transparent/
+
+# iPhone app bundle (npm run build:app; docs/ios/OMC_APP_ROADMAP.md)
+dist-app/
+app-www/
+app-shell-smoke/
