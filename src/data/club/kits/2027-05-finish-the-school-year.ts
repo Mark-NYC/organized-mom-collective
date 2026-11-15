@@ -66,6 +66,6 @@ export const kit:KitConfig={
   screenNote:'Use the illustrated mailed rhythm as-is, or revisit the digital preview if your family’s usual anchors change.',
   letterLinkTop:true,
   accent:'school',
-  qrPath:'/club/may-preview/',
+  qrPath:`/club/kits/${SLUG}?source=mailer`,
  }
 };

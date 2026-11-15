@@ -1,50 +1,58 @@
-# Known test failures on `main` (recorded 2026-10-30)
+# The failing-test baseline, retired (2026-11-15)
 
-`npx vitest run` on `main` at `6c29546` (after PR #258): **42 failed, 686 passed, 101 skipped**, in 14 files (one of
-them, `club-countdown.test.ts`, fails while loading). These predate the Welcome Kit work and are **not regressions** from
-it: the Welcome Kit branch fails exactly the same 42 tests, by name, and adds 6 passing ones
-(`tests/club-onboarding.test.ts`). Compare by name, not by count, before calling anything a regression:
+Until now CI accepted a list of failing unit tests (`tests/known-failures.txt`, 56 by November) and only blocked
+failures not on it. That list and `scripts/compare-test-failures.mjs` are gone. **CI runs `npm test` on every pull
+request and every test must pass.** A real open problem is written into its test as an explicit expectation that
+breaks when the problem is fixed (so it can't be forgotten), never as an ignored failure.
 
-```bash
-npx vitest run 2>&1 | grep -E "^ FAIL " | sort -u > /tmp/fails.txt
-```
+All 56 were audited. Result: 8 real defects fixed, 2 left open and recorded in their tests, 12 tests updated to
+the product as it is, 41 tests removed because the draft they described was replaced.
 
-Nothing below was changed to make it pass. Each group needs an owner decision: update the test to the approved product,
-or restore what the test describes.
+## Real defects, fixed
 
-## 1. Kit tests still describe earlier drafts (37 tests)
-
-The kits' configs were revised to the newer product directions (one practical printed tool per month), but their
-tests still assert the earlier drafts' titles, steps, letters and tools:
-
-| File | Fails | What changed in the kit (test expects → kit has) |
+| Was failing | Defect | Fix |
 | --- | --- | --- |
-| `tests/club-august.test.ts` | 7 | Theme “Ready for the School Year” → “My School Day”; countdown action → `school-day` printable; letter now 111 words (test: 150–200); no back-page question; letter example no longer the routine chart's morning |
-| `tests/club-countdown.test.ts` | file | Crashes on load: it reads August's `action.items`, which August no longer has |
-| `tests/club-january.test.ts` | 5 | Title “A Fresh Start, Together” → “Our Family Habit Cards”; five-step reset → habit plan (docs/club/JANUARY_HABIT_CARDS.md); the tool handoff and plain-text copy have more fields/lines |
-| `tests/club-july.test.ts` | 5 | One outing + packing builder → “What Can I Do Right Now?” activity board; no `tool`; letter 128 words; back-page framework title changed |
-| `tests/club-june.test.ts` | 5 | “Summer With a Plan” agreement + two tools → “My Family’s Snack Station”; letter 105 words; back-page tip title changed |
-| `tests/club-march.test.ts` | 5 | “Spring Clean as a Team” reset → “Our Family Spring Prep” plan; printable ids and field guide title changed; no `tool` |
-| `tests/club-may.test.ts` | 6 | Wrap-up → “Our Summer Day” rhythm; letter 108 words; QR path doesn't point at the kit's own page (`qrPath must point at this kit`); tool handoff has more fields |
-| `tests/club-kits.test.ts` | 1 | The same May `qrPath` problem, seen by the all-kits check |
-| `tests/club-october.test.ts` | 1 | A printable's shape no longer has `kind` |
-| `tests/worksheet.test.ts` | 3 | November worksheet renamed “I Own This Job” → “Our Family Ownership Plan” (file name, PDF title); blank-field handling changed |
+| `club-kits`, `club-may` | May's mailed QR code pointed at a public preview page (`/club/may-preview/`), not the month's own member page like every other kit | `qrPath` now `/club/kits/2027-05-finish-the-school-year?source=mailer`. **Owner: this changes what May 2027's mailer prints; say if the preview page was intended** |
+| `shop` (launch guard) | Calendar buy links went to the website checkout in every build, where `src/config.ts` and every other product say "only in shop-enabled builds, otherwise Etsy" | Guard restored in `src/lib/reorder.ts`. No change on the live site (its shop is enabled; checked 2026-11-15) |
+| `shop` (paste-ready files) | `supabase/dashboard/shop-checkout.ts` (and two others) were out of date with their sources | Regenerated with `npm run build:functions`. Files only; nothing deployed |
+| `email-checkout-attribution` | A URL fragment passed with the query was read as part of the campaign name | The fragment is cut off before parsing, so a resource pass in `#…` can never be read or stored |
+| `club-countdown` (whole file crashed on load) | It borrowed August's countdown lines, which August no longer has; the library is still used by the wrap-up builder and kit pages and had no running tests | The tests have their own fixture; all 17 run again |
 
-**Worth a look before printing anything:** May's QR code (`qrPath must point at this kit`) is the one that would end
-up on paper pointing at the wrong page.
+## Real defects, still open (recorded in the test, CI stays green)
 
-## 2. Other pages moved (2 tests)
-
-| File | Fails | Cause |
+| Where | Problem | Needs |
 | --- | --- | --- |
-| `tests/logic.test.ts` | 1 | “keeps the QR entry point and app routes stable”: the cleaning companion's day link is now `/app/cleaning?day=monday`; the test expects `/app?day=monday`. The test exists to keep printed QR entry points stable, so confirm what the printed calendar's QR code targets before deciding which side is right. |
-| `tests/shop.test.ts` | 1 | `src/data/scheduler.ts` links to the website checkout, which the test allows only for the offer pages, calendar options and mug page |
+| `tests/club-kits.test.ts` → "kits with an open problem" | July and August 2027 have no `action`; the kit page their mailed QR opens still reads one and would fail for those months. `schedulable` refuses both, so nothing can be mailed in this state | Owner/content decision before July is scheduled: give them an action/activity, or open the plan screen from the kit page |
+| `tests/shop.test.ts` → email pictures | `family-schedule-calendar-2027` has no `public/email/<slug>.jpg`; its order email would show a broken image | The real product photo (never a generated one) |
 
-## 3. Slow in some environments (1 test)
+## Updated to the product as it is
 
-| File | Fails | Cause |
+`logic` (the printed QR's `/start` → `/app/calendar`; day links at `/app/cleaning`), `tool-sharing` (the chore chart is
+a builder; the email gate is now checked by behavior, not by source text), `club-october` (motto punctuation; August's
+shape), `club-print-deadline` (benefit-led banner: "Order by Dec 13"), `worksheet` ×3 (renamed Our Family Ownership
+Plan; more fields), `shop` (the scheduler product is on the guarded list).
+
+## Removed: tests of drafts that were replaced
+
+Each month's kit was redesigned (one practical printed tool per month) and its test file kept asserting the earlier
+draft's titles, steps and letter length. Those 41 tests are removed; the helpers in the same files that still exist
+keep their tests. In their place `tests/club-kits.test.ts` checks, for every month at once: the kit passes validation,
+its theme / flagship printable / hosted tool match one table (changed deliberately, with the kit), its letter is
+60–220 words, and its mailed QR opens its own member page.
+
+| File | Removed | Tests |
 | --- | --- | --- |
-| `tests/club-edits.test.ts` | 1 | The 200-run property test takes ~6 s; vitest's default timeout is 5 s. It passes with a longer timeout. |
+| `tests/club-august.test.ts` | 7 | passes every kit check, beside November; is the theme and subtitle the owner set; has exactly the six countdown lines, with an optional helper blank instead of assignments; prints the countdown and the letter, and nothing from the first draft: no launch plan, command center, overview or item sets; has a 150–200 word letter, still a draft for Megan, so the kit can’t be scheduled yet; asks one family question on the back of the letter; the letter’s example is the routine chart’s own morning starter, with its illustrations |
+| `tests/club-january.test.ts` | 10 | passes every kit check and sits in month order; has exactly the five steps, no dates, no per-step assignments; asks for the family’s one thing, offering the habit builder’s own areas, a plan on step 2 and a start day on step 4; saves the one thing, plan and start day, checks in a week later, and never schedules anything else; works for a family that joins late in January, or opens it later: no date is assumed; prints the plan and the letter, like the other three-part kits; is a 150–200 word draft for Megan, greets by name when known, asks the family question, and picks one thing; puts the three principles, one example, the question, the QR code and the calendar note on the back; is a site tool the Club hosts for the whole family, with its first names; copies one habit as plain text with the reflection, and its card has no scoring |
+| `tests/club-july.test.ts` | 5 | passes every kit check and sits in month order; has exactly the five steps, where and when above them, and the outing choices the builder knows; is a 150–200 word draft for Megan, with the question, and no guilt, blame or vacation assumption; puts the guide by age, Pack Check Unpack, the question, the builder, the gear note and the calendar note on the back; is a site tool the Club hosts with the family, separate from the month’s copy, and leaves the travel checklist alone |
+| `tests/club-june.test.ts` | 5 | passes every kit check and sits in month order; has the four decisions, each with a line to write the family’s answer, and nothing scheduled; offers two independent tools, the site’s own, with the June names and buttons; is a 150–200 word draft for Megan, with the question, and no guilt, anti-screen talk or stay-at-home assumption; puts the principles, the boredom card, the gear tip, both tools under one QR code and the calendar note on the back |
+| `tests/club-march.test.ts` | 5 | passes every kit check and sits in month order; has exactly the five steps, the space and when written above them, optional helpers, and nothing scheduled; prints the reset and the letter, with a leafy stem; puts the field guide, the optional decluttering ideas, the question, the builder and the calendar note on the back; is a site tool the Club hosts with the family’s names and ages, separate from the month’s copy |
+| `tests/club-may.test.ts` | 5 | passes every kit check and sits in month order; has exactly the five steps with their sentences, optional helpers, no dates, and a start-anywhere note; is a 150–200 word draft for Megan, with the question, and no guilt, blame or invented story; puts the three principles, the Five Favorites Rule, the reflection keepsake, the builder and the calendar note on the back; is a site tool the Club hosts with the family’s names and ages, using August’s date logic |
+| `tests/club-september.test.ts` | 4 | passes every kit check and sits in month order; has the five meeting steps with their minutes, 15 in all, and a line for the meeting day and time; is a 150–200 word draft for Megan, with the question, and no guilt, blame or two-parent assumption; is a site tool the Club hosts with the family, separate from the month’s copy and from the paid Weekly Reset System |
 
-Related: `npm run test:club` (`tests/club-billing-e2e.test.ts`, local Postgres) spawns many `psql` processes and can
-hit the same 5-second timeout on a slow machine. `bash scripts/test-club.sh --testTimeout=120000` runs all 32 green.
+## Owner decision this audit surfaced again
+
+January and September have traded content between files: January's kit is now the family meeting ("A Week Everyone
+Can See") and September's is the Habit Cards, while the public print-deadline banner still advertises **January's Habit
+Cards**. See [JANUARY_MEETING_ALIGNMENT.md](JANUARY_MEETING_ALIGNMENT.md). The table in `tests/club-kits.test.ts`
+records what the kit files say today; it doesn't decide which month is right.

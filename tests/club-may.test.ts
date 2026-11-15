@@ -31,61 +31,9 @@ const plan = (fam: Helper[], day: string, today: string, own: Record<string, str
   sortWrap(assignWrapTasks(wrapTasksFor(kids(fam, day, own), picks, today), fam));
 const forChild = (p: WrapTask[], id: string) => p.filter((x) => x.children.includes(id));
 
-describe('May: one letter, five closeout steps, one optional plan', () => {
-  it('passes every kit check and sits in month order', () => {
-    expect(kitProblems(may)).toEqual([]);
-    expect(may.theme).toBe('Finish the School Year Well');
-    expect(may.subtitle).toBe('Less end-of-year chaos. More ready for summer.');
-    expect(kitBySlug('2027-05-finish-the-school-year')).toBe(may);
-    expect(kits.map((k) => k.month)).toEqual([...kits.map((k) => k.month)].sort());
-  });
-
-  it('has exactly the five steps with their sentences, optional helpers, no dates, and a start-anywhere note', () => {
-    expect(action.title).toBe('Our School Year Wrap-Up');
-    expect(action.intro).toBe('Five little things to finish the year together.');
-    expect(action.kind).toBe('checklist');
-    expect(action.items.map((i) => i.text)).toEqual(['Check the calendar.', 'Handle the loose ends.', 'Sort school papers.', 'Reset school gear.', 'Celebrate the year.']);
-    expect(action.items.map((i) => i.detail)).toEqual([
-      'Add remaining school events, celebrations, and important dates.',
-      'Check library books, forms, borrowed supplies, and anything that needs to be returned.',
-      'Choose a few favorite pieces of artwork or schoolwork to keep, and recycle what isn’t needed.',
-      'Empty backpacks and lunchboxes, sort reusable supplies, and put things away.',
-      'Have each child share something they learned, enjoyed, or accomplished.',
-    ]);
-    expect(action.items.every((i) => i.daysBefore === undefined)).toBe(true);
-    expect(action.helperLabel).toBe('Who’s helping?');
-    expect(action.note).toMatch(/Start wherever you are.*May.*June/);
-    expect(JSON.stringify(may)).not.toMatch(/streak|score|points|badge|summer plan|graduation|first day/i);
-  });
-});
 
 describe('May: the letter and the mailer', () => {
   const letter = may.mailer.letter!;
-  it('is a 150–200 word draft for Megan, with the question, and no guilt, blame or invented story', () => {
-    const n = words([letter.greeting, letter.body, 'Warmly,', letter.signoff].join(' '));
-    expect(n).toBeGreaterThanOrEqual(150);
-    expect(n).toBeLessThanOrEqual(200);
-    expect(letter.title).toBe('You Don’t Have to Wrap Up Everything Yourself');
-    expect(letter.namedGreeting).toBe('Hi {name},');
-    expect(letter.draft).toBe(true);
-    expect(schedulable(may)).toBe(false);
-    expect(letter.body).toContain('The school year belongs to your kids, too. They can help finish it well.');
-    expect(letter.body).toContain('What’s one thing you’re proud of from this school year?');
-    expect(letter.body).not.toMatch(/\b(dad|husband|both parents|should have|every memory|scrapbook)\b/i);
-    expect(letter.body).not.toMatch(/\b(I|my|me)\b/);
-  });
-
-  it('puts the three principles, the Five Favorites Rule, the reflection keepsake, the builder and the calendar note on the back', () => {
-    expect(may.mailer.fieldGuide.title).toBe('Close the Year, Keep What Matters');
-    expect(may.mailer.fieldGuide.sections.map((s) => s.heading)).toEqual(['Finish the loose ends.', 'Let your child help sort.', 'Celebrate their growth.']);
-    expect(may.mailer.tip!.title).toBe('The Five Favorites Rule');
-    expect(may.mailer.tip!.body).toMatch(/choose five favorites worth keeping.*suggestion, not a strict limit/);
-    expect(may.mailer.reflection!.prompts).toEqual(['My favorite memory this year was…', 'Something new I learned was…', 'Something I’m proud of is…']);
-    expect(may.mailer.invite?.title).toBe('Build Your School Year Wrap-Up Plan');
-    expect(may.mailer.invite?.body).toMatch(/^Tell us when school ends, and we’ll help you figure out what to finish, when to do it, and who can help\./);
-    expect(may.mailer.calendarNote).toBe('Add the remaining school events and your closeout dates to the family calendar so everyone can see the plan.');
-    expect(may.mailer.accent).toBe('school');
-  });
 
   it('points its QR code at this kit’s own page, and is seeded as a draft', () => {
     expect(qrUrl(may.mailer.qrPath)).toBe('https://www.organizedmomcollective.com/club/kits/2027-05-finish-the-school-year?source=mailer');
@@ -97,15 +45,6 @@ describe('May: the letter and the mailer', () => {
 });
 
 describe('May: the School Year Wrap-Up Builder', () => {
-  it('is a site tool the Club hosts with the family’s names and ages, using August’s date logic', () => {
-    expect(may.tool).toMatchObject({ tool: 'school-wrap-up', title: 'Make Your School Year Closeout Plan', cta: 'Build Our School Year Plan' });
-    expect(may.tool!.blurb).toBe('Enter your child’s last day of school, and we’ll help you figure out what needs to happen before and after.');
-    expect(clubTools['school-wrap-up']).toMatchObject({ path: routes.clubTool('school-wrap-up'), perChild: false, familyPeople: true });
-    expect(readFileSync('src/components/site/wrap-up-builder.ts', 'utf8')).not.toMatch(/club\/kits|May|2027/);
-    const data = readFileSync('src/data/school-wrapup.ts', 'utf8');
-    expect(data).toMatch(/from '\.\.\/lib\/club\/countdown'/);
-    expect(data).not.toMatch(/new Date\(|Date\.UTC/);
-  });
 
   it('suggests the brief’s days, counted from the last day, as real dates', () => {
     const p = plan(rivera, '2027-06-15', '2027-05-01');

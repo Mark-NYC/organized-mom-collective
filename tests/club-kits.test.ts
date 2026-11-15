@@ -7,8 +7,56 @@ import { responsibilities } from '../src/data/responsibilities';
 import { routes } from '../src/routes';
 
 describe('club kits: every kit is sound', () => {
+  // OPEN (owner, before July 2027 is scheduled): July and August became single-printable months with no `action`, but
+  // the kit page their mailed QR code opens (KitPage) still reads one, so that page would fail for those two months.
+  // Either give them an action/activity or point their kit page at the plan screen. `schedulable` already refuses
+  // them, so nothing can be mailed in this state. When one is fixed, the second test fails until it leaves this list.
+  const open: Record<string, string[]> = {
+    '2027-07-ready-to-go': ['a kit needs an action or an activity'],
+    '2027-08-school-year': ['a kit needs an action or an activity'],
+  };
+
   it('passes every check', () => {
-    for (const k of kits) expect(kitProblems(k), k.slug).toEqual([]);
+    for (const k of kits.filter((x) => !open[x.slug])) expect(kitProblems(k), k.slug).toEqual([]);
+  });
+
+  it('the kits with an open problem have exactly that problem, and can\'t be scheduled', () => {
+    for (const [slug, problems] of Object.entries(open)) {
+      const k = kits.find((x) => x.slug === slug)!;
+      expect(kitProblems(k), `${slug}: fixed? remove it from the open list`).toEqual(problems);
+      expect(schedulable(k), slug).toBe(false);
+    }
+  });
+
+  // The product as it is in the kit files today. A month's direction changing is a deliberate edit here, in the same
+  // commit as the kit, instead of a per-month test file left describing the draft before it.
+  it('each month is the product in its kit file: theme, the one flagship printable and the hosted tool', () => {
+    expect(kits.map((k) => [k.slug, k.theme, k.printables.find((p) => p.kind === 'flagship')?.id, k.tool?.tool ?? null])).toEqual([
+      ['2026-11-family-ownership', 'Our Family, Our Team', 'ownership-chart', null],
+      ['2026-12-christmas-mission', 'Your Christmas Mission Has Arrived!', expect.any(String), null],
+      ['2027-01-fresh-start-together', 'A Week Everyone Can See', 'family-meeting', 'family-reset'],
+      ['2027-02-better-together', 'Better Together', 'connection-challenge', 'connection-planner'],
+      ['2027-03-spring-clean-together', 'Our Family Spring Prep', 'spring-prep-family-plan', null],
+      ['2027-04-everybody-helps-at-mealtime', 'Everybody Helps at Mealtime', 'dinner-team', 'meal-team'],
+      ['2027-05-finish-the-school-year', 'Our Family Summer Rhythm', expect.any(String), 'school-wrap-up'],
+      ['2027-06-summer-with-a-plan', 'My Family\'s Snack Station', 'snack-station', null],
+      ['2027-07-ready-to-go', 'What Can I Do Right Now?', 'activity-board', null],
+      ['2027-08-school-year', 'My School Day', 'school-day', 'routine-chart'],
+      ['2027-09-a-week-everyone-can-see', 'Our Family Habit Cards', 'one-thing-plan', 'habit-builder'],
+      ['2027-10-home-works-together', 'A Home That Works Together', 'fall-reset', 'chore-chart'],
+      ['2027-12-christmas-family-affair', 'Christmas Is a Family Affair', 'christmas-plan', 'traditions-picker'],
+    ]);
+  });
+
+  it('every letter is short, and every mailed QR code opens that month\'s own member page', () => {
+    for (const k of kits) {
+      if (k.mailer.letter) {
+        const words = k.mailer.letter.body.split(/\s+/).filter(Boolean).length;
+        expect(words, `${k.slug} letter`).toBeGreaterThanOrEqual(60);
+        expect(words, `${k.slug} letter`).toBeLessThanOrEqual(220);
+      }
+      expect(k.mailer.qrPath, k.slug).toBe(`/club/kits/${k.slug}?source=mailer`);
+    }
   });
 
   it('has unique slugs and months, in order', () => {

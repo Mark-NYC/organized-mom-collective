@@ -3,13 +3,23 @@
  * school, practical when time is short, never overwriting her own dates, and calendar-day safe in any time zone.
  */
 import { describe, expect, it } from 'vitest';
-import { kit as august } from '../src/data/club/kits/2027-08-school-year';
 import {
   addDays, basisStart, countdownIcs, countdownText, daysBetween, dayLabel, isDay, localToday, longLabel, planCountdown, readCountdown, resetChanges,
-  type CountdownState,
+  type CountdownItem, type CountdownState,
 } from '../src/lib/club/countdown';
 
-const items = august.action!.items;
+// A six-line dated countdown, the shape August's kit used before it became the My School Day printable. The library
+// is still what the School Year Wrap-Up builder and the kit pages plan dates with, so it keeps its own fixture.
+const TITLE = 'Our Back-to-School Countdown';
+const SLUG = '2027-08-school-year';
+const items: CountdownItem[] = [
+  { text: 'Add school dates and activities to the family calendar.', daysBefore: 14 },
+  { text: 'Decide who’s handling drop-off and pick-up.', daysBefore: 10, essential: true },
+  { text: 'Walk through the morning once.', daysBefore: 7 },
+  { text: 'Set bedtimes back to school nights.', daysBefore: 7, essential: true },
+  { text: 'Choose a place for backpacks and papers.', daysBefore: 5 },
+  { text: 'Lay out the first day the night before.', daysBefore: 1, essential: true },
+];
 const fresh = (): CountdownState => readCountdown(null, items.length);
 const dates = (start: string, today: string, own: (string | null)[] = []) => planCountdown(items, start, today, own).lines.map((l) => l.date);
 
@@ -150,7 +160,7 @@ describe('putting it on the family calendar', () => {
   const plan = planCountdown(items, '2027-08-25', '2027-07-20');
 
   it('copies as plain text with real dates', () => {
-    const text = countdownText(august.action!.title, items, plan, s);
+    const text = countdownText(TITLE, items, plan, s);
     expect(text.split('\n').slice(0, 4)).toEqual([
       'Our Back-to-School Countdown',
       'First day of school: Wednesday, August 25',
@@ -160,7 +170,7 @@ describe('putting it on the family calendar', () => {
   });
 
   it('exports all-day events a phone calendar can import, with no account', () => {
-    const ics = countdownIcs(august.slug, august.action!.title, items, plan, s, '20270720T120000Z');
+    const ics = countdownIcs(SLUG, TITLE, items, plan, s, '20270720T120000Z');
     expect(ics.startsWith('BEGIN:VCALENDAR\r\nVERSION:2.0\r\n')).toBe(true);
     expect(ics.match(/BEGIN:VEVENT/g)?.length).toBe(7);
     expect(ics).toContain('DTSTART;VALUE=DATE:20270811\r\nDTEND;VALUE=DATE:20270812');
@@ -170,6 +180,6 @@ describe('putting it on the family calendar', () => {
     for (const line of ics.split('\r\n')) expect(new TextEncoder().encode(line).length).toBeLessThanOrEqual(75);
     expect(ics.endsWith('END:VCALENDAR\r\n')).toBe(true);
     // Undated: only what has a date goes in.
-    expect(countdownIcs(august.slug, 't', items, planCountdown(items, '', '2027-07-20'), s, '20270720T120000Z').match(/BEGIN:VEVENT/g)).toBeNull();
+    expect(countdownIcs(SLUG, 't', items, planCountdown(items, '', '2027-07-20'), s, '20270720T120000Z').match(/BEGIN:VEVENT/g)).toBeNull();
   });
 });

@@ -15,4 +15,6 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      # Every pull request: the whole unit suite must pass. There is no list of accepted failures.
+      - run: npm test
       - run: npm run build

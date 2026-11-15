@@ -338,7 +338,7 @@ function createCheckoutHandler(deps) {
       if (!cart) return json({ error: "invalid_cart" }, 400, cors);
       const header = req.headers.get("x-shop-preview") ?? "";
       const preview = Boolean(deps.env.previewToken) && safeEqual(header, deps.env.previewToken);
-      const result = await create(deps, cart, clientIp(req), preview);
+      const result = await create(deps, cart, clientIp(req), preview, body.attribution);
       return json(result.body, result.status, cors);
     } catch (err) {
       console.error("shop-checkout", err);
@@ -346,7 +346,7 @@ function createCheckoutHandler(deps) {
     }
   };
 }
-async function create(deps, cart, ip, preview) {
+async function create(deps, cart, ip, preview, attribution) {
   let order;
   try {
     order = await deps.db.rpc("shop_create_order", {
@@ -373,6 +373,21 @@ async function create(deps, cart, ip, preview) {
       `checkout:${order.order_id}`
     );
     await deps.db.rpc("shop_attach_session", { p_order: order.order_id, p_session: session.id, p_livemode: session.livemode });
+    if (attribution && typeof attribution === "object") {
+      const touch = attribution;
+      if (typeof touch.campaign === "string" && typeof touch.touched_at === "string") {
+        try {
+          await deps.db.rpc("marketing_record_checkout_attribution", {
+            p_session: session.id,
+            p_kind: "shop",
+            p_campaign: touch.campaign,
+            p_touched_at: touch.touched_at
+          });
+        } catch (err) {
+          console.warn("shop-attribution-unavailable", err.message);
+        }
+      }
+    }
     return { status: 200, body: { client_secret: session.client_secret, session_id: session.id } };
   } catch (err) {
     console.error("shop-checkout: could not open Stripe checkout", err);

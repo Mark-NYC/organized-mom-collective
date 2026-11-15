@@ -1,6 +1,6 @@
 # iPhone app checks (docs/ios/OMC_APP_ROADMAP.md → 6). Builds nothing for the website and deploys nothing.
 #
-# web-shell (Linux): no new unit-test failures (compared by name with tests/known-failures.txt), the app bundle
+# web-shell (Linux): the whole unit suite (no accepted failures), the app bundle
 #   (npm run build:app → app-www/, which fails on a leaked page, tracking tag or secret), and the iPhone-size smoke
 #   test with screenshots.
 # ios-simulator (macOS): `cap sync ios` + an unsigned Simulator build of ios/App, so Swift and project changes are
@@ -33,8 +33,8 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: Unit tests (no new failures)
-        run: node scripts/compare-test-failures.mjs
+      - name: Unit tests (every test passes; there is no list of accepted failures)
+        run: npm test
       - name: Build the app bundle
         run: npm run build:app
       - name: Install Chromium for the smoke test

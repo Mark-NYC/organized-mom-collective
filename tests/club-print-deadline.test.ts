@@ -14,11 +14,13 @@ describe('Club print deadline in Eastern time', () => {
  });
  it('counts down to January\u2019s print run before the program starts, never a November or December kit', () => {
   const messages = clubPrintMessages(new Date('2026-10-29T20:00:00Z'));
-  expect(messages[0]).toContain('January print deadline: Dec 13');
-  expect(messages[0]).toContain('11:59 p.m. ET');
+  // Benefit-led banner since Nov 2026: the month's offer, then the order-by date (the day before the Monday cutoff).
+  expect(messages[0]).toContain('January');
+  expect(messages[0]).toContain('Order by Dec 13');
+  expect(messages[0]).not.toMatch(/November|December/);
   expect(messages[1]).toContain('$5.90/month');
-  expect(clubPrintMessages(new Date('2026-12-14T05:00:00Z'))[0]).toContain('February print deadline: Jan 10');
-  expect(clubPrintMessages(new Date('2027-03-01T12:00:00Z'))[0]).toContain('April print deadline: Mar 14');
+  expect(clubPrintMessages(new Date('2026-12-14T05:00:00Z'))[0]).toContain('Order by Jan 10');
+  expect(clubPrintMessages(new Date('2027-03-01T12:00:00Z'))[0]).toContain('Order by Mar 14');
  });
  it('shows Your First Month FREE once enrollment is open', () => {
   expect(clubPrintMessages(new Date('2026-11-02T12:00:00Z'), true)[1]).toBe('Your First Month FREE · Then $5.90/month · Explore the Club →');

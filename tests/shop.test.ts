@@ -485,7 +485,9 @@ describe('shipping quote (mirrors shop_shipping_quote)', () => {
 describe('launch guards', () => {
   it('only the offer pages, the calendar options and the mug page link to the website checkout, and only in shop-enabled builds', () => {
     // src/data/weekly-reset.ts builds the /weekly-reset buy link, and only when the shop is switched on.
-    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts', '../src/data/mug.ts', '../src/data/real-life-reset.ts', '../src/lib/reorder.ts']);
+    const allowed = new Set(['../src/routes.ts', '../src/lib/shop.ts', '../src/data/weekly-reset.ts', '../src/data/take-back-control.ts', '../src/data/essential-routines.ts', '../src/data/mug.ts', '../src/data/real-life-reset.ts', '../src/lib/reorder.ts', '../src/data/scheduler.ts']);
+    // The scheduler product (added Oct 2026) follows the same guard.
+    expect(read('src/data/scheduler.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{SCHEDULER_SLUG\}` : null/);
     expect(read('src/data/weekly-reset.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{WEEKLY_RESET_SLUG\}` : null/);
     expect(read('src/data/take-back-control.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{TAKE_BACK_CONTROL_SLUG\}` : null/);
     expect(read('src/data/essential-routines.ts')).toMatch(/buyUrl: shopEnabled\(\) && shopConfigured\(\) \? `\$\{routes\.checkout\}\?product=\$\{ESSENTIAL_ROUTINES_SLUG\}` : null/);
@@ -592,7 +594,12 @@ describe('launch guards', () => {
       .flatMap(([, sql]) => [...sql.matchAll(/^\s*\('([a-z0-9-]+)',\s*'/gm)].map((m) => m[1]))
       .filter((s) => !s.startsWith('placeholder'));
     expect(slugs).toEqual(expect.arrayContaining(['calendar-26-week', 'weekly-reset-system', 'take-back-control', 'essential-routines', MUG_SLUG, REAL_LIFE_RESET_SLUG, FAMILY_SANITY_SAVER_SLUG]));
-    for (const slug of slugs) expect(emailAssets, slug).toContain(`../public/email/${slug}.jpg`);
+    // OPEN (owner): this seeded product has no email picture yet, so its order email would show a broken image.
+    // Needs the real product photo at public/email/<slug>.jpg (never a generated one). When it's added, the last
+    // line fails and this list is emptied: the gap can't stay recorded after it's closed.
+    const missing = ['family-schedule-calendar-2027'];
+    for (const slug of slugs.filter((s) => !missing.includes(s))) expect(emailAssets, slug).toContain(`../public/email/${slug}.jpg`);
+    for (const slug of missing) expect(emailAssets, `${slug} now has its picture: remove it from the list above`).not.toContain(`../public/email/${slug}.jpg`);
   });
 
   it('admin and checkout pages are noindex and stay out of the sitemap', () => {
