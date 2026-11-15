@@ -8,7 +8,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        // Our bridge (OMCBridgeViewController.swift): Capacitor's own controller would use its single-page-app router,
+        // which answers every page address with the root index.html (a blank, reloading app; Simulator run 43656624368).
+        window?.rootViewController = OMCBridgeViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)

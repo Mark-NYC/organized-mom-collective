@@ -15,7 +15,8 @@ on:
   workflow_dispatch:
 concurrency:
   group: ios-app-${{ github.ref }}
-  cancel-in-progress: true
+  # Queue, never cancel: a Simulator run takes ~15 minutes and a cancelled one tells us nothing.
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:

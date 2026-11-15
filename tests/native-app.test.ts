@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { classifyLink, inShell } from '../src/lib/native/links';
 import { mirrored, mirrorWrites, restore, seed, type Mirror } from '../src/lib/native/durable-storage';
 import { APP_FEATURES, visibleFeatures } from '../src/data/app/features';
@@ -119,5 +120,18 @@ describe('app features', () => {
   });
   it('planned areas never reuse the printed QR route /app/calendar', () => {
     for (const f of APP_FEATURES) expect(f.href.startsWith('/app/calendar')).toBe(false);
+  });
+});
+
+describe('iOS project wiring', () => {
+  it('the scene uses our bridge (folder-page router), not Capacitor\'s single-page one', () => {
+    // Capacitor 8's template builds the window in SceneDelegate, not from the storyboard. With CAPBridgeViewController
+    // every page address got the root index.html: a blank, endlessly reloading app (Simulator run 43656624368).
+    const scene = readFileSync('ios/App/App/SceneDelegate.swift', 'utf8');
+    expect(scene).toMatch(/rootViewController = OMCBridgeViewController\(\)/);
+    expect(scene).not.toMatch(/rootViewController = CAPBridgeViewController\(\)/);
+  });
+  it('the app opens on Today', () => {
+    expect(readFileSync('capacitor.config.ts', 'utf8')).toMatch(/appStartPath: 'app'/);
   });
 });
