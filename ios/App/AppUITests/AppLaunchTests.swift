@@ -27,6 +27,12 @@ final class AppLaunchTests: XCTestCase {
         web.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH '1 of' AND label CONTAINS 'done today'")).firstMatch
     }
 
+    /// A button or link by its text, ignoring case: CSS uppercases some (iOS reports "I HAVE THE WALL CALENDAR").
+    private func control(_ name: String) -> XCUIElement {
+        web.descendants(matching: .any).matching(NSPredicate(format: "(elementType == %d OR elementType == %d) AND label ==[c] %@",
+            Int(XCUIElement.ElementType.button.rawValue), Int(XCUIElement.ElementType.link.rawValue), name)).firstMatch
+    }
+
     private func tab(_ name: String) -> XCUIElement {
         web.links.matching(NSPredicate(format: "label == %@", name)).firstMatch
     }
@@ -59,7 +65,7 @@ final class AppLaunchTests: XCTestCase {
     private func finishCleaningOnboarding() {
         // A new device sees the companion's four-step first-run screen; step through it as she would.
         for _ in 0..<6 {
-            let next = web.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Next:' OR label BEGINSWITH 'Open Today'")).firstMatch
+            let next = web.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Next:' OR label BEGINSWITH[c] 'Open Today'")).firstMatch
             guard next.waitForExistence(timeout: 3) else { return }
             next.tap()
         }
@@ -78,7 +84,7 @@ final class AppLaunchTests: XCTestCase {
         shot("01-today")
 
         // A calendar owner opens the cleaning companion, finishes first-run, checks one task.
-        waitFor(web.buttons["I have the wall calendar"], "wall calendar unlock").tap()
+        waitFor(control("I have the wall calendar"), "wall calendar unlock").tap()
         finishCleaningOnboarding()
         let firstTask = waitFor(text("Make beds"), "first Daily Reset task")
         firstTask.tap()
@@ -100,7 +106,7 @@ final class AppLaunchTests: XCTestCase {
         shot("04-account")
 
         // Club sign-in, then back to Today with the tab bar (no dead ends).
-        waitFor(web.links["Sign in"], "Sign in button").tap()
+        waitFor(control("Sign in"), "Sign in button").tap()
         waitFor(text("Welcome back"), "Club sign-in")
         assertInsideSafeArea("Club sign-in", topElement: text("Welcome back"))
         shot("05-club-sign-in")
