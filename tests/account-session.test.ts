@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getSession, loadSession, signOut, type AccountSession } from '../src/lib/account';
+import { getSession, loadSession, signOut, signOutEverywhere, type AccountSession } from '../src/lib/account';
 
 /** Sign-ins are code-only, so a session lost by mistake costs her an email round trip (src/lib/account.ts). */
 const KEY = 'omc:account:session';
@@ -87,5 +87,19 @@ describe('account session', () => {
     await signOut();
     expect(String(fetch.mock.calls[0][0])).toContain('/auth/v1/logout?scope=local');
     expect(loadSession()).toBeNull();
+  });
+
+  it('sign out everywhere ends every device, and only counts when it reached the server', async () => {
+    put(session());
+    const fetch = vi.fn(async (_url: string) => reply(200, {}));
+    vi.stubGlobal('fetch', fetch);
+    await signOutEverywhere();
+    expect(String(fetch.mock.calls[0][0])).toContain('/auth/v1/logout?scope=global');
+    expect(loadSession()).toBeNull();
+
+    put(session());
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
+    await expect(signOutEverywhere()).rejects.toThrow('sign_out_everywhere_failed');
+    expect(loadSession()?.refresh_token).toBe('r1'); // still signed in here, so she can try again
   });
 });

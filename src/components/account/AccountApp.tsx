@@ -14,7 +14,7 @@ import {
   requestCode,
   safeNext,
   setMarketing,
-  signOut,
+  signOut, signOutEverywhere,
   sync,
   verifyCode,
   type AccountOrder,
@@ -274,6 +274,22 @@ function Dashboard({ session, onSignedOut }: { session: AccountSession; onSigned
             }}
           >
             Sign out
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            data-sign-out-everywhere
+            onClick={async () => {
+              if (!confirm('Sign out on every phone, tablet and computer where you’re signed in? Use this if a device is lost or shared. Other devices can take up to an hour to sign out.')) return;
+              try {
+                await signOutEverywhere();
+                onSignedOut();
+              } catch {
+                alert('We couldn’t sign you out everywhere just now. You’re still signed in here. Check your connection and try again.');
+              }
+            }}
+          >
+            Sign out everywhere
           </button>
           <DeleteAccount onDeleted={onSignedOut} />
         </p>

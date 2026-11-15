@@ -249,9 +249,11 @@ async function refreshSession(s: AccountSession): Promise<AccountSession | null>
  * Signs out on this device and forgets sync state; what's on this device stays. Her other devices stay signed in
  * (scope=local): signing out of a shared computer shouldn't sign her phone out too.
  */
-export async function signOut() {
+export async function signOut(scope: 'local' | 'global' = 'local') {
   const s = loadSession();
-  if (s) await auth('/logout?scope=local', {}, s.access_token).catch(() => undefined);
+  // Everywhere must really happen: if the request fails, she's still signed in here and is told so.
+  const res = s ? await auth(`/logout?scope=${scope}`, {}, s.access_token).catch(() => null) : null;
+  if (scope === 'global' && s && !(res && (res.ok || res.status === 401))) throw new Error('sign_out_everywhere_failed');
   saveSession(null);
   try {
     rawRemove(SYNC_KEY);
@@ -259,6 +261,12 @@ export async function signOut() {
     /* fine */
   }
 }
+
+/**
+ * A lost or shared phone: ends this sign-in on every device (scope=global). Other devices stop within the hour, when
+ * their current access expires. Throws when Supabase couldn't be reached, leaving her signed in here to try again.
+ */
+export const signOutEverywhere = () => signOut('global');
 
 // ------------------------------------------------------------------ database calls as her
 
