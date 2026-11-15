@@ -57,7 +57,7 @@ export default function FamilySummary() {
           {household ? <Members household={household} month={month} /> : <p className="mt-3 text-sm text-warm-soft">You haven’t added your family yet.</p>}
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
             <a href={ourWeek ? '/app/family/setup' : routes.clubFamily} className="family-link">{household ? 'Edit our family →' : 'Add your family →'}</a>
-            {family.club && <a href={routes.appClub} className="family-link">Club Home →</a>}
+            {family.club && !ourWeek && <a href={routes.appClub} className="family-link">Club Home →</a>}
             {family.club && !ourWeek && <a href={routes.clubDashboard} className="family-link">Account &amp; Billing →</a>}
           </div>
         </section>
