@@ -19,7 +19,7 @@ const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
       <h1 class="family-title mt-4">A little more calm <em class="text-[#71866c]">today.</em></h1>
       <p class="family-lede mt-4">Today's reset, this month's family plan and everyone's part, in one place.</p>
     </header>
-    {appShell && <TodayPlans client:only="react"><div slot="fallback" class="family-panel h-32"></div></TodayPlans>}
+    {appShell && <div><TodayPlans client:only="react"><div slot="fallback" class="family-panel h-32"></div></TodayPlans></div>}
     <section data-calendar-feature hidden class="family-feature" aria-label="Today's cleaning">
       <p class="label text-[#5c7357]">TODAY'S RESET</p>
       <div class="mt-5"><TodayZone client:only="react"><div slot="fallback" class="h-10"></div></TodayZone></div>
