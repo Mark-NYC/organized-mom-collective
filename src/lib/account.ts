@@ -206,30 +206,52 @@ export async function verifyCode(email: string, code: string): Promise<VerifyRes
   }
 }
 
-/** The current session, refreshed when under five minutes are left. Null when signed out or revoked. */
+/**
+ * The current session, refreshed when under five minutes are left. Null when signed out or revoked.
+ *
+ * One refresh at a time: a page starts several calls at once, and a refresh token is single-use, so parallel refreshes
+ * would race and the loser would look like a revoked sign-in. Only Supabase saying this sign-in is no longer valid
+ * (400/401/403) signs her out. A rate limit or server trouble never does: with a code-only sign-in, a lost session
+ * costs her an email round trip.
+ */
+let refreshing: Promise<AccountSession | null> | undefined;
 export async function getSession(): Promise<AccountSession | null> {
   const s = loadSession();
   if (!s?.refresh_token) return null;
   if (s.expires_at - Date.now() > 5 * 60 * 1000) return s;
+  refreshing ??= refreshSession(s).finally(() => (refreshing = undefined));
+  return refreshing;
+}
+
+async function refreshSession(s: AccountSession): Promise<AccountSession | null> {
+  const stillGood = () => (s.expires_at > Date.now() ? s : null);
   try {
     const res = await auth('/token?grant_type=refresh_token', { refresh_token: s.refresh_token });
-    if (res.status >= 400 && res.status < 500) {
-      saveSession(null);
+    if (res.ok) {
+      const next = toSession((await res.json()) as AuthResponse, s.email);
+      saveSession({ ...next, user_id: next.user_id || s.user_id });
+      return loadSession();
+    }
+    // Another tab or the page before this one may have used the token first: its newer session is ours too.
+    const latest = loadSession();
+    if (latest && latest.refresh_token !== s.refresh_token && latest.expires_at > Date.now()) return latest;
+    if (res.status === 400 || res.status === 401 || res.status === 403) {
+      if (latest?.refresh_token === s.refresh_token) saveSession(null);
       return null;
     }
-    if (!res.ok) return s.expires_at > Date.now() ? s : null;
-    const next = toSession((await res.json()) as AuthResponse, s.email);
-    saveSession({ ...next, user_id: next.user_id || s.user_id });
-    return loadSession();
+    return stillGood();
   } catch {
-    return s.expires_at > Date.now() ? s : null;
+    return stillGood();
   }
 }
 
-/** Signs out everywhere this session reached and forgets sync state; what's on this device stays. */
+/**
+ * Signs out on this device and forgets sync state; what's on this device stays. Her other devices stay signed in
+ * (scope=local): signing out of a shared computer shouldn't sign her phone out too.
+ */
 export async function signOut() {
   const s = loadSession();
-  if (s) await auth('/logout', {}, s.access_token).catch(() => undefined);
+  if (s) await auth('/logout?scope=local', {}, s.access_token).catch(() => undefined);
   saveSession(null);
   try {
     rawRemove(SYNC_KEY);
