@@ -64,20 +64,39 @@ export async function seed(store: Pick<Storage, 'length' | 'key' | 'getItem'>, m
 }
 
 /**
- * Wrap the store's setItem/removeItem so writes reach the mirror too. Mirror failures never break a write.
- * Returns an undo function (tests).
+ * Mirror the store's writes and removals. Mirror failures never break a write. Returns an undo function (tests).
+ *
+ * A real Storage (localStorage) is hooked on Storage.prototype, filtered to this store, the same way the account sync
+ * does it (src/lib/account.ts installStorageHook; the two chain). Never by assigning `localStorage.setItem = …`: on a
+ * Storage object that creates a stored item named "setItem", and whether it overrides the method differs by engine
+ * (on iOS it didn't: nothing reached the mirror; Simulator run 43659865365).
  */
 export function mirrorWrites(store: LocalStore, mirror: Mirror): () => void {
+  const StorageCtor = (globalThis as { Storage?: { prototype: Storage } }).Storage;
+  const onSet = (key: string, value: string) => { if (mirrored(key)) void mirror.set(key, String(value)).catch(() => {}); };
+  const onRemove = (key: string) => { if (mirrored(key)) void mirror.remove(key).catch(() => {}); };
+  if (StorageCtor && store instanceof (StorageCtor as unknown as new () => Storage)) {
+    const proto = StorageCtor.prototype;
+    const set = proto.setItem;
+    const remove = proto.removeItem;
+    proto.setItem = function (this: Storage, key: string, value: string) {
+      set.call(this, key, value);
+      if (this === store) onSet(key, value);
+    };
+    proto.removeItem = function (this: Storage, key: string) {
+      remove.call(this, key);
+      if (this === store) onRemove(key);
+    };
+    return () => {
+      proto.setItem = set;
+      proto.removeItem = remove;
+    };
+  }
+  // A plain object store (tests): wrap its own methods.
   const set = store.setItem.bind(store);
   const remove = store.removeItem.bind(store);
-  store.setItem = (key: string, value: string) => {
-    set(key, value);
-    if (mirrored(key)) void mirror.set(key, String(value)).catch(() => {});
-  };
-  store.removeItem = (key: string) => {
-    remove(key);
-    if (mirrored(key)) void mirror.remove(key).catch(() => {});
-  };
+  store.setItem = (key: string, value: string) => { set(key, value); onSet(key, value); };
+  store.removeItem = (key: string) => { remove(key); onRemove(key); };
   return () => {
     store.setItem = set;
     store.removeItem = remove;

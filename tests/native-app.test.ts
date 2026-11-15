@@ -111,6 +111,40 @@ describe('durable storage', () => {
   });
 });
 
+describe('durable storage on a real Storage object', () => {
+  it('hooks Storage.prototype, never stores a "setItem" item, and only mirrors this store', async () => {
+    // A minimal Storage with the browser's named-property behavior: assigning an unknown property stores an item.
+    class FakeStorage {
+      data = new Map<string, string>();
+      getItem(k: string) { return this.data.get(k) ?? null; }
+      setItem(k: string, v: string) { this.data.set(k, String(v)); }
+      removeItem(k: string) { this.data.delete(k); }
+    }
+    const g = globalThis as { Storage?: unknown };
+    const before = g.Storage;
+    g.Storage = FakeStorage;
+    try {
+      const store = new FakeStorage();
+      const other = new FakeStorage();
+      const mirror = memoryMirror();
+      const undo = mirrorWrites(store as unknown as Storage, mirror);
+      store.setItem('omc:v1:onboarded', '1');
+      other.setItem('omc:v1:other', 'x');
+      await Promise.resolve();
+      expect(mirror.data.get('omc:v1:onboarded')).toBe('1');
+      expect(mirror.data.has('omc:v1:other')).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(store, 'setItem')).toBe(false); // no instance override
+      expect([...store.data.keys()]).toEqual(['omc:v1:onboarded']); // no stray "setItem" item
+      store.removeItem('omc:v1:onboarded');
+      await Promise.resolve();
+      expect(mirror.data.has('omc:v1:onboarded')).toBe(false);
+      undo();
+    } finally {
+      g.Storage = before;
+    }
+  });
+});
+
 describe('app features', () => {
   it('shows only live areas; the Inbox stays hidden until its milestone', () => {
     const live = visibleFeatures().map((f) => f.id);
