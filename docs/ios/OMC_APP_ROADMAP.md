@@ -326,3 +326,22 @@ failure's full error block, so a recurrence shows the cause.
 | `/privacy` published (App Store requires a privacy policy URL; the Club already needs it before launch) | Owner |
 | Privacy manifest check (UserDefaults via Preferences) and App Store privacy answers | Code + owner |
 | First real-device pass: routing, storage that survives an app restart, safe areas, sticky headers on plan pages, swipe-back | Owner's iPhone via TestFlight |
+
+## Progress after the owner's next-milestone decisions (2026-11-14/15)
+
+Owner decisions: Calendar and Sunday Setup are **free**; Family Meeting Club stays the paid membership; build **partner
+accounts**; Sunday Setup **supports the printed wall calendar** (summary + optional one-page print, no competing
+calendar); **one household, one family profile** across every feature. Google Calendar and the AI Family Inbox stay
+future milestones (prepared, not built). Nothing applied to production, deployed or merged.
+
+| Step | State | Where |
+| --- | --- | --- |
+| 1. Real iPhone Simulator test | XCUITest launches the app on an iPhone 17 Pro simulator (iOS 26.2), taps the tabs, unlocks cleaning, checks a task, checks safe areas, relaunches twice (normal, and with the web view's storage wiped). **It found a blank-app bug** (SceneDelegate used Capacitor's own controller, so our router never ran; fixed in `4e7889c`). Since then the app opens on Today in the Simulator. Full pass: see the latest CI run | `ios/App/AppUITests/`, `.github/workflows/ios-app.yml` |
+| 2. Shared household + partners | Built and tested (68 SQL checks + all 542 existing Club/accounts checks still pass with it applied) | [HOUSEHOLD_ARCHITECTURE.md](HOUSEHOLD_ARCHITECTURE.md) |
+| 3. Family calendar | Built and tested (39 SQL checks, 24 unit tests, smoke flows) | [FAMILY_CALENDAR.md](FAMILY_CALENDAR.md) |
+| 4. Sunday Setup | Built and tested (17 SQL checks, 4 unit tests, full smoke run of the review) | [SUNDAY_SETUP.md](SUNDAY_SETUP.md) |
+
+Migrations waiting for the owner's approval, in order: `20261124000000_household_shared.sql`,
+`20261125000000_family_calendar.sql`, `20261126000000_sunday_setup.sql` (plus the earlier unapplied
+`20261121`–`20261123` Club ones, independent). Test them on a Supabase branch first (`scripts/test-household-sql.sh`
+logic), then production.
