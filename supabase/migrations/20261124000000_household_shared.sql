@@ -362,6 +362,10 @@ begin
        where household_id = me.household_id and accepted_at is null and revoked_at is null and expires_at > now()) >= 5 then
     raise exception 'too_many_invites';
   end if;
+  -- Two grown-ups per household (owner decision 2026-11-15): one owner, one partner.
+  if (select count(*) from public.household_adults where household_id = me.household_id) >= 2 then
+    raise exception 'household_full';
+  end if;
   insert into public.household_invites (household_id, member_id, email, code_hash, created_by)
   values (me.household_id, target.id, email, public.household_invite_hash(code), uid)
   returning * into inv;
@@ -425,6 +429,8 @@ begin
      or exists (select 1 from public.household_adults a where a.member_id = inv.member_id) then
     raise exception 'invite_invalid';
   end if;
+  perform pg_advisory_xact_lock(hashtextextended('household-adults:' || inv.household_id::text, 0));
+  if (select count(*) from public.household_adults where household_id = inv.household_id) >= 2 then raise exception 'household_full'; end if;
   insert into public.household_adults (household_id, user_id, role, member_id) values (inv.household_id, uid, 'partner', inv.member_id);
   update public.household_invites set accepted_at = now(), accepted_by = uid where id = inv.id;
   return public.club_household();
@@ -471,5 +477,52 @@ grant select on public.household_adults to authenticated;
 create policy "Adults read their household's adults" on public.household_adults
   for select to authenticated using (household_id = (select public.household_id_for(auth.uid())));
 -- household_invites: no direct access (code hashes stay server-side); household_invites() lists them.
+
+-- ---------------------------------------------------------------- an owner deleting her account
+
+-- Deleting the owner's sign-in used to delete the household with it (club_households.owner_user_id cascades): the
+-- other grown-up would lose the family, its calendar and agreements. Now, when the household has a partner, the
+-- partner becomes the owner first, whatever deletes the sign-in (account_delete, the dashboard, an admin script), and
+-- the family stays. What was the leaving owner's alone still goes with her account: her billing, entitlements,
+-- mailing address and orders (they reference her user id), so the household continues on the free plan.
+-- account_delete already refuses while she has a paid membership ('active_membership').
+-- The future voluntary transfer (owner hands over without leaving) reuses household_owner_handover; not exposed yet.
+create function public.household_owner_handover(p_owner uuid, p_to uuid) returns void
+language plpgsql security definer set search_path = '' as $$
+declare
+  hid uuid;
+  to_member uuid;
+begin
+  select household_id into hid from public.household_adults where user_id = p_owner and role = 'owner';
+  if hid is null or not exists (select 1 from public.household_adults where user_id = p_to and household_id = hid and role = 'partner') then
+    raise exception 'invalid';
+  end if;
+  perform pg_advisory_xact_lock(hashtextextended('household-adults:' || hid::text, 0));
+  select member_id into to_member from public.household_adults where user_id = p_to;
+  delete from public.household_adults where user_id = p_owner;
+  update public.household_adults set role = 'owner' where user_id = p_to;
+  update public.club_households set owner_user_id = p_to, updated_at = now() where id = hid;
+  -- The account-holder row follows the account (it's what links the owner to her family row).
+  if to_member is not null then
+    update public.club_family_members set is_account_holder = (id = to_member), updated_at = now()
+     where household_id = hid and (is_account_holder or id = to_member);
+  end if;
+end $$;
+revoke execute on function public.household_owner_handover(uuid, uuid) from public, anon, authenticated;
+
+create function public.household_owner_leaving() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare
+  partner uuid;
+begin
+  select p.user_id into partner from public.household_adults o
+    join public.household_adults p on p.household_id = o.household_id and p.role = 'partner'
+   where o.user_id = old.id and o.role = 'owner';
+  if partner is not null then perform public.household_owner_handover(old.id, partner); end if;
+  return old;
+end $$;
+revoke execute on function public.household_owner_leaving() from public, anon, authenticated;
+create trigger household_owner_leaving before delete on auth.users
+  for each row execute function public.household_owner_leaving();
 
 commit;

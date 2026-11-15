@@ -1,0 +1,9 @@
+---
+/** /app/family/setup: Our Week (OurWeekFamilySetup; the free family planning app, docs/ios/OMC_APP_ROADMAP.md). */
+import Layout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import OurWeekFamilySetup from '../../../components/ourweek/OurWeekFamilySetup';
+---
+<Layout title="Set up your family" description="Your family, colors and the other grown-up.">
+  <OurWeekFamilySetup client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></OurWeekFamilySetup>
+</Layout>

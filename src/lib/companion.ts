@@ -2,6 +2,9 @@
 export const CALENDAR_ACCESS_KEY = 'omc:calendar-companion:v1';
 export const calendarPath = (path: string) => /^\/app\/calendar(?:\/|$)/.test(path);
 export const hasCalendarAccess = () => {
+  // Our Week (the iPhone app): the complete cleaning companion is free (owner decision 2026-11-15). The website's
+  // rule (the printed calendar's QR code, or a website calendar order) is unchanged until the release plan.
+  if (import.meta.env.PUBLIC_APP_SHELL === 'ios') return true;
   try { return localStorage.getItem(CALENDAR_ACCESS_KEY) === '1'; } catch { return false; }
 };
 export function rememberCalendarAccess() {

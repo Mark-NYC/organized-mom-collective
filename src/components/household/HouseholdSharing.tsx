@@ -79,7 +79,7 @@ export default function HouseholdSharing({ household, access }: { household: Hou
       )}
       {!owner && (
         <>
-          <p className="mt-5 text-sm text-warm-soft">{nameOf(ownerAdult?.memberId ?? null) ?? 'The other grown-up'} set up this family and manages its Club membership and billing.</p>
+          <p className="mt-5 text-sm text-warm-soft">{nameOf(ownerAdult?.memberId ?? null) ?? 'The other grown-up'} set up this family.</p>
           <button type="button" className="family-link mt-3" data-leave-household onClick={() => {
             if (confirm('Leave this family? You’ll stop seeing its calendar and plans. Nothing they’ve planned is deleted.')) void act(leaveHousehold)();
           }}>Leave this family</button>

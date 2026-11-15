@@ -231,14 +231,23 @@ await sam.fill('[data-event-sheet] [data-field="start"]', '18:00');
 await sam.click('[data-save-event]');
 await sam.waitForSelector('[data-sync-status="synced"]', { timeout: 15000 }).catch(() => {});
 check('Sam\'s change saved while Jen is offline', (await sql(`select to_char(start_time, 'HH24:MI') from public.calendar_events where title = 'Soccer practice'`)) === '18:00');
-// Offline agreement change: not queued.
+// Offline agreement change: saved on Jen's phone, waiting to sync.
 await jen2.goto(`${base}/app/family/responsibilities`, { waitUntil: 'networkidle' }); await settle(jen2, 1200);
-await jen2.locator('[data-remove-agreement]').first().click().catch(() => {});
-await jen2.locator('[data-confirm-remove]').first().click().catch(() => {});
-await settle(jen2, 800);
-const offlineMsg = await jen2.locator('[data-responsibilities-status]').innerText().catch(() => '');
-check('offline: an agreement change is refused with a clear message (not queued)', /didn’t save/.test(offlineMsg), offlineMsg);
-check('offline: the agreement is untouched in the household', (await sql(`select count(*) from public.club_responsibilities where status = 'confirmed' and agreed_text = '${edited.replace(/'/g, "''")}'`)) === '1');
+await jen2.locator('[data-edit-agreement]').first().click();
+await jen2.fill('[data-agreement-when]', 'Tuesday after dinner');
+await jen2.click('[data-save-agreement]');
+await settle(jen2, 1200);
+const waitingAg = await jen2.locator('[data-agreements-waiting]').innerText().catch(() => '');
+check('offline: an agreement change is saved on the phone and waiting', /1 change saved on this phone/.test(waitingAg), waitingAg);
+check('offline: Jen\'s phone shows her change right away', /Tuesday after dinner/.test(await jen2.locator('[data-agreement-row]').first().innerText()));
+check('offline: nothing reached the household yet', (await sql(`select coalesce(agreed_when, '') from public.club_responsibilities where status = 'confirmed' and deleted_at is null and agreed_text like 'Take the trash%'`)) === 'Tuesday night');
+// Meanwhile Sam changes the same agreement on his phone.
+await sam.goto(`${base}/app/family/responsibilities`, { waitUntil: 'networkidle' }); await settle(sam, 1500);
+await sam.locator('[data-edit-agreement]').first().click();
+await sam.fill('[data-agreement-text]', 'Take the trash and recycling out every Tuesday.');
+await sam.click('[data-save-agreement]');
+await settle(sam, 2000);
+check('Sam\'s agreement edit reached the household while Jen is offline', (await sql(`select agreed_text from public.club_responsibilities where status = 'confirmed' and deleted_at is null and agreed_text not like 'Ruiz%'`)).includes('every Tuesday'));
 // Back online.
 await jen2.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' });
 await online(jen2Ctx, jen2);
@@ -253,6 +262,25 @@ await shot(jen2, '09-reconnect-conflict');
 await sam.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' });
 await sam.waitForSelector('[data-calendar-event="Dentist"]', { timeout: 15000 }).catch(() => {});
 check('Sam\'s phone gets the Dentist', await sam.locator('[data-calendar-event="Dentist"]').count());
+// Jen's offline agreement edit on reconnect: Sam got there first, so his stays and she's told.
+await jen2.goto(`${base}/app/family/responsibilities`, { waitUntil: 'networkidle' });
+await jen2.waitForSelector('[data-agreements-conflict]', { timeout: 20000 }).catch(() => {});
+const agConflict = await jen2.locator('[data-agreements-conflict]').innerText().catch(() => '');
+check('reconnect: Jen is told Sam changed the agreement first', /changed by the other grown-up first/.test(agConflict), agConflict.replace(/\s+/g, ' '));
+check('reconnect: the household keeps Sam\'s agreement (nothing overwritten)', (await sql(`select agreed_text || '|' || coalesce(agreed_when, '') from public.club_responsibilities where status = 'confirmed' and deleted_at is null and agreed_text not like 'Ruiz%'`)) === 'Take the trash and recycling out every Tuesday.|Tuesday night');
+check('reconnect: Jen\'s phone now shows Sam\'s version', /every Tuesday/.test(await jen2.locator('[data-agreement-row]').first().innerText()));
+await shot(jen2, '10-agreement-conflict');
+// An offline change with no conflict syncs on reconnect.
+await jen2.click('[data-agreements-conflict] button');
+await offline(jen2Ctx);
+await jen2.locator('[data-edit-agreement]').first().click();
+await jen2.fill('[data-agreement-when]', 'Tuesday after dinner');
+await jen2.click('[data-save-agreement]');
+await settle(jen2, 800);
+await online(jen2Ctx, jen2);
+await settle(jen2, 3000);
+check('reconnect: an offline agreement edit with no conflict syncs to the household', (await sql(`select coalesce(agreed_when, '') from public.club_responsibilities where status = 'confirmed' and deleted_at is null and agreed_text not like 'Ruiz%'`)) === 'Tuesday after dinner');
+
 
 // ------------------------------------------------------------------ 10. No household sees another's
 const rosaToken = (await (await fetch(`${API}/auth/v1/verify`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'email', email: 'rosa@e2e.test', token: '123456' }) })).json()).access_token;
@@ -278,6 +306,115 @@ check('the Ruizes can\'t read, remove or delete the Parks\' data', !JSON.stringi
   `remove: ${rosaRemove.body?.message} · delete: ${JSON.stringify(rosaEdit.body)} · Parks event still there: ${parksDentist}`);
 const samMeeting = await rpc(samToken, 'club_me');
 note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has access' : 'no Club access (partner Club access is an open owner decision); he uses Family Responsibilities instead');
+
+// ------------------------------------------------------------------ 11. Free Our Week onboarding (no Club, no purchase)
+{
+  const ctx = await newPhone();
+  const nora = await ctx.newPage();
+  await nora.goto(`${base}/app/sign-in`, { waitUntil: 'networkidle' });
+  await nora.fill('#ow-email', 'nora@e2e.test');
+  await nora.click('button:has-text("Email me a code")');
+  await nora.fill('#ow-code', '123456');
+  await nora.click('button[type="submit"]:has-text("Sign in")');
+  await nora.waitForURL(/\/app\/family\/setup/, { timeout: 15000 }).catch(() => {});
+  check('free sign-in: a new person lands in Our Week family setup, not Club onboarding', /\/app\/family\/setup$/.test(new URL(nora.url()).pathname), nora.url());
+  await nora.waitForSelector('[data-ourweek-setup]', { timeout: 15000 });
+  await nora.fill('label:has-text("What do you call your family?") input', 'The Okoyes');
+  await nora.fill('label:has-text("Your first name") input', 'Nora');
+  await nora.click('button:has-text("Add a grown-up")');
+  const adultRow = nora.locator('label:has-text("Who they are")').first().locator('xpath=..');
+  await adultRow.locator('label:has-text("First name") input').fill('Owen');
+  const kidNames = nora.locator('label:has-text("Age")').locator('xpath=..').locator('label:has-text("First name") input');
+  await kidNames.first().fill('Ada');
+  await nora.locator('label:has-text("Age") select').first().selectOption('9');
+  await nora.click('button:has-text("Add a child")');
+  await kidNames.nth(1).fill('Ben');
+  await nora.locator('label:has-text("Age") select').nth(1).selectOption('5');
+  await nora.click('button[type="submit"]:has-text("Save and continue")');
+  await nora.waitForSelector('[data-setup-saved]', { timeout: 15000 }).catch(() => {});
+  const colors = await sql(`select coalesce((select count(distinct v) || '/' || count(*) from jsonb_each_text(h.preferences -> 'colors') e(k, v)), '0/0') from public.club_households h join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test'`);
+  check('free setup: family saved (2 adults, 2 children), each with a permanent, distinct color', colors === '4/4', colors);
+  check('free setup: no Club membership was needed or created', (await sql(`select count(*) from public.club_subscriptions s join auth.users u on u.id = s.user_id where u.email = 'nora@e2e.test'`)) === '0');
+  await nora.locator('[data-setup-step="partner"]').scrollIntoViewIfNeeded().catch(() => {});
+  await shot(nora, '11-free-setup', true);
+  // Invite the second adult from setup.
+  await nora.waitForSelector('[data-invite-form]', { timeout: 15000 });
+  await nora.fill('[data-invite-form] input[type="email"]', 'owen@e2e.test');
+  await nora.click('[data-invite-form] button[type="submit"]');
+  const link = new URL((await nora.locator('[data-invite-link]').innerText()).trim());
+  const owenCtx = await newPhone();
+  const owen = await owenCtx.newPage();
+  await owen.goto(`${base}/app/sign-in?next=${encodeURIComponent(link.pathname + link.search)}`, { waitUntil: 'networkidle' });
+  await owen.fill('#ow-email', 'owen@e2e.test');
+  await owen.click('button:has-text("Email me a code")');
+  await owen.fill('#ow-code', '123456');
+  await owen.click('button[type="submit"]:has-text("Sign in")');
+  await owen.waitForSelector('[data-invite-state="joined"]', { timeout: 20000 }).catch(() => {});
+  check('free: the second adult signs in and joins from the invitation', await owen.locator('[data-invite-state="joined"]').count());
+  // Start using it: cleaning, the weekly meeting, the calendar.
+  await nora.goto(`${base}/app/family/setup`, { waitUntil: 'networkidle' });
+  await nora.click('[data-start="cleaning"]');
+  await nora.waitForLoadState('networkidle');
+  for (let i = 0; i < 6 && (await nora.locator('[role="dialog"] .btn-primary').isVisible().catch(() => false)); i++) { await nora.locator('[role="dialog"] .btn-primary').click(); await nora.waitForTimeout(150); }
+  check('free: the complete cleaning companion opens, no wall calendar needed', (await nora.locator('input[type="checkbox"]').count()) > 0 && /\/app\/cleaning/.test(nora.url()));
+  await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
+  const parts = await nora.locator('[data-meeting-part]').evaluateAll((els) => els.map((e) => e.getAttribute('data-meeting-part')));
+  check('free: the weekly Family Meeting has the four parts in order', parts.join() === 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice', parts.join(' · '));
+  check('free: no Club card or upgrade on the free meeting', (await nora.locator('[data-club-month-meeting]').count()) === 0 && !/upgrade|subscribe|join the club/i.test(await nora.locator('body').innerText()));
+  await nora.fill('[data-agreement-new]', 'Feed the cat before school');
+  await nora.click('[data-owner-chip="Ada"]');
+  await nora.click('[data-save-new-agreement]');
+  await settle(nora, 2500);
+  check('free: "We agreed" in the free meeting saves to the household', (await sql(`select count(*) from public.club_responsibilities r join public.club_households h on h.id = r.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test' and r.status = 'confirmed' and r.agreed_text = 'Feed the cat before school'`)) === '1');
+  await shot(nora, '12-free-meeting', true);
+  // Account (Our Week): who's signed in and their place in the family; the partner can delete their own account and the
+  // family stays with the owner.
+  await owen.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(owen, 1200);
+  const owenPanel = await owen.locator('[data-account-signin]').innerText().catch(() => '');
+  check('free account: shows the partner\'s sign-in and that the family is shared', owenPanel.includes('owen@e2e.test') && /share this family/i.test(owenPanel), owenPanel.replace(/\s+/g, ' ').slice(0, 120));
+  check('free account: no Club panel or billing for a household without a membership', (await owen.locator('[data-account-club]').count()) === 0 && !/billing/i.test(await owen.locator('body').innerText()));
+  const noraFamily = await sql(`select count(*) from public.club_family_members f join public.club_households h on h.id = f.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test'`);
+  await owen.click('[data-delete-account]');
+  const owenConfirm = await owen.locator('[data-delete-confirm]').innerText();
+  check('free account: delete explains that the family stays with the owner', /stay with the grown-up who set up/i.test(owenConfirm));
+  await shot(owen, '13-account-delete-confirm', true);
+  await owen.click('[data-delete-confirm-yes]');
+  await owen.waitForURL(/\/app$/, { timeout: 15000 }).catch(() => {});
+  check('free account: the partner\'s account is deleted', (await sql(`select count(*) from auth.users where email = 'owen@e2e.test'`)) === '0');
+  check('free account: the owner keeps the whole family and agreements', (await sql(`select count(*) from public.club_family_members f join public.club_households h on h.id = f.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test'`)) === noraFamily
+    && (await sql(`select count(*) from public.club_responsibilities r join public.club_households h on h.id = r.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test' and r.agreed_text = 'Feed the cat before school'`)) === '1');
+  await ctx.close(); await owenCtx.close();
+}
+// An existing Club subscriber signing in through Our Week keeps everything and lands in Our Week.
+{
+  const ctx = await newPhone();
+  const page = await ctx.newPage();
+  await page.goto(`${base}/app/sign-in`, { waitUntil: 'networkidle' });
+  await page.fill('#ow-email', 'jen@e2e.test');
+  await page.click('button:has-text("Email me a code")');
+  await page.fill('#ow-code', '123456');
+  await page.click('button[type="submit"]:has-text("Sign in")');
+  await page.waitForURL(/\/app$/, { timeout: 15000 }).catch(() => {});
+  check('Club subscriber: Our Week sign-in lands on Today (not Club onboarding)', new URL(page.url()).pathname === '/app', page.url());
+  const token = await page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')).access_token);
+  const me = await rpc(token, 'club_me');
+  check('Club subscriber: membership and entitlements unchanged', me.body?.access === true && JSON.stringify(me.body?.kits ?? []).includes('2026-11'), JSON.stringify(me.body?.kits));
+  // Account: Our Week, with the household's Club content and no billing; deleting is refused while the membership lasts.
+  await page.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(page, 1200);
+  const panel = await page.locator('[data-account-signin]').innerText().catch(() => '');
+  check('Club subscriber account: Our Week sign-in panel (owner, shared with one other grown-up)', panel.includes('jen@e2e.test') && /share it with one other grown-up/i.test(panel), panel.replace(/\s+/g, ' ').slice(0, 120));
+  check('Club subscriber account: Club panel links to Club Home, no billing or purchase', (await page.locator('[data-account-club] a[href="/app/club"]').count()) === 1 && !/billing|upgrade|subscribe/i.test(await page.locator('body').innerText()));
+  // A paid membership she could still be charged for (her access here is a free beta grant, which doesn't block deleting).
+  await sql(`insert into public.club_subscriptions (stripe_subscription_id, stripe_customer_id, user_id, status, price_id, current_period_end, started_at, livemode) select 'sub_e2ejen', 'cus_e2ejen', id, 'active', 'price_test', now() + interval '20 days', now(), false from auth.users where email = 'jen@e2e.test'`);
+  await page.click('[data-delete-account]');
+  check('Club subscriber account: delete says the family stays with the other grown-up', /stay with the other grown-up/i.test(await page.locator('[data-delete-confirm]').innerText()));
+  await page.click('[data-delete-confirm-yes]');
+  await page.waitForSelector('[data-delete-confirm] [role="alert"]', { timeout: 15000 }).catch(() => {});
+  const refusal = await page.locator('[data-delete-confirm] [role="alert"]').innerText().catch(() => '');
+  check('Club subscriber account: deletion refused while the membership is active, nothing removed', /still active/i.test(refusal) && (await sql(`select count(*) from auth.users where email = 'jen@e2e.test'`)) === '1', refusal);
+  await shot(page, '14-account-club-delete-refused', true);
+  await ctx.close();
+}
 
 await browser.close();
 server.close();

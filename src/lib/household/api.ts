@@ -62,6 +62,7 @@ export function householdErrorText(code: string): string {
     case 'already_in_household': return 'This account already belongs to a household. Leave it first (Account → Family sharing) to join this one.';
     case 'invite_member_invalid': return 'Pick a grown-up in your family who doesn’t have their own sign-in yet, and use their email, not yours.';
     case 'too_many_invites': return 'You have 5 invitations waiting. Cancel one before sending another.';
+    case 'household_full': return 'Your family already has two grown-ups with their own sign-in. Remove one before inviting someone new.';
     case 'owner_only': return 'Only the person who set up the family can do that.';
     case 'owner_cannot_leave': return 'You set up this family, so you can’t leave it. You can remove the other adult instead.';
     case 'invalid': return 'That doesn’t look like an email address.';

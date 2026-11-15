@@ -28,7 +28,10 @@ export const CLUB_NAV: { id: ClubNavItem; label: string; short: string; href: st
   { id: 'home', label: 'Club Home', short: 'Home', href: routes.appClub },
   { id: 'family', label: 'My Family', short: 'My Family', href: routes.clubFamily },
   { id: 'months', label: 'Monthly Resources', short: 'Resources', href: routes.appClubMonths },
-  { id: 'account', label: 'Account & Billing', short: 'Account', href: routes.clubDashboard },
+  // In the app (Our Week): the app's Account page; billing stays on the website and isn't linked from the app.
+  import.meta.env.PUBLIC_APP_SHELL === 'ios'
+    ? { id: 'account', label: 'Account', short: 'Account', href: routes.appAccount }
+    : { id: 'account', label: 'Account & Billing', short: 'Account', href: routes.clubDashboard },
 ];
 
 /**

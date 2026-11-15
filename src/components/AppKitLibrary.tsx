@@ -153,7 +153,7 @@ export default function AppKitLibrary({ view = 'home' }: { view?: 'home' | 'mont
       <MonthGrid me={me} />
       {me && (
         <p className="ofc-member-account">
-          <a href={routes.appClub}>Club Home</a> · <a href={routes.clubFamily}>My Family</a> · <a href={routes.clubDashboard}>Account &amp; Billing</a>
+          <a href={routes.appClub}>Club Home</a> · <a href={routes.clubFamily}>My Family</a> · <a href={routes.clubDashboard}>{import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'Account' : 'Account & Billing'}</a>
         </p>
       )}
     </>
@@ -415,7 +415,7 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
         <p className="ofc-home-foot-links">
           {me.member && <><a href={routes.appClubFamilyRhythm}>Our Family Rhythm</a> · </>}
           {me.welcome && !welcomeIsMonthly(me) && <><a href={welcomeItemHref(me)}>{welcomeIsRhythm(me) ? 'Your Family Rhythm' : 'Your Family Vision Print'}</a> · <a href={routes.clubMeetingGuide}>Family Meeting Guide</a> · </>}
-          <a href={routes.clubDashboard}>Account &amp; Billing</a>
+          <a href={routes.clubDashboard}>{import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'Account' : 'Account & Billing'}</a>
         </p>
       </footer>
     </>
