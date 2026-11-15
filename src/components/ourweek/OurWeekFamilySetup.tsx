@@ -9,6 +9,8 @@
 import { useEffect, useState } from 'react';
 import FamilyForm from '../club/FamilyForm';
 import HouseholdSharing from '../household/HouseholdSharing';
+import { PasteInvite } from '../household/JoinHousehold';
+import { routes } from '../../routes';
 import { getSession } from '../../lib/account';
 import { accountStore, ColorsNotSavedError, StaleProfileError } from '../../lib/club/store';
 import { householdAccess, type HouseholdAccess } from '../../lib/household/api';
@@ -54,6 +56,17 @@ export default function OurWeekFamilySetup() {
         <h1 className="family-title mt-3 !text-[2.1rem]">{household ? 'Your family' : 'Set up your family'}</h1>
         <p className="family-lede mt-3">Who’s in your home, and each person’s color. The colors stay with each person everywhere: the calendar, cleaning, your Family Meeting and anything you print.</p>
       </header>
+
+      {!household && (
+        <details className="family-note" data-setup-invited>
+          <summary className="cursor-pointer text-sm font-semibold">Did the other grown-up already set up your family? Join theirs instead</summary>
+          <p className="mt-2 text-sm leading-relaxed">Don’t set up a second one. Paste the invitation they sent you (the link, or the whole message) and you’ll share the same family, calendar and plans.</p>
+          <PasteInvite onCode={(c) => location.assign(`${routes.householdJoin}?code=${c}`)} label="Join their family" />
+        </details>
+      )}
+      {household && owner && access && access.adults.length === 1 && (
+        <p className="text-sm text-warm-soft" data-setup-have-invite>Invited to a family the other grown-up set up? <a className="underline underline-offset-4" href={routes.householdJoin}>I have an invitation</a></p>
+      )}
 
       <section aria-labelledby="setup-family-h" data-setup-step="family">
         <p id="setup-family-h" className="label text-[#71866c]">1 · YOUR FAMILY</p>

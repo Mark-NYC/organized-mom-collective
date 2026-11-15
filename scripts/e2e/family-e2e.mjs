@@ -416,6 +416,80 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await ctx.close();
 }
 
+// ------------------------------------------------------------------ 13. The second adult opens the app before the invitation
+// (20261130_household_join_from_own). The app sends a new sign-in to "Set up your family"; without this, a partner who
+// does that owns a second household and can never join the one they were invited to.
+{
+  const owSignIn = async (page, email) => {
+    await page.goto(`${base}/app/sign-in`, { waitUntil: 'networkidle' });
+    await page.fill('#ow-email', email);
+    await page.click('button:has-text("Email me a code")');
+    await page.fill('#ow-code', '123456');
+    await page.click('button[type="submit"]:has-text("Sign in")');
+    await page.waitForFunction(() => Boolean(localStorage.getItem('omc:account:session')), null, { timeout: 15000 });
+    await page.waitForLoadState('networkidle');
+    return page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')).access_token);
+  };
+  const household = (email) => sql(`select coalesce((select a.household_id::text || ':' || a.role from public.household_adults a join auth.users u on u.id = a.user_id where u.email = '${email}'), 'none')`);
+
+  // Priya sets up the family (through the same database functions the form uses) and makes two invitations.
+  const pCtx = await newPhone(); const priya = await pCtx.newPage();
+  const pTok = await owSignIn(priya, 'priya@e2e.test');
+  const fam = await rpc(pTok, 'household_save', { p_expected_version: null, p_display_name: 'The Shahs', p_preferences: {}, p_members: [
+    { first_name: 'Priya', kind: 'adult', role: 'parent', is_account_holder: true }, { first_name: 'Raj', kind: 'adult', role: 'partner' },
+    { first_name: 'Mina', kind: 'child', role: 'child', birth_year: 2018, birth_month: 4 }] });
+  const rajMember = fam.body.members.find((m) => m.first_name === 'Raj').id;
+  const invite = async (email) => (await rpc(pTok, 'household_invite_create', { p_member_id: rajMember, p_email: email })).body.code;
+  const message = (code) => `Join our family on Organized Mom: https://www.organizedmomcollective.com/club/invite?code=${code}`;
+
+  // Raj installs the app first and does what it asks: sets up "his" family, with a plan on its calendar.
+  const rCtx = await newPhone(); const raj = await rCtx.newPage();
+  const rTok = await owSignIn(raj, 'raj@e2e.test');
+  await raj.waitForURL(/\/app\/family\/setup/, { timeout: 15000 }).catch(() => {});
+  await raj.waitForSelector('[data-ourweek-setup]', { timeout: 15000 });
+  check('app first: the setup screen offers joining the other grown-up\'s family before making a second one', await raj.locator('[data-setup-invited]').count());
+  await rpc(rTok, 'household_save', { p_expected_version: null, p_display_name: 'Raj’s', p_preferences: {}, p_members: [
+    { first_name: 'Raj', kind: 'adult', role: 'parent', is_account_holder: true }, { first_name: 'Mina', kind: 'child', role: 'child', birth_year: 2018, birth_month: 4 }] });
+  await rpc(rTok, 'calendar_event_save', { p_event: { id: crypto.randomUUID(), title: 'Soccer', starts_on: '2026-11-20', timezone: 'UTC' }, p_base_revision: null });
+  const before = await household('raj@e2e.test');
+  check('app first: he now owns a second, separate household', /:owner$/.test(before) && before.split(':')[0] !== (await household('priya@e2e.test')).split(':')[0], before);
+
+  // Then he gets the invitation and pastes the whole text message into the app.
+  const code = await invite('raj@e2e.test');
+  await raj.goto(`${base}/app/family/setup`, { waitUntil: 'networkidle' });
+  await raj.click('[data-setup-have-invite] a');
+  await raj.waitForSelector('[data-invite-paste]', { timeout: 15000 });
+  await raj.fill('[data-invite-paste] input', message(code));
+  await raj.click('[data-invite-paste] button[type="submit"]');
+  await raj.waitForSelector('[data-invite-state="confirm"]', { timeout: 20000 }).catch(() => {});
+  const ask = await raj.locator('[data-invite-state="confirm"]').innerText().catch(() => '');
+  check('app first: joining asks first and says what he\'d lose', /Join The Shahs\?/.test(ask) && /Raj, Mina/.test(ask) && /1 calendar plan/.test(ask) && /deleted/i.test(ask), ask.replace(/\s+/g, ' ').slice(0, 200));
+  check('app first: nothing changed before he confirms', (await household('raj@e2e.test')) === before);
+  await shot(raj, '15-join-confirm', true);
+  await raj.click('[data-invite-confirm]');
+  await raj.waitForSelector('[data-invite-state="joined"]', { timeout: 20000 }).catch(() => {});
+  const after = await household('raj@e2e.test');
+  check('app first: he joins the family he was invited to, as the other grown-up', after === `${(await household('priya@e2e.test')).split(':')[0]}:partner`, after);
+  check('app first: the household he made by mistake is gone; one family, one Raj, one Mina',
+    (await sql(`select count(*) from public.club_households where id = '${before.split(':')[0]}'`)) === '0'
+    && (await sql(`select string_agg(first_name, ',' order by sort) from public.club_family_members where household_id = '${after.split(':')[0]}' and archived_at is null`)) === 'Priya,Raj,Mina');
+  await raj.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(raj, 1500);
+  check('app first: his phone shows the shared calendar, not the deleted one', !(await raj.locator('body').innerText()).includes('Soccer') && (await raj.locator('[data-sync-status]').getAttribute('data-sync-status')) === 'synced');
+
+  // A partner with no family yet pastes the invitation on the setup screen instead of filling in the form.
+  await rpc(pTok, 'household_partner_remove');
+  const code2 = await invite('raj2@e2e.test');
+  const tCtx = await newPhone(); const raj2 = await tCtx.newPage();
+  await owSignIn(raj2, 'raj2@e2e.test');
+  await raj2.waitForSelector('[data-setup-invited]', { timeout: 15000 });
+  await raj2.click('[data-setup-invited] summary');
+  await raj2.fill('[data-setup-invited] input', message(code2));
+  await raj2.click('[data-setup-invited] button[type="submit"]');
+  await raj2.waitForSelector('[data-invite-state="joined"]', { timeout: 20000 }).catch(() => {});
+  check('no family yet: pasting the invitation on the setup screen joins straight away, no second household', (await household('raj2@e2e.test')) === `${(await household('priya@e2e.test')).split(':')[0]}:partner` && (await sql(`select count(*) from public.club_households h join auth.users u on u.id = h.owner_user_id where u.email = 'raj2@e2e.test'`)) === '0');
+  await pCtx.close(); await rCtx.close(); await tCtx.close();
+}
+
 await browser.close();
 server.close();
 writeFileSync(join(OUT, 'results.json'), JSON.stringify({ at: new Date().toISOString(), failures, results }, null, 2));

@@ -138,7 +138,7 @@ function ShareInvite({ invite, name }: { invite: NewInvite; name: string }) {
   return (
     <div className="family-note mt-6" data-invite-created>
       <strong className="text-sm">Invitation ready for {name}</strong>
-      <p className="mt-1 text-sm leading-relaxed">Send this link by text or email. {name} signs in with {invite.email} to join. It works once and expires {new Date(invite.expiresAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. It won’t be shown again.</p>
+      <p className="mt-1 text-sm leading-relaxed">Send this link by text or email. {name} signs in with {invite.email} to join: by opening the link, or in the app under Family → “I have an invitation”, pasting it. It works once and expires {new Date(invite.expiresAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. It won’t be shown again.</p>
       <p className="mt-3 break-all rounded-[3px] bg-white px-3 py-2 font-mono text-xs" data-invite-link>{invite.link}</p>
       <button type="button" className="family-action mt-4" onClick={share}>{copied ? 'Link copied' : 'Share invitation'}</button>
     </div>
