@@ -360,6 +360,11 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
   const parts = await nora.locator('[data-meeting-part]').evaluateAll((els) => els.map((e) => e.getAttribute('data-meeting-part')));
   check('free: the weekly Family Meeting has the four parts in order', parts.join() === 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice', parts.join(' · '));
+  await nora.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
+  const famText = await nora.locator('body').innerText();
+  await nora.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
+  check('free: no Family Meeting Club card on Today or Family for a family without the Club', (await nora.locator('[data-club-month], [data-family-club-card]').count()) === 0 && !/family meeting club|membership/i.test(famText) && !/family meeting club|membership/i.test(await nora.locator('body').innerText()));
+  await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
   check('free: no Club card or upgrade on the free meeting', (await nora.locator('[data-club-month-meeting]').count()) === 0 && !/upgrade|subscribe|join the club/i.test(await nora.locator('body').innerText()));
   await nora.fill('[data-agreement-new]', 'Feed the cat before school');
   await nora.click('[data-owner-chip="Ada"]');
@@ -399,6 +404,10 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   const token = await page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')).access_token);
   const me = await rpc(token, 'club_me');
   check('Club subscriber: membership and entitlements unchanged', me.body?.access === true && JSON.stringify(me.body?.kits ?? []).includes('2026-11'), JSON.stringify(me.body?.kits));
+  await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page, 1500);
+  const clubCard = await page.locator('[data-family-club-card]').count();
+  await page.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(page, 1500);
+  check('Club subscriber: her Club cards are on Family and Today', clubCard === 1 && (await page.locator('[data-club-month]').count()) === 1);
   // Account: Our Week, with the household's Club content and no billing; deleting is refused while the membership lasts.
   await page.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(page, 1200);
   const panel = await page.locator('[data-account-signin]').innerText().catch(() => '');

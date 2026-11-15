@@ -7,8 +7,9 @@
 import Layout from '../../../layouts/AppLayout.astro';
 import '../../../styles/family-app-brand.css';
 import MeetingCard from '../../../components/family/MeetingCard';
+import { ClubFamilyCard } from '../../../components/app/TodayOverview';
 ---
-<Layout title="Family" description="Our Family Meeting, who does what, and the Family Meeting Club.">
+<Layout title="Family" description="Our Family Meeting and who does what.">
   <div class="family-brand mx-auto max-w-4xl space-y-9" data-family-hub>
     <header>
       <p class="label text-[#71866c]">FAMILY</p>
@@ -22,12 +23,7 @@ import MeetingCard from '../../../components/family/MeetingCard';
         <p class="mt-2 text-sm leading-relaxed text-warm-soft">What your family agreed in your meeting, and what everyone already does.</p>
         <span class="family-link mt-5">See responsibilities →</span>
       </a>
-      <a href="/app/club" class="family-panel block transition-colors hover:bg-[#f8f8f6]" data-family-club-card>
-        <p class="label text-[#71866c]">FAMILY MEETING CLUB</p>
-        <h2 class="family-panel-title mt-4">Your membership and monthly resources.</h2>
-        <p class="mt-2 text-sm leading-relaxed text-warm-soft">Each month’s Family Focus and its prepared meeting page.</p>
-        <span class="family-link mt-5">Open the Club →</span>
-      </a>
+      <ClubFamilyCard client:only="react" />
     </div>
   </div>
 </Layout>

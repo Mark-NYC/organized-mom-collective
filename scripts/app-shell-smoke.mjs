@@ -247,9 +247,11 @@ await ipad.close();
   await page.goto(base + '/app/family', { waitUntil: 'networkidle' });
   const parts = await page.locator('[data-meeting-parts] li').allInnerTexts();
   if (parts.length !== 4 || !/Our Focus/.test(parts[0]) || !/Let’s Practice/.test(parts[3])) fail(`Family: the four parts aren't shown in order: ${parts.join(' | ')}`);
-  else if (!(await page.locator('[data-family-responsibilities-card]').isVisible()) || !(await page.locator('[data-family-club-card]').isVisible())) fail('Family: responsibilities or Club card missing');
+  else if (!(await page.locator('[data-family-responsibilities-card]').isVisible())) fail('Family: responsibilities card missing');
+  // Nobody is signed in here: a free family sees no Club membership card (it's for households that have the Club).
+  else if (await page.locator('[data-family-club-card]').count()) fail('Family: a free family is shown the Family Meeting Club membership card');
   else if (!(await page.locator('[data-app-tabbar] a[href="/app/family"][aria-current="page"]').count())) fail('Family tab not marked current');
-  else console.log('  ✓ Family: Our Family Meeting (four parts), Family Responsibilities, Family Meeting Club');
+  else console.log('  ✓ Family: Our Family Meeting (four parts), Family Responsibilities; no Club card for a free family');
   await page.screenshot({ path: join(OUT, '14-family.png'), fullPage: true });
 
   // "We agreed" in the meeting (labeled sample family, saved in this tab only), then everywhere else.

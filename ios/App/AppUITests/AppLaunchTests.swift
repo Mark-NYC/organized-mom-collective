@@ -115,19 +115,17 @@ final class AppLaunchTests: XCTestCase {
         assertInsideSafeArea("Cleaning", topElement: text("Daily Reset"))
         shot("02-cleaning-one-done")
 
-        // Family: Our Family Meeting first, then responsibilities and the Club.
+        // Family: Our Family Meeting first, then responsibilities. The Club card is for households that have the Club
+        // (covered with a member in testFamilyFlowWithTestBackend and scripts/e2e/family-e2e.mjs).
         XCTAssertFalse(tab("Club").exists, "the old Club tab is still there")
         XCTAssertFalse(tab("Account").exists, "Account should be the profile icon, not a tab")
         tab("Family").tap()
         let family = waitFor(text("plays a part"), "Family tab")
         waitFor(text("Who does what"), "Family Responsibilities card")
-        waitFor(text("Family Meeting Club"), "Family Meeting Club card")
+        // A free family (nobody signed in here) sees no Club membership card it couldn't open, and nothing to buy.
+        XCTAssertFalse(text("Open the Club").exists, "a free family is shown a Family Meeting Club membership card")
         assertInsideSafeArea("Family", topElement: family)
         shot("03-family")
-        text("Open the Club").tap()
-        let club = waitFor(text("One small win"), "Club home")
-        assertInsideSafeArea("Club", topElement: club)
-        shot("03b-club")
 
         // Account, from the profile icon: signed out, no made-up family.
         tab("Today").tap()
