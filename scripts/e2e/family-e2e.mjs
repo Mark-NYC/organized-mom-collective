@@ -367,6 +367,22 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await settle(nora, 2500);
   check('free: "We agreed" in the free meeting saves to the household', (await sql(`select count(*) from public.club_responsibilities r join public.club_households h on h.id = r.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test' and r.status = 'confirmed' and r.agreed_text = 'Feed the cat before school'`)) === '1');
   await shot(nora, '12-free-meeting', true);
+  // Account (Our Week): who's signed in and their place in the family; the partner can delete their own account and the
+  // family stays with the owner.
+  await owen.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(owen, 1200);
+  const owenPanel = await owen.locator('[data-account-signin]').innerText().catch(() => '');
+  check('free account: shows the partner\'s sign-in and that the family is shared', owenPanel.includes('owen@e2e.test') && /share this family/i.test(owenPanel), owenPanel.replace(/\s+/g, ' ').slice(0, 120));
+  check('free account: no Club panel or billing for a household without a membership', (await owen.locator('[data-account-club]').count()) === 0 && !/billing/i.test(await owen.locator('body').innerText()));
+  const noraFamily = await sql(`select count(*) from public.club_family_members f join public.club_households h on h.id = f.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test'`);
+  await owen.click('[data-delete-account]');
+  const owenConfirm = await owen.locator('[data-delete-confirm]').innerText();
+  check('free account: delete explains that the family stays with the owner', /stay with the grown-up who set up/i.test(owenConfirm));
+  await shot(owen, '13-account-delete-confirm', true);
+  await owen.click('[data-delete-confirm-yes]');
+  await owen.waitForURL(/\/app$/, { timeout: 15000 }).catch(() => {});
+  check('free account: the partner\'s account is deleted', (await sql(`select count(*) from auth.users where email = 'owen@e2e.test'`)) === '0');
+  check('free account: the owner keeps the whole family and agreements', (await sql(`select count(*) from public.club_family_members f join public.club_households h on h.id = f.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test'`)) === noraFamily
+    && (await sql(`select count(*) from public.club_responsibilities r join public.club_households h on h.id = r.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test' and r.agreed_text = 'Feed the cat before school'`)) === '1');
   await ctx.close(); await owenCtx.close();
 }
 // An existing Club subscriber signing in through Our Week keeps everything and lands in Our Week.
@@ -383,6 +399,20 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   const token = await page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')).access_token);
   const me = await rpc(token, 'club_me');
   check('Club subscriber: membership and entitlements unchanged', me.body?.access === true && JSON.stringify(me.body?.kits ?? []).includes('2026-11'), JSON.stringify(me.body?.kits));
+  // Account: Our Week, with the household's Club content and no billing; deleting is refused while the membership lasts.
+  await page.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(page, 1200);
+  const panel = await page.locator('[data-account-signin]').innerText().catch(() => '');
+  check('Club subscriber account: Our Week sign-in panel (owner, shared with one other grown-up)', panel.includes('jen@e2e.test') && /share it with one other grown-up/i.test(panel), panel.replace(/\s+/g, ' ').slice(0, 120));
+  check('Club subscriber account: Club panel links to Club Home, no billing or purchase', (await page.locator('[data-account-club] a[href="/app/club"]').count()) === 1 && !/billing|upgrade|subscribe/i.test(await page.locator('body').innerText()));
+  // A paid membership she could still be charged for (her access here is a free beta grant, which doesn't block deleting).
+  await sql(`insert into public.club_subscriptions (stripe_subscription_id, stripe_customer_id, user_id, status, price_id, current_period_end, started_at, livemode) select 'sub_e2ejen', 'cus_e2ejen', id, 'active', 'price_test', now() + interval '20 days', now(), false from auth.users where email = 'jen@e2e.test'`);
+  await page.click('[data-delete-account]');
+  check('Club subscriber account: delete says the family stays with the other grown-up', /stay with the other grown-up/i.test(await page.locator('[data-delete-confirm]').innerText()));
+  await page.click('[data-delete-confirm-yes]');
+  await page.waitForSelector('[data-delete-confirm] [role="alert"]', { timeout: 15000 }).catch(() => {});
+  const refusal = await page.locator('[data-delete-confirm] [role="alert"]').innerText().catch(() => '');
+  check('Club subscriber account: deletion refused while the membership is active, nothing removed', /still active/i.test(refusal) && (await sql(`select count(*) from auth.users where email = 'jen@e2e.test'`)) === '1', refusal);
+  await shot(page, '14-account-club-delete-refused', true);
   await ctx.close();
 }
 

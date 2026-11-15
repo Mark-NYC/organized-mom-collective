@@ -46,6 +46,7 @@ rehearsed (`supabase/rollout/rollback-welcome-rhythm-kit.sql`, `rollback-welcome
 | 6 | `20261126000000_household_member_colors.sql` | **New**, ready | Every member's color saved permanently by member id; backfill = today's colors | 4 |
 | 7 | `20261127000000_family_agreements.sql` | Ready (revised 2026-11-15 for offline) | "We agreed" agreements: ids made on the phone, a revision per agreement, tombstone removes, a changes feed; conflicts refused, never overwritten | 4 |
 | 8 | `20261128000000_household_club_access.sql` | Ready (written 2026-11-15) | Both adults use the household's Club entitlement; billing, address, approvals and fulfillment stay the owner's | 1–4 |
+| 9 | `20261129000000_account_delete_billing_guard.sql` | Ready; **needs the deletion policy approved** | No sign-in that can still be charged (trialing, active, past due, unpaid, incomplete, paused) can be deleted by any path; account_delete refuses up front. Billing never transfers | 4 |
 
 Applying 1–3 before 4 matters for 8 only: 8 redefines `club_me`, whose current definition is 23's. Writing 8 against
 production's older `club_me` instead would silently drop 22–23's welcome fields. So: 1 → 2 → 3, then 4 onward.
@@ -149,4 +150,5 @@ outbox like the calendar's.
 3. Apply 4, 5, 6 together in one session. Check: 10 households each have one owner row; 20 colors saved and equal to the
    dry run; the live family form still saves.
 4. Apply 7 and 8 (built; need your approval).
+4b. Apply 9 once the deletion policy is approved. Check: `select count(*) from pg_trigger where tgname = 'account_chargeable_guard'` = 1; a test account with a canceled subscription can still delete itself.
 5. Only then ship the app and website code that uses them.

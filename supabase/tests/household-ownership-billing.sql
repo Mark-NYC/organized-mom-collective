@@ -1,6 +1,8 @@
--- Owner deletion and ownership with a Family Meeting Club subscription: TODAY'S behavior, recorded (owner request
--- 2026-11-15). Checks named "gap:" pass because they describe current behavior that the proposed policy would change
--- (docs/ios/OWNERSHIP_AND_BILLING_POLICY.md). Throwaway local database only.
+-- Owner deletion and ownership with a Family Meeting Club subscription (owner request 2026-11-15), with the deletion
+-- guard (20261129_account_delete_billing_guard, proposed, not applied): no sign-in that can still be charged can be
+-- deleted by any path; after canceling, the owner can leave and the partner keeps the family on the free plan; billing is
+-- never transferred. Before 20261129 the "guard:" checks failed (the gaps in docs/ios/OWNERSHIP_AND_BILLING_POLICY.md).
+-- Throwaway local database only.
 \set ON_ERROR_STOP 1
 \set QUIET 1
 create function pg_temp.expect(ok boolean, msg text) returns void language plpgsql as $$
@@ -55,33 +57,59 @@ select pg_temp.expect(pg_temp.fails($$update public.club_subscriptions set cance
 select pg_temp.expect(pg_temp.fails($$select public.household_owner_handover('00000000-0000-0000-0000-00000b001001', '00000000-0000-0000-0000-00000b001002')$$), 'partner can''t take ownership (handover isn''t exposed)');
 reset role;
 
--- ---------------------------------------------------------------- 2. self-service deletion in other chargeable states
+-- ---------------------------------------------------------------- 2. self-service deletion in every other chargeable state: refused
 select pg_temp.family(2, 'unpaid');
+select pg_temp.family(3, 'incomplete');
+select pg_temp.family(6, 'paused');
+select pg_temp.family(7, 'past_due');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b002001');
+select pg_temp.expect(pg_temp.fails($$select public.account_delete()$$, 'active_membership'), 'guard: an "unpaid" subscription blocks deletion');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b003001');
+select pg_temp.expect(pg_temp.fails($$select public.account_delete()$$, 'active_membership'), 'guard: an "incomplete" (first payment pending) subscription blocks deletion');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b006001');
+select pg_temp.expect(pg_temp.fails($$select public.account_delete()$$, 'active_membership'), 'guard: a "paused" subscription (can resume) blocks deletion');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b007001');
+select pg_temp.expect(pg_temp.fails($$select public.account_delete()$$, 'active_membership'), 'guard: "past_due" blocks deletion');
+reset role;
+select pg_temp.expect((select count(*) from public.club_subscriptions where stripe_subscription_id in ('sub_billtest2','sub_billtest3','sub_billtest6','sub_billtest7') and user_id is not null) = 4,
+  'every refused subscription keeps its owner');
+select pg_temp.expect((select count(*) from public.household_adults a join auth.users u on u.id = a.user_id where u.email like 'bill-owner_@example.com' and a.role = 'owner' and u.email in ('bill-owner2@example.com','bill-owner3@example.com','bill-owner6@example.com','bill-owner7@example.com')) = 4,
+  'and each still owns her household (no half-done handover)');
+
+-- ---------------------------------------------------------------- 3. deletion outside account_delete (dashboard, script): refused too
+select pg_temp.family(4, 'active');
+select pg_temp.expect(pg_temp.fails($$delete from auth.users where id = '00000000-0000-0000-0000-00000b004001'$$, 'active_membership'),
+  'guard: deleting the sign-in directly is refused while the subscription is active');
+select pg_temp.expect((select user_id from public.club_subscriptions where stripe_subscription_id = 'sub_billtest4') = '00000000-0000-0000-0000-00000b004001'
+  and (select role from public.household_adults where user_id = '00000000-0000-0000-0000-00000b004001') = 'owner'
+  and (select role from public.household_adults where user_id = '00000000-0000-0000-0000-00000b004002') = 'partner',
+  'nothing moved: subscription, owner and partner as before');
+-- The partner can always leave (they pay for nothing); the owner's membership and the family stay.
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b004002');
+select public.account_delete();
+reset role;
+select pg_temp.expect((select count(*) from auth.users where id = '00000000-0000-0000-0000-00000b004002') = 0
+  and (select status from public.club_subscriptions where stripe_subscription_id = 'sub_billtest4') = 'active'
+  and (select count(*) from public.club_family_members f join public.household_adults a on a.household_id = f.household_id where a.user_id = '00000000-0000-0000-0000-00000b004001') = 3,
+  'the partner deletes their own account: the owner''s membership and all three family members stay');
+
+-- Cancel, then delete: once Stripe reports the subscription canceled, the owner can leave; the partner keeps the family.
+update public.club_subscriptions set status = 'canceled' where stripe_subscription_id = 'sub_billtest2';
 select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b002001');
 select public.account_delete();
 reset role;
-select pg_temp.expect((select user_id is null and status = 'unpaid' from public.club_subscriptions where stripe_subscription_id = 'sub_billtest2'),
-  'gap: an "unpaid" subscription doesn''t block deletion; the subscription is left with no owner');
-select pg_temp.expect((select role from public.household_adults where user_id = '00000000-0000-0000-0000-00000b002002') = 'owner', 'the partner now owns the household (family data kept)');
+select pg_temp.expect((select role from public.household_adults where user_id = '00000000-0000-0000-0000-00000b002002') = 'owner',
+  'after canceling, the owner leaves and the partner owns the household');
 select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b002002');
-select pg_temp.expect((public.club_me() ->> 'access')::boolean is false, 'the new owner has no Club access and no billing to manage (it wasn''t transferred)');
+select pg_temp.expect((public.club_me() ->> 'access')::boolean is false, 'the new owner has no Club access and no billing to manage (nothing was transferred)');
+select pg_temp.expect((select count(*) from public.club_subscriptions) = 0, 'and can''t see the old subscription');
 reset role;
-select pg_temp.family(3, 'incomplete');
-select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b003001');
-select public.account_delete();
-reset role;
-select pg_temp.expect((select user_id is null and status = 'incomplete' from public.club_subscriptions where stripe_subscription_id = 'sub_billtest3'),
-  'gap: an "incomplete" (first payment pending) subscription doesn''t block deletion either');
+update public.club_subscriptions set status = 'incomplete_expired' where stripe_subscription_id = 'sub_billtest3';
+delete from auth.users where id = '00000000-0000-0000-0000-00000b003001';
+select pg_temp.expect((select role from public.household_adults where user_id = '00000000-0000-0000-0000-00000b003002') = 'owner',
+  'an expired first payment (incomplete_expired) no longer blocks deletion');
 
--- ---------------------------------------------------------------- 3. deletion outside account_delete (dashboard, script)
-select pg_temp.family(4, 'active');
-delete from auth.users where id = '00000000-0000-0000-0000-00000b004001';
-select pg_temp.expect((select user_id is null and status = 'active' from public.club_subscriptions where stripe_subscription_id = 'sub_billtest4'),
-  'gap: deleting the sign-in directly leaves an ACTIVE subscription with no owner (Stripe would keep charging)');
-select pg_temp.expect((select role from public.household_adults where user_id = '00000000-0000-0000-0000-00000b004002') = 'owner', 'the family stays with the partner');
-select pg_temp.expect((select count(*) from public.club_customers where stripe_customer_id = 'cus_billtest4') = 0, 'and no customer link exists for anyone to manage it from the app');
-
--- ---------------------------------------------------------------- 4. canceled: safe today
+-- ---------------------------------------------------------------- 4. canceled: the owner can leave
 select pg_temp.family(5, 'canceled');
 select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-00000b005001');
 select public.account_delete();

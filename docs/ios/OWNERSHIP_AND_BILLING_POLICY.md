@@ -1,6 +1,6 @@
 # Household ownership, account deletion and Club billing: proposed policy
 
-Status: **proposal for owner approval, 2026-11-15. The deletion flow and billing are unchanged.** Today's behavior is
+Status: **proposal for owner approval, 2026-11-15. The guard is written and tested on the branch (20261129, not applied); live deletion and billing are unchanged.** Today's behavior is
 recorded in `supabase/tests/household-ownership-billing.sql` (15 checks; "gap:" checks describe what this policy would
 change).
 
@@ -40,6 +40,22 @@ Billing credentials never move today: the Stripe customer stays tied to whoever 
 6. **Safety net for anything that slips through.** If a Stripe event arrives for a subscription whose payer no longer
    exists, `club-webhook` cancels it immediately, flags it, and emails the owner (you) for follow-up and any refund.
    Admin deletion in the dashboard is documented as "cancel in Stripe first".
+
+## Built on the branch (2026-11-15, not applied)
+
+- **20261129_account_delete_billing_guard** (points 1–2): `account_chargeable(uid)` and a BEFORE DELETE trigger on
+  sign-ins that refuses (`active_membership`) while a subscription is trialing, active, past due, unpaid, incomplete or
+  paused, from any path; `account_delete` refuses up front. A refusal rolls back everything, so the household handover
+  never half-happens. Tests (`household-ownership-billing.sql`, 21 checks): every chargeable status refused, the direct
+  delete refused, the partner can always delete their own account (the owner's membership and family stay), cancel then
+  delete works and the partner owns the family with no Club access and no billing, `incomplete_expired` doesn't block.
+- **Our Week Account** (point 3, in the app): sign out and "Delete my account" with what happens to the family spelled
+  out for her role (alone: deleted; with a partner: stays with them; partner: only their sign-in). A refusal says "Contact
+  us and we'll help you cancel it first", never a billing link (no purchasing in the app). Checked end to end in
+  `scripts/e2e/family-e2e.mjs`.
+- Production today (read-only, 2026-11-15): no chargeable subscription without an owner.
+- **Not built:** point 6 (webhook cancels a live subscription whose payer is gone): it changes live billing behavior, so
+  it waits for your approval. With 29 applied it's a second line of defense only.
 
 ## What would change (after approval)
 
