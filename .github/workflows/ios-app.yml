@@ -5,13 +5,16 @@
 #   test with screenshots.
 # ios-simulator (macOS): `cap sync ios` + an unsigned Simulator build of ios/App, so Swift and project changes are
 #   compiled on every change without a Mac. Signing and TestFlight come in Milestone 2 (Apple account needed).
+# family-e2e (Linux) and ios-family-e2e (macOS): the whole family flow against an ISOLATED test backend
+#   (scripts/e2e/: a throwaway Postgres with every migration, a seeded test household, a local stand-in for Supabase's
+#   auth and API). Never a real project. docs/ios/FAMILY_E2E.md.
 name: iPhone app
 on:
   pull_request:
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   push:
     branches: ['claude/**']
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   workflow_dispatch:
 concurrency:
   group: ios-app-${{ github.ref }}
@@ -144,3 +147,122 @@ jobs:
           name: ios-simulator-app
           path: build/Build/Products/Debug-iphonesimulator/App.app
           retention-days: 7
+
+  family-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: ci-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Isolated test database (every migration) and the test household
+        run: bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+      - name: Build the app bundle against the test backend
+        run: npm run build:app
+        env:
+          PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          PUBLIC_SUPABASE_ANON_KEY: e2e-anon
+      - name: Install Chromium
+        run: npm i --no-save playwright && npx playwright install --with-deps chromium
+      - name: Family flow, two phones, offline and isolation
+        run: |
+          node scripts/e2e/test-backend.mjs > backend.log 2>&1 &
+          sleep 1
+          node scripts/e2e/family-e2e.mjs app-www e2e-family
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: family-e2e
+          path: e2e-family/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-www-e2e
+          path: app-www/
+          retention-days: 7
+
+  ios-family-e2e:
+    needs: family-e2e
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Throwaway Postgres on this Mac, every migration, the test household
+        run: |
+          brew install postgresql@16 >/dev/null
+          echo "$(brew --prefix postgresql@16)/bin" >> "$GITHUB_PATH"
+          export PATH="$(brew --prefix postgresql@16)/bin:$PATH"
+          brew services start postgresql@16
+          for i in $(seq 1 30); do pg_isready -h localhost && break; sleep 1; done
+          createdb -h localhost postgres 2>/dev/null || true
+          PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
+          psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+      - name: Start the isolated test backend
+        run: |
+          PGHOST=localhost PGUSER=$(whoami) nohup node scripts/e2e/test-backend.mjs > backend.log 2>&1 &
+          sleep 2; curl -sf -X POST http://127.0.0.1:54321/auth/v1/otp -d '{}' >/dev/null && echo backend up
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-www-e2e
+          path: app-www/
+      - name: Copy the test-backend bundle into the Xcode project
+        run: npx cap sync ios
+      - name: Pick an iPhone simulator and boot it
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          d = json.load(sys.stdin)["devices"]
+          phones = [(rt, x) for rt, xs in d.items() if "iOS" in rt for x in xs if re.match(r"iPhone \d+( Pro)?$", x["name"])]
+          phones.sort(key=lambda p: (p[0], p[1]["name"]))
+          rt, dev = phones[-1]
+          print(dev["udid"]); print(dev["name"], rt, file=sys.stderr)')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+      - name: Family flow in the real app on the iPhone simulator (XCUITest)
+        run: |
+          set -o pipefail
+          TEST_RUNNER_E2E=1 xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -only-testing:AppUITests/AppLaunchTests/testFamilyFlowWithTestBackend \
+            -derivedDataPath build -resultBundlePath build/family-e2e.xcresult \
+            CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|skipped|\*\* TEST"
+      - name: Backend log and app log
+        if: always()
+        run: |
+          tail -n 60 backend.log || true
+          xcrun simctl spawn "${{ steps.sim.outputs.udid }}" log show --last 20m --style compact \
+            --predicate 'process == "App"' | grep -E "OMCRouter|⚡️|rror" | tail -n 120 || true
+      - name: Export the simulator screenshots
+        if: always()
+        run: |
+          mkdir -p simulator-family-e2e
+          xcrun xcresulttool export attachments --path build/family-e2e.xcresult --output-path simulator-family-e2e || true
+          xcrun simctl io "${{ steps.sim.outputs.udid }}" screenshot simulator-family-e2e/zz-final-state.png || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simulator-family-e2e
+          path: simulator-family-e2e/
+          if-no-files-found: ignore

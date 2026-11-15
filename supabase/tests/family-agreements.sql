@@ -59,6 +59,12 @@ select public.club_household_save('Others', '{}', '[{"first_name":"Lee","kind":"
 reset role;
 \set LEE '(select id from public.club_family_members where first_name = ''Lee'')'
 
+-- A household created after the household migration links its owner to her own family row (e2e finding, 2026-11-15).
+select pg_temp.expect((select member_id from public.household_adults where user_id = :MOM) = :ADA, 'new household: owner linked to her account-holder row');
+select pg_temp.as_user('authenticated', :MOM);
+select pg_temp.expect(pg_temp.fails(format('select public.household_invite_create(%L, %L)', :ADA, 'someone@example.com'), 'invite_member_invalid'), 'the owner can''t invite someone into her own place');
+reset role;
+
 -- ---------------------------------------------------------------- agree
 
 select pg_temp.as_user('authenticated', :MOM);
@@ -150,3 +156,21 @@ select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(pg_temp.fails($$update public.club_responsibilities set status = 'confirmed' where true$$), 'no direct table writes');
 reset role;
 select pg_temp.expect((select count(*) from public.club_responsibilities where household_id = :HID and status = 'confirmed') = 1, 'still exactly one agreement');
+
+-- ---------------------------------------------------------------- owner link vs. the family page (e2e finding)
+-- The existing family form saves the whole family without member ids (new rows each time). An owner linked to her row
+-- (backfilled, or linked on first save) must still be able to save it; her link follows the new account-holder row.
+insert into auth.users (id, email, email_confirmed_at) values ('00000000-0000-0000-0000-0000000a9105', 'agr-owner2@example.com', now());
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000a9105');
+select public.club_household_save('The Lins', '{}', '[{"first_name":"Mei","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Kai","kind":"child","role":"child","birth_year":2018,"birth_month":1}]');
+reset role;
+select pg_temp.expect((select f.first_name from public.household_adults a join public.club_family_members f on f.id = a.member_id where a.user_id = '00000000-0000-0000-0000-0000000a9105') = 'Mei', 'owner linked after the first save');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000a9105');
+select pg_temp.expect(public.club_household_save('The Lins', '{}', '[{"first_name":"Mei","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Kai","kind":"child","role":"child","birth_year":2018,"birth_month":1},{"first_name":"Ivy","kind":"child","role":"child","birth_year":2021}]') is not null,
+  'the family form''s id-less save still works for a linked owner');
+reset role;
+select pg_temp.expect((select f.archived_at is null and f.first_name = 'Mei' from public.household_adults a join public.club_family_members f on f.id = a.member_id where a.user_id = '00000000-0000-0000-0000-0000000a9105'), 'her link follows her current row');
+select pg_temp.as_user('authenticated', '00000000-0000-0000-0000-0000000a9105');
+select pg_temp.expect(public.club_household_save('The Lins', '{}', '[{"first_name":"Mei","kind":"adult","role":"parent"},{"first_name":"Kai","kind":"child","role":"child","birth_year":2018,"birth_month":1}]') is not null, 'no account holder marked: still saves');
+reset role;
+select pg_temp.expect((select member_id is null from public.household_adults where user_id = '00000000-0000-0000-0000-0000000a9105'), 'and the owner is simply unlinked');

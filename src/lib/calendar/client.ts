@@ -77,10 +77,33 @@ export interface CalendarHook {
   syncNow(): Promise<void>;
 }
 
+/**
+ * The family (names, ids, colors) kept on this phone with the calendar, so names, colors and "who's going" still work
+ * with no signal. Only shown for the household it belongs to (`scope`).
+ */
+const HOUSEHOLD_KEY = 'omc:household:family:v1';
+function cachedHousehold(scope: string): Household | null {
+  try {
+    const c = JSON.parse(localStorage.getItem(HOUSEHOLD_KEY) ?? 'null') as { scope: string; household: Household } | null;
+    return c && c.scope === scope ? c.household : null;
+  } catch {
+    return null;
+  }
+}
+function keepHousehold(scope: string, household: Household | null) {
+  try {
+    if (household) localStorage.setItem(HOUSEHOLD_KEY, JSON.stringify({ scope, household }));
+    else localStorage.removeItem(HOUSEHOLD_KEY);
+  } catch { /* private mode: this visit only */ }
+}
+/** A request that never reached the server (no signal), as opposed to the server saying no. */
+const unreachable = (e: unknown) => e instanceof TypeError;
+
 export function useCalendar(): CalendarHook {
   const [state, setState] = useState<CalendarState>(loadState);
   const [status, setStatus] = useState<SyncStatus>('local');
-  const [household, setHousehold] = useState<Household | null>(null);
+  const [household, setHousehold] = useState<Household | null>(() =>
+    (isDemo() || state.scope === 'local' ? null : cachedHousehold(state.scope)));
   const [signedIn, setSignedIn] = useState(false);
   const [unsaved, setUnsaved] = useState(false);
   const ref = useRef(state);
@@ -114,38 +137,54 @@ export function useCalendar(): CalendarHook {
     }
   }, [commit]);
 
-  // Who's here: signed in with a household → the household's calendar; otherwise this phone's own.
+  // Who's here: signed in with a household → the household's calendar; otherwise this phone's own. With no signal,
+  // the family and calendar kept on this phone stay (never "set up your family"), and it loads again on reconnect.
+  const load = useCallback(async () => {
+    const s = await getSession();
+    if (!s) return;
+    setSignedIn(true);
+    let h: Household | null;
+    let access: Awaited<ReturnType<typeof householdAccess>>;
+    try {
+      [h, access] = await Promise.all([accountStore.household(), householdAccess()]);
+    } catch (e) {
+      if (unreachable(e)) return setStatus('offline');
+      [h, access] = [null, null];
+    }
+    setHousehold(h);
+    if (!access) {
+      keepHousehold('', null);
+      return setStatus('no-household');
+    }
+    keepHousehold(access.householdId, h);
+    commit(adopt(ref.current, access.householdId));
+    await syncNow();
+  }, [commit, syncNow]);
+
   useEffect(() => {
     if (isDemo()) {
       void appPreviewFamily().then(setHousehold);
       return;
     }
     if (!accountsEnabled()) return;
-    getSession().then(async (s) => {
-      if (!s) return;
-      setSignedIn(true);
-      const [h, access] = await Promise.all([accountStore.household().catch(() => null), householdAccess().catch(() => null)]);
-      setHousehold(h);
-      if (!access) return setStatus('no-household');
-      commit(adopt(ref.current, access.householdId));
-      await syncNow();
-    }).catch(() => setStatus('offline'));
-  }, [commit, syncNow]);
+    load().catch(() => setStatus('offline'));
+  }, [load]);
 
   // Catch up when the app comes back, the window refocuses, and every minute while open.
   useEffect(() => {
     const again = () => { if (document.visibilityState === 'visible') void syncNow(); };
+    const reconnect = () => { if (!isDemo() && accountsEnabled()) void load().catch(() => setStatus('offline')); };
     window.addEventListener(APP_RESUME_EVENT, again);
-    window.addEventListener('online', again);
+    window.addEventListener('online', reconnect);
     document.addEventListener('visibilitychange', again);
     const t = window.setInterval(again, 60_000);
     return () => {
       window.removeEventListener(APP_RESUME_EVENT, again);
-      window.removeEventListener('online', again);
+      window.removeEventListener('online', reconnect);
       document.removeEventListener('visibilitychange', again);
       window.clearInterval(t);
     };
-  }, [syncNow]);
+  }, [syncNow, load]);
 
   const change = (f: (s: CalendarState) => CalendarState) => {
     commit(f(ref.current));
