@@ -48,6 +48,7 @@ rehearsed (`supabase/rollout/rollback-welcome-rhythm-kit.sql`, `rollback-welcome
 | 8 | `20261128000000_household_club_access.sql` | Ready (written 2026-11-15) | Both adults use the household's Club entitlement; billing, address, approvals and fulfillment stay the owner's | 1–4 |
 | 9 | `20261129000000_account_delete_billing_guard.sql` | Ready; **needs the deletion policy approved** | No sign-in that can still be charged (trialing, active, past due, unpaid, incomplete, paused) can be deleted by any path; account_delete refuses up front. Billing never transfers | 4 |
 | 10 | `20261130000000_household_join_from_own.sql` | Ready (written 2026-11-15 on `claude/stoic-albattani-esdhkp`); **needs the replace-on-join rule approved** | A grown-up who already set up their own family in the app can accept an invitation: a preview of what they'd leave, then join. A solo household is deleted only after they confirm on screen; refused when someone shares it or it has Club membership records. Without it, a partner who opens the app before the invitation is locked into a second household for good | 4, 5 |
+| 11 | `20261201000000_household_cleaning_progress.sql` | Ready (written 2026-11-15) | Shared cleaning checkmarks for both grown-ups: one row per item, latest tap wins, an uncheck travels too. Free | 4 |
 
 Applying 1–3 before 4 matters for 8 only: 8 redefines `club_me`, whose current definition is 23's. Writing 8 against
 production's older `club_me` instead would silently drop 22–23's welcome fields. So: 1 → 2 → 3, then 4 onward.
@@ -143,6 +144,8 @@ outbox like the calendar's.
   - a removed partner loses access at once;
   - after the owner cancels, both adults can only read;
   - after an owner handover, the new owner has no paid access until they subscribe.
+
+**How to apply, check and roll back: [MIGRATION_DEPLOYMENT_PLAN.md](MIGRATION_DEPLOYMENT_PLAN.md)** (preflight run against production 2026-11-15: all ok; rollback rehearsed in CI). The short list below is superseded by it.
 
 ## 5. How to apply (each step needs your go)
 
