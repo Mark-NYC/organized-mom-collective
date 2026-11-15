@@ -80,7 +80,7 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
           SKIP_MIGRATIONS: '^2026112[123]'
-          ONLY_TESTS: accounts-access club-access club-membership club-profile household-partners family-calendar family-agreements
+          ONLY_TESTS: accounts-access club-access club-membership club-profile household-partners family-calendar household-colors family-agreements household-ownership
         run: bash scripts/test-household-sql.sh
 
   ios-simulator:

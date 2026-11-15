@@ -4,6 +4,27 @@ Status: Strategic direction as of October 13, 2026. **Proposed phases, not relea
 
 Read first: [VISION.md](VISION.md), [../editorial/BRAND_VOICE.md](../editorial/BRAND_VOICE.md), [../../README.md](../../README.md).
 
+## Decided 2026-11-15: Our Week, free, and two paid products (not live)
+
+Owner decision. **Approved direction, not yet live: production access rules and all sales copy are unchanged until
+launch.** Details: [../ios/ACCESS_MODEL_ASSESSMENT.md](../ios/ACCESS_MODEL_ASSESSMENT.md), database order:
+[../ios/MIGRATION_PLAN.md](../ios/MIGRATION_PLAN.md).
+
+- **Our Week** is the free family planning app and the main entry point into Organized Mom Collective. Free:
+  - the shared digital calendar;
+  - the complete cleaning companion;
+  - the weekly Family Meeting (the standard four-part, ten-minute meeting);
+  - family responsibilities and "We agreed" agreements;
+  - two adult accounts per household (one owner, one partner by invitation; children never have accounts).
+- **Paid:**
+  - **the physical wall calendar**;
+  - **Family Meeting Club**: personalized monthly Family Focus resources, the Welcome Kit and printed monthly mailings.
+- Both adults use the household's Club resources when it subscribes. Only the paying owner manages billing, mailing
+  address, subscription and account ownership. Deleting the owner's account hands the household to the other adult
+  instead of deleting the family.
+- Family member colors are permanent, saved per person; the same color everywhere (calendar, cleaning, meeting,
+  responsibilities, printables).
+
 ## North star
 
 Mom shouldn't have to manage everything alone. Reduce both (1) fragmented family schedules and (2) invisible planning and coordination that falls to one parent.
@@ -23,7 +44,7 @@ The product journey should help households move from mom as the default keeper o
 
 ## Phase 0: Initial physical offer and trust (current focus)
 
-- Sell the printed **11 × 17 inch weekly wall calendar**, bundled with access to the **cleaning companion website**.
+- Sell the printed **11 × 17 inch weekly wall calendar**, bundled with access to the **cleaning companion website**. (Changing with Our Week, decided 2026-11-15: the complete companion becomes free to everyone. Until that launches, current copy and access stay as they are.)
 - Clearly explain the printed sections and the verified website's daily / weekly cleaning routines.
 - Do **not** call the companion an app in customer-facing copy; do not imply it syncs with the paper calendar.
 - Make Etsy and any enabled direct-shop checkout accurate; respect the real purchase/access flow.
@@ -44,7 +65,7 @@ Owner decision, October 13, 2026: **establish the family wall calendar as the pr
 Kept for reference only, not planned. Don't build or mention in customer copy.
 
 - **The Seasonal Family Table** (meal planning from the previous site): [archive/seasonal-family-table.md](archive/seasonal-family-table.md).
-- **Freemium cleaning companion** (seasonal maps free, "VIP" tier paid, from the previous site): retired. The companion stays a full bonus for calendar owners. [archive/fall-cleaning-map-freemium.md](archive/fall-cleaning-map-freemium.md).
+- **Freemium cleaning companion** (seasonal maps free, "VIP" tier paid, from the previous site): retired, and stays retired: there is no paid cleaning tier. Superseded 2026-11-15: the complete companion becomes free to everyone in Our Week (it was a bonus for calendar owners). [archive/fall-cleaning-map-freemium.md](archive/fall-cleaning-map-freemium.md).
 
 ## Phase 1: Brand, discovery and owned audience (next growth work)
 
@@ -60,13 +81,17 @@ Kept for reference only, not planned. Don't build or mention in customer copy.
 
 ## Phase 2: Shared family habits and retention (validate before building)
 
-- Test a simple Sunday/weekly setup ritual: review schedules, meals and responsibilities together.
+- The family's one weekly ritual is the **Family Meeting** (four parts, ten minutes; `src/data/club/meeting-guide.ts`). A separate "Sunday Setup" was built and removed (owner, 2026-11-15); the calendar supports the meeting instead, and the weekly meeting is free in Our Week.
 - Explore age-appropriate child participation and partner ownership of whole tasks, not mom delegating every individual step.
 - Make the cleaning companion more useful based on actual behavior and customer requests, while avoiding inflated product claims.
 - Consider recurring email guidance or lightweight challenges *only if* users want them. Don't launch a community just to have one.
 - Learn what repeat value customers would genuinely pay for before choosing a subscription.
 
-## Proposed: Organized Family Club (planning, not launched)
+## Proposed: Family Meeting Club (planning, not launched; formerly "Organized Family Club")
+
+With Our Week (2026-11-15) the weekly Family Meeting is free; the Club's paid value is the personalized monthly Family
+Focus resources, the Welcome Kit and the printed mailings, for the whole household.
+
 
 **Status (2026-10-26): membership infrastructure built and tested in Stripe test mode (launch price $5.90/month, monthly only; owner, 2026-10-29); not for sale, live payments not approved, not to be mentioned in customer copy until launch** ([../club/MEMBERSHIP.md](../club/MEMBERSHIP.md)). Owner proposal, October 22, 2026; architecture and plan in [../club/IMPLEMENTATION_PLAN.md](../club/IMPLEMENTATION_PLAN.md), curriculum in [../club/YEAR_ONE_CALENDAR.md](../club/YEAR_ONE_CALENDAR.md).
 
@@ -83,7 +108,7 @@ Explore a daily digital hub for:
 - Importing family events from Google/Apple calendars, subject to technical feasibility, permission and privacy review.
 - Bringing in school, sports and club information; a forwarded family inbox is a potential initial approach, not a built capability.
 - Reviewing changes, coordinating schedules, preparing the coming week and tracking relevant cleaning/household routines.
-- Clear “Sunday Setup” workflow, with the printable wall view as the shared family reference.
+- Weekly Family Meeting support (the week ahead, what changed, agreements), with the printed wall calendar as the shared family reference. (Replaces the earlier "Sunday Setup" idea.)
 - Low-friction onboarding, mobile accessibility, notifications only when helpful, and privacy-safe data handling.
 
 Decide whether the physical display is manually updated, printable, or connected based on customer needs and actual implementation. **Do not assert automatic wall-calendar synchronization**, especially for a paper calendar.

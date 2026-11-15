@@ -1,7 +1,20 @@
 # Access model assessment: household Family Meeting, free basics, premium Club
 
-Status: assessment for the owner, 2026-11-15. **Nothing here is implemented, applied or deployed.** Production access
-and billing are unchanged.
+Status: assessment 2026-11-15, **decided the same day** (below). Production access and billing are unchanged.
+
+## Owner decisions (2026-11-15)
+
+- **Cleaning:** the complete Cleaning Companion is free (option c). Our Week is the free family planning app and the
+  main entry point: calendar, complete cleaning companion, weekly Family Meeting, family responsibilities, two adult
+  accounts per household. Paid: the physical wall calendar and Family Meeting Club (monthly Family Focus resources,
+  Welcome Kit, printed mailings). Roadmap updated; sales copy and production access unchanged until launch.
+- **Two adults per household** at first. Both: calendar, responsibilities, the weekly meeting, the household's entitled
+  Club resources. Owner only: billing, mailing address, subscription, account ownership. Ownership transfer designed
+  for, not shipped; deleting the owner's account must not destroy the other adult's access or the family's data.
+- **20261121–23:** neither applied nor retired yet; audited in [MIGRATION_PLAN.md](MIGRATION_PLAN.md).
+- **Colors** permanently saved by member id; never changed by adding, removing or reordering.
+
+What's built on the branch for these (tested, not applied) and what's left: [MIGRATION_PLAN.md](MIGRATION_PLAN.md).
 
 Owner decisions being assessed:
 1. Family Meeting access belongs to the household. Both adults take part in the weekly meeting; with an active Club
