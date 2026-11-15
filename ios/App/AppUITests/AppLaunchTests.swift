@@ -37,11 +37,22 @@ final class AppLaunchTests: XCTestCase {
         web.links.matching(NSPredicate(format: "label == %@", name)).firstMatch
     }
 
-    /// Tap a bottom tab. Over a long page iOS can report the label's activation point as invalid (run 43682700419);
-    /// the tab is on screen, so tap its center.
+    /// Tap a bottom tab. Over a long page iOS can report the tab link's activation point as invalid, and asking
+    /// `isHittable` then fails the test (runs 43682700419, 43718058363), though the bar is on screen. So tap by
+    /// position: the link's frame center when its frame is usable, otherwise its slot in the four-tab bar.
     private func goTo(_ name: String) {
         let t = waitFor(tab(name), "\(name) tab")
-        if t.isHittable { t.tap() } else { t.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
+        let window = app.windows.firstMatch.frame
+        let f = t.frame
+        let origin = app.coordinate(withNormalizedOffset: .zero)
+        if !f.isEmpty && window.contains(CGPoint(x: f.midX, y: f.midY)) {
+            origin.withOffset(CGVector(dx: f.midX, dy: f.midY)).tap()
+            return
+        }
+        let order = ["Today", "Calendar", "Cleaning", "Family"]
+        guard let i = order.firstIndex(of: name) else { return XCTFail("Unknown tab \(name)") }
+        // The bar sits above the 34 pt home indicator; its labels are about 25 pt above that.
+        origin.withOffset(CGVector(dx: window.width * (CGFloat(i) + 0.5) / 4, dy: window.maxY - 34 - 25)).tap()
     }
 
     @discardableResult
