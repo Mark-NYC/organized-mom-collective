@@ -191,8 +191,9 @@ begin
     keep := keep || mid;
   end loop;
   -- An adult who has their own account stays in the family (remove the partner first) and stays an adult.
+  -- (Partners only: the owner's link just follows the account-holder row, below.)
   if exists (select 1 from public.household_adults a
-              where a.household_id = hid and a.member_id is not null
+              where a.household_id = hid and a.role = 'partner' and a.member_id is not null
                 and (not (a.member_id = any (keep))
                      or exists (select 1 from public.club_family_members f where f.id = a.member_id and f.kind <> 'adult'))) then
     raise exception 'linked_member';
@@ -202,6 +203,16 @@ begin
   if (select count(*) from public.club_family_members where household_id = hid and archived_at is null and is_account_holder) > 1 then
     raise exception 'invalid';
   end if;
+  -- The owner is the household's account-holder adult. Keep the link in step with that row: a household created after
+  -- this migration has no members when its owner row is made, and the family page can change who holds the account.
+  -- Null when there isn't exactly one, or when that row is a partner's.
+  update public.household_adults a
+     set member_id = (select f.id from public.club_family_members f
+                       where f.household_id = hid and f.archived_at is null and f.is_account_holder and f.kind = 'adult'
+                         and (select count(*) from public.club_family_members g
+                               where g.household_id = hid and g.archived_at is null and g.is_account_holder and g.kind = 'adult') = 1
+                         and not exists (select 1 from public.household_adults p where p.role = 'partner' and p.member_id = f.id))
+   where a.household_id = hid and a.role = 'owner';
 
   -- Colors: what was saved, overlaid with what this save sends; only for people still in the household.
   prefs := (select preferences from public.club_households where id = hid);

@@ -21,6 +21,8 @@ psql_() { psql -X -q -v ON_ERROR_STOP=1 "$@"; }
 psql_ -d postgres -c "drop database if exists $DB with (force)" -c "create database $DB" >/dev/null
 psql_ -d "$DB" -f supabase/tests/supabase-stub.sql >/dev/null 2>&1
 for f in supabase/migrations/*.sql; do
+  # SKIP_MIGRATIONS (regex): leave out migrations production doesn't have yet, to test the pending ones on its state.
+  if [[ -n "${SKIP_MIGRATIONS:-}" && "$(basename "$f")" =~ $SKIP_MIGRATIONS ]]; then echo "left out: $(basename "$f")"; continue; fi
   if ! out=$(psql_ -d "$DB" -f "$f" 2>&1 >/dev/null); then
     if [[ "$(basename "$f")" == "$KNOWN_BROKEN" ]]; then
       echo "known pre-existing failure (not applied in production): $(basename "$f")"
@@ -36,7 +38,7 @@ done
 # without the household migration: reported, not fatal. Every other suite must pass.
 KNOWN_FAILING_TEST=admin-access
 failed=0
-for t in admin-access accounts-access club-access club-membership club-profile club-welcome-plan club-welcome-rhythm-kit club-welcome-overlap household-partners family-calendar family-agreements ${EXTRA_TESTS:-}; do
+for t in ${ONLY_TESTS:-admin-access accounts-access club-access club-membership club-profile club-welcome-plan club-welcome-rhythm-kit club-welcome-overlap household-partners family-calendar family-agreements} ${EXTRA_TESTS:-}; do
   [[ -f supabase/tests/$t.sql ]] || continue
   if out=$(psql_ -d "$DB" -o /dev/null -f "supabase/tests/$t.sql" 2>&1); then
     echo "ok: supabase/tests/$t.sql ($(grep -c '^psql.*ok - \|ok - ' <<<"$out") checks)"
