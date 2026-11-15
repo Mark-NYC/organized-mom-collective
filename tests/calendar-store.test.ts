@@ -137,3 +137,44 @@ describe('two phones, one household', () => {
     expect(mergeRemote(s, [{ ...ev('a'), revision: 2, title: 'theirs' }]).events.a.title).toBe('mine');
   });
 });
+
+describe('a change the household can\'t take', () => {
+  it('server trouble or an expired sign-in keeps every change waiting, in order', async () => {
+    const srv = server();
+    let s = saveLocal(saveLocal(adopt(emptyState(), 'h1'), ev('a', 'Dentist')), ev('b', 'Swim'));
+    for (const failure of ['request_failed_503', 'signed_out', 'request_failed_429']) {
+      const failing: CalendarApi = { ...srv.api, save: async () => { throw new Error(failure); } };
+      const r = await sync(s, failing);
+      expect(r.offline, failure).toBe(true);
+      expect(r.state.outbox.map((o) => o.id), failure).toEqual(['a', 'b']);
+      expect(r.state.conflicts, failure).toEqual([]);
+      s = r.state;
+    }
+    const r = await sync(s, srv.api);
+    expect(r.state.outbox).toEqual([]);
+    expect([...srv.rows.keys()].sort()).toEqual(['a', 'b']);
+  });
+
+  it('one refused change is set aside and named; the changes behind it still sync', async () => {
+    const srv = server();
+    const picky: CalendarApi = { ...srv.api, save: async (e, base) => { if (e.id === 'bad') throw new Error('invalid'); return srv.api.save(e, base); } };
+    const s = saveLocal(saveLocal(adopt(emptyState(), 'h1'), ev('bad', 'Broken')), ev('b', 'Swim'));
+    const r = await sync(s, picky);
+    expect(r.offline).toBe(false);
+    expect(r.state.outbox).toEqual([]);
+    expect(r.state.conflicts.map((c) => [c.title, c.kind])).toEqual([['Broken', 'refused']]);
+    expect(Object.keys(r.state.events)).toEqual(['b']);
+    expect(srv.rows.has('b')).toBe(true);
+  });
+
+  it('a refused edit brings back the household\'s copy, however old it is', async () => {
+    const srv = server();
+    let s = (await sync(saveLocal(adopt(emptyState(), 'h1'), ev('a', 'Dentist')), srv.api)).state;
+    // Much later (well past the pull overlap), an edit the household refuses.
+    s = { ...s, since: new Date(Date.parse(s.since!) + 3_600_000).toISOString() };
+    const refusing: CalendarApi = { ...srv.api, save: async () => { throw new Error('invalid'); } };
+    const r = await sync(saveLocal(s, { ...s.events.a, title: 'Dentist (moved)' }), refusing);
+    expect(r.state.events.a?.title).toBe('Dentist');
+    expect(r.state.conflicts.map((c) => c.kind)).toEqual(['refused']);
+  });
+});

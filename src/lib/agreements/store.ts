@@ -16,6 +16,7 @@
  * Pure state functions (tests/agreements-store.test.ts); the browser wrapper is ./client.ts.
  */
 import type { ResponsibilityCategory } from '../../data/club/family-profile';
+import { retryLater } from '../sync-errors';
 
 export interface AgreementRow {
   id: string;
@@ -116,9 +117,6 @@ export function adoptAgreements(s: AgreementState, scope: string): AgreementStat
 
 export interface AgreementSyncResult { state: AgreementState; pushed: number; offline: boolean }
 
-/** A request that never reached the server (no signal), as opposed to the server saying no. */
-const unreachable = (e: unknown) => e instanceof TypeError || /^request_failed_0$|failed to fetch|network/i.test((e as Error)?.message ?? '');
-
 export async function syncAgreements(start: AgreementState, api: AgreementApi, now = () => new Date().toISOString()): Promise<AgreementSyncResult> {
   let s = start;
   if (s.scope === 'none') return { state: s, pushed: 0, offline: false };
@@ -141,7 +139,7 @@ export async function syncAgreements(start: AgreementState, api: AgreementApi, n
       }
       pushed++;
     } catch (e) {
-      if (unreachable(e)) return { state: s, pushed, offline: true }; // keep the rest for next time
+      if (retryLater(e)) return { state: s, pushed, offline: true }; // no signal, signed out, server trouble: keep it all
       const reason = (e as Error).message;
       const text = op.row?.text ?? s.items[op.id]?.text ?? 'An agreement';
       const kind: AgreementConflict['kind'] = reason === 'conflict' ? 'changed' : reason === 'removed' ? 'removed' : 'refused';
@@ -166,7 +164,7 @@ export async function syncAgreements(start: AgreementState, api: AgreementApi, n
     }
     s = { ...merged, since: r.now };
   } catch (e) {
-    if (unreachable(e)) return { state: s, pushed, offline: true };
+    if (retryLater(e)) return { state: s, pushed, offline: true };
     throw e;
   }
   return { state: s, pushed, offline: false };

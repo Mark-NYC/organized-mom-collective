@@ -161,3 +161,22 @@ describe('agreements on this phone', () => {
     expect(adoptAgreements({ ...s, scope: 'h1' }, 'h2')).toEqual(emptyAgreements('h2'));
   });
 });
+
+describe('offline agreements survive trouble that isn\'t about them', () => {
+  it('server trouble, a rate limit or an expired sign-in keeps every offline change', async () => {
+    const srv = server();
+    let s = saveLocal(saveLocal(adoptAgreements(emptyAgreements(), 'h1'), row('a')), row('b', { source: 'month:nov-dishes', text: 'Dishes' }));
+    for (const failure of ['request_failed_503', 'signed_out', 'request_failed_429', 'no_household']) {
+      const failing: AgreementApi = { ...srv.api, save: async () => { throw new Error(failure); } };
+      const r = await syncIt(s, failing);
+      expect(r.offline, failure).toBe(true);
+      expect(r.state.outbox.map((o) => o.id), failure).toEqual(['a', 'b']);
+      expect(liveAgreements(r.state).length, failure).toBe(2);
+      expect(r.state.conflicts, failure).toEqual([]);
+      s = r.state;
+    }
+    const r = await syncIt(s, srv.api);
+    expect(r.state.outbox).toEqual([]);
+    expect(srv.rows.size).toBe(2);
+  });
+});

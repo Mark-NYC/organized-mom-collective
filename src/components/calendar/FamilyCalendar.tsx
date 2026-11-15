@@ -12,9 +12,14 @@ import { newEventId } from '../../lib/calendar/store';
 import type { Household } from '../../lib/club/profile';
 import type { MarkerColor } from '../../data/club/family-colors';
 import { routes } from '../../routes';
+import { appShellBuild } from '../../lib/native/platform';
 import { agreementsByPerson, changeOf, type Change } from '../../lib/family-meeting-support';
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import AgreedParts from '../family/AgreedParts';
+
+// In Our Week (the iPhone app) the calendar is free: its sign-in and family setup are Our Week's own, never the Club's.
+const SIGN_IN = appShellBuild() ? '/app/sign-in?next=/app/family-calendar' : routes.clubLogin;
+const FAMILY_SETUP = appShellBuild() ? '/app/family/setup' : routes.clubFamily;
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -65,13 +70,24 @@ export default function FamilyCalendar() {
         <div className="family-note mt-4" data-calendar-demo><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm">A made-up family, to show how the calendar looks. Nothing here is shared or synced. <a href={routes.familyCalendar} className="underline">Leave the demo</a>.</p></div>
       )}
       {!isDemo() && <StatusLine status={cal.status} signedIn={cal.signedIn} unsaved={cal.unsaved} waiting={cal.state.outbox.length} />}
-      {cal.state.conflicts.length > 0 && (
-        <div role="alert" className="family-note mt-4" data-calendar-conflict>
-          <strong className="text-sm">Changed on another phone</strong>
-          <p className="mt-1 text-sm">{cal.state.conflicts.map((c) => `“${c.title}”`).join(', ')} {cal.state.conflicts.length > 1 ? 'were' : 'was'} changed by the other grown-up first, so we kept their version. Check it and make your change again if you still need it.</p>
-          <button type="button" className="family-link mt-1" onClick={cal.dismissConflicts}>OK</button>
-        </div>
-      )}
+      {cal.state.conflicts.length > 0 && (() => {
+        const names = (kind: 'changed' | 'refused') => cal.state.conflicts.filter((c) => (c.kind ?? 'changed') === kind).map((c) => `“${c.title}”`);
+        const changed = names('changed');
+        const refused = names('refused');
+        return (
+          <div role="alert" className="family-note mt-4" data-calendar-conflict>
+            {changed.length > 0 && (<>
+              <strong className="text-sm">Changed on another phone</strong>
+              <p className="mt-1 text-sm">{changed.join(', ')} {changed.length > 1 ? 'were' : 'was'} changed by the other grown-up first, so we kept their version. Check it and make your change again if you still need it.</p>
+            </>)}
+            {refused.length > 0 && (<>
+              <strong className={`text-sm ${changed.length ? 'mt-3 block' : ''}`}>Couldn’t be saved</strong>
+              <p className="mt-1 text-sm" data-calendar-refused>{refused.join(', ')} couldn’t be saved to your family’s calendar, so {refused.length > 1 ? 'those changes weren’t' : 'that change wasn’t'} kept. Everything else is saved. Add it again if you still need it.</p>
+            </>)}
+            <button type="button" className="family-link mt-1" onClick={cal.dismissConflicts}>OK</button>
+          </div>
+        );
+      })()}
 
       {agreed.length > 0 && (
         <details className="family-panel mt-5" data-calendar-agreements>
@@ -154,7 +170,7 @@ function StatusLine({ status, signedIn, unsaved, waiting }: { status: SyncStatus
   else if (status === 'offline') text = waiting ? `No connection: ${waiting} ${waiting === 1 ? 'change' : 'changes'} saved here, will sync when you’re back online.` : 'No connection. Showing what’s saved on this phone.';
   else if (status === 'syncing') text = 'Syncing…';
   else text = 'Shared with your family · up to date';
-  const link = !signedIn ? routes.clubLogin : status === 'no-household' ? routes.clubFamily : null;
+  const link = !signedIn ? SIGN_IN : status === 'no-household' ? FAMILY_SETUP : null;
   return (
     <p className="mt-3 text-[0.8rem] text-warm-soft" role="status" data-sync-status={unsaved ? 'unsaved' : !signedIn ? 'local' : status}>
       {text}{link && <> <a href={link} className="underline underline-offset-4">{!signedIn ? 'Sign in' : 'Set up our family'}</a></>}
@@ -280,7 +296,7 @@ function EventSheet({ initial, date, isNew, people, colors, onClose, onSave, onD
               </select></label>
           </>
         ) : (
-          <p className="mt-5 text-sm text-warm-soft">Set up your family to add who it’s for and who’s handling it. <a className="underline" href={routes.clubFamily}>Set up our family</a></p>
+          <p className="mt-5 text-sm text-warm-soft">Set up your family to add who it’s for and who’s handling it. <a className="underline" href={FAMILY_SETUP}>Set up our family</a></p>
         )}
         <label className="mt-4 block"><span className="label">NOTES (OPTIONAL)</span>
           <textarea className="cal-input min-h-20" value={notes} maxLength={1000} onChange={(e) => setNotes(e.target.value)} /></label>
