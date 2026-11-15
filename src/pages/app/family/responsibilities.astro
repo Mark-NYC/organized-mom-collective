@@ -1,0 +1,9 @@
+---
+/** /app/family/responsibilities: agreements from the Family Meeting and what everyone already does (FamilyResponsibilities). */
+import Layout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import FamilyResponsibilities from '../../../components/family/FamilyResponsibilities';
+---
+<Layout title="Family Responsibilities" description="Who does what in your family.">
+  <FamilyResponsibilities client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></FamilyResponsibilities>
+</Layout>

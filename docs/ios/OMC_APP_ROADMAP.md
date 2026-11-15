@@ -344,8 +344,9 @@ future milestones (prepared, not built). Nothing applied to production, deployed
 | 2. Shared household + partners | Built and tested (68 SQL checks + all 542 existing Club/accounts checks still pass with it applied) | [HOUSEHOLD_ARCHITECTURE.md](HOUSEHOLD_ARCHITECTURE.md) |
 | 3. Family calendar | Built and tested (39 SQL checks, 24 unit tests, smoke flows) | [FAMILY_CALENDAR.md](FAMILY_CALENDAR.md) |
 | 4. Family Meeting support | Sunday Setup removed (page, data, migration, tests). The calendar supports the existing meeting: next 7 days with New/Changed on Today and the calendar, an optional screen-only week beside the meeting, everyone's part (from the meeting engine, suggestions excluded) on Today and cleaning parts in the companion. No database change. 12 unit tests, smoke flows | [FAMILY_MEETING_SUPPORT.md](FAMILY_MEETING_SUPPORT.md) |
+| 5. Agreements + Family tab | "We agreed" in Everyone's Part saves confirmed responsibilities to the household (migration `20261127000000_family_agreements.sql`, 28 SQL checks, not applied); only agreements show as agreed on Today, Calendar and Cleaning; Family Responsibilities edits, reassigns and removes them. Tabs are Today · Calendar · Cleaning · Family; Account is the profile icon. The week is rolling, ready to anchor to a meeting day | [FAMILY_MEETING_SUPPORT.md](FAMILY_MEETING_SUPPORT.md) |
 
 Migrations waiting for the owner's approval, in order: `20261124000000_household_shared.sql`,
-`20261125000000_family_calendar.sql` (plus the earlier unapplied
+`20261125000000_family_calendar.sql`, `20261127000000_family_agreements.sql` (plus the earlier unapplied
 `20261121`–`20261123` Club ones, independent). Test them on a Supabase branch first (`scripts/test-household-sql.sh`
 logic), then production.

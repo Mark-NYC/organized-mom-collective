@@ -18,8 +18,8 @@ import { sampleById } from '../../data/club/samples';
 import { accountRpc } from '../account';
 import type { FamilyMember, Household, HouseholdPreferences, MemberKind, MemberRole } from './profile';
 import {
-  activitiesToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
-  type Activity, type DbProfile, type FamilyProfile, type Responsibility, type SetupStep,
+  activitiesToDb, agreementToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
+  type Activity, type AgreementInput, type DbProfile, type FamilyProfile, type Responsibility, type SetupStep,
 } from './family-profile';
 
 export type KitAccess = 'edit' | 'read';
@@ -109,6 +109,9 @@ export interface ClubStore {
   saveActivities(list: Activity[]): Promise<FamilyProfile>;
   saveResponsibilities(status: 'existing' | 'desired', list: Responsibility[]): Promise<FamilyProfile>;
   saveFocus(step: 'challenges' | 'priority', focus: FocusInput): Promise<FamilyProfile>;
+  /** "We agreed" in the Family Meeting, or an edit / reassignment of an agreement (docs/ios/FAMILY_MEETING_SUPPORT.md). */
+  saveAgreement(a: AgreementInput): Promise<FamilyProfile>;
+  removeAgreement(id: string): Promise<FamilyProfile>;
 }
 
 // ------------------------------------------------------------------ the database, as her
@@ -254,6 +257,12 @@ export const accountStore: ClubStore = {
   async saveResponsibilities(status, list) {
     return profileFromDb(await accountRpc<DbProfile>('club_responsibilities_save', { p_status: status, p_items: responsibilitiesToDb(list) }));
   },
+  async saveAgreement(a) {
+    return profileFromDb(await accountRpc<DbProfile>('household_agreement_save', { p: agreementToDb(a) }));
+  },
+  async removeAgreement(id) {
+    return profileFromDb(await accountRpc<DbProfile>('household_agreement_remove', { p_id: id }));
+  },
   async saveFocus(step, f) {
     return profileFromDb(await accountRpc<DbProfile>('club_focus_save', {
       p_step: step, p_challenges: f.challenges, p_challenge_note: f.challengeNote ?? null,
@@ -382,6 +391,41 @@ export function sampleStore(id: string): ClubStore | null {
           }),
         ],
       }));
+    },
+    // The sample family, on this tab only: the same rules as household_agreement_save / _remove.
+    async saveAgreement(a) {
+      const s = load();
+      if (!onboarded(s.household)) throw new Error('no_household');
+      const live = new Set(s.household!.members.filter((m) => !m.archived).map((m) => m.id));
+      const owners = [...new Set(a.ownerIds)];
+      if (!owners.length || owners.some((o) => !live.has(o)) || !a.text.trim()) throw new Error('invalid');
+      const p = s.profile ?? startProfile();
+      const agreement = {
+        text: a.text.trim(), ...(a.finished?.trim() ? { finished: a.finished.trim() } : {}), ...(a.when?.trim() ? { when: a.when.trim() } : {}),
+      };
+      let list = p.responsibilities;
+      if (a.id) {
+        const cur = list.find((r) => r.id === a.id && r.status === 'confirmed');
+        if (!cur) throw new Error('not_found');
+        const { when: _w, finished: _f, ...kept } = cur.agreement ?? { text: '' };
+        list = list.map((r) => (r === cur ? { ...r, category: a.category, ownerIds: owners, helperIds: r.helperIds.filter((h) => !owners.includes(h)), scope: scopeOf(owners), agreement: { ...kept, ...agreement } } : r));
+      } else if (!list.some((r) => r.status === 'confirmed' && a.source && r.agreement?.source === a.source && r.agreement?.month === a.month && r.ownerIds.join() === owners.join())) {
+        list = [...list, {
+          id: `${sample.id}-g${Date.now()}`, status: 'confirmed', category: a.category, ownerIds: owners, helperIds: [], scope: scopeOf(owners),
+          agreement: { ...agreement, ...(a.month ? { month: a.month } : {}), ...(a.source ? { source: a.source } : {}), agreedAt: new Date().toISOString() },
+        }];
+      }
+      s.profile = { ...p, responsibilities: list };
+      save(s);
+      return s.profile;
+    },
+    async removeAgreement(id) {
+      const s = load();
+      const p = s.profile ?? startProfile();
+      if (!p.responsibilities.some((r) => r.id === id && r.status === 'confirmed')) throw new Error('not_found');
+      s.profile = { ...p, responsibilities: p.responsibilities.filter((r) => r.id !== id) };
+      save(s);
+      return s.profile;
     },
     async saveFocus(step, f) {
       return update(step, (p) => ({

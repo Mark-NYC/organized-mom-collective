@@ -8,7 +8,7 @@
 export type FeatureStatus = 'live' | 'planned';
 
 export interface AppFeature {
-  id: 'today' | 'cleaning' | 'club' | 'family' | 'calendar' | 'inbox';
+  id: 'today' | 'cleaning' | 'club' | 'family' | 'account' | 'calendar' | 'inbox';
   label: string;
   href: string;
   status: FeatureStatus;
@@ -20,7 +20,8 @@ export const APP_FEATURES: readonly AppFeature[] = [
   { id: 'today', label: 'Today', href: '/app', status: 'live', milestone: 1 },
   { id: 'cleaning', label: 'Cleaning', href: '/app/cleaning', status: 'live', milestone: 1 },
   { id: 'club', label: 'Club', href: '/app/club', status: 'live', milestone: 1 },
-  { id: 'family', label: 'Account', href: '/app/account', status: 'live', milestone: 1 },
+  { id: 'family', label: 'Family', href: '/app/family', status: 'live', milestone: 4 },
+  { id: 'account', label: 'Account', href: '/app/account', status: 'live', milestone: 1 },
   { id: 'calendar', label: 'Calendar', href: '/app/family-calendar', status: 'live', milestone: 3 },
   { id: 'inbox', label: 'Inbox', href: '/app/inbox', status: 'planned', milestone: 6 },
 ];

@@ -8,7 +8,8 @@ import { accountsEnabled, getSession } from './account';
 import { accountStore } from './club/store';
 import { appPreviewStore } from './app-family';
 import { isDemo } from './calendar/client';
-import type { FamilyProfile } from './club/family-profile';
+import type { AgreementInput, FamilyProfile } from './club/family-profile';
+import type { ClubStore } from './club/store';
 
 const CACHE = 'omc:household:profile:v1';
 
@@ -21,8 +22,24 @@ function cached(scope: string): FamilyProfile | null {
   }
 }
 
+/** Where agreements save: the signed-in household, or the labeled demo family on this tab. */
+const familyStore = (): ClubStore | null => (isDemo() ? appPreviewStore() : accountsEnabled() ? accountStore : null);
+
+/** Save or remove an agreement and keep this phone's copy current. Throws the database's error on failure. */
+export async function changeAgreement(scope: string | null, change: { save: AgreementInput } | { remove: string }): Promise<FamilyProfile> {
+  const store = familyStore();
+  if (!store) throw new Error('not_signed_in');
+  const p = 'save' in change ? await store.saveAgreement(change.save) : await store.removeAgreement(change.remove);
+  if (scope && !isDemo()) try { localStorage.setItem(CACHE, JSON.stringify({ scope, profile: p })); } catch { /* private mode */ }
+  return p;
+}
+
 /** `scope` is the household id the profile belongs to (from useCalendar), so another family's copy is never shown. */
 export function useFamilyProfile(scope: string | null): FamilyProfile | null {
+  return useFamilyProfileState(scope)[0];
+}
+
+export function useFamilyProfileState(scope: string | null): [FamilyProfile | null, (p: FamilyProfile) => void] {
   const [profile, setProfile] = useState<FamilyProfile | null>(() => (scope && !isDemo() ? cached(scope) : null));
   useEffect(() => {
     let live = true;
@@ -41,5 +58,5 @@ export function useFamilyProfile(scope: string | null): FamilyProfile | null {
     }).catch(() => { /* offline: keep the copy on this phone */ });
     return () => { live = false; };
   }, [scope]);
-  return profile;
+  return [profile, setProfile];
 }

@@ -1,14 +1,15 @@
 /**
  * The Monthly Family Meeting on a Club plan page (ClubFamilyMeeting.astro): switches between the month's tool and its
  * meeting, and draws the meeting from the family the page loaded (./family.ts → onPlanFamily) with the engine
- * (../family-meeting.ts) and its presentation rules (../family-meeting-view.ts). Reads only: nothing is saved, assigned
- * or confirmed here.
+ * (../family-meeting.ts) and its presentation rules (../family-meeting-view.ts). Nothing is saved or assigned
+ * here except the family's optional "We agreed" (and its Undo) on Everyone's Part, on screen only.
  *
  * The view is `data-plan-view="tool" | "meeting"` on the `.club-plan` root, and `?view=meeting` in the address so a
  * link opens the meeting. Switching only hides and shows: the month's editor, its state and its approval are untouched.
  */
-import { buildFamilyMeeting, type FamilyMeeting } from '../family-meeting';
-import { meetingView, monthTitle, type MeetingPersonView } from '../family-meeting-view';
+import { buildFamilyMeeting, suggestionKey, type FamilyMeeting } from '../family-meeting';
+import { meetingView, monthTitle, type MeetingItemView, type MeetingPersonView } from '../family-meeting-view';
+import { accountStore, sampleStore } from '../store';
 import { meetingMonth } from '../../../data/club/family-meeting';
 import { el } from './dom';
 import { familyLabel, onPlanFamily, type ReadyFamily } from './family';
@@ -63,7 +64,30 @@ export function setPlanView(root: HTMLElement, view: PlanView, opts: { focus?: b
 
 const q = <T extends HTMLElement>(root: ParentNode, sel: string) => root.querySelector<T>(sel);
 
-function personCard(p: MeetingPersonView, dense: boolean): HTMLElement {
+/** Screen only: what a grown-up can do to an item in Everyone's Part. Absent on paper and where nothing can be saved. */
+interface PartActions {
+  agree(memberId: string, item: MeetingItemView): void;
+  undo(item: MeetingItemView): void;
+}
+
+function itemAction(p: MeetingPersonView, i: MeetingItemView, actions?: PartActions): HTMLElement[] {
+  if (!actions) return [];
+  if (i.status === 'suggested') {
+    const b = el('button', { type: 'button', class: 'fm-agree', 'data-fm-agree': p.name }, 'We agreed');
+    b.setAttribute('aria-label', `We agreed: ${p.name}, ${i.text}`);
+    b.addEventListener('click', () => { b.disabled = true; actions.agree(p.memberId, i); });
+    return [b];
+  }
+  if (i.status === 'confirmed' && i.rec.agreedFrom) {
+    const b = el('button', { type: 'button', class: 'fm-undo', 'data-fm-undo': p.name }, 'Undo');
+    b.setAttribute('aria-label', `Undo the agreement: ${p.name}, ${i.text}`);
+    b.addEventListener('click', () => { b.disabled = true; actions.undo(i); });
+    return [b];
+  }
+  return [];
+}
+
+function personCard(p: MeetingPersonView, dense: boolean, actions?: PartActions): HTMLElement {
   const items = p.joinsIn
     ? [el('p', { class: 'fm-joins' }, 'Joins in and watches. No job yet.')]
     : p.items.length
@@ -72,7 +96,8 @@ function personCard(p: MeetingPersonView, dense: boolean): HTMLElement {
             el('span', { class: 'fm-pill' }, i.label),
             el('p', { class: 'fm-item-text' }, i.text),
             ...(i.detail || i.when ? [el('p', { class: 'fm-item-meta' }, [i.when, i.detail].filter(Boolean).join(' · '))] : []),
-            ...(i.finished ? [el('p', { class: 'fm-finished' }, el('strong', {}, 'Finished looks like: '), i.finished)] : []));
+            ...(i.finished ? [el('p', { class: 'fm-finished' }, el('strong', {}, 'Finished looks like: '), i.finished)] : []),
+            ...itemAction(p, i, actions));
           item.dataset.status = i.status;
           return item;
         })
@@ -93,7 +118,7 @@ function sectionHead(n: number, title: string, minutes: number, icon: string): H
 }
 
 /** The guide itself: the same four sections on screen and on paper, with the print rules applied to the paper one. */
-function guide(m: FamilyMeeting, family: string, print: boolean, icons: Record<string, string>): HTMLElement[] {
+function guide(m: FamilyMeeting, family: string, print: boolean, icons: Record<string, string>, actions?: PartActions): HTMLElement[] {
   const v = meetingView(m, { print });
   return [
     el('header', { class: 'fm-sheet-head' },
@@ -118,7 +143,7 @@ function guide(m: FamilyMeeting, family: string, print: boolean, icons: Record<s
     el('section', { class: 'fm-sec', id: print ? '' : 'fm-parts' },
       sectionHead(3, 'Everyone’s Part', m.parts.minutes, icons.parts),
       el('p', { class: 'fm-note' }, m.parts.note),
-      el('div', { class: `fm-people${v.dense ? ' fm-people--dense' : ''}` }, ...v.people.map((p) => personCard(p, v.dense))),
+      el('div', { class: `fm-people${v.dense ? ' fm-people--dense' : ''}` }, ...v.people.map((p) => personCard(p, v.dense, print ? undefined : actions))),
       ...(v.dense && v.people.some((p) => p.more) ? [el('p', { class: 'fm-more' }, 'Some people have more on screen in the full meeting.')] : [])),
 
     el('section', { class: 'fm-sec', id: print ? '' : 'fm-practice' },
@@ -159,19 +184,44 @@ export function mountFamilyMeeting(root: HTMLElement) {
   }));
 
   onPlanFamily(root, (family: ReadyFamily) => {
+    const name = familyLabel(family);
+    const familyName = name.replace(/^the /, 'The ');
+    // "We agreed" saves to the household (the signed-in family) or to this tab (a labeled sample). Never on the
+    // owner's print view. Suggestions stay suggestions until someone taps it.
+    const store = family.source === 'account' ? accountStore : family.source === 'sample' && family.sample ? sampleStore(family.sample) : null;
+    let profile = family.profile;
+    const status = q<HTMLElement>(host, '[data-fm-agree-status]');
+    const say = (text: string) => { if (status) status.textContent = text; };
+    const actions: PartActions | undefined = store ? {
+      agree: (memberId, item) => {
+        const r = item.rec;
+        void store.saveAgreement({
+          category: r.category ?? 'other', text: r.description, ...(r.finished ? { finished: r.finished } : {}),
+          ...(r.when ? { when: r.when } : {}), month, ...(suggestionKey(r) ? { source: suggestionKey(r) } : {}), ownerIds: [memberId],
+        }).then((p) => { profile = p; render(); say('Saved: agreed by our family.'); })
+          .catch(() => { render(); say('Couldn’t save that agreement. Check your connection and try again.'); });
+      },
+      undo: (item) => {
+        if (!item.rec.sourceId) return;
+        void store.removeAgreement(item.rec.sourceId)
+          .then((p) => { profile = p; render(); say('Removed. It’s a suggestion again.'); })
+          .catch(() => { render(); say('Couldn’t undo that. Try again.'); });
+      },
+    } : undefined;
     let meeting: FamilyMeeting;
+    const render = () => {
+      meeting = buildFamilyMeeting({ household: family.household, profile, month });
+      q<HTMLElement>(host, '[data-fm-screen]')!.replaceChildren(...guide(meeting, familyName, false, icons, actions));
+      q<HTMLElement>(host, '[data-meeting-sheet]')!.replaceChildren(...guide(meeting, familyName, true, icons));
+    };
     try {
-      meeting = buildFamilyMeeting({ household: family.household, profile: family.profile, month });
+      render();
     } catch {
       q<HTMLElement>(host, '[data-fm-screen]')!.replaceChildren(el('p', { class: 'fm-note' }, 'This month’s meeting isn’t ready yet.'));
       return;
     }
-    const name = familyLabel(family);
-    const familyName = name.replace(/^the /, 'The ');
     q<HTMLElement>(host, '[data-fm-for]')!.textContent = family.source === 'sample' ? `Sample family: ${familyName}` : `Prepared for ${familyName}`;
-    q<HTMLElement>(host, '[data-fm-leader]')!.textContent = meetingView(meeting, { print: false }).leader.text;
-    q<HTMLElement>(host, '[data-fm-screen]')!.replaceChildren(...guide(meeting, familyName, false, icons));
-    q<HTMLElement>(host, '[data-meeting-sheet]')!.replaceChildren(...guide(meeting, familyName, true, icons));
+    q<HTMLElement>(host, '[data-fm-leader]')!.textContent = meetingView(meeting!, { print: false }).leader.text;
     const content = meetingMonth(Number(month.slice(5)));
     const audio = q<HTMLElement>(host, '[data-fm-audio]');
     if (audio && content?.audio) {

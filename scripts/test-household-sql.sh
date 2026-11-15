@@ -36,7 +36,7 @@ done
 # without the household migration: reported, not fatal. Every other suite must pass.
 KNOWN_FAILING_TEST=admin-access
 failed=0
-for t in admin-access accounts-access club-access club-membership club-profile club-welcome-plan club-welcome-rhythm-kit club-welcome-overlap household-partners family-calendar ${EXTRA_TESTS:-}; do
+for t in admin-access accounts-access club-access club-membership club-profile club-welcome-plan club-welcome-rhythm-kit club-welcome-overlap household-partners family-calendar family-agreements ${EXTRA_TESTS:-}; do
   [[ -f supabase/tests/$t.sql ]] || continue
   if out=$(psql_ -d "$DB" -o /dev/null -f "supabase/tests/$t.sql" 2>&1); then
     echo "ok: supabase/tests/$t.sql ($(grep -c '^psql.*ok - \|ok - ' <<<"$out") checks)"

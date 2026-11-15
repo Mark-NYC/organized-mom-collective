@@ -92,14 +92,24 @@ final class AppLaunchTests: XCTestCase {
         assertInsideSafeArea("Cleaning", topElement: text("Daily Reset"))
         shot("02-cleaning-one-done")
 
-        // Club.
-        tab("Club").tap()
+        // Family: Our Family Meeting first, then responsibilities and the Club.
+        XCTAssertFalse(tab("Club").exists, "the old Club tab is still there")
+        XCTAssertFalse(tab("Account").exists, "Account should be the profile icon, not a tab")
+        tab("Family").tap()
+        let family = waitFor(text("plays a part"), "Family tab")
+        waitFor(text("Who does what"), "Family Responsibilities card")
+        waitFor(text("Family Meeting Club"), "Family Meeting Club card")
+        assertInsideSafeArea("Family", topElement: family)
+        shot("03-family")
+        text("Open the Club").tap()
         let club = waitFor(text("One small win"), "Club home")
         assertInsideSafeArea("Club", topElement: club)
-        shot("03-club")
+        shot("03b-club")
 
-        // Account: signed out, no made-up family.
-        tab("Account").tap()
+        // Account, from the profile icon: signed out, no made-up family.
+        tab("Today").tap()
+        waitFor(text("little more calm"), "Today")
+        waitFor(web.links.matching(NSPredicate(format: "label == 'Account and settings'")).firstMatch, "profile icon").tap()
         let account = waitFor(text("Sign in to see your family"), "Account sign-in panel")
         XCTAssertFalse(text("Rivera").exists, "Account shows a made-up family outside the demo")
         assertInsideSafeArea("Account", topElement: text("The people"))

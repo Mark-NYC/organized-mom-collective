@@ -12,7 +12,9 @@ import { newEventId } from '../../lib/calendar/store';
 import type { Household } from '../../lib/club/profile';
 import type { MarkerColor } from '../../data/club/family-colors';
 import { routes } from '../../routes';
-import { changeOf, type Change } from '../../lib/family-meeting-support';
+import { agreementsByPerson, changeOf, type Change } from '../../lib/family-meeting-support';
+import { useFamilyProfile } from '../../lib/family-meeting-client';
+import AgreedParts from '../family/AgreedParts';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -35,6 +37,9 @@ export default function FamilyCalendar() {
   const month = MONTHS[Number(today.slice(5, 7)) - 1];
   const meetingHref = cal.household && !isDemo() ? `/app/club/${month}?view=meeting` : null;
   const now = new Date();
+  // What the family agreed in its Family Meeting, beside the week it plays out in. Agreements only.
+  const profile = useFamilyProfile(cal.state.scope !== 'local' ? cal.state.scope : null);
+  const agreed = agreementsByPerson(cal.household, profile);
 
   const blank = (date: string): CalendarEvent => ({
     id: newEventId(), title: '', starts_on: date, start_time: null, end_time: null, timezone: zone(),
@@ -66,6 +71,13 @@ export default function FamilyCalendar() {
           <p className="mt-1 text-sm">{cal.state.conflicts.map((c) => `“${c.title}”`).join(', ')} {cal.state.conflicts.length > 1 ? 'were' : 'was'} changed by the other grown-up first, so we kept their version. Check it and make your change again if you still need it.</p>
           <button type="button" className="family-link mt-1" onClick={cal.dismissConflicts}>OK</button>
         </div>
+      )}
+
+      {agreed.length > 0 && (
+        <details className="family-panel mt-5" data-calendar-agreements>
+          <summary className="cursor-pointer list-none text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#71866c]">Everyone’s part · agreed in our Family Meeting ▾</summary>
+          <AgreedParts people={agreed} colors={cal.colors} compact />
+        </details>
       )}
 
       <ol className="mt-6 divide-y divide-warm-rule border-y border-warm-rule" data-calendar-week>

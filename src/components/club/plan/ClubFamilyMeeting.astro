@@ -5,8 +5,8 @@
  * engine (src/lib/club/family-meeting.ts), with a one-page US Letter print. Desktop: October's layout, a rail beside
  * the guide. Below 1100px: one column for reading together, with quick links to the four sections.
  *
- * Digital only: it isn't part of the mailed kit or the fulfillment PDF, and it never saves, assigns or confirms
- * anything. Wired by mountFamilyMeeting (src/lib/club/plan/meeting.ts). Docs: docs/club/FAMILY_MEETING.md.
+ * Digital only: it isn't part of the mailed kit or the fulfillment PDF. The only thing it saves is the family's own
+ * optional "We agreed" on a suggestion in Everyone's Part (screen only; docs/ios/FAMILY_MEETING_SUPPORT.md). Wired by mountFamilyMeeting (src/lib/club/plan/meeting.ts). Docs: docs/club/FAMILY_MEETING.md.
  */
 import { meetingMonth } from '../../../data/club/family-meeting';
 import { monthColors } from '../../../theme';
@@ -68,6 +68,7 @@ const sections = [['fm-focus', 'Our Focus', 2], ['fm-talk', 'Let’s Talk', 3], 
     <ol>{sections.map(([id, title], i) => <li><button type="button" data-fm-jump={id}><span>{i + 1}</span>{title}</button></li>)}</ol>
   </nav>
   <div class="fm-main">
+    <p class="fm-agree-status print:hidden" data-fm-agree-status role="status"></p>
     <article class="fm-sheet fm-sheet--screen" data-fm-screen aria-live="polite"><p class="fm-note">Preparing your family’s meeting…</p></article>
     <article class="fm-sheet fm-sheet--print" data-meeting-sheet aria-hidden="true"></article>
   </div>
@@ -116,6 +117,13 @@ const sections = [['fm-focus', 'Our Focus', 2], ['fm-talk', 'Let’s Talk', 3], 
 .fm-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
 .fm-actions button{min-height:48px;padding:12px 18px;border:1px solid var(--fm-ink);border-radius:3px;background:transparent;color:var(--fm-ink);font:600 .74rem var(--font-sans);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
 .fm-actions .fm-print{background:var(--color-warm-button);border-color:var(--color-warm-button);color:#fff}
+.fm-agree,.fm-undo{display:inline-flex;align-items:center;min-height:44px;margin-top:6px;padding:0 16px;border:1px solid var(--fm-sage);border-radius:999px;background:#fff;color:var(--fm-sage);font:600 .72rem var(--font-sans);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.fm-agree:hover{background:#eef3ec}
+.fm-undo{border-color:transparent;padding:0 4px;color:var(--fm-soft);text-decoration:underline;text-underline-offset:4px}
+.fm-agree:disabled,.fm-undo:disabled{opacity:.5;cursor:default}
+.fm-agree-status{margin:0;font-size:.85rem;color:var(--fm-sage);min-height:0}
+.fm-agree-status:empty{display:none}
+@media print{.fm-agree,.fm-undo,.fm-agree-status{display:none!important}}
 .fm-honest{margin-top:16px;color:var(--fm-soft);font-size:.78rem;line-height:1.55}
 .fm-honest a{color:var(--fm-sage);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .fm :focus-visible{outline:2px solid var(--fm-sage);outline-offset:3px}

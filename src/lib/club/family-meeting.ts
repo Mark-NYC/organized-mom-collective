@@ -48,7 +48,13 @@ export interface PartRecommendation {
   /** Profile responsibility id, resource item id, or example id: so the family can accept or adjust it later. */
   sourceId?: string;
   category?: ResponsibilityCategory;
+  /** Confirmed from a meeting's suggestion: that suggestion's key ('month:<example id>' or 'resource:<item id>'). */
+  agreedFrom?: string;
 }
+
+/** The key "We agreed" saves for a suggestion, so the meeting shows it agreed instead of suggesting it again. */
+export const suggestionKey = (r: Pick<PartRecommendation, 'source' | 'sourceId'>) =>
+  r.sourceId && r.source !== 'profile' ? `${r.source}:${r.sourceId}` : undefined;
 
 export interface PersonPart {
   memberId: string;
@@ -183,7 +189,8 @@ export function buildFamilyMeeting(input: MeetingInput): FamilyMeeting {
   const related = profile.responsibilities.filter((r) => inMonth(month, r.category));
   const connection = fill(month.connection, base);
   const existing = related.filter((r) => r.status === 'existing');
-  const confirmed = related.filter((r) => r.status === 'confirmed');
+  // Agreed in this month's meeting counts for this month whatever its category (a resource's own job has none).
+  const confirmed = profile.responsibilities.filter((r) => r.status === 'confirmed' && (inMonth(month, r.category) || r.agreement?.month === input.month));
   const desired = profile.responsibilities.filter((r) => r.status === 'desired' && r.item && month.growth.includes(r.item));
   if (!profile.responsibilities.some((r) => r.status === 'existing')) missing.add('existing responsibilities');
   if (!profile.responsibilities.some((r) => r.status === 'desired')) missing.add('growth areas');
@@ -268,6 +275,8 @@ export function buildFamilyMeeting(input: MeetingInput): FamilyMeeting {
       return part;
     }
     const res = fromResource.get(m.id);
+    // Already agreed to this month's prepared job: shown as agreed, not suggested again.
+    if (res && part.confirmed.some((c) => c.agreedFrom === `resource:${res.id}`)) return part;
     if (res) {
       part.suggested.push({
         memberId: m.id, description: res.description.trim(), status: 'suggested', involvement: 'owns', scope: 'individual',
@@ -322,14 +331,18 @@ export function taskLabel(r: Responsibility): string {
 
 function fromProfile(r: Responsibility, memberId: string, involvement: 'owns' | 'helps', status: 'existing' | 'confirmed', connection: string): PartRecommendation {
   const task = taskLabel(r);
+  // An agreement keeps the words the family agreed to in the meeting.
+  const agreed = status === 'confirmed' ? r.agreement : undefined;
   return {
     memberId,
-    description: involvement === 'owns' ? `Takes care of ${task.toLowerCase()}` : `Helps with ${task.toLowerCase()} when asked`,
+    description: agreed?.text ?? (involvement === 'owns' ? `Takes care of ${task.toLowerCase()}` : `Helps with ${task.toLowerCase()} when asked`),
     status, involvement,
     scope: r.ownerIds.length > 1 ? 'shared' : 'individual',
-    finished: CATEGORY_FINISHED[r.category],
+    ...(agreed?.when ? { when: agreed.when } : {}),
+    finished: agreed?.finished ?? CATEGORY_FINISHED[r.category],
     connection,
     source: 'profile', ...(r.id ? { sourceId: r.id } : {}), category: r.category,
+    ...(agreed?.source ? { agreedFrom: agreed.source } : {}),
   };
 }
 

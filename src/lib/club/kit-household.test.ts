@@ -9,6 +9,8 @@ const account = (over: Partial<ClubStore> = {}): ClubStore => ({
   me: async () => ({ access: true, onboarded: true, kits: [{ slug: SLUG, can: 'edit' }] }),
   household: async () => ({ id: 'h1', displayName: 'The Parks', preferences: {}, profileVersion: 1, members: [{ id: 'm1', firstName: 'Jo', kind: 'adult', role: 'parent', isAccountHolder: true }] }),
   saveHousehold: async () => { throw new Error('unused'); },
+  saveAgreement: async () => { throw new Error('unused'); },
+  removeAgreement: async () => { throw new Error('unused'); },
   documents: async () => ({ can: 'edit', documents: {} }),
   saveDocument: async () => 1,
   profile: async () => null,

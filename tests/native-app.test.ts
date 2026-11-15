@@ -148,7 +148,7 @@ describe('durable storage on a real Storage object', () => {
 describe('app features', () => {
   it('shows only live areas; the Inbox stays hidden until its milestone', () => {
     const live = visibleFeatures().map((f) => f.id);
-    expect(live).toEqual(['today', 'cleaning', 'club', 'family', 'calendar']);
+    expect(live).toEqual(['today', 'cleaning', 'club', 'family', 'account', 'calendar']);
     // Google Calendar import and the AI Family Inbox are future milestones: registered, never shown.
     for (const id of ['inbox']) expect(APP_FEATURES.find((f) => f.id === id)?.status).toBe('planned');
   });

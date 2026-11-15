@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { changeOf, cleaningParts, monthParts, weekAhead } from '../src/lib/family-meeting-support';
-import { buildFamilyMeeting } from '../src/lib/club/family-meeting';
+import { agreementsByPerson, changeOf, cleaningAgreements, meetingWindow, monthAgreements, weekAhead } from '../src/lib/family-meeting-support';
+import { sampleStore } from '../src/lib/club/store';
+import { buildFamilyMeeting, suggestionKey } from '../src/lib/club/family-meeting';
 import { MEETING_GUIDE } from '../src/data/club/meeting-guide';
 import { sampleById } from '../src/data/club/samples';
 import type { CalendarEvent } from '../src/lib/calendar/recurrence';
-import type { FamilyProfile } from '../src/lib/club/family-profile';
+import type { FamilyProfile, Responsibility } from '../src/lib/club/family-profile';
 
 const rivera = sampleById('rivera')!;
 const H = rivera.household;
@@ -67,33 +68,91 @@ describe('before and during: the next seven days', () => {
   });
 });
 
-describe('after: everyone’s part, from the meeting engine', () => {
-  it('is the month’s meeting without the suggestions: agreed and already doing, never suggested', () => {
-    const parts = monthParts(H, P, '2026-11')!;
-    const meeting = buildFamilyMeeting({ household: H, profile: P, month: '2026-11' });
-    expect(parts.route).toBe(meeting.route);
-    for (const p of meeting.parts.people) {
-      const mine = parts.people.find((x) => x.memberId === p.memberId)!;
-      expect(mine.parts.map((x) => x.text)).toEqual([...p.confirmed, ...p.existing].map((r) => r.description));
-      for (const s of p.suggested) expect(mine.parts.map((x) => x.text)).not.toContain(s.description);
-    }
+describe('after: only what the family agreed', () => {
+  const agreement = (over: Partial<Responsibility> = {}): Responsibility => ({
+    id: 'g1', status: 'confirmed', category: 'belongings', ownerIds: ['sample-rivera-sofia'], helperIds: [], scope: 'individual',
+    agreement: { text: 'Pack my soccer bag before bed.', when: 'Monday evening', month: '2026-11', source: 'month:nov-x' }, ...over,
   });
-  it('agreed parts come first and say so', () => {
-    const profile: FamilyProfile = { ...P, responsibilities: [...P.responsibilities, { id: 'c1', status: 'confirmed', category: 'transportation', ownerIds: ['sample-rivera-sofia'], helperIds: [], scope: 'individual' }] };
-    const sofia = monthParts(H, profile, '2027-01')!.people.find((p) => p.name === 'Sofia')!;
-    expect(sofia.parts[0].label).toBe('Agreed by our family');
+  it('what was already done and every suggestion stay out: no agreements, nobody listed', () => {
+    const m = monthAgreements(H, P, '2026-11')!;
+    expect(m.people).toEqual([]);
+    expect(buildFamilyMeeting({ household: H, profile: P, month: '2026-11' }).parts.people.some((p) => p.suggested.length)).toBe(true);
   });
-  it('nothing without a household', () => {
-    expect(monthParts(null, P, '2026-11')).toBeNull();
+  it('an agreement from this month’s meeting shows with its own words, for its person', () => {
+    const profile = { ...P, responsibilities: [...P.responsibilities, agreement()] };
+    const m = monthAgreements(H, profile, '2026-11')!;
+    expect(m.people).toEqual([{ memberId: 'sample-rivera-sofia', name: 'Sofia', parts: [expect.objectContaining({ id: 'g1', text: 'Pack my soccer bag before bed.', when: 'Monday evening' })] }]);
   });
-  it('cleaning: only cleaning and laundry the family already does or agreed, never what they only want', () => {
+  it('the meeting shows it as agreed and suggests nothing new on top', () => {
+    const profile = { ...P, responsibilities: [...P.responsibilities, agreement()] };
+    const sofia = buildFamilyMeeting({ household: H, profile, month: '2026-11' }).parts.people.find((p) => p.firstName === 'Sofia')!;
+    expect(sofia.confirmed.map((c) => [c.description, c.agreedFrom])).toEqual([['Pack my soccer bag before bed.', 'month:nov-x']]);
+    expect(sofia.suggested).toEqual([]);
+  });
+  it('agreeing to the month resource’s own job replaces that suggestion', () => {
+    const resource = [{ memberId: 'sample-rivera-mateo', description: 'Feed the dog after breakfast', id: 'r7' }];
+    const before = buildFamilyMeeting({ household: H, profile: P, month: '2026-11', resource }).parts.people.find((p) => p.firstName === 'Mateo')!;
+    expect(before.suggested.map((x) => suggestionKey(x))).toEqual(['resource:r7']);
+    const profile = { ...P, responsibilities: [...P.responsibilities, agreement({ id: 'g2', category: 'other', ownerIds: ['sample-rivera-mateo'], agreement: { text: 'Feed the dog after breakfast', month: '2026-11', source: 'resource:r7' } })] };
+    const after = buildFamilyMeeting({ household: H, profile, month: '2026-11', resource }).parts.people.find((p) => p.firstName === 'Mateo')!;
+    expect(after.suggested).toEqual([]);
+    expect(after.confirmed.map((c) => c.description)).toEqual(['Feed the dog after breakfast']);
+  });
+  it('an agreement from another month in another area doesn’t show this month', () => {
+    const profile = { ...P, responsibilities: [...P.responsibilities, agreement({ category: 'pet-care', agreement: { text: 'Walk the dog', month: '2027-04' } })] };
+    expect(monthAgreements(H, profile, '2027-01')!.people).toEqual([]);
+  });
+  it('cleaning: only cleaning and laundry agreements, never what the family already does or wants', () => {
     const profile: FamilyProfile = { ...P, responsibilities: [
       ...P.responsibilities,
       { id: 'x1', status: 'existing', category: 'cleaning', ownerIds: ['sample-rivera-mateo'], helperIds: [], scope: 'individual' },
-      { id: 'x2', status: 'desired', category: 'laundry', item: 'put-away-laundry', ownerIds: ['sample-rivera-sofia'], helperIds: [] },
+      agreement({ id: 'g3', category: 'laundry', ownerIds: ['sample-rivera-sofia', 'sample-rivera-mateo'], agreement: { text: 'Fold towels together' } }),
     ] };
-    const people = cleaningParts(H, profile);
-    expect(people.map((p) => p.name)).toEqual(['Mateo']);
-    expect(people[0].parts[0].text).toMatch(/^Takes care of /);
+    const people = cleaningAgreements(H, profile);
+    expect(people.map((p) => [p.name, p.parts.map((x) => x.text)])).toEqual([['Sofia', ['Fold towels together']], ['Mateo', ['Fold towels together']]]);
+  });
+  it('archived people drop out; nothing without a household', () => {
+    const h = { ...H, members: H.members.map((m) => (m.id === 'sample-rivera-sofia' ? { ...m, archived: true } : m)) };
+    expect(agreementsByPerson(h, { ...P, responsibilities: [agreement()] })).toEqual([]);
+    expect(monthAgreements(null, P, '2026-11')).toBeNull();
+  });
+});
+
+describe('the meeting’s week: rolling now, a chosen meeting day later', () => {
+  it('no meeting day: today and the next six days', () => {
+    expect(meetingWindow('2026-11-18')).toEqual({ from: '2026-11-18', to: '2026-11-24' });
+  });
+  it('meeting on Sundays: from the next Sunday, or today when it is Sunday', () => {
+    expect(meetingWindow('2026-11-18', 0)).toEqual({ from: '2026-11-22', to: '2026-11-28' });
+    expect(meetingWindow('2026-11-15', 0)).toEqual({ from: '2026-11-15', to: '2026-11-21' });
+  });
+  it('an invalid meeting day falls back to rolling', () => {
+    expect(meetingWindow('2026-11-18', 9)).toEqual({ from: '2026-11-18', to: '2026-11-24' });
+  });
+  it('weekAhead follows the window and still labels today and tomorrow', () => {
+    const w = weekAhead([ev('Swim', { starts_on: '2026-11-22' })], '2026-11-21', NOW, 0);
+    expect(w.from).toBe('2026-11-22');
+    expect(w.days[0].label).toBe('Tomorrow');
+    expect(w.days[0].items.map((i) => i.title)).toEqual(['Swim']);
+  });
+});
+
+describe('the sample family’s agreements (same rules as the database)', () => {
+  it('agree, no duplicate on a second tap, edit and reassign, remove; the profile’s own rows untouched', async () => {
+    const store = sampleStore('rivera')!;
+    const before = (await store.profile())!.responsibilities.filter((r) => r.status !== 'confirmed');
+    const input = { category: 'belongings' as const, text: 'Pack my bag', month: '2026-11', source: 'month:x', ownerIds: ['sample-rivera-sofia'] };
+    await store.saveAgreement(input);
+    const p = await store.saveAgreement(input);
+    const mine = p.responsibilities.filter((r) => r.status === 'confirmed');
+    expect(mine).toHaveLength(1);
+    const edited = await store.saveAgreement({ ...input, id: mine[0].id, text: 'Pack my bag by 8', ownerIds: ['sample-rivera-mateo'] });
+    const e = edited.responsibilities.find((r) => r.id === mine[0].id)!;
+    expect([e.agreement?.text, e.ownerIds, e.agreement?.source]).toEqual(['Pack my bag by 8', ['sample-rivera-mateo'], 'month:x']);
+    await expect(store.saveAgreement({ ...input, ownerIds: ['someone-else'] })).rejects.toThrow('invalid');
+    const removed = await store.removeAgreement(mine[0].id!);
+    expect(removed.responsibilities.filter((r) => r.status === 'confirmed')).toEqual([]);
+    expect(removed.responsibilities).toEqual(before);
+    await expect(store.removeAgreement(before[0].id!)).rejects.toThrow('not_found');
   });
 });

@@ -1,6 +1,7 @@
 ---
 /**
- * The companion's bottom tab bar (Today · Cleaning · Club · Account), shared by Nav.astro (every /app page) and, in the
+ * The companion's bottom tab bar (website: Today · Cleaning · Club · Account; iPhone app: Today · Calendar · Cleaning ·
+ * Family, with Account behind the profile icon in the header), shared by Nav.astro (every /app page) and, in the
  * iPhone app bundle, ClubLayout (/club/login, /club/family, /club/welcome… ), so no screen in the app is a dead end:
  * the app has no browser back button, and Today is always one tap away (docs/ios/OMC_APP_ROADMAP.md).
  *
@@ -29,8 +30,8 @@ const items = calendar ? [
   { href: '/app', label: 'Today', glyph: '⌂' },
   { href: '/app/family-calendar', label: 'Calendar', glyph: '▤' },
   { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
-  { href: '/app/club', label: 'Club', glyph: '▦' },
-  { href: '/app/account', label: 'Account', glyph: '◯' },
+  // Family: Our Family Meeting, Family Responsibilities and the Family Meeting Club (src/pages/app/family/index.astro).
+  { href: '/app/family', label: 'Family', glyph: '▦' },
 ] : [
   { href: '/app', label: 'Today', glyph: '⌂' },
   { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
@@ -40,6 +41,8 @@ const items = calendar ? [
 const active = (href: string) => {
   if (href === '/app') return path === '/app';
   if (href === '/app/club' && (club || path.startsWith('/club/'))) return true;
+  // The Club, its meeting pages and the family pages all live under the app's Family tab.
+  if (href === '/app/family') return club || path === '/app/family' || /^\/(app\/family|app\/club|club)(\/|$)/.test(path);
   if (appShell && href === '/app/cleaning') return path === '/app/cleaning' || /^\/app\/(week|settings|calendar)(\/|$)/.test(path);
   return path === href || (href !== '/app/calendar' && path.startsWith(href + '/'));
 };

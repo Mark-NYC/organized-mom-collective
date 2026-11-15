@@ -48,7 +48,39 @@ export interface Responsibility {
   helperIds: string[];
   /** From the owners: one is individual, two or more shared, none not assigned yet. */
   scope?: 'individual' | 'shared';
+  /** Confirmed only: what the family agreed in a Family Meeting ("We agreed"; docs/ios/FAMILY_MEETING_SUPPORT.md). */
+  agreement?: Agreement;
 }
+
+/** The words of an agreement, as the meeting showed them, and where it came from. */
+export interface Agreement {
+  text: string;
+  finished?: string;
+  when?: string;
+  /** Kit month 'YYYY-MM' of the meeting it came from. */
+  month?: string;
+  /** The suggestion it came from: 'month:<example id>' or 'resource:<item id>'. */
+  source?: string;
+  agreedAt?: string;
+}
+
+/** What "We agreed" (or an edit / reassignment) saves. `id` edits an existing agreement. */
+export interface AgreementInput {
+  id?: string;
+  category: ResponsibilityCategory;
+  text: string;
+  finished?: string;
+  when?: string;
+  month?: string;
+  source?: string;
+  ownerIds: string[];
+}
+
+export const agreementToDb = (a: AgreementInput) => ({
+  ...(a.id ? { id: a.id } : {}), category: a.category, text: a.text.trim(), owner_ids: [...new Set(a.ownerIds)],
+  ...(a.finished?.trim() ? { finished: a.finished.trim() } : {}), ...(a.when?.trim() ? { when: a.when.trim() } : {}),
+  ...(a.month ? { month: a.month } : {}), ...(a.source ? { source: a.source } : {}),
+});
 
 export interface FamilyProfile {
   setupDone: SetupStep[];
@@ -131,6 +163,8 @@ export interface DbProfile {
   responsibilities: {
     id: string; status: ResponsibilityStatus; category: ResponsibilityCategory; item: string | null; label: string | null;
     owner_ids: string[]; helper_ids: string[]; scope: 'individual' | 'shared' | null;
+    confirmed_at?: string | null; agreed_text?: string | null; agreed_finished?: string | null; agreed_when?: string | null;
+    agreed_month?: string | null; agreed_source?: string | null;
   }[];
 }
 
@@ -148,6 +182,12 @@ export const profileFromDb = (p: DbProfile): FamilyProfile => ({
   responsibilities: p.responsibilities.map((r) => ({
     id: r.id, status: r.status, category: r.category, ownerIds: r.owner_ids, helperIds: r.helper_ids,
     ...(r.item ? { item: r.item } : {}), ...(r.label ? { label: r.label } : {}), ...(r.scope ? { scope: r.scope } : {}),
+    ...(r.status === 'confirmed' && r.agreed_text ? { agreement: {
+      text: r.agreed_text,
+      ...(r.agreed_finished ? { finished: r.agreed_finished } : {}), ...(r.agreed_when ? { when: r.agreed_when } : {}),
+      ...(r.agreed_month ? { month: r.agreed_month } : {}), ...(r.agreed_source ? { source: r.agreed_source } : {}),
+      ...(r.confirmed_at ? { agreedAt: r.confirmed_at } : {}),
+    } } : {}),
   })),
 });
 

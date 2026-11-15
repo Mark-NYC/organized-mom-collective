@@ -29,6 +29,8 @@ export interface MeetingItemView {
   detail?: string;
   when?: string;
   finished?: string;
+  /** The engine's item it shows (screen actions: "We agreed" on a suggestion, undo on an agreement). */
+  rec: PartRecommendation;
 }
 
 export interface MeetingPersonView {
@@ -92,7 +94,7 @@ export function meetingView(meeting: FamilyMeeting, opts: { print: boolean }): M
       if (showFinished && !allFinished) finishedLeft--;
       const text = opts.print ? clip(r.description, PRINT_LIMITS.description) : r.description;
       return {
-        status: r.status, label: STATUS_LABEL[r.status], text,
+        status: r.status, label: STATUS_LABEL[r.status], text, rec: r,
         ...(detail ? { detail } : {}),
         ...(r.when ? { when: r.when } : {}),
         ...(showFinished && r.finished ? { finished: opts.print ? clip(r.finished, PRINT_LIMITS.finished) : r.finished } : {}),

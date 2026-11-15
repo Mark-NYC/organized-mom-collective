@@ -4,6 +4,7 @@
   "include": [
     "^/app$",
     "^/app/(cleaning|week|settings|account|coaching|tidy|family-calendar)$",
+    "^/app/family(/responsibilities)?$",
     "^/app/calendar(/(week|settings))?$",
     "^/app/club(/.*)?$",
     "^/club/(login|invite|welcome|welcome-kit|family|family-vision|family-meeting-guide|start)$",

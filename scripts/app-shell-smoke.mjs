@@ -217,8 +217,90 @@ await ipad.close();
   const parts = page.locator('[data-everyones-part]');
   if (!(await parts.isVisible())) fail('Today: no Everyone\'s Part for a family with parts');
   else if (/Suggested/i.test(await parts.innerText())) fail('Today: shows a suggestion as a part');
-  else console.log('  ✓ Today: everyone\'s part from this month\'s Family Meeting (agreed and already doing only)');
+  else if (/Takes care of|Helps with/.test(await parts.innerText())) fail('Today: shows what was already done as agreed');
+  else console.log('  ✓ Today: Everyone\'s Part before anything is agreed: no suggestions, nothing claimed');
   await page.screenshot({ path: join(OUT, '13-today-everyones-part.png'), fullPage: true });
+  await page.close();
+}
+
+// Navigation: Today · Calendar · Cleaning · Family, Account behind the profile icon. The Family tab leads with Our
+// Family Meeting (the standard guide's four parts), then Family Responsibilities, then the Family Meeting Club.
+{
+  const page = await web.newPage();
+  await page.goto(base + '/app', { waitUntil: 'networkidle' });
+  const tabs = await page.locator('[data-app-tabbar] a').evaluateAll((as) => as.map((a) => a.lastElementChild.textContent.trim()));
+  if (tabs.join() !== 'Today,Calendar,Cleaning,Family') fail(`tabs: expected Today,Calendar,Cleaning,Family, got ${tabs.join()}`);
+  else console.log('  ✓ tabs: Today · Calendar · Cleaning · Family');
+  if (!(await page.locator('[data-profile-link][href="/app/account"]').isVisible())) fail('no profile icon for Account');
+  await page.goto(base + '/app/family', { waitUntil: 'networkidle' });
+  const parts = await page.locator('[data-meeting-parts] li').allInnerTexts();
+  if (parts.length !== 4 || !/Our Focus/.test(parts[0]) || !/Let’s Practice/.test(parts[3])) fail(`Family: the four parts aren't shown in order: ${parts.join(' | ')}`);
+  else if (!(await page.locator('[data-family-responsibilities-card]').isVisible()) || !(await page.locator('[data-family-club-card]').isVisible())) fail('Family: responsibilities or Club card missing');
+  else if (!(await page.locator('[data-app-tabbar] a[href="/app/family"][aria-current="page"]').count())) fail('Family tab not marked current');
+  else console.log('  ✓ Family: Our Family Meeting (four parts), Family Responsibilities, Family Meeting Club');
+  await page.screenshot({ path: join(OUT, '14-family.png'), fullPage: true });
+
+  // "We agreed" in the meeting (labeled sample family, saved in this tab only), then everywhere else.
+  const month = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'][new Date().getMonth()];
+  await page.goto(`${base}/app/club/${month}?sample=rivera&view=meeting`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-fm-ready="true"]', { timeout: 15000 });
+  const sections = await page.locator('[data-fm-screen] .fm-sec h3').allInnerTexts();
+  if (sections.join() !== 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice') fail(`meeting: sections changed: ${sections.join()}`);
+  if (await page.locator('[data-meeting-sheet] .fm-agree, [data-meeting-sheet] .fm-undo').count()) fail('meeting: agree buttons on the printed guide');
+  const agree = page.locator('[data-fm-screen] [data-fm-agree]').first();
+  const who = await agree.getAttribute('data-fm-agree');
+  const suggested = (await agree.locator('xpath=..').locator('.fm-item-text').innerText()).trim();
+  await agree.click();
+  await page.waitForSelector(`[data-fm-screen] [data-fm-undo="${who}"]`, { timeout: 10000 });
+  const card = page.locator('[data-fm-screen] .fm-item[data-status="confirmed"]').filter({ hasText: suggested });
+  if (!(await card.count())) fail('meeting: the agreed part isn\'t shown as agreed');
+  else if (await page.locator('[data-fm-screen] .fm-item[data-status="suggested"]').filter({ hasText: suggested }).count()) fail('meeting: still suggested after agreeing');
+  else console.log(`  ✓ meeting: "We agreed" saves ${who}'s part as agreed (four parts unchanged, not on the print)`);
+  await card.first().scrollIntoViewIfNeeded();
+  await page.screenshot({ path: join(OUT, '15-meeting-we-agreed.png') });
+
+  // Family Responsibilities (labeled demo = the same sample family): edit the words and reassign.
+  await page.goto(base + '/app/family/responsibilities?demo=1', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  if (!(await page.locator('[data-responsibilities-demo]').isVisible())) fail('Responsibilities demo: not labeled');
+  const row = page.locator(`[data-agreement-row="${suggested}"]`);
+  if (!(await row.isVisible())) fail('Responsibilities: the agreement from the meeting is missing');
+  await page.screenshot({ path: join(OUT, '16-responsibilities.png'), fullPage: true });
+  await row.locator('[data-edit-agreement]').click();
+  await page.fill('[data-agreement-text]', 'Pack my bag before bed, every school night.');
+  await page.fill('[data-agreement-when]', 'Before bed');
+  const other = (await page.locator('[data-owner-chip]').allInnerTexts()).map((t) => t.trim()).find((n) => n !== who);
+  await page.click(`[data-owner-chip="${who}"]`);
+  await page.click(`[data-owner-chip="${other}"]`);
+  await page.click('[data-save-agreement]');
+  const edited = page.locator('[data-agreement-row="Pack my bag before bed, every school night."]');
+  if (!(await edited.isVisible()) || !(await edited.innerText()).includes(other)) fail('Responsibilities: edit + reassign didn\'t stick');
+  else console.log(`  ✓ responsibilities: edit the words and reassign ${who} → ${other}`);
+
+  // Today and the calendar show the agreement (agreements only).
+  await page.goto(base + '/app?demo=1', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  const today = await page.locator('[data-everyones-part]').innerText().catch(() => '');
+  if (!today.includes('Pack my bag before bed, every school night.') || !today.includes(other) || !today.includes('Before bed') || today.includes('At ')) fail('Today: the agreement isn\'t in Everyone\'s Part');
+  else if (/Takes care of|Helps with/.test(today)) fail('Today: shows what was already done as agreed');
+  else console.log('  ✓ Today: Everyone\'s Part shows only the agreement');
+  await page.locator('[data-everyones-part]').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: join(OUT, '17-today-agreed.png') });
+  await page.goto(base + '/app/family-calendar?demo=1', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  await page.click('[data-calendar-agreements] summary');
+  if (!(await page.locator('[data-calendar-agreements]').innerText()).includes('Pack my bag before bed')) fail('calendar: the agreement isn\'t shown');
+  else console.log('  ✓ calendar: agreements beside the week');
+  await page.screenshot({ path: join(OUT, '18-calendar-agreed.png') });
+
+  // Remove it: gone everywhere, the profile's own responsibilities stay.
+  await page.goto(base + '/app/family/responsibilities?demo=1', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  await edited.locator('[data-remove-agreement]').click();
+  await edited.locator('[data-confirm-remove]').click();
+  if (!(await page.locator('[data-no-agreements]').isVisible())) fail('Responsibilities: remove didn\'t remove');
+  else if (!(await page.locator('#existing-h + ul li').count())) fail('Responsibilities: removing an agreement touched what the family already does');
+  else console.log('  ✓ responsibilities: remove an agreement; the family profile is untouched');
   await page.close();
 }
 

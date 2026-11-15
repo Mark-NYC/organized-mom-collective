@@ -10,7 +10,8 @@ import { visibleFeatures } from '../../data/app/features';
 import { isDemo, useCalendar } from '../../lib/calendar/client';
 import { localToday, occurrences, timeLabel } from '../../lib/calendar/recurrence';
 import { routes } from '../../routes';
-import { monthOf, monthParts, weekAhead } from '../../lib/family-meeting-support';
+import { monthAgreements, monthOf, weekAhead } from '../../lib/family-meeting-support';
+import AgreedParts from '../family/AgreedParts';
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
@@ -62,9 +63,8 @@ export function TodayPlans() {
   const name = (id?: string | null) => (id ? cal.household?.members.find((m) => m.id === id)?.firstName : undefined);
   const color = (id?: string | null) => cal.colors[id ?? '']?.hex ?? '#9aab8f';
   const week = weekAhead(events, date, today);
-  const parts = monthParts(cal.household, profile, monthOf(today));
-  const withParts = parts?.people.filter((p) => p.parts.length) ?? [];
-  const meetingHref = parts ? `${parts.route}?view=meeting` : null;
+  const agreed = monthAgreements(cal.household, profile, monthOf(today));
+  const meetingHref = agreed ? `${agreed.route}?view=meeting` : null;
   return (
     <div className="space-y-9">
       {isDemo() && (
@@ -112,21 +112,21 @@ export function TodayPlans() {
         </section>
       )}
 
-      {parts && withParts.length > 0 && (
+      {agreed && (
         <section className="family-panel" aria-labelledby="everyones-part-h" data-everyones-part>
           <p id="everyones-part-h" className="label text-[#71866c]">EVERYONE’S PART · {MONTHS[today.getMonth()].toUpperCase()}</p>
-          <ul className="mt-4 space-y-4">
-            {withParts.map((p) => (
-              <li key={p.memberId} data-part-person={p.name}>
-                <p className="flex items-center gap-2 font-semibold"><span aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ background: color(p.memberId) }} />{p.name}</p>
-                <ul className="mt-1 space-y-0.5 pl-[18px] text-[0.92rem] text-warm-soft">
-                  {p.parts.map((x) => <li key={x.text}>{x.text}{x.label === 'Agreed by our family' && <span className="text-[#536e4e]"> · agreed</span>}</li>)}
-                </ul>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-[0.8rem] text-warm-soft">As this month’s Family Meeting lists it: what each person already does and what you agreed.</p>
-          <a href={meetingHref!} className="family-link mt-3">Open this month’s Family Meeting →</a>
+          {agreed.people.length ? (
+            <>
+              <AgreedParts people={agreed.people} colors={cal.colors} />
+              <p className="mt-4 text-[0.8rem] text-warm-soft">Agreed in your Family Meeting.</p>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-warm-soft" data-no-agreements>Nothing agreed yet this month. In your Family Meeting, tap “We agreed” when someone takes a part.</p>
+          )}
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
+            <a href={meetingHref!} className="family-link">This month’s Family Meeting →</a>
+            <a href="/app/family/responsibilities" className="family-link">Who does what →</a>
+          </div>
         </section>
       )}
     </div>
