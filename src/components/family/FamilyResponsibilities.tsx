@@ -10,7 +10,8 @@
  */
 import { useState } from 'react';
 import { useCalendar, isDemo } from '../../lib/calendar/client';
-import { changeAgreement, useFamilyProfileState } from '../../lib/family-meeting-client';
+import { useFamily, type AgreementDraft } from '../../lib/family-meeting-client';
+import { conflictText } from '../../lib/agreements/client';
 import { taskLabel } from '../../lib/club/family-meeting';
 import type { Responsibility } from '../../lib/club/family-profile';
 import type { MarkerColor } from '../../data/club/family-colors';
@@ -26,16 +27,18 @@ const errorText = (e: unknown) => ERRORS[(e as Error).message] ?? 'That didn’t
 export default function FamilyResponsibilities() {
   const cal = useCalendar();
   const scope = cal.state.scope !== 'local' ? cal.state.scope : null;
-  const [profile, setProfile] = useFamilyProfileState(scope);
+  const fam = useFamily(scope);
+  const profile = fam.profile;
   const [msg, setMsg] = useState('');
   const people = (cal.household?.members ?? []).filter((m) => !m.archived && m.firstName.trim());
   const agreed = (profile?.responsibilities ?? []).filter((r) => r.status === 'confirmed' && r.id);
   const existing = (profile?.responsibilities ?? []).filter((r) => r.status === 'existing');
 
-  const run = async (change: Parameters<typeof changeAgreement>[1], done: string) => {
+  const run = async (change: { save: AgreementDraft } | { remove: string }, done: string) => {
     setMsg('');
     try {
-      setProfile(await changeAgreement(scope, change));
+      if ('save' in change) await fam.saveAgreement(change.save);
+      else await fam.removeAgreement(change.remove);
       setMsg(done);
       return true;
     } catch (e) {
@@ -64,6 +67,16 @@ export default function FamilyResponsibilities() {
       ) : (
         <>
           <p role="status" className="text-sm text-[#536e4e]" data-responsibilities-status>{msg}</p>
+          {fam.pending > 0 && fam.status === 'offline' && (
+            <p className="text-sm text-warm-soft" data-agreements-waiting>No connection: {fam.pending} {fam.pending === 1 ? 'change' : 'changes'} saved on this phone, will sync when you’re back online.</p>
+          )}
+          {fam.conflicts.length > 0 && (
+            <div role="alert" className="family-note" data-agreements-conflict>
+              <strong className="text-sm">Changed on another phone</strong>
+              {fam.conflicts.map((c) => <p key={c.id + c.at} className="mt-1 text-sm">{conflictText(c)}</p>)}
+              <button type="button" className="family-link mt-1" onClick={fam.dismissConflicts}>OK</button>
+            </div>
+          )}
           <section aria-labelledby="agreed-h">
             <p id="agreed-h" className="label text-[#71866c]">AGREED BY OUR FAMILY</p>
             {agreed.length ? (

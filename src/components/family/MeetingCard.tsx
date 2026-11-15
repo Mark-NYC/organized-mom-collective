@@ -9,7 +9,6 @@ const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 
 
 export default function MeetingCard() {
   const month = MONTHS[useToday().getMonth()];
-  const name = month[0].toUpperCase() + month.slice(1);
   return (
     <section className="family-feature" aria-labelledby="our-meeting-h" data-our-meeting>
       <p className="label text-[#5c7357]">OUR FAMILY MEETING · {month.toUpperCase()}</p>
@@ -22,8 +21,7 @@ export default function MeetingCard() {
           </li>
         ))}
       </ol>
-      <a href={`/app/club/${month}?view=meeting`} className="family-action mt-6" data-open-meeting>Open {name}’s Family Meeting <span aria-hidden="true" className="ml-2">→</span></a>
-      <a href="/club/family-meeting-guide" className="family-link mt-4 block">How our meeting works →</a>
+      <a href="/app/family/meeting" className="family-action mt-6" data-open-meeting>Start our Family Meeting <span aria-hidden="true" className="ml-2">→</span></a>
     </section>
   );
 }

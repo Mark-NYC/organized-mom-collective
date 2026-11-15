@@ -181,6 +181,8 @@ the live database without explicit approval.
 | 2 | **TestFlight beta** | Apple Developer account, bundle id, signing in CI (App Store Connect API key), app icons/splash from `public/icons`, Universal Links (`/start` and `/app/*` open the app; needs `apple-app-site-association` on the site), `capacitor://localhost` in `CLUB_ALLOWED_ORIGINS`, Supabase Auth redirect URLs, sign-in tested on device, privacy policy published | 5–10 families (calendar owners + Club test members) on TestFlight for 2 weeks; crash-free; sign-in works |
 | 3 | **Accounts step 2 + household members** | Sync cleaning progress to the account (`household_progress`), Keychain session, partner invite (`household_members`, invite by email code), cross-household RLS tests | Two adults on one household see the same progress; no cross-household reads in tests |
 | 4 | **Calendar** | `calendar_events`, manual events with member colors and recurrence (RRULE), week view, Google import (read) + write to the app-created calendar, conflict handling, offline queue | Google verification passed; imports a test calendar; edits round-trip |
+| 4b | **Offline Family Meeting agreements** (owner, 2026-11-15; built on the branch, migration not applied) | Agree, edit, reassign and remove with no signal: client-made ids, a revision per agreement, tombstone removes, an outbox mirrored to native storage, conflicts named on screen (edit vs edit keeps the server copy; edit vs remove keeps it removed; reassign to an archived person refused; the same suggestion agreed on two phones = one agreement). Fold the columns into 20261127 before it's approved. Design: [ACCESS_MODEL_ASSESSMENT.md](ACCESS_MODEL_ASSESSMENT.md) → 3 | Two-phone e2e: changes made offline on both phones, reconnect, no agreement lost or duplicated |
+| 4c | **Household Club access and free basics** (owner, 2026-11-15; built on the branch: 20261128, Our Week sign-in, free family setup, free weekly meeting, free cleaning in the app; not applied) | Both adults open the household's entitled Club months (billing, ownership and fulfillment stay the owner's); a free weekly Family Meeting screen; free Calendar and shared responsibilities; Cleaning per the owner's decision. Assessment, required changes and sequence: [ACCESS_MODEL_ASSESSMENT.md](ACCESS_MODEL_ASSESSMENT.md) | Partner and owner e2e on the isolated backend; no billing data reachable by a partner |
 | 5 | **Smart Family Inbox** | Forwarding address, Email Worker, extraction with Claude, suggestions with approval, retention job, eval set of real (consented) forwarded emails | ≥ target precision on the eval; zero calendar writes without approval |
 | 7 | **App Store launch** | Store listing, review notes (reader/multiplatform: no in-app purchase, sign in with existing account), support flow | Approved; customer copy updated honestly |
 
@@ -346,7 +348,35 @@ future milestones (prepared, not built). Nothing applied to production, deployed
 | 4. Family Meeting support | Sunday Setup removed (page, data, migration, tests). The calendar supports the existing meeting: next 7 days with New/Changed on Today and the calendar, an optional screen-only week beside the meeting, everyone's part (from the meeting engine, suggestions excluded) on Today and cleaning parts in the companion. No database change. 12 unit tests, smoke flows | [FAMILY_MEETING_SUPPORT.md](FAMILY_MEETING_SUPPORT.md) |
 | 5. Agreements + Family tab | "We agreed" in Everyone's Part saves confirmed responsibilities to the household (migration `20261127000000_family_agreements.sql`, 28 SQL checks, not applied); only agreements show as agreed on Today, Calendar and Cleaning; Family Responsibilities edits, reassigns and removes them. Tabs are Today · Calendar · Cleaning · Family; Account is the profile icon. The week is rolling, ready to anchor to a meeting day | [FAMILY_MEETING_SUPPORT.md](FAMILY_MEETING_SUPPORT.md) |
 
-Migrations waiting for the owner's approval, in order: `20261124000000_household_shared.sql`,
-`20261125000000_family_calendar.sql`, `20261127000000_family_agreements.sql` (plus the earlier unapplied
-`20261121`–`20261123` Club ones, independent). Test them on a Supabase branch first (`scripts/test-household-sql.sh`
-logic), then production.
+| 6. Our Week foundation (2026-11-15) | Free sign-in, family setup (colors permanent per person), partner invite, free weekly Family Meeting, free cleaning; offline agreements (20261127 revised); household Club access (20261128); Account for Our Week (who's signed in, the household role, sign out, **delete account** as App Store 5.1.1(v) requires, the household's Club content for either adult, no billing or purchase); deletion guard (20261129). Nothing applied | [OUR_WEEK.md](../brand/OUR_WEEK.md), [OWNERSHIP_AND_BILLING_POLICY.md](OWNERSHIP_AND_BILLING_POLICY.md) |
+
+### Confirmed results (2026-11-15)
+
+| What | Evidence |
+| --- | --- |
+| Family flow in the **real app** on the iPhone Simulator against the isolated backend: sign-in, an event in Maya's color, the free weekly meeting (four parts), "We agreed" in the Club month, the agreement on Today / Calendar / Cleaning, edit + reassign from Family Responsibilities, close and reopen with everything kept | CI `ios-family-e2e`, run 43719625139 (screenshots: artifact `simulator-family-e2e`) |
+| Tabs, safe areas (status bar and home indicator), cleaning checkmark surviving a relaunch and a web-storage wipe, Account → Our Week sign-in | CI `ios-simulator`, run 43723197510 |
+| Two phones, offline: offline edits saved and shown at once, synced on reconnect; the other adult's earlier edit kept and the conflict named; no duplicates; household isolation both ways; free onboarding (Nora/Owen) with no payment, membership or calendar purchase; a Club subscriber keeps her membership; Account: partner deletes their own account and the family stays, deletion refused while a paid membership is active | `scripts/e2e/family-e2e.mjs`, 66 checks (local and CI `family-e2e`) |
+| Database: 16 suites on Postgres 16 (local) and 17 (CI), every migration; and 20261124–27 on production's current schema without 21–23, 28, 29 | `scripts/test-household-sql.sh`, CI `household-db` |
+| Same family colors in the database and the app | `tests/member-colors-parity.test.ts`, `household-colors.sql` |
+| Production compatibility (read-only): every function text 28 and 29 patch exists live; no chargeable subscription is orphaned today | Supabase read-only queries, 2026-11-15 |
+
+Bugs found and fixed by these runs: the Club meeting's jump bar under the status bar; scrolled pages showing text under
+the clock (fixed strip over the status bar in the app shell); the partner's sharing panel claiming a Club membership and
+billing that may not exist; "Sunday Setup" (removed) still named on Account.
+
+### Remaining blockers before TestFlight and Google Calendar
+
+| Blocker | Who |
+| --- | --- |
+| Approve and apply migrations 20261121 → 20261129 one at a time ([MIGRATION_PLAN.md](MIGRATION_PLAN.md)); 29 needs the deletion policy approved first | Owner |
+| Deletion policy decisions: received months after the payer leaves; immediate cancellation and refunds; the Stripe webhook safety net (not built: it changes live billing) | Owner |
+| App Store approach for the Club (today: no purchase, upgrade or billing anywhere in the app) | Owner |
+| January 2027: the kit's 15-minute, five-step meeting vs the four-part, ten-minute guide ([JANUARY_MEETING_ALIGNMENT.md](../club/JANUARY_MEETING_ALIGNMENT.md)) | Owner approval, then content |
+| Our Week setup reuses the Club's family form, which says "It goes on your welcome print" | Copy decision |
+| Apple Developer account, bundle ID, signing, icon/splash, `/privacy`, privacy manifest, `capacitor://localhost` in `CLUB_ALLOWED_ORIGINS` | Owner (table above) |
+| Real-device pass (the Simulator can't show feel, keyboard and swipe-back) | Owner's iPhone via TestFlight |
+
+Migrations waiting for the owner's approval, in order: `20261121`–`20261123` (Club welcome), `20261124` household,
+`20261125` calendar, `20261126` colors, `20261127` agreements, `20261128` household Club access, `20261129` deletion
+guard. Test on a Supabase branch first, then production, one file at a time.

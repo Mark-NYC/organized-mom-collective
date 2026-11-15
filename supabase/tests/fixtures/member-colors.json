@@ -1,0 +1,23 @@
+{
+  "$comment": "Shared by tests/member-colors-parity.test.ts (memberColors in the app) and supabase/tests/household-colors.sql (household_colors_complete in the database): the same household gives the same colors in both. Members are in family order (sort); 'saved' is what preferences.colors held before.",
+  "households": [
+    { "name": "Two adults, two kids, nothing saved",
+      "members": [{"n":"Wren","kind":"adult"},{"n":"Bodhi","kind":"adult"},{"n":"Cleo","kind":"child","y":2017},{"n":"Dev","kind":"child","y":2019}],
+      "saved": {}, "expected": {"Cleo":"blue","Dev":"green","Wren":"purple","Bodhi":"pink"} },
+    { "name": "One chosen color is kept, the rest fill around it",
+      "members": [{"n":"Wren","kind":"adult"},{"n":"Bodhi","kind":"adult"},{"n":"Cleo","kind":"child","y":2017},{"n":"Dev","kind":"child","y":2019}],
+      "saved": {"Cleo":"purple"}, "expected": {"Cleo":"purple","Dev":"blue","Wren":"green","Bodhi":"pink"} },
+    { "name": "Two people saved the same color: the first in order keeps it",
+      "members": [{"n":"Wren","kind":"adult"},{"n":"Cleo","kind":"child","y":2017},{"n":"Dev","kind":"child","y":2019}],
+      "saved": {"Cleo":"teal","Dev":"teal"}, "expected": {"Cleo":"teal","Dev":"blue","Wren":"green"} },
+    { "name": "An unknown saved value is ignored",
+      "members": [{"n":"Wren","kind":"adult"},{"n":"Cleo","kind":"child","y":2017}],
+      "saved": {"Cleo":"gold"}, "expected": {"Cleo":"blue","Wren":"green"} },
+    { "name": "An archived person's color is free for the current family",
+      "members": [{"n":"Wren","kind":"adult"},{"n":"Oona","kind":"child","y":2016,"archived":true},{"n":"Cleo","kind":"child","y":2017}],
+      "saved": {"Oona":"blue"}, "expected": {"Cleo":"blue","Wren":"green"} },
+    { "name": "Nine children: the palette repeats after eight",
+      "members": [{"n":"Wren","kind":"adult"},{"n":"K1","kind":"child","y":2012},{"n":"K2","kind":"child","y":2013},{"n":"K3","kind":"child","y":2014},{"n":"K4","kind":"child","y":2015},{"n":"K5","kind":"child","y":2016},{"n":"K6","kind":"child","y":2017},{"n":"K7","kind":"child","y":2018},{"n":"K8","kind":"child","y":2019},{"n":"K9","kind":"child","y":2020}],
+      "saved": {}, "expected": {"K1":"blue","K2":"green","K3":"purple","K4":"pink","K5":"orange","K6":"teal","K7":"red","K8":"brown","K9":"blue","Wren":"green"} }
+  ]
+}

@@ -6,7 +6,7 @@
  * overflow, leaked tracking and broken link routing before the Xcode build.
  *
  * Checks, per page: no page errors, no missing bundled file (404), no request to Google/Pinterest, no horizontal
- * overflow at 393 px. Then: the "I have the wall calendar" unlock opens cleaning, a checkmark survives a reload, and
+ * overflow at 393 px. Then: Cleaning is free in the app (no wall-calendar unlock), a checkmark survives a reload, and
  * with a stand-in native bridge a shop link opens on the website instead of inside the app.
  *
  * Screenshots → app-shell-smoke/ (CI uploads them). Exit 1 on any failure.
@@ -110,6 +110,7 @@ const manifest = JSON.parse(readFileSync(join(ROOT, 'shell-manifest.json'), 'utf
 const OLD_BRAND = /Organized Family Club|ORGANIZED FAMILY CLUB|organized-family-club-logo/i;
 const ipad = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
 let checked = 0;
+const purchaseHits = [];
 for (const p of manifest.pages) {
   for (const [ctx, label] of [[web, 'iPhone'], [ipad, 'iPad']]) {
     const page = await ctx.newPage();
@@ -125,12 +126,23 @@ for (const p of manifest.pages) {
       const html = await page.content();
       if (OLD_BRAND.test(html)) fail(`${p}: old "Organized Family Club" branding: ${html.match(OLD_BRAND)[0]}`);
       if (/Rivera/.test(await page.locator('body').innerText()) && !/demo=1|sample=/.test(p)) fail(`${p}: shows the made-up Rivera family outside the demo`);
+      // No in-app Club purchasing, upgrade buttons or payment redirects until there's a compliant App Store approach
+      // (owner, 2026-11-15). Links and visible words both.
+      const buy = await page.evaluate(() => {
+        const bad = /\/checkout|\/club\/join|\/club#offer|club_checkout|billing|stripe\.com|buy\.stripe/i;
+        const hrefs = [...document.querySelectorAll('a[href], form[action]')].map((a) => a.getAttribute('href') ?? a.getAttribute('action') ?? '').filter((h) => bad.test(h));
+        const words = (document.body.innerText.match(/\b(upgrade|subscribe now|join the club|get my first month free|start (your|my) free month|account & billing)\b/gi) ?? []);
+        return [...hrefs, ...words];
+      });
+      if (buy.length) purchaseHits.push(`${p}: ${[...new Set(buy)].join(', ')}`);
     }
     await page.close();
   }
   checked++;
 }
 console.log(`  ✓ ${checked} bundled pages checked for a Today tab (iPhone + iPad), old branding and sample families`);
+if (purchaseHits.length) for (const h of purchaseHits) fail(`purchase/billing in the app: ${h}`);
+else console.log('  ✓ no Club purchase, upgrade or billing links on any bundled page');
 await ipad.close();
 
 // Family calendar: works with no account (saved on this phone), survives a reload; in the labeled demo family, a
@@ -332,15 +344,13 @@ await ipad.close();
   await page.close();
 }
 
-// Calendar owners: unlock, then cleaning works and a checkmark survives a reload (native context: the card is app-only UI).
+// Our Week: the complete cleaning companion is free in the app (no wall-calendar unlock); a checkmark survives a reload.
 {
   const page = await visit(native, '/app', '02-today-native');
-  const button = page.locator('[data-calendar-unlock-button]');
-  if (!(await button.isVisible())) fail('"I have the wall calendar" card not shown in the app');
-  else {
-    await button.click();
-    await page.waitForURL(/\/app\/cleaning/);
-    await page.waitForLoadState('networkidle');
+  if (await page.locator('[data-calendar-unlock-button]').isVisible()) fail('the app still asks for the wall calendar before Cleaning');
+  if (!(await page.locator('[data-app-tabbar] a[href="/app/cleaning"]').isVisible())) fail('no Cleaning tab without a wall calendar');
+  {
+    await page.goto(base + '/app/cleaning', { waitUntil: 'networkidle' });
     // A new device sees the companion's short onboarding first: step through it, as she would.
     for (let i = 0; i < 6 && (await page.locator('[role="dialog"] .btn-primary').isVisible().catch(() => false)); i++) {
       await page.locator('[role="dialog"] .btn-primary').click();
@@ -353,7 +363,7 @@ await ipad.close();
       await page.reload({ waitUntil: 'networkidle' });
       const saved = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('omc:v1:daily:') || k.startsWith('omc:v1:focus:')).length);
       if (!saved) fail('/app/cleaning: checkmark not saved after reload');
-      else console.log('  ✓ unlock → cleaning → checkmark saved');
+      else console.log('  ✓ free cleaning (no unlock) → checkmark saved');
       await page.screenshot({ path: join(OUT, '07-cleaning.png') });
     }
   }

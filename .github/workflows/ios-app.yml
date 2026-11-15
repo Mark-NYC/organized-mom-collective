@@ -74,13 +74,13 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/test-household-sql.sh
-      - name: The pending migrations on production's state (without the unapplied 20261121-23 welcome migrations)
+      - name: 20261124-27 on production's current schema (without 20261121-23 and 28, which needs them)
         env:
           PGHOST: localhost
           PGUSER: postgres
           PGPASSWORD: ci-only
-          SKIP_MIGRATIONS: '^2026112[123]'
-          ONLY_TESTS: accounts-access club-access club-membership club-profile household-partners family-calendar family-agreements
+          SKIP_MIGRATIONS: '^2026112[1238]|^20261129'
+          ONLY_TESTS: accounts-access club-access club-membership club-profile household-partners family-calendar household-colors family-agreements household-ownership
         run: bash scripts/test-household-sql.sh
 
   ios-simulator:

@@ -128,7 +128,7 @@ const memberInApp = import.meta.env.PUBLIC_APP_SHELL === 'ios' && !chrome && pat
   {accountsEnabled() && !memberInApp && <SaveNudge />}
   {memberInApp && <AppTabBar club />}
   {memberInApp && <script>import '../lib/native/init';</script>}
-  {memberInApp && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); }</style>}
+  {memberInApp && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); } html.omc-native body::before { content: ''; position: fixed; inset: 0 0 auto 0; height: env(safe-area-inset-top); background-color: inherit; z-index: 1000; pointer-events: none; }</style>}
 </BaseLayout>
 
 <script>

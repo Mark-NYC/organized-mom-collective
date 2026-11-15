@@ -60,6 +60,12 @@ The promise is an intended outcome, not an automatic guarantee. A visible plan m
 - **Physical wall:** a shared, visible family display that helps everyone see the week's plans, meals, priorities and household responsibilities.
 - The two should complement each other without demanding more administration. **Sync, integrations, automated import and a full family app are future aspirations, not current customer promises.**
 
+## Decided 2026-11-15: Our Week (not live)
+
+**Our Week** is the free family planning app and the main entry point; Organized Mom Collective stays the parent brand
+and website; Family Meeting Club is the premium membership. Internal: [OUR_WEEK.md](OUR_WEEK.md). Customer copy below
+is unchanged until the release plan is approved.
+
 ## What exists now: October 2026
 
 The initial offer is a **physical, weekly 11 × 17 inch wall calendar** with access to its **cleaning companion website**. The site currently includes cleaning tasks and routines, with local browser-based progress; it is not the future integrated family system. The wall calendar and companion **do not automatically sync**. Check the product code and live shop status before describing features, access, pricing, edition dates or checkout availability. The cleaning companion is called a **website** or **cleaning companion**, not an app in customer-facing copy.

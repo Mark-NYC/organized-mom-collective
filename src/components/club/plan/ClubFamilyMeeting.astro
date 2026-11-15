@@ -180,7 +180,7 @@ const sections = [['fm-focus', 'Our Focus', 2], ['fm-talk', 'Let’s Talk', 3], 
   .fm-back{display:none}
   .fm-rail{margin-bottom:8px}
   .fm-jump--rail{display:none}
-  .fm-jump--bar{display:block;position:sticky;top:0;z-index:5;margin:16px -16px 0;padding:8px 16px;border-top:1px solid var(--fm-rule);border-bottom:1px solid var(--fm-rule);background:var(--color-ivory)}
+  .fm-jump--bar{display:block;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin:16px -16px 0;padding:8px 16px;border-top:1px solid var(--fm-rule);border-bottom:1px solid var(--fm-rule);background:var(--color-ivory)}
   .fm-jump--bar ol{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0}
   .fm-jump--bar li{flex:none}
   .fm-jump--bar button{width:auto;min-height:44px;padding:0 14px 0 8px;border:1px solid var(--fm-rule);border-radius:999px;background:#fff;font-size:.8rem;gap:8px}

@@ -27,7 +27,8 @@ describe('classifyLink', () => {
   });
   it('opens our other pages on the website, keeping query and hash', () => {
     expect(classifyLink('/shop', HERE)).toEqual({ kind: 'website', url: 'https://www.organizedmomcollective.com/shop' });
-    expect(classifyLink('/club/dashboard', HERE)).toEqual({ kind: 'website', url: 'https://www.organizedmomcollective.com/club/dashboard' });
+    // Billing isn't linked from the app (no in-app purchase or payment redirect): the Club's account page is Account.
+    expect(classifyLink('/club/dashboard', HERE)).toEqual({ kind: 'in-app', href: '/app/account' });
     expect(classifyLink('/calendar#buy', HERE)).toEqual({ kind: 'website', url: 'https://www.organizedmomcollective.com/calendar#buy' });
     expect(classifyLink('/support/', HERE)).toEqual({ kind: 'website', url: 'https://www.organizedmomcollective.com/support' });
   });
@@ -39,7 +40,7 @@ describe('classifyLink', () => {
     expect(classifyLink('/club', HERE)).toEqual({ kind: 'in-app', href: '/app/club' });
     expect(classifyLink('/club/', HERE)).toEqual({ kind: 'in-app', href: '/app/club' });
     expect(classifyLink('https://www.organizedmomcollective.com/club#offer', HERE)).toEqual({ kind: 'in-app', href: '/app/club#offer' });
-    expect(classifyLink('/club/dashboard', HERE).kind).toBe('website');
+    expect(classifyLink('/club/dashboard', HERE)).toEqual({ kind: 'in-app', href: '/app/account' });
   });
   it('sends other sites out', () => {
     expect(classifyLink('https://www.etsy.com/listing/1', HERE)).toEqual({ kind: 'external', url: 'https://www.etsy.com/listing/1' });
