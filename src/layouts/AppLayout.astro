@@ -62,7 +62,7 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     <slot />
   </main>
   {appShell && <script>import '../lib/native/init';</script>}
-  {appShell && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); }</style>}
+  {appShell && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); } html.omc-native body::before { content: ''; position: fixed; inset: 0 0 auto 0; height: env(safe-area-inset-top); background-color: inherit; z-index: 1000; pointer-events: none; }</style>}
   <script is:inline>
     // Offline support for the app only; the future public site stays SW-free.
     if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
