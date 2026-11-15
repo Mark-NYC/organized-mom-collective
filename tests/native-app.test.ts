@@ -169,3 +169,17 @@ describe('iOS project wiring', () => {
     expect(readFileSync('capacitor.config.ts', 'utf8')).toMatch(/appStartPath: 'app'/);
   });
 });
+
+describe('no "Add to Home Screen" inside the iPhone app', () => {
+  it('the app counts as already installed', async () => {
+    const g = globalThis as { Capacitor?: unknown; window?: unknown };
+    const before = g.Capacitor;
+    g.Capacitor = { isNativePlatform: () => true };
+    try {
+      const { isStandalone } = await import('../src/lib/install');
+      expect(isStandalone()).toBe(true);
+    } finally {
+      g.Capacitor = before;
+    }
+  });
+});

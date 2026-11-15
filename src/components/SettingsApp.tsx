@@ -5,6 +5,7 @@ import { resetAllProgress, resetDay, setOnboarded } from '../lib/storage';
 import ConfirmationDialog from './ConfirmationDialog';
 import { InstallSteps } from './InstallInvite';
 import { currentPlatform, isStandalone, saveHandoff } from '../lib/install';
+import { appShellBuild } from '../lib/native/platform';
 import { cleaningRoutes } from '../lib/companion';
 
 export default function SettingsApp() {
@@ -35,7 +36,7 @@ export default function SettingsApp() {
   return (
     <>
       <ul className="border-t border-rule-strong">
-        <Row
+        {!appShellBuild() && <Row
           title="Add to Home Screen"
           detail={
             standalone
@@ -57,7 +58,7 @@ export default function SettingsApp() {
               </button>
             )
           }
-        />
+        />}
         {howOpen && (
           <li className="border-b border-rule pb-5">
             <InstallSteps platform={platform} />
