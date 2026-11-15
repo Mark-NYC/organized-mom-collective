@@ -22,7 +22,7 @@ export const APP_FEATURES: readonly AppFeature[] = [
   { id: 'club', label: 'Club', href: '/app/club', status: 'live', milestone: 1 },
   { id: 'family', label: 'Account', href: '/app/account', status: 'live', milestone: 1 },
   { id: 'calendar', label: 'Calendar', href: '/app/family-calendar', status: 'live', milestone: 3 },
-  { id: 'sunday-setup', label: 'Sunday Setup', href: '/app/sunday-setup', status: 'planned', milestone: 4 },
+  { id: 'sunday-setup', label: 'Sunday Setup', href: '/app/sunday-setup', status: 'live', milestone: 4 },
   { id: 'inbox', label: 'Inbox', href: '/app/inbox', status: 'planned', milestone: 6 },
 ];
 

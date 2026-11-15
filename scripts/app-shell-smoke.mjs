@@ -187,6 +187,41 @@ await ipad.close();
   await page.close();
 }
 
+// Sunday Setup in the labeled demo family (uses the demo calendar from above): every step, assign anything unhandled,
+// a dinner with its cook and a cleaning helper, then the wall-calendar summary shows them in that person's line, and
+// the plan survives a reload.
+{
+  const page = await web.newPage();
+  await page.goto(base + '/app/sunday-setup?demo=1', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  if (!(await page.locator('[data-sunday-demo]').isVisible())) fail('Sunday Setup demo: not labeled as a demo');
+  await page.screenshot({ path: join(OUT, '12-sunday-week.png') });
+  const assign = page.locator('[data-unhandled] [data-assign]').first();
+  if (await assign.count()) await assign.click();
+  await page.click('[data-next]'); // jobs
+  await page.screenshot({ path: join(OUT, '13-sunday-jobs.png') });
+  await page.click('[data-next]'); // dinners
+  const firstDinner = page.locator('[data-dinners] li').nth(1);
+  const day = await firstDinner.locator('[data-dinner]').getAttribute('data-dinner');
+  await firstDinner.locator('[data-dinner]').fill('Tacos');
+  await firstDinner.locator('select').selectOption({ label: 'Luis' });
+  await page.screenshot({ path: join(OUT, '14-sunday-dinners.png') });
+  await page.click('[data-next]'); // cleaning
+  await page.locator('[data-cleaning] li').nth(1).locator('select').selectOption({ label: 'Sofia' });
+  await page.click('[data-next]'); // wall
+  const wall = await page.locator('[data-wall-summary]').innerText();
+  if (!/Dinner: Tacos · Luis cooks/.test(wall)) fail('Sunday Setup: dinner and cook missing from the wall summary');
+  else if (!/Living Room · Sofia/.test(wall)) fail('Sunday Setup: cleaning helper missing from the wall summary');
+  else if (!/Swim practice/.test(wall)) fail('Sunday Setup: calendar events missing from the wall summary');
+  else console.log('  ✓ Sunday Setup: calendar, dinner + cook, cleaning helper all in the wall summary');
+  await page.screenshot({ path: join(OUT, '15-sunday-wall-summary.png'), fullPage: true });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.click('[data-next]'); await page.click('[data-next]');
+  if ((await page.locator(`[data-dinner="${day}"]`).inputValue()) !== 'Tacos') fail('Sunday Setup: plan lost after reload');
+  else console.log('  ✓ Sunday Setup: plan saved on this phone across a reload');
+  await page.close();
+}
+
 // The Club back link ("← Family Meeting Club", href /club) stays in the app: Club Home, not the sales page.
 {
   const page = await native.newPage();

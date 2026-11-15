@@ -41,6 +41,7 @@ export default function FamilyCalendar() {
           <p className="label text-[#71866c]">FAMILY CALENDAR</p>
           <h1 className="family-title mt-3 !text-[2.1rem]" data-week-title>{fmt(days[0], { month: 'short', day: 'numeric' })} – {fmt(days[6], { month: days[0].slice(5, 7) === days[6].slice(5, 7) ? undefined : 'short', day: 'numeric' })}</h1>
         </div>
+        <a href={`${routes.sundaySetup}${isDemo() ? '?demo=1' : ''}`} className="family-link !min-h-0 w-full sm:order-last sm:w-auto" data-open-sunday-setup>Sunday Setup →</a>
         <div className="flex items-center gap-1" role="group" aria-label="Change week">
           <button type="button" className="cal-nav" aria-label="Previous week" onClick={() => setWeek(addDays(week, -7))}>‹</button>
           <button type="button" className="cal-today" onClick={() => setWeek(weekStart(today, startsOn as 0 | 1))}>This week</button>
