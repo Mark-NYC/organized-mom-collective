@@ -153,6 +153,12 @@ final class AppLaunchTests: XCTestCase {
         web.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] %@", prefix)).firstMatch
     }
 
+    /// A person chip (a button with aria-pressed): iOS reports it as a toggle or switch, not a button.
+    private func chip(_ name: String) -> XCUIElement {
+        web.descendants(matching: .any).matching(NSPredicate(format: "(elementType == %d OR elementType == %d OR elementType == %d) AND label ==[c] %@",
+            Int(XCUIElement.ElementType.button.rawValue), Int(XCUIElement.ElementType.toggle.rawValue), Int(XCUIElement.ElementType.switch.rawValue), name)).firstMatch
+    }
+
     private func typeInto(_ field: XCUIElement, _ text: String) {
         field.tap()
         app.typeText(text)
@@ -184,7 +190,7 @@ final class AppLaunchTests: XCTestCase {
         waitFor(web.buttons.matching(NSPredicate(format: "label == %@", "Add to \(f.string(from: Date()))")).firstMatch, "add to today").tap()
         typeInto(waitFor(web.textFields.firstMatch, "event title"), "Soccer practice")
         waitFor(text("All day"), "all day").tap()
-        waitFor(button("Maya"), "Maya chip").tap()
+        waitFor(chip("Maya"), "Maya chip").tap()
         waitFor(control("Save"), "save event").tap()
         waitFor(text("Soccer practice"), "the event on the calendar")
         shot("e2e-02-calendar-event")
@@ -220,8 +226,8 @@ final class AppLaunchTests: XCTestCase {
         waitFor(control("Edit or reassign"), "edit").tap()
         let words = waitFor(web.textViews.firstMatch, "agreement words")
         words.tap(); app.typeText(" Every Tuesday.")
-        waitFor(web.buttons.matching(NSPredicate(format: "label == 'Maya'")).firstMatch, "Maya chip").tap()
-        waitFor(web.buttons.matching(NSPredicate(format: "label == 'Leo'")).firstMatch, "Leo chip").tap()
+        waitFor(chip("Maya"), "Maya chip").tap()
+        waitFor(chip("Leo"), "Leo chip").tap()
         waitFor(control("Save"), "save").tap()
         waitFor(text("Every Tuesday"), "edited words")
         shot("e2e-07-reassigned")
