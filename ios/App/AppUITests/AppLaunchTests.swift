@@ -138,11 +138,12 @@ final class AppLaunchTests: XCTestCase {
         assertInsideSafeArea("Account", topElement: text("The people"))
         shot("04-account")
 
-        // Club sign-in, then back to Today with the tab bar (no dead ends).
+        // Our Week sign-in (free; never the Club's paid onboarding), then back to Today with the tab bar (no dead ends).
         waitFor(control("Sign in"), "Sign in button").tap()
-        waitFor(text("Welcome back"), "Club sign-in")
-        assertInsideSafeArea("Club sign-in", topElement: text("Welcome back"))
-        shot("05-club-sign-in")
+        waitFor(text("Sign in to share your week"), "Our Week sign-in")
+        XCTAssertFalse(text("Welcome back").exists, "Account sign-in opened the Club's sign-in")
+        assertInsideSafeArea("Our Week sign-in", topElement: text("Sign in to share your week"))
+        shot("05-our-week-sign-in")
         tab("Today").tap()
         waitFor(text("little more calm"), "Today after sign-in page")
         _ = account
