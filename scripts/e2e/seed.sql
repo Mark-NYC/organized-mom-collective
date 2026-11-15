@@ -31,6 +31,6 @@ select public.club_household_save('The Ruizes', '{}',
   '[{"first_name":"Rosa","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Tomas","kind":"child","role":"child","birth_year":2016,"birth_month":1}]') \g /dev/null
 select public.calendar_event_save(jsonb_build_object('id', 'ee000000-0000-0000-0000-000000000001', 'title', 'Ruiz private appointment',
   'starts_on', to_char(now(), 'YYYY-MM-DD'), 'timezone', 'America/Chicago', 'member_ids', jsonb_build_array((select id from public.club_family_members where first_name = 'Tomas'))), null) \g /dev/null
-select public.household_agreement_save(jsonb_build_object('category', 'cleaning', 'text', 'Ruiz private chore',
-  'owner_ids', jsonb_build_array((select id from public.club_family_members where first_name = 'Tomas')))) \g /dev/null
+select public.household_agreement_save(jsonb_build_object('id', 'ee000000-0000-0000-0000-0000000000a1', 'category', 'cleaning', 'text', 'Ruiz private chore',
+  'owner_ids', jsonb_build_array((select id from public.club_family_members where first_name = 'Tomas'))), null) \g /dev/null
 reset role;

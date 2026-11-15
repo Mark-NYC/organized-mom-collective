@@ -1,0 +1,9 @@
+---
+/** /app/family/meeting: Our Week (WeeklyMeeting; the free family planning app, docs/ios/OMC_APP_ROADMAP.md). */
+import Layout from '../../../layouts/AppLayout.astro';
+import '../../../styles/family-app-brand.css';
+import WeeklyMeeting from '../../../components/ourweek/WeeklyMeeting';
+---
+<Layout title="Our Family Meeting" description="Ten minutes, once a week, so everyone knows the plan and plays a part.">
+  <WeeklyMeeting client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></WeeklyMeeting>
+</Layout>

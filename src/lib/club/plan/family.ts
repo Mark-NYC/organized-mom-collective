@@ -47,6 +47,8 @@ export function onPlanFamily(root: HTMLElement, callback: (family: ReadyFamily) 
 }
 
 /** "the Rivera family" for a sample, or the household's own name. */
+const OUR_WEEK = import.meta.env.PUBLIC_APP_SHELL === 'ios';
+
 export const familyLabel = (r: ReadyFamily) => (r.source === 'sample' ? r.sampleLabel.replace('Sample: ', '') : r.household.displayName ?? 'your family');
 
 /** Why a member can't open this month yet, in her terms: the payment that brings it, or that it isn't part of hers. */
@@ -64,8 +66,9 @@ function gateMessage(gate: HTMLElement, month: string, result: Exclude<KitHouseh
   const sample = 'sample' in result ? result.sample : null;
   const copy = {
     empty: ['Add your family first', `Your ${month} plan is prepared from your family profile: who lives at home and the children’s ages. Add them and the names and roles fill in for you.`, 'Add your family', clubHref(routes.clubFamily, sample)],
-    'signed-out': ['Sign in to see your plan', `Your ${month} plan is prepared from your family profile. Sign in to see it.`, 'Sign in', routes.clubDashboard],
-    denied: denied ?? [`${month} isn’t open for your account`, 'This month’s kit isn’t available to your account.', 'See your kits', clubHref(routes.clubDashboard, sample)],
+    // In the app (Our Week) sign-in returns here and nothing links to billing (no in-app purchase or payment redirect).
+    'signed-out': ['Sign in to see your plan', `Your ${month} plan is prepared from your family profile. Sign in to see it.`, 'Sign in', OUR_WEEK ? `/app/sign-in?next=${encodeURIComponent(location.pathname)}` : routes.clubDashboard],
+    denied: denied ?? [`${month} isn’t open for your account`, 'This month’s kit isn’t available to your account.', OUR_WEEK ? 'Go to Club Home' : 'See your kits', OUR_WEEK ? routes.appClub : clubHref(routes.clubDashboard, sample)],
     error: ['We couldn’t load your family’s plan', 'Check your connection and try again. Nothing you changed earlier in this tab is lost.', 'Try again', ''],
   }[result.status];
   const [title, text, action, href] = copy;

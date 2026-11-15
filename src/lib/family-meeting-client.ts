@@ -1,15 +1,20 @@
 /**
- * The family profile in the browser / app, for Everyone's Part outside the meeting page (./family-meeting-support.ts).
- * Signed in: the household's profile from the Club's own read (club_family_profile), kept on this phone so the parts
- * still show offline. Demo (?demo=1): the labeled sample family. Otherwise none. Reads only.
+ * The family profile in the browser / app, with the family's agreements in it, for every screen outside the meeting
+ * page (Today, the calendar, cleaning, Family Responsibilities; ./family-meeting-support.ts).
+ *
+ * Signed in: the household's profile (club_family_profile), kept on this phone so it shows offline, with this phone's
+ * agreements laid over it (src/lib/agreements/client.ts: offline-first, synced with the household).
+ * Demo (?demo=1): the labeled sample family, in this tab only. Otherwise none.
  */
 import { useEffect, useState } from 'react';
 import { accountsEnabled, getSession } from './account';
 import { accountStore } from './club/store';
 import { appPreviewStore } from './app-family';
 import { isDemo } from './calendar/client';
-import type { AgreementInput, FamilyProfile } from './club/family-profile';
-import type { ClubStore } from './club/store';
+import { useAgreements, withAgreements, type AgreementStatus } from './agreements/client';
+import type { AgreementRow } from './agreements/store';
+import type { FamilyProfile } from './club/family-profile';
+import type { ResponsibilityCategory } from '../data/club/family-profile';
 
 const CACHE = 'omc:household:profile:v1';
 
@@ -22,24 +27,8 @@ function cached(scope: string): FamilyProfile | null {
   }
 }
 
-/** Where agreements save: the signed-in household, or the labeled demo family on this tab. */
-const familyStore = (): ClubStore | null => (isDemo() ? appPreviewStore() : accountsEnabled() ? accountStore : null);
-
-/** Save or remove an agreement and keep this phone's copy current. Throws the database's error on failure. */
-export async function changeAgreement(scope: string | null, change: { save: AgreementInput } | { remove: string }): Promise<FamilyProfile> {
-  const store = familyStore();
-  if (!store) throw new Error('not_signed_in');
-  const p = 'save' in change ? await store.saveAgreement(change.save) : await store.removeAgreement(change.remove);
-  if (scope && !isDemo()) try { localStorage.setItem(CACHE, JSON.stringify({ scope, profile: p })); } catch { /* private mode */ }
-  return p;
-}
-
-/** `scope` is the household id the profile belongs to (from useCalendar), so another family's copy is never shown. */
-export function useFamilyProfile(scope: string | null): FamilyProfile | null {
-  return useFamilyProfileState(scope)[0];
-}
-
-export function useFamilyProfileState(scope: string | null): [FamilyProfile | null, (p: FamilyProfile) => void] {
+/** The household's profile as the server last sent it (no agreement overlay). */
+function useServerProfile(scope: string | null): [FamilyProfile | null, (p: FamilyProfile) => void] {
   const [profile, setProfile] = useState<FamilyProfile | null>(() => (scope && !isDemo() ? cached(scope) : null));
   useEffect(() => {
     let live = true;
@@ -59,4 +48,55 @@ export function useFamilyProfileState(scope: string | null): [FamilyProfile | nu
     return () => { live = false; };
   }, [scope]);
   return [profile, setProfile];
+}
+
+export interface AgreementDraft {
+  id?: string;
+  category: ResponsibilityCategory;
+  text: string;
+  ownerIds: string[];
+  finished?: string;
+  when?: string;
+  month?: string;
+  source?: string;
+}
+
+/**
+ * The family, its profile and its agreements: what every screen reads, and how agreements change. `scope` is the
+ * household id (from useCalendar), so another family's copy is never shown.
+ */
+export function useFamily(scope: string | null) {
+  const demo = isDemo();
+  const [server, setServer] = useServerProfile(scope);
+  const ag = useAgreements(demo ? null : scope);
+  useEffect(() => { if (!demo && server) ag.seed(server); }, [server]); // eslint-disable-line react-hooks/exhaustive-deps
+  const profile = demo ? server : withAgreements(server, ag.state);
+  const sample = demo ? appPreviewStore() : null;
+  const toRow = (d: AgreementDraft): Omit<AgreementRow, 'revision' | 'id'> & { id?: string } => ({
+    ...(d.id ? { id: d.id } : {}), category: d.category, text: d.text.trim(), owner_ids: [...new Set(d.ownerIds)],
+    finished: d.finished?.trim() || null, when: d.when?.trim() || null, month: d.month ?? null, source: d.source ?? null,
+  });
+  return {
+    profile,
+    /** Saved on this phone at once; sent to the household when there's signal. */
+    async saveAgreement(d: AgreementDraft) {
+      if (sample) return setServer(await sample.saveAgreement({ ...d }));
+      if (!scope) throw new Error('not_signed_in');
+      ag.save(toRow(d));
+    },
+    async removeAgreement(id: string) {
+      if (sample) return setServer(await sample.removeAgreement(id));
+      if (!scope) throw new Error('not_signed_in');
+      ag.remove(id);
+    },
+    status: (demo ? 'none' : ag.status) as AgreementStatus,
+    pending: demo ? 0 : ag.pending,
+    conflicts: demo ? [] : ag.state?.conflicts ?? [],
+    dismissConflicts: ag.dismissConflicts,
+  };
+}
+
+/** The profile with agreements, for screens that only read. */
+export function useFamilyProfile(scope: string | null): FamilyProfile | null {
+  return useFamily(scope).profile;
 }

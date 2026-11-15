@@ -9,7 +9,9 @@
  */
 import { buildFamilyMeeting, suggestionKey, type FamilyMeeting } from '../family-meeting';
 import { meetingView, monthTitle, type MeetingItemView, type MeetingPersonView } from '../family-meeting-view';
-import { accountStore, sampleStore } from '../store';
+import { sampleStore } from '../store';
+import { accountAgreementApi, conflictText, loadAgreements, persistAgreements, seedFromProfile, withAgreements } from '../../agreements/client';
+import { adoptAgreements, newAgreementId, removeLocal, saveLocal, syncAgreements } from '../../agreements/store';
 import { meetingMonth } from '../../../data/club/family-meeting';
 import { el } from './dom';
 import { familyLabel, onPlanFamily, type ReadyFamily } from './family';
@@ -188,29 +190,74 @@ export function mountFamilyMeeting(root: HTMLElement) {
     const familyName = name.replace(/^the /, 'The ');
     // "We agreed" saves to the household (the signed-in family) or to this tab (a labeled sample). Never on the
     // owner's print view. Suggestions stay suggestions until someone taps it.
-    const store = family.source === 'account' ? accountStore : family.source === 'sample' && family.sample ? sampleStore(family.sample) : null;
+    const sample = family.source === 'sample' && family.sample ? sampleStore(family.sample) : null;
+    const account = family.source === 'account';
     let profile = family.profile;
     const status = q<HTMLElement>(host, '[data-fm-agree-status]');
     const say = (text: string) => { if (status) status.textContent = text; };
-    const actions: PartActions | undefined = store ? {
+
+    // Signed in: agreements are saved on this phone first and synced with the household (src/lib/agreements), so
+    // "We agreed" works with no signal and never overwrites the other adult.
+    let ag = account ? seedFromProfile(adoptAgreements(loadAgreements(), family.household.id), family.profile) : null;
+    const shown = () => (ag ? withAgreements(family.profile, ag) : profile);
+    let syncing = false;
+    const sync = async () => {
+      if (!ag || syncing) return;
+      syncing = true;
+      try {
+        const start = ag;
+        const r = await syncAgreements(start, accountAgreementApi);
+        let merged = r.state;
+        for (const o of ag.outbox) if (!start.outbox.includes(o)) merged = o.kind === 'save' && o.row ? saveLocal(merged, o.row) : removeLocal(merged, o.id);
+        ag = merged;
+        persistAgreements(ag);
+        render();
+        if (r.offline && ag.outbox.length) say('Saved on this phone. It will sync with your family when you’re back online.');
+        if (ag.conflicts.length) { say(ag.conflicts.map(conflictText).join(' ')); ag = { ...ag, conflicts: [] }; persistAgreements(ag); }
+      } finally {
+        syncing = false;
+      }
+    };
+    const actions: PartActions | undefined = account || sample ? {
       agree: (memberId, item) => {
         const r = item.rec;
-        void store.saveAgreement({
+        const draft = {
           category: r.category ?? 'other', text: r.description, ...(r.finished ? { finished: r.finished } : {}),
           ...(r.when ? { when: r.when } : {}), month, ...(suggestionKey(r) ? { source: suggestionKey(r) } : {}), ownerIds: [memberId],
-        }).then((p) => { profile = p; render(); say('Saved: agreed by our family.'); })
-          .catch(() => { render(); say('Couldn’t save that agreement. Check your connection and try again.'); });
+        };
+        if (ag) {
+          ag = saveLocal(ag, {
+            id: newAgreementId(), category: draft.category, text: draft.text, owner_ids: draft.ownerIds, finished: draft.finished ?? null,
+            when: draft.when ?? null, month, source: draft.source ?? null, confirmed_at: new Date().toISOString(),
+          });
+          persistAgreements(ag);
+          render();
+          say('Saved: agreed by our family.');
+          void sync();
+          return;
+        }
+        void sample!.saveAgreement(draft)
+          .then((p) => { profile = p; render(); say('Saved: agreed by our family.'); })
+          .catch(() => { render(); say('Couldn’t save that agreement. Try again.'); });
       },
       undo: (item) => {
         if (!item.rec.sourceId) return;
-        void store.removeAgreement(item.rec.sourceId)
+        if (ag) {
+          ag = removeLocal(ag, item.rec.sourceId);
+          persistAgreements(ag);
+          render();
+          say('Removed. It’s a suggestion again.');
+          void sync();
+          return;
+        }
+        void sample!.removeAgreement(item.rec.sourceId)
           .then((p) => { profile = p; render(); say('Removed. It’s a suggestion again.'); })
           .catch(() => { render(); say('Couldn’t undo that. Try again.'); });
       },
     } : undefined;
     let meeting: FamilyMeeting;
     const render = () => {
-      meeting = buildFamilyMeeting({ household: family.household, profile, month });
+      meeting = buildFamilyMeeting({ household: family.household, profile: shown(), month });
       q<HTMLElement>(host, '[data-fm-screen]')!.replaceChildren(...guide(meeting, familyName, false, icons, actions));
       q<HTMLElement>(host, '[data-meeting-sheet]')!.replaceChildren(...guide(meeting, familyName, true, icons));
     };
@@ -236,5 +283,9 @@ export function mountFamilyMeeting(root: HTMLElement) {
     if (fam && family.source === 'account') fam.replaceWith(el('a', { href: routes.clubFamily }, fam.textContent ?? 'your family page'));
     weekBlock(host, family);
     host.dataset.fmReady = 'true';
+    if (ag) {
+      void sync();
+      window.addEventListener('online', () => void sync());
+    }
   });
 }

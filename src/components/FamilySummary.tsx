@@ -18,6 +18,8 @@ import { loadMembership } from '../lib/club/membership';
 import { accountStore } from '../lib/club/store';
 import { routes } from '../routes';
 import HouseholdSharing from './household/HouseholdSharing';
+
+const ourWeek = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 import { householdAccess, type HouseholdAccess } from '../lib/household/api';
 
 export default function FamilySummary() {
@@ -49,9 +51,9 @@ export default function FamilySummary() {
           <h2 className="family-panel-title mt-4">{household?.displayName ?? 'Your family'}</h2>
           {household ? <Members household={household} month={month} /> : <p className="mt-3 text-sm text-warm-soft">You haven’t added your family yet.</p>}
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
-            <a href={routes.clubFamily} className="family-link">{household ? 'Edit our family →' : 'Add your family →'}</a>
+            <a href={ourWeek ? '/app/family/setup' : routes.clubFamily} className="family-link">{household ? 'Edit our family →' : 'Add your family →'}</a>
             {family.club && <a href={routes.appClub} className="family-link">Club Home →</a>}
-            {family.club && <a href={routes.clubDashboard} className="family-link">Account &amp; Billing →</a>}
+            {family.club && !ourWeek && <a href={routes.clubDashboard} className="family-link">Account &amp; Billing →</a>}
           </div>
         </section>
         {household && family.access && <HouseholdSharing household={household} access={family.access} />}
@@ -84,8 +86,9 @@ export default function FamilySummary() {
       <p className="label">YOUR FAMILY</p>
       <h2 className="family-panel-title mt-4">{c.title}</h2>
       <p className="mt-2 text-sm leading-relaxed text-warm-soft">{c.body}</p>
-      {c.signIn && <a href={routes.clubLogin} className="family-action mt-6">Sign in</a>}
-      {c.setup && <a href={routes.clubFamily} className="family-action mt-6">Set up our family</a>}
+      {/* In the app (Our Week, free) sign-in and setup never go through the Club's paid onboarding. */}
+      {c.signIn && <a href={ourWeek ? '/app/sign-in?next=/app/account' : routes.clubLogin} className="family-action mt-6">Sign in</a>}
+      {c.setup && <a href={ourWeek ? '/app/family/setup' : routes.clubFamily} className="family-action mt-6">Set up our family</a>}
     </section>
   );
 }

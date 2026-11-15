@@ -18,7 +18,7 @@ import { sampleById } from '../../data/club/samples';
 import { accountRpc } from '../account';
 import type { FamilyMember, Household, HouseholdPreferences, MemberKind, MemberRole } from './profile';
 import {
-  activitiesToDb, agreementToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
+  activitiesToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
   type Activity, type AgreementInput, type DbProfile, type FamilyProfile, type Responsibility, type SetupStep,
 } from './family-profile';
 
@@ -257,12 +257,10 @@ export const accountStore: ClubStore = {
   async saveResponsibilities(status, list) {
     return profileFromDb(await accountRpc<DbProfile>('club_responsibilities_save', { p_status: status, p_items: responsibilitiesToDb(list) }));
   },
-  async saveAgreement(a) {
-    return profileFromDb(await accountRpc<DbProfile>('household_agreement_save', { p: agreementToDb(a) }));
-  },
-  async removeAgreement(id) {
-    return profileFromDb(await accountRpc<DbProfile>('household_agreement_remove', { p_id: id }));
-  },
+  // A signed-in family's agreements go through the offline-first outbox (src/lib/agreements), which carries the
+  // revision each change started from. Never saved from here.
+  async saveAgreement() { throw new Error('use_agreements_outbox'); },
+  async removeAgreement() { throw new Error('use_agreements_outbox'); },
   async saveFocus(step, f) {
     return profileFromDb(await accountRpc<DbProfile>('club_focus_save', {
       p_step: step, p_challenges: f.challenges, p_challenge_note: f.challengeNote ?? null,

@@ -48,7 +48,7 @@ select pg_temp.as_user('authenticated', :TOMAS);
 select public.household_invite_accept((select i ->> 'code' from inv));
 select public.calendar_event_save(jsonb_build_object('id', 'dd000000-0000-0000-0000-000000000001', 'title', 'Swim', 'starts_on', '2026-11-20',
   'timezone', 'UTC', 'member_ids', jsonb_build_array(:PIA)), null);
-select public.household_agreement_save(jsonb_build_object('category', 'cleaning', 'text', 'Feed the cat', 'owner_ids', jsonb_build_array(:PIA)));
+select public.household_agreement_save(jsonb_build_object('id', gen_random_uuid(), 'category', 'cleaning', 'text', 'Feed the cat', 'owner_ids', jsonb_build_array(:PIA)), null);
 reset role;
 \set COLORS '(select preferences -> ''colors'' from public.club_households where id = (select household_id from public.household_adults where user_id = ''00000000-0000-0000-0000-0000000d0002''))'
 create temp table colors_before as select :COLORS c;

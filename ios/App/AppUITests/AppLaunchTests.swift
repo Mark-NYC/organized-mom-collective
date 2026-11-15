@@ -37,6 +37,13 @@ final class AppLaunchTests: XCTestCase {
         web.links.matching(NSPredicate(format: "label == %@", name)).firstMatch
     }
 
+    /// Tap a bottom tab. Over a long page iOS can report the label's activation point as invalid (run 43682700419);
+    /// the tab is on screen, so tap its center.
+    private func goTo(_ name: String) {
+        let t = waitFor(tab(name), "\(name) tab")
+        if t.isHittable { t.tap() } else { t.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap() }
+    }
+
     @discardableResult
     private func waitFor(_ element: XCUIElement, _ what: String, timeout: TimeInterval = 20) -> XCUIElement {
         XCTAssertTrue(element.waitForExistence(timeout: timeout), "Not found: \(what)")
@@ -84,7 +91,8 @@ final class AppLaunchTests: XCTestCase {
         shot("01-today")
 
         // A calendar owner opens the cleaning companion, finishes first-run, checks one task.
-        waitFor(control("I have the wall calendar"), "wall calendar unlock").tap()
+        XCTAssertFalse(control("I have the wall calendar").exists, "Our Week asks for the wall calendar before Cleaning")
+        goTo("Cleaning")
         finishCleaningOnboarding()
         let firstTask = waitFor(text("Make beds"), "first Daily Reset task")
         firstTask.tap()
@@ -141,7 +149,7 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(web.waitForExistence(timeout: 30))
         waitFor(text("little more calm"), "Today after storage wipe")
         let cleaningTab = tab("Cleaning")
-        XCTAssertTrue(cleaningTab.waitForExistence(timeout: 20), "Cleaning tab gone after a storage wipe: the unlock wasn't restored")
+        XCTAssertTrue(cleaningTab.waitForExistence(timeout: 20), "Cleaning tab gone after a storage wipe")
         cleaningTab.tap()
         waitFor(oneTaskDone, "checkmark restored after a storage wipe")
         shot("07-cleaning-after-storage-wipe")
@@ -185,7 +193,7 @@ final class AppLaunchTests: XCTestCase {
         shot("e2e-01-signed-in")
 
         // A calendar event for Maya.
-        tab("Calendar").tap()
+        goTo("Calendar")
         let f = DateFormatter(); f.locale = Locale(identifier: "en_US"); f.dateFormat = "EEEE, MMMM d"
         waitFor(web.buttons.matching(NSPredicate(format: "label == %@", "Add to \(f.string(from: Date()))")).firstMatch, "add to today").tap()
         typeInto(waitFor(web.textFields.firstMatch, "event title"), "Soccer practice")
@@ -196,32 +204,37 @@ final class AppLaunchTests: XCTestCase {
         shot("e2e-02-calendar-event")
 
         // "We agreed" in this month's Family Meeting.
-        tab("Family").tap()
+        goTo("Family")
         waitFor(text("plays a part"), "Family tab")
-        web.links.matching(NSPredicate(format: "label BEGINSWITH[c] 'Open' AND label CONTAINS[c] 'Family Meeting'")).firstMatch.tap()
+        // The free weekly meeting (Our Week), then this month's Club meeting (Jen's household is a member).
+        waitFor(control("Start our Family Meeting"), "free weekly meeting").tap()
+        waitFor(text("Let’s Practice"), "the four parts")
+        shot("e2e-03a-free-weekly-meeting")
+        waitFor(text("This month’s Family Focus"), "Club month meeting (member)").tap()
         let agree = waitFor(button("We agreed: Maya"), "We agreed for Maya", timeout: 30)
         agree.tap()
         waitFor(button("Undo the agreement: Maya"), "agreed for Maya")
-        shot("e2e-03-meeting-we-agreed")
+        shot("e2e-03b-club-meeting-we-agreed")
 
         // Today and the calendar show it.
-        tab("Today").tap()
+        goTo("Today")
         waitFor(text("trash"), "Today: the agreement")
         shot("e2e-04-today-agreed")
-        tab("Calendar").tap()
+        goTo("Calendar")
         waitFor(text("agreed in our Family Meeting"), "Calendar: agreements panel").tap()
         waitFor(text("trash"), "Calendar: the agreement")
         shot("e2e-05-calendar-agreed")
 
         // Cleaning (a calendar owner): Maya's cleaning part.
-        tab("Today").tap()
-        waitFor(control("I have the wall calendar"), "wall calendar unlock").tap()
+        goTo("Today")
+        XCTAssertFalse(control("I have the wall calendar").exists, "Our Week asks for the wall calendar before Cleaning")
+        goTo("Cleaning")
         finishCleaningOnboarding()
         waitFor(text("part in cleaning"), "Cleaning: the agreement")
         shot("e2e-06-cleaning-agreed")
 
         // Edit and reassign to Leo on Family Responsibilities.
-        tab("Family").tap()
+        goTo("Family")
         waitFor(text("Who does what"), "responsibilities card").tap()
         waitFor(control("Edit or reassign"), "edit").tap()
         let words = waitFor(web.textViews.firstMatch, "agreement words")
@@ -231,7 +244,7 @@ final class AppLaunchTests: XCTestCase {
         waitFor(control("Save"), "save").tap()
         waitFor(text("Every Tuesday"), "edited words")
         shot("e2e-07-reassigned")
-        tab("Today").tap()
+        goTo("Today")
         waitFor(text("Every Tuesday"), "Today after the edit")
         XCTAssertTrue(text("Leo").waitForExistence(timeout: 10), "Today shows Leo")
 
@@ -241,7 +254,7 @@ final class AppLaunchTests: XCTestCase {
         app.launch()
         waitFor(text("Every Tuesday"), "agreement after relaunch", timeout: 30)
         shot("e2e-08-today-after-relaunch")
-        tab("Calendar").tap()
+        goTo("Calendar")
         waitFor(text("Soccer practice"), "event after relaunch")
         shot("e2e-09-calendar-after-relaunch")
     }

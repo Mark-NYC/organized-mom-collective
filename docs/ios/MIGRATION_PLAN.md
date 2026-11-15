@@ -44,8 +44,8 @@ rehearsed (`supabase/rollout/rollback-welcome-rhythm-kit.sql`, `rollback-welcome
 | 4 | `20261124000000_household_shared.sql` | Ready (revised 2026-11-15) | `household_adults`, partners by invitation, **two adults max**, shared family profile, revision-checked family saves, owner linked to her family row, **owner deleting her account hands the household to the partner** | production today (independent of 1–3) |
 | 5 | `20261125000000_family_calendar.sql` | Ready | Shared calendar, free | 4 |
 | 6 | `20261126000000_household_member_colors.sql` | **New**, ready | Every member's color saved permanently by member id; backfill = today's colors | 4 |
-| 7 | `20261127000000_family_agreements.sql` | **Revise before approval** | "We agreed" agreements | 4 |
-| 8 | `20261128000000_household_club_access.sql` | **To write** (after your approval of this plan) | Both adults use the household's Club entitlement | 1–4 |
+| 7 | `20261127000000_family_agreements.sql` | Ready (revised 2026-11-15 for offline) | "We agreed" agreements: ids made on the phone, a revision per agreement, tombstone removes, a changes feed; conflicts refused, never overwritten | 4 |
+| 8 | `20261128000000_household_club_access.sql` | Ready (written 2026-11-15) | Both adults use the household's Club entitlement; billing, address, approvals and fulfillment stay the owner's | 1–4 |
 
 Applying 1–3 before 4 matters for 8 only: 8 redefines `club_me`, whose current definition is 23's. Writing 8 against
 production's older `club_me` instead would silently drop 22–23's welcome fields. So: 1 → 2 → 3, then 4 onward.
@@ -88,7 +88,34 @@ Between steps, the live website keeps working: every change is additive or keeps
 - Every existing suite still passes: accounts, Club access, membership (257), profile, welcome (21–23), partners,
   calendar, agreements.
 
-## 4. Still to build before approval of 7 and 8
+## 4. 7 and 8, as built (2026-11-15)
+
+**7 (revised):** `household_agreement_save(p, p_base)` creates with the phone's id or updates only from the revision it
+started from (`conflict` otherwise; `removed` if the other adult removed it); the same suggestion agreed on two phones
+returns the existing agreement; `household_agreement_remove(id, base)` keeps a tombstone; `household_agreements(since)`
+is the changes feed (removals included). The profile read leaves removed ones out. The app keeps an outbox on the
+phone (`src/lib/agreements/`), like the calendar's. Tests: 52 SQL checks, 10 unit tests (fake server, every conflict
+rule), and the two-phone end-to-end flow (offline edit saved and shown at once; the other adult's earlier edit kept and
+named; a non-conflicting offline edit syncs on reconnect).
+
+**8:** one resolver, `household_billing_user(uid)`: the household owner for either adult. Patched from the live
+definitions (exact text match or the migration stops): `club_resource_get` / `_save`, `club_document_get` / `_save`,
+`club_welcome_plan_get` / `_save` use it. `club_me` becomes a thin wrapper: the owner's view is byte-for-byte as
+before (`club_me_for`, generated from 23's definition); a partner gets access, kits and months, without plan, status,
+renewal, grant, intro, address, welcome items, mailings or the next charge. Owner-only, untouched: approvals of the
+monthly print and the Family Rhythm, the Welcome Kit guide review, the Vision print, fulfillment; `club_address_save`
+now refuses partners (`owner_only`). Tests: 30 SQL checks (partner opens and edits the household's month and Family
+Rhythm; can't approve printing, set an address or personalize the Vision print; sees no billing fields; after the
+owner's membership ends both can only read; a removed partner loses access at once; strangers and anon get nothing).
+
+**Production compatibility (read-only check of live definitions, 2026-11-15):** every text 8 patches exists in
+production: `uid uuid := auth.uid();` in `club_resource_get`, `club_resource_save`, `club_document_get`,
+`club_document_save`, `club_me`; the address marker in `club_address_save`; the `club_me()` header.
+
+**Database test runs (throwaway Postgres 16 locally; CI on Postgres 17):** all 14 suites pass with every migration;
+and 20261124–27 pass on production's current schema without 21–23 and 28 (CI's second pass).
+
+## (Superseded) what was still to build
 
 **7: offline agreements (revise 20261127):** a client-made id on create (a retry never duplicates), a `revision` per
 agreement (edits and removes carry it; `conflict` instead of overwriting), tombstone removes (an offline edit to a
@@ -121,5 +148,5 @@ outbox like the calendar's.
 2. Apply 1, 2, 3 (switch stays off). Check: Family Rhythm page loads for a test member; `club_settings.welcome_item = 'vision'`.
 3. Apply 4, 5, 6 together in one session. Check: 10 households each have one owner row; 20 colors saved and equal to the
    dry run; the live family form still saves.
-4. Apply 7 (revised) and 8 when built and approved.
+4. Apply 7 and 8 (built; need your approval).
 5. Only then ship the app and website code that uses them.
