@@ -54,12 +54,13 @@ jobs:
           retention-days: 7
 
   household-db:
-    # Household, partner and (later) calendar database tests on a throwaway Postgres service. Never a real project.
+    # Household, partner, calendar and agreement database tests on a throwaway Postgres 17 service (production's
+    # major version). Never a real project.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: ci-only
         ports: ['5432:5432']
@@ -72,6 +73,14 @@ jobs:
           PGHOST: localhost
           PGUSER: postgres
           PGPASSWORD: ci-only
+        run: bash scripts/test-household-sql.sh
+      - name: The pending migrations on production's state (without the unapplied 20261121-23 welcome migrations)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+          SKIP_MIGRATIONS: '^2026112[123]'
+          ONLY_TESTS: accounts-access club-access club-membership club-profile household-partners family-calendar family-agreements
         run: bash scripts/test-household-sql.sh
 
   ios-simulator:
@@ -153,7 +162,7 @@ jobs:
     timeout-minutes: 30
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: ci-only
         ports: ['5432:5432']
