@@ -187,38 +187,38 @@ await ipad.close();
   await page.close();
 }
 
-// Sunday Setup in the labeled demo family (uses the demo calendar from above): every step, assign anything unhandled,
-// a dinner with its cook and a cleaning helper, then the wall-calendar summary shows them in that person's line, and
-// the plan survives a reload.
+// The calendar supports the existing Family Meeting; there is no Sunday Setup or other weekly ritual. A plan added today
+// shows on Today's "next 7 days" for the meeting, marked New, and on the calendar with the same mark.
 {
   const page = await web.newPage();
-  await page.goto(base + '/app/sunday-setup?demo=1', { waitUntil: 'networkidle' });
+  if (await page.goto(base + '/app/sunday-setup').then(() => page.locator('[data-sunday-card], [data-sunday-demo]').count()) > 0) fail('Sunday Setup still bundled');
+  await page.goto(base + '/app/family-calendar', { waitUntil: 'networkidle' });
+  if (await page.locator('[data-open-sunday-setup]').count()) fail('calendar: still links to Sunday Setup');
+  const today = page.locator('[data-calendar-day]').filter({ hasText: 'Today' });
+  await today.locator('button.cal-add').click();
+  await page.fill('[data-event-sheet] [data-field="title"]', 'Team photo');
+  await page.fill('[data-event-sheet] [data-field="start"]', '17:00').catch(() => {});
+  await page.click('[data-save-event]');
+  const row = page.locator('[data-calendar-event="Team photo"]');
+  if (!(await row.locator('[data-change="new"]').isVisible())) fail('calendar: a plan added this week isn\'t marked New');
+  else console.log('  ✓ calendar: a plan added this week is marked New for the meeting');
+  await page.goto(base + '/app', { waitUntil: 'networkidle' });
+  const week = page.locator('[data-meeting-week]');
+  if (!(await week.isVisible())) fail('Today: no "next 7 days" for the Family Meeting');
+  else if (!/Team photo/.test(await week.locator('[data-meeting-changes]').innerText())) fail('Today: the new plan isn\'t listed as new or changed');
+  else console.log('  ✓ Today: the next 7 days for the Family Meeting, with what\'s new');
+  if (await page.locator('[data-sunday-card]').count()) fail('Today: still shows Sunday Setup');
+  await week.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: join(OUT, '12-today-meeting-week.png'), fullPage: true });
+  // After the meeting, in the labeled demo family: everyone's part as the month's meeting lists it, in their colors.
+  await page.goto(base + '/app?demo=1', { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
-  if (!(await page.locator('[data-sunday-demo]').isVisible())) fail('Sunday Setup demo: not labeled as a demo');
-  await page.screenshot({ path: join(OUT, '12-sunday-week.png') });
-  const assign = page.locator('[data-unhandled] [data-assign]').first();
-  if (await assign.count()) await assign.click();
-  await page.click('[data-next]'); // jobs
-  await page.screenshot({ path: join(OUT, '13-sunday-jobs.png') });
-  await page.click('[data-next]'); // dinners
-  const firstDinner = page.locator('[data-dinners] li').nth(1);
-  const day = await firstDinner.locator('[data-dinner]').getAttribute('data-dinner');
-  await firstDinner.locator('[data-dinner]').fill('Tacos');
-  await firstDinner.locator('select').selectOption({ label: 'Luis' });
-  await page.screenshot({ path: join(OUT, '14-sunday-dinners.png') });
-  await page.click('[data-next]'); // cleaning
-  await page.locator('[data-cleaning] li').nth(1).locator('select').selectOption({ label: 'Sofia' });
-  await page.click('[data-next]'); // wall
-  const wall = await page.locator('[data-wall-summary]').innerText();
-  if (!/Dinner: Tacos · Luis cooks/.test(wall)) fail('Sunday Setup: dinner and cook missing from the wall summary');
-  else if (!/Living Room · Sofia/.test(wall)) fail('Sunday Setup: cleaning helper missing from the wall summary');
-  else if (!/Swim practice/.test(wall)) fail('Sunday Setup: calendar events missing from the wall summary');
-  else console.log('  ✓ Sunday Setup: calendar, dinner + cook, cleaning helper all in the wall summary');
-  await page.screenshot({ path: join(OUT, '15-sunday-wall-summary.png'), fullPage: true });
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.click('[data-next]'); await page.click('[data-next]');
-  if ((await page.locator(`[data-dinner="${day}"]`).inputValue()) !== 'Tacos') fail('Sunday Setup: plan lost after reload');
-  else console.log('  ✓ Sunday Setup: plan saved on this phone across a reload');
+  if (!(await page.locator('[data-today-demo]').isVisible())) fail('Today demo: not labeled as a demo');
+  const parts = page.locator('[data-everyones-part]');
+  if (!(await parts.isVisible())) fail('Today: no Everyone\'s Part for a family with parts');
+  else if (/Suggested/i.test(await parts.innerText())) fail('Today: shows a suggestion as a part');
+  else console.log('  ✓ Today: everyone\'s part from this month\'s Family Meeting (agreed and already doing only)');
+  await page.screenshot({ path: join(OUT, '13-today-everyones-part.png'), fullPage: true });
   await page.close();
 }
 

@@ -12,6 +12,9 @@ import { newEventId } from '../../lib/calendar/store';
 import type { Household } from '../../lib/club/profile';
 import type { MarkerColor } from '../../data/club/family-colors';
 import { routes } from '../../routes';
+import { changeOf, type Change } from '../../lib/family-meeting-support';
+
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const fmt = (d: string, o: Intl.DateTimeFormatOptions) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { ...o, timeZone: 'UTC' });
@@ -28,6 +31,10 @@ export default function FamilyCalendar() {
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i));
   const list = occurrences(events, days[0], days[6]);
   const people = (cal.household?.members ?? []).filter((m) => !m.archived);
+  // The Family Meeting itself is the Club's (one a month, met weekly); the calendar only links to it for a household.
+  const month = MONTHS[Number(today.slice(5, 7)) - 1];
+  const meetingHref = cal.household && !isDemo() ? `/app/club/${month}?view=meeting` : null;
+  const now = new Date();
 
   const blank = (date: string): CalendarEvent => ({
     id: newEventId(), title: '', starts_on: date, start_time: null, end_time: null, timezone: zone(),
@@ -41,7 +48,7 @@ export default function FamilyCalendar() {
           <p className="label text-[#71866c]">FAMILY CALENDAR</p>
           <h1 className="family-title mt-3 !text-[2.1rem]" data-week-title>{fmt(days[0], { month: 'short', day: 'numeric' })} – {fmt(days[6], { month: days[0].slice(5, 7) === days[6].slice(5, 7) ? undefined : 'short', day: 'numeric' })}</h1>
         </div>
-        <a href={`${routes.sundaySetup}${isDemo() ? '?demo=1' : ''}`} className="family-link !min-h-0 w-full sm:order-last sm:w-auto" data-open-sunday-setup>Sunday Setup →</a>
+        {meetingHref && <a href={meetingHref} className="family-link !min-h-0 w-full sm:order-last sm:w-auto" data-open-meeting>This month’s Family Meeting →</a>}
         <div className="flex items-center gap-1" role="group" aria-label="Change week">
           <button type="button" className="cal-nav" aria-label="Previous week" onClick={() => setWeek(addDays(week, -7))}>‹</button>
           <button type="button" className="cal-today" onClick={() => setWeek(weekStart(today, startsOn as 0 | 1))}>This week</button>
@@ -76,7 +83,7 @@ export default function FamilyCalendar() {
               </div>
               {items.length > 0 && (
                 <ul className="mt-2 space-y-2">
-                  {items.map((o) => <EventRow key={`${o.event.id}-${o.date}`} o={o} colors={cal.colors} household={cal.household} onOpen={() => setEditing({ event: cal.state.events[o.event.id], date: o.date, isNew: false })} />)}
+                  {items.map((o) => <EventRow key={`${o.event.id}-${o.date}`} o={o} change={changeOf(o.event, now)} colors={cal.colors} household={cal.household} onOpen={() => setEditing({ event: cal.state.events[o.event.id], date: o.date, isNew: false })} />)}
                 </ul>
               )}
             </li>
@@ -143,7 +150,7 @@ function StatusLine({ status, signedIn, unsaved, waiting }: { status: SyncStatus
   );
 }
 
-function EventRow({ o, colors, household, onOpen }: { o: Occurrence; colors: Record<string, MarkerColor>; household: Household | null; onOpen: () => void }) {
+function EventRow({ o, change, colors, household, onOpen }: { o: Occurrence; change?: Change; colors: Record<string, MarkerColor>; household: Household | null; onOpen: () => void }) {
   const e = o.event;
   const name = (id: string) => household?.members.find((m) => m.id === id)?.firstName;
   const who = e.member_ids.map((id) => ({ id, name: name(id), color: colors[id] })).filter((p) => p.name);
@@ -155,7 +162,7 @@ function EventRow({ o, colors, household, onOpen }: { o: Occurrence; colors: Rec
       <button type="button" onClick={onOpen} className="flex w-full items-stretch gap-3 bg-white text-left shadow-[0_1px_0_rgba(0,0,0,0.04)]" data-calendar-event={e.title}>
         <span aria-hidden="true" className="w-[5px] shrink-0" style={{ background: bar }} />
         <span className="min-w-0 flex-1 py-2.5 pr-3">
-          <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(e)}{e.recurrence ? ' · repeats' : ''}</span>
+          <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(e)}{e.recurrence ? ' · repeats' : ''}{change && <span className="cal-change ml-2 align-[1px]" data-change={change}>{change === 'new' ? 'New' : 'Changed'}</span>}</span>
           <span className="mt-0.5 block font-semibold text-warm-ink">{e.title}</span>
           {(who.length > 0 || owner) && (
             <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8rem] text-warm-soft">

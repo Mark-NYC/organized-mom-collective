@@ -7,9 +7,11 @@
 import { useToday } from '../../lib/hooks';
 import { planFor } from '../../lib/schedule';
 import { visibleFeatures } from '../../data/app/features';
-import { useCalendar } from '../../lib/calendar/client';
+import { isDemo, useCalendar } from '../../lib/calendar/client';
 import { localToday, occurrences, timeLabel } from '../../lib/calendar/recurrence';
 import { routes } from '../../routes';
+import { monthOf, monthParts, weekAhead } from '../../lib/family-meeting-support';
+import { useFamilyProfile } from '../../lib/family-meeting-client';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 const title = (s: string) => s[0].toUpperCase() + s.slice(1);
@@ -46,44 +48,87 @@ export function ClubThisMonth() {
 }
 
 /**
- * Today's plans from the family calendar, in each person's color, and the way into Sunday Setup (iPhone app).
- * Reads the calendar saved on this phone (src/lib/calendar/client.ts), so it shows even offline.
+ * Today's plans from the family calendar, in each person's color (iPhone app), then what supports the family's weekly
+ * Family Meeting (src/lib/family-meeting-support.ts): the next seven days with what's new or changed, and everyone's
+ * part as this month's meeting lists it. Reads the calendar saved on this phone, so it shows even offline.
  */
 export function TodayPlans() {
   const today = useToday();
   const cal = useCalendar();
+  const profile = useFamilyProfile(cal.state.scope !== 'local' ? cal.state.scope : null);
   const date = localToday(today);
-  const list = occurrences(Object.values(cal.state.events), date, date);
+  const events = Object.values(cal.state.events);
+  const list = occurrences(events, date, date);
   const name = (id?: string | null) => (id ? cal.household?.members.find((m) => m.id === id)?.firstName : undefined);
+  const color = (id?: string | null) => cal.colors[id ?? '']?.hex ?? '#9aab8f';
+  const week = weekAhead(events, date, today);
+  const parts = monthParts(cal.household, profile, monthOf(today));
+  const withParts = parts?.people.filter((p) => p.parts.length) ?? [];
+  const meetingHref = parts ? `${parts.route}?view=meeting` : null;
   return (
-    <section className="family-panel" aria-labelledby="today-plans-h" data-today-plans>
-      <div className="flex items-baseline justify-between gap-3">
-        <p id="today-plans-h" className="label text-[#71866c]">TODAY’S PLANS</p>
-        <a href={routes.familyCalendar} className="family-link !min-h-0">Week →</a>
-      </div>
-      {list.length ? (
-        <ul className="mt-3 space-y-2.5">
-          {list.map((o) => (
-            <li key={o.event.id} className="flex items-stretch gap-3">
-              <span aria-hidden="true" className="w-[4px] shrink-0" style={{ background: cal.colors[o.event.member_ids[0] ?? o.event.owner_member_id ?? '']?.hex ?? '#9aab8f' }} />
-              <span><span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(o.event)}</span>
-                <span className="font-semibold">{o.event.title}</span>{name(o.event.owner_member_id) && <span className="text-sm text-warm-soft"> · {name(o.event.owner_member_id)} handles it</span>}</span>
-            </li>
-          ))}
-        </ul>
-      ) : <p className="mt-3 text-sm text-warm-soft">Nothing on the family calendar today.</p>}
-    </section>
-  );
-}
+    <div className="space-y-9">
+      {isDemo() && (
+        <div className="family-note" data-today-demo><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm">A made-up family, to show how Today looks. Nothing here is shared or synced. <a href="/app" className="underline">Leave the demo</a>.</p></div>
+      )}
+      <section className="family-panel" aria-labelledby="today-plans-h" data-today-plans>
+        <div className="flex items-baseline justify-between gap-3">
+          <p id="today-plans-h" className="label text-[#71866c]">TODAY’S PLANS</p>
+          <a href={routes.familyCalendar} className="family-link !min-h-0">Week →</a>
+        </div>
+        {list.length ? (
+          <ul className="mt-3 space-y-2.5">
+            {list.map((o) => (
+              <li key={o.event.id} className="flex items-stretch gap-3">
+                <span aria-hidden="true" className="w-[4px] shrink-0" style={{ background: color(o.event.member_ids[0] ?? o.event.owner_member_id) }} />
+                <span><span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(o.event)}</span>
+                  <span className="font-semibold">{o.event.title}</span>{name(o.event.owner_member_id) && <span className="text-sm text-warm-soft"> · {name(o.event.owner_member_id)} handles it</span>}</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="mt-3 text-sm text-warm-soft">Nothing on the family calendar today.</p>}
+      </section>
 
-export function SundaySetupCard() {
-  const sunday = useToday().getDay() === 0;
-  return (
-    <a href={routes.sundaySetup} className="family-panel block transition-colors hover:bg-[#f8f8f6]" data-sunday-card>
-      <p className="label text-[#71866c]">SUNDAY SETUP</p>
-      <h2 className="family-panel-title mt-4">{sunday ? 'Ten minutes for the week ahead.' : 'Set up the week together.'}</h2>
-      <p className="mt-2 text-sm leading-relaxed text-warm-soft">Who’s handling what, dinners and cleaning help, then copy it to the wall calendar.</p>
-      <span className="family-link mt-5">Start Sunday Setup →</span>
-    </a>
+      {week.count > 0 && (
+        <section className="family-panel" aria-labelledby="meeting-week-h" data-meeting-week>
+          <p id="meeting-week-h" className="label text-[#71866c]">FOR YOUR FAMILY MEETING · NEXT 7 DAYS</p>
+          <h2 className="family-panel-title mt-4">{week.count === 1 ? 'One plan' : `${week.count} plans`} on the family calendar.</h2>
+          <p className="mt-2 text-sm leading-relaxed text-warm-soft">
+            {[
+              week.changes.length ? `${week.changes.length} new or changed this week` : null,
+              week.unhandled ? `${week.unhandled} nobody has said they’ll handle yet` : null,
+            ].filter(Boolean).join(' · ') || 'Ready to look at together whenever you meet.'}
+          </p>
+          {week.changes.length > 0 && (
+            <ul className="mt-3 space-y-1.5" data-meeting-changes>
+              {week.changes.slice(0, 4).map((c) => (
+                <li key={c.id} className="flex items-baseline gap-2 text-[0.92rem]"><span className="cal-change" data-change={c.change}>{c.change === 'new' ? 'New' : 'Changed'}</span>{c.title}</li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
+            <a href={routes.familyCalendar} className="family-link">See the week →</a>
+            {meetingHref && <a href={meetingHref} className="family-link" data-open-meeting>This month’s Family Meeting →</a>}
+          </div>
+        </section>
+      )}
+
+      {parts && withParts.length > 0 && (
+        <section className="family-panel" aria-labelledby="everyones-part-h" data-everyones-part>
+          <p id="everyones-part-h" className="label text-[#71866c]">EVERYONE’S PART · {MONTHS[today.getMonth()].toUpperCase()}</p>
+          <ul className="mt-4 space-y-4">
+            {withParts.map((p) => (
+              <li key={p.memberId} data-part-person={p.name}>
+                <p className="flex items-center gap-2 font-semibold"><span aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ background: color(p.memberId) }} />{p.name}</p>
+                <ul className="mt-1 space-y-0.5 pl-[18px] text-[0.92rem] text-warm-soft">
+                  {p.parts.map((x) => <li key={x.text}>{x.text}{x.label === 'Agreed by our family' && <span className="text-[#536e4e]"> · agreed</span>}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-[0.8rem] text-warm-soft">As this month’s Family Meeting lists it: what each person already does and what you agreed.</p>
+          <a href={meetingHref!} className="family-link mt-3">Open this month’s Family Meeting →</a>
+        </section>
+      )}
+    </div>
   );
 }

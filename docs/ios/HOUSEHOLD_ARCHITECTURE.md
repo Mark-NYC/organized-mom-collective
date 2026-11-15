@@ -2,7 +2,7 @@
 
 **Status (2026-11-14): designed and built on `claude/focused-fermi-re9ddc`, tested on a throwaway local database.
 Not applied to production. Applying it needs the owner's approval.** Owner requirement (2026-11-14): Calendar, the
-cleaning companion, Sunday Setup and the Family Meeting Club use the same household and family information. One
+cleaning companion and the Family Meeting Club use the same household and family information. One
 household, stable member ids, one family profile, one color per person everywhere, one responsibility system, both
 adults on their own accounts, children without accounts, existing Club data and colors preserved.
 
@@ -13,7 +13,7 @@ adults on their own accounts, children without accounts, existing Club data and 
 | `club_households` | One per account: `owner_user_id` (unique), `display_name`, `preferences` (jsonb, closed key set incl. `colors`, `icon_style`, `week_starts`, `weekday_dinner`, `pets`, `school`…), `profile_version`, setup/focus fields | **Not membership-gated**: "anyone signed in may keep a profile; kits are what membership unlocks" (`club_household_save`). So a free household already works. |
 | `club_family_members` | Stable `id` per person, `first_name`, `kind` adult/child, `role`, `birth_year/month` (children), `is_account_holder`, `sort`, `archived_at` (never deleted) | Assignments everywhere point at these ids. |
 | `club_activities` | The typical week: category, name, `member_ids[]`, `days[]` (0–6), `starts_at` | Recurring family schedule already entered during Club setup → seeds the calendar. |
-| `club_responsibilities` | Jobs with `owner_ids[]`, `helper_ids[]`, category, status (existing/desired/suggested/confirmed) | **This is the shared responsibility system.** Cleaning, Calendar and Sunday Setup read it; nothing new. |
+| `club_responsibilities` | Jobs with `owner_ids[]`, `helper_ids[]`, category, status (existing/desired/suggested/confirmed) | **This is the shared responsibility system.** Cleaning, Calendar and the Family Meeting read it; nothing new. |
 | Colors | `preferences.colors`: member id → one of 8 marker colors (`src/data/club/family-colors.ts`, migration `20261120000000`) | Unsaved colors are **auto-assigned in family order, children first** (`memberColors`). |
 | Billing, entitlements, fulfillment, welcome kit, resource versions, email log | Keyed to the household or `owner_user_id` | Stay with the paying owner. |
 
@@ -28,7 +28,7 @@ in.
 
 1. **Colors can shift.** Because unsaved colors are computed from family order, adding a child (children come first)
    or archiving someone moves other people's colors. Harmless while colors only appear on one monthly printable; wrong
-   once the same color must mean the same person in the calendar, Sunday Setup and on the wall calendar.
+   once the same color must mean the same person in the calendar, the Family Meeting and on the wall calendar.
 2. **Whole-family save is last-write-wins.** `club_household_save` replaces the member list and archives anyone not
    in it. With one adult that's fine; with two phones, a stale copy could archive someone the other adult just added.
 
@@ -54,7 +54,7 @@ auth.users ──< household_adults >── club_households ──< club_family_
   `club_household_save`, `club_family_profile()`, and the four read policies switch to it. Everything built on
   `club_my_household()` (activities, responsibilities, focus, setup steps) follows automatically.
 - **Owner-only, unchanged:** billing, Stripe, entitlements, Club resource approval for printing, welcome kit, address,
-  account deletion of the household. The partner sees the shared family, calendar and Sunday Setup. Whether the
+  account deletion of the household. The partner sees the shared family and calendar. Whether the
   partner also opens the paid Club months is an owner decision (§6); nothing in this change grants it.
 - **Colors pinned, never overwritten.** Every save stores a color for every active member: saved colors first, then
   the color the member is *already being shown* (computed from the family as it was before the change), and only then

@@ -14,6 +14,37 @@ import { el } from './dom';
 import { familyLabel, onPlanFamily, type ReadyFamily } from './family';
 import { printPlan } from './proof';
 import { routes } from '../../../routes';
+import { loadState } from '../../calendar/client';
+import { localToday } from '../../calendar/recurrence';
+import { weekAhead } from '../../family-meeting-support';
+import { memberColors } from '../../../data/club/family-colors';
+
+/**
+ * Beside the meeting, on screen only: the family calendar's next seven days, there to look at during Let's Talk if the
+ * family wants it. Not a step and not on the printed guide; the four parts are unchanged. Only a signed-in member's own
+ * household calendar (saved on this device), never on a sample.
+ */
+function weekBlock(host: HTMLElement, family: ReadyFamily) {
+  const box = q<HTMLElement>(host, '[data-fm-week]');
+  if (!box || family.source !== 'account') return;
+  const state = loadState();
+  if (state.scope !== family.household.id) return;
+  const week = weekAhead(Object.values(state.events), localToday(), new Date());
+  if (!week.count) return;
+  const colors = memberColors(family.household);
+  const days = week.days.filter((d) => d.items.length);
+  box.replaceChildren(
+    el('p', { class: 'fm-rail-label' }, 'This week on our calendar'),
+    el('ul', { class: 'fm-week' }, ...days.map((d) => el('li', {},
+      el('strong', {}, d.label),
+      ...d.items.map((i) => {
+        const dot = el('span', { class: 'fm-week-dot', 'aria-hidden': 'true' });
+        dot.style.background = colors[i.memberIds[0] ?? i.ownerId ?? '']?.hex ?? '#9aab8f';
+        return el('span', { class: 'fm-week-item' }, dot, `${i.time === 'All day' ? '' : `${i.time} `}${i.title}`);
+      })))),
+    el('a', { href: routes.familyCalendar, class: 'fm-week-link' }, 'Open the family calendar →'));
+  box.hidden = false;
+}
 
 export type PlanView = 'tool' | 'meeting';
 
@@ -153,6 +184,7 @@ export function mountFamilyMeeting(root: HTMLElement) {
     // A link to her family page only for a signed-in member (Club member pages are never linked statically).
     const fam = q<HTMLElement>(host, '[data-fm-family-link]');
     if (fam && family.source === 'account') fam.replaceWith(el('a', { href: routes.clubFamily }, fam.textContent ?? 'your family page'));
+    weekBlock(host, family);
     host.dataset.fmReady = 'true';
   });
 }

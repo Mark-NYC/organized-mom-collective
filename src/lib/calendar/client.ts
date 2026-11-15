@@ -154,7 +154,9 @@ export function useCalendar(): CalendarHook {
   return {
     state, status, household, signedIn, unsaved,
     colors: household ? memberColors(household) : {},
-    save: (e) => change((s) => saveLocal(s, e)),
+    // Stamped here so the week before the Family Meeting can say "new" or "changed" before it syncs (the server's
+    // own time replaces it once saved).
+    save: (e) => change((s) => saveLocal(s, { ...e, updated_at: new Date().toISOString() })),
     remove: (id) => change((s) => deleteLocal(s, id)),
     skip: (id, date) => change((s) => skipOccurrence(s, id, date)),
     dismissConflicts: () => commit({ ...ref.current, conflicts: [] }),

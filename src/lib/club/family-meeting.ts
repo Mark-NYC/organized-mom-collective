@@ -316,7 +316,7 @@ export function buildFamilyMeeting(input: MeetingInput): FamilyMeeting {
   };
 }
 
-function taskLabel(r: Responsibility): string {
+export function taskLabel(r: Responsibility): string {
   return r.label?.trim() || labelOf(RESPONSIBILITY_CATEGORIES, r.category) || labelOf(GROWTH_ITEMS, r.item);
 }
 

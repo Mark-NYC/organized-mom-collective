@@ -2,13 +2,13 @@
 /**
  * Today (/app): the family system's front page, on the website and in the iPhone app (docs/ios/OMC_APP_ROADMAP.md).
  * Today's cleaning reset (calendar owners), this month's Club plan, the family. Everything date-based renders on the
- * device (TodayOverview), never at build time. Calendar, Inbox and Sunday Setup are planned (src/data/app/features.ts)
- * and not shown.
+ * device (TodayOverview), never at build time. The family calendar's plans and what supports the Family Meeting are app-only
+ * (TodayPlans). The Inbox is planned (src/data/app/features.ts) and not shown.
  */
 import Layout from '../../layouts/AppLayout.astro';
 import '../../styles/family-app-brand.css';
 import HomeStatus from '../../components/HomeStatus';
-import { TodayDate, TodayZone, ClubThisMonth, TodayPlans, SundaySetupCard } from '../../components/app/TodayOverview';
+import { TodayDate, TodayZone, ClubThisMonth, TodayPlans } from '../../components/app/TodayOverview';
 import { dailyEssentials } from '../../data/cleaning';
 const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 ---
@@ -36,7 +36,6 @@ const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
       </section>
     )}
     <div class="family-card-grid">
-      {appShell && <SundaySetupCard client:only="react"><div slot="fallback" class="family-panel h-48"></div></SundaySetupCard>}
       <ClubThisMonth client:only="react"><div slot="fallback" class="family-panel h-48"></div></ClubThisMonth>
       <a href="/app/account" class="family-panel block transition-colors hover:bg-[#f8f8f6]"><p class="label text-[#71866c]">YOUR FAMILY</p><h2 class="family-panel-title mt-4">Everyone has a part.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Your family's names, ages and roles, used by every monthly plan.</p><span class="family-link mt-5">View family →</span></a>
     </div>

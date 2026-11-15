@@ -178,8 +178,6 @@ export const routes = {
   appAccount: '/app/account',
   /** The shared family calendar (free; docs/ios/FAMILY_CALENDAR.md). */
   familyCalendar: '/app/family-calendar',
-  /** The weekly review (free; docs/ios/SUNDAY_SETUP.md). */
-  sundaySetup: '/app/sunday-setup',
   week: '/app/week',
   /** Old name for the Week page; redirects to `week`. */
   tidy: '/app/tidy',

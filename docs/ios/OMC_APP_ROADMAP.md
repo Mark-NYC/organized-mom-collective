@@ -157,9 +157,13 @@ calls an Edge Function that asks Claude for structured output (`output_config.fo
 cancellations, confidence, the quoted sentence it came from). Results land in `inbox_suggestions` as `pending`. **Nothing
 touches the calendar until a household adult taps Approve**; approve/edit/dismiss is logged. No Gmail inbox access.
 
-**Sunday Setup (M6).** A guided weekly review that reads this week's events, pending inbox suggestions, cleaning rhythm
-and the Club month's plan, then produces a printable week for the wall calendar (the physical calendar stays the family's
-shared view; the app never claims to sync paper).
+**Family Meeting support (not a feature of its own).** The family already has a weekly ritual: the Club's Family
+Meeting (src/data/club/meeting-guide.ts; once a week, ten minutes, Our Focus 2 · Let's Talk 3 · Everyone's Part 3 ·
+Let's Practice 2). The app adds no second one. The calendar supports it: before, the next seven days and what's new or
+changed; during, the same week to look at if the family wants it (never a step); after, everyone's part as the month's
+meeting lists it, in Today and the cleaning companion. Later, approved inbox suggestions show up the same way. See
+[FAMILY_MEETING_SUPPORT.md](FAMILY_MEETING_SUPPORT.md). (Replaces the earlier "Sunday Setup" plan, removed 2026-11-15
+on the owner's direction.)
 
 A draft of these tables with RLS is in [schema-draft.sql](schema-draft.sql): **documentation, not a migration**, kept out
 of `supabase/migrations/` so nothing can apply it by accident.
@@ -173,12 +177,11 @@ the live database without explicit approval.
 
 | # | Milestone | Scope | Exit criteria |
 | --- | --- | --- | --- |
-| **1** | **App foundation + Cleaning + Club in one shell** (this branch) | Capacitor iOS project, custom router, app build + allowlisted bundle, native bridge (external links, durable storage, resume refresh, status bar), unified **Today** screen (today's cleaning + this month's Club plan + family), feature registry with Calendar/Inbox/Sunday Setup off, GA off in app, CI (unit tests + shell checks + macOS simulator build), docs | Bundle builds and passes checks; iPhone-size smoke test passes; simulator build green in CI; website build unchanged; no new failing tests |
+| **1** | **App foundation + Cleaning + Club in one shell** (this branch) | Capacitor iOS project, custom router, app build + allowlisted bundle, native bridge (external links, durable storage, resume refresh, status bar), unified **Today** screen (today's cleaning + this month's Club plan + family), feature registry with Calendar/Inbox off, GA off in app, CI (unit tests + shell checks + macOS simulator build), docs | Bundle builds and passes checks; iPhone-size smoke test passes; simulator build green in CI; website build unchanged; no new failing tests |
 | 2 | **TestFlight beta** | Apple Developer account, bundle id, signing in CI (App Store Connect API key), app icons/splash from `public/icons`, Universal Links (`/start` and `/app/*` open the app; needs `apple-app-site-association` on the site), `capacitor://localhost` in `CLUB_ALLOWED_ORIGINS`, Supabase Auth redirect URLs, sign-in tested on device, privacy policy published | 5–10 families (calendar owners + Club test members) on TestFlight for 2 weeks; crash-free; sign-in works |
 | 3 | **Accounts step 2 + household members** | Sync cleaning progress to the account (`household_progress`), Keychain session, partner invite (`household_members`, invite by email code), cross-household RLS tests | Two adults on one household see the same progress; no cross-household reads in tests |
 | 4 | **Calendar** | `calendar_events`, manual events with member colors and recurrence (RRULE), week view, Google import (read) + write to the app-created calendar, conflict handling, offline queue | Google verification passed; imports a test calendar; edits round-trip |
 | 5 | **Smart Family Inbox** | Forwarding address, Email Worker, extraction with Claude, suggestions with approval, retention job, eval set of real (consented) forwarded emails | ≥ target precision on the eval; zero calendar writes without approval |
-| 6 | **Sunday Setup** | Guided weekly review, printable week for the wall, push reminders (only if families want them) | Families complete it weekly in beta |
 | 7 | **App Store launch** | Store listing, review notes (reader/multiplatform: no in-app purchase, sign in with existing account), support flow | Approved; customer copy updated honestly |
 
 ---
@@ -233,7 +236,7 @@ the live database without explicit approval.
    mirror + restore, pure core tested), `init.ts` (wires it up from `AppLayout`/`ClubLayout`, resume → refresh event).
 4. **Unified Today** (`/app`): today's cleaning reset (if unlocked), this month's Club plan, family, and in the app an
    "I have the wall calendar" unlock that sets the same device flag as the printed QR. Feature registry
-   `src/data/app/features.ts`: Calendar, Inbox and Sunday Setup are `planned` and never rendered.
+   `src/data/app/features.ts`: Calendar and Inbox were `planned` and never rendered (Calendar is live since M3 of this branch; Inbox is still planned).
 5. **GA4 off inside the app**; the website keeps it.
 6. **CI** `.github/workflows/ios-app.yml`: Linux job (whole unit suite, failing only on failures not in
    `tests/known-failures.txt`; app build; shell checks; iPhone smoke test with screenshots as artifacts) and macOS job (`cap sync ios` + unsigned simulator `xcodebuild`).
@@ -329,9 +332,10 @@ failure's full error block, so a recurrence shows the cause.
 
 ## Progress after the owner's next-milestone decisions (2026-11-14/15)
 
-Owner decisions: Calendar and Sunday Setup are **free**; Family Meeting Club stays the paid membership; build **partner
-accounts**; Sunday Setup **supports the printed wall calendar** (summary + optional one-page print, no competing
-calendar); **one household, one family profile** across every feature. Google Calendar and the AI Family Inbox stay
+Owner decisions: the Calendar is **free**; Family Meeting Club stays the paid membership; build **partner
+accounts**; **one household, one family profile** across every feature. Correction (2026-11-15): no Sunday Setup or other
+new weekly ritual; the calendar supports the existing four-part Family Meeting, whose guide, order, timing and monthly
+personalization don't change without the owner's approval. Google Calendar and the AI Family Inbox stay
 future milestones (prepared, not built). Nothing applied to production, deployed or merged.
 
 | Step | State | Where |
@@ -339,9 +343,9 @@ future milestones (prepared, not built). Nothing applied to production, deployed
 | 1. Real iPhone Simulator test | XCUITest launches the app on an iPhone 17 Pro simulator (iOS 26.2), taps the tabs, unlocks cleaning, checks a task, checks safe areas, relaunches twice (normal, and with the web view's storage wiped). **It found a blank-app bug** (SceneDelegate used Capacitor's own controller, so our router never ran; fixed in `4e7889c`). Since then the app opens on Today in the Simulator. It also found that the storage mirror never reached iOS (fixed by hooking `Storage.prototype`, `dbe5483`) and that the cleaning page offered "Add to Home Screen" inside the app (removed). **Passed** in run 43671309903: tabs, safe areas, a checkmark survives a relaunch and a full web-storage wipe | `ios/App/AppUITests/`, `.github/workflows/ios-app.yml` |
 | 2. Shared household + partners | Built and tested (68 SQL checks + all 542 existing Club/accounts checks still pass with it applied) | [HOUSEHOLD_ARCHITECTURE.md](HOUSEHOLD_ARCHITECTURE.md) |
 | 3. Family calendar | Built and tested (39 SQL checks, 24 unit tests, smoke flows) | [FAMILY_CALENDAR.md](FAMILY_CALENDAR.md) |
-| 4. Sunday Setup | Built and tested (17 SQL checks, 4 unit tests, full smoke run of the review) | [SUNDAY_SETUP.md](SUNDAY_SETUP.md) |
+| 4. Family Meeting support | Sunday Setup removed (page, data, migration, tests). The calendar supports the existing meeting: next 7 days with New/Changed on Today and the calendar, an optional screen-only week beside the meeting, everyone's part (from the meeting engine, suggestions excluded) on Today and cleaning parts in the companion. No database change. 12 unit tests, smoke flows | [FAMILY_MEETING_SUPPORT.md](FAMILY_MEETING_SUPPORT.md) |
 
 Migrations waiting for the owner's approval, in order: `20261124000000_household_shared.sql`,
-`20261125000000_family_calendar.sql`, `20261126000000_sunday_setup.sql` (plus the earlier unapplied
+`20261125000000_family_calendar.sql` (plus the earlier unapplied
 `20261121`–`20261123` Club ones, independent). Test them on a Supabase branch first (`scripts/test-household-sql.sh`
 logic), then production.
