@@ -1,20 +1,58 @@
 ---
+/**
+ * Today (/app): the family system's front page, on the website and in the iPhone app (docs/ios/OMC_APP_ROADMAP.md).
+ * Today's cleaning reset (calendar owners), this month's Club plan, the family. Everything date-based renders on the
+ * device (TodayOverview), never at build time. The family calendar's plans and what supports the Family Meeting are app-only
+ * (TodayPlans). The Inbox is planned (src/data/app/features.ts) and not shown.
+ */
 import Layout from '../../layouts/AppLayout.astro';
 import '../../styles/family-app-brand.css';
 import HomeStatus from '../../components/HomeStatus';
-import { dailyEssentials, weeklySchedule } from '../../data/cleaning';
-const now = new Date();
-const today = new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric'}).format(now);
-const zone = weeklySchedule.find(d => Number(d.day) === now.getDay());
+import { TodayDate, TodayZone, ClubThisMonth, TodayPlans } from '../../components/app/TodayOverview';
+import { dailyEssentials } from '../../data/cleaning';
+const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 ---
-<Layout title="Home" description="Your family, your rhythm, one place.">
+<Layout title="Today" description="Today's reset, this month's family plan and your family, in one place.">
   <div class="family-brand mx-auto max-w-4xl space-y-9">
-    <header><p class="label text-[#71866c]">YOUR FAMILY HOME · {today}</p><h1 class="family-title mt-4">A little more calm <em class="text-[#71866c]">today.</em></h1><p class="family-lede mt-4">One place for the plan, the daily reset, and your family's tools.</p></header>
-    <section data-calendar-feature hidden class="family-feature" aria-label="Today's cleaning"><div class="flex items-center justify-between gap-3"><p class="label text-[#5c7357]">TODAY'S RESET</p><span class="family-preview-pill">10–15 minutes</span></div><h2 class="family-panel-title mt-5">{zone?.zone ?? 'A fresh start for home'}</h2><p class="mt-2 text-[0.95rem] leading-relaxed text-warm-soft">Your {dailyEssentials.tasks.length} daily essentials and today's cleaning zone. Your existing checkmarks are ready whenever you are.</p><HomeStatus client:only="react" />
-<a href="/app/cleaning" class="family-action mt-6">Open today's cleaning <span aria-hidden="true" class="ml-2">→</span></a></section>
+    <header>
+      <p class="label text-[#71866c]">TODAY · <TodayDate client:only="react" /></p>
+      <h1 class="family-title mt-4">A little more calm <em class="text-[#71866c]">today.</em></h1>
+      <p class="family-lede mt-4">Today's reset, this month's family plan and everyone's part, in one place.</p>
+    </header>
+    {appShell && <div><TodayPlans client:only="react"><div slot="fallback" class="family-panel h-32"></div></TodayPlans></div>}
+    <section data-calendar-feature hidden class="family-feature" aria-label="Today's cleaning">
+      <p class="label text-[#5c7357]">TODAY'S RESET</p>
+      <div class="mt-5"><TodayZone client:only="react"><div slot="fallback" class="h-10"></div></TodayZone></div>
+      <p class="mt-2 text-[0.95rem] leading-relaxed text-warm-soft">Your {dailyEssentials.tasks.length} daily essentials and today's cleaning zone. Your checkmarks are ready whenever you are.</p>
+      <HomeStatus client:only="react" />
+      <a href="/app/cleaning" class="family-action mt-6">Open today's cleaning <span aria-hidden="true" class="ml-2">→</span></a>
+    </section>
+    {appShell && (
+      <section data-calendar-unlock hidden class="family-panel" aria-label="Cleaning companion">
+        <p class="label text-[#71866c]">CLEANING COMPANION</p>
+        <h2 class="family-panel-title mt-4">Have our wall calendar?</h2>
+        <p class="mt-2 text-sm leading-relaxed text-warm-soft">The daily and weekly cleaning companion comes with the printed family wall calendar. Open it here to keep your checkmarks on this iPhone.</p>
+        <button type="button" data-calendar-unlock-button class="family-action mt-5">I have the wall calendar</button>
+      </section>
+    )}
     <div class="family-card-grid">
-      <a href="/app/club" class="family-panel block transition-colors hover:bg-[#f8f8f6]"><p class="label text-[#71866c]">FAMILY CLUB</p><h2 class="family-panel-title mt-4">Good things, done together.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Explore your monthly family kits, including the October Sunday Reset preview.</p><span class="family-link mt-5">Explore Club →</span></a>
-      <a href="/app/account" class="family-panel block transition-colors hover:bg-[#f8f8f6]"><p class="label text-[#71866c]">YOUR FAMILY</p><h2 class="family-panel-title mt-4">Everyone has a part.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">See how your family's details will connect with prepared monthly tools.</p><span class="family-link mt-5">View family →</span></a>
+      <ClubThisMonth client:only="react"><div slot="fallback" class="family-panel h-48"></div></ClubThisMonth>
+      <a href="/app/account" class="family-panel block transition-colors hover:bg-[#f8f8f6]"><p class="label text-[#71866c]">YOUR FAMILY</p><h2 class="family-panel-title mt-4">Everyone has a part.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Your family's names, ages and roles, used by every monthly plan.</p><span class="family-link mt-5">View family →</span></a>
     </div>
   </div>
 </Layout>
+{appShell && (
+  <script>
+    import { hasCalendarAccess, rememberCalendarAccess } from '../../lib/companion';
+    // Same device-local rule as scanning the printed QR code (src/lib/companion.ts): no purchase check, by design.
+    const card = document.querySelector<HTMLElement>('[data-calendar-unlock]');
+    if (card && !hasCalendarAccess()) card.hidden = false;
+    // A signed-in website calendar order also unlocks cleaning (companion-access.ts): then the card goes.
+    const cleaning = document.querySelector<HTMLElement>('section[data-calendar-feature]');
+    if (card && cleaning) new MutationObserver(() => { if (!cleaning.hidden) card.hidden = true; }).observe(cleaning, { attributes: true, attributeFilter: ['hidden'] });
+    document.querySelector('[data-calendar-unlock-button]')?.addEventListener('click', () => {
+      rememberCalendarAccess();
+      location.assign('/app/cleaning');
+    });
+  </script>
+)}

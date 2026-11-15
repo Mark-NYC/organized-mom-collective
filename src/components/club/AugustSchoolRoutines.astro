@@ -14,7 +14,7 @@ const pencil='<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24"
 ---
 <div class="asr" data-asr-key={storageKey} data-asr-plan={planMode ? "" : undefined}>
  {!planMode && <header class="asr-intro">
-  <a href="/club">← Organized Family Club</a>
+  <a href="/club">← Family Meeting Club</a>
   <h1>Fewer reminders. <em>Smoother school days.</em></h1>
   <p>A ready-made picture routine for mornings and after school. Kids can see the next step instead of asking Mom what to do.</p>
  </header>}
@@ -525,7 +525,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     });
     const deadline = c.banner.deadline ? `By ${c.banner.deadline} · ${c.banner.line}` : c.banner.line;
     sheet.append(
-      el('div', { className: 'rc-brand' }, el('span', { className: 'rc-rule' }), el('img', { className: 'rc-logo', src: '/images/club/organized-family-club-logo.png', alt: 'Organized Family Club', width: 106, height: 24 }), el('span', { className: 'rc-rule' })),
+      el('div', { className: 'rc-brand' }, el('span', { className: 'rc-rule' }), el('img', { className: 'rc-logo', src: '/images/club/family-meeting-club-horizontal-logo.webp', alt: 'The Family Meeting Club', width: 85, height: 24 }), el('span', { className: 'rc-rule' })),
       el('header', { className: 'rc-head' },
         el('div', { className: 'rc-titles' },
           el('p', { className: 'rc-family', textContent: familyName || 'Our family' }),
@@ -556,7 +556,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
     const who = familyName || 'Our family';
     sheet.append(
       el('header', { className: 'asr-paper-head asr-fam-head' },
-        el('p', { textContent: 'ORGANIZED FAMILY CLUB · AUGUST' }),
+        el('p', { textContent: 'FAMILY MEETING CLUB · AUGUST' }),
         el('h2', {}, 'Back to School ', el('em', { textContent: 'Without the Scramble' })),
         el('span', { textContent: `${who} · Out the door by ${v.plan.leaveClock}` })),
       el('div', { className: 'asr-fam-grid' }, ...v.plan.sections.map((sec, i) => {
@@ -576,7 +576,7 @@ for (const root of document.querySelectorAll<HTMLElement & { clubPlan?: AugPlan 
           })),
           doneLine(sec.done));
       })),
-      el('footer', { className: 'asr-paper-foot' }, el('strong', { textContent: 'Everyone has a part. Nobody has to remember it all.' }), el('span', { textContent: 'ORGANIZED FAMILY CLUB · AUGUST' })));
+      el('footer', { className: 'asr-paper-foot' }, el('strong', { textContent: 'Everyone has a part. Nobody has to remember it all.' }), el('span', { textContent: 'FAMILY MEETING CLUB · AUGUST' })));
     familyStage.replaceChildren(sheet);
   };
   const draw = () => {

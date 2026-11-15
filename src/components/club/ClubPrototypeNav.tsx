@@ -84,7 +84,7 @@ export default function ClubPrototypeNav({month}:{month:'november'|'december'|'j
    </div>
   </>
    :<section className="cproto-inner cproto-family">
-    <p className="cproto-overline">ORGANIZED FAMILY CLUB / FAMILY SETTINGS</p>
+    <p className="cproto-overline">FAMILY MEETING CLUB / FAMILY SETTINGS</p>
     <p>These are the same family settings used in the Club member pages. Save your edits and return to any month to see the updated sample profile.</p>
     {household?<FamilyForm key={sample+'-'+household.profileVersion} household={household} mode="edit" submitLabel="Save our family" onSave={async input=>{
       const updated=await sampleStore(sample)!.saveHousehold(input);

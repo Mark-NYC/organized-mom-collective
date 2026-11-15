@@ -15,6 +15,7 @@ import SaveNudge from '../components/account/SaveNudge.astro';
 import { accountsEnabled } from '../lib/account';
 import { BRAND_NAME } from '../config';
 import { pageUpdated } from '../data/page-updated';
+import AppTabBar from '../components/AppTabBar.astro';
 
 interface Props {
   title?: string;
@@ -66,6 +67,10 @@ const jsonLd =
 const founderPhoto = existsSync('public/images/site/mark-megan-family-story-1200.webp');
 const mainClass =
   width === 'full' ? '' : ['mx-auto px-5 sm:px-8', width === 'wide' ? 'max-w-5xl' : 'max-w-3xl', chrome ? 'py-8 sm:py-14' : 'py-12 sm:py-20'].join(' ');
+// iPhone app bundle only (PUBLIC_APP_SHELL=ios): the Club member pages that render through this layout without site
+// chrome (/club/resources/<slug>, /club/family-vision) get the app's tab bar and native bridge, like ClubLayout pages.
+// The website build never renders any of this.
+const memberInApp = import.meta.env.PUBLIC_APP_SHELL === 'ios' && !chrome && path.startsWith('/club/');
 ---
 
 <BaseLayout
@@ -120,7 +125,10 @@ const mainClass =
   )}
   {chrome && <SiteFooter />}
   <CtaTracking />
-  {accountsEnabled() && <SaveNudge />}
+  {accountsEnabled() && !memberInApp && <SaveNudge />}
+  {memberInApp && <AppTabBar club />}
+  {memberInApp && <script>import '../lib/native/init';</script>}
+  {memberInApp && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); }</style>}
 </BaseLayout>
 
 <script>

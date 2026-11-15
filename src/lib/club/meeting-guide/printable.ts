@@ -112,7 +112,7 @@ function sheet(kids: number, children: HTMLElement[], foot: string, side: 'front
 function sheets(g: MeetingGuide, monthLabel: string, measure: HTMLElement): HTMLElement[] {
   const n = Math.max(0, ...g.experiments.map((e) => e.adaptations?.length ?? 0));
   const b = blocks(g, monthLabel);
-  const one = sheet(n, [b.head, b.focusBox, b.habits, b.words, b.bring], `${g.familyName} · Organized Family Club`, 'front', true, g.plan.month);
+  const one = sheet(n, [b.head, b.focusBox, b.habits, b.words, b.bring], `${g.familyName} · Family Meeting Club`, 'front', true, g.plan.month);
   measure.replaceChildren(one);
   const fits = one.scrollHeight <= one.clientHeight + 1;
   measure.replaceChildren();
@@ -120,7 +120,7 @@ function sheets(g: MeetingGuide, monthLabel: string, measure: HTMLElement): HTML
   const c = blocks(g, monthLabel);
   return [
     sheet(n, [c.head, c.focusBox, c.habits], 'Our Words of the Week are on the back →', 'front', false, g.plan.month),
-    sheet(n, [c.words, c.bring], `${g.familyName} · Organized Family Club`, 'back', true, g.plan.month),
+    sheet(n, [c.words, c.bring], `${g.familyName} · Family Meeting Club`, 'back', true, g.plan.month),
   ];
 }
 

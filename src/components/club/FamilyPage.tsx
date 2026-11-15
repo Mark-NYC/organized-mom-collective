@@ -14,7 +14,7 @@ import { routes } from '../../routes';
 import ClubGate, { type ClubContext } from './ClubGate';
 import FamilyForm from './FamilyForm';
 import { clubNav } from '../../lib/club/nav';
-import { ColorsNotSavedError } from '../../lib/club/store';
+import { ColorsNotSavedError, StaleProfileError } from '../../lib/club/store';
 
 export default function FamilyPage({ mode }: { mode: 'start' | 'edit' }) {
   return <ClubGate page={mode === 'start' ? 'start' : 'family'}>{(ctx) => <Family ctx={ctx} mode={mode} />}</ClubGate>;
@@ -27,6 +27,7 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
   const [firstKit, setFirstKit] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [colorsNotSaved, setColorsNotSaved] = useState(false);
+  const [staleReloaded, setStaleReloaded] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -77,9 +78,18 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
         onSave={async (input, { colorsChanged }) => {
           let h: Household;
           try {
-            h = await ctx.store.saveHousehold(input);
+            h = await ctx.store.saveHousehold({ ...input, expectedVersion: household?.profileVersion });
             setColorsNotSaved(false);
+            setStaleReloaded(false);
           } catch (e) {
+            if (e instanceof StaleProfileError) {
+              // The other adult saved first. Show their version; nothing of theirs is overwritten.
+              const latest = await ctx.store.household();
+              setHousehold(latest);
+              setStaleReloaded(true);
+              setSaved(false);
+              return;
+            }
             if (!(e instanceof ColorsNotSavedError)) throw e;
             h = e.household;
             // Nothing of hers is lost when she didn't pick a color: the automatic ones simply stay automatic.
@@ -93,6 +103,11 @@ function Family({ ctx, mode }: { ctx: ClubContext; mode: 'start' | 'edit' }) {
           setSaved(true);
         }}
       />
+      {staleReloaded && (
+        <p role="alert" data-stale-profile className="mt-6 max-w-2xl border-l-[3px] border-[#C53F7E] bg-white px-4 py-3 text-warm-ink">
+          Your family was just changed on another phone, so we loaded the newest version. Make your change again and save.
+        </p>
+      )}
       {saved && colorsNotSaved && (
         <p role="alert" data-colors-not-saved className="mt-6 max-w-2xl border-l-[3px] border-[#C53F7E] bg-white px-4 py-3 text-warm-ink">
           Your family is saved, but your color choices couldn’t be saved yet. Everyone keeps their standard color for now. Please try again later.

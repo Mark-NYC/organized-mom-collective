@@ -8,6 +8,7 @@
  *   - On iPhone the Home Screen app gets its OWN storage, separate from Safari. Cache Storage is shared,
  *     so we leave a snapshot there for the installed app to pick up on first launch (best effort).
  */
+import { appShellBuild, isNativeApp } from './native/platform';
 import { exportProgress, importMissing, hasAnyProgress, readFlag, writeFlag } from './storage';
 
 export type Platform = 'ios-safari' | 'ios-other' | 'android' | 'other';
@@ -25,6 +26,8 @@ export function currentPlatform(): Platform {
 
 /** Already opened from the Home Screen. */
 export function isStandalone(): boolean {
+  // The iPhone app is already on the Home Screen: never offer to add it.
+  if (appShellBuild() || isNativeApp()) return true;
   try {
     return (
       window.matchMedia('(display-mode: standalone)').matches ||

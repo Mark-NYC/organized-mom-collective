@@ -6,7 +6,7 @@
 export const WORKSHEET = {
   month: 'November',
   year: '2026',
-  brand: 'Organized Family Club',
+  brand: 'Family Meeting Club',
   site: 'organizedmomcollective.com',
   front: {
     eyebrow: 'Family ownership',

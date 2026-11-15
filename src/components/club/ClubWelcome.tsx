@@ -54,7 +54,7 @@ export default function ClubWelcome() {
   if (paid === 'checking') return <p className="py-16 text-center text-warm-soft">Confirming your membership…</p>;
   const intro = (
     <>
-      <p className="label text-warm-soft">{paid === 'paid' ? 'Welcome to the Organized Family Club' : 'Welcome'}</p>
+      <p className="label text-warm-soft">{paid === 'paid' ? 'Welcome to the Family Meeting Club' : 'Welcome'}</p>
       <h1 className="mt-2 font-serif text-[2.2rem] leading-tight text-warm-ink">{paid === 'paid' ? 'You’re in.' : 'Let’s make your Welcome Kit'}</h1>
       <p className="mt-3 leading-relaxed text-warm-soft">
         {paid === 'pending'

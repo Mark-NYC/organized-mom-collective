@@ -22,7 +22,7 @@ Switching only hides and shows: the month's editor, its saved plan, approval and
 
 **Audio.** `MeetingMonth.audio` (`src` in `public/`, `minutes`) shows Megan's introduction with a plain `<audio controls preload="none">` in the rail. None is set; no player shows until a real recording exists. Never autoplays.
 
-**Agreement.** Read-only in this release: suggestions are labeled and explained, never saved or confirmed. Accepting a suggestion later means writing a `confirmed` row to `club_responsibilities` (PR #264's table); the browser can't write that status yet (`club_responsibilities_save` accepts only `existing` and `desired`), so it needs a small migration plus duplicate checks. Families change who does what on `/club/family` meanwhile.
+**Agreement.** On screen, each suggestion in Everyone's Part has an optional **We agreed** button; tapping it writes a `confirmed` row to `club_responsibilities` with the meeting's words, the month and the suggestion's key (`household_agreement_save`, migration `20261127000000_family_agreements.sql`, not yet applied). The engine then lists it as *Agreed by our family* and suggests nothing new on top. Edit, reassign and remove live on the app's Family Responsibilities page. Nothing is confirmed without that tap. Details: [docs/ios/FAMILY_MEETING_SUPPORT.md](../ios/FAMILY_MEETING_SUPPORT.md).
 
 **QA.** `PUBLIC_CLUB_ENABLED=true npx astro build && npx astro preview --port 4330`, then `node scripts/club-meeting-qa.mjs http://localhost:4330 --shots=<dir>`: all 12 months, five sample families, a twelve-person family with long names, desktop and mobile, switching, print size and page counts.
 
@@ -47,7 +47,7 @@ Switching only hides and shows: the month's editor, its saved plan, approval and
 - No "Mom", "Dad" or "parents". One grown-up, a grandparent or two partners all read right.
 - The account holder doesn't lead when anyone else can (rotates among other grown-ups and children 9+), and never gets an organizer or reminder job.
 - At most one new suggestion per person, and none for someone who already owns this month's kind of job.
-- Suggestions are never confirmed. The engine doesn't change the profile or write anything.
+- Suggestions are never confirmed by the engine; only the family's "We agreed" tap does. The engine itself reads only.
 
 ## Themes (verified against the current resources)
 

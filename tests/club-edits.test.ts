@@ -356,7 +356,7 @@ describe('club edits: property test (seeded, deterministic)', () => {
         }
       }
     }
-  });
+  }, 30_000); // 200 runs x 25 steps: ~3 s alone, past the default 5 s on a busy CI runner (run 43654239462 timed out)
 });
 
 describe('club edits: reading saved edits', () => {

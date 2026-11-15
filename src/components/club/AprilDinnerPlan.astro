@@ -14,11 +14,11 @@ const steps=['Check ingredients & assign helpers','Cook safely using the directi
 const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washing-dishes'];
 ---
 <div class="adc" data-adc-key={storageKey} data-adc-plan={planMode ? '' : undefined} style={accent}>
- {!planMode && <header class="adc-intro"><a href="/club">← Organized Family Club</a><p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>One fully prepared dinner for tonight, plus a reusable four-role Dinner Team your family can use again and again.</p></header>}
+ {!planMode && <header class="adc-intro"><a href="/club">← Family Meeting Club</a><p class="adc-eyebrow">FAMILY MEETING CLUB · APRIL 2027</p><h1>Tonight, <em>we've got dinner.</em></h1><p>One fully prepared dinner for tonight, plus a reusable four-role Dinner Team your family can use again and again.</p></header>}
  <div class={planMode ? 'adc-plan' : 'adc-layout'}>
  {!planMode && <section class="adc-controls" aria-label="Your prepared April dinner plan">
   <div class="adc-controls-head">
-   <p class="adc-eyebrow">ORGANIZED FAMILY CLUB · APRIL</p>
+   <p class="adc-eyebrow">FAMILY MEETING CLUB · APRIL</p>
    <h2>Tonight, <em>we've got dinner.</em></h2>
    <p class="adc-vision">Dinner shouldn't depend on Mom to plan, assign, cook, and clean up. This meal is already planned. Everyone gets a part, and your Dinner Team can use the same four jobs again next time.</p>
   </div>
@@ -73,7 +73,7 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
   <div class="adc-stage" data-adc-stage>
   <div class="adc-pages" data-adc-pages>
    <article class="adc-sheet adc-front" style={accent} data-plan-sheet={planMode ? 'front' : undefined}>
-    <div class="adc-sheet-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Tonight, <em>we've got dinner.</em></h2><span>ONE DINNER PLANNED. EVERYONE HAS A PART.</span></div>
+    <div class="adc-sheet-head"><p>FAMILY MEETING CLUB · APRIL 2027</p><h2>Tonight, <em>we've got dinner.</em></h2><span>ONE DINNER PLANNED. EVERYONE HAS A PART.</span></div>
     <div class="adc-sheet-inner">
      <div class="adc-meal-head"><div><span class="adc-tiny">TONIGHT'S DINNER</span><h3 data-out-meal contenteditable="true" role="textbox" aria-label="Edit dinner name">{initial.name}</h3></div><div class="adc-time"><span data-out-time contenteditable="true" role="textbox" aria-label="Edit dinner time">{initial.time}</span><small data-out-servings contenteditable="true" role="textbox" aria-label="Edit servings">{initial.servings}</small></div></div>
      <div class="adc-section-label">OUR DINNER TEAM</div>
@@ -91,10 +91,10 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
      </div>
      <div class="adc-rule"><span>OUR FAMILY RULE</span><p data-out-rule contenteditable="true" role="textbox" aria-label="Edit family dinner rule">Ask the Dinner Captain what’s next, not Mom. The captain leads the plan and finishes with the team.</p></div>
     </div>
-    <footer class="adc-foot">ORGANIZED FAMILY CLUB <span>· APRIL · FRONT</span></footer>
+    <footer class="adc-foot">FAMILY MEETING CLUB <span>· APRIL · FRONT</span></footer>
    </article>
    <article class="adc-sheet adc-back" style={accent} data-plan-sheet={planMode ? 'back' : undefined} data-plan-sheet-end={planMode ? '' : undefined}>
-    <div class="adc-sheet-head adc-back-head"><p>ORGANIZED FAMILY CLUB · APRIL 2027</p><h2>Tonight's dinner. <em>Tomorrow's team.</em></h2><span>COOK THIS MEAL. KEEP THE TEAM FOR NEXT TIME.</span></div>
+    <div class="adc-sheet-head adc-back-head"><p>FAMILY MEETING CLUB · APRIL 2027</p><h2>Tonight's dinner. <em>Tomorrow's team.</em></h2><span>COOK THIS MEAL. KEEP THE TEAM FOR NEXT TIME.</span></div>
     <div class="adc-sheet-inner adc-back-inner">
       <div class="adc-recipe-top"><div><span class="adc-tiny">TONIGHT'S COOKING GUIDE</span><h3 data-out-recipe-title contenteditable="true" role="textbox" aria-label="Edit recipe name">{initial.name}</h3></div><span data-out-recipe-time contenteditable="true" role="textbox" aria-label="Edit recipe time">{initial.time}</span></div>
       <p class="adc-recipe-intro" data-out-intro contenteditable="true" role="textbox" aria-label="Edit cooking introduction">Follow these directions for tonight’s meal. The Cooking Lead handles hot or sharp tasks; everyone else does their part.</p>
@@ -114,7 +114,7 @@ const stepIcons=['grocery-bag-with-produce','cooking-pot','place-setting','washi
         <div class="adc-repeat-next"><strong>Next time, choose another dinner and use the same team.</strong><span>Swap people if you want. Keep the four jobs and the four steps.</span></div>
       </section>
     </div>
-    <footer class="adc-foot">ORGANIZED FAMILY CLUB <span>· APRIL · BACK</span></footer>
+    <footer class="adc-foot">FAMILY MEETING CLUB <span>· APRIL · BACK</span></footer>
    </article>
   </div>
   </div>

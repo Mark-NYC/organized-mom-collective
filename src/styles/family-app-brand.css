@@ -35,3 +35,7 @@
  .family-brand .family-title{font-size:2.35rem}
  .family-brand .family-lede{font-size:1rem}
 }
+
+/* New / Changed on the family calendar, for the week before the Family Meeting (src/lib/family-meeting-support.ts). */
+.cal-change{display:inline-flex;align-items:center;flex-shrink:0;padding:1px 7px;border-radius:999px;background:#eaf2eb;color:#315d49;font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;line-height:1.6}
+.cal-change[data-change="changed"]{background:#f6ecd9;color:#6b4f1d}

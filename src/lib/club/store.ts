@@ -9,6 +9,8 @@
  *
  * Family data never goes into localStorage or account_saves.
  */
+import { pinMemberColors, unpinned } from '../household/colors';
+import { memberColors } from '../../data/club/family-colors';
 import type { ToolPaletteId } from '../../data/tool-palettes';
 import { resolveToolPalette } from '../../data/tool-palettes';
 import { kits } from '../../data/club/kits';
@@ -16,8 +18,8 @@ import { sampleById } from '../../data/club/samples';
 import { accountRpc } from '../account';
 import type { FamilyMember, Household, HouseholdPreferences, MemberKind, MemberRole } from './profile';
 import {
-  activitiesToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
-  type Activity, type DbProfile, type FamilyProfile, type Responsibility, type SetupStep,
+  activitiesToDb, agreementToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
+  type Activity, type AgreementInput, type DbProfile, type FamilyProfile, type Responsibility, type SetupStep,
 } from './family-profile';
 
 export type KitAccess = 'edit' | 'read';
@@ -57,6 +59,18 @@ export interface HouseholdInput {
   displayName?: string;
   preferences: HouseholdPreferences;
   members: MemberInput[];
+  /**
+   * The profile_version this edit started from. With it, a save that the other adult beat is refused
+   * (StaleProfileError) instead of overwriting their change (docs/ios/HOUSEHOLD_ARCHITECTURE.md).
+   */
+  expectedVersion?: number;
+}
+
+/** The other adult changed the family since this copy was loaded: reload it and make the change again. */
+export class StaleProfileError extends Error {
+  constructor() {
+    super('stale_profile');
+  }
 }
 
 /** Steps 5 and 6: both answers travel together; `step` says which one she just answered or skipped. */
@@ -95,6 +109,9 @@ export interface ClubStore {
   saveActivities(list: Activity[]): Promise<FamilyProfile>;
   saveResponsibilities(status: 'existing' | 'desired', list: Responsibility[]): Promise<FamilyProfile>;
   saveFocus(step: 'challenges' | 'priority', focus: FocusInput): Promise<FamilyProfile>;
+  /** "We agreed" in the Family Meeting, or an edit / reassignment of an agreement (docs/ios/FAMILY_MEETING_SUPPORT.md). */
+  saveAgreement(a: AgreementInput): Promise<FamilyProfile>;
+  removeAgreement(id: string): Promise<FamilyProfile>;
 }
 
 // ------------------------------------------------------------------ the database, as her
@@ -159,23 +176,51 @@ export const accountStore: ClubStore = {
     return r ? fromDb(r) : null;
   },
   async saveHousehold(input) {
-    const save = (preferences: typeof input.preferences) => accountRpc<DbHousehold>('club_household_save', {
-      p_display_name: input.displayName ?? null,
-      p_preferences: preferences,
-      p_members: toDbMembers(input.members),
-    });
+    // One color per person for good: pin everyone's color from the family as it is now, before this change
+    // (src/lib/household/colors.ts). Her explicit choices in input.preferences.colors win.
+    const before = await accountRpc<DbHousehold | null>('club_household').then((r) => (r ? fromDb(r) : null)).catch(() => null);
+    const sentColors = ((input.preferences as { colors?: Record<string, string> }).colors) ?? {};
+    const existingIds = input.members.map((m) => m.id).filter((id): id is string => Boolean(id));
+    const pinned = pinMemberColors(before, existingIds, sentColors);
+    const withPins = (Object.keys(pinned).length ? { ...input.preferences, colors: pinned } : input.preferences) as typeof input.preferences;
+
+    // household_save checks the version (two adults); a database without 20261124 doesn't have it yet.
+    let versioned = input.expectedVersion !== undefined;
+    const save = async (preferences: typeof input.preferences, members = input.members) => {
+      const args = { p_display_name: input.displayName ?? null, p_preferences: preferences, p_members: toDbMembers(members) };
+      if (versioned) {
+        try {
+          return await accountRpc<DbHousehold>('household_save', { p_expected_version: input.expectedVersion, ...args });
+        } catch (e) {
+          if ((e as Error).message === 'stale_profile') throw new StaleProfileError();
+          if (!/household_save|PGRST202|404|function/i.test((e as Error).message)) throw e;
+          versioned = false;
+        }
+      }
+      return accountRpc<DbHousehold>('club_household_save', args);
+    };
     // A database without 20261120 (member colors) or 20261113 (illustration style) refuses that key. Drop the newest
     // unknown key first, one at a time, so nothing the database does accept is lost; her family still saves.
-    let prefs = { ...(input.preferences as Record<string, unknown>) };
+    let prefs = { ...(withPins as Record<string, unknown>) };
     let dropped: string[] = [];
     for (;;) {
       try {
-        const saved = fromDb(await save(prefs as typeof input.preferences));
+        let saved = fromDb(await save(prefs as typeof input.preferences));
         // Her color choices are hers: never dropped quietly. The rest is saved; the page tells her the colors weren't.
         if (dropped.includes('colors')) throw new ColorsNotSavedError(saved);
+        // Someone new just got an id: pin the color they're being shown, so nobody's color moves later.
+        const fresh = unpinned(saved);
+        if (fresh.length) {
+          const shown = memberColors(saved);
+          const colors = { ...((saved.preferences as { colors?: Record<string, string> }).colors ?? {}) };
+          for (const id of fresh) colors[id] = shown[id].id;
+          versioned = false; // the version just moved because of our own save
+          saved = fromDb(await save({ ...saved.preferences, colors } as typeof input.preferences,
+            saved.members.filter((m) => !m.archived).map((m) => ({ ...m }))));
+        }
         return saved;
       } catch (e) {
-        if (e instanceof ColorsNotSavedError) throw e;
+        if (e instanceof ColorsNotSavedError || e instanceof StaleProfileError) throw e;
         const next = ['colors', 'icon_style'].find((k) => k in prefs);
         if ((e as Error).message !== 'invalid' || !next) throw e;
         const { [next]: _gone, ...rest } = prefs;
@@ -211,6 +256,12 @@ export const accountStore: ClubStore = {
   },
   async saveResponsibilities(status, list) {
     return profileFromDb(await accountRpc<DbProfile>('club_responsibilities_save', { p_status: status, p_items: responsibilitiesToDb(list) }));
+  },
+  async saveAgreement(a) {
+    return profileFromDb(await accountRpc<DbProfile>('household_agreement_save', { p: agreementToDb(a) }));
+  },
+  async removeAgreement(id) {
+    return profileFromDb(await accountRpc<DbProfile>('household_agreement_remove', { p_id: id }));
   },
   async saveFocus(step, f) {
     return profileFromDb(await accountRpc<DbProfile>('club_focus_save', {
@@ -340,6 +391,41 @@ export function sampleStore(id: string): ClubStore | null {
           }),
         ],
       }));
+    },
+    // The sample family, on this tab only: the same rules as household_agreement_save / _remove.
+    async saveAgreement(a) {
+      const s = load();
+      if (!onboarded(s.household)) throw new Error('no_household');
+      const live = new Set(s.household!.members.filter((m) => !m.archived).map((m) => m.id));
+      const owners = [...new Set(a.ownerIds)];
+      if (!owners.length || owners.some((o) => !live.has(o)) || !a.text.trim()) throw new Error('invalid');
+      const p = s.profile ?? startProfile();
+      const agreement = {
+        text: a.text.trim(), ...(a.finished?.trim() ? { finished: a.finished.trim() } : {}), ...(a.when?.trim() ? { when: a.when.trim() } : {}),
+      };
+      let list = p.responsibilities;
+      if (a.id) {
+        const cur = list.find((r) => r.id === a.id && r.status === 'confirmed');
+        if (!cur) throw new Error('not_found');
+        const { when: _w, finished: _f, ...kept } = cur.agreement ?? { text: '' };
+        list = list.map((r) => (r === cur ? { ...r, category: a.category, ownerIds: owners, helperIds: r.helperIds.filter((h) => !owners.includes(h)), scope: scopeOf(owners), agreement: { ...kept, ...agreement } } : r));
+      } else if (!list.some((r) => r.status === 'confirmed' && a.source && r.agreement?.source === a.source && r.agreement?.month === a.month && r.ownerIds.join() === owners.join())) {
+        list = [...list, {
+          id: `${sample.id}-g${Date.now()}`, status: 'confirmed', category: a.category, ownerIds: owners, helperIds: [], scope: scopeOf(owners),
+          agreement: { ...agreement, ...(a.month ? { month: a.month } : {}), ...(a.source ? { source: a.source } : {}), agreedAt: new Date().toISOString() },
+        }];
+      }
+      s.profile = { ...p, responsibilities: list };
+      save(s);
+      return s.profile;
+    },
+    async removeAgreement(id) {
+      const s = load();
+      const p = s.profile ?? startProfile();
+      if (!p.responsibilities.some((r) => r.id === id && r.status === 'confirmed')) throw new Error('not_found');
+      s.profile = { ...p, responsibilities: p.responsibilities.filter((r) => r.id !== id) };
+      save(s);
+      return s.profile;
     },
     async saveFocus(step, f) {
       return update(step, (p) => ({

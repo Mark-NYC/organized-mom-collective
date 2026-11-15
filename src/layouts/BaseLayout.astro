@@ -25,7 +25,10 @@ interface Props {
   tracking?: boolean;
 }
 
-const { title, description, robots, canonical, ogType = 'website', ogImage = '/icons/icon-512.png', jsonLd = [], tracking = true } = Astro.props;
+const { title, description, robots, canonical, ogType = 'website', ogImage = '/icons/icon-512.png', jsonLd = [], tracking: trackingProp = true } = Astro.props;
+// The iPhone app bundle (npm run build:app) loads no GA4 or Pinterest tag: no third-party tracking in the app
+// (docs/ios/OMC_APP_ROADMAP.md → 2.3). The website build is unaffected.
+const tracking = trackingProp && import.meta.env.PUBLIC_APP_SHELL !== 'ios';
 const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).href : ogImage;
 const monthHexes = monthColors.map((m) => m.hex);
 ---

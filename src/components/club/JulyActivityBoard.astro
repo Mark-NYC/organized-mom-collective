@@ -16,10 +16,10 @@ const tiers=[
 ];
 ---
 <div class="jab" data-jab-key={storageKey} data-jab-icons={JSON.stringify(icons)} data-jab-plan={planMode ? "" : undefined}>
- {!planMode && <header class="jab-intro"><a href="/club">← Organized Family Club</a><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h1>I'm Bored! <em>What Can I Do?</em></h1><p>Fun things kids can start without asking Mom or Dad to entertain them.</p></header>}
+ {!planMode && <header class="jab-intro"><a href="/club">← Family Meeting Club</a><p class="jab-eyebrow">FAMILY MEETING CLUB · JULY 2027</p><h1>I'm Bored! <em>What Can I Do?</em></h1><p>Fun things kids can start without asking Mom or Dad to entertain them.</p></header>}
  <div class={planMode ? "jab-plan" : "jab-layout"}>
   {!planMode && <aside class="jab-editor" aria-label="Prepared July activity board">
-   <div class="jab-editor-head"><p class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY 2027</p><h2>I'm Bored! <em>What Can I Do?</em></h2><button type="button" class="jab-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
+   <div class="jab-editor-head"><p class="jab-eyebrow">FAMILY MEETING CLUB · JULY 2027</p><h2>I'm Bored! <em>What Can I Do?</em></h2><button type="button" class="jab-edit-link" data-open-vision>Why this matters <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4M4 20l4-.8L19 8.2a2.1 2.1 0 0 0-3-3L5 16.2 4 20Z"/></svg></button></div>
    <div class="jab-prepared" id="july-edit-controls"><span class="jab-eyebrow">YOUR FAMILY'S PREPARED BOARD</span><strong>What Can I Do Right Now?</strong><p>Nine illustrated activities, prepared for your children's ages and interests.</p>
     <div class="jab-summary-row"><span>Prepared for</span><b data-jab-summary-child>Whole family</b></div>
     <div class="jab-summary-row"><span>Activity style</span><b data-jab-summary-focus>A little of everything</b></div>
@@ -31,7 +31,7 @@ const tiers=[
     <button class="jab-clear" type="button" data-jab-reset>Restore starter board</button></div>
   </aside>}
   <dialog class="jab-dialog" data-vision-dialog aria-labelledby="jab-vision-title">
-   <div class="jab-dialog-head"><div><span class="jab-eyebrow">ORGANIZED FAMILY CLUB · JULY</span><h2 id="jab-vision-title">Why this matters</h2></div><button type="button" class="jab-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+   <div class="jab-dialog-head"><div><span class="jab-eyebrow">FAMILY MEETING CLUB · JULY</span><h2 id="jab-vision-title">Why this matters</h2></div><button type="button" class="jab-dialog-close" data-close-dialog aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
    <p>Summer free time shouldn't mean Mom has to plan and direct every activity. This picture-led board gives kids realistic choices they can start themselves, from something quick to a project they can return to later.</p>
    <button type="button" class="jab-dialog-done" data-close-dialog>Back to our plan</button>
   </dialog>
@@ -77,7 +77,7 @@ const tiers=[
         </div>
        </section>)}
      </div>
-     <footer class="jab-footer"><strong data-jab-edit="rule" contenteditable="true" role="textbox" aria-label="Edit finishing rule">Before asking: Pick one · Get what you need · Have fun · Put things away.</strong><span>ORGANIZED FAMILY CLUB</span></footer>
+     <footer class="jab-footer"><strong data-jab-edit="rule" contenteditable="true" role="textbox" aria-label="Edit finishing rule">Before asking: Pick one · Get what you need · Have fun · Put things away.</strong><span>FAMILY MEETING CLUB</span></footer>
     </article>
    </div>
    

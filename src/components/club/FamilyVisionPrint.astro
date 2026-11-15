@@ -14,15 +14,15 @@ const visionModules = import.meta.glob('../../../assets/icons/ofc/vision/*.{jpeg
 const visionImages: Record<string, string> = Object.fromEntries(Object.entries(visionModules).map(([path, url]) => [path.split('/').pop()!, url as string]));
 ---
 <main class:list={["fvp", { "fvp-member": member }]} >
-  {!member && <header class="fvp-top"><a href="/club">← Organized Family Club</a><span>WELCOME PRINT · DESIGN PREVIEW</span></header>}
+  {!member && <header class="fvp-top"><a href="/club">← Family Meeting Club</a><span>WELCOME PRINT · DESIGN PREVIEW</span></header>}
 
-  {member && <div class="fvp-brandline"><span>ORGANIZED FAMILY CLUB</span><span>WELCOME PRINT</span></div>}
+  {member && <div class="fvp-brandline"><span>FAMILY MEETING CLUB</span><span>WELCOME PRINT</span></div>}
   <div class="fvp-grid">
     <section class="fvp-editor" aria-labelledby="personalize-heading">
   {member && <div id="fvp-progress-slot" class="fvp-progress-slot"></div>}
   {member
     ? <section class="fvp-intro"><p class="eyebrow">YOUR WELCOME GIFT</p><h1>A little gift,<br/><em>just for your family.</em></h1><p>Your family name and the value you’re growing together, in watercolor. It’s our gift, and it comes in your Welcome Kit with your first family resource.</p></section>
-    : <section class="fvp-intro"><p class="eyebrow">ORGANIZED FAMILY CLUB · WELCOME PRINT</p><h1>Our Family <em>Vision.</em></h1><p>One watercolor and one word that feels like your family.</p></section>}
+    : <section class="fvp-intro"><p class="eyebrow">FAMILY MEETING CLUB · WELCOME PRINT</p><h1>Our Family <em>Vision.</em></h1><p>One watercolor and one word that feels like your family.</p></section>}
       <div class="fvp-editor-summary"><span class="eyebrow">YOUR PERSONALIZED PRINT</span><div class="fvp-summary-row"><span>Family</span><b id="fvp-summary-name">The Johnson Family</b></div><div class="fvp-summary-row"><span>Chosen value</span><b id="fvp-summary-values">Love</b></div><button type="button" id="fvp-open-editor" class="fvp-edit-trigger">✎ Customize artwork</button></div>
       <dialog class="fvp-dialog" id="fvp-dialog" aria-labelledby="personalize-heading"><div class="fvp-dialog-header"><span class="eyebrow">MAKE IT YOURS</span><button type="button" id="fvp-close-editor" aria-label="Close editor">×</button></div>
       <h2 id="personalize-heading">Make it yours.</h2><p>Add your family name and choose one watercolor.</p>

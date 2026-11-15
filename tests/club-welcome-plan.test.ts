@@ -19,7 +19,7 @@ const tick = () => new Promise((r) => setTimeout(r, 5));
 const account = (me: Awaited<ReturnType<ClubStore['me']>>): ClubStore => ({
   kind: 'account', label: '', me: async () => me,
   household: async () => ({ id: 'h1', displayName: 'The Parks', preferences: {}, profileVersion: 1, members: [{ id: 'm1', firstName: 'Jo', kind: 'adult', role: 'parent', isAccountHolder: true }] }),
-  saveHousehold: async () => { throw new Error('unused'); }, documents: async () => ({ can: 'edit', documents: {} }), saveDocument: async () => 1,
+  saveHousehold: async () => { throw new Error('unused'); }, saveAgreement: async () => { throw new Error('unused'); }, removeAgreement: async () => { throw new Error('unused'); }, documents: async () => ({ can: 'edit', documents: {} }), saveDocument: async () => 1,
   profile: async () => null, saveActivities: async () => { throw new Error('unused'); }, saveResponsibilities: async () => { throw new Error('unused'); },
   saveFocus: async () => { throw new Error('unused'); },
 });

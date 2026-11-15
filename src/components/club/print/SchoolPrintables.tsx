@@ -71,7 +71,7 @@ export function CommandCenterSheet({ doc, title, familyName, month, palette, pre
         </div>
       </div>
       <footer className="club-chart-foot">
-        <span>Organized Family Club · Ready for the School Year</span>
+        <span>Family Meeting Club · Ready for the School Year</span>
         <span>The week’s plans go on the family calendar</span>
       </footer>
     </div>
@@ -96,7 +96,7 @@ export function GuideSheet({ doc, title, familyName, month, palette, preview, se
           </section>
         ))}
       </div>
-      <div className="club-sheet-foot">Organized Family Club · {monthLabel(month)}</div>
+      <div className="club-sheet-foot">Family Meeting Club · {monthLabel(month)}</div>
     </div>
   );
 }

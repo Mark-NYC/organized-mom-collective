@@ -1,0 +1,12 @@
+---
+/**
+ * /app/family-calendar: the shared family calendar (docs/ios/FAMILY_CALENDAR.md). Free, no Club membership. In the
+ * iPhone app's tab bar; on the website it exists but isn't linked until the owner decides (src/data/app/features.ts).
+ */
+import Layout from '../../layouts/AppLayout.astro';
+import '../../styles/family-app-brand.css';
+import FamilyCalendar from '../../components/calendar/FamilyCalendar';
+---
+<Layout title="Calendar" description="Your family's week: who's where, who's handling it.">
+  <FamilyCalendar client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></FamilyCalendar>
+</Layout>

@@ -35,7 +35,7 @@ export function decemberPages(m:Metrics,f:Pick<Family,'members'>):[Page,Page]{
  const helper=second||'a grown-up';
  const a=new Pen(m);
  a.rect(42,40,528,9);
- a.text(42,75,'ORGANIZED FAMILY CLUB  /  DECEMBER','sansBold',8,SOFT);
+ a.text(42,75,'FAMILY MEETING CLUB  /  DECEMBER','sansBold',8,SOFT);
  a.text(42,114,'A CHRISTMAS MISSION FOR', 'sansBold',9,DEEP);
  a.block(42,162,names+',','serifBoldItalic',33,526,2,DEEP);
  a.block(42,208,'Your Christmas Mission Has Arrived!', 'serifBoldItalic',25,526,2,DEEP);

@@ -55,7 +55,7 @@ export function JobArt({ illustration }: { illustration?: string }) {
 
 export default function ResponsibilityChart({
   doc, title, familyName, month, people, rows, palette, preview, orientation = 'landscape', subtitle, promise = 'Every job has one owner',
-  footer = ['Organized Family Club · Family Ownership Builder', 'Check the chart first'], chip: chipText = (r) => FREQUENCY_LABEL[r.frequency], checkboxes,
+  footer = ['Family Meeting Club · Family Ownership Builder', 'Check the chart first'], chip: chipText = (r) => FREQUENCY_LABEL[r.frequency], checkboxes,
 }: Props) {
   const [swipe, card, chip] = toolPalettes[palette].colors;
   const names = new Map(people.map((p) => [p.id, p.firstName]));

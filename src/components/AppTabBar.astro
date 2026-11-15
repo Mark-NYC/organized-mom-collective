@@ -1,0 +1,79 @@
+---
+/**
+ * The companion's bottom tab bar (website: Today · Cleaning · Club · Account; iPhone app: Today · Calendar · Cleaning ·
+ * Family, with Account behind the profile icon in the header), shared by Nav.astro (every /app page) and, in the
+ * iPhone app bundle, ClubLayout (/club/login, /club/family, /club/welcome… ), so no screen in the app is a dead end:
+ * the app has no browser back button, and Today is always one tap away (docs/ios/OMC_APP_ROADMAP.md).
+ *
+ * Website: unchanged. Phones only (sm:hidden), and the printed-calendar QR copy (/app/calendar…) keeps its own four
+ * tabs. App bundle (PUBLIC_APP_SHELL=ios): visible at every width (on iPad a member's Club header replaces the top bar
+ * that held these links), and always the unified tabs (the QR copy's "Calendar" tab is the reorder sales page, which
+ * stays on the website).
+ */
+import { calendarPath } from '../lib/companion';
+
+interface Props {
+  /** Render in ClubLayout: Club pages count as the Club tab, and the bar needs room reserved below the page. */
+  club?: boolean;
+}
+const { club = false } = Astro.props;
+const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const calendar = !appShell && calendarPath(path);
+const items = calendar ? [
+  { href: '/app/calendar', label: 'Today', glyph: '✓' },
+  { href: '/app/calendar/week', label: 'Week', glyph: '▦' },
+  { href: '/app/calendar/reorder', label: 'Calendar', glyph: '⌂' },
+  { href: '/app/calendar/settings', label: 'Settings', glyph: '◯' },
+] : appShell ? [
+  // The app: one unified family system. Calendar is free (src/data/app/features.ts).
+  { href: '/app', label: 'Today', glyph: '⌂' },
+  { href: '/app/family-calendar', label: 'Calendar', glyph: '▤' },
+  { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
+  // Family: Our Family Meeting, Family Responsibilities and the Family Meeting Club (src/pages/app/family/index.astro).
+  { href: '/app/family', label: 'Family', glyph: '▦' },
+] : [
+  { href: '/app', label: 'Today', glyph: '⌂' },
+  { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
+  { href: '/app/club', label: 'Club', glyph: '▦' },
+  { href: '/app/account', label: 'Account', glyph: '◯' },
+];
+const active = (href: string) => {
+  if (href === '/app') return path === '/app';
+  if (href === '/app/club' && (club || path.startsWith('/club/'))) return true;
+  // The Club, its meeting pages and the family pages all live under the app's Family tab.
+  if (href === '/app/family') return club || path === '/app/family' || /^\/(app\/family|app\/club|club)(\/|$)/.test(path);
+  if (appShell && href === '/app/cleaning') return path === '/app/cleaning' || /^\/app\/(week|settings|calendar)(\/|$)/.test(path);
+  return path === href || (href !== '/app/calendar' && path.startsWith(href + '/'));
+};
+const cleaningGated = (href: string) => !calendar && href === '/app/cleaning';
+---
+<nav
+  data-chrome
+  data-app-tabbar
+  aria-label="App navigation"
+  class:list={[
+    'fixed inset-x-0 bottom-0 z-40 border-t border-warm-rule bg-ivory/95 shadow-[0_-8px_25px_rgba(67,65,55,0.05)] backdrop-blur-md pb-[env(safe-area-inset-bottom)]',
+    appShell ? 'print:hidden' : 'sm:hidden',
+  ]}
+>
+  <ul class:list={['grid grid-flow-col auto-cols-fr', appShell && 'mx-auto max-w-xl']}>
+    {items.map(item => <li data-calendar-feature={cleaningGated(item.href) ? "" : undefined} hidden={cleaningGated(item.href)}><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['flex min-h-[64px] flex-col items-center justify-center gap-1 px-1 text-[0.65rem] font-semibold tracking-wide transition-colors', active(item.href) ? 'text-[#536e4e]' : 'text-warm-soft']}>
+      <span aria-hidden="true" class:list={['flex h-7 w-10 items-center justify-center rounded-full text-[1.4rem] leading-none',active(item.href) ? 'bg-sage-wash' : '']}>{item.glyph}</span><span>{item.label}</span>
+    </a></li>)}
+  </ul>
+</nav>
+{club && (
+  <>
+    <style is:global>
+      /* Room for the fixed tab bar under a Club page (the app bundle only renders this). */
+      body { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+      @media print { body { padding-bottom: 0; } }
+    </style>
+    <script>
+      // Show the Cleaning tab when this device or account has the wall calendar (same rule as every /app page).
+      import { initCompanionAccess } from '../lib/companion-access';
+      void initCompanionAccess();
+    </script>
+  </>
+)}

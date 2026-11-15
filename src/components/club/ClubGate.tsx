@@ -59,6 +59,9 @@ export default function ClubGate({ page, children, signInIntro, bare = false }: 
 }
 
 /** Signed in: the one Club nav (ClubNav). Signed out (or a sample): the sign-in pages' own short header. */
+// In the iPhone app, billing (/club/dashboard) is on the website: keep the signed-out header's links inside the app.
+const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
+
 function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) => string; signedIn: boolean }) {
   if (signedIn) return <ClubNav current={page === 'dashboard' ? 'account' : page === 'family' ? 'family' : null} />;
   const link = (p: Page, to: string, label: string) => (
@@ -69,9 +72,9 @@ function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) 
   return (
     <header data-club-chrome className="border-b border-warm-rule bg-ivory">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-8">
-        <a href={href(routes.clubDashboard)} aria-label="Family Meeting Club home" className="flex min-w-0 items-center"><img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width={2027} height={570} className="block h-auto w-[148px] max-w-[48vw] object-contain object-left sm:w-[190px]" /></a>
+        <a href={href(appShell ? routes.appClub : routes.clubDashboard)} aria-label="Family Meeting Club home" className="flex min-w-0 items-center"><img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width={2027} height={570} className="block h-auto w-[148px] max-w-[48vw] object-contain object-left sm:w-[190px]" /></a>
         <nav aria-label="Club" className="-mr-2 flex items-center gap-1">
-          {link('dashboard', routes.clubDashboard, 'Your months')}
+          {link('dashboard', appShell ? routes.appClubMonths : routes.clubDashboard, 'Your months')}
           {link('family', routes.clubFamily, 'Family')}
         </nav>
       </div>

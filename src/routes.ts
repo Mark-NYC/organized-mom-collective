@@ -75,6 +75,8 @@ export const routes = {
   /** The offer on the Club landing page: its button opens Stripe Checkout. */
   clubJoin: '/club-2',
   clubLogin: '/club/login',
+  /** A partner's invitation (src/lib/household/api.ts): sign in with the invited email, join the household. */
+  householdJoin: '/club/invite',
   clubWelcome: '/club/welcome',
   clubWelcomeKit: '/club/welcome-kit',
   clubDashboard: '/club/dashboard',
@@ -174,6 +176,8 @@ export const routes = {
   /** The Welcome Family Rhythm: every member's, whatever month she joins (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md). */
   appClubFamilyRhythm: '/app/club/family-rhythm',
   appAccount: '/app/account',
+  /** The shared family calendar (free; docs/ios/FAMILY_CALENDAR.md). */
+  familyCalendar: '/app/family-calendar',
   week: '/app/week',
   /** Old name for the Week page; redirects to `week`. */
   tidy: '/app/tidy',
