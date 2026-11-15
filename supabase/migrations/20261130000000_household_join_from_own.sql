@@ -11,13 +11,57 @@
 --   household_invite_preview(code)         read-only: what accepting this invitation means for the caller.
 --   household_invite_accept_leaving(code)  accept it, leaving the caller's current household first:
 --       a partner elsewhere  → their access there ends (that family is untouched);
---       an owner on her own  → her own household is deleted (the app shows what's in it and asks first), unless
---                              someone shares it ('own_household_shared') or it has Club membership records
---                              ('own_household_membership': billing and received months hang off it; support
---                              moves those by hand, never a silent delete).
--- Nothing is merged: people, calendars and agreements of the two households have different ids and meanings.
+--       an owner on her own  → her own household is replaced (owner decision 2026-11-15), with three protections:
+--                              1. the app shows what's in it and asks first, and the call must name the household it
+--                                 showed (p_leaving), so nothing but the family on screen can ever be replaced;
+--                              2. her calendar plans come with her (p_keep_events, on by default): they move into
+--                                 the family she joins, without the people on them (the two families' people have
+--                                 different ids);
+--                              3. everything else (people, colors, typical week, agreements, the plans too) is
+--                                 kept as a copy in household_archives for 90 days, readable by her.
+--                              Never when someone shares it ('own_household_shared') or it has Club membership
+--                              records ('own_household_membership': billing and received months hang off it;
+--                              support moves those by hand).
+-- People and agreements are not merged: the two households' ids and meanings differ.
 -- The plain household_invite_accept is unchanged and still refuses an account that's already in a household.
 begin;
+
+-- A copy of a household replaced on joining another, for the person who replaced it. Written only by
+-- household_invite_accept_leaving; she can read her own. Kept 90 days (purge_after): removing older rows is a
+-- scheduled job or a manual sweep, decided with the privacy policy.
+create table public.household_archives (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  reason text not null check (reason in ('joined_another')),
+  family text,
+  snapshot jsonb not null,
+  created_at timestamptz not null default now(),
+  purge_after timestamptz not null default now() + interval '90 days'
+);
+create index household_archives_user on public.household_archives (user_id, created_at desc);
+alter table public.household_archives enable row level security;
+revoke all on public.household_archives from public, anon, authenticated;
+grant all on public.household_archives to service_role;
+grant select on public.household_archives to authenticated;
+create policy "People read their own archived family" on public.household_archives
+  for select to authenticated using (user_id = (select auth.uid()));
+
+-- Everything a family made, as one document.
+create function public.household_snapshot(p_household uuid) returns jsonb
+language sql stable security definer set search_path = '' as $$
+  select jsonb_build_object(
+    'household', (select jsonb_build_object('display_name', h.display_name, 'preferences', h.preferences, 'created_at', h.created_at)
+                    from public.club_households h where h.id = p_household),
+    'members', coalesce((select jsonb_agg(to_jsonb(f) - 'household_id' order by f.sort, f.created_at)
+                           from public.club_family_members f where f.household_id = p_household), '[]'),
+    'activities', coalesce((select jsonb_agg(to_jsonb(a) - 'household_id' order by a.sort, a.created_at)
+                              from public.club_activities a where a.household_id = p_household), '[]'),
+    'responsibilities', coalesce((select jsonb_agg(to_jsonb(r) - 'household_id' order by r.created_at)
+                                    from public.club_responsibilities r where r.household_id = p_household), '[]'),
+    'calendar_events', coalesce((select jsonb_agg(to_jsonb(e) - 'household_id' - 'created_by' - 'updated_by' order by e.starts_on, e.start_time)
+                                   from public.calendar_events e where e.household_id = p_household and e.deleted_at is null), '[]'))
+$$;
+revoke execute on function public.household_snapshot(uuid) from public, anon, authenticated;
 
 -- Why this account can't simply drop the household it owns (null: it can).
 create function public.household_own_blocker(p_uid uuid, p_household uuid) returns text
@@ -82,7 +126,7 @@ begin
   if not found then return r || jsonb_build_object('status', 'ready'); end if;
   if me.household_id = inv.household_id then return r || jsonb_build_object('status', 'joined'); end if;
   r := r || jsonb_build_object('mine', jsonb_build_object(
-    'role', me.role,
+    'id', me.household_id, 'role', me.role,
     'family', (select h.display_name from public.club_households h where h.id = me.household_id),
     'people', (select coalesce(jsonb_agg(f.first_name order by f.sort, f.created_at), '[]') from public.club_family_members f
                 where f.household_id = me.household_id and f.archived_at is null),
@@ -95,33 +139,51 @@ end $$;
 revoke execute on function public.household_invite_preview(text) from public, anon;
 grant execute on function public.household_invite_preview(text) to authenticated;
 
--- Accept, leaving the caller's current household first. One transaction: if the acceptance fails for any reason,
--- nothing was left or deleted.
-create function public.household_invite_accept_leaving(p_code text) returns jsonb
+-- Accept, leaving the caller's current household first. p_leaving must be the household the preview showed
+-- ('leaving_mismatch' otherwise): a stale screen or a blind call can never replace a different family. One
+-- transaction: if the acceptance fails for any reason, nothing was left, moved, archived or deleted.
+create function public.household_invite_accept_leaving(p_code text, p_leaving uuid, p_keep_events boolean default true) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare
   uid uuid := auth.uid();
   inv public.household_invites%rowtype := public.household_invite_for_me(p_code);
   me public.household_adults%rowtype;
   blocker text;
+  moved int := 0;
+  r jsonb;
 begin
   select * into me from public.household_adults where user_id = uid;
   if found and me.household_id = inv.household_id then return public.club_household(); end if; -- already in this family
-  if found then
-    -- Serialize with anything changing who's in the household being left (an invitation accepted into it right now).
-    perform pg_advisory_xact_lock(hashtextextended('household-adults:' || me.household_id::text, 0));
-    select * into me from public.household_adults where user_id = uid;
-  end if;
-  if found and me.role = 'partner' then
+  if not found then return public.household_invite_accept(p_code); end if;
+  if p_leaving is distinct from me.household_id then raise exception 'leaving_mismatch'; end if;
+  -- Serialize with anything changing who's in the household being left (an invitation accepted into it right now).
+  perform pg_advisory_xact_lock(hashtextextended('household-adults:' || me.household_id::text, 0));
+  select * into me from public.household_adults where user_id = uid;
+  if not found or p_leaving is distinct from me.household_id then raise exception 'leaving_mismatch'; end if;
+
+  if me.role = 'partner' then
     delete from public.household_adults where user_id = uid and role = 'partner';
-  elsif found then
-    blocker := public.household_own_blocker(uid, me.household_id);
-    if blocker is not null then raise exception '%', blocker; end if;
-    delete from public.club_households where id = me.household_id and owner_user_id = uid;
+    return public.household_invite_accept(p_code);
   end if;
-  return public.household_invite_accept(p_code);
+
+  blocker := public.household_own_blocker(uid, me.household_id);
+  if blocker is not null then raise exception '%', blocker; end if;
+  -- The safety copy first, complete (the plans too, with the people who were on them).
+  insert into public.household_archives (user_id, reason, family, snapshot)
+  select uid, 'joined_another', h.display_name, public.household_snapshot(h.id) from public.club_households h where h.id = me.household_id;
+  -- Her plans come with her, as new changes the other grown-up's phone picks up. The people on them stay behind.
+  if p_keep_events then
+    update public.calendar_events
+       set household_id = inv.household_id, member_ids = '{}', owner_member_id = null, source = 'manual', source_ref = null,
+           revision = revision + 1, updated_by = uid, updated_at = now()
+     where household_id = me.household_id and deleted_at is null;
+    get diagnostics moved = row_count;
+  end if;
+  delete from public.club_households where id = me.household_id and owner_user_id = uid;
+  r := public.household_invite_accept(p_code);
+  return r || jsonb_build_object('brought_events', moved);
 end $$;
-revoke execute on function public.household_invite_accept_leaving(text) from public, anon;
-grant execute on function public.household_invite_accept_leaving(text) to authenticated;
+revoke execute on function public.household_invite_accept_leaving(text, uuid, boolean) from public, anon;
+grant execute on function public.household_invite_accept_leaving(text, uuid, boolean) to authenticated;
 
 commit;

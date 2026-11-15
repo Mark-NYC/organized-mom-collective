@@ -60,7 +60,7 @@ export interface InvitePreview {
   reason?: 'own_household_shared' | 'own_household_membership';
   invitedAs: string | null;
   family: string | null;
-  mine?: { role: AdultRole; family: string | null; people: string[]; events: number; agreements: number };
+  mine?: { id: string; role: AdultRole; family: string | null; people: string[]; events: number; agreements: number };
 }
 interface DbPreview { status: InvitePreview['status']; reason?: InvitePreview['reason']; invited_as: string | null; family: string | null; mine?: InvitePreview['mine'] }
 /** Null on a database without 20261130 (the plain accept then decides). Invalid codes throw the usual invite errors. */
@@ -73,8 +73,13 @@ export async function previewInvite(code: string): Promise<InvitePreview | null>
     throw e;
   }
 }
-/** Accept, leaving the family this account is in now (asked for and confirmed on screen first). */
-export const acceptInviteLeaving = (code: string) => accountRpc<DbAccess>('household_invite_accept_leaving', { p_code: code });
+/**
+ * Accept, leaving the family this account is in now. `leaving` is the household the confirmation screen showed
+ * (preview.mine.id): the database refuses anything else. `keepEvents`: her calendar plans come with her. A copy of
+ * everything she set up is kept for 90 days either way.
+ */
+export const acceptInviteLeaving = (code: string, leaving: string, keepEvents: boolean) =>
+  accountRpc<DbAccess & { brought_events?: number }>('household_invite_accept_leaving', { p_code: code, p_leaving: leaving, p_keep_events: keepEvents });
 
 /** The code in whatever they pasted: the invitation link, the whole message, or the code itself. */
 export function inviteCodeFrom(text: string): string | null {
@@ -91,6 +96,7 @@ export function householdErrorText(code: string): string {
     case 'invite_expired': return 'This invitation has expired (they last 7 days). Ask for a new one.';
     case 'invite_wrong_email': return 'You’re signed in with a different email from the one this invitation was sent to. Sign out and sign in with that email.';
     case 'already_in_household': return 'This account already has a family set up, so it can’t join another one yet. Contact us and we’ll sort it out.';
+    case 'leaving_mismatch': return 'Your family changed while this was open. Open your invitation again to see what joining means now.';
     case 'own_household_shared': return 'Another grown-up shares the family on this account. Remove their access first (Account → Family sharing), then open your invitation again.';
     case 'own_household_membership': return 'The family on this account has a Family Meeting Club membership, so we won’t replace it automatically. Contact us and we’ll move you over.';
     case 'invite_member_invalid': return 'Pick a grown-up in your family who doesn’t have their own sign-in yet, and use their email, not yours.';
@@ -99,7 +105,11 @@ export function householdErrorText(code: string): string {
     case 'owner_only': return 'Only the person who set up the family can do that.';
     case 'owner_cannot_leave': return 'You set up this family, so you can’t leave it. You can remove the other adult instead.';
     case 'invalid': return 'That doesn’t look like an email address.';
-    default: return 'Something went wrong. Check your connection and try again.';
+    case 'signed_out': return 'Your sign-in ended. Open your invitation again and sign in.';
+    default:
+      // A backend that doesn't have family sharing yet (the function isn't there).
+      if (/schema cache|could not find the function|request_failed_404/i.test(code)) return 'Family sharing isn’t switched on yet. Your invitation will work as soon as it is; nothing is wrong with your link.';
+      return 'Something went wrong. Check your connection and try again.';
   }
 }
 

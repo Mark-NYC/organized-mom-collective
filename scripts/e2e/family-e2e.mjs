@@ -450,7 +450,7 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   check('app first: the setup screen offers joining the other grown-up\'s family before making a second one', await raj.locator('[data-setup-invited]').count());
   await rpc(rTok, 'household_save', { p_expected_version: null, p_display_name: 'Raj’s', p_preferences: {}, p_members: [
     { first_name: 'Raj', kind: 'adult', role: 'parent', is_account_holder: true }, { first_name: 'Mina', kind: 'child', role: 'child', birth_year: 2018, birth_month: 4 }] });
-  await rpc(rTok, 'calendar_event_save', { p_event: { id: crypto.randomUUID(), title: 'Soccer', starts_on: '2026-11-20', timezone: 'UTC' }, p_base_revision: null });
+  await rpc(rTok, 'calendar_event_save', { p_event: { id: crypto.randomUUID(), title: 'Soccer', starts_on: new Date().toLocaleDateString('en-CA'), timezone: 'UTC' }, p_base_revision: null });
   const before = await household('raj@e2e.test');
   check('app first: he now owns a second, separate household', /:owner$/.test(before) && before.split(':')[0] !== (await household('priya@e2e.test')).split(':')[0], before);
 
@@ -463,7 +463,8 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await raj.click('[data-invite-paste] button[type="submit"]');
   await raj.waitForSelector('[data-invite-state="confirm"]', { timeout: 20000 }).catch(() => {});
   const ask = await raj.locator('[data-invite-state="confirm"]').innerText().catch(() => '');
-  check('app first: joining asks first and says what he\'d lose', /Join The Shahs\?/.test(ask) && /Raj, Mina/.test(ask) && /1 calendar plan/.test(ask) && /deleted/i.test(ask), ask.replace(/\s+/g, ' ').slice(0, 200));
+  check('app first: joining asks first, lists what he set up, offers to bring his plans and says a copy is kept', /Join The Shahs\?/.test(ask) && /Raj, Mina/.test(ask) && /1 calendar plan/.test(ask) && /Bring my 1 calendar plan/.test(ask) && /copy of everything/i.test(ask) && (await raj.locator('[data-invite-keep-events]').isChecked()), ask.replace(/\s+/g, ' ').slice(0, 260));
+  check('app first: the header is Organized Family, not the Club; no Club sign-in or sales', (await raj.locator('[data-free-flow="invite"] header').innerText()).trim().startsWith('organized') && (await raj.locator('img[alt*="Family Meeting Club"]').count()) === 0);
   check('app first: nothing changed before he confirms', (await household('raj@e2e.test')) === before);
   await shot(raj, '15-join-confirm', true);
   await raj.click('[data-invite-confirm]');
@@ -473,8 +474,11 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   check('app first: the household he made by mistake is gone; one family, one Raj, one Mina',
     (await sql(`select count(*) from public.club_households where id = '${before.split(':')[0]}'`)) === '0'
     && (await sql(`select string_agg(first_name, ',' order by sort) from public.club_family_members where household_id = '${after.split(':')[0]}' and archived_at is null`)) === 'Priya,Raj,Mina');
+  check('app first: a copy of what he set up is kept for him', (await sql(`select count(*) from public.household_archives a join auth.users u on u.id = a.user_id where u.email = 'raj@e2e.test' and a.family = 'Raj’s'`)) === '1');
   await raj.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(raj, 1500);
-  check('app first: his phone shows the shared calendar, not the deleted one', !(await raj.locator('body').innerText()).includes('Soccer') && (await raj.locator('[data-sync-status]').getAttribute('data-sync-status')) === 'synced');
+  check('app first: his plan came with him to the shared calendar, and his phone is in sync', (await sql(`select count(*) from public.calendar_events where title = 'Soccer' and deleted_at is null and household_id = '${after.split(':')[0]}'`)) === '1' && (await raj.locator('[data-sync-status]').getAttribute('data-sync-status')) === 'synced');
+  await priya.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(priya, 2000);
+  check('app first: she sees the plan he brought on her phone', (await priya.locator('[data-calendar-event="Soccer"]').count()) > 0 && (await priya.locator('[data-sync-status]').getAttribute('data-sync-status')) === 'synced');
 
   // A partner with no family yet pastes the invitation on the setup screen instead of filling in the form.
   await rpc(pTok, 'household_partner_remove');
