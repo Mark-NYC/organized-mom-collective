@@ -58,6 +58,11 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     import { initCompanionAccess } from '../lib/companion-access';
     void initCompanionAccess();
   </script>
+  <script>
+    // Shared cleaning progress for a signed-in household (does nothing while accounts are off or she has no family).
+    import { startCleaningSync } from '../lib/cleaning-sync/client';
+    void startCleaningSync();
+  </script>
   <main data-calendar-feature={cleaningOnly ? "" : undefined} hidden={cleaningOnly} id="main" class="mx-auto max-w-5xl px-5 pt-7 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-12 sm:pb-20">
     <slot />
   </main>

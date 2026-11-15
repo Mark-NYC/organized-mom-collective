@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { dailyEssentials, weekend } from '../data/cleaning';
 import type { MonthlyFocus, WeekdayFocus, WeekendDay } from '../data/cleaning';
 import { dateForWeekday, dateKey, monthKey, parseDayParam } from '../lib/dates';
-import { useCheckedSet, useSaving, useToday } from '../lib/hooks';
+import { useCheckedSet, useCleaningShare, useSaving, useToday } from '../lib/hooks';
 import { monthFocusFor, planFor } from '../lib/schedule';
 import { takeSourceParam } from '../lib/entry';
 import { creditMonthly, isOnboarded, keys, pruneOld, setEntrySource, setOnboarded, uncreditMonthly } from '../lib/storage';
@@ -88,6 +88,11 @@ function Today({ justStarted }: { justStarted: boolean }) {
   // the week dots when a weekend or monthly check, which lives in WeekendSection, changes.
   const [, setActivity] = useState(0);
   const saving = useSaving();
+  const share = useCleaningShare();
+  // The page's "stays on this device" line is only true while progress isn't shared with a household.
+  useEffect(() => {
+    document.querySelectorAll<HTMLElement>('[data-device-only]').forEach((el) => { el.hidden = share.status !== 'local'; });
+  }, [share.status]);
   // After a checkmark (never during onboarding or before her first task), offer Add to Home Screen once.
   const [invite, setInvite] = useState(false);
   const noteChange = useCallback((checked: boolean) => {
@@ -161,6 +166,11 @@ function Today({ justStarted }: { justStarted: boolean }) {
 
   return (
     <div>
+      {saving && share.status !== 'local' && (
+        <p className="mb-3 text-[0.8rem] text-warm-soft" role="status" data-cleaning-share={share.status}>
+          {share.status === 'shared' ? 'Shared with your family · up to date' : `Saved on this phone${share.waiting ? ` · ${share.waiting} ${share.waiting === 1 ? 'change' : 'changes'} will share when you’re back online` : ' · sharing…'}`}
+        </p>
+      )}
       {!saving && (
         <p role="status" className="mb-5 border-l-[3px] border-month bg-band px-3.5 py-2.5 text-[0.95rem] leading-snug">
           <strong className="font-semibold">This browser isn’t saving checkmarks right now.</strong> You can still check things

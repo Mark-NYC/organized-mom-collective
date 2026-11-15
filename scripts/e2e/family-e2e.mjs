@@ -491,7 +491,52 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await raj2.click('[data-setup-invited] button[type="submit"]');
   await raj2.waitForSelector('[data-invite-state="joined"]', { timeout: 20000 }).catch(() => {});
   check('no family yet: pasting the invitation on the setup screen joins straight away, no second household', (await household('raj2@e2e.test')) === `${(await household('priya@e2e.test')).split(':')[0]}:partner` && (await sql(`select count(*) from public.club_households h join auth.users u on u.id = h.owner_user_id where u.email = 'raj2@e2e.test'`)) === '0');
-  await pCtx.close(); await rCtx.close(); await tCtx.close();
+  await tCtx.close();
+
+  // ---------------------------------------------------------------- 14. Shared cleaning progress (20261201)
+  // Priya and Raj2 share the family now. A checkmark on one phone shows on the other; offline taps catch up.
+  const openCleaning = async (page) => {
+    await page.goto(`${base}/app/cleaning`, { waitUntil: 'networkidle' });
+    for (let i = 0; i < 6 && (await page.locator('[role="dialog"] .btn-primary').isVisible().catch(() => false)); i++) { await page.locator('[role="dialog"] .btn-primary').click(); await page.waitForTimeout(150); }
+    await page.waitForSelector('input[type="checkbox"]', { timeout: 15000 });
+    await settle(page, 1500);
+  };
+  const boxes = (page) => page.locator('input[type="checkbox"]');
+  // The real checkbox sits under a styled one: tap it the way the label does.
+  const tap = (page, i) => boxes(page).nth(i).evaluate((el) => el.click());
+  const marks = (where = 'done') => sql(`select count(*) from public.household_cleaning_marks c join public.household_adults a on a.household_id = c.household_id join auth.users u on u.id = a.user_id where u.email = 'priya@e2e.test' and ${where}`);
+  const r2Ctx = await newPhone(); const raj2b = await r2Ctx.newPage();
+  await owSignIn(raj2b, 'raj2@e2e.test');
+  await openCleaning(priya); await openCleaning(raj2b);
+  check('cleaning: with a shared family the screen says it\'s shared', (await priya.locator('[data-cleaning-share]').getAttribute('data-cleaning-share').catch(() => null)) === 'shared');
+  await tap(priya, 0);
+  await settle(priya, 1500);
+  check('cleaning: her checkmark is saved to the household', (await marks()) === '1', await marks());
+  await raj2b.reload({ waitUntil: 'networkidle' }); await settle(raj2b, 2000);
+  check('cleaning: it shows checked on his phone', await boxes(raj2b).nth(0).isChecked());
+  // Both check different things; neither is lost.
+  await tap(raj2b, 1); await tap(priya, 2);
+  await settle(priya, 1500); await settle(raj2b, 500);
+  await priya.reload({ waitUntil: 'networkidle' }); await settle(priya, 2000);
+  await raj2b.reload({ waitUntil: 'networkidle' }); await settle(raj2b, 2000);
+  const three = async (page) => (await Promise.all([0, 1, 2].map((i) => boxes(page).nth(i).isChecked()))).join();
+  check('cleaning: they check different things at once and both phones show all three', (await three(priya)) === 'true,true,true' && (await three(raj2b)) === 'true,true,true', `${await three(priya)} / ${await three(raj2b)}`);
+  // Offline: he unchecks one with no signal; it's kept on his phone, then reaches hers.
+  await offline(r2Ctx);
+  await tap(raj2b, 0);
+  await settle(raj2b, 1500);
+  check('cleaning offline: his change is kept on his phone and marked as waiting', !(await boxes(raj2b).nth(0).isChecked()) && (await raj2b.locator('[data-cleaning-share]').getAttribute('data-cleaning-share')) === 'waiting' && (await marks()) === '3');
+  await raj2b.reload({ waitUntil: 'domcontentloaded' }).catch(() => {}); await settle(raj2b, 1500);
+  check('cleaning offline: closing and reopening the app keeps his change', !(await boxes(raj2b).nth(0).isChecked().catch(() => true)));
+  await online(r2Ctx, raj2b);
+  await settle(raj2b, 2500);
+  check('cleaning: back online, his uncheck reaches the household', (await marks()) === '2' && (await marks('not done')) === '1', `${await marks()} done`);
+  await priya.reload({ waitUntil: 'networkidle' }); await settle(priya, 2000);
+  check('cleaning: and her phone shows it unchecked, the other two still checked', (await three(priya)) === 'false,true,true', await three(priya));
+  await shot(priya, '16-cleaning-shared', false);
+  // Without a household nothing leaves the phone.
+  check('cleaning: another household has none of these marks', (await sql(`select count(distinct household_id) from public.household_cleaning_marks`)) === '1');
+  await pCtx.close(); await rCtx.close(); await r2Ctx.close();
 }
 
 await browser.close();

@@ -181,13 +181,48 @@ export function readList(key: string): string[] {
   }
 }
 
-/** Returns false if the change couldn't be saved to the device (it's still kept for this visit). */
-export function writeList(key: string, ids: string[]): boolean {
+/**
+ * Someone checked or unchecked something on this device: (key, ids added, ids removed). The household sync
+ * (src/lib/cleaning-sync/) listens here, so no screen needs to know about it. Not called for the server's own
+ * changes (applyShared) or for pruning old days.
+ */
+type ListChange = (key: string, added: string[], removed: string[]) => void;
+const changeListeners = new Set<ListChange>();
+export function onListChange(listener: ListChange): () => void {
+  changeListeners.add(listener);
+  return () => changeListeners.delete(listener);
+}
+function store(key: string, ids: string[]): boolean {
   if (ids.length === 0) {
     backend.remove(key);
     return true;
   }
   return backend.set(key, JSON.stringify(ids));
+}
+
+/** Returns false if the change couldn't be saved to the device (it's still kept for this visit). */
+export function writeList(key: string, ids: string[]): boolean {
+  const before = changeListeners.size ? readList(key) : [];
+  const ok = store(key, ids);
+  if (changeListeners.size) {
+    const added = ids.filter((x) => !before.includes(x));
+    const removed = before.filter((x) => !ids.includes(x));
+    if (added.length || removed.length) for (const l of changeListeners) l(key, added, removed);
+  }
+  return ok;
+}
+
+/** The other grown-up's change, from the household: saved here without announcing it as a change made here. */
+export function applyShared(key: string, id: string, done: boolean): boolean {
+  const cur = readList(key);
+  if (cur.includes(id) === done) return false;
+  store(key, done ? [...cur, id] : cur.filter((x) => x !== id));
+  return true;
+}
+
+/** Every checked item on this device, as [key, ids] (for the first upload to a household). */
+export function allLists(): [string, string[]][] {
+  return progressKeys().filter((k) => /^omc:v1:(daily|focus|weekend|monthly|active):/.test(k)).map((k) => [k, readList(k)] as [string, string[]]).filter(([, ids]) => ids.length > 0);
 }
 
 export function isOnboarded(): boolean {
@@ -210,12 +245,16 @@ export function resetDay(date: string): void {
   writeList(keys.daily(date), []);
   writeList(keys.focus(date), []);
   writeList(keys.weekend(date), []);
-  backend.remove(keys.active(date));
+  writeList(keys.active(date), []);
+  backend.remove(keys.active(date)); // the legacy "1" flag isn't a list
 }
 
 /** Clears every checkbox everywhere. Keeps the onboarding flag. */
 export function resetAllProgress(): void {
-  for (const k of progressKeys()) backend.remove(k);
+  for (const k of progressKeys()) {
+    writeList(k, []); // announces each uncheck, so a shared household clears too
+    backend.remove(k);
+  }
 }
 
 /** Removes old day-scoped entries. Monthly entries are kept. */
