@@ -48,18 +48,27 @@ class OMCBridgeViewController: CAPBridgeViewController {
 
     #if DEBUG
     /// Simulator test only (ios/App/AppUITests): `-OMCResetWebStorageForTesting` wipes the web view's own storage, the
-    /// way iOS can under storage pressure, then reloads. The page must come back from the native copy
+    /// way iOS can under storage pressure. The page must come back from the native copy
     /// (src/lib/native/durable-storage.ts). Compiled out of Release builds.
-    override open func viewDidLoad() {
-        super.viewDidLoad()
-        guard ProcessInfo.processInfo.arguments.contains("-OMCResetWebStorageForTesting") else { return }
-        WKWebsiteDataStore.default().removeData(
-            ofTypes: [WKWebsiteDataTypeLocalStorage, WKWebsiteDataTypeSessionStorage, WKWebsiteDataTypeIndexedDBDatabases],
-            modifiedSince: .distantPast
-        ) { [weak self] in
-            NSLog("OMCTest web storage wiped; reloading %@", self?.webView?.url?.absoluteString ?? "(no url)")
-            self?.webView?.reload()
+    ///
+    /// The wipe finishes BEFORE the web view exists, so the app loads once, against already-empty storage. It used to
+    /// start after the first page load had begun and then call `reload()`: depending on which finished first, the
+    /// reload hit a web view with nothing loaded yet (a blank app), or restarted a half-loaded page that the page's
+    /// own restore then reloaded again (three loads; on a slow CI simulator, past the test's wait). That race, not
+    /// the app, was the intermittent "Not found: Today" (runs 43745562656, 43771254277, 43771126012).
+    override open func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
+        if ProcessInfo.processInfo.arguments.contains("-OMCResetWebStorageForTesting") {
+            var done = false
+            WKWebsiteDataStore.default().removeData(
+                ofTypes: [WKWebsiteDataTypeLocalStorage, WKWebsiteDataTypeSessionStorage, WKWebsiteDataTypeIndexedDBDatabases],
+                modifiedSince: .distantPast
+            ) { done = true }
+            // The completion handler runs on the main queue: keep the run loop turning until it has (10 s at most).
+            let deadline = Date().addingTimeInterval(10)
+            while !done && Date() < deadline { RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05)) }
+            NSLog("OMCTest web storage wiped before the first load (finished: %@)", done ? "yes" : "NO, timed out")
         }
+        return super.webViewConfiguration(for: instanceConfiguration)
     }
     #endif
 }

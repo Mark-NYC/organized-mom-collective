@@ -65,8 +65,35 @@ Billing credentials never move today: the Stripe customer stays tied to whoever 
 - App/website copy for the deletion refusal (owner-approved wording).
 - Optional (decision 4): re-grant received months to the new owner on handover.
 
-## Decisions needed
+## Decisions needed (updated 2026-11-16)
 
-1. Approve policy points 1–3 and 6 (the guard, cancel-then-delete, free-plan handover, webhook safety net).
-2. Point 4: should the household keep read/print access to months already received after the payer leaves?
-3. Immediate cancellation on request: always at period end, or support may cancel immediately with a prorated refund?
+Decided by the owner on 2026-11-16: an account deletion must never leave a paid subscription charging without a
+clear way to cancel, and must never cost the other adult their household access or data. Built and tested:
+
+- The database refuses to delete any sign-in with a chargeable subscription, by any path (20261129, not applied).
+- The refusal now says why and how to fix it. In the app: "Contact us and we'll help you cancel it first" (no
+  billing link inside the app). On the website: a link to Account & Billing to cancel, and to support.
+- When an owner's account is deleted, the household passes to the other adult first; a partner deleting their
+  account removes only their own sign-in.
+
+Decided 2026-11-16 (second round) and built in `20261203_household_billing_either_adult` (not applied; 49 checks in
+`supabase/tests/household-billing.sql`; its own capture and rollback, rehearsed):
+
+1. **Months already received stay with the household.** When the adult who held them leaves, is removed or deletes
+   their account, the delivered digital months are re-granted to the other adult with an audit note. Without a
+   membership they open read-only. Months not delivered yet, mailings and billing records are never handed over.
+2. **Either adult's paid membership is the household's.** A partner who pays opens the Club for the family; no second
+   household is created for them; their months, mailing address and print approvals are theirs to manage. When both
+   adults pay, the household uses the owner's and both subscriptions show on the admin's list for a refund conversation.
+3. **Orphaned subscriptions: found and flagged, never cancelled automatically.** A daily job flags a live subscription
+   with no account behind it; the admin list shows it; an owner-admin must verify it with a written reason
+   (`club_admin_orphan_verify`, logged) before it may be cancelled. The cancellation itself is a manual step in
+   Stripe today. `club-webhook` is unchanged.
+4. **Voluntary ownership transfer: deferred until after launch.** `household_owner_handover` stays unexposed.
+
+Still yours to decide:
+
+1. **Leaving right now.** Cancellation is at period end. May support cancel immediately on request, and with what
+   refund? Recommended: yes, under the existing refund terms in CUSTOMER_SUPPORT.md; no new terms.
+2. **After verification.** Should a verified orphan be cancelled by a button in admin (an Edge Function calling
+   Stripe), or stay a manual Stripe step? Recommended: manual until there has ever been one.

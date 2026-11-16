@@ -47,7 +47,7 @@ export default function OurWeekSignIn() {
 
   return (
     <div className="family-brand mx-auto max-w-md" data-ourweek-signin>
-      <p className="label text-[#71866c]">OUR WEEK</p>
+      <p className="label text-[#71866c]">ORGANIZED FAMILY</p>
       <h1 className="family-title mt-4 !text-[2.1rem]">Sign in to share your week.</h1>
       <p className="family-lede mt-3">Keep your family’s calendar, cleaning and meeting on every phone, shared with the other grown-up in your home. Free.</p>
       {!sent ? (

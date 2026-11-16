@@ -608,6 +608,22 @@ async function checkout(deps, req, body) {
   await deps.db.rpc("club_checkout_record", {
     p: { id: session.id, customer, user_id: user?.id ?? null, email, plan, url: session.url, livemode: session.livemode, expires_at: new Date(session.expires_at * 1e3).toISOString() }
   });
+  const attribution = body.attribution;
+  if (attribution && typeof attribution === "object") {
+    const touch = attribution;
+    if (typeof touch.campaign === "string" && typeof touch.touched_at === "string") {
+      try {
+        await deps.db.rpc("marketing_record_checkout_attribution", {
+          p_session: session.id,
+          p_kind: "club",
+          p_campaign: touch.campaign,
+          p_touched_at: touch.touched_at
+        });
+      } catch (err) {
+        console.warn("club-attribution-unavailable", err.message);
+      }
+    }
+  }
   return { url: session.url };
 }
 async function offer(deps) {

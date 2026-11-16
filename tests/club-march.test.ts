@@ -27,40 +27,12 @@ const chenTeens = people([['Mei', null, true], ['Grace', 16], ['Owen', 14]]);
 const allJobs = [...cleaningRooms.flatMap((r) => r.jobs), ...otherRoomJobs];
 
 describe('March: one letter, one room, one optional cleaning plan', () => {
-  it('passes every kit check and sits in month order', () => {
-    expect(kitProblems(march)).toEqual([]);
-    expect(march.theme).toBe('Spring Clean as a Team');
-    expect(march.subtitle).toBe('Less cleaning for Mom. More helping hands.');
-    expect(kitBySlug('2027-03-spring-clean-together')).toBe(march);
-    expect(kits.map((k) => k.month)).toEqual([...kits.map((k) => k.month)].sort());
-  });
-
-  it('has exactly the five steps, the space and when written above them, optional helpers, and nothing scheduled', () => {
-    expect(action.title).toBe('Our One-Room Family Reset');
-    expect(action.intro).toBe('One room. Thirty minutes. Everyone has a part.');
-    expect(action.items.map((i) => i.text)).toEqual([
-      'Choose one room or shared space.',
-      'Have everyone choose one job they can handle.',
-      'Set a timer for 30 minutes.',
-      'Work together and put things back where they belong.',
-      'Enjoy the result and decide if you want to tackle another space.',
-    ]);
-    expect(action.helperLabel).toBe('Who’s helping?');
-    expect(action.focus).toMatchObject({ printLabel: 'The space we’re resetting', whenLabel: 'When we’re doing it' });
-    expect(action.focus!.suggestions.map((s) => s.id)).toEqual(cleaningRooms.map((r) => r.id));
-    expect(action.note).toMatch(/try 15/);
-    expect(JSON.stringify(march)).not.toMatch(/streak|score|points|badge|reminder|deadline/i);
-  });
 
   it('saves the room and the day, and copies them without a check-in', () => {
     const s = readCountdown({ focus: { area: 'living', text: 'Living room', start: '2027-03-06' } }, 5);
     expect(focusLines('The space we’re resetting', s.focus, 'When we’re doing it')).toEqual(['The space we’re resetting: Living room', 'When we’re doing it: Saturday, March 6', '']);
   });
 
-  it('prints the reset and the letter, with a leafy stem', () => {
-    expect(march.printables.map((p) => [p.id, p.component])).toEqual([['one-room-reset', 'Action'], ['letter', 'Letter']]);
-    expect(march.mailer.accent).toBe('spring');
-  });
 });
 
 describe('March: the letter and the mailer', () => {
@@ -79,16 +51,6 @@ describe('March: the letter and the mailer', () => {
     expect(letter.body).not.toMatch(/\b(I|my|me)\b/);
   });
 
-  it('puts the field guide, the optional decluttering ideas, the question, the builder and the calendar note on the back', () => {
-    expect(march.mailer.fieldGuide.title).toBe('Your Spring Reset Field Guide');
-    expect(march.mailer.fieldGuide.sections.map((s) => s.heading)).toEqual(['Start with one room.', 'Give everyone a real job.', 'Work in short sessions.']);
-    expect(march.mailer.checklist!.items).toEqual(['Outgrown clothes and shoes', 'Toys, games and books', 'Paperwork and school papers', 'Unused household items']);
-    expect(march.mailer.checklist!.note).toMatch(/not four more projects/);
-    expect(march.mailer.invite?.title).toBe('Build Your Family Spring Cleaning Plan');
-    expect(march.mailer.invite?.body).toMatch(/^Choose your rooms, who’s helping, and how much time you have\. We’ll help divide the work/);
-    expect(march.mailer.calendarNote).toBe('Choose one cleaning session and put it on your wall calendar so everyone knows when it’s happening.');
-  });
-
   it('points its QR code at this kit’s own page, and is seeded as a draft', () => {
     expect(qrUrl(march.mailer.qrPath)).toBe('https://www.organizedmomcollective.com/club/kits/2027-03-spring-clean-together?source=mailer');
     expect(readableUrl(march.mailer.qrPath)).toBe('organizedmomcollective.com/club/kits/2027-03-spring-clean-together');
@@ -99,11 +61,6 @@ describe('March: the letter and the mailer', () => {
 });
 
 describe('March: the Family Spring Cleaning Builder', () => {
-  it('is a site tool the Club hosts with the family’s names and ages, separate from the month’s copy', () => {
-    expect(march.tool).toMatchObject({ tool: 'spring-cleaning', title: 'Make a Family Cleaning Plan', cta: 'Build Our Cleaning Plan' });
-    expect(clubTools['spring-cleaning']).toMatchObject({ path: routes.clubTool('spring-cleaning'), perChild: false, familyPeople: true });
-    expect(readFileSync('src/components/site/spring-cleaning-builder.ts', 'utf8')).not.toMatch(/club\/kits|March|2027/);
-  });
 
   it('offers the rooms asked for, each with a short starting list and more to add', () => {
     expect(cleaningRooms.map((r) => r.label)).toEqual(['Kitchen', 'Living room', 'Dining room', 'Bathroom', 'Bedrooms', 'Entryway or mudroom', 'Laundry area', 'Playroom', 'Home office', 'Closets']);

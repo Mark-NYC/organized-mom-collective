@@ -7,7 +7,8 @@ export interface EmailCheckoutAttribution { campaign:string; touched_at:string; 
 /** Public pages call this on entry. No emails, tokens or URL fragments are stored. */
 export function captureEmailCheckoutAttribution(search:string,storage?:Pick<Storage,'getItem'|'setItem'>,now=Date.now()):boolean {
  try {
-  const u=new URLSearchParams(search);
+  // Only the query: a caller that passes a whole href must never get its #fragment (a resource pass) read as a campaign.
+  const u=new URLSearchParams(search.split('#')[0]);
   if(u.get('utm_source')!=='omc_email'||u.get('utm_medium')!=='email')return false;
   const campaign=u.get('utm_campaign')||'';
   storage??=typeof window==='undefined'?undefined:window.sessionStorage;

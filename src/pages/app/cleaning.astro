@@ -6,7 +6,7 @@ const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 ---
 <Layout title="Cleaning" description="Your existing Daily Reset and cleaning companion.">
   <div class="mx-auto max-w-3xl">
-    <div class="mb-7"><p class="label text-[#71866c]">CLEANING COMPANION</p><p class="mt-2 text-sm text-warm-soft">Same daily rhythm. Your saved progress stays on this device.</p></div>
+    <div class="mb-7"><p class="label text-[#71866c]">CLEANING COMPANION</p><p class="mt-2 text-sm text-warm-soft">Same daily rhythm. <span data-device-only>Your saved progress stays on this device.</span></p></div>
     <TodayApp client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></TodayApp>
     {appShell && <CleaningParts client:only="react" />}
   </div>

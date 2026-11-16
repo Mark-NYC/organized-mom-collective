@@ -1,12 +1,33 @@
 ---
 /**
  * /club/invite?code=…: accept a partner invitation to share a household (docs/ios/HOUSEHOLD_ARCHITECTURE.md).
- * Noindex, never linked, behind PUBLIC_CLUB_ENABLED like every /club page (in the iPhone app bundle, on).
+ *
+ * A free household invitation, not a Club page: it is NOT behind PUBLIC_CLUB_ENABLED and doesn't use ClubLayout or
+ * the Club's sign-in, so the link in a text message works on the website whether or not Club enrollment is open,
+ * and in the iPhone app. Organized Family branding, no Club logo, no sales or billing links. Noindex, never linked;
+ * no GA4 or Pinterest tag (family names appear here). The URL stays under /club/ because invitations carry it.
  */
-import ClubLayout from '../../layouts/ClubLayout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppTabBar from '../../components/AppTabBar.astro';
 import JoinHousehold from '../../components/household/JoinHousehold';
+import '../../styles/club.css';
+
+const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 ---
 
-<ClubLayout title="Join your family">
-  <JoinHousehold client:only="react" />
-</ClubLayout>
+<BaseLayout title="Join your family · Organized Family" description="Accept an invitation to share your family's calendar and plans." robots="noindex" tracking={false}>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <div class="min-h-screen bg-ivory text-warm-ink" data-free-flow="invite">
+    <header class="border-b border-warm-rule bg-ivory">
+      <div class="mx-auto flex min-h-16 max-w-5xl items-center px-5 sm:px-8">
+        <a href="/app" class="font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized <span class="italic text-[#71866c]">family.</span></a>
+      </div>
+    </header>
+    <main class="mx-auto w-full max-w-5xl px-5 pb-28 pt-8 sm:px-8 sm:pt-12">
+      <JoinHousehold client:only="react" />
+    </main>
+  </div>
+  {appShell && <AppTabBar />}
+  {appShell && <script>import '../../lib/native/init';</script>}
+  {appShell && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); } html.omc-native body::before { content: ''; position: fixed; inset: 0 0 auto 0; height: env(safe-area-inset-top); background-color: inherit; z-index: 1000; pointer-events: none; }</style>}
+</BaseLayout>

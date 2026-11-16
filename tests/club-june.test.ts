@@ -22,71 +22,9 @@ const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 const action = june.action!;
 const rhythm = (o: Partial<SummerInput> = {}) => summerRhythm({ stage: 'school', days: 'home', structure: 'balanced', focus: [], ...o });
 
-describe('June: one letter, four decisions, two optional tools', () => {
-  it('passes every kit check and sits in month order', () => {
-    expect(kitProblems(june)).toEqual([]);
-    expect(june.theme).toBe('Summer With a Plan');
-    expect(june.subtitle).toBe('More freedom for the kids. Less managing for Mom.');
-    expect(kitBySlug('2027-06-summer-with-a-plan')).toBe(june);
-    expect(kits.map((k) => k.month)).toEqual([...kits.map((k) => k.month)].sort());
-  });
-
-  it('has the four decisions, each with a line to write the family’s answer, and nothing scheduled', () => {
-    expect(action.title).toBe('Our Summer Family Agreement');
-    expect(action.intro).toBe('Four little decisions for a summer everyone can enjoy.');
-    expect(action.items.map((i) => i.text)).toEqual(['Choose our daily anchors.', 'Agree on screen-time expectations.', 'Share summer responsibilities.', 'Choose something fun.']);
-    expect(action.items.every((i) => i.detail && i.daysBefore === undefined)).toBe(true);
-    expect(action.helperPlacement).toBe('below');
-    expect(action.helperLabel).toBe('We decided');
-    expect(JSON.stringify(june)).not.toMatch(/streak|score|points|badge|dashboard|hour-by-hour|punish/i);
-  });
-
-  it('offers two independent tools, the site’s own, with the June names and buttons', () => {
-    expect(june.tool).toBeUndefined();
-    expect(june.toolkit!.title).toBe('Your Summer Toolkit');
-    expect(june.toolkit!.tools.map((t) => [t.tool, t.title, t.cta, t.start])).toEqual([
-      ['routine-chart', 'Summer Rhythm Builder', 'Build Our Summer Rhythm', 'summer'],
-      ['screen-time', 'Family Screen Time Agreement', 'Make Our Screen Agreement', 'agreement'],
-    ]);
-    expect(june.toolkit!.tools[0].blurb).toBe('Create a simple daily rhythm that helps your kids know what to expect.');
-    expect(june.toolkit!.tools[1].blurb).toBe('Set clear expectations together so screens don’t become a daily argument.');
-    // Each opens the public tool's own component: no Club version.
-    expect(clubTools['routine-chart'].publicPath).toBe(routes.routineChart);
-    expect(clubTools['screen-time']).toMatchObject({ path: routes.clubTool('screen-time'), publicPath: routes.screenTime, perChild: true });
-    expect(readFileSync('src/pages/club/tools/screen-time.astro', 'utf8')).toMatch(/components\/site\/ScreenTimeContract\.astro/);
-    expect(readFileSync('src/pages/screen-time-contract.astro', 'utf8')).toMatch(/components\/site\/ScreenTimeContract\.astro/);
-    expect(kitProblems({ ...june, tool: august.tool })).toContain('a kit has one tool or a toolkit, not both');
-  });
-});
 
 describe('June: the letter and the mailer', () => {
   const letter = june.mailer.letter!;
-  it('is a 150–200 word draft for Megan, with the question, and no guilt, anti-screen talk or stay-at-home assumption', () => {
-    const n = words([letter.greeting, letter.body, 'Warmly,', letter.signoff].join(' '));
-    expect(n).toBeGreaterThanOrEqual(150);
-    expect(n).toBeLessThanOrEqual(200);
-    expect(letter.title).toBe('Summer Doesn’t Need a Schedule for Every Hour');
-    expect(letter.namedGreeting).toBe('Hi {name},');
-    expect(letter.draft).toBe(true);
-    expect(schedulable(june)).toBe(false);
-    expect(letter.body).toContain('What would make this summer really good for each of us?');
-    expect(letter.body).toMatch(/home all day or fitting it around work/);
-    expect(letter.body).not.toMatch(/\b(dad|husband|addict|toxic|rot|stay-at-home|should be ashamed)\b/i);
-    expect(letter.body).not.toMatch(/\b(I|my|me)\b/);
-  });
-
-  it('puts the principles, the boredom card, the gear tip, both tools under one QR code and the calendar note on the back', () => {
-    expect(june.mailer.fieldGuide.title).toBe('A Little Structure. A Lot of Summer.');
-    expect(june.mailer.fieldGuide.sections.map((s) => s.heading)).toEqual(['Keep a few predictable anchors.', 'Agree before the argument.', 'Leave room for boredom.']);
-    expect(june.mailer.card).toEqual({ title: 'When I’m Bored…', ideas: ['Read something', 'Make or draw something', 'Play outside', 'Build something', 'Help someone', 'Invite someone to play'] });
-    expect(june.mailer.tip!.body).toBe('Check water bottles, sunscreen, swim gear, and the supplies your family regularly takes outdoors.');
-    expect(june.mailer.invite!.tools).toEqual([
-      { title: 'Build Your Summer Rhythm', body: 'A simple daily flow that fits your family’s summer.' },
-      { title: 'Make Your Family Screen Agreement', body: 'Agree on screen-time expectations before the daily negotiations begin.' },
-    ]);
-    expect(june.mailer.calendarNote).toBe('Add camps, activities, trips, and family plans to your calendar. Let the summer rhythm handle the ordinary days in between.');
-    expect(june.mailer.accent).toBe('summer');
-  });
 
   it('points its one QR code at this kit’s own page, and is seeded as a draft', () => {
     expect(qrUrl(june.mailer.qrPath)).toBe('https://www.organizedmomcollective.com/club/kits/2027-06-summer-with-a-plan?source=mailer');

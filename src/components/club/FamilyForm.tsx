@@ -73,6 +73,9 @@ export function toInput(me: Draft, adults: Draft[], kids: Draft[], extras: { dis
   };
 }
 
+// The free app's family setup uses this form too: there, the name isn't for a Club print.
+const NAME_USE = import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'It’s the name on your family’s calendar and plans.' : 'It goes on your welcome print.';
+
 interface Props {
   household: Household | null;
   mode: 'start' | 'edit';
@@ -124,7 +127,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
     setError('');
     if (problems.length) return setError('Add a first name for everyone, and an age for each child.');
     // Her welcome print and printed resources carry it, so the welcome flow asks for it.
-    if (mode === 'start' && !displayName.trim()) return setError('Add what you call your family. It goes on your welcome print.');
+    if (mode === 'start' && !displayName.trim()) return setError(`Add what you call your family. ${NAME_USE}`);
     const data = toInput(me, adults, filledKids, { displayName, pets, iconStyle, ...(mode === 'edit' ? { colors } : {}) }, household?.preferences ?? {}, today);
     const check = validateHousehold({ id: household?.id ?? 'new', preferences: data.preferences, profileVersion: 0, members: data.members.map((m, i) => ({ id: m.id ?? `new-${i}`, ...m })) }, today);
     if (check.length) return setError('Something doesn’t look right. Check each name (up to 30 letters) and age.');
@@ -164,7 +167,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
           <section>
             <label className="block">
               <span className="text-[0.95rem] font-semibold text-warm-ink">What do you call your family?</span>
-              <span className="block text-[0.88rem] text-warm-soft">It goes on your welcome print. “The Rivera Family”, “Team Rivera”.</span>
+              <span className="block text-[0.88rem] text-warm-soft">{NAME_USE} “The Rivera Family”, “Team Rivera”.</span>
               <input className={`${input} mt-1.5 ${tried && !displayName.trim() ? 'border-rose' : ''}`} value={displayName} maxLength={45} autoComplete="family-name" onChange={(e) => setDisplayName(e.target.value)} />
             </label>
           </section>

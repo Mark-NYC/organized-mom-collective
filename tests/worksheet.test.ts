@@ -38,7 +38,10 @@ describe('worksheet normalize', () => {
     expect(normalize({ familyName: '   ' }).familyName).toBeNull();
   });
   it('blank fields become null (a line to write on)', () => {
-    expect(normalize({})).toEqual({ familyName: null, owner: null, job: null, when: null, done: null, checkIn: null });
+    // Every field, including the adult's and second child's lines added with the Family Ownership Plan.
+    const blank = normalize({});
+    expect(Object.keys(blank)).toEqual(expect.arrayContaining(['familyName', 'owner', 'job', 'when', 'done', 'checkIn']));
+    expect(Object.values(blank).every((v) => v === null)).toBe(true);
   });
   it('keeps only drawable characters', () => {
     expect(normalize({ owner: 'Zoë 🎉' }).owner).toBe('Zoë');
@@ -56,8 +59,8 @@ describe('worksheet normalize', () => {
     expect(normalize({ checkIn: 'soon' }).checkIn).toBeNull();
   });
   it('makes safe file names', () => {
-    expect(worksheetFileName({ familyName: 'Nuñez-Ortiz' })).toBe('november-i-own-this-job-nunez-ortiz.pdf');
-    expect(worksheetFileName({})).toBe('november-i-own-this-job.pdf');
+    expect(worksheetFileName({ familyName: 'Nuñez-Ortiz' })).toBe('november-family-plan-nunez-ortiz.pdf'); // renamed with the worksheet (Our Family Ownership Plan)
+    expect(worksheetFileName({})).toBe('november-family-plan.pdf');
   });
 });
 
@@ -102,7 +105,7 @@ describe('worksheet PDF', () => {
     const doc = await PDFDocument.load(bytes);
     expect(doc.getPageCount()).toBe(2);
     for (const p of doc.getPages()) expect(p.getSize()).toEqual({ width: 612, height: 792 });
-    expect(doc.getTitle()).toContain('I Own This Job');
+    expect(doc.getTitle()).toContain('Our Family Ownership Plan');
     const prefs = doc.catalog.getOrCreateViewerPreferences();
     expect(prefs.getPrintScaling()).toBe('None');
     expect(prefs.getDuplex()).toBe('DuplexFlipLongEdge');

@@ -136,7 +136,7 @@ describe('October: the tool is the site’s chore chart', () => {
 
   it('prints ownership, not helping, on every chore chart', () => {
     const chart = readFileSync('src/components/site/ChoreChart.astro', 'utf8');
-    expect(chart).toContain('My jobs, start to finish.');
+    expect(chart).toContain('My jobs. Start to finish.');
     expect(chart).not.toMatch(/helping hand/i);
   });
 
@@ -148,7 +148,8 @@ describe('October: the tool is the site’s chore chart', () => {
 
 describe('October doesn’t change August or November', () => {
   it('keeps their shapes', () => {
-    expect(august.action!.kind).toBe('countdown');
+    // August became the My School Day printable (no dated countdown); its tool is still the site's routine chart.
+    expect(august.printables.map((p) => p.id)).toEqual(['school-day']);
     expect(august.tool!.tool).toBe('routine-chart');
     expect(november.action).toBeUndefined();
     expect(november.printables.map((p) => p.id)).toEqual(['ownership-chart', 'kitchen-pantry-reset', 'who-owns-what', 'handing-over']);

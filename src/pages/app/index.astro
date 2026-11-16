@@ -37,7 +37,7 @@ const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
     )}
     <div class="family-card-grid">
       <ClubThisMonth client:only="react"><div slot="fallback" class="family-panel h-48"></div></ClubThisMonth>
-      <a href="/app/account" class="family-panel block transition-colors hover:bg-[#f8f8f6]"><p class="label text-[#71866c]">YOUR FAMILY</p><h2 class="family-panel-title mt-4">Everyone has a part.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">Your family's names, ages and roles, used by every monthly plan.</p><span class="family-link mt-5">View family →</span></a>
+      <a href="/app/account" class="family-panel block transition-colors hover:bg-[#f8f8f6]"><p class="label text-[#71866c]">YOUR FAMILY</p><h2 class="family-panel-title mt-4">Everyone has a part.</h2><p class="mt-2 text-sm leading-relaxed text-warm-soft">{appShell ? "Your family's names, ages and colors, used by the calendar, cleaning and your Family Meeting." : "Your family's names, ages and roles, used by every monthly plan."}</p><span class="family-link mt-5">View family →</span></a>
     </div>
   </div>
 </Layout>

@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import { appPreviewFamily } from '../lib/app-family';
 import { ageInMonth, monthOf, type Household } from '../lib/club/profile';
 import { clubAccountsEnabled } from '../data/club/config';
-import { deleteAccount, getSession, signOut } from '../lib/account';
+import { deleteAccount, getSession, signOut, signOutEverywhere } from '../lib/account';
 import { loadMembership } from '../lib/club/membership';
 import { accountStore } from '../lib/club/store';
 import { routes } from '../routes';
@@ -57,7 +57,7 @@ export default function FamilySummary() {
           {household ? <Members household={household} month={month} /> : <p className="mt-3 text-sm text-warm-soft">You haven’t added your family yet.</p>}
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
             <a href={ourWeek ? '/app/family/setup' : routes.clubFamily} className="family-link">{household ? 'Edit our family →' : 'Add your family →'}</a>
-            {family.club && <a href={routes.appClub} className="family-link">Club Home →</a>}
+            {family.club && !ourWeek && <a href={routes.appClub} className="family-link">Club Home →</a>}
             {family.club && !ourWeek && <a href={routes.clubDashboard} className="family-link">Account &amp; Billing →</a>}
           </div>
         </section>
@@ -168,11 +168,15 @@ function OurWeekSignedIn({ email, role, shared }: { email: string; role: 'owner'
       <p className="mt-2 text-sm text-warm-soft">{role === 'partner' ? 'You share this family with the grown-up who set it up.' : shared ? 'You set up this family and share it with one other grown-up.' : 'You set up this family.'}</p>
       <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
         <button type="button" className="family-link" onClick={async () => { await signOut(); location.replace('/app'); }} data-sign-out>Sign out</button>
+        <button type="button" className="family-link text-warm-soft" data-sign-out-everywhere onClick={async () => {
+          if (!confirm('Sign out on every phone, tablet and computer where you’re signed in? Use this if a device is lost or shared. Other devices can take up to an hour to sign out.')) return;
+          try { await signOutEverywhere(); location.replace('/app'); } catch { alert('We couldn’t sign you out everywhere just now. You’re still signed in here. Check your connection and try again.'); }
+        }}>Sign out everywhere</button>
         {step === 'idle' && <button type="button" className="family-link text-warm-soft" onClick={() => setStep('confirm')} data-delete-account>Delete my account</button>}
       </div>
       {step !== 'idle' && (
         <div className="family-note mt-5" role="group" aria-label="Delete your account" data-delete-confirm>
-          <p className="text-sm font-semibold">Delete your Our Week account?</p>
+          <p className="text-sm font-semibold">Delete your Organized Family account?</p>
           <p className="mt-1 text-sm leading-relaxed">{what} Cleaning progress saved on this phone stays on this phone.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <button type="button" className="family-action" disabled={step === 'busy'} onClick={() => void remove()} data-delete-confirm-yes>{step === 'busy' ? 'Deleting…' : 'Delete my account'}</button>

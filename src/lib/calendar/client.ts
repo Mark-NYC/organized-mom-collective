@@ -96,8 +96,6 @@ function keepHousehold(scope: string, household: Household | null) {
     else localStorage.removeItem(HOUSEHOLD_KEY);
   } catch { /* private mode: this visit only */ }
 }
-/** A request that never reached the server (no signal), as opposed to the server saying no. */
-const unreachable = (e: unknown) => e instanceof TypeError;
 
 export function useCalendar(): CalendarHook {
   const [state, setState] = useState<CalendarState>(loadState);
@@ -147,13 +145,16 @@ export function useCalendar(): CalendarHook {
     let access: Awaited<ReturnType<typeof householdAccess>>;
     try {
       [h, access] = await Promise.all([accountStore.household(), householdAccess()]);
-    } catch (e) {
-      if (unreachable(e)) return setStatus('offline');
-      [h, access] = [null, null];
+    } catch {
+      // No signal, an expired sign-in or server trouble: keep the family and calendar on this phone as they are.
+      // Only the household's own answer (below) may say there's no family.
+      return setStatus('offline');
     }
     setHousehold(h);
     if (!access) {
       keepHousehold('', null);
+      // No longer in the household this phone's calendar belongs to (removed, or another account): it isn't hers to keep.
+      if (ref.current.scope !== 'local') commit(emptyState());
       return setStatus('no-household');
     }
     keepHousehold(access.householdId, h);

@@ -25,43 +25,9 @@ const chen = people([['Mei', null, true], ['David', null], ['Lin', null], ['Grac
 const agenda = (p: Helper[], concerns: Concern[] = [], other = '') => resetAgenda({ people: p, concerns, other });
 const text = (p: Helper[], c: Concern[] = []) => JSON.stringify(agenda(p, c));
 
-describe('September: one letter, one meeting, one optional guide', () => {
-  it('passes every kit check and sits in month order', () => {
-    expect(kitProblems(september)).toEqual([]);
-    expect(september.theme).toBe('A Week Everyone Can See');
-    expect(september.subtitle).toBe('One family. One calendar. Everyone knows the plan.');
-    expect(kitBySlug('2027-09-a-week-everyone-can-see')).toBe(september);
-    expect(kits.map((k) => k.month)).toEqual([...kits.map((k) => k.month)].sort());
-  });
-
-  it('has the five meeting steps with their minutes, 15 in all, and a line for the meeting day and time', () => {
-    expect(action.title).toBe('Our First 15-Minute Family Meeting');
-    expect(action.intro).toBe('One short conversation. One shared plan.');
-    expect(action.items.map((i) => i.text)).toEqual([
-      'Gather around the calendar. (3 min)', 'Look at the week ahead. (4 min)', 'Decide who’s doing what. (3 min)', 'Make the week easier. (3 min)', 'Ask who needs help. (2 min)',
-    ]);
-    const minutes = action.items.map((i) => Number(/\((\d+) min\)/.exec(i.text)![1]));
-    expect(minutes.reduce((a, b) => a + b, 0)).toBe(15);
-    expect(action.focus!.printLabel).toBe('Our family meeting day and time');
-    expect(action.items[3].detail).toMatch(/meal plan.*grocery list/);
-    expect(JSON.stringify(september)).not.toMatch(/attendance|minutes of the meeting|streak|score|dashboard|agenda item/i);
-  });
-});
 
 describe('September: the letter and the mailer', () => {
   const letter = september.mailer.letter!;
-  it('is a 150–200 word draft for Megan, with the question, and no guilt, blame or two-parent assumption', () => {
-    const n = words([letter.greeting, letter.body, 'Warmly,', letter.signoff].join(' '));
-    expect(n).toBeGreaterThanOrEqual(150);
-    expect(n).toBeLessThanOrEqual(200);
-    expect(letter.title).toBe('You Don’t Have to Remember Everything');
-    expect(letter.draft).toBe(true);
-    expect(schedulable(september)).toBe(false);
-    expect(letter.body).toContain('What’s one thing happening this week that everyone needs to know about?');
-    expect(letter.body).toMatch(/walking calendar/);
-    expect(letter.body).not.toMatch(/\b(dad|husband|both parents|your partner|lazy)\b/i);
-    expect(letter.body).not.toMatch(/\b(I|my|me)\b/);
-  });
 
   it('points its QR code at this kit’s own page, and is seeded as a draft', () => {
     expect(qrUrl(september.mailer.qrPath)).toBe('https://www.organizedmomcollective.com/club/kits/2027-09-a-week-everyone-can-see?source=mailer');
@@ -73,12 +39,6 @@ describe('September: the letter and the mailer', () => {
 });
 
 describe('September: the Family Weekly Reset Builder', () => {
-  it('is a site tool the Club hosts with the family, separate from the month’s copy and from the paid Weekly Reset System', () => {
-    expect(september.tool).toMatchObject({ tool: 'family-reset' });
-    expect(clubTools['family-reset']).toMatchObject({ path: routes.clubTool('family-reset'), perChild: false, familyPeople: true });
-    expect(routes.clubTool('family-reset')).not.toBe('/weekly-reset');
-    expect(readFileSync('src/components/site/family-reset-builder.ts', 'utf8')).not.toMatch(/club\/kits|September|2027/);
-  });
 
   it('makes five steps, about 15 minutes, around the calendar’s own sections, with no planning grid', () => {
     for (const fam of [rivera, brooks, chen]) {

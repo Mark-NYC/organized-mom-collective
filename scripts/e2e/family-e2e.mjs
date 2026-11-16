@@ -360,6 +360,11 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
   const parts = await nora.locator('[data-meeting-part]').evaluateAll((els) => els.map((e) => e.getAttribute('data-meeting-part')));
   check('free: the weekly Family Meeting has the four parts in order', parts.join() === 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice', parts.join(' · '));
+  await nora.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
+  const famText = await nora.locator('body').innerText();
+  await nora.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
+  check('free: no Family Meeting Club card on Today or Family for a family without the Club', (await nora.locator('[data-club-month], [data-family-club-card]').count()) === 0 && !/family meeting club|membership/i.test(famText) && !/family meeting club|membership/i.test(await nora.locator('body').innerText()));
+  await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
   check('free: no Club card or upgrade on the free meeting', (await nora.locator('[data-club-month-meeting]').count()) === 0 && !/upgrade|subscribe|join the club/i.test(await nora.locator('body').innerText()));
   await nora.fill('[data-agreement-new]', 'Feed the cat before school');
   await nora.click('[data-owner-chip="Ada"]');
@@ -399,6 +404,10 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   const token = await page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')).access_token);
   const me = await rpc(token, 'club_me');
   check('Club subscriber: membership and entitlements unchanged', me.body?.access === true && JSON.stringify(me.body?.kits ?? []).includes('2026-11'), JSON.stringify(me.body?.kits));
+  await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page, 1500);
+  const clubCard = await page.locator('[data-family-club-card]').count();
+  await page.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(page, 1500);
+  check('Club subscriber: her Club cards are on Family and Today', clubCard === 1 && (await page.locator('[data-club-month]').count()) === 1);
   // Account: Our Week, with the household's Club content and no billing; deleting is refused while the membership lasts.
   await page.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(page, 1200);
   const panel = await page.locator('[data-account-signin]').innerText().catch(() => '');
@@ -414,6 +423,197 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   check('Club subscriber account: deletion refused while the membership is active, nothing removed', /still active/i.test(refusal) && (await sql(`select count(*) from auth.users where email = 'jen@e2e.test'`)) === '1', refusal);
   await shot(page, '14-account-club-delete-refused', true);
   await ctx.close();
+}
+
+// ------------------------------------------------------------------ 13. The second adult opens the app before the invitation
+// (20261130_household_join_from_own). The app sends a new sign-in to "Set up your family"; without this, a partner who
+// does that owns a second household and can never join the one they were invited to.
+{
+  const owSignIn = async (page, email) => {
+    await page.goto(`${base}/app/sign-in`, { waitUntil: 'networkidle' });
+    await page.fill('#ow-email', email);
+    await page.click('button:has-text("Email me a code")');
+    await page.fill('#ow-code', '123456');
+    await page.click('button[type="submit"]:has-text("Sign in")');
+    await page.waitForFunction(() => Boolean(localStorage.getItem('omc:account:session')), null, { timeout: 15000 });
+    await page.waitForLoadState('networkidle');
+    return page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')).access_token);
+  };
+  const household = (email) => sql(`select coalesce((select a.household_id::text || ':' || a.role from public.household_adults a join auth.users u on u.id = a.user_id where u.email = '${email}'), 'none')`);
+
+  // Priya sets up the family (through the same database functions the form uses) and makes two invitations.
+  const pCtx = await newPhone(); const priya = await pCtx.newPage();
+  const pTok = await owSignIn(priya, 'priya@e2e.test');
+  const fam = await rpc(pTok, 'household_save', { p_expected_version: null, p_display_name: 'The Shahs', p_preferences: {}, p_members: [
+    { first_name: 'Priya', kind: 'adult', role: 'parent', is_account_holder: true }, { first_name: 'Raj', kind: 'adult', role: 'partner' },
+    { first_name: 'Mina', kind: 'child', role: 'child', birth_year: 2018, birth_month: 4 }] });
+  const rajMember = fam.body.members.find((m) => m.first_name === 'Raj').id;
+  const invite = async (email) => (await rpc(pTok, 'household_invite_create', { p_member_id: rajMember, p_email: email })).body.code;
+  const message = (code) => `Join our family on Organized Mom: https://www.organizedmomcollective.com/club/invite?code=${code}`;
+
+  // Raj installs the app first and does what it asks: sets up "his" family, with a plan on its calendar.
+  const rCtx = await newPhone(); const raj = await rCtx.newPage();
+  const rTok = await owSignIn(raj, 'raj@e2e.test');
+  await raj.waitForURL(/\/app\/family\/setup/, { timeout: 15000 }).catch(() => {});
+  await raj.waitForSelector('[data-ourweek-setup]', { timeout: 15000 });
+  check('app first: the setup screen offers joining the other grown-up\'s family before making a second one', await raj.locator('[data-setup-invited]').count());
+  await rpc(rTok, 'household_save', { p_expected_version: null, p_display_name: 'Raj’s', p_preferences: {}, p_members: [
+    { first_name: 'Raj', kind: 'adult', role: 'parent', is_account_holder: true }, { first_name: 'Mina', kind: 'child', role: 'child', birth_year: 2018, birth_month: 4 }] });
+  await rpc(rTok, 'calendar_event_save', { p_event: { id: crypto.randomUUID(), title: 'Soccer', starts_on: new Date().toLocaleDateString('en-CA'), timezone: 'UTC' }, p_base_revision: null });
+  const before = await household('raj@e2e.test');
+  check('app first: he now owns a second, separate household', /:owner$/.test(before) && before.split(':')[0] !== (await household('priya@e2e.test')).split(':')[0], before);
+
+  // Then he gets the invitation and pastes the whole text message into the app.
+  const code = await invite('raj@e2e.test');
+  await raj.goto(`${base}/app/family/setup`, { waitUntil: 'networkidle' });
+  await raj.click('[data-setup-have-invite] a');
+  await raj.waitForSelector('[data-invite-paste]', { timeout: 15000 });
+  await raj.fill('[data-invite-paste] input', message(code));
+  await raj.click('[data-invite-paste] button[type="submit"]');
+  await raj.waitForSelector('[data-invite-state="confirm"]', { timeout: 20000 }).catch(() => {});
+  const ask = await raj.locator('[data-invite-state="confirm"]').innerText().catch(() => '');
+  check('app first: joining asks first, lists what he set up, offers to bring his plans and says a copy is kept', /Join The Shahs\?/.test(ask) && /Raj, Mina/.test(ask) && /1 calendar plan/.test(ask) && /Bring my 1 calendar plan/.test(ask) && /copy of everything/i.test(ask) && (await raj.locator('[data-invite-keep-events]').isChecked()), ask.replace(/\s+/g, ' ').slice(0, 260));
+  check('app first: the header is Organized Family, not the Club; no Club sign-in or sales', (await raj.locator('[data-free-flow="invite"] header').innerText()).trim().startsWith('organized') && (await raj.locator('img[alt*="Family Meeting Club"]').count()) === 0);
+  check('app first: nothing changed before he confirms', (await household('raj@e2e.test')) === before);
+  await shot(raj, '15-join-confirm', true);
+  await raj.click('[data-invite-confirm]');
+  await raj.waitForSelector('[data-invite-state="joined"]', { timeout: 20000 }).catch(() => {});
+  const after = await household('raj@e2e.test');
+  check('app first: he joins the family he was invited to, as the other grown-up', after === `${(await household('priya@e2e.test')).split(':')[0]}:partner`, after);
+  check('app first: the household he made by mistake is gone; one family, one Raj, one Mina',
+    (await sql(`select count(*) from public.club_households where id = '${before.split(':')[0]}'`)) === '0'
+    && (await sql(`select string_agg(first_name, ',' order by sort) from public.club_family_members where household_id = '${after.split(':')[0]}' and archived_at is null`)) === 'Priya,Raj,Mina');
+  check('app first: a copy of what he set up is kept for him', (await sql(`select count(*) from public.household_archives a join auth.users u on u.id = a.user_id where u.email = 'raj@e2e.test' and a.family = 'Raj’s'`)) === '1');
+  await raj.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(raj, 1500);
+  check('app first: his plan came with him to the shared calendar, and his phone is in sync', (await sql(`select count(*) from public.calendar_events where title = 'Soccer' and deleted_at is null and household_id = '${after.split(':')[0]}'`)) === '1' && (await raj.locator('[data-sync-status]').getAttribute('data-sync-status')) === 'synced');
+  await priya.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(priya, 2000);
+  check('app first: she sees the plan he brought on her phone', (await priya.locator('[data-calendar-event="Soccer"]').count()) > 0 && (await priya.locator('[data-sync-status]').getAttribute('data-sync-status')) === 'synced');
+
+  // A partner with no family yet pastes the invitation on the setup screen instead of filling in the form.
+  await rpc(pTok, 'household_partner_remove');
+  const code2 = await invite('raj2@e2e.test');
+  const tCtx = await newPhone(); const raj2 = await tCtx.newPage();
+  await owSignIn(raj2, 'raj2@e2e.test');
+  await raj2.waitForSelector('[data-setup-invited]', { timeout: 15000 });
+  await raj2.click('[data-setup-invited] summary');
+  await raj2.fill('[data-setup-invited] input', message(code2));
+  await raj2.click('[data-setup-invited] button[type="submit"]');
+  await raj2.waitForSelector('[data-invite-state="joined"]', { timeout: 20000 }).catch(() => {});
+  check('no family yet: pasting the invitation on the setup screen joins straight away, no second household', (await household('raj2@e2e.test')) === `${(await household('priya@e2e.test')).split(':')[0]}:partner` && (await sql(`select count(*) from public.club_households h join auth.users u on u.id = h.owner_user_id where u.email = 'raj2@e2e.test'`)) === '0');
+  await tCtx.close();
+
+  // ---------------------------------------------------------------- 14. Shared cleaning progress (20261201)
+  // Priya and Raj2 share the family now. A checkmark on one phone shows on the other; offline taps catch up.
+  const openCleaning = async (page) => {
+    await page.goto(`${base}/app/cleaning`, { waitUntil: 'networkidle' });
+    for (let i = 0; i < 6 && (await page.locator('[role="dialog"] .btn-primary').isVisible().catch(() => false)); i++) { await page.locator('[role="dialog"] .btn-primary').click(); await page.waitForTimeout(150); }
+    await page.waitForSelector('input[type="checkbox"]', { timeout: 15000 });
+    await settle(page, 1500);
+  };
+  const boxes = (page) => page.locator('input[type="checkbox"]');
+  // The real checkbox sits under a styled one: tap it the way the label does.
+  const tap = (page, i) => boxes(page).nth(i).evaluate((el) => el.click());
+  const marks = (where = 'done') => sql(`select count(*) from public.household_cleaning_marks c join public.household_adults a on a.household_id = c.household_id join auth.users u on u.id = a.user_id where u.email = 'priya@e2e.test' and ${where}`);
+  const r2Ctx = await newPhone(); const raj2b = await r2Ctx.newPage();
+  await owSignIn(raj2b, 'raj2@e2e.test');
+  await openCleaning(priya); await openCleaning(raj2b);
+  check('cleaning: with a shared family the screen says it\'s shared', (await priya.locator('[data-cleaning-share]').getAttribute('data-cleaning-share').catch(() => null)) === 'shared');
+  await tap(priya, 0);
+  await settle(priya, 1500);
+  check('cleaning: her checkmark is saved to the household', (await marks()) === '1', await marks());
+  await raj2b.reload({ waitUntil: 'networkidle' }); await settle(raj2b, 2000);
+  check('cleaning: it shows checked on his phone', await boxes(raj2b).nth(0).isChecked());
+  // Both check different things; neither is lost.
+  await tap(raj2b, 1); await tap(priya, 2);
+  await settle(priya, 1500); await settle(raj2b, 500);
+  await priya.reload({ waitUntil: 'networkidle' }); await settle(priya, 2000);
+  await raj2b.reload({ waitUntil: 'networkidle' }); await settle(raj2b, 2000);
+  const three = async (page) => (await Promise.all([0, 1, 2].map((i) => boxes(page).nth(i).isChecked()))).join();
+  check('cleaning: they check different things at once and both phones show all three', (await three(priya)) === 'true,true,true' && (await three(raj2b)) === 'true,true,true', `${await three(priya)} / ${await three(raj2b)}`);
+  // Offline: he unchecks one with no signal; it's kept on his phone, then reaches hers.
+  await offline(r2Ctx);
+  await tap(raj2b, 0);
+  await settle(raj2b, 1500);
+  check('cleaning offline: his change is kept on his phone and marked as waiting', !(await boxes(raj2b).nth(0).isChecked()) && (await raj2b.locator('[data-cleaning-share]').getAttribute('data-cleaning-share')) === 'waiting' && (await marks()) === '3');
+  await raj2b.reload({ waitUntil: 'domcontentloaded' }).catch(() => {}); await settle(raj2b, 1500);
+  check('cleaning offline: closing and reopening the app keeps his change', !(await boxes(raj2b).nth(0).isChecked().catch(() => true)));
+  await online(r2Ctx, raj2b);
+  await settle(raj2b, 2500);
+  check('cleaning: back online, his uncheck reaches the household', (await marks()) === '2' && (await marks('not done')) === '1', `${await marks()} done`);
+  await priya.reload({ waitUntil: 'networkidle' }); await settle(priya, 2000);
+  check('cleaning: and her phone shows it unchecked, the other two still checked', (await three(priya)) === 'false,true,true', await three(priya));
+  await shot(priya, '16-cleaning-shared', false);
+  // ---------------------------------------------------------------- 15. Two parents, the awkward cases
+  // Both tap the SAME box at almost the same moment: no error, and both phones end up agreeing.
+  await tap(priya, 3); await tap(raj2b, 3);
+  await settle(priya, 2000); await settle(raj2b, 2000);
+  await priya.reload({ waitUntil: 'networkidle' }); await settle(priya, 2000);
+  await raj2b.reload({ waitUntil: 'networkidle' }); await settle(raj2b, 2000);
+  const same = [await boxes(priya).nth(3).isChecked(), await boxes(raj2b).nth(3).isChecked()];
+  check('two parents: tapping the same box at once ends with both phones agreeing, and one record', same[0] === same[1] && same[0] === true && (await marks(`done and (list, period, item) in (select list, period, item from public.household_cleaning_marks group by 1,2,3 having count(*) = 1)`)) === '3', same.join());
+  check('two parents: neither phone shows an error or a stuck change', (await priya.locator('[data-cleaning-share]').getAttribute('data-cleaning-share')) === 'shared' && (await raj2b.locator('[data-cleaning-share]').getAttribute('data-cleaning-share')) === 'shared');
+
+  // He signs out. His phone keeps what's on it, stops sharing, and asks nothing of her.
+  await raj2b.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(raj2b, 1200);
+  await raj2b.click('[data-sign-out]');
+  await raj2b.waitForFunction(() => !localStorage.getItem('omc:account:session'), null, { timeout: 15000 });
+  await openCleaning(raj2b);
+  check('sign-out: his checkmarks are still on his phone', (await three(raj2b)) === 'false,true,true');
+  await tap(raj2b, 4); // a change made while signed out
+  await settle(raj2b, 1500);
+  const whileOut = await marks();
+  check('sign-out: a change made while signed out stays on his phone, nothing is sent', (await boxes(raj2b).nth(4).isChecked()) && whileOut === '3', whileOut);
+  await priya.reload({ waitUntil: 'networkidle' }); await settle(priya, 1500);
+  check('sign-out: her phone is unaffected and still sharing', (await priya.locator('[data-cleaning-share]').getAttribute('data-cleaning-share')) === 'shared' && !(await boxes(priya).nth(4).isChecked()));
+  // He signs back in: what he did while signed out joins the family's, nothing is lost or doubled.
+  await owSignIn(raj2b, 'raj2@e2e.test');
+  await openCleaning(raj2b); await settle(raj2b, 2000);
+  check('sign back in: his signed-out change reaches the household', (await marks()) === '4', await marks());
+  await priya.reload({ waitUntil: 'networkidle' }); await settle(priya, 2000);
+  check('sign back in: both phones show the same five boxes', (await Promise.all([0, 1, 2, 3, 4].map((i) => boxes(priya).nth(i).isChecked()))).join() === 'false,true,true,true,true' && (await Promise.all([0, 1, 2, 3, 4].map((i) => boxes(raj2b).nth(i).isChecked()))).join() === 'false,true,true,true,true');
+
+  // She removes his access. His phone stops seeing the family at once; her family and its progress are untouched.
+  await rpc(pTok, 'household_partner_remove');
+  await raj2b.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(raj2b, 2000);
+  check('removed: his phone no longer shows the family calendar', (await raj2b.locator('[data-calendar-event="Soccer"]').count()) === 0 && (await raj2b.locator('[data-sync-status]').getAttribute('data-sync-status')) === 'no-household');
+  await openCleaning(raj2b);
+  await tap(raj2b, 0); await settle(raj2b, 1500);
+  check('removed: his cleaning is his phone\'s only; nothing he taps reaches her family', (await raj2b.locator('[data-cleaning-share]').count()) === 0 && (await marks()) === '4');
+  check('removed: her family, plans and progress are all still there', (await sql(`select count(*) from public.club_family_members f join public.household_adults a on a.household_id = f.household_id join auth.users u on u.id = a.user_id where u.email = 'priya@e2e.test' and f.archived_at is null`)) === '3' && (await sql(`select count(*) from public.calendar_events e join public.household_adults a on a.household_id = e.household_id join auth.users u on u.id = a.user_id where u.email = 'priya@e2e.test' and e.deleted_at is null`)) === '1');
+
+  // She invites him again; the old invitation is dead, the new one brings him back to the same family.
+  await raj2b.goto(`${base}/club/invite?code=${code2}`, { waitUntil: 'networkidle' });
+  await raj2b.waitForSelector('[data-invite-state="error"]', { timeout: 20000 }).catch(() => {});
+  check('rejoin: an invitation that was already used can\'t be used again, and says so plainly', /can’t be used|already accepted/i.test(await raj2b.locator('[data-invite-state="error"]').innerText().catch(() => '')));
+  const code3 = await invite('raj2@e2e.test');
+  // A stranger who gets hold of the link learns nothing and is told which email it's for.
+  const sCtx = await newPhone(); const stranger = await sCtx.newPage();
+  await owSignIn(stranger, 'stranger@e2e.test');
+  await stranger.goto(`${base}/club/invite?code=${code3}`, { waitUntil: 'networkidle' });
+  await stranger.waitForSelector('[data-invite-state="error"]', { timeout: 20000 }).catch(() => {});
+  const strangerText = await stranger.locator('body').innerText();
+  check('rejoin: someone else with the link is refused and sees no family names', /different email/i.test(strangerText) && !/Shah|Priya|Mina/.test(strangerText) && (await household('stranger@e2e.test')) === 'none');
+  await sCtx.close();
+  await raj2b.goto(`${base}/club/invite?code=${code3}`, { waitUntil: 'networkidle' });
+  await raj2b.waitForSelector('[data-invite-state="joined"]', { timeout: 20000 }).catch(() => {});
+  check('rejoin: he is back in the same family as the other grown-up', (await household('raj2@e2e.test')) === `${(await household('priya@e2e.test')).split(':')[0]}:partner`);
+  await openCleaning(raj2b); await settle(raj2b, 2500);
+  check('rejoin: his phone shares the family\'s cleaning again, with everything done while he was away', (await raj2b.locator('[data-cleaning-share]').getAttribute('data-cleaning-share')) === 'shared' && (await boxes(raj2b).nth(1).isChecked()) && (await boxes(raj2b).nth(4).isChecked()));
+  await raj2b.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(raj2b, 2000);
+  check('rejoin: and the family calendar is back on his phone', (await raj2b.locator('[data-calendar-event="Soccer"]').count()) > 0);
+  // A third grown-up can't be added while two share the family.
+  const third = await rpc(pTok, 'household_invite_create', { p_member_id: rajMember, p_email: 'third@e2e.test' });
+  check('two adults: a third can\'t be invited', third.status >= 400 && /household_full|invite_member_invalid/.test(JSON.stringify(third.body)), JSON.stringify(third.body).slice(0, 120));
+  // The app's name on the free screens.
+  for (const path of ['/app/sign-in', '/app/family/setup', '/app/account']) {
+    await raj2b.goto(`${base}${path}`, { waitUntil: 'networkidle' }); await settle(raj2b, 800);
+    const t = await raj2b.locator('body').innerText();
+    check(`name: ${path} never says "Our Week"`, !/\bOur Week\b(?!ly|-)/i.test(t), (t.match(/.{0,30}Our Week.{0,20}/i) ?? [''])[0]);
+  }
+
+  // Without a household nothing leaves the phone.
+  check('cleaning: another household has none of these marks', (await sql(`select count(distinct household_id) from public.household_cleaning_marks`)) === '1');
+  await pCtx.close(); await rCtx.close(); await r2Ctx.close();
 }
 
 await browser.close();

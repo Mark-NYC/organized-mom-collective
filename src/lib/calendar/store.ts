@@ -8,14 +8,19 @@
  * - Never overwrites the other adult: each save carries the revision it started from. If theirs landed first the
  *   server says 'conflict'; their version is kept, and this phone's change is set aside and named in `conflicts` so
  *   the app can say "Sam changed Dentist on another phone; check it and make your change again."
+ * - One bad change never blocks the rest: a change the household refuses outright is set aside and named too, and the
+ *   outbox moves on. Only "try again later" failures (no signal, signed out, server trouble: ../sync-errors.ts) stop
+ *   a round, with everything kept.
  * - Signing in with a household turns a local calendar into the household's: its events upload as new ones.
  *
  * The state functions are pure (tested in tests/calendar-store.test.ts); the browser wrapper is at the bottom.
  */
 import type { CalendarEvent } from './recurrence';
+import { retryLater } from '../sync-errors';
 
 export interface Op { opId: string; kind: 'save' | 'delete'; id: string; base: number | null; event?: CalendarEvent }
-export interface Conflict { id: string; title: string; at: string }
+/** kind: 'changed' (default) the other adult got there first; 'refused' the household wouldn't take it. */
+export interface Conflict { id: string; title: string; at: string; kind?: 'changed' | 'refused' }
 export interface CalendarState {
   /** 'local' (no household yet) or the household id these events belong to. */
   scope: string;
@@ -100,6 +105,7 @@ export async function sync(start: CalendarState, api: CalendarApi, now = () => n
   let s = start;
   if (s.scope === 'local') return { state: s, pushed: 0, offline: false };
   let pushed = 0;
+  let setAside = false;
   for (const op of [...s.outbox]) {
     try {
       if (op.kind === 'save' && op.event) {
@@ -111,18 +117,19 @@ export async function sync(start: CalendarState, api: CalendarApi, now = () => n
       }
       pushed++;
     } catch (e) {
-      if ((e as Error).message === 'conflict') {
-        // Theirs wins; ours is set aside and named. The pull below brings their version.
-        const title = op.event?.title ?? s.events[op.id]?.title ?? 'An event';
-        const { [op.id]: _mine, ...events } = s.events;
-        s = { ...s, events, outbox: s.outbox.filter((o) => o.opId !== op.opId), conflicts: [...s.conflicts, { id: op.id, title, at: now() }] };
-        continue;
-      }
-      return { state: s, pushed, offline: true }; // no signal: keep the rest for next time
+      if (retryLater(e)) return { state: s, pushed, offline: true }; // keep this and the rest for next time
+      // 'conflict': theirs wins. Anything else: the household refused it. Either way ours is set aside and named, and
+      // the full pull below brings back what the household has.
+      const kind: Conflict['kind'] = (e as Error).message === 'conflict' ? 'changed' : 'refused';
+      const title = op.event?.title ?? s.events[op.id]?.title ?? 'An event';
+      const { [op.id]: _mine, ...events } = s.events;
+      s = { ...s, events, outbox: s.outbox.filter((o) => o.opId !== op.opId), conflicts: [...s.conflicts, { id: op.id, title, at: now(), kind }] };
+      setAside = true;
     }
   }
   try {
-    const sinceWithOverlap = s.since ? new Date(Date.parse(s.since) - 5 * 60_000).toISOString() : null;
+    // After setting a change aside, pull everything: the household's copy may be older than the last pull.
+    const sinceWithOverlap = s.since && !setAside ? new Date(Date.parse(s.since) - 5 * 60_000).toISOString() : null;
     const r = await api.changes(sinceWithOverlap);
     s = { ...mergeRemote(s, r.events), since: r.now };
   } catch {

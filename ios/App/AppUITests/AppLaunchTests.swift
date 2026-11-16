@@ -55,10 +55,30 @@ final class AppLaunchTests: XCTestCase {
         origin.withOffset(CGVector(dx: window.width * (CGFloat(i) + 0.5) / 4, dy: window.maxY - 34 - 25)).tap()
     }
 
+    /// A cold launch (process start, web view, first page) on a shared CI Mac, as opposed to moving between pages.
+    private let launchTimeout: TimeInterval = 45
+
     @discardableResult
     private func waitFor(_ element: XCUIElement, _ what: String, timeout: TimeInterval = 20) -> XCUIElement {
-        XCTAssertTrue(element.waitForExistence(timeout: timeout), "Not found: \(what)")
+        if !element.waitForExistence(timeout: timeout) {
+            // Say what WAS on screen, in the failure line CI keeps, so an intermittent miss can be diagnosed from the log.
+            XCTFail("Not found: \(what). On screen: \(onScreen())")
+        }
         return element
+    }
+
+    /// The first labels the web view exposes right now (headings, links, buttons, text), for failure messages.
+    private func onScreen() -> String {
+        guard web.exists else { return "(no web view; app state \(app.state.rawValue))" }
+        var seen: [String] = []
+        for q in [web.staticTexts, web.buttons, web.links] {
+            for e in q.allElementsBoundByIndex.prefix(40) {
+                let l = e.label.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !l.isEmpty && !seen.contains(l) { seen.append(String(l.prefix(40))) }
+                if seen.count >= 30 { break }
+            }
+        }
+        return seen.isEmpty ? "(web view with no text: a blank or still-loading page)" : seen.joined(separator: " | ")
     }
 
     private func shot(_ name: String) {
@@ -75,21 +95,44 @@ final class AppLaunchTests: XCTestCase {
         waitFor(today, "\(screen): Today tab")
         XCTAssertTrue(today.isHittable, "\(screen): Today tab can't be tapped")
         // WebKit can paint once before env(safe-area-inset-bottom) applies (run 43718058363, a slow GPU process): give
-        // the bar up to 5 s to settle. A bar that stays under the home indicator still fails below.
-        let settle = Date().addingTimeInterval(5)
-        while today.frame.maxY > window.maxY - 20 && Date() < settle { RunLoop.current.run(until: Date().addingTimeInterval(0.25)) }
-        // Home indicator area is 34 pt on Face ID iPhones; the tab's label must sit above it.
-        XCTAssertLessThanOrEqual(today.frame.maxY, window.maxY - 20, "\(screen): tab bar runs under the home indicator")
+        // the bar time to settle. Run 43928888138: the simulator's GPU process died and restarted mid-test, which took
+        // longer than the 5 s allowed then; 20 s covers a restart. A bar that stays under the home indicator still
+        // fails below.
+        let began = Date()
+        let settle = began.addingTimeInterval(20)
+        while today.frame.maxY > window.maxY - 34 && Date() < settle { RunLoop.current.run(until: Date().addingTimeInterval(0.25)) }
+        // The measured position, in the CI log: the pass is about where the bar is, not how long we waited.
+        print(String(format: "OMCGeometry %@: tab label bottom %.0f, window bottom %.0f, clearance %.0f pt (home indicator 34 pt), content top %.0f, settled after %.2f s",
+                     screen, today.frame.maxY, window.maxY, window.maxY - today.frame.maxY, topElement.frame.minY, Date().timeIntervalSince(began)))
+        // Home indicator area is 34 pt on Face ID iPhones; the tab's label must sit wholly above it. Measured on
+        // run 43933158863: 43 pt of clearance on all five screens, settled in under a second. The failing run had
+        // 9 pt: the same layout before env(safe-area-inset-bottom) (34 pt) applied.
+        XCTAssertLessThanOrEqual(today.frame.maxY, window.maxY - 34, "\(screen): tab bar runs under the home indicator")
         // Status bar / Dynamic Island: at least 44 pt on every current iPhone.
         XCTAssertGreaterThanOrEqual(topElement.frame.minY, window.minY + 44, "\(screen): content starts under the status bar")
     }
 
     private func finishCleaningOnboarding() {
-        // A new device sees the companion's four-step first-run screen; step through it as she would.
-        for _ in 0..<6 {
-            let next = web.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Next:' OR label BEGINSWITH[c] 'Open Today'")).firstMatch
-            guard next.waitForExistence(timeout: 3) else { return }
-            next.tap()
+        // A new device sees the companion's four-step first-run screen; step through it as she would. Wait for what
+        // is actually on screen: either a first-run button to tap, or the checklist itself. (It used to give the
+        // first-run screen 3 s to appear and otherwise assume there was none; on a slow CI Mac the screen arrived
+        // later and covered the checklist: "Not found: first Daily Reset task", run 43799453411.)
+        let next = web.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Next:' OR label BEGINSWITH[c] 'Open Today'")).firstMatch
+        let checklist = text("Make beds")
+        let deadline = Date().addingTimeInterval(launchTimeout)
+        var taps = 0
+        while Date() < deadline {
+            if next.exists && taps < 8 {
+                next.tap()
+                taps += 1
+                RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+            } else if checklist.exists {
+                // The first-run screen can still be on its way in: only done once it has had a moment and isn't there.
+                RunLoop.current.run(until: Date().addingTimeInterval(1.0))
+                if !next.exists { return }
+            } else {
+                RunLoop.current.run(until: Date().addingTimeInterval(0.25))
+            }
         }
     }
 
@@ -101,7 +144,7 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(web.waitForExistence(timeout: 30), "The web view never appeared")
 
         // Today.
-        let title = waitFor(text("little more calm"), "Today title")
+        let title = waitFor(text("little more calm"), "Today title", timeout: launchTimeout)
         assertInsideSafeArea("Today", topElement: title)
         shot("01-today")
 
@@ -115,19 +158,17 @@ final class AppLaunchTests: XCTestCase {
         assertInsideSafeArea("Cleaning", topElement: text("Daily Reset"))
         shot("02-cleaning-one-done")
 
-        // Family: Our Family Meeting first, then responsibilities and the Club.
+        // Family: Our Family Meeting first, then responsibilities. The Club card is for households that have the Club
+        // (covered with a member in testFamilyFlowWithTestBackend and scripts/e2e/family-e2e.mjs).
         XCTAssertFalse(tab("Club").exists, "the old Club tab is still there")
         XCTAssertFalse(tab("Account").exists, "Account should be the profile icon, not a tab")
         tab("Family").tap()
         let family = waitFor(text("plays a part"), "Family tab")
         waitFor(text("Who does what"), "Family Responsibilities card")
-        waitFor(text("Family Meeting Club"), "Family Meeting Club card")
+        // A free family (nobody signed in here) sees no Club membership card it couldn't open, and nothing to buy.
+        XCTAssertFalse(text("Open the Club").exists, "a free family is shown a Family Meeting Club membership card")
         assertInsideSafeArea("Family", topElement: family)
         shot("03-family")
-        text("Open the Club").tap()
-        let club = waitFor(text("One small win"), "Club home")
-        assertInsideSafeArea("Club", topElement: club)
-        shot("03b-club")
 
         // Account, from the profile icon: signed out, no made-up family.
         tab("Today").tap()
@@ -152,7 +193,7 @@ final class AppLaunchTests: XCTestCase {
         app.terminate()
         app.launchArguments = []
         app.launch()
-        waitFor(text("little more calm"), "Today after relaunch")
+        waitFor(text("little more calm"), "Today after relaunch", timeout: launchTimeout)
         tab("Cleaning").tap()
         finishCleaningOnboarding()
         waitFor(oneTaskDone, "checkmark after relaunch")
@@ -163,7 +204,7 @@ final class AppLaunchTests: XCTestCase {
         app.launchArguments = ["-OMCResetWebStorageForTesting"]
         app.launch()
         XCTAssertTrue(web.waitForExistence(timeout: 30))
-        waitFor(text("little more calm"), "Today after storage wipe")
+        waitFor(text("little more calm"), "Today after storage wipe", timeout: launchTimeout)
         let cleaningTab = tab("Cleaning")
         XCTAssertTrue(cleaningTab.waitForExistence(timeout: 20), "Cleaning tab gone after a storage wipe")
         cleaningTab.tap()
@@ -195,7 +236,7 @@ final class AppLaunchTests: XCTestCase {
         app.launchArguments = ["-OMCResetWebStorageForTesting"]
         app.launch()
         XCTAssertTrue(web.waitForExistence(timeout: 30))
-        waitFor(text("little more calm"), "Today")
+        waitFor(text("little more calm"), "Today", timeout: launchTimeout)
 
         // Sign in as Jen (the test backend's code is 123456).
         waitFor(web.links.matching(NSPredicate(format: "label == 'Account and settings'")).firstMatch, "profile icon").tap()

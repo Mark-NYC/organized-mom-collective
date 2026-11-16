@@ -1,9 +1,13 @@
 ---
+import { existsSync } from 'node:fs';
 import type { InspirationGallery as Gallery } from '../../data/inspiration-galleries';
 interface Props { gallery: Gallery; }
 const { gallery } = Astro.props;
 const origin = Astro.site?.origin ?? 'https://www.organizedmomcollective.com';
 const canonical = new URL('/resources/'+gallery.slug,origin).href;
+// A photo counts only when its file is in the build: a listed but missing file shows the "coming soon" tile, never a
+// broken image or a Pinterest Save button for a picture that isn't there.
+const hasImage = (image?: string) => Boolean(image) && (!image!.startsWith('/') || existsSync(`public${image}`));
 const hasAllImages = gallery.ideas.every(idea=>Boolean(idea.image));
 const isLive = gallery.published && hasAllImages;
 const hasTwoTips = gallery.ideas.some(idea => Boolean(idea.secondTitle));
@@ -75,7 +79,7 @@ const categoryItems = (gallery.sections ?? []).map((section, index, all) => ({
             <p>{gallery.sections.find(section => section.start === index)?.intro}</p>
           </header>}
           <div class="inspo-image-frame">
-            {idea.image ? <img src={idea.image} width="1000" height="1500" alt={idea.alt} loading={index===0?'eager':'lazy'} fetchpriority={index===0?'high':undefined} decoding="async" /> :
+            {hasImage(idea.image) ? <img src={idea.image} width="1000" height="1500" alt={idea.alt} loading={index===0?'eager':'lazy'} fetchpriority={index===0?'high':undefined} decoding="async" /> :
             <div class="inspo-missing" role="note"><span>PHOTO {String(index+1).padStart(2,'0')} / {gallery.ideas.length}</span><small>Image coming soon</small></div>}
           </div>
           <div class="inspo-item-copy">
@@ -98,7 +102,7 @@ const categoryItems = (gallery.sections ?? []).map((section, index, all) => ({
                 <p>{idea.secondTip}</p>
               </section>}
             </div>
-            {isLive && idea.image && <a class="inspo-save" data-inspo-save data-idea={idea.id}
+            {isLive && hasImage(idea.image) && <a class="inspo-save" data-inspo-save data-idea={idea.id}
               href={'https://www.pinterest.com/pin/create/button/?'+new URLSearchParams({url:canonical+'#'+idea.id,media:new URL(idea.image,origin).href,description:idea.pinDescription}).toString()}
               target="_blank" rel="noopener noreferrer" aria-label={'Save '+idea.title+' to Pinterest'}>
               <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.6 19.33 9.4 9.4 0 0 1 .04-2.88l1.27-5.41s-.32-.63-.32-1.57c0-1.47.85-2.56 1.9-2.56.9 0 1.33.68 1.33 1.49 0 .91-.58 2.27-.87 3.53-.25 1.05.53 1.91 1.56 1.91 1.87 0 3.32-1.97 3.32-4.82 0-2.52-1.81-4.28-4.39-4.28-3.02 0-4.79 2.26-4.79 4.6 0 .91.35 1.89.8 2.42.09.11.11.2.08.31l-.3 1.25c-.05.2-.16.24-.36.15-1.35-.63-2.19-2.6-2.19-4.19 0-3.4 2.47-6.51 7.12-6.51 3.74 0 6.65 2.67 6.65 6.25 0 3.73-2.35 6.73-5.61 6.73-1.09 0-2.12-.57-2.48-1.25l-.67 2.55c-.25.98-.95 2.21-1.42 3.04A10 10 0 1 0 12 2Z"/></svg>

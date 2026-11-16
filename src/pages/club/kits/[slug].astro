@@ -7,6 +7,8 @@
 import ClubLayout from '../../../layouts/ClubLayout.astro';
 import KitPage from '../../../components/club/KitPage';
 import { kits } from '../../../data/club/kits';
+import { memberPlanHref } from '../../../lib/club/plan/account';
+import { routes } from '../../../routes';
 import ClubMonthAccess from '../../../components/club/ClubMonthAccess';
 import NovemberOwnershipPrototype from '../../../components/club/NovemberOwnershipPrototype.astro';
 import DecemberMissionPrototype from '../../../components/club/DecemberMissionPrototype.astro';
@@ -24,11 +26,18 @@ export function getStaticPaths() {
 }
 
 const { slug, theme } = Astro.props;
+// Where the mailed QR code lands: the month's own member page when it has one (every month in the app's year except
+// November, whose tool is this page). The older per-month copies below stay only for months without one.
+const plan = memberPlanHref(slug);
+const planHref = plan.startsWith(`${routes.appClub}/`) ? plan : null;
+
 const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : slug === "2027-05-finish-the-school-year" ? "may" : slug === "2027-06-summer-with-a-plan" ? "june" : slug === "2027-07-ready-to-go" ? "july" : slug === "2027-08-school-year" ? "august" : null;
 ---
 
 <ClubLayout title={theme}>
-  {month ? (
+  {planHref ? (
+    <ClubMonthAccess client:only="react" slug={slug} planHref={planHref} />
+  ) : month ? (
     <>
       <ClubMonthAccess client:only="react" slug={slug} />
       <div id="club-month-content" hidden>

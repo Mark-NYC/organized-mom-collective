@@ -229,8 +229,10 @@ var routes = {
   /** Organized Family Club member pages (behind PUBLIC_CLUB_ENABLED; never linked from public pages). */
   clubStart: "/club/start",
   /** The offer on the Club landing page: its button opens Stripe Checkout. */
-  clubJoin: "/club#offer",
+  clubJoin: "/club-2",
   clubLogin: "/club/login",
+  /** A partner's invitation (src/lib/household/api.ts): sign in with the invited email, join the household. */
+  householdJoin: "/club/invite",
   clubWelcome: "/club/welcome",
   clubWelcomeKit: "/club/welcome-kit",
   clubDashboard: "/club/dashboard",
@@ -300,6 +302,9 @@ var routes = {
   mentalLoad: "/mental-load-worksheet",
   familyMeetingAgenda: "/family-meeting-agenda",
   resources: "/resources",
+  /** Practical household systems with printable reference guides. */
+  guides: "/guides",
+  guide: (slug) => `/guides/${slug}/`,
   /** The Free tools section of the resource hub. */
   freeTools: "/tools",
   article: (slug) => `/resources/${slug}`,
@@ -324,7 +329,11 @@ var routes = {
   cleaning: "/app/cleaning",
   appClub: "/app/club",
   appClubMonths: "/app/club/months",
+  /** The Welcome Family Rhythm: every member's, whatever month she joins (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md). */
+  appClubFamilyRhythm: "/app/club/family-rhythm",
   appAccount: "/app/account",
+  /** The shared family calendar (free; docs/ios/FAMILY_CALENDAR.md). */
+  familyCalendar: "/app/family-calendar",
   week: "/app/week",
   /** Old name for the Week page; redirects to `week`. */
   tidy: "/app/tidy",

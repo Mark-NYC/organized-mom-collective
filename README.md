@@ -23,7 +23,7 @@ npm run build:functions # rebuild the paste-ready Edge Function files in supabas
 npm run build:app     # iPhone app bundle: dist-app/ → app-www/ (member pages only; fails on a leaked page, tracker or secret)
 npm run test:app-shell # after build:app: drive app-www/ at iPhone size in Chromium (needs `npm i --no-save playwright`)
 npm run ios:sync      # copy app-www/ into ios/App (the Xcode build runs in CI on macOS: .github/workflows/ios-app.yml)
-node scripts/compare-test-failures.mjs # whole unit suite, failing only on failures not in tests/known-failures.txt
+npm test                              # whole unit suite; every test must pass (docs/club/KNOWN_TEST_FAILURES.md: how the old baseline was retired)
 ```
 
 `dist/` is a fully static site.

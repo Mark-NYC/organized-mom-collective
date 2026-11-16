@@ -65,3 +65,17 @@ export function useCheckedSet(key: string): [Set<string>, (id: string) => void] 
 export function useSaving(): boolean {
   return useSyncExternalStore(onSavingChange, isSaving, () => true);
 }
+
+/**
+ * Shared cleaning progress (src/lib/cleaning-sync/): 'local' (this device only), 'shared' (the household has every
+ * change) or 'waiting' (changes saved here, not yet with the household), and how many are waiting.
+ */
+export function useCleaningShare(): { status: 'local' | 'shared' | 'waiting'; waiting: number } {
+  const [s, setS] = useState<{ status: 'local' | 'shared' | 'waiting'; waiting: number }>({ status: 'local', waiting: 0 });
+  useEffect(() => {
+    const on = (e: Event) => setS((e as CustomEvent).detail);
+    window.addEventListener('omc:cleaning:synced', on);
+    return () => window.removeEventListener('omc:cleaning:synced', on);
+  }, []);
+  return s;
+}

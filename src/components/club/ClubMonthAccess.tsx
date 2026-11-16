@@ -8,10 +8,15 @@ import ClubGate,{type ClubContext} from './ClubGate';
 import type {Household} from '../../lib/club/profile';
 import {routes} from '../../routes';
 
-export default function ClubMonthAccess({slug}:{slug:string}){
- return <ClubGate page="kit">{ctx=><MemberMonth ctx={ctx} slug={slug}/>}</ClubGate>;
+/**
+ * `planHref`: this month's own member page (/app/club/<month>). The mailed QR code opens /club/kits/<slug>; once the
+ * household's access is confirmed she is sent on to that page, so the code always lands on the month's real, current
+ * resource (never an older copy of it), keeping ?source=mailer.
+ */
+export default function ClubMonthAccess({slug,planHref}:{slug:string;planHref?:string}){
+ return <ClubGate page="kit">{ctx=><MemberMonth ctx={ctx} slug={slug} planHref={planHref}/>}</ClubGate>;
 }
-function MemberMonth({ctx,slug}:{ctx:ClubContext;slug:string}){
+function MemberMonth({ctx,slug,planHref}:{ctx:ClubContext;slug:string;planHref?:string}){
  const [state,setState]=useState<'loading'|'denied'|'ready'|'failed'>('loading');
  const [household,setHousehold]=useState<Household|null>(null);
  useEffect(()=>{
@@ -21,6 +26,7 @@ function MemberMonth({ctx,slug}:{ctx:ClubContext;slug:string}){
   Promise.all([ctx.store.me(),ctx.store.household()]).then(([me,h])=>{
    if(!active)return;
    if(!h||!me.kits.some(k=>k.slug===slug)){setState('denied');return;}
+   if(planHref&&!ctx.sample){location.replace(planHref+location.search);return;}
    setHousehold(h);
    // Dispatch before revealing content, so the print view has current household names.
    window.dispatchEvent(new CustomEvent('omc:club-preview-household',{detail:{household:h,sample:ctx.sample}}));

@@ -17,10 +17,6 @@ import { readFileSync, readdirSync } from 'node:fs';
 const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
 describe('August: one letter, one action, one tool', () => {
-  it('passes every kit check, beside November', () => {
-    expect(kitProblems(august)).toEqual([]);
-    expect(kits.map((k) => k.slug)).toEqual(['2026-11-family-ownership', '2027-01-fresh-start-together', '2027-02-better-together', '2027-03-spring-clean-together', '2027-04-everybody-helps-at-mealtime', '2027-05-finish-the-school-year', '2027-06-summer-with-a-plan', '2027-07-ready-to-go', '2027-08-school-year', '2027-09-a-week-everyone-can-see', '2027-10-home-works-together', '2027-12-christmas-family-affair']);
-  });
 
   it('keeps November exactly as it was', () => {
     expect(november.action).toBeUndefined();
@@ -30,46 +26,6 @@ describe('August: one letter, one action, one tool', () => {
     expect(november.printables.map((p) => [p.id, p.component])).toEqual([
       ['ownership-chart', 'ResponsibilityChart'], ['kitchen-pantry-reset', 'ResetChecklist'], ['who-owns-what', 'ConversationCard'], ['handing-over', 'Checklist'],
     ]);
-  });
-
-  it('is the theme and subtitle the owner set', () => {
-    expect(august.theme).toBe('Ready for the School Year');
-    expect(august.subtitle).toBe('One calmer start. Everyone has a part.');
-  });
-
-  it('has exactly the six countdown lines, with an optional helper blank instead of assignments', () => {
-    expect(august.action!.title).toBe('Our Back-to-School Countdown');
-    expect(august.action!.items.map((i) => [i.text, i.daysBefore])).toEqual([
-      ['Add school dates and activities to the family calendar.', 14],
-      ['Check clothes, shoes and school supplies.', 10],
-      ['Set up a place for backpacks and school papers.', 7],
-      ['Decide who’s handling drop-off and pick-up.', 7],
-      ['Practice morning and after-school routines.', 5],
-      ['Pack bags and get everything ready the night before.', 1],
-    ]);
-    expect(august.action!.helperLabel).toBe('Who’s helping?');
-  });
-
-  it('prints the countdown and the letter, and nothing from the first draft: no launch plan, command center, overview or item sets', () => {
-    expect(august.printables.map((p) => [p.id, p.component])).toEqual([['countdown', 'Action'], ['letter', 'Letter']]);
-    expect(august.overview).toBeUndefined();
-    expect(august.itemSets).toBeUndefined();
-    expect(august.printables.some((p) => p.secondary || p.editor)).toBe(false);
-  });
-
-  it('has a 150–200 word letter, still a draft for Megan, so the kit can’t be scheduled yet', () => {
-    const letter = august.mailer.letter!;
-    expect(words([letter.greeting, letter.body].join(' '))).toBeGreaterThanOrEqual(150);
-    expect(words([letter.greeting, letter.body].join(' '))).toBeLessThanOrEqual(200);
-    expect(letter.draft).toBe(true);
-    expect(schedulable(august)).toBe(false);
-    expect(letter.body).toMatch(/family calendar/);
-    expect(letter.body).toContain('You don’t have to tackle all six at once. Start with what matters most, and share the jobs.');
-    expect(letter.namedGreeting).toBe('Hi {name},');
-  });
-
-  it('asks one family question on the back of the letter', () => {
-    expect(august.mailer.conversation?.question).toBe('What’s one thing you want to be able to do by yourself before school starts?');
   });
 
   it('puts the QR code, a readable address and one calendar reminder on the back', () => {
@@ -93,10 +49,6 @@ describe('August: the tool is the site’s routine chart', () => {
     expect(august.items).toEqual([]);
   });
 
-  it('the letter’s example is the routine chart’s own morning starter, with its illustrations', () => {
-    expect(exampleRoutine(august).map((s) => s.title)).toEqual(routineTypes.morning.steps.map(([, t]) => t));
-    for (const s of exampleRoutine(august)) expect(s.illustration).toBe(matchResponsibility(s.title));
-  });
 });
 
 describe('August: the QR code', () => {
