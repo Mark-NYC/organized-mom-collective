@@ -55,6 +55,9 @@ final class AppLaunchTests: XCTestCase {
         origin.withOffset(CGVector(dx: window.width * (CGFloat(i) + 0.5) / 4, dy: window.maxY - 34 - 25)).tap()
     }
 
+    /// A cold launch (process start, web view, first page) on a shared CI Mac, as opposed to moving between pages.
+    private let launchTimeout: TimeInterval = 45
+
     @discardableResult
     private func waitFor(_ element: XCUIElement, _ what: String, timeout: TimeInterval = 20) -> XCUIElement {
         XCTAssertTrue(element.waitForExistence(timeout: timeout), "Not found: \(what)")
@@ -101,7 +104,7 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(web.waitForExistence(timeout: 30), "The web view never appeared")
 
         // Today.
-        let title = waitFor(text("little more calm"), "Today title")
+        let title = waitFor(text("little more calm"), "Today title", timeout: launchTimeout)
         assertInsideSafeArea("Today", topElement: title)
         shot("01-today")
 
@@ -150,7 +153,7 @@ final class AppLaunchTests: XCTestCase {
         app.terminate()
         app.launchArguments = []
         app.launch()
-        waitFor(text("little more calm"), "Today after relaunch")
+        waitFor(text("little more calm"), "Today after relaunch", timeout: launchTimeout)
         tab("Cleaning").tap()
         finishCleaningOnboarding()
         waitFor(oneTaskDone, "checkmark after relaunch")
@@ -161,7 +164,7 @@ final class AppLaunchTests: XCTestCase {
         app.launchArguments = ["-OMCResetWebStorageForTesting"]
         app.launch()
         XCTAssertTrue(web.waitForExistence(timeout: 30))
-        waitFor(text("little more calm"), "Today after storage wipe")
+        waitFor(text("little more calm"), "Today after storage wipe", timeout: launchTimeout)
         let cleaningTab = tab("Cleaning")
         XCTAssertTrue(cleaningTab.waitForExistence(timeout: 20), "Cleaning tab gone after a storage wipe")
         cleaningTab.tap()
@@ -193,7 +196,7 @@ final class AppLaunchTests: XCTestCase {
         app.launchArguments = ["-OMCResetWebStorageForTesting"]
         app.launch()
         XCTAssertTrue(web.waitForExistence(timeout: 30))
-        waitFor(text("little more calm"), "Today")
+        waitFor(text("little more calm"), "Today", timeout: launchTimeout)
 
         // Sign in as Jen (the test backend's code is 123456).
         waitFor(web.links.matching(NSPredicate(format: "label == 'Account and settings'")).firstMatch, "profile icon").tap()

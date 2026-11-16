@@ -268,7 +268,7 @@ jobs:
         run: |
           tail -n 60 backend.log || true
           xcrun simctl spawn "${{ steps.sim.outputs.udid }}" log show --last 20m --style compact \
-            --predicate 'process == "App"' | grep -E "OMCRouter|⚡️|rror" | tail -n 120 || true
+            --predicate 'process == "App"' | grep -E "OMCRouter /app |OMCTest|⚡️|rror" | tail -n 120 || true
       - name: Export the simulator screenshots
         if: always()
         run: |
