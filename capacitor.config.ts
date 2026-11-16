@@ -7,7 +7,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
  */
 const config: CapacitorConfig = {
   appId: 'com.organizedmomcollective.app',
-  appName: 'Organized Mom',
+  appName: 'Organized Family',
   webDir: 'app-www',
   // Open straight on Today (/app -> app/index.html via OMCRouter), not through the root redirect page.
   server: { appStartPath: 'app' },
