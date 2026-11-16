@@ -350,8 +350,11 @@ describe('emails', () => {
 });
 
 describe('dashboard logic', () => {
+  // Fixed ids: the dashboard search also reads the id, and a random UUID now and then contains the letters a test
+  // searches for ("bea" is valid hex), which failed CI at random (run 43892919830).
+  let nextId = 0;
   const o = (over: Partial<OrderRow>): OrderRow => ({
-    id: crypto.randomUUID(),
+    id: `00000000-0000-4000-8000-${String(++nextId).padStart(12, '0')}`,
     order_number: 1001,
     created_at: '2026-10-10T12:00:00Z',
     updated_at: '2026-10-10T12:00:00Z',
