@@ -95,8 +95,10 @@ final class AppLaunchTests: XCTestCase {
         waitFor(today, "\(screen): Today tab")
         XCTAssertTrue(today.isHittable, "\(screen): Today tab can't be tapped")
         // WebKit can paint once before env(safe-area-inset-bottom) applies (run 43718058363, a slow GPU process): give
-        // the bar up to 5 s to settle. A bar that stays under the home indicator still fails below.
-        let settle = Date().addingTimeInterval(5)
+        // the bar time to settle. Run 43928888138: the simulator's GPU process died and restarted mid-test, which took
+        // longer than the 5 s allowed then; 20 s covers a restart. A bar that stays under the home indicator still
+        // fails below.
+        let settle = Date().addingTimeInterval(20)
         while today.frame.maxY > window.maxY - 20 && Date() < settle { RunLoop.current.run(until: Date().addingTimeInterval(0.25)) }
         // Home indicator area is 34 pt on Face ID iPhones; the tab's label must sit above it.
         XCTAssertLessThanOrEqual(today.frame.maxY, window.maxY - 20, "\(screen): tab bar runs under the home indicator")
