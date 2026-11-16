@@ -11,7 +11,7 @@ production, deployed or merged. Evidence is in CI on that branch and in the file
 | Database | 16 suites, Postgres 16 locally and 17 in CI, also on production's migration state (`scripts/test-household-sql.sh`, CI `household-db`) |
 | Rollback | Apply → verify → roll back → identical schema fingerprint, no family lost (`scripts/rehearse-household-rollback.sh`, in CI) |
 | Two parents, end to end | 107 checks at iPhone size on an isolated backend: invite, join from an own family (confirm, plans carried, copy kept), shared cleaning, offline, same-box taps, sign-out and back, removal, re-invite, a stranger with the link, a third adult (`scripts/e2e/family-e2e.mjs`, CI `family-e2e`) |
-| Real app on the iPhone Simulator | `ios-simulator` (tabs, safe areas, checkmark surviving a relaunch and a cleared-storage launch) and `ios-family-e2e` (family flow). See "Simulator" below for the run count |
+| Real app on the iPhone Simulator | `ios-simulator`: tabs, safe areas, a checkmark surviving a relaunch and a cleared-storage launch, then the family flow against the isolated backend (one macOS job). See "Simulator" below for the run count |
 | Website | Production-style build passes; site check: 3 remaining, all Pinterest plan docs with missing research fields |
 | Monthly QR codes | November 2026 to October 2027: each is a built page that sends a member to that month's own page (`tests/club-kits.test.ts`) |
 | January / September | January = the four-part, ten-minute Family Meeting; September = Habit Cards, in kit, banner, member pages and tests |

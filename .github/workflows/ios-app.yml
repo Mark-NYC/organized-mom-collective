@@ -5,7 +5,7 @@
 #   test with screenshots.
 # ios-simulator (macOS): `cap sync ios` + an unsigned Simulator build of ios/App, so Swift and project changes are
 #   compiled on every change without a Mac. Signing and TestFlight come in Milestone 2 (Apple account needed).
-# family-e2e (Linux) and ios-family-e2e (macOS): the whole family flow against an ISOLATED test backend
+# family-e2e (Linux) and the second half of ios-simulator (macOS): the whole family flow against an ISOLATED test backend
 #   (scripts/e2e/: a throwaway Postgres with every migration, a seeded test household, a local stand-in for Supabase's
 #   auth and API). Never a real project. docs/ios/FAMILY_E2E.md.
 name: iPhone app
@@ -90,12 +90,13 @@ jobs:
         run: bash scripts/rehearse-household-rollback.sh
 
   ios-simulator:
-    needs: web-shell
+    # Both simulator tests: the launch test, then the family flow against the isolated backend.
+    needs: [web-shell, family-e2e]
     # A claude/** branch is already tested on push; the pull_request run of the same commit would only double the
     # macOS load (two runs at once starved each other of runners: jobs cancelled after 15 minutes in the queue).
     if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'claude/')
     runs-on: macos-15
-    timeout-minutes: 60
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -145,6 +146,52 @@ jobs:
           done
           rm -rf build/ui-tests.xcresult && cp -R "build/ui-tests-$N.xcresult" build/ui-tests.xcresult
           echo "=== $N of $N consecutive simulator rounds passed ==="
+      # ---- The family flow, in this same job: one macOS runner for both simulator tests. As a second macOS job it
+      # was cancelled five times after 15 minutes waiting for a runner (2026-11-16), run beside or after this one.
+      - name: Throwaway Postgres on this Mac, every migration, the test household
+        run: |
+          brew install postgresql@16 >/dev/null
+          echo "$(brew --prefix postgresql@16)/bin" >> "$GITHUB_PATH"
+          export PATH="$(brew --prefix postgresql@16)/bin:$PATH"
+          brew services start postgresql@16
+          for i in $(seq 1 30); do pg_isready -h localhost && break; sleep 1; done
+          createdb -h localhost postgres 2>/dev/null || true
+          PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
+          psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+      - name: Start the isolated test backend
+        run: |
+          PGHOST=localhost PGUSER=$(whoami) nohup node scripts/e2e/test-backend.mjs > backend.log 2>&1 &
+          sleep 2; curl -sf -X POST http://127.0.0.1:54321/auth/v1/otp -d '{}' >/dev/null && echo backend up
+      - name: Swap in the bundle built against the test backend
+        run: rm -rf app-www
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-www-e2e
+          path: app-www/
+      - name: Copy the test-backend bundle into the Xcode project
+        run: npx cap sync ios
+      - name: Family flow in the real app on the iPhone simulator (XCUITest)
+        # Repeated .github/simulator-repeat times (see ios-simulator). Every round: a fresh app install and a freshly
+        # seeded throwaway database, so each is a first run.
+        run: |
+          set -o pipefail
+          N=$(cat .github/simulator-repeat 2>/dev/null || echo 1)
+          for i in $(seq 1 "$N"); do
+            echo "=== family round $i of $N ==="
+            xcrun simctl uninstall "${{ steps.sim.outputs.udid }}" com.organizedmomcollective.app || true
+            if [ "$i" -gt 1 ]; then
+              PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
+              psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+            fi
+            TEST_RUNNER_E2E=1 xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+              -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+              -only-testing:AppUITests/AppLaunchTests/testFamilyFlowWithTestBackend \
+              -derivedDataPath build -resultBundlePath "build/family-e2e-$i.xcresult" \
+              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|skipped|\*\* TEST"
+            echo "=== family round $i of $N passed ==="
+          done
+          rm -rf build/family-e2e.xcresult && cp -R "build/family-e2e-$N.xcresult" build/family-e2e.xcresult
+          echo "=== $N of $N consecutive family rounds passed ==="
       - name: App log from the simulator (router decisions, page console, load errors)
         if: always()
         run: |
@@ -175,6 +222,24 @@ jobs:
           name: ios-simulator-app
           path: build/Build/Products/Debug-iphonesimulator/App.app
           retention-days: 7
+      - name: Backend log and app log
+        if: always()
+        run: |
+          tail -n 60 backend.log || true
+          xcrun simctl spawn "${{ steps.sim.outputs.udid }}" log show --last 20m --style compact \
+            --predicate 'process == "App"' | grep -E "OMCRouter /app |OMCTest|⚡️|rror" | tail -n 120 || true
+      - name: Export the simulator screenshots
+        if: always()
+        run: |
+          mkdir -p simulator-family-e2e
+          xcrun xcresulttool export attachments --path build/family-e2e.xcresult --output-path simulator-family-e2e || true
+          xcrun simctl io "${{ steps.sim.outputs.udid }}" screenshot simulator-family-e2e/zz-final-state.png || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simulator-family-e2e
+          path: simulator-family-e2e/
+          if-no-files-found: ignore
 
   family-e2e:
     runs-on: ubuntu-latest
@@ -223,93 +288,3 @@ jobs:
           name: app-www-e2e
           path: app-www/
           retention-days: 7
-
-  ios-family-e2e:
-    # After ios-simulator, never beside it: a second macOS job waiting for a runner was cancelled after 15 minutes in the
-    # queue three times running (runs 43880730018, 43880744002, 43885738456) while the first held the runner.
-    needs: [family-e2e, ios-simulator]
-    # A claude/** branch is already tested on push; the pull_request run of the same commit would only double the
-    # macOS load (two runs at once starved each other of runners: jobs cancelled after 15 minutes in the queue).
-    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'claude/')
-    runs-on: macos-15
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - run: npm ci
-      - name: Throwaway Postgres on this Mac, every migration, the test household
-        run: |
-          brew install postgresql@16 >/dev/null
-          echo "$(brew --prefix postgresql@16)/bin" >> "$GITHUB_PATH"
-          export PATH="$(brew --prefix postgresql@16)/bin:$PATH"
-          brew services start postgresql@16
-          for i in $(seq 1 30); do pg_isready -h localhost && break; sleep 1; done
-          createdb -h localhost postgres 2>/dev/null || true
-          PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
-          psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
-      - name: Start the isolated test backend
-        run: |
-          PGHOST=localhost PGUSER=$(whoami) nohup node scripts/e2e/test-backend.mjs > backend.log 2>&1 &
-          sleep 2; curl -sf -X POST http://127.0.0.1:54321/auth/v1/otp -d '{}' >/dev/null && echo backend up
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-www-e2e
-          path: app-www/
-      - name: Copy the test-backend bundle into the Xcode project
-        run: npx cap sync ios
-      - name: Pick an iPhone simulator and boot it
-        id: sim
-        run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c '
-          import json, re, sys
-          d = json.load(sys.stdin)["devices"]
-          phones = [(rt, x) for rt, xs in d.items() if "iOS" in rt for x in xs if re.match(r"iPhone \d+( Pro)?$", x["name"])]
-          phones.sort(key=lambda p: (p[0], p[1]["name"]))
-          rt, dev = phones[-1]
-          print(dev["udid"]); print(dev["name"], rt, file=sys.stderr)')
-          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
-          xcrun simctl boot "$UDID" || true
-          xcrun simctl bootstatus "$UDID" -b
-      - name: Family flow in the real app on the iPhone simulator (XCUITest)
-        # Repeated .github/simulator-repeat times (see ios-simulator). Every round: a fresh app install and a freshly
-        # seeded throwaway database, so each is a first run.
-        run: |
-          set -o pipefail
-          N=$(cat .github/simulator-repeat 2>/dev/null || echo 1)
-          for i in $(seq 1 "$N"); do
-            echo "=== family round $i of $N ==="
-            xcrun simctl uninstall "${{ steps.sim.outputs.udid }}" com.organizedmomcollective.app || true
-            if [ "$i" -gt 1 ]; then
-              PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
-              psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
-            fi
-            TEST_RUNNER_E2E=1 xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
-              -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
-              -only-testing:AppUITests/AppLaunchTests/testFamilyFlowWithTestBackend \
-              -derivedDataPath build -resultBundlePath "build/family-e2e-$i.xcresult" \
-              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|skipped|\*\* TEST"
-            echo "=== family round $i of $N passed ==="
-          done
-          rm -rf build/family-e2e.xcresult && cp -R "build/family-e2e-$N.xcresult" build/family-e2e.xcresult
-          echo "=== $N of $N consecutive family rounds passed ==="
-      - name: Backend log and app log
-        if: always()
-        run: |
-          tail -n 60 backend.log || true
-          xcrun simctl spawn "${{ steps.sim.outputs.udid }}" log show --last 20m --style compact \
-            --predicate 'process == "App"' | grep -E "OMCRouter /app |OMCTest|⚡️|rror" | tail -n 120 || true
-      - name: Export the simulator screenshots
-        if: always()
-        run: |
-          mkdir -p simulator-family-e2e
-          xcrun xcresulttool export attachments --path build/family-e2e.xcresult --output-path simulator-family-e2e || true
-          xcrun simctl io "${{ steps.sim.outputs.udid }}" screenshot simulator-family-e2e/zz-final-state.png || true
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: simulator-family-e2e
-          path: simulator-family-e2e/
-          if-no-files-found: ignore
