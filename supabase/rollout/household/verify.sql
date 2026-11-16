@@ -6,7 +6,8 @@ with s as (select
   to_regprocedure('public.household_agreement_save(jsonb,integer)') is not null as m27,
   to_regprocedure('public.household_billing_user(uuid)') is not null as m28,
   to_regprocedure('public.account_chargeable(uuid)') is not null as m29,
-  to_regclass('public.household_archives') is not null as m30, to_regclass('public.household_cleaning_marks') is not null as m1201),
+  to_regclass('public.household_archives') is not null as m30, to_regclass('public.household_cleaning_marks') is not null as m1201,
+  to_regprocedure('public.club_household_of(uuid)') is not null as m1203),
 checks(step, check_name, applied, ok) as (
   select '24', 'every household has exactly one owner row, and it is its owner_user_id', m24,
          m24 and (select count(*) from public.club_households) = (select count(*) from public.household_adults where role = 'owner')
@@ -52,5 +53,20 @@ checks(step, check_name, applied, ok) as (
          m1201 and (select relrowsecurity from pg_class where oid = 'public.household_cleaning_marks'::regclass)
          and not has_table_privilege('authenticated', 'public.household_cleaning_marks', 'insert') and not has_table_privilege('anon', 'public.household_cleaning_marks', 'select')
          and not has_function_privilege('anon', 'public.cleaning_marks_push(jsonb)', 'execute') from s
+  union all select '1203', 'billing: no function still finds a household only through its owner; resolvers internal', m1203,
+         m1203 and not has_function_privilege('authenticated', 'public.club_household_of(uuid)', 'execute')
+         and not has_function_privilege('authenticated', 'public.household_keep_received_months(uuid,uuid)', 'execute')
+         and (select bool_and(position('owner_user_id' in pg_get_functiondef(f::regprocedure)) = 0)
+                from unnest(array['public.club_invoice_apply(jsonb,jsonb)', 'public.club_me_for(uuid)', 'public.club_resource_get(text)',
+                                  'public.club_fulfillment_approve(text)', 'public.club_welcome_plan_get()']) f) from s
+  union all select '1203', 'billing: months are kept before a sign-in is deleted; triggers fire guard, keep, handover', m1203,
+         m1203 and (select array_agg(tgname::text order by tgname) from pg_trigger where tgrelid = 'auth.users'::regclass and not tgisinternal
+                     and tgname in ('account_chargeable_guard', 'household_keep_months', 'household_owner_leaving'))
+                   = array['account_chargeable_guard', 'household_keep_months', 'household_owner_leaving'] from s
+  union all select '1203', 'orphans: admin-only list and verify, service-only flagging, no household split across two owners', m1203,
+         m1203 and not has_function_privilege('anon', 'public.club_orphaned_subscriptions()', 'execute')
+         and not has_function_privilege('authenticated', 'public.club_orphans_flag()', 'execute')
+         and not has_function_privilege('authenticated', 'public.club_orphans()', 'execute')
+         and not exists (select 1 from public.household_adults a join public.club_households h on h.owner_user_id = a.user_id where h.id <> a.household_id) from s
 )
 select step, check_name, applied, (not applied or ok) as ok from checks order by 1, 2;

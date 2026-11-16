@@ -1,4 +1,4 @@
--- Rolls back 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,21 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261203 billing for either adult. To undo ONLY this step use rollback-billing.sql (with capture-billing.sql).
+-- In a full rollback the patched functions come back from restore-functions.sql. Months already kept for a household
+-- stay (ordinary admin-granted months); a payer-partner's months stay theirs.
+drop trigger if exists household_keep_months on auth.users;
+drop function if exists public.household_keep_months_on_delete();
+drop function if exists public.household_keep_received_months(uuid, uuid);
+drop function if exists public.club_admin_orphan_verify(uuid, text);
+drop function if exists public.club_orphans_flag();
+drop function if exists public.club_orphaned_subscriptions();
+drop function if exists public.club_orphans();
+do $$ begin if exists (select 1 from pg_extension where extname = 'pg_cron') then perform cron.unschedule('omc-club-orphans-flag'); end if; exception when others then null; end $$;
+update public.club_subscriptions set flags = array_remove(array_remove(flags, 'orphaned'), 'orphan_cancel_verified')
+ where flags && array['orphaned', 'orphan_cancel_verified'];
+drop function if exists public.club_household_of(uuid);
 
 -- ---- 20261201 shared cleaning progress (independent; safe to run alone)
 drop function if exists public.cleaning_marks_changes(timestamptz);

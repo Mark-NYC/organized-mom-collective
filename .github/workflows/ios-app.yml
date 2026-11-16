@@ -15,7 +15,15 @@ on:
   push:
     branches: ['claude/**']
     paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    tags: ['release-*']
   workflow_dispatch:
+    inputs:
+      rounds:
+        description: 'Simulator rounds in a row (5 = release verification)'
+        default: '5'
+        required: true
+        type: choice
+        options: ['1', '3', '5']
 concurrency:
   group: ios-app-${{ github.ref }}
   # Queue, never cancel: a Simulator run takes ~15 minutes and a cancelled one tells us nothing.
@@ -97,8 +105,19 @@ jobs:
     if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'claude/')
     runs-on: macos-15
     timeout-minutes: 110
+    env:
+      # One round on an ordinary push. Release verification is five rounds in a row: run this workflow by hand
+      # (Actions → iPhone app → Run workflow, rounds = 5) or push a release-* tag. .github/simulator-repeat can
+      # still raise the number for a branch that is proving a flaky-test fix.
+      SIM_ROUNDS_REQUESTED: ${{ github.event_name == 'workflow_dispatch' && inputs.rounds || (startsWith(github.ref, 'refs/tags/release-') && '5' || '') }}
     steps:
       - uses: actions/checkout@v4
+      - name: How many simulator rounds
+        run: |
+          N=${SIM_ROUNDS_REQUESTED:-$(cat .github/simulator-repeat 2>/dev/null || echo 1)}
+          case "$N" in ''|*[!0-9]*) N=1 ;; esac
+          echo "SIM_ROUNDS=$N" >> "$GITHUB_ENV"
+          echo "simulator rounds: $N"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -130,11 +149,10 @@ jobs:
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
       - name: Launch and interaction test on the iPhone simulator (XCUITest)
-        # .github/simulator-repeat holds how many times in a row the test must pass (1 normally; raised to prove a
-        # flaky-test fix). Every round starts from a freshly installed app: no web storage, no native storage.
+        # SIM_ROUNDS (see the job's env): how many times in a row the test must pass. Every round starts from a freshly installed app: no web storage, no native storage.
         run: |
           set -o pipefail
-          N=$(cat .github/simulator-repeat 2>/dev/null || echo 1)
+          N=$SIM_ROUNDS
           for i in $(seq 1 "$N"); do
             echo "=== simulator round $i of $N ==="
             xcrun simctl uninstall "${{ steps.sim.outputs.udid }}" com.organizedmomcollective.app || true
@@ -171,11 +189,11 @@ jobs:
       - name: Copy the test-backend bundle into the Xcode project
         run: npx cap sync ios
       - name: Family flow in the real app on the iPhone simulator (XCUITest)
-        # Repeated .github/simulator-repeat times (see ios-simulator). Every round: a fresh app install and a freshly
+        # Repeated SIM_ROUNDS times (see the job's env). Every round: a fresh app install and a freshly
         # seeded throwaway database, so each is a first run.
         run: |
           set -o pipefail
-          N=$(cat .github/simulator-repeat 2>/dev/null || echo 1)
+          N=$SIM_ROUNDS
           for i in $(seq 1 "$N"); do
             echo "=== family round $i of $N ==="
             xcrun simctl uninstall "${{ steps.sim.outputs.udid }}" com.organizedmomcollective.app || true
