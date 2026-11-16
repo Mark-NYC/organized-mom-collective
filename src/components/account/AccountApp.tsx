@@ -456,24 +456,38 @@ function Order({ order: o }: { order: AccountOrder }) {
 
 function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
   const [busy, setBusy] = useState(false);
+  // A membership that can still be charged blocks deletion (the database refuses): say so, and give the way to cancel.
+  const [membership, setMembership] = useState(false);
   return (
-    <button
-      type="button"
-      disabled={busy}
-      className="inline-flex min-h-11 items-center px-2 text-[0.85rem] text-soft underline underline-offset-4"
-      onClick={async () => {
-        if (!confirm('Delete your account? Your saved things are removed from your account and you’re unsubscribed from marketing email. What’s in this browser stays, and your order records stay for our books.')) return;
-        setBusy(true);
-        try {
-          await deleteAccount();
-          onDeleted();
-        } catch (err) {
-          setBusy(false);
-          alert((err as Error).message.includes('admin_account') ? 'This is an admin account. Remove it from the dashboard instead.' : 'We couldn’t delete your account just now. Please try again, or write to us.');
-        }
-      }}
-    >
-      Delete my account
-    </button>
+    <>
+      <button
+        type="button"
+        disabled={busy}
+        className="inline-flex min-h-11 items-center px-2 text-[0.85rem] text-soft underline underline-offset-4"
+        onClick={async () => {
+          if (!confirm('Delete your account? Your saved things are removed from your account and you’re unsubscribed from marketing email. What’s in this browser stays, and your order records stay for our books.')) return;
+          setBusy(true);
+          setMembership(false);
+          try {
+            await deleteAccount();
+            onDeleted();
+          } catch (err) {
+            setBusy(false);
+            const m = (err as Error).message;
+            if (m.includes('active_membership')) return setMembership(true);
+            alert(m.includes('admin_account') ? 'This is an admin account. Remove it from the dashboard instead.' : 'We couldn’t delete your account just now. Please try again, or write to us.');
+          }
+        }}
+      >
+        Delete my account
+      </button>
+      {membership && (
+        <span role="alert" className="mt-3 block basis-full text-[0.9rem] leading-relaxed" data-delete-blocked>
+          Your Family Meeting Club membership is still active, so your account can’t be deleted yet: deleting it wouldn’t stop the charges. Nothing was removed.{' '}
+          <a href={routes.clubDashboard} className="underline underline-offset-4">Cancel your membership in Account &amp; Billing</a>, then delete your account here. Need a hand?{' '}
+          <a href={routes.support} className="underline underline-offset-4">Write to us</a> and we’ll cancel it for you.
+        </span>
+      )}
+    </>
   );
 }

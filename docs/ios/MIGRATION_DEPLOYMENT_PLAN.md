@@ -32,11 +32,12 @@ subscription Stripe could still charge (step 9 will refuse to delete those until
 | 9 | `20261129000000_account_delete_billing_guard` | 4 | **Yes:** an account with a chargeable subscription can't be deleted by any path | Deletion policy (OWNERSHIP_AND_BILLING_POLICY.md) |
 | 10 | `20261130000000_household_join_from_own` | 4, 5 | No (new functions, one new table) | Approved 2026-11-15 (replace-on-join with confirmation, plans carried over, 90-day copy). Open: the 90-day purge and a privacy-policy line |
 | 11 | `20261201000000_household_cleaning_progress` | 4 | No (new table and two functions) | — |
+| 12 | `20261202000000_club_kit_titles_january_september` | production today (independent) | **Changes two rows:** `club_kits.title` for January ("Our First Family Meeting") and September ("Our Family Habit Cards"). January is already **scheduled** in production under its old title | Owner go (decision made 2026-11-16; the write still needs it) |
 
 Why 1–3 go before 4–8: step 8 rebuilds `club_me` from its live definition. Applied on production's older `club_me`
 it would silently lose what 2–3 add. Steps 5, 6, 7, 9, 10 and 11 only need 4 and can go in any order after it.
 
-Suggested sessions: **A** = 1, 2, 3. **B** = 4, 5, 6. **C** = 7, 8, 11. **D** = 10. **E** = 9 (after the policy decision).
+Suggested sessions: **A** = 1, 2, 3. **B** = 4, 5, 6. **C** = 7, 8, 11. **D** = 10. **E** = 9 (after the policy decision). **F** = 12 (any time; before January's mailing is reviewed).
 
 ## Preflight (before session A, and again before B)
 
@@ -70,6 +71,22 @@ applied row must be `ok`), then the step's own check:
 Then, per session, the end-to-end pass on the Supabase branch with the app build pointed at it: the two-phone flow
 in `scripts/e2e/family-e2e.mjs` covers sign-in, the invitation, joining from an account with its own family, the
 calendar, agreements, shared cleaning and account deletion.
+
+## Existing production functionality stays intact (checked after every session)
+
+Run as a signed-in test member on the live website, and compare `supabase/rollout/household/fingerprint.sql` before
+and after for everything the session did not mean to change:
+
+| What must still work | How to check |
+| --- | --- |
+| Shop checkout and order confirmation | Open `/checkout?product=calendar-26-week`: the form loads. `select count(*) from shop_orders` unchanged by the session |
+| Club sign-in, Club Home, a month, Account & Billing | Sign in at `/club/login`; open Club Home, this month's page and `/club/dashboard`; the billing portal link opens |
+| `club_me` for a paying member | Same fields and values as before the session (save the JSON before; diff after) |
+| Family page saves | Change a family member's name and change it back |
+| Admin | `/admin/club`: members, fulfillment queue and kit list load with the same counts |
+| Subscriptions and entitlements | `select status, count(*) from club_subscriptions group by 1` and `select count(*) from club_entitlements where revoked_at is null`: identical before and after |
+| Email automation | `select count(*) from cron.job` identical, plus one (`omc-household-archives-purge`) after step 10 |
+| Stripe webhook | Dashboard → Webhooks: no new failures in the hour after each session |
 
 ## Rollback
 
@@ -109,4 +126,5 @@ Auth redirect settings (owner; OMC_APP_ROADMAP.md → TestFlight blockers).
 
 1. Each session A–E, separately, after its preflight is shown.
 2. Step 9's deletion policy (three open questions in OWNERSHIP_AND_BILLING_POLICY.md).
-3. Step 10's archive: keep 90 days and purge how (a scheduled job, or by hand), and the privacy-policy sentence.
+3. Step 10's archive is approved (2026-11-16): purged daily by a scheduled job, restorable by support only, removed with the account. Still yours: the wording of the privacy paragraph (`src/pages/privacy.astro`).
+4. Session F (two kit titles).

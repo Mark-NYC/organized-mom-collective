@@ -65,8 +65,27 @@ Billing credentials never move today: the Stripe customer stays tied to whoever 
 - App/website copy for the deletion refusal (owner-approved wording).
 - Optional (decision 4): re-grant received months to the new owner on handover.
 
-## Decisions needed
+## Decisions needed (updated 2026-11-16)
 
-1. Approve policy points 1–3 and 6 (the guard, cancel-then-delete, free-plan handover, webhook safety net).
-2. Point 4: should the household keep read/print access to months already received after the payer leaves?
-3. Immediate cancellation on request: always at period end, or support may cancel immediately with a prorated refund?
+Decided by the owner on 2026-11-16: an account deletion must never leave a paid subscription charging without a
+clear way to cancel, and must never cost the other adult their household access or data. Built and tested:
+
+- The database refuses to delete any sign-in with a chargeable subscription, by any path (20261129, not applied).
+- The refusal now says why and how to fix it. In the app: "Contact us and we'll help you cancel it first" (no
+  billing link inside the app). On the website: a link to Account & Billing to cancel, and to support.
+- When an owner's account is deleted, the household passes to the other adult first; a partner deleting their
+  account removes only their own sign-in.
+
+Still yours to decide:
+
+1. **Months already received.** After the payer cancels and leaves, should the household keep read and print access
+   to the months it already received? Today they become unreadable. Recommended: keep them (re-grant to the new
+   owner with an audit note). Not built.
+2. **Leaving right now.** Cancellation is at period end. May support cancel immediately on request, and with what
+   refund? Recommended: yes, under the existing refund terms in CUSTOMER_SUPPORT.md; no new terms.
+3. **Webhook safety net.** If Stripe ever reports a live subscription whose payer no longer exists, cancel it
+   automatically, flag it and email you? Recommended: yes. It changes live billing behavior, so it isn't built.
+4. **A partner who pays.** If the second adult holds their own membership and the owner doesn't, the household
+   shows no Club access today (access follows the owner). Recommended: honor either adult's membership. Not built.
+5. **Voluntary ownership transfer** while subscribed. Not in release 1; needs both adults to confirm and the new
+   owner to subscribe with their own card.
