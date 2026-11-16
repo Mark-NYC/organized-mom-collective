@@ -52,7 +52,7 @@ export default function OurWeekFamilySetup() {
   return (
     <div className="family-brand mx-auto max-w-3xl space-y-10" data-ourweek-setup>
       <header>
-        <p className="label text-[#71866c]">OUR WEEK · FREE</p>
+        <p className="label text-[#71866c]">ORGANIZED FAMILY · FREE</p>
         <h1 className="family-title mt-3 !text-[2.1rem]">{household ? 'Your family' : 'Set up your family'}</h1>
         <p className="family-lede mt-3">Who’s in your home, and each person’s color. The colors stay with each person everywhere: the calendar, cleaning, your Family Meeting and anything you print.</p>
       </header>

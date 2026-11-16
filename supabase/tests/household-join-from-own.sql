@@ -177,3 +177,42 @@ select pg_temp.expect((select count(*) from public.calendar_events where id = 'e
   and (select jsonb_array_length(snapshot -> 'calendar_events') from public.household_archives where user_id = :DEV) = 1, 'choosing not to bring plans: they aren''t moved, and are still in his copy');
 select pg_temp.expect((select count(*) from public.household_archives) = 2, 'a partner switching families and refused attempts made no copies');
 reset role;
+
+-- ---------------------------------------------------------------- the 90-day copy: recovery, purge, deletion
+-- Ben leaves the family he joined and asks for what he set up before. Support restores his copy.
+select pg_temp.as_user('authenticated', :BEN);
+select pg_temp.expect(pg_temp.fails('select public.household_archive_restore((select id from public.household_archives limit 1))') and pg_temp.fails('select public.household_archives_purge()'), 'restoring and purging are not something a member can call');
+reset role;
+select pg_temp.expect(pg_temp.fails(format('select public.household_archive_restore(%L)', (select id from public.household_archives where user_id = :BEN)), 'already_in_household'), 'a copy is never restored over a family she is in');
+select pg_temp.as_user('authenticated', :BEN);
+select public.household_leave();
+reset role;
+create temp table restored as select public.household_archive_restore((select id from public.household_archives where user_id = :BEN)) as hid;
+select pg_temp.as_user('authenticated', :BEN);
+select pg_temp.expect((public.club_household() ->> 'display_name') = 'Ben''s family' and (public.club_household() ->> 'my_role') = 'owner'
+  and (select jsonb_agg(m ->> 'first_name' order by m ->> 'first_name') from jsonb_array_elements(public.club_household() -> 'members') m) = '["Ben", "Lia"]', 'recovery works: he has the family he set up again, as its owner');
+select pg_temp.expect((public.club_household() ->> 'my_member_id') is not null and jsonb_array_length(public.club_household() -> 'adults') = 1, 'he is linked to his own family row; nobody else is in it');
+select pg_temp.expect((select count(*) from public.calendar_events where household_id = public.household_id_for(auth.uid())) = 0, 'the plan he brought to the other family stays there (it is theirs now), not duplicated');
+select public.club_household_save('Ben''s family', '{}', (select jsonb_agg(jsonb_build_object('id', m ->> 'id', 'first_name', m ->> 'first_name', 'kind', m ->> 'kind', 'role', m ->> 'role', 'is_account_holder', m -> 'is_account_holder', 'birth_year', m -> 'birth_year', 'birth_month', m -> 'birth_month')) from jsonb_array_elements(public.club_household() -> 'members') m));
+select pg_temp.expect(true, 'and the restored family saves like any other');
+reset role;
+select pg_temp.expect((select count(*) from public.calendar_events where id = 'ee000000-0000-0000-0000-000000000001' and household_id = (select id from ana_hid)) = 1, 'the other family lost nothing');
+select pg_temp.expect(pg_temp.fails(format('select public.household_archive_restore(%L)', (select id from public.household_archives where user_id = :BEN)), 'already_restored'), 'a copy restores once');
+-- Dev chose not to bring his plan: restoring brings it back from the copy.
+delete from public.household_adults where user_id = :DEV;
+select public.household_archive_restore((select id from public.household_archives where user_id = :DEV));
+select pg_temp.expect((select count(*) from public.calendar_events e join public.club_households h on h.id = e.household_id where h.owner_user_id = :DEV and e.title = 'Dev trip') = 1, 'a plan that did not travel comes back with the family');
+-- Automatic purge at 90 days.
+select pg_temp.expect(public.household_archives_purge() = 0, 'nothing is purged before 90 days');
+update public.household_archives set purge_after = now() - interval '1 minute' where user_id = :DEV;
+select pg_temp.expect(public.household_archives_purge() = 1, 'a copy past 90 days is purged');
+select pg_temp.expect((select count(*) from public.household_archives where user_id = :DEV) = 0, 'and it is really gone');
+insert into public.household_archives (user_id, reason, family, snapshot, purge_after) values (:CLEO, 'joined_another', 'old', '{"household":{}, "members":[]}', now() - interval '1 day');
+select pg_temp.expect(pg_temp.fails(format('select public.household_archive_restore(%L)', (select id from public.household_archives where user_id = :CLEO)), 'archive_expired'), 'an expired copy can no longer be restored');
+select public.household_archives_purge();
+-- An account-deletion request removes the copy at once: nothing of a deleted account is kept.
+select pg_temp.expect((select count(*) from public.household_archives where user_id = :BEN) = 1, 'before: his copy exists');
+select pg_temp.as_user('authenticated', :BEN);
+select public.account_delete();
+reset role;
+select pg_temp.expect((select count(*) from public.household_archives where user_id = :BEN) = 0 and (select count(*) from auth.users where id = :BEN) = 0, 'he deletes his account: the copy is gone with it, at once');

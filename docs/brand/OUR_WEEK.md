@@ -1,6 +1,6 @@
 # Our Week, the website and Family Meeting Club: names and boundaries
 
-Status: owner decision 2026-11-15. **Internal documentation.** Customer-facing website copy is unchanged until the
+Status: owner decision 2026-11-15; **name changed 2026-11-16: the app's user-facing name is "Organized Family"** (from Organized Mom Collective, the parent brand). "Our Week" below is the earlier working name and survives only in code and file names (`src/components/ourweek/`); never show it to a customer. **Internal documentation.** Customer-facing website copy is unchanged until the
 release plan is approved; nothing here is a claim that the app is available.
 
 | Name | What it is | Price | Where |

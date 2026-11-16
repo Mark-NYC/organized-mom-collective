@@ -176,7 +176,7 @@ function OurWeekSignedIn({ email, role, shared }: { email: string; role: 'owner'
       </div>
       {step !== 'idle' && (
         <div className="family-note mt-5" role="group" aria-label="Delete your account" data-delete-confirm>
-          <p className="text-sm font-semibold">Delete your Our Week account?</p>
+          <p className="text-sm font-semibold">Delete your Organized Family account?</p>
           <p className="mt-1 text-sm leading-relaxed">{what} Cleaning progress saved on this phone stays on this phone.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <button type="button" className="family-action" disabled={step === 'busy'} onClick={() => void remove()} data-delete-confirm-yes>{step === 'busy' ? 'Deleting…' : 'Delete my account'}</button>

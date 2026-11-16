@@ -26,9 +26,12 @@
 -- The plain household_invite_accept is unchanged and still refuses an account that's already in a household.
 begin;
 
--- A copy of a household replaced on joining another, for the person who replaced it. Written only by
--- household_invite_accept_leaving; she can read her own. Kept 90 days (purge_after): removing older rows is a
--- scheduled job or a manual sweep, decided with the privacy policy.
+-- A copy of a household replaced on joining another, for the person who replaced it (owner-approved 2026-11-16).
+--   Secured: RLS, no direct writes by anyone; written only by household_invite_accept_leaving.
+--   Access-controlled: she reads only her own; restoring is support's (service role), never self-service.
+--   Automatically purged: household_archives_purge(), scheduled daily below, deletes copies past purge_after (90 days).
+--   An account-deletion request wins: the copy goes with the sign-in at once (user_id on delete cascade).
+--   Disclosed: the privacy policy's "Keeping and deleting your data" (src/pages/privacy.astro).
 create table public.household_archives (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -36,7 +39,9 @@ create table public.household_archives (
   family text,
   snapshot jsonb not null,
   created_at timestamptz not null default now(),
-  purge_after timestamptz not null default now() + interval '90 days'
+  purge_after timestamptz not null default now() + interval '90 days',
+  -- Set when support put it back (household_archive_restore).
+  restored_at timestamptz
 );
 create index household_archives_user on public.household_archives (user_id, created_at desc);
 alter table public.household_archives enable row level security;
@@ -62,6 +67,69 @@ language sql stable security definer set search_path = '' as $$
                                    from public.calendar_events e where e.household_id = p_household and e.deleted_at is null), '[]'))
 $$;
 revoke execute on function public.household_snapshot(uuid) from public, anon, authenticated;
+
+-- Daily: remove copies older than 90 days. Returns how many went.
+create function public.household_archives_purge() returns int
+language plpgsql security definer set search_path = '' as $$
+declare n int;
+begin
+  delete from public.household_archives where purge_after <= now();
+  get diagnostics n = row_count;
+  return n;
+end $$;
+revoke execute on function public.household_archives_purge() from public, anon, authenticated;
+grant execute on function public.household_archives_purge() to service_role;
+-- Scheduled where pg_cron is installed (production; a plain test database has no scheduler and skips this).
+do $$
+begin
+  if exists (select 1 from pg_extension where extname = 'pg_cron') then
+    perform cron.schedule('omc-household-archives-purge', '17 4 * * *', 'select public.household_archives_purge()');
+  end if;
+end $$;
+
+-- Support puts a copy back: the family as she set it up (people with their original ids and colors, typical week,
+-- responsibilities and agreements, and any calendar plans that didn't travel with her). Only while she is in no
+-- household (she left, or was removed from, the family she joined); never over an existing one. Service role only.
+create function public.household_archive_restore(p_archive uuid) returns uuid
+language plpgsql security definer set search_path = '' as $$
+declare
+  a public.household_archives%rowtype;
+  hid uuid;
+  holder uuid;
+begin
+  select * into a from public.household_archives where id = p_archive for update;
+  if not found then raise exception 'not_found'; end if;
+  if a.purge_after <= now() then raise exception 'archive_expired'; end if;
+  if a.restored_at is not null then raise exception 'already_restored'; end if;
+  if exists (select 1 from public.household_adults where user_id = a.user_id)
+     or exists (select 1 from public.club_households where owner_user_id = a.user_id) then
+    raise exception 'already_in_household';
+  end if;
+  insert into public.club_households (owner_user_id, display_name, preferences, onboarded_at)
+  values (a.user_id, a.snapshot -> 'household' ->> 'display_name', coalesce(a.snapshot -> 'household' -> 'preferences', '{}'), now())
+  returning id into hid;
+  insert into public.club_family_members
+  select * from jsonb_populate_recordset(null::public.club_family_members,
+    (select coalesce(jsonb_agg(m || jsonb_build_object('household_id', hid)), '[]') from jsonb_array_elements(a.snapshot -> 'members') m));
+  insert into public.club_activities
+  select * from jsonb_populate_recordset(null::public.club_activities,
+    (select coalesce(jsonb_agg(x || jsonb_build_object('household_id', hid)), '[]') from jsonb_array_elements(a.snapshot -> 'activities') x));
+  insert into public.club_responsibilities
+  select * from jsonb_populate_recordset(null::public.club_responsibilities,
+    (select coalesce(jsonb_agg(x || jsonb_build_object('household_id', hid, 'updated_by', null)), '[]') from jsonb_array_elements(a.snapshot -> 'responsibilities') x));
+  -- Plans that travelled to the other family are theirs now; only the ones that no longer exist come back.
+  insert into public.calendar_events
+  select * from jsonb_populate_recordset(null::public.calendar_events,
+    (select coalesce(jsonb_agg(x || jsonb_build_object('household_id', hid)), '[]') from jsonb_array_elements(a.snapshot -> 'calendar_events') x
+      where not exists (select 1 from public.calendar_events e where e.id = (x ->> 'id')::uuid)));
+  -- She is her family's account holder again.
+  select f.id into holder from public.club_family_members f where f.household_id = hid and f.is_account_holder and f.kind = 'adult' and f.archived_at is null;
+  update public.household_adults set member_id = holder where household_id = hid and user_id = a.user_id and role = 'owner';
+  update public.household_archives set restored_at = now() where id = a.id;
+  return hid;
+end $$;
+revoke execute on function public.household_archive_restore(uuid) from public, anon, authenticated;
+grant execute on function public.household_archive_restore(uuid) to service_role;
 
 -- Why this account can't simply drop the household it owns (null: it can).
 create function public.household_own_blocker(p_uid uuid, p_household uuid) returns text

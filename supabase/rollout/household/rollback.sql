@@ -22,6 +22,9 @@ drop function if exists public.household_invite_preview(text);
 drop function if exists public.household_invite_for_me(text);
 drop function if exists public.household_own_blocker(uuid, uuid);
 drop function if exists public.household_snapshot(uuid);
+drop function if exists public.household_archive_restore(uuid);
+drop function if exists public.household_archives_purge();
+do $$ begin if exists (select 1 from pg_extension where extname = 'pg_cron') then perform cron.unschedule('omc-household-archives-purge'); end if; exception when others then null; end $$;
 drop table if exists public.household_archives;
 
 -- ---- 20261129 deletion billing guard (then restore public.account_delete from restore-functions.sql)
