@@ -11,10 +11,10 @@
 name: iPhone app
 on:
   pull_request:
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/rehearse-household-rollback.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   push:
     branches: ['claude/**']
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/rehearse-household-rollback.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   workflow_dispatch:
 concurrency:
   group: ios-app-${{ github.ref }}
@@ -91,6 +91,9 @@ jobs:
 
   ios-simulator:
     needs: web-shell
+    # A claude/** branch is already tested on push; the pull_request run of the same commit would only double the
+    # macOS load (two runs at once starved each other of runners: jobs cancelled after 15 minutes in the queue).
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'claude/')
     runs-on: macos-15
     timeout-minutes: 60
     steps:
@@ -126,12 +129,22 @@ jobs:
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
       - name: Launch and interaction test on the iPhone simulator (XCUITest)
+        # .github/simulator-repeat holds how many times in a row the test must pass (1 normally; raised to prove a
+        # flaky-test fix). Every round starts from a freshly installed app: no web storage, no native storage.
         run: |
           set -o pipefail
-          xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
-            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
-            -derivedDataPath build -resultBundlePath build/ui-tests.xcresult \
-            CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|\*\* TEST" 
+          N=$(cat .github/simulator-repeat 2>/dev/null || echo 1)
+          for i in $(seq 1 "$N"); do
+            echo "=== simulator round $i of $N ==="
+            xcrun simctl uninstall "${{ steps.sim.outputs.udid }}" com.organizedmomcollective.app || true
+            xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+              -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+              -derivedDataPath build -resultBundlePath "build/ui-tests-$i.xcresult" \
+              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|\*\* TEST"
+            echo "=== simulator round $i of $N passed ==="
+          done
+          rm -rf build/ui-tests.xcresult && cp -R "build/ui-tests-$N.xcresult" build/ui-tests.xcresult
+          echo "=== $N of $N consecutive simulator rounds passed ==="
       - name: App log from the simulator (router decisions, page console, load errors)
         if: always()
         run: |
@@ -213,6 +226,9 @@ jobs:
 
   ios-family-e2e:
     needs: family-e2e
+    # A claude/** branch is already tested on push; the pull_request run of the same commit would only double the
+    # macOS load (two runs at once starved each other of runners: jobs cancelled after 15 minutes in the queue).
+    if: github.event_name != 'pull_request' || !startsWith(github.head_ref, 'claude/')
     runs-on: macos-15
     timeout-minutes: 60
     steps:
@@ -256,13 +272,27 @@ jobs:
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
       - name: Family flow in the real app on the iPhone simulator (XCUITest)
+        # Repeated .github/simulator-repeat times (see ios-simulator). Every round: a fresh app install and a freshly
+        # seeded throwaway database, so each is a first run.
         run: |
           set -o pipefail
-          TEST_RUNNER_E2E=1 xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
-            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
-            -only-testing:AppUITests/AppLaunchTests/testFamilyFlowWithTestBackend \
-            -derivedDataPath build -resultBundlePath build/family-e2e.xcresult \
-            CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|skipped|\*\* TEST"
+          N=$(cat .github/simulator-repeat 2>/dev/null || echo 1)
+          for i in $(seq 1 "$N"); do
+            echo "=== family round $i of $N ==="
+            xcrun simctl uninstall "${{ steps.sim.outputs.udid }}" com.organizedmomcollective.app || true
+            if [ "$i" -gt 1 ]; then
+              PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
+              psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+            fi
+            TEST_RUNNER_E2E=1 xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+              -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+              -only-testing:AppUITests/AppLaunchTests/testFamilyFlowWithTestBackend \
+              -derivedDataPath build -resultBundlePath "build/family-e2e-$i.xcresult" \
+              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|skipped|\*\* TEST"
+            echo "=== family round $i of $N passed ==="
+          done
+          rm -rf build/family-e2e.xcresult && cp -R "build/family-e2e-$N.xcresult" build/family-e2e.xcresult
+          echo "=== $N of $N consecutive family rounds passed ==="
       - name: Backend log and app log
         if: always()
         run: |
