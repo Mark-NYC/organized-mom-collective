@@ -88,11 +88,26 @@ final class AppLaunchTests: XCTestCase {
     }
 
     private func finishCleaningOnboarding() {
-        // A new device sees the companion's four-step first-run screen; step through it as she would.
-        for _ in 0..<6 {
-            let next = web.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Next:' OR label BEGINSWITH[c] 'Open Today'")).firstMatch
-            guard next.waitForExistence(timeout: 3) else { return }
-            next.tap()
+        // A new device sees the companion's four-step first-run screen; step through it as she would. Wait for what
+        // is actually on screen: either a first-run button to tap, or the checklist itself. (It used to give the
+        // first-run screen 3 s to appear and otherwise assume there was none; on a slow CI Mac the screen arrived
+        // later and covered the checklist: "Not found: first Daily Reset task", run 43799453411.)
+        let next = web.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Next:' OR label BEGINSWITH[c] 'Open Today'")).firstMatch
+        let checklist = text("Make beds")
+        let deadline = Date().addingTimeInterval(launchTimeout)
+        var taps = 0
+        while Date() < deadline {
+            if next.exists && taps < 8 {
+                next.tap()
+                taps += 1
+                RunLoop.current.run(until: Date().addingTimeInterval(0.6))
+            } else if checklist.exists {
+                // The first-run screen can still be on its way in: only done once it has had a moment and isn't there.
+                RunLoop.current.run(until: Date().addingTimeInterval(1.0))
+                if !next.exists { return }
+            } else {
+                RunLoop.current.run(until: Date().addingTimeInterval(0.25))
+            }
         }
     }
 
