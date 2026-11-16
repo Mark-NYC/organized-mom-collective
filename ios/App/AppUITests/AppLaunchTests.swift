@@ -60,8 +60,25 @@ final class AppLaunchTests: XCTestCase {
 
     @discardableResult
     private func waitFor(_ element: XCUIElement, _ what: String, timeout: TimeInterval = 20) -> XCUIElement {
-        XCTAssertTrue(element.waitForExistence(timeout: timeout), "Not found: \(what)")
+        if !element.waitForExistence(timeout: timeout) {
+            // Say what WAS on screen, in the failure line CI keeps, so an intermittent miss can be diagnosed from the log.
+            XCTFail("Not found: \(what). On screen: \(onScreen())")
+        }
         return element
+    }
+
+    /// The first labels the web view exposes right now (headings, links, buttons, text), for failure messages.
+    private func onScreen() -> String {
+        guard web.exists else { return "(no web view; app state \(app.state.rawValue))" }
+        var seen: [String] = []
+        for q in [web.staticTexts, web.buttons, web.links] {
+            for e in q.allElementsBoundByIndex.prefix(40) {
+                let l = e.label.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !l.isEmpty && !seen.contains(l) { seen.append(String(l.prefix(40))) }
+                if seen.count >= 30 { break }
+            }
+        }
+        return seen.isEmpty ? "(web view with no text: a blank or still-loading page)" : seen.joined(separator: " | ")
     }
 
     private func shot(_ name: String) {
