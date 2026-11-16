@@ -100,12 +100,14 @@ final class AppLaunchTests: XCTestCase {
         // fails below.
         let began = Date()
         let settle = began.addingTimeInterval(20)
-        while today.frame.maxY > window.maxY - 20 && Date() < settle { RunLoop.current.run(until: Date().addingTimeInterval(0.25)) }
+        while today.frame.maxY > window.maxY - 34 && Date() < settle { RunLoop.current.run(until: Date().addingTimeInterval(0.25)) }
         // The measured position, in the CI log: the pass is about where the bar is, not how long we waited.
         print(String(format: "OMCGeometry %@: tab label bottom %.0f, window bottom %.0f, clearance %.0f pt (home indicator 34 pt), content top %.0f, settled after %.2f s",
                      screen, today.frame.maxY, window.maxY, window.maxY - today.frame.maxY, topElement.frame.minY, Date().timeIntervalSince(began)))
-        // Home indicator area is 34 pt on Face ID iPhones; the tab's label must sit above it.
-        XCTAssertLessThanOrEqual(today.frame.maxY, window.maxY - 20, "\(screen): tab bar runs under the home indicator")
+        // Home indicator area is 34 pt on Face ID iPhones; the tab's label must sit wholly above it. Measured on
+        // run 43933158863: 43 pt of clearance on all five screens, settled in under a second. The failing run had
+        // 9 pt: the same layout before env(safe-area-inset-bottom) (34 pt) applied.
+        XCTAssertLessThanOrEqual(today.frame.maxY, window.maxY - 34, "\(screen): tab bar runs under the home indicator")
         // Status bar / Dynamic Island: at least 44 pt on every current iPhone.
         XCTAssertGreaterThanOrEqual(topElement.frame.minY, window.minY + 44, "\(screen): content starts under the status bar")
     }
