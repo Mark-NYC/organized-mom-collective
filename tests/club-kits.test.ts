@@ -3,6 +3,7 @@ import { monthlyDeepClean } from '../src/data/cleaning';
 import { existsSync, readFileSync } from 'node:fs';
 import { kitBySlug, kitProblems, kits, schedulable } from '../src/data/club/kits';
 import { MEETING_GUIDE } from '../src/data/club/meeting-guide';
+import { MEETING_MONTHS } from '../src/data/club/family-meeting';
 import { clubResourceBySlug } from '../src/data/club/resources';
 import { memberPlanHref } from '../src/lib/club/plan/account';
 import { clubPrintMessages, clubPrintMobileMessages } from '../src/lib/club-print-deadline';
@@ -52,6 +53,27 @@ describe('club kits: every kit is sound', () => {
     expect(banner('2026-12-01T12:00:00Z')).toMatch(/January’s Family Meeting Kit/);
     expect(banner('2026-12-01T12:00:00Z')).not.toMatch(/Habit Cards/);
     expect(banner('2027-08-01T12:00:00Z')).toMatch(/September’s Habit Cards/);
+  });
+
+  // The banner names each month's resource the way the member pages and the Family Meeting do, so nobody is sold
+  // "Connection Cards" and mailed laundry guides.
+  it('the public banner names every month’s real resource', () => {
+    const key: Record<number, string> = { 1: 'Family', 2: 'Laundry Guides', 3: 'Family Rhythm', 4: 'Dinner Team', 5: 'Summer Day Rhythm', 6: 'Snack Station',
+      7: 'Activity Board', 8: 'School Day Routines', 9: 'Habit Cards', 10: '5-Minute Reset', 11: 'Ownership', 12: 'Christmas Mission' };
+    const labels = new Set<string>();
+    const lines = new Set<string>();
+    for (let d = Date.UTC(2026, 11, 1); d < Date.UTC(2027, 11, 30); d += 7 * 86400000) {
+      labels.add(clubPrintMobileMessages(new Date(d))[0].split(' · ')[0]);
+      lines.add(clubPrintMessages(new Date(d))[0].split('. Order by')[0]);
+    }
+    expect(labels.size).toBe(12);
+    for (const m of MEETING_MONTHS) {
+      const name = new Date(Date.UTC(2027, m.month - 1, 15)).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+      expect(m.resourceTitle, `${name} resource`).toContain(key[m.month]);
+      expect([...labels].find((l) => l.startsWith(name)), `${name} mobile banner`).toContain(key[m.month]);
+      expect([...lines].find((l) => l.includes(`${name}’s`)), `${name} banner`).toContain(key[m.month]);
+    }
+    expect([...labels, ...lines].join(' | ')).not.toMatch(/Connection Cards|Giving Cards|Sunday Reset|Chore Chart|Summer Day Planner|Activity Kit|School Routine Kit/);
   });
 
   // Every mailed QR code, November 2026 through October 2027: /club/kits/<slug> is a built page, and it sends a

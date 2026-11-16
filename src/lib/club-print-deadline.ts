@@ -37,35 +37,37 @@ function printMonth(lastDay: Date) {
  const { year, month } = localDate(lastDay);
  return new Date(Date.UTC(year, month + 1, 15)).getUTCMonth();
 }
+/** Each month names the resource members actually get: MEETING_MONTHS[].resourceTitle in src/data/club/family-meeting.ts
+ * (tests/club-kits.test.ts holds the two together). */
 const MONTHLY_OFFERS = [
  'Start a weekly family meeting where everyone has a part. Get January’s Family Meeting Kit',
- 'Make more room for family connection. Get February’s Connection Cards',
- 'Get the whole family helping with spring cleaning. Get March’s Chore Chart',
+ 'Hand off laundry, one step at a time. Get February’s Laundry Guides',
+ 'Get chores done without chasing everyone. Get March’s Family Rhythm',
  'Make dinner a team effort. Get April’s Dinner Team Kit',
- 'Give your family a simple summer rhythm. Get May’s Summer Day Planner',
+ 'Give your family a simple summer rhythm. Get May’s Summer Day Rhythm',
  'Help your kids make their own snacks. Get June’s Snack Station Kit',
- 'Give bored kids ideas they can use on their own. Get July’s Activity Kit',
- 'Make back-to-school mornings easier. Get August’s School Routine Kit',
+ 'Give bored kids ideas they can use on their own. Get July’s Activity Board',
+ 'Make back-to-school mornings easier. Get August’s School Day Routines',
  'Help your kids build better morning and bedtime habits. Get September’s Habit Cards',
- 'Make Sundays easier with a shared family reset. Get October’s Sunday Reset',
+ 'Reset the house together in five minutes a day. Get October’s 5-Minute Reset',
  'Share responsibility at home. Get November’s Family Ownership Kit',
- 'Help your kids bless someone else. Get December’s Giving Cards',
+ 'Help your kids bless someone else. Get December’s Christmas Mission',
 ] as const;
 
 /** Compact mobile copy keeps the resource name and the ordering deadline. */
 const MOBILE_OFFERS = [
  'January Family Meeting Kit',
- 'February Connection Cards',
- 'March Chore Chart',
+ 'February Laundry Guides',
+ 'March Family Rhythm',
  'April Dinner Team Kit',
- 'May Summer Day Planner',
+ 'May Summer Day Rhythm',
  'June Snack Station Kit',
- 'July Activity Kit',
- 'August School Routine Kit',
+ 'July Activity Board',
+ 'August School Day Routines',
  'September Habit Cards',
- 'October Sunday Reset',
+ 'October 5-Minute Reset',
  'November Family Ownership Kit',
- 'December Giving Cards',
+ 'December Christmas Mission',
 ] as const;
 
 export function clubPrintMobileMessages(now = new Date(), offer = false) {
