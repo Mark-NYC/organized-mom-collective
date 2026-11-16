@@ -1,4 +1,4 @@
-# Deploying 20261121 → 20261201 to production
+# Deploying 20261121 → 20261203 to production
 
 Status: **plan for the owner's approval, 2026-11-15. Nothing here has been applied.** What each migration is and why:
 [MIGRATION_PLAN.md](MIGRATION_PLAN.md). This is how to apply them, how to check each step, and how to go back.
@@ -33,11 +33,12 @@ subscription Stripe could still charge (step 9 will refuse to delete those until
 | 10 | `20261130000000_household_join_from_own` | 4, 5 | No (new functions, one new table) | Approved 2026-11-15 (replace-on-join with confirmation, plans carried over, 90-day copy). Open: the 90-day purge and a privacy-policy line |
 | 11 | `20261201000000_household_cleaning_progress` | 4 | No (new table and two functions) | — |
 | 12 | `20261202000000_club_kit_titles_january_september` | production today (independent) | **Changes two rows:** `club_kits.title` for January ("Our First Family Meeting") and September ("Our Family Habit Cards"). January is already **scheduled** in production under its old title | Owner go (decision made 2026-11-16; the write still needs it) |
+| 13 | `20261203000000_household_billing_either_adult` | **1–3, 4, 8 and 9** | **Yes:** every billing function finds a member's household through either adult. A partner who pays opens the Club for the household and no second household is made for them; print and address decisions belong to the payer; delivered months stay with the household when the holder leaves. Adds the orphaned-subscription list and daily flag (cancels nothing) | Owner go (decisions made 2026-11-16) |
 
 Why 1–3 go before 4–8: step 8 rebuilds `club_me` from its live definition. Applied on production's older `club_me`
 it would silently lose what 2–3 add. Steps 5, 6, 7, 9, 10 and 11 only need 4 and can go in any order after it.
 
-Suggested sessions: **A** = 1, 2, 3. **B** = 4, 5, 6. **C** = 7, 8, 11. **D** = 10. **E** = 9 (after the policy decision). **F** = 12 (any time; before January's mailing is reviewed).
+Suggested sessions: **A** = 1, 2, 3. **B** = 4, 5, 6. **C** = 7, 8, 11. **D** = 10. **E** = 9 (after the policy decision). **F** = 12 (any time; before January's mailing is reviewed). **G** = 13 (last; take `capture-billing.sql` right before it). Session A's own review: [SESSION_A_REVIEW.md](SESSION_A_REVIEW.md).
 
 ## Preflight (before session A, and again before B)
 
@@ -67,6 +68,7 @@ applied row must be `ok`), then the step's own check:
 | 8 | Signed in as a test member: Club Home, a month and the dashboard are unchanged; `club_me` returns the same fields as before the step |
 | 9 | One trigger named `account_chargeable_guard`; a test account with a cancelled subscription can still delete itself |
 | 10, 11 | verify.sql rows only (no existing behavior changes) |
+| 13 | verify.sql's three `1203` rows; `club_me` for every paying member returns the same JSON as before the step (save before, diff after); `select * from club_orphans()` is empty; `/admin/club` members list has the same rows |
 
 Then, per session, the end-to-end pass on the Supabase branch with the app build pointed at it: the two-phone flow
 in `scripts/e2e/family-e2e.mjs` covers sign-in, the invitation, joining from an account with its own family, the
@@ -85,7 +87,7 @@ and after for everything the session did not mean to change:
 | Family page saves | Change a family member's name and change it back |
 | Admin | `/admin/club`: members, fulfillment queue and kit list load with the same counts |
 | Subscriptions and entitlements | `select status, count(*) from club_subscriptions group by 1` and `select count(*) from club_entitlements where revoked_at is null`: identical before and after |
-| Email automation | `select count(*) from cron.job` identical, plus one (`omc-household-archives-purge`) after step 10 |
+| Email automation | `select count(*) from cron.job` identical, plus one (`omc-household-archives-purge`) after step 10 and one (`omc-club-orphans-flag`) after step 13 |
 | Stripe webhook | Dashboard → Webhooks: no new failures in the hour after each session |
 
 ## Rollback
@@ -97,6 +99,7 @@ nothing behind. To undo steps that did apply:
 | --- | --- | --- |
 | 1–3 | `supabase/rollout/rollback-welcome-overlap.sql`, then `rollback-welcome-rhythm-kit.sql` (rehearsed earlier); 1 is additive, leave it | Saved Family Rhythms only if 1's table is dropped |
 | 10 or 11 alone | Their sections at the top of `supabase/rollout/household/rollback.sql` | Archive copies / shared cleaning marks. Device checkmarks stay on the phones |
+| 13 alone | `rollback-billing.sql`, then `restore-billing-functions.sql` (from `capture-billing.sql`, taken right before applying), then drop `club_household_of` | Nothing is deleted. A partner who pays stops opening the Club for the household |
 | 9 alone | Its section of `rollback.sql`, then `account_delete` from `restore-functions.sql` | Nothing |
 | 4–11, all | `rollback.sql`, then `restore-functions.sql`, then `finish.sql`, one session. `fingerprint.sql` must then equal `before.txt` | Partner access and invitations, the calendar, agreements, shared cleaning marks, archive copies. **Keeps** every household, family member, Club record, subscription and saved color |
 | Anything unexpected | Point-in-time recovery to the time noted in preflight | Everything after that time, across the whole database |
@@ -128,3 +131,4 @@ Auth redirect settings (owner; OMC_APP_ROADMAP.md → TestFlight blockers).
 2. Step 9's deletion policy (three open questions in OWNERSHIP_AND_BILLING_POLICY.md).
 3. Step 10's archive is approved (2026-11-16): purged daily by a scheduled job, restorable by support only, removed with the account. Still yours: the wording of the privacy paragraph (`src/pages/privacy.astro`).
 4. Session F (two kit titles).
+5. Session G (billing for either adult). Cancelling an orphaned subscription stays a manual step in Stripe after an admin's verification; nothing cancels automatically.
