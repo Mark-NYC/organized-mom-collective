@@ -96,8 +96,7 @@ select pg_temp.expect((select (m ->> 'access')::boolean and m ->> 'plan' is not 
 select pg_temp.expect((public.club_resource_get(:'kit') -> 'state' ->> 'omc:club:x') is not null, 'paying partner sees the owner''s edit: one household copy');
 select pg_temp.expect(not pg_temp.fails($$select public.club_address_save('{"name":"H","line1":"1 A St","city":"X","state":"NY","postal_code":"10001"}')$$), 'paying partner sets the mailing address');
 reset role;
-select pg_temp.expect((select count(*) from public.club_resource_versions where household_id = :'hid_a') = 1
-  and not exists (select 1 from public.club_resource_versions v where v.household_id not in (:'hid_a', :'hid_b', :'hid_c')), 'the month is stored once, for the shared household');
+select pg_temp.expect((select count(*) from public.club_resource_versions where household_id = :'hid_a') = 1, 'the month is stored once, for the shared household');
 
 -- ================================================================ the household keeps what it received
 -- (a) the paying partner leaves

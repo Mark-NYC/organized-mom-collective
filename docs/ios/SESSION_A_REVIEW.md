@@ -54,8 +54,7 @@ which is a separate decision and not part of this session.
 4. Save `club_me` for one test member (the JSON), for the before/after comparison.
 5. Apply 21, 22, 23, one at a time (SQL editor or `apply_migration`; never `supabase db push`).
 6. Verify: `supabase/rollout/household/verify.sql` (rows for unapplied steps say `applied = false`);
-   `select welcome_item from club_settings` = `vision`; `snapshot.sql` again: identical except `club_households`
-   gaining its column default; the Family Rhythm page loads and saves for the test member; `/admin/club` members,
+   `select welcome_item from club_settings` = `vision`; `snapshot.sql` again: identical; the Family Rhythm page loads and saves for the test member; `/admin/club` members,
    queue and Welcome Kits show the same counts; `club_me` has the same values plus the new welcome fields.
 
 ## Rollback
