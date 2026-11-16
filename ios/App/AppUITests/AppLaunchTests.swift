@@ -98,8 +98,12 @@ final class AppLaunchTests: XCTestCase {
         // the bar time to settle. Run 43928888138: the simulator's GPU process died and restarted mid-test, which took
         // longer than the 5 s allowed then; 20 s covers a restart. A bar that stays under the home indicator still
         // fails below.
-        let settle = Date().addingTimeInterval(20)
+        let began = Date()
+        let settle = began.addingTimeInterval(20)
         while today.frame.maxY > window.maxY - 20 && Date() < settle { RunLoop.current.run(until: Date().addingTimeInterval(0.25)) }
+        // The measured position, in the CI log: the pass is about where the bar is, not how long we waited.
+        print(String(format: "OMCGeometry %@: tab label bottom %.0f, window bottom %.0f, clearance %.0f pt (home indicator 34 pt), content top %.0f, settled after %.2f s",
+                     screen, today.frame.maxY, window.maxY, window.maxY - today.frame.maxY, topElement.frame.minY, Date().timeIntervalSince(began)))
         // Home indicator area is 34 pt on Face ID iPhones; the tab's label must sit above it.
         XCTAssertLessThanOrEqual(today.frame.maxY, window.maxY - 20, "\(screen): tab bar runs under the home indicator")
         // Status bar / Dynamic Island: at least 44 pt on every current iPhone.

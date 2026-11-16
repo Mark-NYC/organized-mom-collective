@@ -159,7 +159,7 @@ jobs:
             xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
               -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
               -derivedDataPath build -resultBundlePath "build/ui-tests-$i.xcresult" \
-              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|\*\* TEST"
+              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|OMCGeometry|\*\* TEST"
             echo "=== simulator round $i of $N passed ==="
           done
           rm -rf build/ui-tests.xcresult && cp -R "build/ui-tests-$N.xcresult" build/ui-tests.xcresult
@@ -205,7 +205,7 @@ jobs:
               -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
               -only-testing:AppUITests/AppLaunchTests/testFamilyFlowWithTestBackend \
               -derivedDataPath build -resultBundlePath "build/family-e2e-$i.xcresult" \
-              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|skipped|\*\* TEST"
+              CODE_SIGNING_ALLOWED=NO | grep -E "Test Case|error:|failed|passed|XCTAssert|OMCGeometry|skipped|\*\* TEST"
             echo "=== family round $i of $N passed ==="
           done
           rm -rf build/family-e2e.xcresult && cp -R "build/family-e2e-$N.xcresult" build/family-e2e.xcresult
