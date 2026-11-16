@@ -1,7 +1,11 @@
 ---
+import { existsSync } from 'node:fs';
 import type { DirectoryPresentation } from '../../data/tools-directory';
 interface Props { href: string; resource: DirectoryPresentation; seasonal?: boolean; popular?: boolean; priority?: boolean; }
 const { href, resource, seasonal = false, popular = false, priority = false } = Astro.props;
+// A tool without a preview picture yet shows its plain tile, never a broken image (scripts/check-site.mjs lists them).
+const preview = `/images/tools/previews/${resource.slug}.webp`;
+const hasPreview = existsSync(`public${preview}`);
 ---
 <article
   class:list={['resource', seasonal && 'resource-seasonal']}
@@ -12,7 +16,7 @@ const { href, resource, seasonal = false, popular = false, priority = false } = 
   hidden={!seasonal && !popular}
 >
   <a class="resource-preview" href={href} tabindex="-1" aria-hidden="true">
-    <img src={`/images/tools/previews/${resource.slug}.webp`} alt={`Preview of ${resource.title}${resource.onScreen ? ', an on-screen checklist' : ''}.`} width="900" height="720" loading={priority ? 'eager' : 'lazy'} decoding="async" />
+    {hasPreview && <img src={preview} alt={`Preview of ${resource.title}${resource.onScreen ? ', an on-screen checklist' : ''}.`} width="900" height="720" loading={priority ? 'eager' : 'lazy'} decoding="async" />}
   </a>
   <div class="resource-copy">
     <h3>{resource.title}</h3>

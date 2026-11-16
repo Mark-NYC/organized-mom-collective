@@ -6,6 +6,7 @@ import { responsibilityById } from '../../responsibilities';
 import { FREQUENCIES, OWNERSHIP_LEVELS, SCHOOL_TYPES, type KitConfig, type KitItem } from '../types';
 import { routineTypes } from '../../routines';
 import { clubToolById } from '../tools';
+import { clubResourceBySlug } from '../resources';
 import { kit as november2026 } from './2026-11-family-ownership';
 import { kit as december2026 } from './2026-12-christmas-mission';
 import { kit as january2027 } from './2027-01-fresh-start-together';
@@ -131,7 +132,9 @@ export function kitProblems(kit: KitConfig): string[] {
   if (prompts && (prompts.length < 2 || prompts.length > 4 || !prompts.includes(kit.mailer.conversation!.question))) out.push('conversation: 2–4 prompts, the letter’s question among them');
   if (kit.mailer.letter?.namedGreeting && !kit.mailer.letter.namedGreeting.includes('{name}')) out.push('letter: namedGreeting needs {name}');
   if (kit.mailer.example && !routineTypes[kit.mailer.example.variant]) out.push(`example: no routine ${kit.mailer.example.variant}`);
-  if (!kit.action && !kit.mailer.activity) out.push('a kit needs an action or an activity');
+  // A month whose member page is its own tool (src/data/club/resources.ts → /app/club/<month>, where the mailed QR
+  // code lands) doesn't need the generic kit page's action.
+  if (!kit.action && !kit.mailer.activity && !clubResourceBySlug(kit.slug)) out.push('a kit needs an action, an activity or its own member page');
   return out;
 }
 

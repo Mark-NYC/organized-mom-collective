@@ -86,7 +86,10 @@ for (const file of htmlFiles) {
       if (!ref.startsWith('/')) continue;
       // The Club's sales page (/club) may be linked from anywhere; its member pages (/club/…) only from the Club
       // itself, which links in through /club (docs/club/MEMBERSHIP.md).
-      if (/^\/club\/[^?#]/.test(ref) && !(path === '/club' || path.startsWith('/club/'))) fail(rel, `links to the Club member page ${ref}`);
+      // Two deliberate exceptions: the site menu's "Already a member? Sign in" (/club/login is the sign-in page itself,
+      // and only rendered when the Club is on), and the member area under /app/club, which is the Club too.
+      const clubEntry = ref === '/club/login' || path === '/app/club' || path.startsWith('/app/club/');
+      if (/^\/club\/[^?#]/.test(ref) && !clubEntry && !(path === '/club' || path.startsWith('/club/'))) fail(rel, `links to the Club member page ${ref}`);
       const target = resolve(ref);
       if (!target) {
         fail(rel, `broken link ${ref}`);

@@ -12,7 +12,7 @@ import type {Household} from '../../lib/club/profile';
 const months=[
  {slug:'november',label:'November',url:'/club/worksheet-generator/'},
  {slug:'december',label:'December',url:'/club/december-preview/'},
- {slug:'january',label:'January',url:'/preview/january-habit-cards'},
+ {slug:'january',label:'January',url:'/app/club/january?sample=rivera'},
  {slug:'february',label:'February',url:'/club/february-preview/'},
  {slug:'march',label:'March',url:'/club/march-preview/'},
  {slug:'april',label:'April',url:'/club/april-preview/'},

@@ -38,7 +38,7 @@ function printMonth(lastDay: Date) {
  return new Date(Date.UTC(year, month + 1, 15)).getUTCMonth();
 }
 const MONTHLY_OFFERS = [
- 'Help your kids build better morning and bedtime habits. Get January’s Habit Cards',
+ 'Start a weekly family meeting where everyone has a part. Get January’s Family Meeting Kit',
  'Make more room for family connection. Get February’s Connection Cards',
  'Get the whole family helping with spring cleaning. Get March’s Chore Chart',
  'Make dinner a team effort. Get April’s Dinner Team Kit',
@@ -46,7 +46,7 @@ const MONTHLY_OFFERS = [
  'Help your kids make their own snacks. Get June’s Snack Station Kit',
  'Give bored kids ideas they can use on their own. Get July’s Activity Kit',
  'Make back-to-school mornings easier. Get August’s School Routine Kit',
- 'Put the whole family on the same page. Get September’s Weekly Plan',
+ 'Help your kids build better morning and bedtime habits. Get September’s Habit Cards',
  'Make Sundays easier with a shared family reset. Get October’s Sunday Reset',
  'Share responsibility at home. Get November’s Family Ownership Kit',
  'Help your kids bless someone else. Get December’s Giving Cards',
@@ -54,7 +54,7 @@ const MONTHLY_OFFERS = [
 
 /** Compact mobile copy keeps the resource name and the ordering deadline. */
 const MOBILE_OFFERS = [
- 'January Habit Cards',
+ 'January Family Meeting Kit',
  'February Connection Cards',
  'March Chore Chart',
  'April Dinner Team Kit',
@@ -62,7 +62,7 @@ const MOBILE_OFFERS = [
  'June Snack Station Kit',
  'July Activity Kit',
  'August School Routine Kit',
- 'September Weekly Plan',
+ 'September Habit Cards',
  'October Sunday Reset',
  'November Family Ownership Kit',
  'December Giving Cards',
