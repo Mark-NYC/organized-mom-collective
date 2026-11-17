@@ -1,7 +1,7 @@
-# Sessions D, E, F, G for review: 20261129, 20261130, 20261202, 20261203
+# Sessions D, E, F, G: 20261129, 20261130, 20261202, 20261203
 
-Status 2026-11-17: **prepared, not applied. Each needs the owner's separate approval.** Sessions A, B and C are applied
-and verified. **None of these four is needed for TestFlight**: the app falls back without each one (below).
+Status 2026-11-17: **E applied and verified (results at the end). D, F and G prepared, not applied; each needs the
+owner's separate approval.** Sessions A, B and C are applied and verified. **None of these four is needed for TestFlight**: the app falls back without each one (below).
 
 ## Preflight (production, read-only, 2026-11-17 after Session C)
 
@@ -66,3 +66,23 @@ F before January's mailing review, then D, then G last.
 ## What I need from you
 
 A separate "apply Session E" (and D, F, G when you want them). Recommended next: **E**, because it closes a live risk.
+
+## Session E result (applied 2026-11-17 18:48 UTC)
+
+| Step | Result |
+| --- | --- |
+| Backup right before: `20261117T184244Z` (run 44150617098) | VERIFIED: 104 tables, 936 rows restored exactly |
+| Preflight | `account_delete` identical to the repo (`94dd0c44…`) and still has the line E patches; E absent; only `household_owner_leaving` on sign-ins; no cron job or other function deletes sign-ins; subscriptions: 10 trialing, 1 canceled; schema identical to post-Session C |
+| Apply (text hashing to `764cbd64…`) | Schema change identical to the rehearsal: +6 (`account_chargeable`, `account_chargeable_guard`, the trigger, grants), `account_delete` changed. One guard trigger; members can't call the check |
+| Unchanged (checksums) | 11 subscriptions, 12 entitlements, 12 Club orders, 34 shop orders, 4 shop entitlements, households, 20 family members, responsibilities, adults, customers, addresses, kits, email log, lifecycle queue, cron jobs, 11 sign-ins, Club access per sign-in (10 with access), every owner's `club_me`, family, profile, welcome plan and 140 month pages. 47 migrations |
+| Now blocked from deletion | The 10 sign-ins with a trialing subscription, until it is canceled |
+
+**Feature test on production, rolled back (10 of 10;** `supabase/rollout/household/session-e-feature-test.sql`; test-mode
+subscriptions so nothing is queued): an owner with a trialing subscription can't delete in the app or by deleting the
+sign-in directly, and the refused delete leaves the family whole; an `unpaid` subscription (no Club access, the old
+gap) blocks both ways too; a canceled subscription allows deletion; a second adult deleting their account removes only
+their sign-in; an owner who canceled deletes and the other adult becomes owner with every member kept and still opens
+the family; canceled subscription records stay for billing history. Afterwards no test rows remain. The same test on a
+pre-E copy fails the direct-delete and `unpaid` checks, so it does test the change.
+
+The app already shows the approved refusal ("Contact us and we'll help you cancel it first", with a support link).
