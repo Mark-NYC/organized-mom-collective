@@ -30,6 +30,9 @@ permissions:
   contents: read
 env:
   KEEP: 30
+  # A pinned version: "latest" asks GitHub's API, which rate-limits. Raise it when a restore check reports that
+  # production's auth or storage tables are newer than the local Supabase (DATABASE_BACKUPS.md → When a backup fails).
+  SUPABASE_CLI: 3.2.0
 
 jobs:
   selftest:
@@ -42,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: ${{ env.SUPABASE_CLI }}
       - name: Tools (age, Postgres 17 client)
         run: bash scripts/db-backup/tools.sh
       - name: A throwaway source database with every kind of thing a real backup carries
@@ -96,7 +99,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: ${{ env.SUPABASE_CLI }}
       - name: Tools (age, Postgres 17 client)
         run: bash scripts/db-backup/tools.sh
       - name: Hide the connection details from the log; prepare the key

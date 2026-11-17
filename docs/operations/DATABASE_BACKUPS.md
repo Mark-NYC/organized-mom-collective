@@ -118,6 +118,6 @@ Open the run linked in the issue. The failing step says where it stopped:
 | The six backup secrets are set | A secret is missing or misnamed |
 | Dump production | Wrong or rotated database password; Supabase down. The log shows which dump failed |
 | Upload / Download it back | R2 token expired or lacks write access to the bucket |
-| Restore ... and verify | A Supabase update changed `auth` or `storage` tables faster than the newest Supabase CLI: run it again the next day. Anything else: the backup may be unusable; don't migrate until one passes |
+| Restore ... and verify | A Supabase update changed `auth` or `storage` tables beyond what the pinned Supabase CLI's local stack has (a COPY into `auth.*` or `storage.*` fails): raise `SUPABASE_CLI` in `db-backup.yml` to the newest release. Anything else: the backup may be unusable; don't migrate until one passes |
 
 No migration session starts without a verified backup from the same day.
