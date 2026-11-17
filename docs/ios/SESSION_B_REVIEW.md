@@ -1,10 +1,32 @@
 # Session B for review: 20261124, 20261125, 20261126
 
-Status 2026-11-17 18:00 UTC: **ready; waiting for the owner's explicit approval.** Not applied. This session makes
-the app's family features possible: two adults in one household, the family calendar, and permanent member colors.
-It follows [Session A](SESSION_A_REVIEW.md) (applied 2026-11-17).
+Status: **APPLIED to production 2026-11-17 18:07–18:12 UTC with the owner's approval. Verified.** Next:
+[Session C](SESSION_C_REVIEW.md).
 
-## Final preflight (production, read-only, 2026-11-17 17:56 UTC)
+## Result (2026-11-17)
+
+Fresh verified backup first: `backups/20261117T180028Z` (run 44142983172), 100 tables and 920 rows restored exactly.
+Before-record 18:05:31 UTC. Each file ran as one statement that refused to run unless its text hashed to the reviewed
+file's.
+
+| Check | After 24 | After 25 | After 26 |
+| --- | --- | --- | --- |
+| Schema change vs the same file on a test database (every function, column, view, constraint, index, policy, trigger, grant) | identical (+84, 10 replaced) | identical (+60) | identical (+3, 1 replaced) |
+| Households (10), family members (20), activities (16), responsibilities (27): row checksums | unchanged | unchanged | unchanged (colors added, below) |
+| Subscriptions (11), entitlements (12), orders (12), addresses, customers, resource versions, email log, kits, scheduled jobs | unchanged | unchanged | unchanged |
+| Club access and paid access per sign-in (11) | unchanged | unchanged | unchanged |
+| `club_me` and `club_family_profile` for all 10 members | unchanged | unchanged | unchanged |
+| `club_household` for all 10 members | every earlier field unchanged; adds `my_role`, `my_member_id`, `adults` | unchanged | `preferences.colors` added |
+
+- **Owners:** exactly 10 owner rows, one per household, each its `owner_user_id`; 0 partners, 0 invitations.
+- **Calendar:** created, empty, row-level security on; `calendar_changes` returns no events for any member.
+- **Colors:** 20 saved, every one equal to the dry run (5 families: blue, green, purple, pink). The 5 households
+  with no family members got an empty `colors: {}` (the migration's normal result; no values). Everything else in
+  `preferences` unchanged.
+- `verify.sql`: all 7 checks for 24–26 ok; no later step present. 43 migrations recorded, latest
+  `household_member_colors`.
+
+## Preflight (production, read-only, 2026-11-17 17:56 UTC)
 
 | Check | Result |
 | --- | --- |
@@ -76,7 +98,3 @@ the shared calendar.
 
 Rehearsed in CI on every push (`scripts/rehearse-household-rollback.sh`): apply with real rows, roll back, schema
 fingerprint identical to before, no household or family member lost.
-
-## What I need from you
-
-An explicit "apply Session B".

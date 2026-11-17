@@ -22,7 +22,7 @@ production or deployed. Evidence is in CI on that branch and in the files named 
 
 | # | Blocker | Who |
 | --- | --- | --- |
-| 1 | Apply the migrations, in the sessions of MIGRATION_DEPLOYMENT_PLAN.md. **Session A applied 2026-11-17; B is ready for approval.** Until then sign-in works but family sharing, calendar sync, agreements and shared cleaning have no backend | Owner approves each session |
+| 1 | Apply the migrations, in the sessions of MIGRATION_DEPLOYMENT_PLAN.md. **Sessions A and B applied 2026-11-17 (households for two adults, the calendar, permanent colors); C is ready for approval (agreements, Club for the second adult, shared cleaning). Daily encrypted backups run since 2026-11-17 (docs/operations/DATABASE_BACKUPS.md).** Until then sign-in works but family sharing, calendar sync, agreements and shared cleaning have no backend | Owner approves each session |
 | 2 | Apple Developer Program membership; bundle id `com.organizedmomcollective.app`; App Store Connect app record | Owner |
 | 3 | App Store Connect API key and team id in GitHub secrets ([TESTFLIGHT.md](TESTFLIGHT.md)). The signed archive and upload job is written (`ios-testflight.yml`) and has never run | Owner, then a first run |
 | 4 | ~~App origin settings~~ None needed: Auth and the database API already answer `capacitor://localhost` (checked 2026-11-17). Sign-in on a real device is still untested | Owner's iPhone, via TestFlight |
