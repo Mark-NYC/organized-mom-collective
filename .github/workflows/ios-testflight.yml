@@ -1,5 +1,6 @@
-# Signed build of the iPhone app, uploaded to TestFlight. Runs ONLY when someone starts it by hand
-# (Actions → iPhone app: TestFlight → Run workflow). Never on a push. docs/ios/TESTFLIGHT.md has the one-time setup.
+# Signed build of the iPhone app, uploaded to TestFlight. Signs and uploads ONLY when someone starts it by hand
+# (Actions → iPhone app: TestFlight → Run workflow) without "Check only". A pull request that touches the iPhone build
+# runs the check only: the unsigned Release archive, no secrets used, nothing uploaded. docs/ios/TESTFLIGHT.md has the one-time setup.
 #
 # Needs four repository secrets (Settings → Secrets and variables → Actions):
 #   APPLE_TEAM_ID   the 10-character team id (developer.apple.com → Membership)
@@ -20,9 +21,16 @@ on:
         description: 'Check only: build the Release archive, skip signing and upload (needs no Apple secrets)'
         type: boolean
         default: false
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'capacitor.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ios-testflight.yml'
 concurrency:
-  group: ios-testflight
-  cancel-in-progress: false
+  group: ios-testflight-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 permissions:
   contents: read
 jobs:
@@ -34,8 +42,8 @@ jobs:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
-      VERSION: ${{ inputs.version }}
-      ARCHIVE_ONLY: ${{ inputs.archive_only }}
+      VERSION: ${{ inputs.version || '1.0' }}
+      ARCHIVE_ONLY: ${{ github.event_name != 'workflow_dispatch' || inputs.archive_only }}
     steps:
       - name: The four Apple secrets are set
         run: |
@@ -63,7 +71,7 @@ jobs:
         run: npm run build:app
       - run: npx cap sync ios
       - name: App Store Connect key
-        if: inputs.archive_only != true
+        if: env.ARCHIVE_ONLY != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/keys"
           printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
@@ -88,7 +96,7 @@ jobs:
           done | tee -a "$GITHUB_STEP_SUMMARY"
           [ -f "$app/public/index.html" ] || { echo "::error::The web bundle is missing from the app"; exit 1; }
       - name: Upload to TestFlight
-        if: inputs.archive_only != true
+        if: env.ARCHIVE_ONLY != 'true'
         run: |
           set -o pipefail
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/OrganizedFamily.xcarchive" \

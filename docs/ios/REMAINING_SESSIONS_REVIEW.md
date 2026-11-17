@@ -20,12 +20,12 @@ owner's separate approval.** Sessions A, B and C are applied and verified. **Non
 
 | Session | File | New / changed (on the copy) | Existing rows written | Without it |
 | --- | --- | --- | --- | --- |
-| **E** | `20261129_account_delete_billing_guard` | 5 new (guard function, trigger on sign-ins); `account_delete` changed | None | **Live risk today:** any of the 10 members with a chargeable subscription can delete their account (website or app) and Stripe keeps charging. E refuses that by any path, with the approved "contact us / cancel first" wording |
+| **E** | `20261129_account_delete_billing_guard` | 5 new (guard function, trigger on sign-ins); `account_delete` changed | None | **Applied 2026-11-17.** Closed the risk that a member with a chargeable subscription could delete their account (website or app) while Stripe keeps charging; refused now by any path, with the approved "contact us / cancel first" wording |
 | **D** | `20261130_household_join_from_own` | 30 new (archive table, preview/accept-leaving/snapshot functions, daily purge job `omc-household-archives-purge`) | None | Someone who already has a family can't join another adult's; the invitation page falls back to the plain accept |
 | **F** | `20261202_club_kit_titles_january_september` | No schema | **2 rows:** `club_kits.title` January → "Our First Family Meeting", September → "Our Family Habit Cards". January is **scheduled**; its title shows in admin, the fulfillment queue and Club emails | Admin and emails keep the old working titles |
 | **G** | `20261203_household_billing_either_adult` | 17 new (`club_household_of`, orphan list/flag/verify, daily job `omc-club-orphans-flag`); **26 changed**, including `club_invoice_apply` (the Stripe webhook path), `club_me`, `club_member_link`, fulfillment approval and admin lists | None directly; from then on, delivered months are re-granted to the other adult when the holder leaves | A partner who pays gets a second household; delivered months leave with the adult who held them |
 
-Order: **E before G** (G needs it). D and F are independent. Suggested: E next (closes the live billing risk), then
+Order: **E before G** (G needs it). D and F are independent. E is done. Suggested:
 F before January's mailing review, then D, then G last.
 
 ## Approvals still open
@@ -65,7 +65,7 @@ F before January's mailing review, then D, then G last.
 
 ## What I need from you
 
-A separate "apply Session E" (and D, F, G when you want them). Recommended next: **E**, because it closes a live risk.
+A separate approval for each of D, F and G. None blocks TestFlight. Suggested order: F before January's mailing review, then D (after the privacy paragraph is live), then G.
 
 ## Session E result (applied 2026-11-17 18:48 UTC)
 

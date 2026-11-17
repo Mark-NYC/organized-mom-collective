@@ -1,4 +1,4 @@
-# Session B for review: 20261124, 20261125, 20261126
+# Session B: 20261124, 20261125, 20261126
 
 Status: **APPLIED to production 2026-11-17 18:07–18:12 UTC with the owner's approval. Verified.** Next:
 [Session C](SESSION_C_REVIEW.md).
