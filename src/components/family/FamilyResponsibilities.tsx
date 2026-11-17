@@ -8,6 +8,7 @@
  *
  * Suggestions never appear here: an agreement exists only because someone tapped "We agreed".
  */
+import { thisDevice } from '../../lib/native/platform';
 import { useState } from 'react';
 import { useCalendar, isDemo } from '../../lib/calendar/client';
 import { useFamily, type AgreementDraft } from '../../lib/family-meeting-client';
@@ -68,7 +69,7 @@ export default function FamilyResponsibilities() {
         <>
           <p role="status" className="text-sm text-[#536e4e]" data-responsibilities-status>{msg}</p>
           {fam.pending > 0 && fam.status === 'offline' && (
-            <p className="text-sm text-warm-soft" data-agreements-waiting>No connection: {fam.pending} {fam.pending === 1 ? 'change' : 'changes'} saved on this phone, will sync when you’re back online.</p>
+            <p className="text-sm text-warm-soft" data-agreements-waiting>No connection: {fam.pending} {fam.pending === 1 ? 'change' : 'changes'} saved on {thisDevice()}, will sync when you’re back online.</p>
           )}
           {fam.conflicts.length > 0 && (
             <div role="alert" className="family-note" data-agreements-conflict>

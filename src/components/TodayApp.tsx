@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { thisDevice } from '../lib/native/platform';
 import type { ReactNode } from 'react';
 import { dailyEssentials, weekend } from '../data/cleaning';
 import type { MonthlyFocus, WeekdayFocus, WeekendDay } from '../data/cleaning';
@@ -168,7 +169,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
     <div>
       {saving && share.status !== 'local' && (
         <p className="mb-3 text-[0.8rem] text-warm-soft" role="status" data-cleaning-share={share.status}>
-          {share.status === 'shared' ? 'Shared with your family · up to date' : `Saved on this phone${share.waiting ? ` · ${share.waiting} ${share.waiting === 1 ? 'change' : 'changes'} will share when you’re back online` : ' · sharing…'}`}
+          {share.status === 'shared' ? 'Shared with your family · up to date' : `Saved on ${thisDevice()}${share.waiting ? ` · ${share.waiting} ${share.waiting === 1 ? 'change' : 'changes'} will share when you’re back online` : ' · sharing…'}`}
         </p>
       )}
       {!saving && (

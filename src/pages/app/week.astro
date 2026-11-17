@@ -14,7 +14,7 @@ const week = [
 const principles = [
   {
     title: 'Daily Reset',
-    body: `The same five tasks every day, about ${dailyEssentials.minutes}: beds, dishes, counters and a quick pickup. Starts fresh every morning. Agree on who owns each part; checkmarks stay on this phone.`,
+    body: `The same five tasks every day, about ${dailyEssentials.minutes}: beds, dishes, counters and a quick pickup. Starts fresh every morning. Agree on who owns each part; checkmarks stay on ${import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'this phone' : 'this device'}.`,
   },
   {
     title: 'Mon–Thu zones',

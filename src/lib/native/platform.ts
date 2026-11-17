@@ -16,5 +16,8 @@ export function isNativeApp(): boolean {
 /** Built for the app bundle (npm run build:app). Pages may show app-only UI even before the bridge answers. */
 export const appShellBuild = () => import.meta.env.PUBLIC_APP_SHELL === 'ios';
 
+/** Where local saves live, in customer words: "this phone" in the app; "this device" on the website (any screen). */
+export const thisDevice = () => (appShellBuild() ? 'this phone' : 'this device');
+
 /** Fired on the window when the app returns to the foreground, so screens can refresh "today". */
 export const APP_RESUME_EVENT = 'omc:app:resume';

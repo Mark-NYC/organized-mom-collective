@@ -35,10 +35,10 @@ Read with: [VISION.md](../brand/VISION.md), [PRODUCT_ROADMAP.md](../brand/PRODUC
 - `/app/cleaning` (+ `week`, `reorder`, `settings`) is the cleaning companion (`TodayApp.tsx`, data
   `src/data/cleaning.ts`, progress `src/lib/storage.ts` under `omc:v1:*`, **device-local only, not synced**).
 - `/app/calendar/*` is the QR copy of the companion for calendar owners (`START_DESTINATION =
-  /app/calendar?source=calendar`), its own four tabs, no Club. Visiting it sets `omc:calendar-companion:v1 = 1`, which
-  unlocks cleaning on `/app` for that device. Otherwise cleaning is unlocked only by a signed-in account with a **direct
-  website** calendar order (`calendarOrderAccess`). **Etsy buyers (the main channel) can't be verified**; the gate is
-  device-local honor system by design.
+  /app/calendar?source=calendar`), its own four tabs, no Club. **Since 2026-11-17 cleaning is free everywhere** (owner
+  decision): the website's `/app` is the same experience as the app, and nothing unlocks it any more
+  (`hasCalendarAccess()` is always true). Before that, the QR visit or a direct website calendar order unlocked it on
+  the website. Parity record: [WEB_APP_PARITY.md](WEB_APP_PARITY.md).
 - `/app/club`, `/app/club/<month>` (12 months + Welcome Family Rhythm), `/app/club/months`: Club Home and each month's
   personalized plan on the shared plan shell (`src/components/club/plan/`). `/club/*` (ClubLayout): login, welcome,
   welcome kit, family profile, family vision, resources, tools, dashboard (billing). All behind

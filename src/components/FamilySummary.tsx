@@ -21,8 +21,12 @@ import HouseholdSharing from './household/HouseholdSharing';
 
 import { householdAccess, type HouseholdAccess } from '../lib/household/api';
 
-/** The iPhone app (Our Week, free): its own sign-in, setup and account; never Club sales or billing (docs/brand/OUR_WEEK.md). */
-const ourWeek = import.meta.env.PUBLIC_APP_SHELL === 'ios';
+/**
+ * The same account screen on the website's /app and in the iPhone app (owner decision 2026-11-17): the app's sign-in,
+ * family setup, sharing and account deletion. One platform difference: billing. Nothing is bought or managed in the
+ * app (docs/brand/OUR_WEEK.md), so the Club's Account & Billing link and "cancel it there" exist on the website only.
+ */
+const web = import.meta.env.PUBLIC_APP_SHELL !== 'ios';
 
 export default function FamilySummary() {
   const [family, setFamily] = useState<Family | undefined>(undefined);
@@ -41,8 +45,8 @@ export default function FamilySummary() {
       ]);
       if (!household) return setFamily({ state: 'not-member', household: null });
       const owner = (access?.myRole ?? 'owner') === 'owner';
-      // Website: Club links for the paying owner. Our Week: the household's Club content for either adult (20261128), no billing.
-      setFamily({ state: 'member', household, access, club: ourWeek ? Boolean(me?.access) : Boolean(me && (me.member || me.grant)) && owner });
+      // The household's Club content for either adult (20261128); billing (website only) is the paying owner's.
+      setFamily({ state: 'member', household, access, club: Boolean(me?.access), billing: web && owner && Boolean(me && (me.member || me.grant)) });
     }).catch(() => setFamily({ state: 'unavailable', household: null }));
   }, []);
   if (family === undefined) return <p className="mt-6 text-warm-soft">Loading your family…</p>;
@@ -56,21 +60,22 @@ export default function FamilySummary() {
           <h2 className="family-panel-title mt-4">{household?.displayName ?? 'Your family'}</h2>
           {household ? <Members household={household} month={month} /> : <p className="mt-3 text-sm text-warm-soft">You haven’t added your family yet.</p>}
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
-            <a href={ourWeek ? '/app/family/setup' : routes.clubFamily} className="family-link">{household ? 'Edit our family →' : 'Add your family →'}</a>
-            {family.club && !ourWeek && <a href={routes.appClub} className="family-link">Club Home →</a>}
-            {family.club && !ourWeek && <a href={routes.clubDashboard} className="family-link">Account &amp; Billing →</a>}
+            <a href="/app/family/setup" className="family-link">{household ? 'Edit our family →' : 'Add your family →'}</a>
           </div>
         </section>
         {household && family.access && <HouseholdSharing household={household} access={family.access} />}
-        {ourWeek && family.club && (
+        {(family.club || family.billing) && (
           <section className="family-panel mt-5" data-account-club>
             <p className="label text-[#71866c]">FAMILY MEETING CLUB</p>
             <h2 className="family-panel-title mt-3">Your household’s membership</h2>
             <p className="mt-2 text-sm leading-relaxed text-warm-soft">Your monthly Family Focus and kits, for both grown-ups.</p>
-            <a href={routes.appClub} className="family-link mt-4">Club Home →</a>
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+              {family.club && <a href={routes.appClub} className="family-link">Club Home →</a>}
+              {family.billing && <a href={routes.clubDashboard} className="family-link">Account &amp; Billing →</a>}
+            </div>
           </section>
         )}
-        {ourWeek && <OurWeekSignedIn email={email} role={family.access?.myRole ?? 'owner'} shared={(family.access?.adults.length ?? 1) > 1} />}
+        {<OurWeekSignedIn email={email} role={family.access?.myRole ?? 'owner'} shared={(family.access?.adults.length ?? 1) > 1} />}
       </>
     );
   }
@@ -90,9 +95,7 @@ export default function FamilySummary() {
   }
   const copy: Record<Exclude<Family['state'], 'member' | 'demo'>, { title: string; body: string; signIn: boolean; setup?: boolean }> = {
     'signed-out': { title: 'Sign in to see your family', body: 'Sign in with your email to keep your family, calendar and weekly plan on every phone, shared with the other adult in your home. We’ll send a 6-digit code; there’s no password.', signIn: true },
-    'not-member': ourWeek
-      ? { title: 'Set up your family', body: 'Add everyone once: names, ages and each person’s color. The calendar, cleaning and your weekly Family Meeting all use the same family. Invited by another grown-up? Open the link in your invitation.', signIn: false, setup: true }
-      : { title: 'Set up your family', body: 'Add everyone once: names, ages and who does what. The calendar, the cleaning companion and the Family Meeting Club all use the same family. Invited by another adult? Open the link in your invitation.', signIn: false, setup: true },
+    'not-member': { title: 'Set up your family', body: 'Add everyone once: names, ages and each person’s color. The calendar, cleaning and your weekly Family Meeting all use the same family. Invited by another grown-up? Open the link in your invitation.', signIn: false, setup: true },
     'no-sign-in': { title: 'Your family', body: 'A Family Meeting Club member’s family (names, ages and roles, used by every monthly plan) appears here once she signs in.', signIn: false },
     unavailable: { title: 'We couldn’t load your family', body: 'Check your connection and open this page again. Nothing you saved is lost.', signIn: false },
   };
@@ -103,11 +106,11 @@ export default function FamilySummary() {
       <p className="label">YOUR FAMILY</p>
       <h2 className="family-panel-title mt-4">{c.title}</h2>
       <p className="mt-2 text-sm leading-relaxed text-warm-soft">{c.body}</p>
-      {/* In the app (Our Week, free) sign-in and setup never go through the Club's paid onboarding. */}
-      {c.signIn && <a href={ourWeek ? '/app/sign-in?next=/app/account' : routes.clubLogin} className="family-action mt-6">Sign in</a>}
-      {c.setup && <a href={ourWeek ? '/app/family/setup' : routes.clubFamily} className="family-action mt-6">Set up our family</a>}
+      {/* Sign-in and setup never go through the Club's paid onboarding. */}
+      {c.signIn && <a href="/app/sign-in?next=/app/account" className="family-action mt-6">Sign in</a>}
+      {c.setup && <a href="/app/family/setup" className="family-action mt-6">Set up our family</a>}
     </section>
-    {ourWeek && state === 'not-member' && <OurWeekSignedIn email={email} role="owner" shared={false} />}
+    {state === 'not-member' && <OurWeekSignedIn email={email} role="owner" shared={false} />}
     </>
   );
 }
@@ -117,8 +120,10 @@ type Family = {
   household: Household | null;
   /** Who shares the household (state 'member'). */
   access?: HouseholdAccess | null;
-  /** Club links (members, owner's account only: billing is hers). */
+  /** The household has the Club (either adult). */
   club?: boolean;
+  /** Website only: the paying owner's Account & Billing link. */
+  billing?: boolean;
 };
 
 function Members({ household, month }: { household: Household; month: string }) {
@@ -157,7 +162,9 @@ function OurWeekSignedIn({ email, role, shared }: { email: string; role: 'owner'
       setStep('confirm');
       const m = (e as Error).message;
       setMsg(m.includes('active_membership')
-        ? 'Your Family Meeting Club membership is still active, so your account can’t be deleted yet. Contact us and we’ll help you cancel it first.'
+        ? (web
+          ? 'Your Family Meeting Club membership is still active, so your account can’t be deleted yet. Cancel it in Account & Billing first, or contact us and we’ll help.'
+          : 'Your Family Meeting Club membership is still active, so your account can’t be deleted yet. Contact us and we’ll help you cancel it first.')
         : m.includes('admin_account') ? 'This is an admin account; it can’t be deleted here.' : 'We couldn’t delete your account just now. Check your connection and try again.');
     }
   };
@@ -177,12 +184,12 @@ function OurWeekSignedIn({ email, role, shared }: { email: string; role: 'owner'
       {step !== 'idle' && (
         <div className="family-note mt-5" role="group" aria-label="Delete your account" data-delete-confirm>
           <p className="text-sm font-semibold">Delete your Organized Family account?</p>
-          <p className="mt-1 text-sm leading-relaxed">{what} Cleaning progress saved on this phone stays on this phone.</p>
+          <p className="mt-1 text-sm leading-relaxed">{what} Cleaning progress saved on this {web ? 'device stays on this device' : 'phone stays on this phone'}.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <button type="button" className="family-action" disabled={step === 'busy'} onClick={() => void remove()} data-delete-confirm-yes>{step === 'busy' ? 'Deleting…' : 'Delete my account'}</button>
             <button type="button" className="family-link" disabled={step === 'busy'} onClick={() => { setStep('idle'); setMsg(''); }}>Keep my account</button>
           </div>
-          {msg && <p role="alert" className="mt-3 text-sm">{msg} {msg.includes('Contact us') && <a href="/support" className="underline">Contact support →</a>}</p>}
+          {msg && <p role="alert" className="mt-3 text-sm">{msg} {web && msg.includes('Account & Billing') && <><a href={routes.clubDashboard} className="underline">Account &amp; Billing →</a> </>}{/contact us/i.test(msg) && <a href="/support" className="underline">Contact support →</a>}</p>}
         </div>
       )}
     </section>

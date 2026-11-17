@@ -1,12 +1,12 @@
 /** Calendar QR access is device-local, not a paid Club entitlement. */
 export const CALENDAR_ACCESS_KEY = 'omc:calendar-companion:v1';
 export const calendarPath = (path: string) => /^\/app\/calendar(?:\/|$)/.test(path);
-export const hasCalendarAccess = () => {
-  // Our Week (the iPhone app): the complete cleaning companion is free (owner decision 2026-11-15). The website's
-  // rule (the printed calendar's QR code, or a website calendar order) is unchanged until the release plan.
-  if (import.meta.env.PUBLIC_APP_SHELL === 'ios') return true;
-  try { return localStorage.getItem(CALENDAR_ACCESS_KEY) === '1'; } catch { return false; }
-};
+/**
+ * The complete cleaning companion is free, in the iPhone app (owner decision 2026-11-15) and on the website (owner
+ * decision 2026-11-17: the website's /app is the same experience as the app). The printed calendar's QR pages
+ * (/app/calendar…) still remember the scan, which they use for their own home screen.
+ */
+export const hasCalendarAccess = () => true;
 export function rememberCalendarAccess() {
   try { localStorage.setItem(CALENDAR_ACCESS_KEY, '1'); } catch { /* QR still works without storage. */ }
 }
