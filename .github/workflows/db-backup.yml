@@ -56,21 +56,59 @@ jobs:
         run: psql "$SRC_URL" -X -q -v ON_ERROR_STOP=1 -f scripts/db-backup/selftest-seed.sql
       - name: Back it up
         run: OUT="${T:?}/plain" LOGS="${T:?}/logs" bash scripts/db-backup/dump.sh
-      - name: Encrypt and decrypt (throwaway key)
+      - name: Encrypt (throwaway key)
         run: |
           age-keygen -o "${T:?}/test.key" 2>/dev/null
           tar -C "${T:?}/plain" -cf - . | age -r "$(age-keygen -y "${T:?}/test.key")" > "${T:?}/backup.tar.age"
+          echo "SHA=$(sha256sum "${T:?}/backup.tar.age" | cut -d' ' -f1)" >> "$GITHUB_ENV"
+      - name: Private storage round trip and retention (a local S3-compatible server, the same code as production)
+        env:
+          BACKUP_S3_ENDPOINT: http://127.0.0.1:9000
+          BACKUP_S3_BUCKET: omc-db-backups
+          AWS_ACCESS_KEY_ID: selftest
+          AWS_SECRET_ACCESS_KEY: selftest-only-secret
+        run: |
+          docker run -d --name s3 -p 9000:9000 -e MINIO_ROOT_USER=selftest -e MINIO_ROOT_PASSWORD=selftest-only-secret minio/minio server /data >/dev/null
+          until curl -sf http://127.0.0.1:9000/minio/health/ready; do sleep 1; done
+          AWS_DEFAULT_REGION=us-east-1 aws --endpoint-url "$BACKUP_S3_ENDPOINT" s3api create-bucket --bucket "$BACKUP_S3_BUCKET" >/dev/null
+          stamp=20991231T000000Z
+          bash scripts/db-backup/store.sh put "${T:?}/backup.tar.age" "backups/$stamp/backup.tar.age"
+          bash scripts/db-backup/store.sh get "backups/$stamp/backup.tar.age" "${T:?}/fetched.tar.age"
+          [ "$(sha256sum "${T:?}/fetched.tar.age" | cut -d' ' -f1)" = "$SHA" ] && echo "stored copy: checksum matches"
           mkdir "${T:?}/files"
-          age -d -i "${T:?}/test.key" "${T:?}/backup.tar.age" | tar -x -C "${T:?}/files"
-          cmp <(cd "${T:?}/plain" && sha256sum *) <(cd "${T:?}/files" && sha256sum *) && echo "round trip identical"
-      - name: Remove the source; restore into a fresh, empty one and verify
+          age -d -i "${T:?}/test.key" "${T:?}/fetched.tar.age" | tar -x -C "${T:?}/files"
+          cmp <(cd "${T:?}/plain" && sha256sum *) <(cd "${T:?}/files" && sha256sum *) && echo "decrypted copy identical to the dump"
+          # Retention: 9 older verified backups and 1 unverified one; keep 7 → the 3 oldest verified go, the newest stays.
+          date > "${T:?}/marker"
+          for d in 20990101 20990102 20990103 20990104 20990105 20990106 20990107 20990108 20990109; do
+            bash scripts/db-backup/store.sh put "${T:?}/marker" "backups/${d}T000000Z/VERIFIED"
+          done
+          bash scripts/db-backup/store.sh put "${T:?}/marker" "backups/20990110T000000Z/backup.tar.age"
+          bash scripts/db-backup/store.sh put "${T:?}/marker" "backups/$stamp/VERIFIED"
+          bash scripts/db-backup/store.sh prune 7
+          left=$(bash scripts/db-backup/store.sh list | cut -d/ -f2 | sort -u | tr '\n' ' ')
+          echo "left: $left"
+          [ "$left" = "20990104T000000Z 20990105T000000Z 20990106T000000Z 20990107T000000Z 20990108T000000Z 20990109T000000Z 20990110T000000Z $stamp " ] && echo "retention correct"
+      - name: Remove the source; restore the downloaded copy into a fresh, empty database and verify
         run: |
           bash scripts/db-backup/local-stack.sh down "${T:?}/source"
           url=$(bash scripts/db-backup/local-stack.sh up "${T:?}/target")
+          echo "TARGET_URL=$url" >> "$GITHUB_ENV"
           DIR="${T:?}/files" TARGET_URL="$url" LOGS="${T:?}/logs" bash scripts/db-backup/verify-restore.sh
+      - name: A failing restore never prints customer data
+        run: |
+          source scripts/db-backup/common.sh
+          LOGS="${T:?}/logs"
+          # Real Postgres errors that quote a row: a duplicate key (DETAIL) and a bad COPY row (CONTEXT).
+          out=$( { quiet leak-test-1 psql "$TARGET_URL" -X -v ON_ERROR_STOP=1 -c "create temp table t (email text unique); insert into t values ('selftest1@example.com'), ('selftest1@example.com')"; \
+                   quiet leak-test-2 psql "$TARGET_URL" -X -v ON_ERROR_STOP=1 -f "${T:?}/files/data.sql"; } 2>&1 || true)
+          echo "$out"
+          if grep -qiE '@example\.com|Family [0-9]|line one' <<<"$out"; then echo "::error::customer-like data reached the log"; exit 1; fi
+          grep -q 'FAILED: leak-test-1' <<<"$out" && grep -q 'FAILED: leak-test-2' <<<"$out" && echo "both errors reported, no data in them"
       - name: Clean up
         if: always()
         run: |
+          docker rm -f s3 >/dev/null 2>&1 || true
           if [ -n "${T:-}" ]; then
             bash scripts/db-backup/local-stack.sh down "${T:?}/target" || true
             rm -rf -- "${T:?}"
