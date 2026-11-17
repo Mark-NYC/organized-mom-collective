@@ -5,6 +5,7 @@
  * family profile, who's responsible ("Sam drives"), and repeats. Add/edit in a bottom sheet. Works offline and before
  * signing in (saved on this phone); signed in, it's the household's calendar, shared by both grown-ups.
  */
+import { thisDevice } from '../../lib/native/platform';
 import { useMemo, useState } from 'react';
 import { useCalendar, importTypicalWeek, isDemo, type SyncStatus } from '../../lib/calendar/client';
 import { addDays, localToday, occurrences, repeatLabel, timeLabel, weekStart, type CalendarEvent, type Freq, type Occurrence } from '../../lib/calendar/recurrence';
@@ -12,14 +13,14 @@ import { newEventId } from '../../lib/calendar/store';
 import type { Household } from '../../lib/club/profile';
 import type { MarkerColor } from '../../data/club/family-colors';
 import { routes } from '../../routes';
-import { appShellBuild } from '../../lib/native/platform';
 import { agreementsByPerson, changeOf, type Change } from '../../lib/family-meeting-support';
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import AgreedParts from '../family/AgreedParts';
 
 // In Our Week (the iPhone app) the calendar is free: its sign-in and family setup are Our Week's own, never the Club's.
-const SIGN_IN = appShellBuild() ? '/app/sign-in?next=/app/family-calendar' : routes.clubLogin;
-const FAMILY_SETUP = appShellBuild() ? '/app/family/setup' : routes.clubFamily;
+// The same on the website and in the app: the free app's sign-in and family setup, never the Club's onboarding.
+const SIGN_IN = '/app/sign-in?next=/app/family-calendar';
+const FAMILY_SETUP = '/app/family/setup';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -165,9 +166,9 @@ export default function FamilyCalendar() {
 function StatusLine({ status, signedIn, unsaved, waiting }: { status: SyncStatus; signedIn: boolean; unsaved: boolean; waiting: number }) {
   let text: string;
   if (unsaved) text = 'This browser isn’t saving: changes last until you leave.';
-  else if (!signedIn) text = 'Saved on this phone. Sign in to share it with the other grown-up.';
-  else if (status === 'no-household') text = 'Saved on this phone. Set up your family to share it and add who’s going.';
-  else if (status === 'offline') text = waiting ? `No connection: ${waiting} ${waiting === 1 ? 'change' : 'changes'} saved here, will sync when you’re back online.` : 'No connection. Showing what’s saved on this phone.';
+  else if (!signedIn) text = `Saved on ${thisDevice()}. Sign in to share it with the other grown-up.`;
+  else if (status === 'no-household') text = `Saved on ${thisDevice()}. Set up your family to share it and add who’s going.`;
+  else if (status === 'offline') text = waiting ? `No connection: ${waiting} ${waiting === 1 ? 'change' : 'changes'} saved here, will sync when you’re back online.` : `No connection. Showing what’s saved on ${thisDevice()}.`;
   else if (status === 'syncing') text = 'Syncing…';
   else text = 'Shared with your family · up to date';
   const link = !signedIn ? SIGN_IN : status === 'no-household' ? FAMILY_SETUP : null;

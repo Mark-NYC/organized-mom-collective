@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import { useToday } from '../../lib/hooks';
 import { getSession } from '../../lib/account';
 import { accountStore } from '../../lib/club/store';
-import { appShellBuild } from '../../lib/native/platform';
 import { planFor } from '../../lib/schedule';
 import { visibleFeatures } from '../../data/app/features';
 import { isDemo, useCalendar } from '../../lib/calendar/client';
@@ -39,23 +38,21 @@ export function TodayZone() {
 }
 
 /**
- * In the free app, Family Meeting Club cards are for households that have the Club: a free family never sees a
- * membership card it can't open, an upgrade or a price. True on the website (its Club pages have their own gate).
- * Remembered for the visit so the card doesn't flicker in on every screen.
+ * Family Meeting Club cards are for households that have the Club, on the website and in the app (owner decision
+ * 2026-11-17): a free family never sees a membership card it can't open, an upgrade or a price. Selling the Club stays
+ * on the public /club page. Remembered for the visit so the card doesn't flicker in on every screen.
  */
 const CLUB_SEEN = 'omc:app:club-access';
 export function useShowsClub(): boolean {
-  const free = appShellBuild();
   const [has, setHas] = useState(() => { try { return sessionStorage.getItem(CLUB_SEEN) === '1'; } catch { return false; } });
   useEffect(() => {
-    if (!free) return;
     void getSession().then(async (s) => {
       const access = s ? Boolean((await accountStore.me().catch(() => null))?.access) : false;
       setHas(access);
       try { sessionStorage.setItem(CLUB_SEEN, access ? '1' : '0'); } catch { /* this screen only */ }
     });
-  }, [free]);
-  return !free || has;
+  }, []);
+  return has;
 }
 
 export function ClubThisMonth() {

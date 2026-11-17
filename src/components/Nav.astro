@@ -2,7 +2,8 @@
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 import { calendarPath } from '../lib/companion';
 import AppTabBar from './AppTabBar.astro';
-// The iPhone app is one unified app: the QR copy's own tabs (and its reorder tab) are website-only (AppTabBar.astro).
+// Organized Family is one unified app on the website and on the iPhone (AppTabBar.astro). Only the printed calendar's
+// QR copy (/app/calendar…, website only) keeps its own tabs, with its links in the header on wider screens.
 const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 const calendar = !appShell && calendarPath(path);
 const isClubApp = path === '/app/club' || path.startsWith('/app/club/');
@@ -11,12 +12,7 @@ const items = calendar ? [
   { href: '/app/calendar/week', label: 'Week', glyph: '▦' },
   { href: '/app/calendar/reorder', label: 'Calendar', glyph: '⌂' },
   { href: '/app/calendar/settings', label: 'Settings', glyph: '◯' },
-] : [
-  { href: '/app', label: 'Today', glyph: '⌂' },
-  { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
-  { href: '/app/club', label: 'Club', glyph: '▦' },
-  { href: '/app/account', label: 'Account', glyph: '◯' },
-];
+] : [];
 const active = (href: string) => href === '/app' ? path === href : path === href || (href !== '/app/calendar' && path.startsWith(href + '/'));
 ---
 <header data-chrome class="border-b border-warm-rule bg-ivory">
@@ -28,15 +24,15 @@ const active = (href: string) => href === '/app' ? path === href : path === href
     ) : (
       <a href={calendar ? "/app/calendar" : "/app"} class="font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized <span class="italic text-[#71866c]">family.</span></a>
     )}
-    {appShell && (
+    {!calendar && (
       <a href="/app/account" aria-label="Account and settings" aria-current={path === '/app/account' || path === '/app/settings' ? 'page' : undefined} data-profile-link
          class="inline-flex size-11 items-center justify-center rounded-full border border-warm-rule bg-white text-warm-ink hover:bg-[#f3f6f1]">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
       </a>
     )}
-    <nav aria-label="Desktop app navigation" class:list={['hidden', !appShell && 'sm:block']}><ul class="flex items-center gap-6">
-      {items.map(item => <li data-calendar-feature={!calendar && item.href === "/app/cleaning" ? "" : undefined} hidden={!calendar && item.href === "/app/cleaning"}><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['inline-flex min-h-12 items-center border-b-2 px-1 text-[0.8rem] font-semibold',active(item.href) ? 'border-sage text-warm-ink' : 'border-transparent text-warm-soft hover:text-warm-ink']}>{item.label}</a></li>)}
-    </ul></nav>
+    {calendar && <nav aria-label="Desktop app navigation" class="hidden sm:block"><ul class="flex items-center gap-6">
+      {items.map(item => <li><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['inline-flex min-h-12 items-center border-b-2 px-1 text-[0.8rem] font-semibold',active(item.href) ? 'border-sage text-warm-ink' : 'border-transparent text-warm-soft hover:text-warm-ink']}>{item.label}</a></li>)}
+    </ul></nav>}
   </div>
 </header>
 <AppTabBar />

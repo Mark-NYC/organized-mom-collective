@@ -8,7 +8,10 @@
  * Network loss is simulated the way the app sees it: the app's own files keep loading (they're inside the app), only
  * the backend is unreachable, then reachable again.
  *
- * Usage: node scripts/e2e/family-e2e.mjs [app-www] [out=e2e-family]
+ * Usage: node scripts/e2e/family-e2e.mjs [app-www] [out=e2e-family] [app|web]
+ *   web: a website build (dist/) against the same backend. The website's /app is the same experience as the app
+ *   (owner decision 2026-11-17); the only differences checked are the intended ones: "this device" instead of
+ *   "this phone", and the Club's Account & Billing link, which exists on the website only.
  */
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
@@ -19,6 +22,8 @@ const require = createRequire(import.meta.url);
 const { chromium, devices } = require('playwright');
 const ROOT = process.argv[2] ?? 'app-www';
 const OUT = process.argv[3] ?? 'e2e-family';
+const WEB = process.argv[4] === 'web';
+const HERE = WEB ? 'this device' : 'this phone';
 const API = 'http://127.0.0.1:54321';
 mkdirSync(OUT, { recursive: true });
 
@@ -238,7 +243,7 @@ await jen2.fill('[data-agreement-when]', 'Tuesday after dinner');
 await jen2.click('[data-save-agreement]');
 await settle(jen2, 1200);
 const waitingAg = await jen2.locator('[data-agreements-waiting]').innerText().catch(() => '');
-check('offline: an agreement change is saved on the phone and waiting', /1 change saved on this phone/.test(waitingAg), waitingAg);
+check('offline: an agreement change is saved on the phone and waiting', new RegExp(`1 change saved on ${HERE}`).test(waitingAg), waitingAg);
 check('offline: Jen\'s phone shows her change right away', /Tuesday after dinner/.test(await jen2.locator('[data-agreement-row]').first().innerText()));
 check('offline: nothing reached the household yet', (await sql(`select coalesce(agreed_when, '') from public.club_responsibilities where status = 'confirmed' and deleted_at is null and agreed_text like 'Take the trash%'`)) === 'Tuesday night');
 // Meanwhile Sam changes the same agreement on his phone.
@@ -412,7 +417,12 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await page.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(page, 1200);
   const panel = await page.locator('[data-account-signin]').innerText().catch(() => '');
   check('Club subscriber account: Our Week sign-in panel (owner, shared with one other grown-up)', panel.includes('jen@e2e.test') && /share it with one other grown-up/i.test(panel), panel.replace(/\s+/g, ' ').slice(0, 120));
-  check('Club subscriber account: Club panel links to Club Home, no billing or purchase', (await page.locator('[data-account-club] a[href="/app/club"]').count()) === 1 && !/billing|upgrade|subscribe/i.test(await page.locator('body').innerText()));
+  if (WEB) {
+    // Website: billing lives here (never in the app), so the payer also gets Account & Billing; still nothing to buy.
+    check('Club subscriber account (website): Club Home plus Account & Billing, no upgrade or purchase', (await page.locator('[data-account-club] a[href="/app/club"]').count()) === 1 && (await page.locator('[data-account-club] a[href="/club/dashboard"]').count()) === 1 && !/upgrade|subscribe/i.test(await page.locator('body').innerText()));
+  } else {
+    check('Club subscriber account: Club panel links to Club Home, no billing or purchase', (await page.locator('[data-account-club] a[href="/app/club"]').count()) === 1 && !/billing|upgrade|subscribe/i.test(await page.locator('body').innerText()));
+  }
   // A paid membership she could still be charged for (her access here is a free beta grant, which doesn't block deleting).
   await sql(`insert into public.club_subscriptions (stripe_subscription_id, stripe_customer_id, user_id, status, price_id, current_period_end, started_at, livemode) select 'sub_e2ejen', 'cus_e2ejen', id, 'active', 'price_test', now() + interval '20 days', now(), false from auth.users where email = 'jen@e2e.test'`);
   await page.click('[data-delete-account]');

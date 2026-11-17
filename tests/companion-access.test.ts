@@ -25,21 +25,24 @@ describe('companion access display', () => {
     expect(session).not.toHaveBeenCalled();
     expect(orders).not.toHaveBeenCalled();
   });
-  it('Club alone does not reveal cleaning', async () => {
+  // Cleaning is free on the website too (owner decision 2026-11-17), as in the app: no QR scan or order needed.
+  it('a visitor with no calendar, no account and no Club sees cleaning, without any network call', async () => {
     await initCompanionAccess();
-    expect(elements.every(el => el.hidden)).toBe(true);
+    expect(elements.every(el => !el.hidden)).toBe(true);
+    expect(session).not.toHaveBeenCalled();
+    expect(orders).not.toHaveBeenCalled();
   });
-  it('calendar QR access reveals cleaning in the combined shell without network', async () => {
+  it('calendar QR access still reveals cleaning without network', async () => {
     values.set(CALENDAR_ACCESS_KEY, '1');
     await initCompanionAccess();
     expect(elements.every(el => !el.hidden)).toBe(true);
     expect(session).not.toHaveBeenCalled();
   });
-  it('account failure keeps cleaning hidden and redirects a direct cleaning visit', async () => {
+  it('offline, a direct cleaning visit stays on cleaning (no redirect, no account check)', async () => {
     location.pathname = '/app/cleaning';
     session.mockRejectedValue(new Error('offline'));
     await initCompanionAccess();
-    expect(elements.every(el => el.hidden)).toBe(true);
-    expect(location.replace).toHaveBeenCalledWith('/app');
+    expect(elements.every(el => !el.hidden)).toBe(true);
+    expect(location.replace).not.toHaveBeenCalled();
   });
 });
