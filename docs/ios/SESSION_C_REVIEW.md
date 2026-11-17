@@ -1,6 +1,6 @@
-# Session C for review: 20261127, 20261128, 20261201
+# Session C: 20261127, 20261128, 20261201
 
-Status 2026-11-17: **prepared, not applied. Needs the owner's explicit approval.** Follows
+Status 2026-11-17: **applied and verified** (approved by the owner the same day; results below). Follows
 [Session B](SESSION_B_REVIEW.md) (applied and verified 2026-11-17). This session completes the app's family features:
 "We agreed" family agreements, Club content for the second grown-up, and shared cleaning progress.
 
@@ -72,6 +72,31 @@ Billing does not move in this session: the subscription, mailing address and pri
 sections 1201, 28, 27 plus the capture bring the schema back **identical to production after Session B**. (Use the
 new capture for C alone; the earlier `restore-functions-after-session-a.sql` predates Session B.)
 
-## What I need from you
+## Result (applied 2026-11-17, 18:30–18:33 UTC)
 
-An explicit "apply Session C".
+| Step | Result |
+| --- | --- |
+| Post-Session-B backup `20261117T181823Z` | VERIFIED (103 tables, 933 rows restored exactly) |
+| Fresh backup right before C: `20261117T182351Z`, run 44147177662 | VERIFIED: 103 tables, 933 rows restored exactly; structure identical; 43 migrations |
+| Before-record | Schema fingerprint identical to production right after Session B (no drift) |
+| 27 `family_agreements` (applied as text hashing to `9bad4ec6…`) | Schema change identical to the test database (+27 −1). 27 responsibilities, all `revision 0`, every new field empty |
+| 28 `household_club_access` (`5cf619c6…`) | Identical (+12 −8). For all 10 owners: `club_me`, `club_welcome_plan_get` and `club_resource_get` for all 14 kits (140 calls) byte-identical to before. All 11 sign-ins bill as themselves (no partners yet) |
+| 1201 `household_cleaning_progress` (`528718ee…`) | Identical (+23). `household_cleaning_marks` exists, empty |
+| Whole session | +62 −9 objects, identical to the rehearsal. 46 migrations, latest `household_cleaning_progress` |
+| Unchanged throughout (checksums) | Households (all columns), 20 family members, 16 activities, 27 responsibilities, 11 subscriptions, 12 entitlements, 12 orders, 10 addresses, 11 customers, grants, 2 resource versions, 10 email log rows, 14 kits, 10 household adults, the fulfillment queue, 5 cron jobs, 11 sign-ins, Club access for every sign-in (10 with access), every owner's `club_household` |
+| `club_family_profile` | Differs only by the five new, empty `agreed_*` keys on each responsibility; with those removed, byte-identical to before for all 10 owners |
+| `verify.sql` | Every applied row ok (steps 24–28, 1201) |
+
+**Feature test on production, rolled back (15 of 15).** One statement with throwaway `@example.invalid` sign-ins that
+ends by raising an error, so nothing it wrote remains: the second adult joins by invitation; each adult sees the
+agreements the other made, and the family profile lists them; one adult checks a cleaning task and the other sees it,
+then unchecks and the first hears it; with January held by the owner, the second adult has Club access, is told they
+are the partner, sees no plan or address, opens January to edit and saves the household copy; the second adult
+can't set the mailing address (`owner_only`) or approve printing; a stranger gets no Club access, no cleaning marks and
+no agreements. Afterwards: 0 test sign-ins, households, marks, grants or invites; entitlements 12, responsibilities
+27, household adults 10, sign-ins 11; kits checksum equal to before (January's status unchanged).
+
+**Fixed on the way:** `supabase/rollout/household/verify.sql` cast tables that a later step creates with `::regclass`,
+which errors before that step is applied; it now uses `to_regclass`.
+
+Post-session backup `20261117T183605Z` (run 44149506440): VERIFIED, 104 tables and 936 rows restored exactly, 46 migrations.
