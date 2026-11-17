@@ -1,9 +1,30 @@
 # Session A for review: 20261121, 20261122, 20261123
 
-Status 2026-11-16: **prepared, not applied. Needs the owner's go.** This is the first of the sessions in
-[MIGRATION_DEPLOYMENT_PLAN.md](MIGRATION_DEPLOYMENT_PLAN.md). It is the Welcome Kit's Family Rhythm backend. It does
-not turn on any household or app feature; it is first because step 8 (Club access for the second adult) rebuilds
-`club_me` on top of it.
+Status: **APPLIED to production 2026-11-17 01:06 UTC, with the owner's approval. Verified.** This was the first of the
+sessions in [MIGRATION_DEPLOYMENT_PLAN.md](MIGRATION_DEPLOYMENT_PLAN.md): the Welcome Kit's Family Rhythm backend. It
+turned on no household or app feature. Next: [SESSION_B_REVIEW.md](SESSION_B_REVIEW.md).
+
+## Result (2026-11-17)
+
+Before-record taken 2026-11-16 23:48:53 UTC (data checksums, full schema fingerprint, every member's `club_me`).
+Each file ran in one transaction; 22 and 23 ran only because their text hashed to the reviewed file's.
+
+| Check | After 21 | After 22 | After 23 |
+| --- | --- | --- | --- |
+| Schema change vs the change the repo's files make on a test database (every function, column, view, constraint, index, policy, trigger, grant) | identical (+29) | identical (+29, 14 replaced) | identical (+15, 10 replaced) |
+| Subscriptions (11), entitlements (12), orders (12), customers, addresses, households, family members, resource versions, email log, scheduled jobs: row checksums | unchanged | unchanged | unchanged |
+| Who has Club access and paid access (11 sign-ins) | unchanged | unchanged | unchanged |
+| The fulfillment queue's 12 rows (type, status, readiness, kit) | unchanged | unchanged | unchanged |
+| `club_me` for all 10 members, every field that existed before | unchanged | unchanged | unchanged |
+
+After the session: `welcome_item` = `vision`; every welcome order is still a Vision order; May and August carry the
+daily-rhythm flag; no household is marked first-month-only; no Family Rhythm saved yet; all 10 members can open the
+Family Rhythm (`can: edit`). Three migrations recorded in production's history (40 total). Not checked from here: the
+pages in a browser as a signed-in member, and `/admin/club`.
+
+Backup: **none existed.** Checked 2026-11-17: the project is on Supabase's Free plan, which takes no daily backups
+and can't enable point-in-time recovery (supabase.com/docs/guides/platform/backups). Session A was applied without a
+platform backup; its undo path is the two rollback files below, which leave every existing row in place.
 
 ## Production preflight (read-only, 2026-11-16, `supabase/rollout/session-a/preflight.sql`)
 
@@ -69,7 +90,3 @@ which is a separate decision and not part of this session.
 Rehearsed 2026-11-16 on a throwaway database: after both rollback files the schema is **identical** to the state
 after 21 alone, and every object the session changed is back to its pre-session definition. While
 `welcome_item = 'vision'` neither refusal condition can occur.
-
-## What I need from you
-
-A yes to apply Session A to production (or to a Supabase branch first, then production).

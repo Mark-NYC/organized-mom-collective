@@ -1,6 +1,6 @@
 # Deploying 20261121 → 20261203 to production
 
-Status: **plan for the owner's approval, 2026-11-15. Nothing here has been applied.** What each migration is and why:
+Status 2026-11-17: **Session A (steps 1–3) is applied and verified ([SESSION_A_REVIEW.md](SESSION_A_REVIEW.md)). Session B is prepared for approval ([SESSION_B_REVIEW.md](SESSION_B_REVIEW.md)). Nothing else has been applied.** What each migration is and why:
 [MIGRATION_PLAN.md](MIGRATION_PLAN.md). This is how to apply them, how to check each step, and how to go back.
 
 Production today (read-only, 2026-11-15): Postgres 17.11, 37 migrations applied, the last `club_household_icon_style`.
@@ -44,8 +44,9 @@ Suggested sessions: **A** = 1, 2, 3. **B** = 4, 5, 6. **C** = 7, 8, 11. **D** = 
 
 All read-only.
 
-1. `supabase/rollout/snapshot.sql` and confirm the project's point-in-time recovery or a fresh backup exists
-   (Dashboard → Database → Backups). Note the time: it is the fallback for everything below.
+1. `supabase/rollout/snapshot.sql`, and a usable backup taken before the session. On the Free plan (today) there are
+   no platform backups: take a `supabase db dump` (roles, schema, data; SESSION_B_REVIEW.md → Backup) and keep it
+   off-site. On Pro, a scheduled backup from after the last change. Note the time: it is the fallback for everything below.
 2. `supabase/rollout/household/preflight.sql`: every row `ok = true`.
 3. `supabase/rollout/household/fingerprint.sql`: save the output as `before.txt`.
 4. `supabase/rollout/household/capture.sql`: save the one value it returns as `restore-functions.sql`. It is the
@@ -102,7 +103,7 @@ nothing behind. To undo steps that did apply:
 | 13 alone | `rollback-billing.sql`, then `restore-billing-functions.sql` (from `capture-billing.sql`, taken right before applying), then drop `club_household_of` | Nothing is deleted. A partner who pays stops opening the Club for the household |
 | 9 alone | Its section of `rollback.sql`, then `account_delete` from `restore-functions.sql` | Nothing |
 | 4–11, all | `rollback.sql`, then `restore-functions.sql`, then `finish.sql`, one session. `fingerprint.sql` must then equal `before.txt` | Partner access and invitations, the calendar, agreements, shared cleaning marks, archive copies. **Keeps** every household, family member, Club record, subscription and saved color |
-| Anything unexpected | Point-in-time recovery to the time noted in preflight | Everything after that time, across the whole database |
+| Anything unexpected | Restore the backup from preflight step 1 (a scheduled backup on Pro, or the `db dump` files into the project) | Everything after that time, across the whole database |
 
 Rehearsed on a throwaway database by `scripts/rehearse-household-rollback.sh` (in CI): it runs preflight, applies
 4–11 with real rows (partners, events, cleaning marks, archives), runs verify, rolls back, and requires the schema
@@ -122,8 +123,10 @@ A rollback after families have used the features removes their data. Past the fi
 | 10 | Joining from an account that already has a family (the page falls back to the plain accept without it) |
 | 11 | Shared cleaning progress (without it the companion stays on the device, as today) |
 
-Also needed before the app can sign in at all: `capacitor://localhost` in `CLUB_ALLOWED_ORIGINS` and the Supabase
-Auth redirect settings (owner; OMC_APP_ROADMAP.md → TestFlight blockers).
+Sign-in from the app needs no setting change (checked 2026-11-17): Supabase Auth and the database API already
+answer `capacitor://localhost`, and the app signs in with an emailed code, not a redirect link. Only `club-billing`
+(checkout and the billing portal) refuses the app's origin, on purpose: nothing is bought inside the app.
+`CLUB_ALLOWED_ORIGINS` accepts `https://` origins only, so adding `capacitor://localhost` there would do nothing.
 
 ## What needs the owner's approval
 
