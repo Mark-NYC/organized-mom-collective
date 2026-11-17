@@ -44,8 +44,9 @@ Suggested sessions: **A** = 1, 2, 3. **B** = 4, 5, 6. **C** = 7, 8, 11. **D** = 
 
 All read-only.
 
-1. `supabase/rollout/snapshot.sql` and confirm the project's point-in-time recovery or a fresh backup exists
-   (Dashboard → Database → Backups). Note the time: it is the fallback for everything below.
+1. `supabase/rollout/snapshot.sql`, and a usable backup taken before the session. On the Free plan (today) there are
+   no platform backups: take a `supabase db dump` (roles, schema, data; SESSION_B_REVIEW.md → Backup) and keep it
+   off-site. On Pro, a scheduled backup from after the last change. Note the time: it is the fallback for everything below.
 2. `supabase/rollout/household/preflight.sql`: every row `ok = true`.
 3. `supabase/rollout/household/fingerprint.sql`: save the output as `before.txt`.
 4. `supabase/rollout/household/capture.sql`: save the one value it returns as `restore-functions.sql`. It is the
@@ -102,7 +103,7 @@ nothing behind. To undo steps that did apply:
 | 13 alone | `rollback-billing.sql`, then `restore-billing-functions.sql` (from `capture-billing.sql`, taken right before applying), then drop `club_household_of` | Nothing is deleted. A partner who pays stops opening the Club for the household |
 | 9 alone | Its section of `rollback.sql`, then `account_delete` from `restore-functions.sql` | Nothing |
 | 4–11, all | `rollback.sql`, then `restore-functions.sql`, then `finish.sql`, one session. `fingerprint.sql` must then equal `before.txt` | Partner access and invitations, the calendar, agreements, shared cleaning marks, archive copies. **Keeps** every household, family member, Club record, subscription and saved color |
-| Anything unexpected | Point-in-time recovery to the time noted in preflight | Everything after that time, across the whole database |
+| Anything unexpected | Restore the backup from preflight step 1 (a scheduled backup on Pro, or the `db dump` files into the project) | Everything after that time, across the whole database |
 
 Rehearsed on a throwaway database by `scripts/rehearse-household-rollback.sh` (in CI): it runs preflight, applies
 4–11 with real rows (partners, events, cleaning marks, archives), runs verify, rolls back, and requires the schema

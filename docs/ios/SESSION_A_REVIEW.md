@@ -22,8 +22,9 @@ daily-rhythm flag; no household is marked first-month-only; no Family Rhythm sav
 Family Rhythm (`can: edit`). Three migrations recorded in production's history (40 total). Not checked from here: the
 pages in a browser as a signed-in member, and `/admin/club`.
 
-Backup: I recorded the time above as the point-in-time reference; I could not see the Backups page from here, so
-whether point-in-time recovery is switched on for the project is unconfirmed.
+Backup: **none existed.** Checked 2026-11-17: the project is on Supabase's Free plan, which takes no daily backups
+and can't enable point-in-time recovery (supabase.com/docs/guides/platform/backups). Session A was applied without a
+platform backup; its undo path is the two rollback files below, which leave every existing row in place.
 
 ## Production preflight (read-only, 2026-11-16, `supabase/rollout/session-a/preflight.sql`)
 

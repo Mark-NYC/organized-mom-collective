@@ -1,6 +1,7 @@
 # Session B for review: 20261124, 20261125, 20261126
 
-Status 2026-11-17: **prepared, not applied. Needs the owner's go.** This is the session that makes the app's family
+Status 2026-11-17: **approved by the owner on condition of a usable backup. Blocked: there is none yet** (see Backup
+below). Not applied. This is the session that makes the app's family
 features possible: two adults in one household, the family calendar, and permanent member colors. It follows
 [Session A](SESSION_A_REVIEW.md) (applied 2026-11-17).
 
@@ -19,6 +20,19 @@ features possible: two adults in one household, the family calendar, and permane
 
 One difference found outside this session: production's `club_member_link` lacks one comment line the repo has (same
 logic). Session B doesn't touch it; the billing step (`20261203`) patches a different line of it and still applies.
+
+## Backup (the owner's condition, not yet met)
+
+The project is on Supabase's **Free** plan (checked 2026-11-17). Free projects get no daily backups and can't enable
+point-in-time recovery; the WAL archiving visible on the server is not restorable by us. Either of these meets the
+condition:
+
+1. **A logical dump, today, free.** On the owner's computer with the Supabase CLI, the database connection string
+   (Dashboard → Connect) in `$DB_URL`: `supabase db dump --db-url "$DB_URL" -f roles.sql --role-only`, then
+   `-f schema.sql`, then `--data-only --use-copy -f data.sql`. Keep the three files off-site and out of this
+   repository: `data.sql` contains every member's data.
+2. **Pro plan** ($25/month): daily backups kept 7 days. Wait until Dashboard → Database → Backups → Scheduled lists
+   one dated after the upgrade.
 
 ## Exact changes
 
@@ -68,5 +82,5 @@ fingerprint identical to before, no household or family member lost.
 
 ## What I need from you
 
-A yes to apply Session B. And, once, a look at Supabase → Database → Backups to confirm point-in-time recovery or a
-recent backup exists: I can't see that page from here.
+Approved 2026-11-17, conditional on a usable backup. Waiting on: the dump's time (option 1) or the first scheduled
+backup on Pro (option 2).
