@@ -1,6 +1,6 @@
 # Deploying 20261121 → 20261203 to production
 
-Status: **plan for the owner's approval, 2026-11-15. Nothing here has been applied.** What each migration is and why:
+Status 2026-11-17: **Session A (steps 1–3) is applied and verified ([SESSION_A_REVIEW.md](SESSION_A_REVIEW.md)). Session B is prepared for approval ([SESSION_B_REVIEW.md](SESSION_B_REVIEW.md)). Nothing else has been applied.** What each migration is and why:
 [MIGRATION_PLAN.md](MIGRATION_PLAN.md). This is how to apply them, how to check each step, and how to go back.
 
 Production today (read-only, 2026-11-15): Postgres 17.11, 37 migrations applied, the last `club_household_icon_style`.
@@ -122,8 +122,10 @@ A rollback after families have used the features removes their data. Past the fi
 | 10 | Joining from an account that already has a family (the page falls back to the plain accept without it) |
 | 11 | Shared cleaning progress (without it the companion stays on the device, as today) |
 
-Also needed before the app can sign in at all: `capacitor://localhost` in `CLUB_ALLOWED_ORIGINS` and the Supabase
-Auth redirect settings (owner; OMC_APP_ROADMAP.md → TestFlight blockers).
+Sign-in from the app needs no setting change (checked 2026-11-17): Supabase Auth and the database API already
+answer `capacitor://localhost`, and the app signs in with an emailed code, not a redirect link. Only `club-billing`
+(checkout and the billing portal) refuses the app's origin, on purpose: nothing is bought inside the app.
+`CLUB_ALLOWED_ORIGINS` accepts `https://` origins only, so adding `capacitor://localhost` there would do nothing.
 
 ## What needs the owner's approval
 
