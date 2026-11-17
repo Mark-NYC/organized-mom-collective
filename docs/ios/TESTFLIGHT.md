@@ -14,9 +14,16 @@ What's done in code, what only the owner can do, in order. Nothing here publishe
 | Signed archive + TestFlight upload, started by hand | `.github/workflows/ios-testflight.yml`, `ios/ExportOptions.plist` |
 | Simulator checks: one round per push, five for a release | `.github/workflows/ios-app.yml` (Run workflow → rounds 5, or a `release-*` tag) |
 
-**Not verified:** the TestFlight workflow has never run (it needs the Apple secrets below, and a Mac runner). Expect
-one or two fixes on the first run. The icon is the 512px seal enlarged to 1024px: fine for TestFlight; supply a
+**Not verified:** the signed upload has never run (it needs the Apple secrets below). The archive is made unsigned and
+signed on export with the API key, so no registered device or certificate is needed; expect at most one fix on the
+first signed run. The icon is the 512px seal enlarged to 1024px: fine for TestFlight; supply a
 1024px master (or an Organized Family icon) before the App Store listing.
+
+## Check first (no Apple account needed)
+
+Actions → **iPhone app: TestFlight** → Run workflow → branch `claude/stoic-albattani-esdhkp` (or `main` once merged) →
+tick **Check only**. It builds the real Release archive with the newest Xcode on the runner and prints its bundle id,
+version and SDK. Green means the only things left are Apple's.
 
 ## Owner, once
 
@@ -31,8 +38,8 @@ one or two fixes on the first run. The icon is the 512px seal enlarged to 1024px
 
 ## Each build
 
-1. The household migrations must be live for the family features to work on the phone
-   ([MIGRATION_DEPLOYMENT_PLAN.md](MIGRATION_DEPLOYMENT_PLAN.md)); the app talks to production.
+1. Done 2026-11-17: every migration the app's family features need is live (sessions A, B, C, E); the app talks to
+   production.
 2. Actions → **iPhone app** → Run workflow → rounds 5 (release verification). Green.
 3. Actions → **iPhone app: TestFlight** → Run workflow. About 20 minutes, then Apple processes the build.
 4. Open TestFlight on the iPhone and install.
