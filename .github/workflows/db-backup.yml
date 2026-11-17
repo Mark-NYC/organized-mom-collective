@@ -36,9 +36,9 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
-    env:
-      T: ${{ runner.temp }}/selftest
     steps:
+      - name: Work folder
+        run: echo "T=$RUNNER_TEMP/selftest" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
@@ -68,8 +68,10 @@ jobs:
       - name: Clean up
         if: always()
         run: |
-          bash scripts/db-backup/local-stack.sh down "${T:?}/target" || true
-          rm -rf -- "${T:?}"
+          if [ -n "${T:-}" ]; then
+            bash scripts/db-backup/local-stack.sh down "${T:?}/target" || true
+            rm -rf -- "${T:?}"
+          fi
 
   backup:
     if: >-
@@ -78,7 +80,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      W: ${{ runner.temp }}/backup
       SRC_URL: ${{ secrets.SUPABASE_DB_URL }}
       BACKUP_AGE_SECRET_KEY: ${{ secrets.BACKUP_AGE_SECRET_KEY }}
       BACKUP_S3_ENDPOINT: ${{ secrets.BACKUP_S3_ENDPOINT }}
@@ -102,6 +103,7 @@ jobs:
         run: |
           source scripts/db-backup/common.sh
           mask_url "$SRC_URL"
+          W="$RUNNER_TEMP/backup"; echo "W=$W" >> "$GITHUB_ENV"
           mkdir -p "${W:?}"; chmod 700 "${W:?}"
           printf '%s\n' "$BACKUP_AGE_SECRET_KEY" > "${W:?}/age.key"; chmod 600 "${W:?}/age.key"
           age-keygen -y "${W:?}/age.key" > "${W:?}/age.pub" 2>/dev/null || { echo "::error::BACKUP_AGE_SECRET_KEY isn't an age secret key"; exit 1; }
@@ -150,8 +152,10 @@ jobs:
       - name: Clean up
         if: always()
         run: |
-          bash scripts/db-backup/local-stack.sh down "${W:?}/stack" || true
-          rm -rf -- "${W:?}"
+          if [ -n "${W:-}" ]; then
+            bash scripts/db-backup/local-stack.sh down "${W:?}/stack" || true
+            rm -rf -- "${W:?}"
+          fi
 
   notify:
     needs: backup
