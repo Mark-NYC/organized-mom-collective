@@ -86,3 +86,6 @@ the family; canceled subscription records stay for billing history. Afterwards n
 pre-E copy fails the direct-delete and `unpaid` checks, so it does test the change.
 
 The app already shows the approved refusal ("Contact us and we'll help you cancel it first", with a support link).
+
+Post-session backup `20261117T185117Z` (run 44152144309): VERIFIED, 104 tables and 938 rows restored exactly, 47
+migrations, both sign-in triggers included.
