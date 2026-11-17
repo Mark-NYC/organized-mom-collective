@@ -1,38 +1,53 @@
-# Session B for review: 20261124, 20261125, 20261126
+# Session B: 20261124, 20261125, 20261126
 
-Status 2026-11-17: **approved by the owner on condition of a usable backup. Blocked: there is none yet** (see Backup
-below). Not applied. This is the session that makes the app's family
-features possible: two adults in one household, the family calendar, and permanent member colors. It follows
-[Session A](SESSION_A_REVIEW.md) (applied 2026-11-17).
+Status: **APPLIED to production 2026-11-17 18:07–18:12 UTC with the owner's approval. Verified.** Next:
+[Session C](SESSION_C_REVIEW.md).
 
-## Production preflight (read-only, 2026-11-17, `supabase/rollout/household/preflight.sql`)
+## Result (2026-11-17)
+
+Fresh verified backup first: `backups/20261117T180028Z` (run 44142983172), 100 tables and 920 rows restored exactly.
+Before-record 18:05:31 UTC. Each file ran as one statement that refused to run unless its text hashed to the reviewed
+file's.
+
+| Check | After 24 | After 25 | After 26 |
+| --- | --- | --- | --- |
+| Schema change vs the same file on a test database (every function, column, view, constraint, index, policy, trigger, grant) | identical (+84, 10 replaced) | identical (+60) | identical (+3, 1 replaced) |
+| Households (10), family members (20), activities (16), responsibilities (27): row checksums | unchanged | unchanged | unchanged (colors added, below) |
+| Subscriptions (11), entitlements (12), orders (12), addresses, customers, resource versions, email log, kits, scheduled jobs | unchanged | unchanged | unchanged |
+| Club access and paid access per sign-in (11) | unchanged | unchanged | unchanged |
+| `club_me` and `club_family_profile` for all 10 members | unchanged | unchanged | unchanged |
+| `club_household` for all 10 members | every earlier field unchanged; adds `my_role`, `my_member_id`, `adults` | unchanged | `preferences.colors` added |
+
+- **Owners:** exactly 10 owner rows, one per household, each its `owner_user_id`; 0 partners, 0 invitations.
+- **Calendar:** created, empty, row-level security on; `calendar_changes` returns no events for any member.
+- **Colors:** 20 saved, every one equal to the dry run (5 families: blue, green, purple, pink). The 5 households
+  with no family members got an empty `colors: {}` (the migration's normal result; no values). Everything else in
+  `preferences` unchanged.
+- `verify.sql`: all 7 checks for 24–26 ok; no later step present. 43 migrations recorded, latest
+  `household_member_colors`.
+
+## Preflight (production, read-only, 2026-11-17 17:56 UTC)
 
 | Check | Result |
 | --- | --- |
-| None of the household migrations is already there | ok |
-| Every household has exactly one owner account; no account owns two | ok |
-| The two profile saves still carry the lock 24 rewrites; the four read policies 24 replaces exist by name | ok |
-| pgcrypto is in the `extensions` schema (invitation codes) | ok |
-| No household has more than 20 family members | ok |
-| Later steps (27, 28, 29): their starting points are intact | ok |
-| Everything the session replaces or removes (6 functions, 4 policies) is byte-identical to the repo | **10 of 10** |
-| Production data | 10 households, 20 current family members, 16 activities, 27 responsibilities, 11 sign-ins; no saved colors yet |
+| Verified backup | `backups/20261117T174106Z` (run 44139509039): 100 tables, 920 rows, 11 sign-ins, 40 migrations restored exactly into an isolated database; stored encrypted in R2. A fresh one is taken right before applying |
+| Everything the session replaces (6 functions, 4 policies) is byte-identical to the repo | **10 of 10** |
+| None of Session B (or later) is already there; Session A is in (40 migrations, latest `20261117010634`) | ok |
+| Every household has one owner, a real sign-in; nobody owns two; at most 20 members each | ok |
+| The profile saves still carry the lock 24 rewrites; pgcrypto in `extensions` | ok |
+| Rollback capture re-taken: production's 29 function definitions | identical to `captured/restore-functions-after-session-a.sql` |
+| Database suites (17) and the full rollback rehearsal on today's `main` | pass |
 
-One difference found outside this session: production's `club_member_link` lacks one comment line the repo has (same
-logic). Session B doesn't touch it; the billing step (`20261203`) patches a different line of it and still applies.
+**Dry run of the color backfill (26), read-only, same order and palette as the migration:** 10 households, 5 with
+family members, 20 colors to save, 4 per family (`blue, green, purple, pink`), 0 saved colors today, 0 archived
+members, largest family 4 (no repeats), 0 orders printed or mailed. What families see today is exactly what gets
+saved; nothing printed can differ.
 
-## Backup (the owner's condition, not yet met)
+**Production before Session B:** 10 households, 20 family members, 16 activities, 27 responsibilities, 11 sign-ins,
+subscriptions 10 trialing / 1 canceled, 12 live entitlements, 12 orders, 10 accounts with Club access.
 
-The project is on Supabase's **Free** plan (checked 2026-11-17). Free projects get no daily backups and can't enable
-point-in-time recovery; the WAL archiving visible on the server is not restorable by us. Either of these meets the
-condition:
-
-1. **A logical dump, today, free.** On the owner's computer with the Supabase CLI, the database connection string
-   (Dashboard → Connect) in `$DB_URL`: `supabase db dump --db-url "$DB_URL" -f roles.sql --role-only`, then
-   `-f schema.sql`, then `--data-only --use-copy -f data.sql`. Keep the three files off-site and out of this
-   repository: `data.sql` contains every member's data.
-2. **Pro plan** ($25/month): daily backups kept 7 days. Wait until Dashboard → Database → Backups → Scheduled lists
-   one dated after the upgrade.
+**File hashes to apply (md5):** 24 `b2eeb7c00c41b9d9cb6681dab2d72e71`, 25 `7041580f74696b0c21061cbc4a5bf386`,
+26 `d7f150dc156e40b6eac31816e05d70bd`.
 
 ## Exact changes
 
@@ -58,15 +73,19 @@ the shared calendar.
 
 ## Procedure (after your go)
 
-1. Note the time as the point-in-time reference; take the data checksums, the schema fingerprint and each member's
-   `club_household`, `club_family_profile` and `club_me`.
-2. `supabase/rollout/household/preflight.sql`: all ok. Re-capture `capture.sql` and compare with
-   `supabase/rollout/household/captured/restore-functions-after-session-a.sql` (taken 2026-11-17): must be identical.
-3. Apply 24, 25, 26 one at a time, each hash-guarded as in Session A. After each: the schema change must equal the
-   expected change exactly; `supabase/rollout/household/verify.sql`; data checksums.
-4. After 24: 10 owner rows, one per household; `club_household` and `club_family_profile` return the same JSON as
-   before for all 10 members. After 25: no events. After 26: 20 saved colors, each equal to the color shown today.
-5. Stop at the first check that isn't clean.
+1. **Fresh backup**, read-only on production: the backup workflow, then wait for `VERIFIED`. No backup, no session.
+2. **Before-record:** data checksums (households, members, activities, responsibilities, subscriptions,
+   entitlements, orders, addresses, customers, email log), Club access per sign-in, the full schema fingerprint,
+   and for all 10 members `club_household`, `club_family_profile` and `club_me` (checksums only).
+3. **Apply 24, 25, 26 one at a time**, each refusing to run unless its text hashes to the file above. After each:
+   - the schema change equals the change the same file makes on a test database, object for object;
+   - `supabase/rollout/household/verify.sql`: every applied row ok;
+   - subscriptions, entitlements, orders, addresses, customers and Club access: **unchanged**.
+4. **After 24:** exactly 10 owner rows, one per household, each its `owner_user_id`; `club_household`,
+   `club_family_profile` and `club_me` return the same JSON as before for all 10 members; 20 family members intact.
+5. **After 25:** `calendar_events` exists and is empty.
+6. **After 26:** 20 saved colors, equal to the dry run above; families, members and everything else unchanged.
+7. Stop at the first check that isn't clean; roll back that step (below). Then a post-session backup.
 
 ## Rollback
 
@@ -79,8 +98,3 @@ the shared calendar.
 
 Rehearsed in CI on every push (`scripts/rehearse-household-rollback.sh`): apply with real rows, roll back, schema
 fingerprint identical to before, no household or family member lost.
-
-## What I need from you
-
-Approved 2026-11-17, conditional on a usable backup. Waiting on: the dump's time (option 1) or the first scheduled
-backup on Pro (option 2).

@@ -1,6 +1,6 @@
 # Deploying 20261121 → 20261203 to production
 
-Status 2026-11-17: **Session A (steps 1–3) is applied and verified ([SESSION_A_REVIEW.md](SESSION_A_REVIEW.md)). Session B is prepared for approval ([SESSION_B_REVIEW.md](SESSION_B_REVIEW.md)). Nothing else has been applied.** What each migration is and why:
+Status 2026-11-17: **Sessions A (steps 1–3), B (steps 4–6), C (steps 7, 8, 11) and E (step 9) are applied and verified ([A](SESSION_A_REVIEW.md), [B](SESSION_B_REVIEW.md), [C](SESSION_C_REVIEW.md), [E](REMAINING_SESSIONS_REVIEW.md)). D, F and G are prepared for approval ([REMAINING_SESSIONS_REVIEW.md](REMAINING_SESSIONS_REVIEW.md)). Nothing else has been applied.**
 [MIGRATION_PLAN.md](MIGRATION_PLAN.md). This is how to apply them, how to check each step, and how to go back.
 
 Production today (read-only, 2026-11-15): Postgres 17.11, 37 migrations applied, the last `club_household_icon_style`.
