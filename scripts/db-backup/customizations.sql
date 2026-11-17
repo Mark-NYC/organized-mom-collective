@@ -1,5 +1,8 @@
 -- Read-only. Our own triggers and policies on Supabase's auth and storage schemas: `supabase db dump` leaves those
 -- schemas out (Supabase manages them), so they're captured here and restored after schema.sql. Definitions only.
+-- An empty search_path makes every table, function and type in the definitions schema-qualified: the restore
+-- runs Supabase's schema.sql, which empties the search_path too.
+set search_path = '';
 select 'drop trigger if exists ' || quote_ident(t.tgname) || ' on ' || quote_ident(n.nspname) || '.' || quote_ident(c.relname)
        || '; ' || pg_get_triggerdef(t.oid) || ';'
   from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace n on n.oid = c.relnamespace
