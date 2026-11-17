@@ -61,15 +61,16 @@ jobs:
           age-keygen -o "${T:?}/test.key" 2>/dev/null
           tar -C "${T:?}/plain" -cf - . | age -r "$(age-keygen -y "${T:?}/test.key")" > "${T:?}/backup.tar.age"
           echo "SHA=$(sha256sum "${T:?}/backup.tar.age" | cut -d' ' -f1)" >> "$GITHUB_ENV"
-      - name: Private storage round trip and retention (a local S3-compatible server, the same code as production)
+      - name: Private storage round trip and retention (a local S3-compatible server; the same store.sh and AWS CLI as production)
         env:
           BACKUP_S3_ENDPOINT: http://127.0.0.1:9000
           BACKUP_S3_BUCKET: omc-db-backups
           AWS_ACCESS_KEY_ID: selftest
           AWS_SECRET_ACCESS_KEY: selftest-only-secret
         run: |
-          docker run -d --name s3 -p 9000:9000 -e MINIO_ROOT_USER=selftest -e MINIO_ROOT_PASSWORD=selftest-only-secret minio/minio server /data >/dev/null
-          until curl -sf http://127.0.0.1:9000/minio/health/ready; do sleep 1; done
+          python3 -m venv "${T:?}/s3venv" && "${T:?}/s3venv/bin/pip" install -q "moto[server]"
+          ("${T:?}/s3venv/bin/moto_server" -H 127.0.0.1 -p 9000 >"${T:?}/s3.log" 2>&1 &)
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:9000/ && break; sleep 1; done
           AWS_DEFAULT_REGION=us-east-1 aws --endpoint-url "$BACKUP_S3_ENDPOINT" s3api create-bucket --bucket "$BACKUP_S3_BUCKET" >/dev/null
           stamp=20991231T000000Z
           bash scripts/db-backup/store.sh put "${T:?}/backup.tar.age" "backups/$stamp/backup.tar.age"
@@ -108,7 +109,7 @@ jobs:
       - name: Clean up
         if: always()
         run: |
-          docker rm -f s3 >/dev/null 2>&1 || true
+          pkill -f moto_server || true
           if [ -n "${T:-}" ]; then
             bash scripts/db-backup/local-stack.sh down "${T:?}/target" || true
             rm -rf -- "${T:?}"

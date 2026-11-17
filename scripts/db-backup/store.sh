@@ -6,10 +6,10 @@
 source "$(dirname "$0")/common.sh"
 : "${BACKUP_S3_ENDPOINT:?}" "${BACKUP_S3_BUCKET:?}"
 export AWS_DEFAULT_REGION=auto AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
-s3() { aws --endpoint-url "$BACKUP_S3_ENDPOINT" --only-show-errors "$@"; }
+s3() { aws --endpoint-url "$BACKUP_S3_ENDPOINT" "$@"; }
 case "$1" in
-  put)  s3 s3 cp "$2" "s3://$BACKUP_S3_BUCKET/$3" ;;
-  get)  s3 s3 cp "s3://$BACKUP_S3_BUCKET/$2" "$3" ;;
+  put)  s3 s3 cp --only-show-errors "$2" "s3://$BACKUP_S3_BUCKET/$3" ;;
+  get)  s3 s3 cp --only-show-errors "s3://$BACKUP_S3_BUCKET/$2" "$3" ;;
   list) s3 s3api list-objects-v2 --bucket "$BACKUP_S3_BUCKET" --prefix backups/ --query 'Contents[].Key' --output text | tr '\t' '\n' | grep -v '^None$' || true ;;
   prune)
     # Keep the newest <keep> VERIFIED backups (never fewer than 7). Delete only folders older than the oldest one kept,
@@ -21,6 +21,6 @@ case "$1" in
     if (( count <= keep )); then echo "retention: $count verified backups kept, nothing to delete"; exit 0; fi
     oldest_kept=$(sed -n "${keep}p" <<<"$verified")
     old=$(cut -d/ -f2 <<<"$keys" | sort -u | awk -v k="$oldest_kept" '$0 < k')
-    for d in $old; do s3 s3 rm --recursive "s3://$BACKUP_S3_BUCKET/backups/$d/"; done
+    for d in $old; do s3 s3 rm --only-show-errors --recursive "s3://$BACKUP_S3_BUCKET/backups/$d/"; done
     echo "retention: kept the newest $keep verified backups; deleted $(grep -c . <<<"$old" || true) older folder(s)" ;;
 esac
