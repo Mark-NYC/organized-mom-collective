@@ -472,3 +472,23 @@ so no saved work or order was affected. Details and test evidence: `PRINTED_WORD
   November kit (same idea as the printable). Not urgent before autumn 2027.
 - The kit registry (`src/data/club/kits/`) has no November 2027 kit yet (production has the row, draft), so its mailer
   QR page `/club/kits/2027-11-family-ownership` isn't built. Add it with that mailer.
+
+## 16. What viewing, saving, printing and downloading write (existing behavior, documented 2026-11-18, unchanged)
+
+Read from the current definitions (`club_resource_save` in `20261108000000_club_welcome_kit.sql`, `club_resource_get`
+and `club_admin_fulfillment_bundle` in `20261104000000_club_membership.sql`) and confirmed in the Club journey:
+
+| Action | Writes |
+| --- | --- |
+| Opening a monthly resource for the first time | `club_resource_save` creates the household's saved version (revision 1) and, for that month's **pending or on-hold** monthly order only, sets `member_approved_at = null`, `pdf_status = 'not_ready'`, `updated_at = now()`. Status never changes. |
+| Opening it again (nothing changed) | The page writes back what it loaded; the function returns early ("the same state changes nothing, and keeps her approval"). No version, order or `updated_at` change (verified: same hash and revision). |
+| Editing | New revision; the version's `approved_at` and the pending/on-hold order's member approval are cleared, `updated_at` bumped (she approves again). |
+| Any save once the month's order is printed or mailed (or approved inside a Welcome Kit) | Refused (`already_printed`): historical orders and what printed can't change. |
+| Admin print view (`?fulfillment=`) | Nothing (`club_admin_fulfillment_bundle` only reads; verified: both November orders byte-identical before and after). |
+| Print / Save PDF / Download PNG | Nothing on the server; done in the browser. |
+| Viewing a retired tool's saved work (January `?earlier`) | Nothing for the retired key (it is never written back; verified byte-identical). |
+| Billing, subscriptions, entitlements | Never written by any of the above. |
+
+**Found, not changed (existing, outside this PR):** `club_resource_save` finds the household by owner only
+(`club_households.owner_user_id = auth.uid()`), so a second adult can open and print a monthly resource but their edits
+don't save ("no_household"). Fixing it is a database change: needs your go.
