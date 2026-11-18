@@ -41,6 +41,8 @@ export interface ClubResource {
 
 const RESOURCES: readonly ClubResource[] = [
   { slug: '2026-11-family-ownership', month: '2026-11', title: 'Our Family Ownership Plan', problem: 'Who owns which jobs, start to finish', component: 'november', preview: '/club/worksheet-generator' },
+  // November 2027: the same tool, its own edition (slug, saved versions, orders); the year comes from the month.
+  { slug: '2027-11-family-ownership', month: '2027-11', title: 'Our Family Ownership Plan', problem: 'Who owns which jobs, start to finish', component: 'november', preview: '/club/worksheet-generator' },
   { slug: '2026-12-christmas-mission', month: '2026-12', title: 'Your Christmas Mission', problem: 'A kindness mission the kids lead', component: 'december', preview: '/club/december-preview' },
   { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our Family Focus', problem: 'One shared focus, a habit or two and four Words of the Week', component: 'january', preview: '/app/club/january?sample=rivera',
     // The printed resource is the app tool /app/club/january (MeetingGuidePrintable: the family's two-page Family Meeting companion),

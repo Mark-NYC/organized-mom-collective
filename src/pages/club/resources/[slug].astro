@@ -47,7 +47,7 @@ const forwards = !KEEP.has(resource.slug) && forward !== `/club/resources/${reso
     <>
       <ClubResourceAccess client:only="react" slug={resource.slug} />
       <div id="club-month-content" hidden>
-        {c === 'november' && <NovemberOwnershipPrintable storageKey={key} />}
+        {c === 'november' && <NovemberOwnershipPrintable storageKey={key} kitMonth={resource.month} />}
         {c === 'december' && <DecemberMissionPrototype />}
         {c === 'january' && (
           <>

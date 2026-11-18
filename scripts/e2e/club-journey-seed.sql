@@ -89,3 +89,23 @@ select public.household_id_for('00000000-0000-0000-0000-0000000c1b03'), k.id,
     'omc:club:member:2027-01-fresh-start-together:v1', jsonb_build_object('s', 's', 'v', '{}')),
   1, 7
 from public.club_kits k where k.slug = '2027-01-fresh-start-together';
+
+-- November has two editions (owner, 2026-11-18): 2026 and 2027. The returning family holds both (digital and printed),
+-- each with a pending mailing, and an admin can open each mailing's print view. Test database only.
+update public.club_kits set status = 'scheduled', release_at = least(release_at, now()) where month = '2027-11-01';
+insert into auth.users (id, email, email_confirmed_at) values ('00000000-0000-0000-0000-0000000c1b0a', 'admin@e2e.test', now()) on conflict do nothing;
+insert into public.admin_users (user_id, role) values ('00000000-0000-0000-0000-0000000c1b0a', 'owner') on conflict do nothing;
+do $n$
+declare hid uuid := public.household_id_for('00000000-0000-0000-0000-0000000c1b03'); e uuid; m date;
+begin
+  insert into public.club_entitlements (user_id, household_id, resource_month, kind, membership_year, plan, source, note)
+  values ('00000000-0000-0000-0000-0000000c1b03', hid, '2027-11-01', 'digital', 2, 'admin', 'admin', 'e2e: November 2027');
+  foreach m in array array['2026-11-01'::date, '2027-11-01'::date] loop
+    insert into public.club_entitlements (user_id, household_id, resource_month, kind, membership_year, plan, source, note)
+    values ('00000000-0000-0000-0000-0000000c1b03', hid, m, 'physical', case when m = '2026-11-01' then 1 else 2 end, 'admin', 'admin', 'e2e: printed November')
+    returning id into e;
+    insert into public.club_fulfillment_orders (entitlement_id, user_id, household_id, resource_month, kit_id, status, cutoff_at, note)
+    select e, '00000000-0000-0000-0000-0000000c1b03', hid, m, k.id, 'pending', now() + interval '10 days', 'e2e November ' || extract(year from m)
+      from public.club_kits k where k.month = m;
+  end loop;
+end $n$;

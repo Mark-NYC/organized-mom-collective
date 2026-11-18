@@ -43,16 +43,19 @@ editor's footer ("Family Meeting Club · {theme}"). Every mailer is still a draf
 
 The kit slugs never change (entitlements, saved work and QR codes are keyed by them).
 
-## C. Found while reviewing: November's printable year
+## C. November's printable year: FIXED (owner approved a narrow fix, 2026-11-18)
 
 `src/components/club/NovemberOwnershipPrintable.astro` prints "FAMILY MEETING CLUB · NOVEMBER 2027" on all three
 headers and works out children's ages as of 2027. It is the November tool for both November 2026
 (`2026-11-family-ownership`, the current month) and November 2027. A November 2026 family would see 2027 and ages a
 year ahead. Nobody holds November 2026 in production today (read-only, 2026-11-18), so no printed copy is affected yet.
 
-**Proposed:** print the household's own kit month ("NOVEMBER 2026" / "NOVEMBER 2027") and work out ages for that month,
-the way the shared personalization foundation does for other months. Needs your approval because it changes a
-printable.
+**Done:** the page passes the kit's own month (`kitMonth`) and the printable prints "NOVEMBER 2026" or "NOVEMBER
+2027" and works out ages for that November, with the same age rule as before. November 2027 got its own member route
+(`/club/resources/2027-11-family-ownership`, its own saved version and orders). Tested separately for both editions:
+headers, age-dependent jobs (Mia, born May 2017: 9 → "Lay out tomorrow's clothes"; 10 → "Prepare my school and
+activity gear"), separate saved versions, the admin print view of each mailing, no order status changed. The public
+sample (`/club/worksheet-generator`) shows the registry's November edition (2026), not a fixed year.
 
 ## D. Not proposed
 

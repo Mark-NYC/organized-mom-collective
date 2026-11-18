@@ -16,10 +16,12 @@ describe('monthly names', () => {
   it('Club Home carries no month names of its own', () => {
     expect(copy).not.toMatch(/"title"\s*:/);
   });
-  it('the resource registry names each calendar month exactly once', () => {
+  it('the resource registry covers every calendar month, each edition once (November has 2026 and 2027)', () => {
     const months = clubResources.map((r) => Number(r.month.slice(5, 7)));
     expect([...new Set(months)].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-    expect(months.length).toBe(12);
+    expect(new Set(clubResources.map((r) => r.slug)).size).toBe(clubResources.length);
+    expect(new Set(clubResources.map((r) => r.month)).size).toBe(clubResources.length);
+    expect(clubResources.filter((r) => r.month.endsWith('-11')).map((r) => r.month)).toEqual(['2026-11', '2027-11']);
   });
   it('keeps the owner-approved January and September', () => {
     const by = (m: string) => clubResources.find((r) => r.month === m)!;
@@ -31,8 +33,21 @@ describe('monthly names', () => {
   it('every month but November opens on its app page', () => {
     for (const r of clubResources) {
       const href = memberPlanHref(r.slug);
-      if (r.month === "2026-11") expect(href).toBe(`/club/resources/${r.slug}`);
+      if (r.month.endsWith('-11')) expect(href).toBe(`/club/resources/${r.slug}`);
       else expect(href).toMatch(/^\/app\/club\/[a-z]+$/);
     }
+  });
+});
+
+describe('November prints its own year', () => {
+  const src = readFileSync('src/components/club/NovemberOwnershipPrintable.astro', 'utf8');
+  it('no fixed year in the headers or the age rule', () => {
+    expect(src).not.toMatch(/NOVEMBER 20\d\d/);
+    expect(src).not.toMatch(/Math\.max\(2,20\d\d-/);
+    expect(src).toMatch(/NOVEMBER \{kitYear\}/);
+  });
+  it('every page passes the kit period', () => {
+    expect(readFileSync('src/pages/club/resources/[slug].astro', 'utf8')).toMatch(/kitMonth=\{resource\.month\}/);
+    expect(readFileSync('src/pages/club/worksheet-generator.astro', 'utf8')).toMatch(/kitMonth=\{sampleNovember\}/);
   });
 });

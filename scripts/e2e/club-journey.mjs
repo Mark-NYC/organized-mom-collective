@@ -261,6 +261,57 @@ for (const person of PEOPLE) {
   await ctx.close();
 }
 
+// November has two editions (owner, 2026-11-18). Each prints its own year and works out ages for its own November:
+// Mia (born May 2017) is 9 in November 2026 and 10 in November 2027, so her prepared job differs. Saved versions stay
+// per edition; an admin's print view of each mailing shows that edition; viewing changes no order.
+{
+  const who = 'november editions';
+  const NOV = { '2026': '2026-11-family-ownership', '2027': '2027-11-family-ownership' };
+  const JOB = { '2026': "Lay out tomorrow's clothes", '2027': 'Prepare my school and activity gear' };
+  for (const [y, slug] of Object.entries(NOV)) {
+    const html = readFileSync(join(ROOT, 'club/resources', slug, 'index.html'), 'utf8');
+    const other = y === '2026' ? '2027' : '2026';
+    check(who, `${y}: every printed header says NOVEMBER ${y} (static page)`, (html.match(new RegExp(`FAMILY MEETING CLUB · NOVEMBER ${y}`, 'g')) ?? []).length === 3 && !html.includes(`NOVEMBER ${other}`));
+  }
+  const version = (slug) => sql(`select coalesce(md5(v.state::text) || ':' || v.revision, 'none') from public.club_kits k left join public.club_resource_versions v on v.kit_id = k.id and v.household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03') where k.slug = '${slug}'`);
+  const orders = () => sql(`select string_agg(to_char(resource_month,'YYYY-MM') || ' ' || status || ' ' || updated_at::text, ', ' order by resource_month) from public.club_fulfillment_orders where note like 'e2e November%'`);
+  const statuses = () => sql(`select string_agg(to_char(resource_month,'YYYY-MM') || ' ' || status, ', ' order by resource_month) from public.club_fulfillment_orders where note like 'e2e November%'`);
+  const statusBefore = await statuses();
+  const ordersBefore = await orders();
+  const { ctx, page } = await session('active@e2e.test', 1280);
+  const seen = {};
+  for (const [y, slug] of Object.entries(NOV)) {
+    await page.goto(`${base}/club/resources/${slug}`, { waitUntil: 'load' }); await settle(page, 6000);
+    const text = await page.locator('.nvp').innerText().catch(() => '');
+    seen[y] = await version(slug);
+    check(who, `${y}: Mia's prepared job is the one for her age that November (${JOB[y]})`, text.includes(JOB[y]) && !text.includes(JOB[y === '2026' ? '2027' : '2026']) && text.includes(`NOVEMBER ${y}`));
+    check(who, `${y}: inside the app with the Club bar`, inApp(await chrome(page)) && (await chrome(page)).clubBar);
+    await shot(page, `november-${y}`);
+  }
+  check(who, `each edition keeps its own saved version (${seen['2026'].split(':')[1] ?? '–'} / ${seen['2027'].split(':')[1] ?? '–'})`, seen['2026'] !== seen['2027']);
+  await page.goto(`${base}/club/resources/${NOV['2026']}`, { waitUntil: 'load' }); await settle(page, 6000);
+  check(who, '2026 again after opening 2027: its saved version and its job are unchanged', (await version(NOV['2026'])) === seen['2026'] && (await page.locator('.nvp').innerText()).includes(JOB['2026']));
+  await ctx.close();
+  // (A member's first save of a month resets that month's PENDING order to "not approved by her yet": the existing
+  // rule in club_resource_save. Printed and mailed orders are never touched by it.)
+  const ordersBeforeAdmin = await orders();
+  // An admin's print view of each mailing (bare, the household's own edition).
+  const admin = await session('admin@e2e.test', 1280);
+  const tok = await admin.page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')));
+  await admin.page.evaluate((t) => { sessionStorage.setItem('omc:v1:admin', JSON.stringify({ access_token: t.access_token, refresh_token: t.refresh_token ?? '', expires_at: Date.now() + 3600e3, email: 'admin@e2e.test' })); sessionStorage.setItem('omc:v1:admin:active', String(Date.now())); }, tok);
+  for (const [y, slug] of Object.entries(NOV)) {
+    const id = await sql(`select id from public.club_fulfillment_orders where note = 'e2e November ${y}'`);
+    await admin.page.goto(`${base}/club/resources/${slug}?fulfillment=${id}`, { waitUntil: 'load' }); await settle(admin.page, 6000);
+    const c = await chrome(admin.page);
+    const text = await admin.page.locator('.nvp').innerText().catch(() => '');
+    check(who, `${y}: the mailing's print view is bare and prints NOVEMBER ${y} with the right job`, !c.header && c.tabs.length === 0 && !c.clubBar && text.includes(`NOVEMBER ${y}`) && text.includes(JOB[y]), `${JSON.stringify(c).slice(0, 80)} ${text.slice(0, 60)}`);
+    await shot(admin.page, `november-${y}-fulfillment`);
+  }
+  await admin.ctx.close();
+  check(who, 'the print views change nothing on either order', (await orders()) === ordersBeforeAdmin, ordersBeforeAdmin);
+  check(who, 'no order status changed by any of this', (await statuses()) === statusBefore, statusBefore);
+}
+
 // Every monthly page (the source of truth for its month) opens inside the app: header, four tabs, Club bar, and
 // Club Home's year strip calls each month what its page calls it (src/data/club/month-pages.ts).
 {

@@ -5,7 +5,11 @@
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import ClubPrototypeNav from '../../components/club/ClubPrototypeNav';
 import NovemberOwnershipPrintable from '../../components/club/NovemberOwnershipPrintable.astro';
+import { kits } from '../../data/club/kits';
 import NovemberActivityCalendar from '../../components/club/NovemberActivityCalendar.astro';
+// The public sample shows the Club's current November edition (src/data/club/kits): no fixed year.
+const sampleNovember = kits.filter((k) => k.month.endsWith('-11')).map((k) => k.month).sort()[0];
+if (!sampleNovember) throw new Error('no November kit in the registry');
 ---
 <PublicLayout fullTitle="November Family Activity Guide | Family Meeting Club" description="November Club family activity preview." indexable={false} chrome={false} width="full" tracking={false}>
  <ClubPrototypeNav client:only="react" month="november" />
@@ -15,7 +19,7 @@ import NovemberActivityCalendar from '../../components/club/NovemberActivityCale
    <button type="button" id="nov-tab-plan" role="tab" aria-selected="false" aria-controls="nov-panel-plan" tabindex="-1">Ownership plan <span>EARLIER VERSION</span></button>
   </div>
   <section id="nov-panel-activities" role="tabpanel" aria-labelledby="nov-tab-activities"><NovemberActivityCalendar /></section>
-  <section id="nov-panel-plan" role="tabpanel" aria-labelledby="nov-tab-plan" hidden><NovemberOwnershipPrintable /></section>
+  <section id="nov-panel-plan" role="tabpanel" aria-labelledby="nov-tab-plan" hidden><NovemberOwnershipPrintable kitMonth={sampleNovember} /></section>
  </main>
 </PublicLayout>
 <style is:global>
