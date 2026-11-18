@@ -18,6 +18,9 @@ import { loadMembership } from '../lib/club/membership';
 import { accountStore } from '../lib/club/store';
 import { routes } from '../routes';
 import HouseholdSharing from './household/HouseholdSharing';
+import { Avatar, Chevron } from './app/ui';
+import type { MarkerColor } from '../data/club/family-colors';
+import { memberColors } from '../data/club/family-colors';
 
 import { householdAccess, type HouseholdAccess } from '../lib/household/api';
 
@@ -55,25 +58,28 @@ export default function FamilySummary() {
   if (state === 'member') {
     return (
       <>
-        <section className="family-panel mt-6" data-account-family="member">
-          <p className="label">YOUR FAMILY</p>
-          <h2 className="family-panel-title mt-4">{household?.displayName ?? 'Your family'}</h2>
-          {household ? <Members household={household} month={month} /> : <p className="mt-3 text-sm text-warm-soft">You haven’t added your family yet.</p>}
-          <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
-            <a href="/app/family/setup" className="family-link">{household ? 'Edit our family →' : 'Add your family →'}</a>
+        <p className="of-group-title">Household</p>
+        <section className="of-tile" data-account-family="member">
+          <div className="of-tile-head">
+            <div className="min-w-0"><p className="of-eyebrow">Your family</p><h2 className="of-tile-title">{household?.displayName ?? 'Your family'}</h2></div>
+            <a href="/app/family/setup" className="of-tile-action">{household ? 'Edit' : 'Add'} <Chevron /></a>
           </div>
+          {household ? <Members household={household} month={month} /> : <p className="mt-3 text-sm text-warm-soft">You haven’t added your family yet.</p>}
         </section>
         {household && family.access && <HouseholdSharing household={household} access={family.access} />}
         {(family.club || family.billing) && (
-          <section className="family-panel mt-5" data-account-club>
-            <p className="label text-[#71866c]">FAMILY MEETING CLUB</p>
-            <h2 className="family-panel-title mt-3">Your household’s membership</h2>
-            <p className="mt-2 text-sm leading-relaxed text-warm-soft">Your monthly Family Focus and kits, for both grown-ups.</p>
-            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-              {family.club && <a href={routes.appClub} className="family-link">Club Home →</a>}
-              {family.billing && <a href={routes.clubDashboard} className="family-link">Account &amp; Billing →</a>}
+          <>
+          <p className="of-group-title">Membership</p>
+          <section className="of-tile of-tile--month" data-account-club>
+            <p className="of-eyebrow">Family Meeting Club</p>
+            <h2 className="of-tile-title">Your household’s membership</h2>
+            <p className="of-tile-sub">Your monthly Family Focus and kits, for both grown-ups.</p>
+            <div className="mt-3 flex flex-wrap gap-x-6">
+              {family.club && <a href={routes.appClub} className="of-tile-action">Club Home <Chevron /></a>}
+              {family.billing && <a href={routes.clubDashboard} className="of-tile-action">Account &amp; Billing <Chevron /></a>}
             </div>
           </section>
+          </>
         )}
         {<OurWeekSignedIn email={email} role={family.access?.myRole ?? 'owner'} shared={(family.access?.adults.length ?? 1) > 1} />}
       </>
@@ -84,9 +90,9 @@ export default function FamilySummary() {
       <>
         <div className="family-note mt-8" data-account-family="demo"><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm leading-relaxed">You opened the demo (<code>?demo=1</code>). The people below are made up, to show how a family's details look. <a href={routes.appAccount} className="underline">Leave the demo</a>.</p></div>
         {household ? (
-          <section className="family-panel mt-6">
-            <p className="label">DEMO FAMILY</p>
-            <h2 className="family-panel-title mt-4">{household.displayName ?? 'Our family'}</h2>
+          <section className="of-tile mt-6">
+            <p className="of-eyebrow">Demo family</p>
+            <h2 className="of-tile-title">{household.displayName ?? 'Our family'}</h2>
             <Members household={household} month={month} />
           </section>
         ) : <p className="mt-6 text-warm-soft">Demo family unavailable.</p>}
@@ -102,13 +108,13 @@ export default function FamilySummary() {
   const c = copy[state];
   return (
     <>
-    <section className="family-panel mt-8" data-account-family={state}>
-      <p className="label">YOUR FAMILY</p>
-      <h2 className="family-panel-title mt-4">{c.title}</h2>
-      <p className="mt-2 text-sm leading-relaxed text-warm-soft">{c.body}</p>
+    <section className="of-tile mt-6" data-account-family={state}>
+      <p className="of-eyebrow">Your family</p>
+      <h2 className="of-tile-title">{c.title}</h2>
+      <p className="of-tile-sub">{c.body}</p>
       {/* Sign-in and setup never go through the Club's paid onboarding. */}
-      {c.signIn && <a href="/app/sign-in?next=/app/account" className="family-action mt-6">Sign in</a>}
-      {c.setup && <a href="/app/family/setup" className="family-action mt-6">Set up our family</a>}
+      {c.signIn && <a href="/app/sign-in?next=/app/account" className="of-btn mt-5">Sign in</a>}
+      {c.setup && <a href="/app/family/setup" className="of-btn mt-5">Set up our family</a>}
     </section>
     {state === 'not-member' && <OurWeekSignedIn email={email} role="owner" shared={false} />}
     </>
@@ -127,11 +133,12 @@ type Family = {
 };
 
 function Members({ household, month }: { household: Household; month: string }) {
+  const colors: Record<string, MarkerColor> = memberColors(household);
   return (
-    <ul className="mt-5 divide-y divide-warm-rule">
+    <ul className="of-rows">
       {household.members.filter((m) => !m.archived).map((m) => (
-        <li key={m.id} className="flex min-h-14 items-center justify-between gap-3 py-3">
-          <span className="font-semibold">{m.firstName}</span>
+        <li key={m.id} className="of-row justify-between">
+          <span className="flex items-center gap-3"><Avatar name={m.firstName} color={colors[m.id]} size="sm" /><span className="font-semibold">{m.firstName}</span></span>
           <span className="text-sm text-warm-soft">{m.kind === 'child' && m.birthYear ? `Child · ${ageInMonth(m.birthYear, m.birthMonth, month)} years` : m.kind === 'child' ? 'Child' : 'Adult'}</span>
         </li>
       ))}
@@ -169,29 +176,31 @@ function OurWeekSignedIn({ email, role, shared }: { email: string; role: 'owner'
     }
   };
   return (
-    <section className="family-panel mt-5" data-account-signin aria-labelledby="acct-signin-h">
-      <p className="label">SIGN-IN</p>
-      <h2 id="acct-signin-h" className="family-panel-title mt-3">Signed in{email ? ` as ${email}` : ''}</h2>
-      <p className="mt-2 text-sm text-warm-soft">{role === 'partner' ? 'You share this family with the grown-up who set it up.' : shared ? 'You set up this family and share it with one other grown-up.' : 'You set up this family.'}</p>
-      <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
-        <button type="button" className="family-link" onClick={async () => { await signOut(); location.replace('/app'); }} data-sign-out>Sign out</button>
-        <button type="button" className="family-link text-warm-soft" data-sign-out-everywhere onClick={async () => {
+    <>
+    <p className="of-group-title">Sign-in</p>
+    <section className="of-tile" data-account-signin aria-labelledby="acct-signin-h">
+      <h2 id="acct-signin-h" className="of-tile-title !mt-0 break-words">Signed in{email ? ` as ${email}` : ''}</h2>
+      <p className="of-tile-sub">{role === 'partner' ? 'You share this family with the grown-up who set it up.' : shared ? 'You set up this family and share it with one other grown-up.' : 'You set up this family.'}</p>
+      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+        <button type="button" className="of-btn of-btn--soft" onClick={async () => { await signOut(); location.replace('/app'); }} data-sign-out>Sign out</button>
+        <button type="button" className="of-btn of-btn--soft" data-sign-out-everywhere onClick={async () => {
           if (!confirm('Sign out on every phone, tablet and computer where you’re signed in? Use this if a device is lost or shared. Other devices can take up to an hour to sign out.')) return;
           try { await signOutEverywhere(); location.replace('/app'); } catch { alert('We couldn’t sign you out everywhere just now. You’re still signed in here. Check your connection and try again.'); }
         }}>Sign out everywhere</button>
-        {step === 'idle' && <button type="button" className="family-link text-warm-soft" onClick={() => setStep('confirm')} data-delete-account>Delete my account</button>}
+        {step === 'idle' && <button type="button" className="of-btn of-btn--danger sm:col-span-2" onClick={() => setStep('confirm')} data-delete-account>Delete my account</button>}
       </div>
       {step !== 'idle' && (
         <div className="family-note mt-5" role="group" aria-label="Delete your account" data-delete-confirm>
           <p className="text-sm font-semibold">Delete your Organized Family account?</p>
           <p className="mt-1 text-sm leading-relaxed">{what} Cleaning progress saved on this {web ? 'device stays on this device' : 'phone stays on this phone'}.</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <button type="button" className="family-action" disabled={step === 'busy'} onClick={() => void remove()} data-delete-confirm-yes>{step === 'busy' ? 'Deleting…' : 'Delete my account'}</button>
-            <button type="button" className="family-link" disabled={step === 'busy'} onClick={() => { setStep('idle'); setMsg(''); }}>Keep my account</button>
+            <button type="button" className="of-btn of-btn--danger" disabled={step === 'busy'} onClick={() => void remove()} data-delete-confirm-yes>{step === 'busy' ? 'Deleting…' : 'Delete my account'}</button>
+            <button type="button" className="of-btn of-btn--soft" disabled={step === 'busy'} onClick={() => { setStep('idle'); setMsg(''); }}>Keep my account</button>
           </div>
           {msg && <p role="alert" className="mt-3 text-sm">{msg} {web && msg.includes('Account & Billing') && <><a href={routes.clubDashboard} className="underline">Account &amp; Billing →</a> </>}{/contact us/i.test(msg) && <a href="/support" className="underline">Contact support →</a>}</p>}
         </div>
       )}
     </section>
+    </>
   );
 }

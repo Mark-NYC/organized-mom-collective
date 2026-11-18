@@ -39,3 +39,118 @@
 /* New / Changed on the family calendar, for the week before the Family Meeting (src/lib/family-meeting-support.ts). */
 .cal-change{display:inline-flex;align-items:center;flex-shrink:0;padding:1px 7px;border-radius:999px;background:#eaf2eb;color:#315d49;font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;line-height:1.6}
 .cal-change[data-change="changed"]{background:#f6ecd9;color:#6b4f1d}
+
+/* ===================================================================================================================
+   Organized Family design system (docs/ios/APP_DESIGN_SYSTEM.md). One stylesheet for the website's /app and the iPhone
+   app. Base interface is the same all year; the month's approved calendar color (src/theme.ts, via monthTints) only
+   tints month tiles, highlights and progress (--of-month*, set per device in AppLayout). Family member colors are
+   separate and never come from the month.
+   =================================================================================================================== */
+:root{
+  --of-bg:#fbf7f1;            /* warm ivory */
+  --of-surface:#fffefc;
+  --of-ink:#4d4544;           /* warm charcoal: 8.7:1 on ivory */
+  --of-soft:#6e6461;          /* 5.4:1 */
+  --of-rule:#e8e0d6;
+  --of-rule-strong:#d9cfc3;
+  --of-sage:#e3eadf;          /* permanent brand tint (cleaning, success) */
+  --of-sage-ink:#4c6648;      /* 5.2:1 on --of-sage */
+  --of-sage-bar:#8fa686;
+  --of-shadow:0 1px 2px rgba(60,55,50,.05),0 8px 24px -12px rgba(60,55,50,.12);
+  --of-radius:10px;
+  --of-month:#cddde1;         /* replaced on the device with this month's color */
+  --of-month-wash:#e6edee;
+  --of-month-accent:#3d6470;
+}
+.of-page{max-width:72rem;margin-inline:auto}
+.of-eyebrow{font-family:var(--font-sans);font-size:.68rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--of-soft)}
+.of-page-title{font-family:var(--font-serif);font-weight:400;font-size:clamp(2.05rem,6vw,2.9rem);line-height:1.08;letter-spacing:-.015em;color:var(--of-ink);text-wrap:balance}
+.of-page-title em{font-style:italic;color:var(--of-sage-ink)}
+.of-page-lede{margin-top:.6rem;font-size:.98rem;line-height:1.6;color:var(--of-soft);max-width:38rem}
+
+/* Tiles */
+.of-tile{position:relative;display:block;min-width:0;background:var(--of-surface);border:1px solid var(--of-rule);border-radius:var(--of-radius);box-shadow:var(--of-shadow);padding:20px;color:var(--of-ink)}
+@media(min-width:640px){.of-tile{padding:24px}}
+a.of-tile,button.of-tile{text-align:left;transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}
+a.of-tile:hover,button.of-tile:hover{border-color:var(--of-rule-strong);box-shadow:0 1px 2px rgba(60,55,50,.06),0 14px 30px -14px rgba(60,55,50,.2)}
+a.of-tile:active,button.of-tile:active{transform:translateY(1px)}
+.of-tile--sage{background:var(--of-sage);border-color:transparent}
+.of-tile--month{background:var(--of-month-wash);border-color:transparent}
+.of-tile--month .of-eyebrow{color:var(--of-month-accent)}
+.of-tile--sage .of-eyebrow{color:var(--of-sage-ink)}
+.of-tile--quiet{background:transparent;box-shadow:none}
+.of-tile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.of-tile-title{font-family:var(--font-serif);font-weight:400;font-size:1.42rem;line-height:1.18;color:var(--of-ink);margin-top:.35rem;text-wrap:balance}
+.of-tile-title--lg{font-size:clamp(1.55rem,4vw,1.9rem)}
+.of-tile-sub{margin-top:.3rem;font-size:.9rem;line-height:1.55;color:var(--of-soft)}
+.of-tile-action{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--of-ink);text-decoration:none}
+.of-tile-action:hover{text-decoration:underline;text-underline-offset:5px}
+.of-chevron{flex-shrink:0;color:var(--of-soft)}
+.of-grid{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:768px){.of-grid--2{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.of-span-2{grid-column:span 2}}
+@media(min-width:1100px){.of-grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}.of-grid--dash{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}}
+
+/* Event and list rows */
+.of-rows{margin-top:12px;border-top:1px solid var(--of-rule)}
+.of-row{display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 0;border-bottom:1px solid var(--of-rule)}
+.of-row:last-child{border-bottom:0}
+.of-time{flex-shrink:0;width:4.6rem;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--of-soft);font-variant-numeric:tabular-nums}
+.of-swatch{flex-shrink:0;width:4px;align-self:stretch;border-radius:2px}
+.of-row-title{font-weight:600;line-height:1.35}
+.of-row-meta{display:block;font-size:.8rem;color:var(--of-soft);margin-top:1px}
+
+/* Member avatars and chips: the family member's permanent color, never the month's */
+.of-avatar{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:40px;height:40px;border-radius:8px;font-family:var(--font-serif);font-size:1.15rem;line-height:1}
+.of-avatar--sm{width:28px;height:28px;border-radius:6px;font-size:.85rem}
+.of-chip{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:2px 10px 2px 4px;border-radius:999px;background:var(--of-surface);border:1px solid var(--of-rule);font-size:.8rem;font-weight:600}
+.of-dot{display:inline-block;width:9px;height:9px;border-radius:999px;flex-shrink:0}
+
+/* Progress: one quiet bar, filled in sage (brand) or the month color */
+.of-progress{display:flex;gap:4px;height:8px}
+.of-progress > span{flex:1;border-radius:3px;background:rgba(255,255,255,.75)}
+.of-tile:not(.of-tile--sage):not(.of-tile--month) .of-progress > span{background:#efe9e1}
+.of-progress > span[data-on]{background:var(--of-sage-bar)}
+.of-tile--month .of-progress > span[data-on]{background:var(--of-month-accent)}
+.of-stat{display:inline-flex;align-items:center;justify-content:center;min-width:3.6rem;height:2.6rem;padding:0 .7rem;border-radius:8px;background:rgba(255,255,255,.8);font-family:var(--font-serif);font-size:1.3rem;font-variant-numeric:tabular-nums}
+
+/* Segmented control */
+.of-seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;padding:3px;border:1px solid var(--of-rule);border-radius:9px;background:var(--of-surface)}
+.of-seg > button,.of-seg > a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 14px;border-radius:7px;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--of-soft);text-decoration:none;white-space:nowrap}
+.of-seg > [aria-pressed="true"],.of-seg > [aria-current="page"]{background:var(--of-month-wash);color:var(--of-ink)}
+
+/* Buttons */
+.of-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:0 20px;border-radius:8px;font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;border:1px solid transparent;background:var(--color-warm-button,#4a3f3e);color:#fff;transition:background .15s ease}
+.of-btn:hover{background:#3a302f}
+.of-btn--soft{background:var(--of-surface);color:var(--of-ink);border-color:var(--of-rule-strong)}
+.of-btn--soft:hover{background:#f6f2ec}
+.of-btn--danger{background:#f7e6e6;color:#8a2b2b;border-color:#ecd0d0}
+.of-btn--danger:hover{background:#f2d9d9}
+.of-btn--block{width:100%}
+.of-btn:disabled{opacity:.6}
+
+/* Grouped settings-style lists */
+.of-group-title{margin:26px 0 8px;font-size:.7rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--of-soft)}
+.of-list{background:var(--of-surface);border:1px solid var(--of-rule);border-radius:var(--of-radius);box-shadow:var(--of-shadow);overflow:hidden}
+.of-list > * + *{border-top:1px solid var(--of-rule)}
+.of-list-item{display:flex;align-items:center;gap:14px;min-height:56px;padding:12px 18px;color:var(--of-ink);text-decoration:none}
+a.of-list-item:hover{background:#faf6f0}
+.of-icon-box{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;height:36px;border-radius:8px;background:var(--of-month-wash);color:var(--of-ink)}
+.of-icon-box--sage{background:var(--of-sage)}
+
+/* Focus rings stay visible on every control */
+.family-brand :is(a,button,select,input,summary):focus-visible{outline:2px solid var(--of-month-accent);outline-offset:2px}
+
+/* Today dashboard: one column on phones (tiles in --of-order), two columns on wide screens */
+.of-dash{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.of-dash-col{display:contents}
+.of-dash-col > *{order:var(--of-order,0)}
+.of-span-all{grid-column:1/-1}
+@media(min-width:900px){
+  .of-dash{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+  .of-dash-col{display:flex;flex-direction:column;gap:18px}
+  .of-dash-col > *{order:0}
+}
+/* The cleaning companion's muted text keeps AA contrast on the sage tile (its own pages are unchanged). */
+.of-tile--sage .text-muted{color:#5c5754}
+/* Soft text on a month tile: a touch darker so every month's tint keeps AA (October's is the warmest). */
+.of-tile--month :is(.of-tile-sub,.text-warm-soft){color:#5f5754}

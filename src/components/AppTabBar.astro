@@ -9,6 +9,8 @@
  * "Calendar" tab is the reorder page, which stays on the website).
  */
 import { calendarPath } from '../lib/companion';
+import { Icon } from './app/ui';
+import { PRIMARY_TABS } from '../data/app/tabs';
 
 interface Props {
   /** Render in ClubLayout: Club pages count as the Club tab, and the bar needs room reserved below the page. */
@@ -23,14 +25,7 @@ const items = calendar ? [
   { href: '/app/calendar/week', label: 'Week', glyph: '▦' },
   { href: '/app/calendar/reorder', label: 'Calendar', glyph: '⌂' },
   { href: '/app/calendar/settings', label: 'Settings', glyph: '◯' },
-] : [
-  // One unified family system, on the website and in the app. Calendar is free (src/data/app/features.ts).
-  { href: '/app', label: 'Today', glyph: '⌂' },
-  { href: '/app/family-calendar', label: 'Calendar', glyph: '▤' },
-  { href: '/app/cleaning', label: 'Cleaning', glyph: '✓' },
-  // Family: Our Family Meeting, Family Responsibilities and the Family Meeting Club (src/pages/app/family/index.astro).
-  { href: '/app/family', label: 'Family', glyph: '▦' },
-];
+] : PRIMARY_TABS;
 const active = (href: string) => {
   if (href === '/app') return path === '/app';
   if (href === '/app/club' && (club || path.startsWith('/club/'))) return true;
@@ -46,12 +41,13 @@ const active = (href: string) => {
   aria-label="App navigation"
   class:list={[
     'fixed inset-x-0 bottom-0 z-40 border-t border-warm-rule bg-ivory/95 shadow-[0_-8px_25px_rgba(67,65,55,0.05)] backdrop-blur-md pb-[env(safe-area-inset-bottom)]',
-    calendar ? 'sm:hidden' : 'print:hidden',
+    // Wide screens get the tabs in the header (Nav.astro), except on the app's Club pages, whose header is the Club's.
+    calendar ? 'sm:hidden' : club ? 'print:hidden' : 'print:hidden lg:hidden',
   ]}
 >
   <ul class:list={['grid grid-flow-col auto-cols-fr', !calendar && 'mx-auto max-w-xl']}>
-    {items.map(item => <li><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['flex min-h-[64px] flex-col items-center justify-center gap-1 px-1 text-[0.65rem] font-semibold tracking-wide transition-colors', active(item.href) ? 'text-[#536e4e]' : 'text-warm-soft']}>
-      <span aria-hidden="true" class:list={['flex h-7 w-10 items-center justify-center rounded-full text-[1.4rem] leading-none',active(item.href) ? 'bg-sage-wash' : '']}>{item.glyph}</span><span>{item.label}</span>
+    {items.map(item => <li><a href={item.href} aria-current={active(item.href) ? 'page' : undefined} class:list={['flex min-h-[64px] flex-col items-center justify-center gap-1 px-1 text-[0.65rem] font-semibold tracking-wide transition-colors', active(item.href) ? 'text-warm-ink' : 'text-warm-soft']}>
+      <span aria-hidden="true" class:list={['flex h-8 w-12 items-center justify-center rounded-[9px] text-[1.4rem] leading-none', active(item.href) ? 'bg-[var(--of-month-wash)] text-warm-ink' : '']}>{'icon' in item ? <Icon name={item.icon} size={22} /> : item.glyph}</span><span>{item.label}</span>
     </a></li>)}
   </ul>
 </nav>

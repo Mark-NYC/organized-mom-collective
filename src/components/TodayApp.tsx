@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { thisDevice } from '../lib/native/platform';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { appShellBuild, thisDevice } from '../lib/native/platform';
 import type { ReactNode } from 'react';
 import { dailyEssentials, weekend } from '../data/cleaning';
 import type { MonthlyFocus, WeekdayFocus, WeekendDay } from '../data/cleaning';
@@ -10,6 +10,7 @@ import { takeSourceParam } from '../lib/entry';
 import { creditMonthly, isOnboarded, keys, pruneOld, setEntrySource, setOnboarded, uncreditMonthly } from '../lib/storage';
 import { progressLine, weekActivity } from '../lib/progress';
 import { ProgressRing, WeekDots } from './Progress';
+import { Progress } from './app/ui';
 import InstallInvite from './InstallInvite';
 import { currentPlatform, isStandalone, restoreHandoff, saveHandoff, shouldOfferInstall } from '../lib/install';
 import { cleaningRoutes } from '../lib/companion';
@@ -18,7 +19,14 @@ import Onboarding from './Onboarding';
 import { Tally, TaskList } from './TaskList';
 import { monthColor } from '../theme';
 
-export default function TodayApp() {
+/**
+ * `variant="app"`: Organized Family's Cleaning tab (/app/cleaning, website and iPhone app; docs/ios/APP_DESIGN_SYSTEM.md).
+ * The same routines, checklists, progress and storage, presented as tiles with this week's rhythm. Without it (the
+ * printed calendar's QR pages, /app/calendar…) everything renders exactly as before.
+ */
+const AppVariant = createContext(false);
+
+export default function TodayApp({ variant }: { variant?: 'app' } = {}) {
   // ?setup=1 reopens the family-meeting walkthrough without resetting cleaning progress.
   // Fresh QR visitors still see it automatically on their first visit.
   const [forceSetup] = useState(() =>
@@ -65,10 +73,11 @@ export default function TodayApp() {
 
   if (!ready) return null;
   if (!onboarded) return <Onboarding onDone={finish} />;
-  return <Today justStarted={justStarted} />;
+  return <AppVariant.Provider value={variant === 'app'}><Today justStarted={justStarted} /></AppVariant.Provider>;
 }
 
 function Today({ justStarted }: { justStarted: boolean }) {
+  const app = useContext(AppVariant);
   const today = useToday();
   const todayKey = dateKey(today);
 
@@ -140,6 +149,8 @@ function Today({ justStarted }: { justStarted: boolean }) {
   const nextDaily = !viewing && dailyEssentials.tasks.some((t) => t.id === next) ? next : undefined;
   const nextZone = zoneTasks.some((t) => t.id === next) ? next : undefined;
 
+  // The Cleaning tab's page title is its h1; the companion's own pages keep the date as theirs.
+  const DayHeading = app ? 'h2' : 'h1';
   const weekday = shown.toLocaleDateString('en-US', { weekday: 'long' });
   const dayNum = String(shown.getDate()).padStart(2, '0');
   const monthYear = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -193,14 +204,37 @@ function Today({ justStarted }: { justStarted: boolean }) {
         </div>
       )}
 
+      {app && !viewing && <WeekRhythm today={today} />}
+      {app ? (
+      <header className="of-tile of-tile--sage mt-4" data-cleaning-today>
+        <div className="of-tile-head">
+          <div className="min-w-0">
+            <p className="of-eyebrow">{viewing ? `Viewing · ${longDate}` : `Today’s reset · ${longDate}`}</p>
+            <DayHeading aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`} className="of-tile-title">{viewing ? `${weekday}’s cleaning` : 'Today’s cleaning'}</DayHeading>
+            <p className="of-tile-sub tabular-nums">{`${routineDone} of ${routine} tasks complete`}</p>
+          </div>
+          {routine > 0 && <span className="of-stat" aria-hidden="true">{Math.round((routineDone / Math.max(routine, 1)) * 100)}%</span>}
+        </div>
+        {routine > 0 && <div className="mt-4"><Progress done={routineDone} total={routine} label={complete ? 'Today’s routine is done' : `${routineDone} of ${routine} tasks done today`} /></div>}
+        {!viewing && (
+          <a href={plan.kind === 'weekday' ? '#focus' : '#weekend'} aria-label={`Today’s zone: ${zoneLabel}. Jump to its tasks`} className="mt-3 flex min-h-11 flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span className="label text-muted">Today’s zone</span>
+            <ZoneTag icon={zoneIcon} label={zoneLabel} size="sm" />
+          </a>
+        )}
+        <p aria-live="polite" className="mt-1 min-h-[1.4em] text-[0.92rem] leading-snug tabular-nums">
+          <span key={line} className={`line-in block ${complete && !viewing ? 'font-semibold text-ink' : 'text-muted'}`}>{line}</span>
+        </p>
+      </header>
+      ) : (
       <header className="border-l-[3px] border-month pl-3.5">
         <div className="flex items-start justify-between gap-3">
-          <h1 aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`} className="min-w-0">
+          <DayHeading aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`} className="min-w-0">
             <span className="block text-[1.5rem] leading-tight font-bold tracking-[0.09em] whitespace-nowrap uppercase min-[400px]:tracking-[0.12em] sm:text-[1.75rem]">
               {weekday} {dayNum}
             </span>
             <span className="month-title mt-1 block text-[1.15rem] leading-none">{monthYear}</span>
-          </h1>
+          </DayHeading>
           {routine > 0 && (
             <div className="-mt-0.5 flex shrink-0 flex-col items-center gap-2">
               <ProgressRing done={routineDone} total={routine} bloom={bloom} />
@@ -224,8 +258,9 @@ function Today({ justStarted }: { justStarted: boolean }) {
           </span>
         </p>
       </header>
+      )}
 
-      <div className="mt-7 grid grid-cols-[minmax(0,1fr)] gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12">
+      <div className={app ? 'mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-5' : 'mt-7 grid grid-cols-[minmax(0,1fr)] gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12'}>
         {!viewing && (
           <Section
             id="daily"
@@ -266,9 +301,17 @@ function Today({ justStarted }: { justStarted: boolean }) {
         <a href={cleaningRoutes().week} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
           See your whole week <span aria-hidden="true">→</span>
         </a>
-        <a href={cleaningRoutes().reorder} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] text-muted uppercase">
-          Reorder your calendar <span aria-hidden="true">→</span>
-        </a>
+        {app ? (
+          <a href="/app/settings" className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] uppercase">
+            Cleaning preferences <span aria-hidden="true">→</span>
+          </a>
+        ) : null}
+        {/* Buying a printed calendar is the website's: never linked from the iPhone app. */}
+        {!(app && appShellBuild()) && (
+          <a href={cleaningRoutes().reorder} className="flex min-h-12 items-center justify-between border-b border-rule text-[0.7rem] font-semibold tracking-[0.16em] text-muted uppercase">
+            Reorder your calendar <span aria-hidden="true">→</span>
+          </a>
+        )}
       </nav>
 
       {invite && (
@@ -282,10 +325,41 @@ function Today({ justStarted }: { justStarted: boolean }) {
   );
 }
 
+/** This week's cleaning rhythm (Mon–Sun): each day's zone with its icon, today marked, finished days checked. */
+function WeekRhythm({ today }: { today: Date }) {
+  const days = weekActivity(today);
+  return (
+    <nav aria-label="This week’s cleaning rhythm" data-week-rhythm>
+      <p className="of-eyebrow">This week’s rhythm</p>
+      <ol className="mt-2 grid grid-cols-7 gap-1.5">
+        {days.map((d) => {
+          const p = planFor(d.date);
+          const zone = p.kind === 'weekday' ? p.focus.zone : p.day.zone;
+          const icon = p.kind === 'weekday' ? p.focus.icon : weekend.icon;
+          const isToday = d.state === 'today' || dateKey(d.date) === dateKey(today);
+          return (
+            <li key={d.name}>
+              <a href={isToday ? cleaningRoutes().today : cleaningRoutes().day(d.date.getDay())} aria-current={isToday ? 'date' : undefined}
+                aria-label={`${d.name}: ${zone}${d.state === 'done' ? ', done' : ''}`}
+                className={`relative flex min-h-[4.6rem] flex-col items-center justify-center gap-1 rounded-[9px] border px-0.5 py-2 text-center ${isToday ? 'border-[var(--of-month-accent)]/30 bg-[var(--of-month-wash)]' : 'border-[var(--of-rule)] bg-[var(--of-surface)]'}`}>
+                <span className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{d.name.slice(0, 3)}</span>
+                <img src={icon} alt="" width={192} height={192} className="size-7" />
+                <span className="hidden text-[0.62rem] leading-tight sm:block">{zone}</span>
+                {d.state === 'done' && <span aria-hidden="true" className="absolute right-1 bottom-1 grid size-4 place-items-center rounded-full bg-[var(--of-sage-bar)] text-[0.6rem] text-white">✓</span>}
+              </a>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
 /** A quiet reminder that the month's deeper project exists. Links to it on the Week page. */
 function MonthlyTeaser({ month }: { month: MonthlyFocus }) {
+  const app = useContext(AppVariant);
   return (
-    <section aria-labelledby="monthly-teaser-heading" className="mt-9 border-t border-rule-strong pt-3.5">
+    <section aria-labelledby="monthly-teaser-heading" className={app ? 'of-tile mt-4' : 'mt-9 border-t border-rule-strong pt-3.5'}>
       <h2 id="monthly-teaser-heading" className="label text-muted">
         Monthly home project
       </h2>
@@ -315,8 +389,9 @@ interface SectionProps {
 
 /** One block of the day: a single heading line (title left, time + tally right), optional note, then ruled tasks. */
 function Section({ id, eyebrow, heading, meta, note, first, children }: SectionProps) {
+  const app = useContext(AppVariant);
   return (
-    <section id={id} aria-labelledby={`${id}-heading`} className={`scroll-mt-4 ${first ? '' : 'border-t border-rule-strong pt-3.5 md:border-t-0 md:pt-0'}`}>
+    <section id={id} aria-labelledby={`${id}-heading`} className={app ? 'of-tile scroll-mt-4' : `scroll-mt-4 ${first ? '' : 'border-t border-rule-strong pt-3.5 md:border-t-0 md:pt-0'}`}>
       <p className="label mb-1.5 text-muted" aria-hidden="true">
         {eyebrow}
       </p>

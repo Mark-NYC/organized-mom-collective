@@ -1,0 +1,118 @@
+/**
+ * Family (/app/family): the family's shared headquarters, the same on the website and in the iPhone app
+ * (docs/ios/APP_DESIGN_SYSTEM.md). This month's Family Meeting first, then the family's own data: members in their
+ * permanent colors, who does what (agreements only), who shares the family, and the Family Meeting Club for households
+ * that have it. Nothing here is a new feature: every tile opens a page that already exists.
+ */
+import { useEffect, useState } from 'react';
+import { useToday } from '../../lib/hooks';
+import { isDemo, useCalendar } from '../../lib/calendar/client';
+import { useFamilyProfile } from '../../lib/family-meeting-client';
+import { agreementsByPerson } from '../../lib/family-meeting-support';
+import { householdAccess, type HouseholdAccess } from '../../lib/household/api';
+import { ageInMonth, monthOf } from '../../lib/club/profile';
+import { MEETING_GUIDE } from '../../data/club/meeting-guide';
+import { useShowsClub } from '../app/TodayOverview';
+import { Avatar, Chevron, Icon, TileHead } from '../app/ui';
+
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
+export default function FamilyHub() {
+  const today = useToday();
+  const month = MONTHS[today.getMonth()];
+  const cal = useCalendar();
+  const household = cal.household;
+  const profile = useFamilyProfile(cal.state.scope !== 'local' ? cal.state.scope : null);
+  const agreed = agreementsByPerson(household, profile);
+  const members = (household?.members ?? []).filter((m) => !m.archived);
+  const showsClub = useShowsClub();
+  const [access, setAccess] = useState<HouseholdAccess | null>(null);
+  useEffect(() => {
+    if (!cal.signedIn || isDemo()) return;
+    void householdAccess().then(setAccess, () => setAccess(null));
+  }, [cal.signedIn]);
+  const shared = (access?.adults.length ?? 1) > 1;
+
+  return (
+    <div className="of-grid of-grid--2 mt-6">
+      <section className="of-tile of-tile--month of-span-2" aria-labelledby="our-meeting-h" data-our-meeting>
+        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-end">
+          <div>
+            <p className="of-eyebrow">Our Family Meeting · {month[0].toUpperCase() + month.slice(1)}</p>
+            <h2 id="our-meeting-h" className="of-tile-title of-tile-title--lg">{MEETING_GUIDE.subtitle}</h2>
+            <a href="/app/family/meeting" className="of-btn mt-5" data-open-meeting>Start our Family Meeting</a>
+          </div>
+          <ol className="grid grid-cols-2 gap-2" data-meeting-parts>
+            {MEETING_GUIDE.parts.map((p, i) => (
+              <li key={p.title} className="rounded-[9px] bg-white/80 px-3 py-2.5">
+                <span className="font-serif text-[1.1rem] text-[var(--of-month-accent)]">{i + 1}</span>
+                <span className="block text-[0.88rem] font-semibold leading-tight">{p.title}</span>
+                <span className="text-[0.75rem] text-warm-soft">{p.minutes} min</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="of-tile" aria-labelledby="our-family-h" data-family-members>
+        <TileHead eyebrow="Our family" title={<span id="our-family-h">{household?.displayName ?? 'Everyone in it'}</span>}
+          action={household ? <a href="/app/family/setup" className="of-tile-action">Edit <Chevron /></a> : undefined} />
+        {members.length ? (
+          <ul className="of-rows">
+            {members.map((m) => (
+              <li key={m.id} className="of-row" data-family-member={m.firstName}>
+                <Avatar name={m.firstName} color={cal.colors[m.id]} />
+                <span className="min-w-0">
+                  <span className="of-row-title">{m.firstName}</span>
+                  <span className="of-row-meta">{m.kind === 'child' ? (m.birthYear ? `Child · ${ageInMonth(m.birthYear, m.birthMonth, monthOf(today))} years` : 'Child') : 'Adult'}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <>
+            <p className="mt-3 text-[0.92rem] text-warm-soft">Add everyone once: names, ages and each person’s color. The calendar, cleaning and your Family Meeting all use the same family.</p>
+            <a href={cal.signedIn ? '/app/family/setup' : '/app/sign-in?next=/app/family'} className="of-btn of-btn--soft mt-4">{cal.signedIn ? 'Set up our family' : 'Sign in to set up your family'}</a>
+          </>
+        )}
+      </section>
+
+      <a href="/app/family/responsibilities" className="of-tile" data-family-responsibilities-card>
+        <TileHead eyebrow="Family responsibilities" title="Who does what." chevron />
+        {agreed.length ? (
+          <ul className="of-rows">
+            {agreed.slice(0, 4).map((p) => (
+              <li key={p.memberId} className="of-row !items-start">
+                <Avatar name={p.name} color={cal.colors[p.memberId]} size="sm" />
+                <span className="min-w-0"><span className="of-row-title">{p.name}</span><span className="of-row-meta">{p.parts.slice(0, 2).map((x) => x.text).join(' · ')}{p.parts.length > 2 ? ` · ${p.parts.length - 2} more` : ''}</span></span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="of-tile-sub">What your family agreed in your meeting, and what everyone already does.</p>
+        )}
+      </a>
+
+      {household && (
+        <a href="/app/account#sharing-h" className="of-tile" data-family-sharing-card>
+          <div className="flex items-center gap-4">
+            <span className="of-icon-box of-icon-box--sage"><Icon name={shared ? 'family' : 'people-plus'} /></span>
+            <span className="min-w-0 flex-1">
+              <span className="of-eyebrow block">{shared ? 'Shared family' : 'Two grown-ups'}</span>
+              <span className="mt-1 block font-serif text-[1.2rem] leading-snug">{shared ? 'Both grown-ups share this family' : 'Invite another adult'}</span>
+              <span className="of-tile-sub block">{shared ? 'Calendar, cleaning and agreements stay in sync for both of you.' : 'Share the calendar, cleaning and agreements with the other grown-up at home.'}</span>
+            </span>
+            <Chevron />
+          </div>
+        </a>
+      )}
+
+      {showsClub && (
+        <a href="/app/club" className="of-tile of-tile--month" data-family-club-card>
+          <TileHead eyebrow="Family Meeting Club" title="Your membership and monthly resources." sub="Each month’s Family Focus and its prepared meeting page." chevron />
+          <span className="of-tile-action mt-2">Open the Club <Chevron /></span>
+        </a>
+      )}
+    </div>
+  );
+}

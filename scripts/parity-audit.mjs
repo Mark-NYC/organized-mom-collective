@@ -76,7 +76,7 @@ for (const [w, h, mobile] of WIDTHS) {
         return {
           finalPath: location.pathname,
           title: document.title,
-          tabs: texts('[data-app-tabbar] a'),
+          tabs: texts('[data-app-tabbar] a, [data-app-topnav] a'),
           headerLinks: texts('header a, header button').slice(0, 12),
           profileIcon: vis(document.querySelector('[data-profile-link]')),
           headings: texts('h1, h2').slice(0, 14),
@@ -107,3 +107,4 @@ for w in os.listdir(out):
         c.save(os.path.join(d, n + '.png'))
 `, OUT]);
 console.log(`parity screenshots → ${OUT}/`);
+process.exit(0); // the local servers would otherwise keep Node running
