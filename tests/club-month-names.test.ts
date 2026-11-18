@@ -51,3 +51,15 @@ describe('November prints its own year', () => {
     expect(readFileSync('src/pages/club/worksheet-generator.astro', 'utf8')).toMatch(/kitMonth=\{sampleNovember\}/);
   });
 });
+
+describe('November 2027 cannot go live with 2026 meeting ages', () => {
+  // /app/club/november is built for one November kit (its meeting works out ages for that kit's month). The day a
+  // second November kit is added to the registry, this fails until the page chooses the member's own edition
+  // (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §15, "Before November 2027 goes live").
+  it('the November meeting page handles every November edition in the registry', () => {
+    const novembers = kits.filter((k) => k.month.endsWith('-11')).map((k) => k.month);
+    const page = readFileSync('src/pages/app/club/november.astro', 'utf8');
+    const pinned = /k\.month === '20\d\d-11'/.test(page);
+    expect(novembers.length > 1 && pinned, `November editions ${novembers.join(', ')}; the page pins one`).toBe(false);
+  });
+});

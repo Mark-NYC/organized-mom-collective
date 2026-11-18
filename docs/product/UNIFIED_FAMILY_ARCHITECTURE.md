@@ -466,6 +466,14 @@ the resource's month; November 2027 is a second entry in `src/data/club/resource
 saved version (per kit) and orders. Nobody held November 2026 or had saved it in production (read-only, 2026-11-18),
 so no saved work or order was affected. Details and test evidence: `PRINTED_WORDING_PROPOSAL.md` §C.
 
+**Before November 2027 goes live (checklist; owner, 2026-11-18):**
+1. Add the November 2027 kit to `src/data/club/kits/` (production already has the row, draft) with its mailer; this
+   also builds its QR page `/club/kits/2027-11-family-ownership`.
+2. `/app/club/november`: choose the edition from the member's held November kit (2026 or 2027) so its meeting works
+   out ages for that November, like the printable. `tests/club-month-names.test.ts` fails as soon as step 1 is done
+   until this is.
+3. Repeat the November checks in the Club journey for the meeting page (ages, header year) and the print views.
+
 **Still to decide or do (not in this fix):**
 - `/app/club/november` (the November meeting page) is built for the November 2026 kit, so in November 2027 its
   meeting would use 2026 ages. Fix when November 2027 is scheduled: choose the edition from the member's held
