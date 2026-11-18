@@ -49,6 +49,12 @@ grant select on ola to authenticated, anon;
 \set OLA '(select id from ola)'
 \set HID '(select household_id from public.household_adults where user_id = ''00000000-0000-0000-0000-0000000cf101'')'
 
+-- One event the family made itself: nothing below may change it.
+select pg_temp.as_user('authenticated', :MOM);
+select public.calendar_event_save(jsonb_build_object('id', 'cf000000-0000-0000-0000-0000000000e1', 'title', 'Dentist', 'starts_on', '2026-11-20', 'timezone', 'America/Chicago'), null);
+reset role;
+create temp table own_before as select id, title, revision, deleted_at from public.calendar_events;
+
 -- Subscribe (private by default), webcal:// becomes https://, the same URL twice is one subscription.
 select pg_temp.as_user('authenticated', :MOM);
 create temp table f1 as select public.calendar_feed_add(jsonb_build_object('url', 'webcal://school.example.org/cal.ics?token=SECRET', 'name', 'Lincoln Elementary', 'member_id', :LIA, 'timezone', 'America/Chicago')) as j;
@@ -60,6 +66,7 @@ select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect((public.calendar_feed_add('{"url":"https://school.example.org/cal.ics?token=SECRET"}') ->> 'id')::uuid = :F1, 'the same URL again is the same subscription');
 select pg_temp.expect(pg_temp.fails($q$select public.calendar_feed_add('{"url":"http://localhost:8080/x.ics"}')$q$, 'invalid_url'), 'a local address is refused');
 select pg_temp.expect(pg_temp.fails($q$select public.calendar_feed_add('{"url":"ftp://x.example/cal.ics"}')$q$, 'invalid_url'), 'only http(s) and webcal');
+select pg_temp.expect(pg_temp.fails($q$select public.calendar_feed_add('{"url":"https://172.20.1.1/x.ics"}')$q$, 'invalid_url') and pg_temp.fails($q$select public.calendar_feed_add('{"url":"https://printer.local/x.ics"}')$q$, 'invalid_url'), 'private networks and local names are refused');
 select pg_temp.expect(pg_temp.fails(format('select public.calendar_feed_add(%L)', jsonb_build_object('url', 'https://x.example/a.ics', 'member_id', :OLA)), 'invalid'), 'another family''s member is refused');
 reset role;
 
@@ -115,14 +122,28 @@ select pg_temp.expect((select status = 'error' and event_count = 2 and failures 
   and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 2, 'an error keeps the last good events');
 select public.calendar_feed_store(:F1, '{"result":"not_modified"}');
 select pg_temp.expect((select status = 'ok' and failures = 0 from public.calendar_feeds where id = :F1), 'unchanged since last time: ok, events kept');
+select public.calendar_feed_store(:F1, '{"result":"ok","events":[]}');
+select pg_temp.expect((select status = 'error' and event_count = 2 from public.calendar_feeds where id = :F1)
+  and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 2, 'a calendar that suddenly comes back empty keeps its events (a hiccup)');
+select public.calendar_feed_store(:F1, '{"result":"not_modified","etag":"v2"}');
+select pg_temp.expect((select etag from public.calendar_feeds where id = :F1) = 'v2', 'unchanged: the new ETag is kept');
+select public.calendar_feed_store(:F1, '{"result":"gone","error":"This calendar no longer exists at that link."}');
 select public.calendar_feed_store(:F1, '{"result":"gone"}');
-select pg_temp.expect((select status = 'disconnected' and event_count = 0 and etag is null from public.calendar_feeds where id = :F1)
-  and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 0, 'a calendar that''s gone is disconnected and its stale events leave the calendar');
+select pg_temp.expect((select status = 'error' and failures = 2 and event_count = 2 from public.calendar_feeds where id = :F1)
+  and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 2, 'a link that stops working: events kept through two failed refreshes');
+select public.calendar_feed_store(:F1, '{"result":"gone"}');
+select pg_temp.expect((select status = 'disconnected' and event_count = 0 and etag is null and content_hash is null from public.calendar_feeds where id = :F1)
+  and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 0, 'the third in a row disconnects it and its stale events leave the calendar');
 select pg_temp.expect(jsonb_array_length(public.calendar_feed_claim(50)) = 0 or not exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50)) c where (c ->> 'id')::uuid = :F1), 'a disconnected one isn''t refreshed');
 select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(public.calendar_feed_retry(:F1) ->> 'status' = 'pending', 'its owner can retry it');
 reset role;
-select pg_temp.expect(exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50, :F1, :MOM)) c where (c ->> 'id')::uuid = :F1), 'Refresh now: the named feed, for its owner');
+select pg_temp.expect(exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50, :F1, :MOM)) c where (c ->> 'id')::uuid = :F1 and c ? 'url'), 'Refresh now: the named feed, for its owner');
+select pg_temp.expect((public.calendar_feed_claim(1, :F1, :MOM) -> 0 ->> 'recent')::boolean and not (public.calendar_feed_claim(1, :F1, :MOM) -> 0 ? 'url'), 'refreshed seconds ago: not fetched again (a double tap)');
+select pg_temp.as_user('authenticated', :MOM);
+select public.calendar_feed_retry(:F1);
+reset role;
+select pg_temp.expect((select last_attempt_at is not null from public.calendar_feeds where id = :F1), 'retry only restarts a disconnected calendar (no way around the double-tap guard)');
 select pg_temp.expect(jsonb_array_length(public.calendar_feed_claim(50, :F1, :DAD)) = 0, 'never for someone else');
 
 -- Ben leaves: his shared calendar stops showing to the household at once.
@@ -131,7 +152,19 @@ select public.household_leave();
 reset role;
 select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(jsonb_array_length(public.calendar_feeds()) = 1 and (public.calendar_feeds() -> 0 ->> 'name') = 'Lincoln Elementary', 'an adult who left: their calendars leave with them');
+reset role;
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50)) c where (c ->> 'id')::uuid = (select (j ->> 'id')::uuid from f2)), 'and are no longer fetched for that household');
+select pg_temp.as_user('authenticated', :DAD);
+select public.club_household_save('Ben''s', '{}', '[{"first_name":"Ben","kind":"adult","role":"parent","is_account_holder":true}]');
+create temp table f2b as select public.calendar_feed_add('{"url":"https://school.example.org/cal.ics?token=BENS","name":"School"}') as j;
+reset role;
+select pg_temp.expect((select (j ->> 'id')::uuid from f2b) = (select (j ->> 'id')::uuid from f2)
+  and (select household_id <> :HID and visibility = 'private' and event_count = 0 from public.calendar_feeds where id = (select (j ->> 'id')::uuid from f2))
+  and (select count(*) from public.calendar_feed_events where feed_id = (select (j ->> 'id')::uuid from f2)) = 0,
+  'adding it again in his new household moves it there, private, without the old household''s events');
+select pg_temp.as_user('authenticated', :MOM);
 create temp table removed as select public.calendar_feed_remove(:F1) as ok;
 reset role;
 select pg_temp.expect((select ok from removed) and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 0, 'unsubscribing removes its imported events');
-select pg_temp.expect((select count(*) from public.calendar_events) >= 0, 'the family''s own calendar is untouched by all of this');
+select pg_temp.expect((select count(*) from public.calendar_events) = (select count(*) from own_before)
+  and not exists (select id, title, revision, deleted_at from public.calendar_events except select * from own_before), 'the family''s own events are untouched by all of this');

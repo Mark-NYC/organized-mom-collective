@@ -73,7 +73,7 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
   const [msg, setMsg] = useState('');
   const run = async (key: string, f: () => Promise<unknown>, done?: string) => {
     setBusy(key); setMsg('');
-    try { await f(); await onChanged(); if (done) setMsg(done); } catch (e) { setMsg(ERRORS[(e as Error).message] ?? 'That didn’t work. Check your connection and try again.'); } finally { setBusy(null); }
+    try { await f(); await onChanged(); if (done) setMsg(done); } catch (e) { const m = (e as Error).message; setMsg(ERRORS[m] ?? (/\s/.test(m) ? m : 'That didn’t work. Check your connection and try again.')); await onChanged().catch(() => {}); } finally { setBusy(null); }
   };
   const add = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,7 +136,7 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
           <p className="font-semibold">Add a calendar</p>
           <label className="mt-3 block"><span className="label">CALENDAR LINK</span>
             <input className="cal-input" value={url} onChange={(e) => setUrl(e.target.value)} inputMode="url" autoCapitalize="off" autoCorrect="off" placeholder="webcal://… or https://….ics" data-field="feed-url" /></label>
-          <p className="mt-1 text-[0.78rem] text-warm-soft">Schools and teams usually offer “Subscribe” or an iCal link. From Google Calendar: Settings → the calendar → “Secret address in iCal format”.</p>
+          <p className="mt-1 text-[0.78rem] text-warm-soft">Schools and teams usually offer “Subscribe” or an iCal link. From Google Calendar on a computer: Settings → the calendar → “Secret address in iCal format”. Treat a secret link like a password: only you see it here, and you can reset it in Google any time.</p>
           <label className="mt-3 block"><span className="label">NAME</span>
             <input className="cal-input" value={name} maxLength={80} onChange={(e) => setName(e.target.value)} placeholder="Lincoln Elementary" data-field="feed-name" /></label>
           <p className="label mt-3">WHOSE CALENDAR</p>

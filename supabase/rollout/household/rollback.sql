@@ -1,4 +1,4 @@
--- Rolls back 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,22 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261205 calendar subscriptions (independent; safe to run alone: supabase/rollout/calendar/rollback.sql).
+-- Removes subscriptions and imported events; the family calendar and every other table are untouched.
+do $$ begin if exists (select 1 from pg_extension where extname = 'pg_cron') then perform cron.unschedule('omc-calendar-feeds-refresh'); end if; exception when others then null; end $$;
+drop function if exists public.calendar_feed_retry(uuid);
+drop function if exists public.calendar_feed_store(uuid, jsonb);
+drop function if exists public.calendar_feed_claim(int, uuid, uuid);
+drop function if exists public.calendar_feed_events(timestamptz, timestamptz, text);
+drop function if exists public.calendar_feeds();
+drop function if exists public.calendar_feed_remove(uuid);
+drop function if exists public.calendar_feed_update(uuid, jsonb);
+drop function if exists public.calendar_feed_add(jsonb);
+drop function if exists public.calendar_feeds_visible(uuid);
+drop function if exists public.calendar_feed_json(public.calendar_feeds, uuid);
+drop table if exists public.calendar_feed_events;
+drop table if exists public.calendar_feeds;
 
 -- ---- 20261204 follow-through on agreements (independent; safe to run alone). Removes the check-in answers families
 -- gave (progress, checked_on, barrier); the agreements themselves stay exactly as they are.

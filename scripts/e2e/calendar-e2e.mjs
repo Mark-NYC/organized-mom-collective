@@ -78,6 +78,7 @@ const check = (step, ok, detail = '') => {
   if (!ok) failures++;
   console.log(`  ${ok ? '✓' : '✗'} ${step}${detail ? ` — ${detail}` : ''}`);
 };
+const note = (step, detail) => { results.push({ step, ok: null, detail }); console.log(`  • ${step} — ${detail}`); };
 const sql = async (q) => (await (await fetch(`${API}/__test/sql`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sql: q }) })).json()).out;
 const call = async (path, token, body, headers = {}) => {
   const r = await fetch(`${API}${path}`, { method: 'POST', headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}), ...headers }, body: JSON.stringify(body) });
@@ -209,6 +210,30 @@ const jt = await titles(jen);
 check('Jen sees her own private work calendar', jt.includes('Board review'));
 check('Jen also sees each school event once (her copy + Sam’s)', jt.filter((x) => x === 'Choir').length === 3);
 
+let eventCalls = 0;
+jen.on('request', (r) => { if (r.url().includes('/rpc/calendar_feed_events')) eventCalls++; });
+await openCalendar(jen);
+check('nothing changed: reopening downloads the list, not the events again', eventCalls === 0, `${eventCalls} events downloads`);
+const tap1 = await call('/functions/v1/calendar-feeds', jenToken, { feed_id: work.body?.id });
+const tap = await call('/functions/v1/calendar-feeds', jenToken, { feed_id: work.body?.id });
+note('Refresh, then Refresh again at once', `${tap1.body?.result} → ${tap.body?.result}`);
+check('a second Refresh within 30 s doesn’t fetch again', tap.body?.result === 'not_modified');
+const cached = await jen.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('omc:calendar:feeds')).map((k) => localStorage.getItem(k)).join(''));
+check('the device copy never holds a calendar link', cached.includes('Board review') && !/e2e\.test|webcal:|https?:\/\//.test(cached), cached.match(/.{0,50}(e2e\.test|webcal:|https?:\/\/).{0,30}/)?.[0] ?? `Board review in copy: ${cached.includes('Board review')}`);
+
+// Offline: the imported events stay (the device copy), and nothing is lost when the connection comes back.
+await jenCtx.route(`${API}/**`, (route) => route.abort('internetdisconnected'));
+await jen.reload({ waitUntil: 'domcontentloaded' });
+await jen.waitForSelector('[data-calendar-event="Choir"]', { timeout: 15000 }).catch(() => {});
+await jen.click('[data-view="agenda"]').catch(() => {});
+await settle(jen);
+const off = await titles(jen);
+check('offline: imported and family events still show', off.includes('Choir') && off.includes('Board review') && off.includes('Dentist'), off.join(', '));
+await shot(jen, '05b-offline');
+await jenCtx.unroute(`${API}/**`);
+await openCalendar(jen);
+check('back online: same calendar', (await titles(jen)).filter((x) => x === 'Choir').length === 3);
+
 // ------------------------------------------------------------------ 7. Weekly Family Meeting: shared calendars only
 await jen.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' });
 await jen.waitForSelector('[data-meeting-week]', { timeout: 15000 }).catch(() => {});
@@ -237,8 +262,14 @@ const afterPrivate = await rpc(samToken, 'calendar_feeds');
 check('Sam no longer sees it listed', !afterPrivate.body?.some((f) => f.name === 'Lincoln Elementary'));
 
 goneStatus = 404;
-const goneRun = await call('/functions/v1/calendar-feeds', jenToken, { feed_id: gone.id });
-check('a calendar link that stopped working is marked disconnected', goneRun.body?.result === 'gone' && (await sql(`select status || '|' || event_count from public.calendar_feeds where id = '${gone.id}'`)) === 'disconnected|0');
+// Each refresh as if the backoff had passed (a manual Refresh within 30 s is answered from what's stored).
+const refreshGone = async () => { await sql(`update public.calendar_feeds set last_attempt_at = now() - interval '1 hour' where id = '${gone.id}'`); return call('/functions/v1/calendar-feeds', jenToken, { feed_id: gone.id }); };
+await refreshGone();
+await refreshGone();
+check('a link that stops working keeps its events through two failed refreshes', (await sql(`select status || '|' || event_count from public.calendar_feeds where id = '${gone.id}'`)) === 'error|1'
+  && (await sql(`select count(*) from public.calendar_feed_events where feed_id = '${gone.id}'`)) === '1');
+const goneRun = await refreshGone();
+check('the third in a row marks it disconnected', goneRun.body?.result === 'gone' && (await sql(`select status || '|' || event_count from public.calendar_feeds where id = '${gone.id}'`)) === 'disconnected|0');
 check('a disconnected calendar’s events are cleared', (await sql(`select count(*) from public.calendar_feed_events where feed_id = '${gone.id}'`)) === '0');
 await openCalendar(jen);
 await jen.click('[data-open-calendars]');
@@ -273,6 +304,17 @@ await jen.locator('[data-calendar-event="Piano"]').first().click();
 await jen.waitForSelector('[data-event-sheet]');
 check('family events still open the edit sheet', await jen.locator('[data-event-sheet]').count());
 await shot(jen, '09-family-event-edit');
+
+// ------------------------------------------------------------------ 11. Rollback: imported calendars vanish, family events stay
+await jen.click('[data-event-sheet] button:has-text("Cancel"), [data-event-sheet] [aria-label="Close"]').catch(() => {});
+await jen.keyboard.press('Escape').catch(() => {});
+await sql(readFileSync('supabase/rollout/calendar/rollback.sql', 'utf8'));
+check('rollback removes subscriptions only (family events intact)', (await sql(`select to_regclass('public.calendar_feeds') is null`)) === 't'
+  && (await sql(`select count(*) from public.calendar_events where title in ('Dentist', 'Piano') and deleted_at is null`)) === '2');
+await openCalendar(jen);
+const rb = await titles(jen);
+check('after a rollback the app shows no imported events and no Calendars entry; family events remain', !rb.includes('Choir') && rb.includes('Dentist') && rb.includes('Piano') && !(await jen.locator('[data-open-calendars]').count()), rb.join(', '));
+check('…and forgets its device copy (nothing stale offline)', !(await jen.evaluate(() => Object.keys(localStorage).some((k) => k.startsWith('omc:calendar:feeds')))));
 
 writeFileSync(join(OUT, 'results.json'), JSON.stringify({ at: new Date().toISOString(), failures, results }, null, 2));
 await browser.close();

@@ -88,15 +88,22 @@ const WINDOWS_ZONES: Record<string, string> = {
   'GMT Standard Time': 'Europe/London', 'W. Europe Standard Time': 'Europe/Berlin', 'UTC': 'UTC',
 };
 
+// Building an Intl formatter is slow (much slower than using one): zones are checked once and offsets cached, so a
+// large calendar parses within an Edge Function's CPU budget (docs/calendar/CALENDAR_INTEGRATION.md → Usage).
+const zoneCache = new Map<string, string | null>();
 function validZone(tz: string | undefined | null): string | null {
   if (!tz) return null;
+  let v = zoneCache.get(tz);
+  if (v !== undefined) return v;
   const name = WINDOWS_ZONES[tz] ?? tz.replace(/^\/[^/]+\/[^/]+\//, ''); // strip "/mozilla.org/20050126_1/" style prefixes
   try {
-    new Intl.DateTimeFormat('en-US', { timeZone: name });
-    return name;
+    zoneFormat(name);
+    v = name;
   } catch {
-    return null;
+    v = null;
   }
+  if (zoneCache.size < 500) zoneCache.set(tz, v);
+  return v;
 }
 
 const fmtCache = new Map<string, Intl.DateTimeFormat>();
@@ -109,7 +116,20 @@ function zoneFormat(tz: string) {
   return f;
 }
 /** The zone's offset from UTC at an instant, in ms. */
+const offsetCache = new Map<string, number>();
+const QUARTER_HOUR = 900_000;
 function zoneOffset(ms: number, tz: string): number {
+  // Zone offsets only change on quarter-hour boundaries, so one lookup per zone and quarter hour is exact.
+  const key = `${tz}|${Math.floor(ms / QUARTER_HOUR)}`;
+  let off = offsetCache.get(key);
+  if (off === undefined) {
+    off = zoneOffsetUncached(Math.floor(ms / QUARTER_HOUR) * QUARTER_HOUR, tz);
+    if (offsetCache.size > 50_000) offsetCache.clear();
+    offsetCache.set(key, off);
+  }
+  return off;
+}
+function zoneOffsetUncached(ms: number, tz: string): number {
   const parts = Object.fromEntries(zoneFormat(tz).formatToParts(new Date(ms)).map((p) => [p.type, p.value]));
   const asUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour % 24, +parts.minute, +parts.second);
   return asUtc - Math.floor(ms / 1000) * 1000;
@@ -290,6 +310,8 @@ function dateKeys(props: Prop[], fallbackTz: string): Set<string> {
 export function parseIcs(text: string, opts: { fromMs: number; toMs: number; householdTz: string }): IcsResult {
   const lines = unfold(text);
   if (!lines.some((l) => /^BEGIN:VCALENDAR/i.test(l))) throw new Error('not_ical');
+  // Cut off mid-download (a dropped connection): never store half a calendar in place of the whole one.
+  if (!lines.some((l) => /^END:VCALENDAR/i.test(l))) throw new Error('incomplete');
   let name: string | null = null;
   let calTz: string | null = null;
   const events: RawEvent[] = [];

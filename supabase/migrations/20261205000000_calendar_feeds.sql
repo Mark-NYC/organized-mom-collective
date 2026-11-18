@@ -31,7 +31,11 @@ create table public.calendar_feeds (
   failures int not null default 0,
   etag text check (char_length(etag) <= 200),
   last_modified text check (char_length(last_modified) <= 100),
+  -- SHA-256 of the last calendar stored: the same bytes again are neither re-parsed nor rewritten.
+  content_hash text check (char_length(content_hash) = 64),
   event_count int not null default 0,
+  -- When its imported events last changed: the app re-downloads events only when this moves.
+  events_at timestamptz not null default now(),
   last_attempt_at timestamptz,
   last_success_at timestamptz,
   created_at timestamptz not null default now(),
@@ -74,7 +78,7 @@ language sql stable set search_path = '' as $$
   select jsonb_build_object('id', f.id, 'kind', f.kind, 'name', f.name, 'visibility', f.visibility, 'member_id', f.member_id,
     'mine', f.owner_user_id = p_uid, 'url', case when f.owner_user_id = p_uid then f.url end, 'timezone', f.timezone,
     'status', f.status, 'last_error', case when f.owner_user_id = p_uid then f.last_error end, 'event_count', f.event_count,
-    'last_success_at', f.last_success_at, 'updated_at', f.updated_at)
+    'last_success_at', f.last_success_at, 'events_at', f.events_at, 'updated_at', f.updated_at)
 $$;
 revoke execute on function public.calendar_feed_json(public.calendar_feeds, uuid) from public, anon, authenticated;
 
@@ -106,10 +110,21 @@ begin
   u := btrim(coalesce(p ->> 'url', ''));
   u := regexp_replace(u, '^webcals?://', 'https://', 'i');
   if u !~* '^https?://[^/\s]+' or char_length(u) > 2000 then raise exception 'invalid_url'; end if;
-  if u ~* '^https?://(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.|\[)' then raise exception 'invalid_url'; end if;
+  -- A first check for obvious local addresses; the Edge Function checks every host and resolved address it fetches.
+  if u ~* '^https?://([^/@]*@)?(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2[0-9]|3[01])\.|0\.|\[|[^/]*\.(local|internal|localhost)([:/]|$))' then
+    raise exception 'invalid_url';
+  end if;
   select * into f from public.calendar_feeds where owner_user_id = uid and lower(url) = lower(u);
-  if found then return public.calendar_feed_json(f, uid); end if;
-  if (select count(*) from public.calendar_feeds where owner_user_id = uid) >= 20 then raise exception 'too_many'; end if;
+  if found and f.household_id = hid then return public.calendar_feed_json(f, uid); end if;
+  if found then
+    -- Added before in a household they've since left: it moves with them, private again, and is fetched afresh.
+    delete from public.calendar_feed_events where feed_id = f.id;
+    update public.calendar_feeds set household_id = hid, member_id = null, visibility = 'private', status = 'pending', failures = 0,
+           last_attempt_at = null, etag = null, last_modified = null, content_hash = null, event_count = 0, events_at = now(), updated_at = now()
+     where id = f.id returning * into f;
+    return public.calendar_feed_json(f, uid);
+  end if;
+  if (select count(*) from public.calendar_feeds where owner_user_id = uid and household_id = hid) >= 20 then raise exception 'too_many'; end if;
   mid := nullif(p ->> 'member_id', '')::uuid;
   if mid is not null and not exists (select 1 from public.club_family_members m where m.id = mid and m.household_id = hid and m.archived_at is null) then
     raise exception 'invalid';
@@ -207,15 +222,24 @@ revoke execute on function public.calendar_feed_events(timestamptz, timestamptz,
 grant execute on function public.calendar_feed_events(timestamptz, timestamptz, text) to authenticated;
 
 -- ---------------------------------------------------------------- the refresher (Edge Function, service role only)
--- Feeds due for a refresh: never fetched, or 3 hours since the last attempt (backing off after failures, up to a day),
--- or one named feed now ("Refresh" by its owner, checked by the function). Marks the attempt so two runs don't overlap.
+-- Feeds due for a refresh: never fetched, or 3 hours since the last attempt (backing off after failures: 6, 12, then
+-- 24 hours), and only while their owner is still in the household. Or one named feed now ("Refresh" by its owner,
+-- checked by the function); refreshed in the last 30 seconds, it comes back marked `recent` and isn't fetched again.
+-- Marks the attempt so two runs never fetch the same feed.
 create function public.calendar_feed_claim(p_limit int default 20, p_feed uuid default null, p_owner uuid default null) returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare out jsonb;
 begin
+  if p_feed is not null then
+    select jsonb_build_array(jsonb_build_object('id', f.id, 'recent', true, 'event_count', f.event_count)) into out
+      from public.calendar_feeds f
+     where f.id = p_feed and f.owner_user_id = p_owner and f.status <> 'disconnected' and f.last_attempt_at > now() - interval '30 seconds';
+    if out is not null then return out; end if;
+  end if;
   with due as (
     select f.id from public.calendar_feeds f
      where f.kind = 'ical' and f.status <> 'disconnected'
+       and exists (select 1 from public.household_adults a where a.household_id = f.household_id and a.user_id = f.owner_user_id)
        and (case when p_feed is not null then f.id = p_feed and f.owner_user_id = p_owner
                  else (f.last_attempt_at is null
                        or f.last_attempt_at <= now() - least(interval '3 hours' * power(2, least(f.failures, 3)), interval '24 hours')) end)
@@ -224,7 +248,7 @@ begin
      for update skip locked
   ), marked as (
     update public.calendar_feeds f set last_attempt_at = now() from due where f.id = due.id
-    returning f.id, f.url, f.etag, f.last_modified, f.timezone
+    returning f.id, f.url, f.etag, f.last_modified, f.timezone, f.content_hash
   )
   select coalesce(jsonb_agg(to_jsonb(marked)), '[]') into out from marked;
   return out;
@@ -232,9 +256,14 @@ end $$;
 revoke execute on function public.calendar_feed_claim(int, uuid, uuid) from public, anon, authenticated;
 grant execute on function public.calendar_feed_claim(int, uuid, uuid) to service_role;
 
--- Store one fetch. p: { result: 'ok' | 'not_modified' | 'error' | 'gone', error?, etag?, last_modified?, events? }.
--- 'ok' replaces the feed's events in one step (a refresh never shows half a calendar); 'error' keeps the last good
--- events and counts the failure; 'gone' (the link no longer works: 401/403/404/410) disconnects it and clears its events.
+-- Store one fetch. p: { result: 'ok' | 'not_modified' | 'error' | 'gone', error?, etag?, last_modified?, content_hash?, events? }.
+-- A failed refresh never destroys good events:
+-- - 'ok' replaces the feed's events in one step (a refresh never shows half a calendar). A calendar that suddenly comes
+--   back EMPTY is treated as a failure the first two times in a row (a server hiccup), and believed the third.
+-- - 'error' keeps the last good events and counts the failure.
+-- - 'gone' (the link stopped working: 401/403/404/410) is a failure too, until the third in a row (6 + 12 hours of
+--   backoff later, or three Refreshes by its owner): then the subscription is disconnected and its events, by then
+--   stale, leave the calendar. Refresh after the link works again brings them back.
 create function public.calendar_feed_store(p_feed uuid, p jsonb) returns int
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -243,6 +272,12 @@ declare
 begin
   select * into f from public.calendar_feeds where id = p_feed for update;
   if not found then return 0; end if;
+  if p ->> 'result' = 'ok' and jsonb_array_length(coalesce(p -> 'events', '[]')) = 0 and f.event_count > 0 and f.failures < 2 then
+    p := jsonb_build_object('result', 'error', 'error', 'The calendar came back empty. We kept the last copy and will check again.');
+  end if;
+  if p ->> 'result' = 'gone' and f.failures < 2 then
+    p := jsonb_build_object('result', 'error', 'error', p ->> 'error');
+  end if;
   if p ->> 'result' = 'ok' then
     delete from public.calendar_feed_events where feed_id = p_feed;
     insert into public.calendar_feed_events (feed_id, household_id, uid, instance_key, title, location, all_day, starts_at, ends_at, start_date, end_date, status)
@@ -252,17 +287,20 @@ begin
       from (select e from jsonb_array_elements(coalesce(p -> 'events', '[]')) e limit 5000) x
     on conflict do nothing;
     get diagnostics n = row_count;
-    update public.calendar_feeds set status = 'ok', last_error = null, failures = 0, event_count = n, last_success_at = now(),
-           etag = left(p ->> 'etag', 200), last_modified = left(p ->> 'last_modified', 100), updated_at = now()
+    update public.calendar_feeds set status = 'ok', last_error = null, failures = 0, event_count = n, last_success_at = now(), events_at = now(),
+           etag = left(p ->> 'etag', 200), last_modified = left(p ->> 'last_modified', 100),
+           content_hash = case when p ->> 'content_hash' ~ '^[0-9a-f]{64}$' then p ->> 'content_hash' end, updated_at = now()
      where id = p_feed;
   elsif p ->> 'result' = 'not_modified' then
-    update public.calendar_feeds set status = 'ok', last_error = null, failures = 0, last_success_at = now(), updated_at = now() where id = p_feed;
+    update public.calendar_feeds set status = 'ok', last_error = null, failures = 0, last_success_at = now(),
+           etag = coalesce(left(p ->> 'etag', 200), etag), last_modified = coalesce(left(p ->> 'last_modified', 100), last_modified), updated_at = now()
+     where id = p_feed;
     n := f.event_count;
   elsif p ->> 'result' = 'gone' then
     -- Its link no longer works: its old events would go stale silently, so they leave the calendar until it's fixed.
     delete from public.calendar_feed_events where feed_id = p_feed;
     update public.calendar_feeds set status = 'disconnected', last_error = left(coalesce(p ->> 'error', 'This calendar is no longer available.'), 200),
-           failures = failures + 1, event_count = 0, etag = null, last_modified = null, updated_at = now() where id = p_feed;
+           failures = failures + 1, event_count = 0, etag = null, last_modified = null, content_hash = null, events_at = now(), updated_at = now() where id = p_feed;
   else
     update public.calendar_feeds set status = 'error', last_error = left(coalesce(p ->> 'error', 'Couldn’t refresh this calendar.'), 200),
            failures = failures + 1, updated_at = now() where id = p_feed;
@@ -278,9 +316,11 @@ language plpgsql security definer set search_path = '' as $$
 declare f public.calendar_feeds%rowtype;
 begin
   if auth.uid() is null then raise exception 'not_signed_in'; end if;
-  update public.calendar_feeds set status = 'pending', failures = 0, last_attempt_at = null, updated_at = now()
-   where id = p_id and owner_user_id = auth.uid() returning * into f;
+  select * into f from public.calendar_feeds where id = p_id and owner_user_id = auth.uid();
   if not found then raise exception 'not_found'; end if;
+  if f.status <> 'disconnected' then return public.calendar_feed_json(f, auth.uid()); end if;
+  update public.calendar_feeds set status = 'pending', failures = 0, last_attempt_at = null, updated_at = now()
+   where id = p_id returning * into f;
   return public.calendar_feed_json(f, auth.uid());
 end $$;
 revoke execute on function public.calendar_feed_retry(uuid) from public, anon;

@@ -78,6 +78,7 @@ describe('iCal feeds', () => {
     expect(r.instances).toHaveLength(0);
     expect(r.skipped).toBe(2);
     expect(() => parseIcs('<html>Sign in</html>', window)).toThrow('not_ical');
+    expect(() => parseIcs('BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:x\r\nDTSTART:20261120T100000Z\r\nEND:VEVENT\r\n', window)).toThrow('incomplete');
   });
 
   it('only the window, and never one occurrence twice', () => {

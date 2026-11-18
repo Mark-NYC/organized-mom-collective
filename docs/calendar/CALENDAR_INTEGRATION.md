@@ -1,7 +1,7 @@
 # Calendar integration
 
-Status (2026-11-18): **iCal subscriptions and the unified calendar are built and tested on branch
-`claude/calendar-integration`. Nothing is deployed, and migration 20261205 has not been applied.** Google Calendar
+Status (2026-11-18): **iCal subscriptions and the unified calendar are built, security-reviewed and tested on branch
+`claude/calendar-integration` (PR open, not merged). Nothing is deployed, and migration 20261205 has not been applied.** Google Calendar
 OAuth is not built yet; it needs the owner's Google Cloud credentials first (see "Google Calendar" below).
 
 Until the migration and function are live, the app checks for the feed functions, doesn't find them, and hides the
@@ -92,10 +92,13 @@ Imported events are never flagged as "new/changed" or "nobody handling it" (nobo
 
 | Test | Covers |
 | --- | --- |
-| `tests/calendar-ics.test.ts` (8) | DST, EXDATE, moved and cancelled overrides, multi-day all-day events, UTC, floating and Outlook zones, monthly/yearly rules, refusals, windowing |
-| `tests/calendar-feeds-handler.test.ts` (5) | Auth, owner-only refresh, the cron secret, status mapping, SSRF incl. redirects |
-| `supabase/tests/calendar-feeds.sql` (29) | Privacy, ownership, link secrecy, duplicates, limits, store/error/gone/retry, removal, leaving the household |
-| `scripts/e2e/calendar-e2e.mjs` (42) | Two adults on phones against the isolated backend with local iCal fixtures: add via the panel, unified Agenda, recurrence/EXDATE/cancel/move, LA→NY time zone, multi-day, read-only sheet, private vs household, duplicate shown once, link never shared, other household isolated, meeting shows shared only, Today, privacy switch, error / not-a-calendar / disconnected / reconnect, remove, scheduled refresh, family create/edit still works |
+| `tests/calendar-ics.test.ts` (8) | DST, EXDATE, moved and cancelled overrides, multi-day all-day events, UTC, floating and Outlook zones, monthly/yearly rules, refusals, truncated downloads, windowing |
+| `tests/calendar-feeds-handler.test.ts` (11) | Auth, owner-only refresh, double tap, constant-time cron secret, status mapping, content hash (incl. Google's DTSTAMP), scheduled-run budget, SSRF incl. DNS answers and redirects |
+| `tests/calendar-feeds-client.test.ts` (4) | Conversion to read-only events in the device zone, colors, week-ahead labels |
+| `supabase/tests/calendar-feeds.sql` (37) | Privacy, ownership, link secrecy, duplicates, limits, store/error/empty/gone thresholds, throttle, retry, removal, leaving and moving households, family events untouched |
+| `scripts/rehearse-calendar-rollout.sh` | Preflight, apply, verify, use, rollback (schema identical), re-apply |
+| `AppLaunchTests.testFamilyFlowWithTestBackend` (iPhone simulator, CI) | Imported shared and private events on the real app's calendar, read-only sheet, Calendars panel, still there after relaunch |
+| `scripts/e2e/calendar-e2e.mjs` (52, app bundle and website build) | Offline (device copy), no events re-download when nothing changed, rollback hides everything and keeps family events, plus: | Two adults on phones against the isolated backend with local iCal fixtures: add via the panel, unified Agenda, recurrence/EXDATE/cancel/move, LA→NY time zone, multi-day, read-only sheet, private vs household, duplicate shown once, link never shared, other household isolated, meeting shows shared only, Today, privacy switch, error / not-a-calendar / disconnected / reconnect, remove, scheduled refresh, family create/edit still works |
 
 Run the e2e:
 
@@ -115,44 +118,51 @@ PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 PUBLIC_SUPABASE_ANON_KEY=e2e-anon npm
 node scripts/e2e/calendar-e2e.mjs app-www e2e-calendar
 ```
 
-## 3. Turning it on (owner steps, in order, each with approval)
+## 3. Turning it on
 
-Nothing below has been done. Steps 1–4 need no outside accounts.
+See [ROLLOUT.md](ROLLOUT.md): preflight (already passed read-only on production), a verified backup, the migration, the function, the secret (created by the owner, never in chat), the 30-minute schedule, post-deployment checks and rollback. Security: [SECURITY_REVIEW.md](SECURITY_REVIEW.md).
 
-1. **Apply migration `20261205000000_calendar_feeds.sql`** to production.
-   - It only adds new tables and functions; it alters no existing table, row or function, and doesn't touch billing or the Club.
-   - Rollback: `drop table public.calendar_feed_events, public.calendar_feeds cascade;` and drop the `calendar_feed_*` functions.
-2. **Set the function secret** `CALENDAR_CRON_SECRET` to a long random value (Dashboard → Edge Functions → Secrets, or `supabase secrets set CALENDAR_CRON_SECRET=…`). `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_ANON_KEY` are provided automatically.
-3. **Deploy the function** `calendar-feeds`. It does its own auth, so deploy it with JWT verification off, the same as the scheduled refresh call:
+### Usage on the Supabase Free plan
 
-   ```bash
-   supabase functions deploy calendar-feeds --no-verify-jwt
-   ```
+Free-plan limits that matter: 500,000 Edge Function invocations/month; **2 s CPU** and 150 s wall clock per request; 500 MB database; 5 GB egress.
 
-4. **Schedule the refresh** every 30 minutes. Store the same secret in Vault, then in the SQL editor:
+| Item | Amount | Share of the Free plan |
+| --- | --- | --- |
+| Scheduled runs (every 30 min) | 1,440 invocations/month, plus one per Refresh tap | ≈0.3% of invocations. Production already runs 4 jobs every 5–10 min, so this adds ~3% to existing cron traffic. |
+| An idle run (nothing due) | One small SQL claim, then return | Negligible |
+| CPU per run | Calendars are claimed **one at a time** until 0.9 s of parsing, 25 calendars or 90 s, whichever comes first; the rest wait for the next run | Under the 2 s CPU limit. After the parser fix in this PR: Google's US-holidays feed 32 ms, a 300-event school calendar ≈90 ms, a 5 MB worst case ≈380 ms. |
+| Capacity | Each calendar refreshes every 3 h (6 h → 24 h when failing); 6 runs × 25 = **~150 calendars per 3 hours** | If that's ever exceeded, refreshes simply stretch. Then go every 15 minutes (still <0.6% of invocations). |
+| Unchanged calendars | ETag/Last-Modified (HTTP 304), otherwise a content hash that ignores Google's per-download `DTSTAMP` | Unchanged calendars: no parse, no database write |
+| Database | ~0.1 MB per typical school calendar (100–400 occurrences), 1.5 MB worst case (the 5,000 cap) | 100 calendars ≈ 10–15 MB of 500 MB (today 20 MB used) |
+| App traffic | The list (≈1 KB per calendar) on open/focus and every 15 min while visible. Events are re-downloaded only when a calendar actually changed (`events_at`). | A few KB per visit typically |
 
-   ```sql
-   select vault.create_secret('<the CALENDAR_CRON_SECRET value>', 'calendar_cron_secret');
-   select cron.schedule('omc-calendar-feeds-refresh', '*/30 * * * *', $$
-     select net.http_post(
-       url := 'https://uvqhmlqwmgnohhduttip.supabase.co/functions/v1/calendar-feeds',
-       body := '{"mode":"due"}'::jsonb,
-       headers := jsonb_build_object('Content-Type', 'application/json',
-         'x-calendar-cron', (select decrypted_secret from vault.decrypted_secrets where name = 'calendar_cron_secret')),
-       timeout_milliseconds := 60000);
-   $$);
-   ```
-
-   Each run claims at most 20 due calendars (each refreshed at most every 3 hours when healthy, backing off when failing).
-5. **Release the website/app.**
-   - The UI code ships with the branch, but it's hidden until steps 1–3 are live, so merging before them is harmless. The order matters only to make the feature appear.
-   - The iPhone app picks it up in the next TestFlight build (not started; needs approval).
-
-Smoke test after turning it on: add a public school or holiday calendar from one test account, check it on both adults' phones, switch it to private, and remove it.
+**Verdict:** the 30-minute schedule fits comfortably. Hourly would also work; 30 minutes gives fresher school changes at negligible cost.
 
 ## 4. Google Calendar (next; needs owner credentials)
 
-Families can already add Google calendars today, read-only, through iCal: Google Calendar → Settings → the calendar → **"Secret address in iCal format"**. The panel explains this.
+### Google's secret iCal address: the interim path (no OAuth)
+
+Families can add Google calendars today, read-only, through iCal: Google Calendar on a computer → Settings → the calendar → **"Secret address in iCal format"** → copy, then paste it into Calendars. The panel says this. It was verified against Google on 2026-11-18:
+- the feed parses correctly (33 US holidays in 32 ms in Deno);
+- Google sends no ETag, and a new `DTSTAMP` on every download, so the content hash ignores DTSTAMP; unchanged Google calendars are neither re-parsed nor rewritten;
+- a revoked or wrong secret link returns 404, which the app handles as "stopped working" (events kept through two failures, then disconnected).
+
+**It works. Tradeoffs to communicate:**
+
+| | Secret iCal link (now) | Google OAuth (next phase) |
+| --- | --- | --- |
+| Setup for mom | Desktop or browser only (not the Google Calendar phone app); find Settings → the calendar → copy a long link; once per calendar | One "Connect Google" tap; pick calendars |
+| What the link grants | **Anyone who has the link can read that whole calendar, with details**, until it's reset. Google itself warns not to share it. | A read-only token scoped to our app, revocable from her Google account |
+| Where it's kept | Our database (owner-only in the app, never shown to the other adult, never on the device, never logged; plain text at rest, readable by the project owner/service role) | Encrypted refresh token |
+| Revoking | She resets the secret address in Google; our copy stops working and is disconnected | Remove in the app or in her Google account |
+| Freshness | Our schedule: within ~3 h, or right away with Refresh | Same schedule, or push notifications later |
+| Work/school accounts | Google Workspace admins can disable secret addresses | Admin approval may be needed |
+| Private event details | Full details (titles, locations) of every event, even ones marked private in some setups | The same read-only data; scopes can't narrow it further |
+| Approval needed from Google | None | App verification for the sensitive scope (2–6 weeks) |
+
+**Recommendation:** ship the secret-link path now with clear in-app wording ("Treat this link like a password; only you see it here; reset it in Google any time"). Use it for family, school and sport calendars, and suggest "Only me" for work calendars. Don't advertise "Connect Google Calendar" until OAuth ships.
+
+### Google OAuth setup (next phase)
 
 For one-tap "Connect Google Calendar" (OAuth, read-only), the owner needs to set up a Google Cloud project:
 

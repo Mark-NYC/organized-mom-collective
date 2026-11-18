@@ -260,6 +260,22 @@ final class AppLaunchTests: XCTestCase {
         waitFor(text("Soccer practice"), "the event on the calendar")
         shot("e2e-02-calendar-event")
 
+        // Imported calendars (scripts/e2e/calendar-seed.sql): Jen's shared school calendar and her private work one sit
+        // beside the family's events, labeled with their source, and open read-only (docs/calendar/CALENDAR_INTEGRATION.md).
+        let picture = waitFor(text("Picture day"), "imported school event on the calendar", timeout: 30)
+        waitFor(text("Board review"), "Jen's private imported event (hers to see)")
+        XCTAssertTrue(text("Lincoln Elementary").exists, "imported events name their calendar")
+        shot("e2e-02b-imported-calendars")
+        picture.tap()
+        waitFor(text("read-only here"), "an imported event opens read-only")
+        XCTAssertFalse(control("Save").exists, "no edit sheet for an imported event")
+        shot("e2e-02c-imported-event")
+        waitFor(control("Done"), "close the imported event").tap()
+        waitFor(control("Calendars · 2"), "the Calendars panel entry").tap()
+        waitFor(text("Who sees it"), "the Calendars panel")
+        shot("e2e-02d-calendars-panel")
+        waitFor(control("Done"), "close the Calendars panel").tap()
+
         // "We agreed" in this month's Family Meeting.
         goTo("Family")
         waitFor(text("plays a part"), "Family tab")
@@ -314,6 +330,7 @@ final class AppLaunchTests: XCTestCase {
         shot("e2e-08-today-after-relaunch")
         goTo("Calendar")
         waitFor(text("Soccer practice"), "event after relaunch")
+        waitFor(text("Picture day"), "imported event after relaunch")
         shot("e2e-09-calendar-after-relaunch")
     }
 }
