@@ -7,6 +7,11 @@ const calendar = calendarPath(Astro.url.pathname);
 const cleaningOnly = !calendar && /^\/app\/(cleaning|week|reorder|settings)\/?$/.test(Astro.url.pathname);
 import { SITE_NAME } from '../config';
 import { ONBOARDED_KEY } from '../lib/storage';
+import { monthTints } from '../lib/club/month-tints';
+import '../styles/family-app-brand.css';
+// This month's approved calendar color (src/theme.ts) as the app's accent, chosen on the device (the page is static).
+// Tiles use the month's lightest step (the same steps its Club printables use); the accent carries labels and progress.
+const MONTH_THEME = Array.from({ length: 12 }, (_, i) => { const t = monthTints(i); return [t.base, t.weeks[0], t.accent]; });
 // iPhone app bundle only (npm run build:app; docs/ios/OMC_APP_ROADMAP.md): native links, durable storage, lifecycle.
 const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 
@@ -23,7 +28,7 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
 ---
 
 <BaseLayout title={fullTitle} description={description} robots="noindex">
-  <style is:global>[data-calendar-feature][hidden] { display: none !important; } body { background: #fffdfa; color: #4d4544; }</style>
+  <style is:global>[data-calendar-feature][hidden] { display: none !important; } body { background: var(--of-bg, #fbf7f1); color: #4d4544; }</style>
   <Fragment slot="head">
     <link rel="manifest" href={calendar ? "/calendar.webmanifest" : "/manifest.webmanifest"} />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -38,6 +43,12 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
         window.__omcInstallPrompt = e;
         window.dispatchEvent(new Event('omc:installable'));
       });
+    </script>
+    <script is:inline define:vars={{ MONTH_THEME }}>
+      try {
+        const t = MONTH_THEME[new Date().getMonth()], r = document.documentElement.style;
+        r.setProperty('--of-month', t[0]); r.setProperty('--of-month-wash', t[1]); r.setProperty('--of-month-accent', t[2]);
+      } catch (e) {}
     </script>
     <script is:inline define:vars={{ ONBOARDED_KEY }}>
       // First visit to Today: hide app chrome until the onboarding screen renders.

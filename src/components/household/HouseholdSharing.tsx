@@ -36,9 +36,9 @@ export default function HouseholdSharing({ household, access }: { household: Hou
   };
 
   return (
-    <section className="family-panel mt-5" data-household-sharing aria-labelledby="sharing-h">
-      <p className="label">FAMILY SHARING</p>
-      <h2 id="sharing-h" className="family-panel-title mt-4">{partner ? 'You share this family' : 'Share with the other grown-up'}</h2>
+    <section className="of-tile mt-4" data-household-sharing aria-labelledby="sharing-h">
+      <p className="of-eyebrow">FAMILY SHARING</p>
+      <h2 id="sharing-h" className="of-tile-title">{partner ? 'You share this family' : 'Share with the other grown-up'}</h2>
       <p className="mt-2 text-sm leading-relaxed text-warm-soft">
         Both of you see and change the same family, calendar, weekly plan and who does what, each from your own phone and sign-in. Kids don’t need accounts.
       </p>
@@ -60,7 +60,7 @@ export default function HouseholdSharing({ household, access }: { household: Hou
 
       {owner && invites && invites.some((i) => i.open) && (
         <div className="mt-6" data-household-invites>
-          <p className="label">WAITING</p>
+          <p className="of-eyebrow">WAITING</p>
           <ul className="mt-2 divide-y divide-warm-rule">
             {invites.filter((i) => i.open).map((i) => (
               <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
@@ -110,17 +110,17 @@ function InviteForm({ candidates, onCreated }: { candidates: Household['members'
       setBusy(false);
     }}>
       <label className="block">
-        <span className="label">WHO</span>
-        <select className="mt-2 block min-h-12 w-full border border-warm-rule bg-white px-3" value={memberId} onChange={(e) => setMemberId(e.target.value)}>
+        <span className="of-eyebrow">WHO</span>
+        <select className="mt-2 block min-h-12 w-full rounded-[8px] border border-warm-rule bg-white px-3" value={memberId} onChange={(e) => setMemberId(e.target.value)}>
           {candidates.map((m) => <option key={m.id} value={m.id}>{m.firstName}</option>)}
         </select>
       </label>
       <label className="block">
-        <span className="label">THEIR EMAIL</span>
-        <input type="email" required autoComplete="off" inputMode="email" className="mt-2 block min-h-12 w-full border border-warm-rule bg-white px-3" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <span className="of-eyebrow">THEIR EMAIL</span>
+        <input type="email" required autoComplete="off" inputMode="email" className="mt-2 block min-h-12 w-full rounded-[8px] border border-warm-rule bg-white px-3" value={email} onChange={(e) => setEmail(e.target.value)} />
         <span className="mt-1 block text-xs text-warm-soft">They sign in with this email to join. The invitation works once and lasts 7 days.</span>
       </label>
-      <button type="submit" disabled={busy} className="family-action">{busy ? 'Creating…' : 'Create invitation'}</button>
+      <button type="submit" disabled={busy} className="of-btn">{busy ? 'Creating…' : 'Create invitation'}</button>
       {error && <p role="alert" className="text-sm text-warm-ink">{error}</p>}
     </form>
   );
@@ -140,7 +140,7 @@ function ShareInvite({ invite, name }: { invite: NewInvite; name: string }) {
       <strong className="text-sm">Invitation ready for {name}</strong>
       <p className="mt-1 text-sm leading-relaxed">Send this link by text or email. {name} signs in with {invite.email} to join: by opening the link, or in the app under Family → “I have an invitation”, pasting it. It works once and expires {new Date(invite.expiresAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. It won’t be shown again.</p>
       <p className="mt-3 break-all rounded-[3px] bg-white px-3 py-2 font-mono text-xs" data-invite-link>{invite.link}</p>
-      <button type="button" className="family-action mt-4" onClick={share}>{copied ? 'Link copied' : 'Share invitation'}</button>
+      <button type="button" className="of-btn mt-4" onClick={share}>{copied ? 'Link copied' : 'Share invitation'}</button>
     </div>
   );
 }

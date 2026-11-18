@@ -2,6 +2,8 @@
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 import { calendarPath } from '../lib/companion';
 import AppTabBar from './AppTabBar.astro';
+import { Icon } from './app/ui';
+import { PRIMARY_TABS } from '../data/app/tabs';
 // Organized Family is one unified app on the website and on the iPhone (AppTabBar.astro). Only the printed calendar's
 // QR copy (/app/calendar…, website only) keeps its own tabs, with its links in the header on wider screens.
 const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
@@ -14,6 +16,11 @@ const items = calendar ? [
   { href: '/app/calendar/settings', label: 'Settings', glyph: '◯' },
 ] : [];
 const active = (href: string) => href === '/app' ? path === href : path === href || (href !== '/app/calendar' && path.startsWith(href + '/'));
+// Wide screens (desktop, iPad): the four tabs live in the header instead of the bottom bar (AppTabBar.astro).
+const tabActive = (href: string) => href === '/app' ? path === '/app'
+  : href === '/app/family' ? /^\/app\/(family|club)(\/|$)/.test(path)
+  : href === '/app/cleaning' ? /^\/app\/(cleaning|week|settings)(\/|$)/.test(path)
+  : path === href || path.startsWith(href + '/');
 ---
 <header data-chrome class="border-b border-warm-rule bg-ivory">
   <div class="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-5 sm:px-8">
@@ -22,7 +29,12 @@ const active = (href: string) => href === '/app' ? path === href : path === href
         <img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width="2027" height="570" class="block h-auto w-[150px] max-w-[49vw] object-contain object-left sm:w-[180px]" />
       </a>
     ) : (
-      <a href={calendar ? "/app/calendar" : "/app"} class="font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized <span class="italic text-[#71866c]">family.</span></a>
+      <a href={calendar ? "/app/calendar" : "/app"} class="inline-flex min-h-11 items-center font-serif text-[1.1rem] font-semibold tracking-tight text-warm-ink" aria-label="Organized Family home">organized&nbsp;<span class="italic text-[#536b4e]">family.</span></a>
+    )}
+    {!calendar && (
+      <nav aria-label="Organized Family" class="hidden lg:block" data-app-topnav><ul class="flex items-center gap-1">
+        {PRIMARY_TABS.map(t => <li><a href={t.href} aria-current={tabActive(t.href) ? 'page' : undefined} class:list={['inline-flex min-h-11 items-center gap-2 rounded-[9px] px-3.5 text-[0.82rem] font-semibold', tabActive(t.href) ? 'bg-[var(--of-month-wash)] text-warm-ink' : 'text-warm-soft hover:text-warm-ink']}><Icon name={t.icon} size={19} />{t.label}</a></li>)}
+      </ul></nav>
     )}
     {!calendar && (
       <a href="/app/account" aria-label="Account and settings" aria-current={path === '/app/account' || path === '/app/settings' ? 'page' : undefined} data-profile-link

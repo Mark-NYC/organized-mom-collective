@@ -1,29 +1,19 @@
 ---
 /**
- * /app/family: the Family tab (iPhone app; docs/ios/OMC_APP_ROADMAP.md). Our Family Meeting first (the Club's existing
- * four-part, ten-minute meeting; its guide and monthly pages are unchanged), then Family Responsibilities, then the
- * Family Meeting Club (membership and monthly resources). Account is the profile icon in the header.
+ * /app/family: the Family tab (website and iPhone app; docs/ios/OMC_APP_ROADMAP.md, docs/ios/APP_DESIGN_SYSTEM.md). Our
+ * Family Meeting first (the Club's existing four-part, ten-minute meeting; its guide and monthly pages are unchanged),
+ * then the family, who does what, sharing with the other grown-up and the Family Meeting Club. Account is the profile
+ * icon in the header.
  */
 import Layout from '../../../layouts/AppLayout.astro';
-import '../../../styles/family-app-brand.css';
-import MeetingCard from '../../../components/family/MeetingCard';
-import { ClubFamilyCard } from '../../../components/app/TodayOverview';
+import FamilyHub from '../../../components/family/FamilyHub';
 ---
-<Layout title="Family" description="Our Family Meeting and who does what.">
-  <div class="family-brand mx-auto max-w-4xl space-y-9" data-family-hub>
+<Layout title="Family" description="Our Family Meeting, the family, and who does what.">
+  <div class="family-brand of-page max-w-4xl" data-family-hub>
     <header>
-      <p class="label text-[#71866c]">FAMILY</p>
-      <h1 class="family-title mt-4">A home where everyone <em class="text-[#71866c]">plays a part.</em></h1>
+      <p class="of-eyebrow">Family</p>
+      <h1 class="of-page-title mt-3">A home where everyone <em>plays a part.</em></h1>
     </header>
-    <MeetingCard client:only="react"><div slot="fallback" class="family-feature h-72"></div></MeetingCard>
-    <div class="family-card-grid">
-      <a href="/app/family/responsibilities" class="family-panel block transition-colors hover:bg-[#f8f8f6]" data-family-responsibilities-card>
-        <p class="label text-[#71866c]">FAMILY RESPONSIBILITIES</p>
-        <h2 class="family-panel-title mt-4">Who does what.</h2>
-        <p class="mt-2 text-sm leading-relaxed text-warm-soft">What your family agreed in your meeting, and what everyone already does.</p>
-        <span class="family-link mt-5">See responsibilities →</span>
-      </a>
-      <ClubFamilyCard client:only="react" />
-    </div>
+    <FamilyHub client:only="react"><div slot="fallback" class="of-tile mt-6 h-72" aria-busy="true"></div></FamilyHub>
   </div>
 </Layout>

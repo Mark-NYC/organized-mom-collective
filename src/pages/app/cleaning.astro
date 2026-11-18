@@ -1,12 +1,21 @@
 ---
+/**
+ * Cleaning (/app/cleaning): the cleaning companion as Organized Family's Cleaning tab, the same on the website and in
+ * the iPhone app. TodayApp's app variant: the same routines, zones, checklists and progress, as tiles with this
+ * week's rhythm (docs/ios/APP_DESIGN_SYSTEM.md). Zone icons are the existing artwork (public/icons/zones/).
+ */
 import Layout from '../../layouts/AppLayout.astro';
 import TodayApp from '../../components/TodayApp';
 import CleaningParts from '../../components/app/CleaningParts';
 ---
-<Layout title="Cleaning" description="Your existing Daily Reset and cleaning companion.">
-  <div class="mx-auto max-w-3xl">
-    <div class="mb-7"><p class="label text-[#71866c]">CLEANING COMPANION</p><p class="mt-2 text-sm text-warm-soft">Same daily rhythm. <span data-device-only>Your saved progress stays on this device.</span></p></div>
-    <TodayApp client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></TodayApp>
+<Layout title="Cleaning" description="Today's reset, this week's zones and everyone's part in cleaning.">
+  <div class="family-brand of-page max-w-4xl">
+    <header class="mb-5">
+      <p class="of-eyebrow">Cleaning companion</p>
+      <h1 class="of-page-title mt-3">Cleaning</h1>
+      <p class="of-page-lede">Same daily rhythm. <span data-device-only>Your saved progress stays on this device.</span></p>
+    </header>
+    <TodayApp variant="app" client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></TodayApp>
     <CleaningParts client:only="react" />
   </div>
 </Layout>
