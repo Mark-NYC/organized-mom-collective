@@ -75,3 +75,17 @@ begin
   update public.club_responsibilities set confirmed_at = now() - interval '8 days', updated_at = now() - interval '8 days'
    where status = 'confirmed' and agreed_text in ('Put my shoes by the door', 'Feed the fish after breakfast', 'Pack my school bag before bed');
 end $a$;
+
+-- January's earlier tools, shaped like production's (2026-11-18, keys only): a returning family holds January and saved
+-- on the retired Weekly Meeting tool and on the old Habit Cards copy, never on the current Our Family Focus page.
+-- The journey checks both stay reachable and that viewing them changes nothing saved.
+update public.club_kits set status = 'scheduled', release_at = least(release_at, now()) where month = '2027-01-01';
+insert into public.club_entitlements (user_id, household_id, resource_month, kind, membership_year, plan, source, note)
+select '00000000-0000-0000-0000-0000000c1b03', public.household_id_for('00000000-0000-0000-0000-0000000c1b03'), '2027-01-01', 'digital', 1, 'admin', 'admin', 'e2e: January held';
+insert into public.club_resource_versions (household_id, kit_id, state, profile_version, revision)
+select public.household_id_for('00000000-0000-0000-0000-0000000c1b03'), k.id,
+  jsonb_build_object(
+    'omc:club:january-weekly-meeting:v1', jsonb_build_object('s', 's', 'v', '{"current":"seed","state":{"trigger":"Sunday after lunch","assignments":{},"fallJobs":[]}}'),
+    'omc:club:member:2027-01-fresh-start-together:v1', jsonb_build_object('s', 's', 'v', '{}')),
+  1, 7
+from public.club_kits k where k.slug = '2027-01-fresh-start-together';

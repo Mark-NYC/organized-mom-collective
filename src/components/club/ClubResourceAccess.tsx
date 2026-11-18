@@ -69,6 +69,7 @@ export default function ClubResourceAccess({ slug }: { slug: string }) {
 }
 
 function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
+  const earlier = typeof location !== 'undefined' && new URLSearchParams(location.search).has('earlier');
   const [state, setState] = useState<'loading' | 'denied' | 'preparing' | 'ready' | 'failed'>('loading');
   const [v, setV] = useState<ResourceVersion | null>(null);
   const [saving, setSaving] = useState<'' | 'saving' | 'saved' | 'conflict' | 'printed' | 'error'>('');
@@ -97,10 +98,13 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
         if (!h) return clubNavToWelcome(ctx);
         // Her Welcome Kit's first resource is looked over and confirmed on its real tool (/app/club/<month>).
         const tool = memberPlanHref(slug);
-        if (m && tool !== routes.clubResource(slug) && welcomeKitView(m, slug) !== 'none') return location.replace(`${tool}?welcome=1`);
+        // ?earlier: the family came for work saved on an earlier tool of this month; never bounce them away from it.
+        if (m && !earlier && tool !== routes.clubResource(slug) && welcomeKitView(m, slug) !== 'none') return location.replace(`${tool}?welcome=1`);
         setMe(m);
         setHousehold(h);
         setV(res);
+        // Which tools this family has saved on, for pages that keep earlier tools reachable ([slug].astro, January).
+        window.dispatchEvent(new CustomEvent('omc:club-saved-keys', { detail: Object.keys(res.state ?? {}) }));
         setApproved(Boolean(res.mailing?.approved));
         rev.current = res.revision;
         clearMemberStorage();
@@ -148,7 +152,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
       <div className="max-w-xl py-6">
         <p role="alert" className="text-warm-ink">This month isn’t part of your membership.</p>
         <p className="mt-2 text-warm-soft">Members receive each month they pay for.</p>
-        <a className="mt-4 inline-block font-semibold underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>See your months</a>
+        <a className="mt-4 inline-block font-semibold underline underline-offset-4" href={routes.appClubMonths}>See your months</a>
       </div>
     );
   }
@@ -158,7 +162,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
       <div className="max-w-xl py-6">
         <p className="text-warm-ink"><strong>{r?.title ?? 'This month'}</strong> is yours. We’re finishing it; it opens here as soon as it’s ready.</p>
         {r && <a className="mt-3 inline-block underline underline-offset-4" href={r.preview}>See a sample of what’s coming</a>}
-        <a className="mt-4 block font-semibold underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>See your months</a>
+        <a className="mt-4 block font-semibold underline underline-offset-4" href={routes.appClubMonths}>See your months</a>
       </div>
     );
   }
@@ -166,7 +170,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
 
   const pending = v?.mailing && v.mailing.status === 'pending';
   // Her Welcome Kit carries this month: one confirmation for the package instead of the monthly "Looks good, print it".
-  const kit = me?.welcome && ['pending', 'on_hold'].includes(me.welcome.status) && firstMonth(me)?.slug === slug && v?.can === 'edit' ? me.welcome : null;
+  const kit = !earlier && me?.welcome && ['pending', 'on_hold'].includes(me.welcome.status) && firstMonth(me)?.slug === slug && v?.can === 'edit' ? me.welcome : null;
   const confirm = async () => {
     setConfirming(true);
     try {
@@ -214,8 +218,14 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
           )}
         </section>
       )}
+      {earlier && (
+        <p className="mb-3 max-w-3xl text-warm-ink" data-earlier-note>
+          <strong>Saved earlier.</strong> This is work your family saved on an earlier version of {r ? monthName(`${r.month}-01`).split(' ')[0] : 'this month'}’s resource, kept for you to view and print. Your current plan is <a className="font-semibold underline underline-offset-4" href={memberPlanHref(slug)}>{r?.title ?? 'this month’s page'}</a>.
+        </p>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
-      <a className="underline underline-offset-4" href={ctx.href(routes.clubDashboard)}>← Your months</a>
+      {/* Navigation is the app's (header, tabs, Club bar with Monthly resources); no second "back" here. */}
+      <span />
       <span className="text-warm-soft" role="status">
         {v?.can === 'read' ? 'Your copy to view and print (your membership has ended, so changes aren’t saved).'
           : saving === 'saving' ? 'Saving…'
@@ -225,7 +235,7 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
           : saving === 'error' ? 'Couldn’t save. Check your connection.'
           : ctx.store.kind === 'sample' ? 'Sample family: changes stay in this tab.' : 'Changes save to your account.'}
       </span>
-      {pending && v?.can === 'edit' && !kit && (
+      {pending && v?.can === 'edit' && !kit && !earlier && (
         approved
           ? <span className="font-semibold text-warm-ink">Approved for printing ✓</span>
           : <button type="button" className="btn-primary" onClick={() => approveResource(slug).then((ok) => setApproved(ok), () => setSaving('error'))}>Looks good, print it</button>

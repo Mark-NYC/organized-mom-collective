@@ -381,14 +381,15 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
           )}
           <a className="ofc-home-link" href={routes.clubFamily}>Edit my family</a>
         </div>
-        {profileLeft > 0 && state !== 'setup' && state !== 'starts' && (
+        {/* Not twice: "Prepared for your family" on this month's card already asks for what's missing. */}
+        {profileLeft > 0 && state !== 'setup' && state !== 'starts' && state !== 'ongoing' && (
           <p className="ofc-kit-status">{profileLeft} optional family {profileLeft === 1 ? 'question' : 'questions'} left. <a className="ofc-home-link" href={`${routes.clubFamily}?setup=1`}>Finish your family profile</a></p>
         )}
-        <p className="ofc-home-foot-links">
-          {me.member && <><a href={routes.appClubFamilyRhythm}>Our Family Rhythm</a> · </>}
-          {me.welcome && !welcomeIsMonthly(me) && <><a href={welcomeItemHref(me)}>{welcomeIsRhythm(me) ? 'Your Family Rhythm' : 'Your Family Vision Print'}</a> · </>}
-          <a href={routes.clubMeetingGuide}>Family Meeting Guide</a>
-        </p>
+        {/* Only what isn't already above: the Family Rhythm has its own section and the Meeting Guide is on the
+            membership tile; a Welcome print that isn't the Family Rhythm is linked here. */}
+        {me.welcome && !welcomeIsMonthly(me) && !welcomeIsRhythm(me) && (
+          <p className="ofc-home-foot-links"><a href={welcomeItemHref(me)}>Your Family Vision Print</a></p>
+        )}
       </footer>
     </>
   );

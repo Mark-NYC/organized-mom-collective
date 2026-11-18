@@ -144,14 +144,13 @@ export default function FamilyHub() {
             <div>
               <p className="of-eyebrow">Family Meeting Club · {Month}</p>
               <h2 id="family-club-h" className="of-tile-title">{monthPage(today.getMonth() + 1).name}</h2>
-              <p className="of-tile-sub">Your monthly Family Focus, prepared from your family profile. Its ideas come into your weekly meeting.</p>
+              <p className="of-tile-sub">Prepared from your family profile. Its ideas come into your Family Meeting above.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {/* The month's own page and its resources (March: Family Rhythm and Spring Prep). */}
               <a href={monthPage(today.getMonth() + 1).route} className="of-btn">Open {Month}</a>
               {monthPage(today.getMonth() + 1).resources.filter((r) => r.route !== monthPage(today.getMonth() + 1).route).map((r) => <a key={r.route} href={r.route} className="of-btn of-btn--soft !normal-case !tracking-normal">{r.name}</a>)}
-              {/* One meeting: this week's carries the month's plan (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2). */}
-              <a href="/app/family/meeting" className="of-btn of-btn--soft">This week’s meeting</a>
+
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-x-5">

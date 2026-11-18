@@ -5,7 +5,7 @@
  * the database confirms her entitlement and hands it her household (ClubResourceAccess). The static HTML holds no
  * family data. Noindex, no tracking; a "not available" notice unless PUBLIC_CLUB_ENABLED.
  */
-import PublicLayout from '../../../layouts/PublicLayout.astro';
+import ClubLayout from '../../../layouts/ClubLayout.astro';
 import ClubResourceAccess from '../../../components/club/ClubResourceAccess';
 import NovemberOwnershipPrintable from '../../../components/club/NovemberOwnershipPrintable.astro';
 import DecemberMissionPrototype from '../../../components/club/DecemberMissionPrototype.astro';
@@ -40,7 +40,8 @@ const KEEP = new Set(['2027-01-fresh-start-together']);
 const forward = memberPlanHref(resource.slug);
 const forwards = !KEEP.has(resource.slug) && forward !== `/club/resources/${resource.slug}`;
 ---
-<PublicLayout fullTitle={`${resource.title} · ${CLUB_NAME}`} description={`${CLUB_NAME} member resource.`} indexable={false} chrome={false} width="full" tracking={false}>
+<ClubLayout title={resource.title}>
+  {/* Member page: inside Organized Family (app header, four tabs, Club bar), like every /club page; bare for ?fulfillment, hidden chrome in ?thumb previews. */}
   {forwards && <script is:inline define:vars={{ forward }}>location.replace(forward + location.search + location.hash);</script>}
   {enabled ? (
     <>
@@ -48,7 +49,18 @@ const forwards = !KEEP.has(resource.slug) && forward !== `/club/resources/${reso
       <div id="club-month-content" hidden>
         {c === 'november' && <NovemberOwnershipPrintable storageKey={key} />}
         {c === 'december' && <DecemberMissionPrototype />}
-        {c === 'january' && <JanuaryHabitCards storageKey={key} />}
+        {c === 'january' && (
+          <>
+            {/* Two earlier January tools, kept so families keep what they saved (owner, 2026-11-18): Habit Cards on
+                this copy, and the retired Weekly Meeting (its saves stay under its own key; viewing and printing only). */}
+            <nav class="mx-auto mb-4 flex max-w-3xl justify-center gap-6 border-b border-warm-rule" aria-label="Earlier January plans" data-earlier-switch hidden>
+              <button type="button" class="min-h-[46px] border-b-2 border-transparent px-1 text-[0.75rem] font-semibold uppercase tracking-[0.16em]" data-earlier-show="habit-cards">Habit Cards</button>
+              <button type="button" class="min-h-[46px] border-b-2 border-transparent px-1 text-[0.75rem] font-semibold uppercase tracking-[0.16em]" data-earlier-show="weekly-meeting">Weekly Meeting</button>
+            </nav>
+            <div data-earlier-tool="habit-cards"><JanuaryHabitCards storageKey={key} /></div>
+            <div data-earlier-tool="weekly-meeting" hidden><SeptemberSundayReset storageKey="omc:club:january-weekly-meeting:v1" /></div>
+          </>
+        )}
         {c === 'february' && <FebruaryConnectionCards storageKey={key} />}
         {c === 'march' && <MarchSpringPrep storageKey={key} />}
         {c === 'april' && <AprilDinnerPlan storageKey={key} />}
@@ -63,4 +75,30 @@ const forwards = !KEEP.has(resource.slug) && forward !== `/club/resources/${reso
   ) : (
     <main class="mx-auto max-w-xl px-4 py-24 sm:px-8"><h1 class="font-serif text-[1.8rem] leading-tight">This page isn’t available.</h1></main>
   )}
-</PublicLayout>
+</ClubLayout>
+<script>
+// January's earlier tools (above): which ones this family saved, from the saved version itself (ClubResourceAccess
+// sends its keys), never from what a tool writes into the tab.
+const WEEKLY = 'omc:club:january-weekly-meeting:v1';
+const tools = document.querySelectorAll<HTMLElement>('[data-earlier-tool]');
+const sw = document.querySelector<HTMLElement>('[data-earlier-switch]');
+if (tools.length && sw) {
+  const show = (id: string) => {
+    tools.forEach((t) => { t.hidden = t.dataset.earlierTool !== id; });
+    sw.querySelectorAll<HTMLButtonElement>('[data-earlier-show]').forEach((b) => {
+      const on = b.dataset.earlierShow === id;
+      b.setAttribute('aria-pressed', String(on));
+      b.style.borderBottomColor = on ? 'var(--color-warm-button, #4a3f3e)' : 'transparent';
+    });
+  };
+  sw.querySelectorAll<HTMLButtonElement>('[data-earlier-show]').forEach((b) => b.addEventListener('click', () => show(b.dataset.earlierShow!)));
+  window.addEventListener('omc:club-saved-keys', (e: Event) => {
+    const keys = (e as CustomEvent<string[]>).detail ?? [];
+    const weekly = keys.includes(WEEKLY);
+    const cards = keys.some((k) => k.startsWith('omc:club:member:'));
+    sw.hidden = !(weekly && cards);
+    if (weekly && !cards) show('weekly-meeting');
+    else show('habit-cards');
+  });
+}
+</script>

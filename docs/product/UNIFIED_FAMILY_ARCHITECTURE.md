@@ -419,3 +419,40 @@ it "Our Family Focus"); 6 Welcome prints. Entitlements: 12, all January. No chan
 Checked and fine: the mailed QR codes open `/club/kits/<slug>`, which already sends a member with access straight on
 to the month's page (every month except November, whose tool that page is). Only its browser-tab title used the kit
 theme; it now uses the page's name.
+
+## 14. Owner decisions (2026-11-18, second round) and the member experience review
+
+**Decisions:** (1) October stays the Daily Reset. (2) Printed titles and mailer wording are aligned only where it
+helps, from exact before/after wording you approve first: `docs/product/PRINTED_WORDING_PROPOSAL.md` (nothing printed
+has changed). (3) Migration 20261202 is held; apply only for a specific functional need. (4) Both January families'
+saved work is preserved, including work on retired tools; legacy access keeps working; nothing is migrated or deleted.
+
+**January legacy access (decision 4).** Production keys only, read 2026-11-18: one family has Habit Cards (old copy) and
+the current January page; the other has Habit Cards and the retired January Weekly Meeting (`omc:club:january-weekly-meeting:v1`),
+which no page read anymore. Now:
+- `/club/resources/2027-01-fresh-start-together?earlier` shows "Saved earlier" with both tools, whichever the family
+  saved (from the saved version's own keys), never bounces them to the Welcome Kit and never offers print approval.
+  The retired Weekly Meeting opens read-only: it reads its key and nothing it does is written back.
+- The January page links to it whenever earlier work exists ("Open the copy you saved earlier"), not only until the
+  family saves on the current tool (`EARLIER_KEYS`, `src/lib/club/plan/account.ts`).
+- The Club journey checks both, and that the saved value is byte-for-byte unchanged after viewing.
+
+**Member journey, tested end to end** (Club journey, phone size): Today → Family → the weekly Family Meeting (this
+month's plan inside it) → the month's personalized resource (inside the app, Club bar) → back in one step → "We
+agreed" (saved for the household) → a week later, Let's Talk asks how it went → On my own (celebrated) → Family's
+Who does what.
+
+**Mobile review: what was wrong and what changed**
+
+| Found | Change |
+| --- | --- |
+| Today's meeting link opened the month's printable meeting sheet; Family's opened the weekly meeting: two "meetings" | Both open the weekly meeting |
+| Family had two buttons into the same meeting (the meeting tile and the Club tile) | The Club tile opens the month and its resources only |
+| November's tool page, January's earlier plans and the Family Vision print used the public layout: no app header or tabs on the website | They use the Club layout like every other `/club` page: app header, four tabs, Club bar; bare for `?fulfillment`, chrome hidden in `?thumb` previews |
+| "← Your months" on those pages went to the billing dashboard and repeated the Club bar | Removed; "See your months" goes to Monthly resources |
+| Club Home asked to finish the family profile twice (month card and footer) and linked the Family Rhythm and Meeting Guide twice | Asked once (on the month card); footer keeps only what isn't above |
+| "Prepared for your family" repeated the month's name right under it | Shows what the month builds instead |
+
+**Left as is, on purpose:** Today's "Who's doing what" and Family's "Who does what" (a summary and the full list); the
+four meeting parts shown on Today and Family (a preview of the meeting); the Getting started checklist (a done step
+links to the meeting, as a checklist should).

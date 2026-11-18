@@ -206,6 +206,61 @@ for (const person of PEOPLE) {
   await ctx.close();
 }
 
+// THE member journey, one family, phone size: Today → Family → this week's Family Meeting → this month's personalized
+// resource → back → "We agreed" → a week later, the follow-through on what they agreed. Every screen is the app.
+{
+  const who = 'member journey';
+  const { ctx, page } = await session('active@e2e.test');
+  const step = async (name, ok, detail) => { check(who, name, ok, detail); await shot(page, `journey-${String(results.filter((r) => r.who === who).length).padStart(2, '0')}`); };
+  await page.goto(`${base}/app`, { waitUntil: 'load' }); await settle(page, 3000);
+  await step('Today: the app, with this month’s Club tile named as its page names it', inApp(await chrome(page)) && (await page.locator('[data-club-month]').count()) === 1);
+  await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family$/); await settle(page, 2500);
+  await step('Family: one way into the meeting, then the month’s Club tile (no duplicate meeting buttons)', inApp(await chrome(page)) && (await page.locator('a[href="/app/family/meeting"]:not([data-getting-started] a)').count()) === 1 && (await page.locator('[data-family-club-card]').count()) === 1);
+  await page.click('[data-app-tabbar] a[href="/app"]'); await page.waitForURL(/\/app$/); await settle(page, 2500);
+  await step('Today’s meeting link opens the same weekly meeting', (await page.locator('a[href*="view=meeting"]').count()) === 0);
+  await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family$/); await settle(page, 2500);
+  await page.click('[data-open-meeting]'); await page.waitForURL(/\/app\/family\/meeting/); await settle(page, 3500);
+  await step('Weekly meeting: this month’s prepared plan inside the four parts', inApp(await chrome(page)) && (await page.locator('[data-weekly-meeting][data-meeting-kind="club"]').count()) === 1);
+  const res = page.locator('[data-meeting-resource]').first();
+  const resHref = await res.getAttribute('href');
+  await res.click(); await page.waitForURL((u) => u.pathname === resHref); await settle(page, 5000);
+  const r = await chrome(page);
+  await step(`the month’s personalized resource (${resHref}) opens inside the app with the Club bar`, inApp(r) && r.clubBar, JSON.stringify(r).slice(0, 160));
+  await page.goBack({ waitUntil: 'load' }); await settle(page, 3500);
+  await step('back to the meeting in one step', /\/app\/family\/meeting/.test(page.url()));
+  const before = Number(await sql(`select count(*) from public.club_responsibilities where status = 'confirmed' and deleted_at is null and household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03')`));
+  const sug = page.locator('[data-agree-suggestion]').first();
+  const had = await sug.count();
+  if (had) { await sug.click(); await settle(page, 2500); }
+  else { await page.fill('[data-agreement-new]', 'Set the table before dinner'); await page.click('[data-owner-chip="Mia"]'); await page.click('[data-save-new-agreement]'); await settle(page, 2500); }
+  const after = Number(await sql(`select count(*) from public.club_responsibilities where status = 'confirmed' and deleted_at is null and household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03')`));
+  await step(`"We agreed" saves the agreement for the household (${had ? 'the month’s suggestion' : 'their own words'})`, after === before + 1, `${before} → ${after}`);
+  // A week passes (test database only): the new agreement is 8 days old.
+  await sql(`update public.club_responsibilities set confirmed_at = now() - interval '8 days' where status = 'confirmed' and household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03') and checked_on is null and confirmed_at > now() - interval '1 day'`);
+  await page.reload({ waitUntil: 'load' }); await settle(page, 3500);
+  const due = page.locator('[data-check-in]');
+  await step('next week: Let’s Talk asks how it went', (await due.count()) >= 1);
+  if (await due.count()) {
+    await due.first().locator('[data-check-in-answer="on-own"]').click(); await settle(page, 2000);
+    await step('On my own: celebrated, nothing new added', (await page.locator('[data-check-in-result="celebrate"]').count()) === 1);
+  }
+  await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family$/); await settle(page, 2500);
+  await step('Family’s “Who does what” shows the agreement', (await page.locator('[data-family-responsibilities-card]').innerText()).length > 20);
+  // January's earlier work (production shape): reachable from the January page, viewed without changing anything saved.
+  const savedBefore = await sql(`select v.state -> 'omc:club:january-weekly-meeting:v1' ->> 'v' from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '2027-01-fresh-start-together' and v.household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03')`);
+  await page.goto(`${base}/app/club/january`, { waitUntil: 'load' }); await settle(page, 5000);
+  const earlierLink = await page.locator('a[href*="?earlier"]').count();
+  await step('January page offers the plans this family saved earlier', earlierLink >= 1);
+  await page.goto(`${base}/club/resources/2027-01-fresh-start-together?earlier`, { waitUntil: 'load' }); await settle(page, 5000);
+  const e = await chrome(page);
+  await step('earlier January plans: inside the app, a clear note, both tools offered, no print approval', inApp(e) && (await page.locator('[data-earlier-note]').count()) === 1 && !(await page.locator('[data-earlier-switch]').isHidden()) && (await page.locator('button:has-text("Looks good, print it")').count()) === 0, JSON.stringify(e).slice(0, 120));
+  await page.click('[data-earlier-show="weekly-meeting"]'); await settle(page, 1500);
+  await step('the retired January Weekly Meeting opens', await page.locator('[data-earlier-tool="weekly-meeting"]').isVisible());
+  const savedAfter = await sql(`select v.state -> 'omc:club:january-weekly-meeting:v1' ->> 'v' from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '2027-01-fresh-start-together' and v.household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03')`);
+  check(who, 'viewing the retired tool changes nothing saved', savedBefore === savedAfter && savedBefore.length > 0);
+  await ctx.close();
+}
+
 // Every monthly page (the source of truth for its month) opens inside the app: header, four tabs, Club bar, and
 // Club Home's year strip calls each month what its page calls it (src/data/club/month-pages.ts).
 {

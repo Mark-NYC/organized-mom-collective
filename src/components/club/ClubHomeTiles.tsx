@@ -129,7 +129,8 @@ export function PreparedFor({ household, profile, month }: { household: Househol
   const challenges = (profile?.challenges ?? []).map((c) => labelOf(CHALLENGES, c)).filter(Boolean) as string[];
   const rows: [string, string][] = [
     ...(kids.length ? [['Your children', kids.map((k) => (k.age !== null ? `${k.firstName} (${k.age})` : k.firstName)).join(', ')] as [string, string]] : []),
-    ['This month', `${monthPage(Number(month.slice(5, 7))).name} · ${monthPage(Number(month.slice(5, 7))).builds}`],
+    // The card's title already names the month's resource; here, what it builds.
+    ['This month builds', monthPage(Number(month.slice(5, 7))).builds],
     ...(priority && profile?.priority !== 'other' ? [['Your priority', priority] as [string, string]] : []),
     ...(challenges.length ? [['What’s hard right now', challenges.join(', ')] as [string, string]] : []),
   ];
