@@ -211,11 +211,11 @@ function Today({ justStarted }: { justStarted: boolean }) {
           <div className="min-w-0">
             <p className="of-eyebrow">{viewing ? `Viewing · ${longDate}` : `Today’s reset · ${longDate}`}</p>
             <DayHeading aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`} className="of-tile-title">{viewing ? `${weekday}’s cleaning` : 'Today’s cleaning'}</DayHeading>
-            <p className="of-tile-sub tabular-nums">{routineDone} of {routine} tasks complete</p>
+            <p className="of-tile-sub tabular-nums">{`${routineDone} of ${routine} tasks complete`}</p>
           </div>
           {routine > 0 && <span className="of-stat" aria-hidden="true">{Math.round((routineDone / Math.max(routine, 1)) * 100)}%</span>}
         </div>
-        {routine > 0 && <div className="mt-4"><Progress done={routineDone} total={routine} label="Today’s cleaning progress" /></div>}
+        {routine > 0 && <div className="mt-4"><Progress done={routineDone} total={routine} label={complete ? 'Today’s routine is done' : `${routineDone} of ${routine} tasks done today`} /></div>}
         {!viewing && (
           <a href={plan.kind === 'weekday' ? '#focus' : '#weekend'} aria-label={`Today’s zone: ${zoneLabel}. Jump to its tasks`} className="mt-3 flex min-h-11 flex-wrap items-center gap-x-2.5 gap-y-1">
             <span className="label text-muted">Today’s zone</span>
