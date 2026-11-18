@@ -18,6 +18,7 @@ import { familyLabel, onPlanFamily, type ReadyFamily } from './family';
 import { printPlan } from './proof';
 import { routes } from '../../../routes';
 import { loadState } from '../../calendar/client';
+import { loadConnectedEvents } from '../../calendar/connected';
 import { localToday } from '../../calendar/recurrence';
 import { weekAhead } from '../../family-meeting-support';
 import { memberColors } from '../../../data/club/family-colors';
@@ -32,7 +33,8 @@ function weekBlock(host: HTMLElement, family: ReadyFamily) {
   if (!box || family.source !== 'account') return;
   const state = loadState();
   if (state.scope !== family.household.id) return;
-  const week = weekAhead(Object.values(state.events), localToday(), new Date());
+  // The family's events and the connected calendars shared with this adult (school, sports, Google), as on the calendar.
+  const week = weekAhead([...Object.values(state.events), ...loadConnectedEvents()], localToday(), new Date());
   if (!week.count) return;
   const colors = memberColors(family.household);
   const days = week.days.filter((d) => d.items.length);
@@ -43,7 +45,7 @@ function weekBlock(host: HTMLElement, family: ReadyFamily) {
       ...d.items.map((i) => {
         const dot = el('span', { class: 'fm-week-dot', 'aria-hidden': 'true' });
         dot.style.background = colors[i.memberIds[0] ?? i.ownerId ?? '']?.hex ?? '#9aab8f';
-        return el('span', { class: 'fm-week-item' }, dot, `${i.time === 'All day' ? '' : `${i.time} `}${i.title}`);
+        return el('span', { class: 'fm-week-item' }, dot, `${i.time === 'All day' ? '' : `${i.time} `}${i.title}${i.from ? ` · ${i.from}` : ''}`);
       })))),
     el('a', { href: routes.familyCalendar, class: 'fm-week-link' }, 'Open the family calendar →'));
   box.hidden = false;

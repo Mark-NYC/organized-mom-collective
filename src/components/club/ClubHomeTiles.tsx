@@ -26,7 +26,7 @@ export function MeetingConnect({ meetingHref }: { meetingHref: string }) {
   const cal = useCalendar();
   const profile = useFamilyProfile(cal.state.scope !== 'local' ? cal.state.scope : null);
   const today = new Date();
-  const week = weekAhead(Object.values(cal.state.events), localToday(today), today);
+  const week = weekAhead(cal.all, localToday(today), today);
   const agreed = monthAgreements(cal.household, profile, monthOf(today));
   const changed = new Map(week.changes.map((c) => [c.id, c.change]));
   const items = week.days.flatMap((d) => d.items.map((i) => ({ ...i, day: d.date })))

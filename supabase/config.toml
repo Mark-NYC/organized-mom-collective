@@ -50,3 +50,9 @@ verify_jwt = false
 
 [functions.resend-contact-sync]
 verify_jwt = false
+
+# Connected calendars (docs/ios/CALENDAR_INTEGRATION.md). Google redirects here without a Supabase JWT, and the
+# scheduled sync sends its own secret. Checks its own callers: her access token (Supabase Auth) for every action on
+# her calendars, the one-time OAuth state for Google's redirect, CALENDAR_CRON_SECRET for sync_due.
+[functions.calendar-connect]
+verify_jwt = false

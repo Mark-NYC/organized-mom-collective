@@ -1,0 +1,32 @@
+---
+/**
+ * /app/calendar-connected: where Google sends her back after connecting Google Calendar from the iPhone app
+ * (docs/ios/CALENDAR_INTEGRATION.md). It opens inside the app's Safari sheet, so it only says how it went and to tap
+ * Done; the app picks up the new calendars when the sheet closes. Not linked anywhere; noindex like every /app page.
+ */
+import Layout from '../../layouts/AppLayout.astro';
+import '../../styles/family-app-brand.css';
+---
+<Layout title="Calendar" description="Connecting your calendar.">
+  <div class="family-brand of-page max-w-xl" data-calendar-connected>
+    <p class="of-eyebrow">Family calendar</p>
+    <h1 class="of-page-title mt-2" data-result-title>Google Calendar is connected</h1>
+    <p class="mt-3 text-[1rem] leading-relaxed text-warm-soft" data-result-text>Tap <strong>Done</strong> to go back to Organized Family. Your main calendar shows there now, just for you; choose what else to show and what the family sees in Calendars.</p>
+    <a href="/app/family-calendar" class="of-btn mt-6" data-result-web>Open the family calendar</a>
+  </div>
+  <script>
+    const r = new URLSearchParams(location.search).get('result');
+    const text: Record<string, [string, string]> = {
+      denied: ['Google Calendar wasn’t connected', 'Nothing changed. Tap Done to go back; you can try again any time.'],
+      scope: ['Google Calendar wasn’t connected', 'Calendar access was left unticked. Tap Done, then try again and allow it.'],
+      too_many: ['Too many calendars', 'You’ve connected the most calendars we allow. Tap Done and remove one first.'],
+      failed: ['Something went wrong', 'Google Calendar couldn’t be connected. Tap Done and try again.'],
+      expired: ['That took too long', 'Tap Done and start again from Calendars.'],
+    };
+    const t = r && text[r];
+    if (t) {
+      document.querySelector('[data-result-title]')!.textContent = t[0];
+      document.querySelector('[data-result-text]')!.textContent = t[1];
+    }
+  </script>
+</Layout>

@@ -38,8 +38,8 @@ tombstones so the other phone hears about them. Pull uses a 5-minute overlap and
 
 ## Not in this milestone (prepared, not built)
 
-- **Google Calendar** (read the calendars she picks, write only to a calendar the app creates): `source` values and the
-  `calendar_connections` design are in `docs/ios/schema-draft.sql`; nothing implemented.
+- **Google Calendar and calendar links**: built (read-only) on 2026-11-18, not live: [CALENDAR_INTEGRATION.md](CALENDAR_INTEGRATION.md).
+  Writing to Google is not built.
 - **AI Family Inbox** (forwarded school and activity email → suggested events, approval required): designed in
   `docs/ios/OMC_APP_ROADMAP.md` §2.4; nothing implemented.
 - Moving a single occurrence (only skip one or change all); push reminders.
