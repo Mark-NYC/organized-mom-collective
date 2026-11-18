@@ -1,4 +1,4 @@
--- Rolls back 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,18 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261204 follow-through on agreements (independent; safe to run alone). Removes the check-in answers families
+-- gave (progress, checked_on, barrier); the agreements themselves stay exactly as they are.
+drop function if exists public.household_agreement_check_in(uuid, text, text, int);
+drop function if exists public.household_follow_through();
+drop function if exists public.household_follow_through_json(public.club_responsibilities);
+alter table public.club_responsibilities
+  drop constraint if exists club_responsibilities_barrier_only_struggling,
+  drop constraint if exists club_responsibilities_follow_through_only_confirmed,
+  drop column if exists barrier,
+  drop column if exists checked_on,
+  drop column if exists progress;
 
 -- ---- 20261203 billing for either adult. To undo ONLY this step use rollback-billing.sql (with capture-billing.sql).
 -- In a full rollback the patched functions come back from restore-functions.sql. Months already kept for a household

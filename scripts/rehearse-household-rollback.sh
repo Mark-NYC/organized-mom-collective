@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rehearses rolling back the household migrations (20261124 → 20261203) on a THROWAWAY local database, the way
+# Rehearses rolling back the household migrations (20261124 → 20261204) on a THROWAWAY local database, the way
 # docs/ios/MIGRATION_DEPLOYMENT_PLAN.md describes it. Never point it at a real project.
 #
 #   PGHOST=localhost PGUSER=postgres PGPASSWORD=… bash scripts/rehearse-household-rollback.sh
@@ -69,7 +69,7 @@ apply "${billing[@]}"
 bad=$(psql_ -d "$DB" -At -F ' | ' -f "$R/verify.sql" | grep -v ' | t | t$' || true)
 [[ -z "$bad" ]] || { echo "VERIFY FAILED after applying:"; echo "$bad"; exit 1; }
 echo "verify: every step applied and ok ($(psql_ -d "$DB" -At -f "$R/verify.sql" | wc -l) checks)"
-for t in household-partners family-calendar family-agreements household-join-from-own household-cleaning-progress; do # (household-club-access reschedules kits, which the older suites count)
+for t in household-partners family-calendar family-agreements household-join-from-own household-cleaning-progress agreement-follow-through; do # (household-club-access reschedules kits, which the older suites count)
   psql_ -d "$DB" -o /dev/null -f "supabase/tests/$t.sql" >/dev/null 2>&1 || { echo "FAILED before rollback: $t"; exit 1; }
 done
 kept=$(psql_ -d "$DB" -At -c "select (select count(*) from public.club_households) || ' households, ' || (select count(*) from public.club_family_members) || ' family members'")

@@ -109,3 +109,17 @@ begin
       from public.club_kits k where k.month = m;
   end loop;
 end $n$;
+
+-- A family that saved November 2026 BEFORE the year fix: its plan was prepared with the old 2027 ages, so Noah (born
+-- May 2017, 9 that November) got the age-10 job. Saved work must stay exactly as saved; the journey checks it.
+insert into public.club_resource_versions (household_id, kit_id, state, profile_version, revision)
+select h, k.id, jsonb_build_object('omc:club:member:2026-11-family-ownership:v1', jsonb_build_object('s', 's', 'v', jsonb_build_object(
+    'familyKey', 'account:' || h,
+    'state', jsonb_build_object('family', 'The Trial', 'familyLine', 'A ready-to-use plan for The Trial', 'planTitle', 'Our School-Night Reset',
+      'goal', 'Tomorrow is ready without Mom managing every step.', 'readyWhen', 'Tomorrow’s bags, clothes, supplies, and plans are ready.',
+      'guideIntro', 'A simple way to move responsibility beyond Mom.', 'familyRule', 'Ask the owner what comes next. Let the owner finish the job.',
+      'people', jsonb_build_array(jsonb_build_object('id', (select id from public.club_family_members where household_id = h and kind = 'child' limit 1),
+        'name', 'Noah', 'kind', 'child', 'label', 'CHILD RESPONSIBILITY', 'job', 'Prepare my school and activity gear', 'when', 'Each evening',
+        'done', 'My bag, clothes and gear are ready.'))))::text)),
+  1, 3
+from (select public.household_id_for('00000000-0000-0000-0000-0000000c1b02') as h) x, public.club_kits k where k.slug = '2026-11-family-ownership';

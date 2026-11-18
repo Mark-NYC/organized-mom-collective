@@ -292,6 +292,16 @@ for (const person of PEOPLE) {
   await page.goto(`${base}/club/resources/${NOV['2026']}`, { waitUntil: 'load' }); await settle(page, 6000);
   check(who, '2026 again after opening 2027: its saved version and its job are unchanged', (await version(NOV['2026'])) === seen['2026'] && (await page.locator('.nvp').innerText()).includes(JOB['2026']));
   await ctx.close();
+  // Saved before the fix (old 2027 ages): opening it keeps the family's saved plan exactly as saved.
+  {
+    const t = await session('trial@e2e.test', 1280);
+    const v = () => sql(`select md5(v.state::text) || ':' || v.revision from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${NOV['2026']}' and v.household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b02')`);
+    const before = await v();
+    await t.page.goto(`${base}/club/resources/${NOV['2026']}`, { waitUntil: 'load' }); await settle(t.page, 6000);
+    const text = await t.page.locator('.nvp').innerText().catch(() => '');
+    check(who, 'a plan saved before the fix stays exactly as saved (its job and its saved version), with the right year label', text.includes('Prepare my school and activity gear') && text.includes('NOVEMBER 2026') && (await v()) === before, before);
+    await t.ctx.close();
+  }
   // (A member's first save of a month resets that month's PENDING order to "not approved by her yet": the existing
   // rule in club_resource_save. Printed and mailed orders are never touched by it.)
   const ordersBeforeAdmin = await orders();
