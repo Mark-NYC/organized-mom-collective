@@ -25,7 +25,7 @@ reading this plan. Migration: `supabase/migrations/20261204000000_agreement_foll
 | Standalone rehearsal (`scripts/rehearse-follow-through.sh`) | preflight → apply → verify (5/5) → counts and functions byte-identical → every agreement row unchanged → follow-through suite (21 checks) → rollback → schema identical (every column, function, constraint) → re-apply → verify |
 | Household rollback rehearsal (CI, `household-db`) | Passes with 20261204 included (run 120) |
 | SQL tests on production's set + 20261204 | 16/16 applicable files, 944 checks |
-| Verified backup | Requested with this commit ([db-backup]); its ID is in the PR once the run completes. Take another right before executing |
+| Verified backup | `backups/20261118T162254Z` (Database backup run 21): restored into a throwaway Supabase, "104 tables and 1001 rows restored exactly; structure identical to the source" (and the second set, 38 tables and 258 rows, likewise). Take another right before executing |
 
 Production function fingerprints (must be identical after applying):
 
