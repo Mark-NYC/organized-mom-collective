@@ -164,7 +164,7 @@ export default function WeeklyMeeting() {
                             <span className="block text-[0.92rem]">{r.description}</span>
                             {r.finished && <span className="mt-0.5 block text-[0.8rem] text-warm-soft">{r.finished}</span>}</span>
                         </div>
-                        <button type="button" className="of-btn of-btn--soft mt-3 !min-h-[44px] w-full sm:w-auto" onClick={() => void agreeTo(person.memberId, r)} data-agree-suggestion>We agreed</button>
+                        <button type="button" className="of-btn of-btn--soft mt-3 !min-h-[44px] w-full sm:w-auto" onClick={() => void agreeTo(person.memberId, r)} aria-label={`We agreed: ${person.firstName}`} data-agree-suggestion>We agreed</button>
                       </li>
                     )))}
                   </ul>
