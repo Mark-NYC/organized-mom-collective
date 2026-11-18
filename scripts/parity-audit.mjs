@@ -107,3 +107,4 @@ for w in os.listdir(out):
         c.save(os.path.join(d, n + '.png'))
 `, OUT]);
 console.log(`parity screenshots → ${OUT}/`);
+process.exit(0); // the local servers would otherwise keep Node running

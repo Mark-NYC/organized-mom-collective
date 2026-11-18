@@ -10,6 +10,7 @@ import { takeSourceParam } from '../lib/entry';
 import { creditMonthly, isOnboarded, keys, pruneOld, setEntrySource, setOnboarded, uncreditMonthly } from '../lib/storage';
 import { progressLine, weekActivity } from '../lib/progress';
 import { ProgressRing, WeekDots } from './Progress';
+import { Progress } from './app/ui';
 import InstallInvite from './InstallInvite';
 import { currentPlatform, isStandalone, restoreHandoff, saveHandoff, shouldOfferInstall } from '../lib/install';
 import { cleaningRoutes } from '../lib/companion';
@@ -204,8 +205,29 @@ function Today({ justStarted }: { justStarted: boolean }) {
       )}
 
       {app && !viewing && <WeekRhythm today={today} />}
-      <header className={app ? 'of-tile of-tile--sage mt-4' : 'border-l-[3px] border-month pl-3.5'} data-cleaning-today>
-        {app && <p className="of-eyebrow mb-2">{viewing ? 'Viewing' : 'Today’s reset'}</p>}
+      {app ? (
+      <header className="of-tile of-tile--sage mt-4" data-cleaning-today>
+        <div className="of-tile-head">
+          <div className="min-w-0">
+            <p className="of-eyebrow">{viewing ? `Viewing · ${longDate}` : `Today’s reset · ${longDate}`}</p>
+            <DayHeading aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`} className="of-tile-title">{viewing ? `${weekday}’s cleaning` : 'Today’s cleaning'}</DayHeading>
+            <p className="of-tile-sub tabular-nums">{routineDone} of {routine} tasks complete</p>
+          </div>
+          {routine > 0 && <span className="of-stat" aria-hidden="true">{Math.round((routineDone / Math.max(routine, 1)) * 100)}%</span>}
+        </div>
+        {routine > 0 && <div className="mt-4"><Progress done={routineDone} total={routine} label="Today’s cleaning progress" /></div>}
+        {!viewing && (
+          <a href={plan.kind === 'weekday' ? '#focus' : '#weekend'} aria-label={`Today’s zone: ${zoneLabel}. Jump to its tasks`} className="mt-3 flex min-h-11 flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span className="label text-muted">Today’s zone</span>
+            <ZoneTag icon={zoneIcon} label={zoneLabel} size="sm" />
+          </a>
+        )}
+        <p aria-live="polite" className="mt-1 min-h-[1.4em] text-[0.92rem] leading-snug tabular-nums">
+          <span key={line} className={`line-in block ${complete && !viewing ? 'font-semibold text-ink' : 'text-muted'}`}>{line}</span>
+        </p>
+      </header>
+      ) : (
+      <header className="border-l-[3px] border-month pl-3.5">
         <div className="flex items-start justify-between gap-3">
           <DayHeading aria-label={viewing ? `Viewing ${longDate}` : `Today, ${longDate}`} className="min-w-0">
             <span className="block text-[1.5rem] leading-tight font-bold tracking-[0.09em] whitespace-nowrap uppercase min-[400px]:tracking-[0.12em] sm:text-[1.75rem]">
@@ -236,6 +258,7 @@ function Today({ justStarted }: { justStarted: boolean }) {
           </span>
         </p>
       </header>
+      )}
 
       <div className={app ? 'mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2 md:gap-5' : 'mt-7 grid grid-cols-[minmax(0,1fr)] gap-6 md:mt-10 md:grid-cols-2 md:gap-x-12'}>
         {!viewing && (
