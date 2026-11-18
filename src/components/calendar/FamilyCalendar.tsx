@@ -7,7 +7,7 @@
  * signing in (saved on this phone); signed in, it's the household's calendar, shared by both grown-ups.
  */
 import { thisDevice } from '../../lib/native/platform';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCalendar, importTypicalWeek, isDemo, type SyncStatus } from '../../lib/calendar/client';
 import { addDays, localToday, occurrences, repeatLabel, timeLabel, weekStart, type CalendarEvent, type Freq, type Occurrence } from '../../lib/calendar/recurrence';
 import { newEventId } from '../../lib/calendar/store';
@@ -18,6 +18,7 @@ import { agreementsByPerson, changeOf, type Change } from '../../lib/family-meet
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import AgreedParts from '../family/AgreedParts';
 import { tint } from '../app/ui';
+import { ConnectedSheet, ImportedSheet, sourceTag } from './ConnectedCalendars';
 
 // In Our Week (the iPhone app) the calendar is free: its sign-in and family setup are Our Week's own, never the Club's.
 // The same on the website and in the app: the free app's sign-in and family setup, never the Club's onboarding.
@@ -48,7 +49,22 @@ export default function FamilyCalendar() {
   const [picked, setPicked] = useState(today);
   const [editing, setEditing] = useState<{ event: CalendarEvent; date: string; isNew: boolean } | null>(null);
   const [importMsg, setImportMsg] = useState('');
-  const events = useMemo(() => Object.values(cal.state.events), [cal.state.events]);
+  // The family's own events and, beside them, connected calendars (Google, school and team links): read-only.
+  const events = cal.all;
+  const [viewing, setViewing] = useState<{ event: CalendarEvent; date: string } | null>(null);
+  const [managing, setManaging] = useState(false);
+  // Back from Google's consent page (website): say how it went once, then tidy the address.
+  const [returned, setReturned] = useState<string | null>(null);
+  useEffect(() => {
+    const url = new URL(location.href);
+    const r = url.searchParams.get('calendar');
+    if (!r) return;
+    setReturned(r);
+    if (r === 'connected') setManaging(true);
+    url.searchParams.delete('calendar');
+    history.replaceState(history.state, '', url);
+  }, []);
+  const needsReconnect = (cal.connected.sources?.mine ?? []).some((c) => c.status === 'reauth');
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i));
   const list = occurrences(events, days[0], days[6]);
   const people = (cal.household?.members ?? []).filter((m) => !m.archived);
@@ -65,7 +81,9 @@ export default function FamilyCalendar() {
     recurrence: null, skip_dates: [], member_ids: [], owner_member_id: null, revision: 0,
   });
   const add = (date: string) => setEditing({ event: blank(date), date, isNew: true });
-  const open = (o: Occurrence) => setEditing({ event: cal.state.events[o.event.id], date: o.date, isNew: false });
+  const open = (o: Occurrence) => (o.event.external
+    ? setViewing({ event: o.event, date: o.date })
+    : setEditing({ event: cal.state.events[o.event.id], date: o.date, isNew: false }));
   const row = (o: Occurrence) => <EventRow key={`${o.event.id}-${o.date}`} o={o} change={changeOf(o.event, now)} colors={cal.colors} household={cal.household} onOpen={() => open(o)} />;
 
   const title = view === 'week'
@@ -80,7 +98,10 @@ export default function FamilyCalendar() {
         <p className="of-eyebrow">Family calendar</p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <h1 className="of-page-title !text-[clamp(1.9rem,6vw,2.5rem)]" data-week-title={view === 'week' ? '' : undefined}>{title}</h1>
-          <button type="button" className="of-btn max-sm:!hidden" onClick={() => add(view === 'month' ? picked : today)} data-add-event>Add event</button>
+          <div className="flex items-center gap-2">
+            {!isDemo() && <button type="button" className="of-btn of-btn--soft" onClick={() => setManaging(true)} data-manage-calendars>Calendars</button>}
+            <button type="button" className="of-btn max-sm:!hidden" onClick={() => add(view === 'month' ? picked : today)} data-add-event>Add event</button>
+          </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="of-seg" role="group" aria-label="Calendar view">
@@ -101,6 +122,22 @@ export default function FamilyCalendar() {
         <div className="family-note mt-4" data-calendar-demo><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm">A made-up family, to show how the calendar looks. Nothing here is shared or synced. <a href={routes.familyCalendar} className="underline">Leave the demo</a>.</p></div>
       )}
       {!isDemo() && <StatusLine status={cal.status} signedIn={cal.signedIn} unsaved={cal.unsaved} waiting={cal.state.outbox.length} />}
+      {returned && (
+        <div role="status" className="family-note mt-4" data-calendar-returned={returned}>
+          <p className="text-sm">{returned === 'connected' ? 'Google Calendar is connected. Your main calendar shows now, just for you. Choose what else to show and what the family sees.'
+            : returned === 'denied' ? 'Google Calendar wasn’t connected. You can try again any time.'
+            : returned === 'scope' ? 'Google Calendar wasn’t connected: calendar access was left unticked. Try again and allow it.'
+            : returned === 'too_many' ? 'You’ve connected the most calendars we allow. Remove one to add another.'
+            : 'Google Calendar couldn’t be connected. Try again.'}</p>
+          <button type="button" className="family-link mt-1" onClick={() => setReturned(null)}>OK</button>
+        </div>
+      )}
+      {needsReconnect && !managing && (
+        <div className="family-note mt-4" data-calendar-reconnect>
+          <p className="text-sm">Google stopped sharing your calendar with us, so those plans may be out of date.</p>
+          <button type="button" className="family-link mt-1" onClick={() => setManaging(true)}>Reconnect</button>
+        </div>
+      )}
       {cal.state.conflicts.length > 0 && (() => {
         const names = (kind: 'changed' | 'refused') => cal.state.conflicts.filter((c) => (c.kind ?? 'changed') === kind).map((c) => `“${c.title}”`);
         const changed = names('changed');
@@ -165,6 +202,7 @@ export default function FamilyCalendar() {
         <div className="of-tile of-tile--month mt-6" data-calendar-empty>
           <h2 className="of-tile-title !mt-0">Put this week where everyone can see it</h2>
           <p className="of-tile-sub">Add practices, appointments and early pickups. Give each one the people it’s for and who’s handling it, so the plan doesn’t live only in your head.</p>
+          {!isDemo() && <button type="button" className="of-btn of-btn--soft mt-4 mr-2" onClick={() => setManaging(true)} data-empty-connect>Bring in Google or a school calendar</button>}
           {cal.signedIn && cal.status !== 'no-household' && (
             <button type="button" className="of-btn of-btn--soft mt-4" data-import-week onClick={async () => {
               try {
@@ -181,6 +219,13 @@ export default function FamilyCalendar() {
       {/* Phones: one clear way to add, above the tab bar. */}
       <button type="button" className="of-btn of-btn--block mt-6 sm:!hidden" onClick={() => add(view === 'month' ? picked : today)} data-add-event>Add event</button>
 
+      {viewing && (
+        <ImportedSheet event={viewing.event} date={viewing.date} household={cal.household} colors={cal.colors}
+          onClose={() => setViewing(null)} onManage={() => { setViewing(null); setManaging(true); }} />
+      )}
+      {managing && (
+        <ConnectedSheet connected={cal.connected} household={cal.household} colors={cal.colors} signedIn={cal.signedIn} onClose={() => setManaging(false)} />
+      )}
       {editing && (
         <EventSheet
           key={editing.event.id}
@@ -299,14 +344,18 @@ function EventRow({ o, change, colors, household, onOpen }: { o: Occurrence; cha
   const who = e.member_ids.map((id) => ({ id, name: name(id), color: colors[id] })).filter((p) => p.name);
   const owner = e.owner_member_id ? name(e.owner_member_id) : null;
   // Like the wall calendar: the color says whose plan it is (the first person it's for); who handles it is in words.
-  const bar = colors[e.member_ids[0] ?? e.owner_member_id ?? '']?.hex ?? '#9aab8f';
+  // From a connected calendar: the family color when she said whose calendar it is, else a quiet gray; a striped bar and
+  // the calendar's name say it's view-only here.
+  const ext = e.external;
+  const bar = colors[e.member_ids[0] ?? e.owner_member_id ?? '']?.hex ?? (ext ? '#a3acb5' : '#9aab8f');
   return (
     <li>
       <button type="button" onClick={onOpen} className="flex w-full items-stretch gap-3 overflow-hidden rounded-[8px] border border-[var(--of-rule)] text-left transition-colors hover:border-[var(--of-rule-strong)]" style={{ background: tint(bar, 0.07) }} data-calendar-event={e.title}>
-        <span aria-hidden="true" className="w-[5px] shrink-0" style={{ background: bar }} />
+        <span aria-hidden="true" className="w-[5px] shrink-0" style={{ background: ext ? `repeating-linear-gradient(180deg, ${bar} 0 6px, transparent 6px 9px)` : bar }} />
         <span className="min-w-0 flex-1 py-2.5 pr-3">
-          <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(e)}{e.recurrence ? ' · repeats' : ''}{change && <span className="cal-change ml-2 align-[1px]" data-change={change}>{change === 'new' ? 'New' : 'Changed'}</span>}</span>
+          <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(ext && e.ends_on ? { start_time: e.start_time, end_time: null } : e)}{e.recurrence ? ' · repeats' : ''}{change && <span className="cal-change ml-2 align-[1px]" data-change={change}>{change === 'new' ? 'New' : 'Changed'}</span>}</span>
           <span className="mt-0.5 block font-semibold text-warm-ink">{e.title}</span>
+          {ext && <span className="mt-1 block truncate text-[0.75rem] text-warm-soft" data-event-source={ext.provider}>{sourceTag(e)} · view only</span>}
           {(who.length > 0 || owner) && (
             <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8rem] text-warm-soft">
               {who.map((p) => <span key={p.id} className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ background: p.color?.hex }} />{p.name}</span>)}

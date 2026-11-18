@@ -32,12 +32,27 @@ export interface CalendarEvent {
   skip_dates?: string[];
   member_ids: string[];
   owner_member_id?: string | null;
-  source?: 'manual' | 'activity';
+  source?: 'manual' | 'activity' | 'google' | 'ical';
   source_ref?: string | null;
+  /** From a connected calendar (Google or a subscribed link): shown here, changed only where it came from. */
+  external?: ExternalInfo;
   /** Server revision this copy matches; 0 = never saved to the server. */
   revision: number;
   deleted?: boolean;
   updated_at?: string;
+}
+
+export interface ExternalInfo {
+  provider: 'google' | 'ical';
+  /** The connected calendar it came from. */
+  sourceId: string;
+  sourceName: string;
+  /** Open it where it lives (only on the adult's own calendars). */
+  url: string | null;
+  /** Her own calendar (true) or shared by the other adult. */
+  mine: boolean;
+  /** Same event on other connected calendars too (shown once). */
+  alsoOn: string[];
 }
 
 export interface Occurrence {
@@ -112,7 +127,8 @@ export function occurrences(events: CalendarEvent[], from: string, to: string): 
         if (!skip.has(d) && repeatsOn(e, e.recurrence, d)) out.push({ event: e, date: d, continued: false });
       }
     } else {
-      const last = e.ends_on && !e.start_time ? e.ends_on : e.starts_on;
+      // Multi-day: all-day family events (a trip), and connected-calendar events that run past midnight (a tournament).
+      const last = e.ends_on && (!e.start_time || e.external) ? e.ends_on : e.starts_on;
       for (let d = e.starts_on > from ? e.starts_on : from; d <= last && d <= to; d = addDays(d, 1)) {
         if (!skip.has(d)) out.push({ event: e, date: d, continued: d !== e.starts_on });
       }

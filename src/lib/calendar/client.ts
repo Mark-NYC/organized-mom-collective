@@ -5,7 +5,7 @@
  * Stored under omc:calendar:v1 (mirrored to native storage in the app; never synced into account_saves, see
  * syncableKey in src/lib/account.ts: the calendar has its own table).
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { accountRpc, accountsEnabled, getSession } from '../account';
 import { accountStore } from '../club/store';
 import { householdAccess } from '../household/api';
@@ -14,6 +14,7 @@ import { memberColors, type MarkerColor } from '../../data/club/family-colors';
 import type { Household } from '../club/profile';
 import { APP_RESUME_EVENT } from '../native/platform';
 import type { CalendarEvent } from './recurrence';
+import { useConnected, type ConnectedHook } from './connected';
 import { adopt, deleteLocal, emptyState, saveLocal, skipOccurrence, sync, type CalendarApi, type CalendarState } from './store';
 
 const KEY = 'omc:calendar:v1';
@@ -64,6 +65,10 @@ export type SyncStatus = 'local' | 'syncing' | 'synced' | 'offline' | 'no-househ
 
 export interface CalendarHook {
   state: CalendarState;
+  /** The family's own events and, beside them, events from connected calendars (read-only): what screens show. */
+  all: CalendarEvent[];
+  /** Google Calendar and subscribed links (src/lib/calendar/connected.ts). */
+  connected: ConnectedHook;
   status: SyncStatus;
   household: Household | null;
   colors: Record<string, MarkerColor>;
@@ -187,12 +192,15 @@ export function useCalendar(): CalendarHook {
     };
   }, [syncNow, load]);
 
+  const connected = useConnected(!isDemo());
+  const all = useMemo(() => [...Object.values(state.events), ...connected.events], [state.events, connected.events]);
+
   const change = (f: (s: CalendarState) => CalendarState) => {
     commit(f(ref.current));
     void syncNow();
   };
   return {
-    state, status, household, signedIn, unsaved,
+    state, status, household, signedIn, unsaved, all, connected,
     colors: household ? memberColors(household) : {},
     // Stamped here so the week before the Family Meeting can say "new" or "changed" before it syncs (the server's
     // own time replaces it once saved).

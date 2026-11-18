@@ -30,7 +30,7 @@ export default function TodayDashboard() {
   const cal = useCalendar();
   const profile = useFamilyProfile(cal.state.scope !== 'local' ? cal.state.scope : null);
   const date = localToday(today);
-  const events = Object.values(cal.state.events);
+  const events = cal.all;
   const week = weekAhead(events, date, today);
   const agreed = monthAgreements(cal.household, profile, monthOf(today));
   const showsClub = useShowsClub() && visibleFeatures().some((f) => f.id === 'club');
@@ -60,7 +60,7 @@ type Week = ReturnType<typeof weekAhead>;
 type Style = { order: number };
 
 function TodayPlans({ date, cal, week, style }: { date: string; cal: Cal; week: Week; style: Style }) {
-  const list = occurrences(Object.values(cal.state.events), date, date);
+  const list = occurrences(cal.all, date, date);
   const name = (id?: string | null) => (id ? cal.household?.members.find((m) => m.id === id)?.firstName : undefined);
   const color = (id?: string | null) => cal.colors[id ?? '']?.hex ?? '#8fa686';
   // Nothing today: the next plan this week, so the tile still says something useful.
