@@ -117,6 +117,7 @@ const send = (res, status, body) => {
   res.end(body === undefined ? '' : typeof body === 'string' ? body : JSON.stringify(body));
 };
 
+let calendarFeeds = null;
 const server = createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*');
   res.setHeader('Access-Control-Allow-Headers', 'apikey, authorization, content-type, prefer, x-client-info');
@@ -163,6 +164,18 @@ const server = createServer(async (req, res) => {
         asUser(user, `delete from public.account_saves where key = ${q(key ?? '')}`);
         return send(res, 204);
       }
+    }
+    // ---- the calendar-feeds Edge Function: the real handler (supabase/functions/_shared/handlers/calendar-feeds.ts),
+    // with the database as the service role and fixtures on this machine allowed. The scheduled mode uses 'e2e-cron'.
+    if (url.pathname === '/functions/v1/calendar-feeds') {
+      calendarFeeds ??= (await import('../../supabase/functions/_shared/handlers/calendar-feeds.ts')).createCalendarFeedsHandler({
+        db: { rpc: async (name, args = {}) => JSON.parse(psql(callSql(name, args)) || 'null') },
+        getUser: async (t) => { const s = tokens.get(t); return s && s.exp > Date.now() ? { id: s.sub } : null; },
+        fetch, now: () => Date.now(), cronSecret: 'e2e-cron', allowPrivateHosts: true,
+      });
+      const r = await calendarFeeds(new Request(`http://127.0.0.1${url.pathname}`, { method: req.method, headers: Object.fromEntries(Object.entries(req.headers).filter(([, v]) => typeof v === 'string')), body: req.method === 'POST' ? raw : undefined }));
+      res.writeHead(r.status, { 'Content-Type': 'application/json' });
+      return res.end(await r.text());
     }
     return send(res, 404, { message: `not served by the e2e backend: ${req.method} ${url.pathname}` });
   } catch (e) {
