@@ -1,14 +1,33 @@
 # Organized Family + Family Meeting Club: unified architecture (Stage 1)
 
-Status 2026-11-18: **proposal for owner approval. Nothing here is built yet** beyond the Club-inside-the-app shell on
-branch `claude/club-integration` (app header and tabs on every Club page, Club bar, Family Club tile, kept-months
-tile, Club journey test). No migrations, billing, entitlement or production data changes are proposed.
+Status 2026-11-18: **approved in principle by the owner, with the decisions in §0.** Stage 2 is built on branch
+`claude/unified-family-meeting` (stacked on `claude/club-integration`, the Club-inside-the-app shell). Nothing is merged,
+deployed or applied to production. Production was only read.
+
+**Product principle (owner, 2026-11-18): the Club is not a second meeting system or a separate resource portal. It is
+the personalized guidance layer of Organized Family.**
 
 **The one-line model.** Organized Family organizes the week. The Club personalizes how the family grows. The weekly
 Family Meeting is where they meet: free families run it from their own week; Club families run it with their
 month's prepared plan inside it.
 
 ---
+
+## 0. Owner decisions (2026-11-18)
+
+| # | Decision | What it means here |
+| --- | --- | --- |
+| 1 | **October 2027 is Our Family Sunday Reset.** | Audit in §6a. Not a rename: the Daily Reset generates different content. Prepared, not switched (§9, step 1c). |
+| 2 | **Keep the four parts:** Our Focus · Let's Talk · Everyone's Part · Let's Practice. | The weekly meeting uses them unchanged; printed guides and kits stay compatible. |
+| 3 | **Free families get profile questions progressively.** | Never the five-step intake up front. One question at a time, only where it changes what they see right then (§8). Club rules and data untouched. |
+| 4 | **Club discovery and conversion on the website, after real value.** | iPhone app: members keep full access; no purchase prompts, no Club selling, pending a separate App Store compliance review. |
+| 5 | **Hide audio until recordings exist.** | The `audio` field and player slot stay; nothing says "audio coaching" while no month has a file. |
+| 6 | **Migration 20261202: prepare and verify only.** | Diff, effects, rollback, rehearsal and a verified backup in §10. Production execution waits for final approval. |
+
+**Critical priority:** one weekly Family Meeting for everyone. Free: the four parts with basic guidance. Club: the same
+meeting, carrying the family's personalized month (children's ages, the month's theme, their challenges and priority),
+and what they agree is followed through in weeks 2–4 with the existing framework (on my own · needs reminders ·
+struggling).
 
 ## 1. Audit: how the app and the Club relate today (from the code)
 
@@ -114,31 +133,130 @@ Nothing free gets restricted. The difference is personalization and the printed,
 | Family | Home of all three surfaces above. The Club is a section of Family, reached by tiles and the Club bar; never a fifth tab. |
 | Account (profile) | Membership status; billing link on the website only, payer only. |
 
-## 6. Approved monthly content: repository vs your list (flag for review)
+## 6. Approved monthly content
 
-Source of truth used: `src/data/club/kits/*.ts` and the month pages.
+Superseded by the fuller audit in §6a (October) and §6b (every month, including production).
 
-| Month | Your list | Repository | Status |
-| --- | --- | --- | --- |
-| Nov 2026 | Our Family, Our Team | Our Family, Our Team (responsibility chart) | Match |
-| Dec 2026 | Give to Others | Our Christmas Kindness Mission | Match in substance; title differs |
-| Jan 2027 | Family Meeting Introduction | Our First Family Meeting (four parts) | Match. Prod title fix is migration 20261202, **not applied** |
-| Feb 2027 | Family Connection | Better Together / Connection Challenge | Match |
-| Mar 2027 | Spring Clean as a Team | Our Family Spring Prep | Match |
-| Apr 2027 | Dinner Team | Our Family Dinner Team | Match |
-| May 2027 | Our Family Summer Rhythm | Our Family Summer Rhythm | Match (slug `finish-the-school-year`, legacy) |
-| Jun 2027 | I Can Make My Own Snack | Snack station | Match |
-| Jul 2027 | I'm Bored! What Can I Do? | What Can I Do Right Now? | Match |
-| Aug 2027 | Back to School | My School Day | Match |
-| Sep 2027 | Habit Cards | Our Family Habit Cards | Match. Prod title fix in 20261202, **not applied** |
-| Oct 2027 | Our Family Sunday Reset | **A Home That Works Together: the Daily Reset** (Sunday Reset moved off October in Oct 2026; `SeptemberSundayReset.astro` is unused) | **Mismatch: decide** |
+## 6a. October: Daily Reset vs the approved Sunday Reset (decision 1)
 
-**Also wrong:** Club Home's "Your year" strip (`src/components/AppKitLibrary.tsx`, a hard-coded list) shows older
-outcome titles that contradict the registry: January "Stop Being the Family's Calendar", February "Laundry That
-Isn't All on You", September "School Routines Without the Nagging", October "Less Asking. More Doing.". Members see
-this today. Fix: read titles from the kit registry.
+Three different Octobers exist in the repository today:
 
-## 7. Preservation plan: must not change
+| Where | What it is |
+| --- | --- |
+| Member page `/app/club/october` and `/club/resources/2027-10-…` | **Daily Reset** ("Less asking. More doing."): `OctoberDailyReset.astro`, `OctoberPlanMobile.astro`, engine `engines/daily-reset.ts`. A child-facing daily cleanup sheet: one area (whole home, bedroom, playroom, living room), one trigger ("Before Dinner"…), two or three cleanup jobs from `JOB_OPTIONS` with icons, a finish line; a parent back page. Moved here from September in Oct 2026. |
+| Kit registry `2027-10-home-works-together.ts` and its mailer draft | **"A Home That Works Together" / Our Fall Home Reset**: a five-item fall checklist and a chore-chart tool (`tool: 'chore-chart'`), mailer `docs/club/mailers/2027-10-home-works-together.md` (draft, not printed). |
+| Monthly meeting content `src/data/club/family-meeting.ts` (month 10) | "Daily home reset and shared spaces", resource "Our 5-Minute Reset": written for the Daily Reset. |
+| Orphaned | **Sunday Reset**: engine `engines/sunday-reset.ts`, printable `SeptemberSundayReset.astro`, phone screen `SeptemberPlanMobile.astro`, artwork in `public/images/club/october/` (it was designed for October). Three fixed Sunday steps (Look ahead · Prepare early · Share the work), a weekly role per person by age, three fall jobs, a chosen Sunday moment ("Sunday after lunch"). Only reachable today through the legacy `/club/resources/2027-09-…` route. |
+
+**The approved theme already exists as finished work: the Sunday Reset.** Aligning October means switching which
+existing printable October uses, not writing a new one. Exactly what changes:
+
+1. `/app/club/october`: render the Sunday Reset (printable, phone screen, desktop rail) instead of the Daily Reset.
+2. `/club/resources/[slug]`: October → Sunday Reset; September stops rendering the Sunday Reset (see §6b).
+3. Registry `2027-10-home-works-together.ts`: theme "Our Family Sunday Reset", the subtitle, action and tool from the
+   Sunday Reset's own text (`DEFAULT_TAGLINE` "Look ahead. Get ready. Share the work.", `SUNDAY_STEPS`). **Slug
+   unchanged** (entitlements, saved work and QR codes are keyed by it).
+4. Meeting content month 10: theme and questions for the Sunday Reset, written from its existing text.
+5. Mailer draft: rewritten from the Sunday Reset printable. **Copy needs your review** before it's final.
+6. Production title `club_kits` October: "Our Family Sunday Reset" (part of the title migration in §10b).
+7. Bring the Sunday Reset up to the shared personalization foundation it predates: ages for the kit's month through
+   `personalize/family.ts` (it hard-codes January 2027), roles that respect the account-holder rule the same way.
+   The fixed steps, artwork and layout stay.
+8. The Daily Reset is kept in the code, unassigned (a good candidate for a later month or a free tool). Nothing deleted.
+
+Risk: none for members (October 2027 is a draft; 0 holders, 0 saved versions in production, read 2026-11-18).
+
+## 6b. What members actually open, month by month (repository vs your list vs production)
+
+Production `club_kits` read-only on 2026-11-18. "Member page" is what `memberPlanHref` opens.
+
+| Month | Your list | Member page today | Registry theme | Production title | Action |
+| --- | --- | --- | --- | --- | --- |
+| Nov 26 | Our Family, Our Team | Ownership plan | Our Family, Our Team | Our Family, Our Team | — |
+| Dec 26 | Give to Others | Christmas Kindness Mission | Your Christmas Mission Has Arrived! | Your Christmas Mission | Wording only: **you choose the title** |
+| Jan 27 | Family Meeting Introduction | Meeting guide (four parts) | Our First Family Meeting | **A Fresh Start, Together** (scheduled, 12 holders) | 20261202 |
+| Feb 27 | Family Connection | **Laundry guides** | Better Together (Connection Challenge) | Better Together | **Substance mismatch: decide** (connection cards exist on the legacy route only) |
+| Mar 27 | Spring Clean as a Team | **Our Family Rhythm first**, Spring Prep as second tab | Our Family Spring Prep | Spring Clean as a Team | **Decide** which leads |
+| Apr 27 | Dinner Team | Dinner Team | Everybody Helps at Mealtime | Everybody Helps at Mealtime | Wording only |
+| May 27 | Our Family Summer Rhythm | Summer Day | Our Family Summer Rhythm | **Finish the School Year Well** | Title fix |
+| Jun 27 | I Can Make My Own Snack | Snack Station | My Family's Snack Station | **Summer With a Plan** | Title fix |
+| Jul 27 | I'm Bored! What Can I Do? | Activity board | What Can I Do Right Now? | **Ready to Go** | Title fix |
+| Aug 27 | Back to School | School routines | My School Day | Ready for the School Year | Wording only |
+| Sep 27 | Habit Cards | Habit Cards | Our Family Habit Cards | **A Week Everyone Can See** | 20261202 |
+| Oct 27 | Our Family Sunday Reset | **Daily Reset** | A Home That Works Together | A Home That Works Together | §6a |
+
+Also wrong today, fixed in step 1 (no production change):
+- Club Home's year strip (`AppKitLibrary.tsx`) is a hard-coded list of old titles. It will read the registry.
+- The legacy route `/club/resources/<slug>` renders stale printables for January (Habit Cards) and September (Sunday
+  Reset); members are no longer sent there, but old emails and bookmarks are. It will send every month except
+  November to the member page, keeping the link working.
+- `docs/editorial/SEASONAL_ACQUISITION_PLAN.md` still lists January 2027 as Habit Cards.
+
+**Title rule I recommend:** production `club_kits.title` = the registry `theme` (what the kit itself says), set by
+guarded migrations that touch a row only while it still carries the old seed title. You approve the exact title per
+month in the table above before any second title migration is written.
+
+## 7. Follow-through (decision: check-ins in weeks 2–4)
+
+**What exists** (`src/lib/club/family-plan.ts`, never wired): `Commitment` (only from the family's own choice, with
+`progress`), `CheckInAnswer` = `on-own` · `reminders` · `struggling` · `moved-on`, an optional barrier after
+struggling (`forgets`, `too-hard`, `not-set-up`, `not-interested`, `schedule`, `other`) mapped to one habit principle
+(`BARRIER_PRINCIPLE`), `nextStep()` (celebrate · continue · adjust · retire) and `checkInDue()` (every 6 weeks).
+
+**What the family already makes:** agreements ("We agreed"), stored as `confirmed` rows in `club_responsibilities`,
+shared by both adults, synced offline with revisions. These are the commitments. There is **no column for a check-in**.
+
+**Design (reuses the rules, adds storage only):**
+- Each agreement gets `progress` (`practicing` · `improving` · `independent` · `struggling`), `last_checked_on`, and
+  `barrier`. One new migration (`20261204000000_agreement_follow_through.sql`) adds the three nullable columns and one
+  function, `household_agreement_check_in(p_id, p_answer, p_barrier, p_base)`, with the same household, revision and
+  two-adult rules as `household_agreement_save`. No existing row changes; old clients ignore the fields.
+- **Cadence:** weekly instead of six-weekly, for agreements 7+ days old not yet checked this week, stopping once one
+  is `independent` twice in a row or retired. `checkInDue` gains a `days` argument; the 42-day default stays for any
+  other caller.
+- **In the meeting:** Let's Talk opens with "How did it go?" for each due agreement: three answers on screen
+  (On my own · Needs reminders · Struggling). Struggling asks the optional barrier and shows the one adjustment from
+  `nextStep()`. "We're done with this" is the existing remove. On my own is celebrated ("Mia owns it now").
+- **Through the week:** Today and Family show each agreement's progress dot, and Club Home's "what's next" uses it.
+- **Needs your approval to apply.** Until applied, the meeting hides check-ins (the function is absent) and
+  everything else works.
+
+## 8. Progressive profiling for free families (decision 3)
+
+Same tables and functions as the Club intake (`club_activities_save`, `club_responsibilities_save`,
+`club_focus_save`; none requires a membership). One question, at the moment it pays off, never a wizard:
+
+| Moment | Question (existing step) | Immediate value |
+| --- | --- | --- |
+| After the first meeting's Everyone's Part | "What's hardest to share at home?" (challenges) | Next week's Let's Talk asks about it |
+| My Family, members added | "Who already does what?" (responsibilities, existing) | My Family shows it; the meeting stops suggesting what's already owned |
+| Second meeting | "The one thing you'd love to stop managing alone?" (priority) | Our Focus names it |
+
+Each answer marks its step in `setup_done`, so the Club intake later skips it (existing rule, `nextOpenStep`). Club
+members' answers and rules are untouched.
+
+## 9. Implementation sequence and acceptance criteria (Stage 2)
+
+| Step | Work | Acceptance criteria |
+| --- | --- | --- |
+| **1a** Titles in the app | Club Home year strip reads the kit registry; legacy `/club/resources/<slug>` sends non-November months to the member page | Every month name on Club Home equals the registry theme (unit test over all 12); `/club/resources/2027-01-…` lands on `/app/club/january` signed in or out; November's route unchanged; QR and email links still open |
+| **1b** Migration 20261202 | Prepared, rehearsed, backed up (§10) | Rehearsal on a production-shaped copy changes exactly 2 rows, is idempotent, leaves admin-edited titles, entitlements and saved versions unchanged; rollback rehearsed; verified backup ID recorded |
+| **1c** October | Sunday Reset switch per §6a, steps 1–4, 7; mailer copy drafted for review | `/app/club/october` shows the Sunday Reset on phone and desktop; prints two sheets; personalization by kit-month ages; Daily Reset still builds; snapshot tests updated deliberately |
+| **2** One weekly meeting | `/app/family/meeting` is the meeting for everyone; the monthly page's meeting view links to it for the week; four part names unchanged | Free: week ahead, agreements, four parts, "We agreed" works as before (family e2e passes). No second meeting component: both pages render from one module |
+| **3** Club personalization in the meeting | For members, the weekly page shows `buildFamilyMeeting()` output for the current month (focus, prepared questions, age-fit suggestions, practice step, link to the month's resource) | Same family + month gives identical focus, questions and suggestions on the weekly and monthly pages (test from one fixture); a free household never receives month content (server: `club_resource_get` refused; UI shows none); partner sees the same as the owner |
+| **4** Follow-through | Migration 20261204 written and tested locally; check-ins in Let's Talk; progress on Today/Family | Rolled-back SQL test: both adults can check in, outsiders refused, revisions enforced; UI: due rules (7 days, weekly), three answers, barrier → one adjustment; hidden cleanly when the function is absent |
+| **5** Club dashboard and navigation | Club Home leads with "Prepared for your family" (ages, theme, priority it used: the engine's `used`), this week's meeting and follow-through; audio mentions hidden | Club Home shows what was prepared and why without the year strip first; no "audio" text anywhere while no month has a file; app and website identical |
+| **6** Progressive profiling | The three moments in §8 for free families, website and app | One question per moment, skippable, saved to the existing functions, `setup_done` marked; a later Club intake skips answered steps (e2e) |
+| **Throughout** | Tests and screenshots | Unit tests, family e2e (web + app), Club journey (free, trial + second adult, active, canceled, beta grant; 393 and 1280), axe, app-shell smoke, iOS simulator on CI; rendered screenshots of every changed screen |
+
+Out of scope without separate approval: applying any migration, production title changes, February and March content,
+the October mailer's final copy, any App Store-facing purchase change.
+
+## 10. Migration 20261202: preparation package
+
+Filled in as the preparation runs; see §10 in the next revision.
+
+## 11. Preservation plan: must not change
 
 Kit definitions and engines; `personalize/` rules and snapshots; month pages, printables, previews (`?thumb=1`),
 fulfillment views (`?fulfillment=`, bare); approval and cutoff (`club_resource_versions`, mailings,
@@ -149,31 +267,3 @@ purchasing or Club selling in the iPhone app.
 
 Verified on the test backend: free refused November; trial, active, partner, beta grant open it; canceled keeps
 November read-only; partner refused the mailing address and shown no billing.
-
-## 8. Prioritized implementation plan (after approval)
-
-| # | Work | Size | Risk |
-| --- | --- | --- | --- |
-| 0 | Ship the shell already built (Club inside the app; journey test 62 web / 58 app checks) | done, PR pending | Low |
-| 1 | Club Home year strip reads the kit registry | S | Low |
-| 2 | My Family: show the profile (who does what, priorities) with edit links to the existing FamilySetup steps; free families may answer optionally | M | Low: existing functions, no migration |
-| 3 | Weekly meeting for members reuses `family-meeting.ts` output inside the four parts; suggestions become agreements with `source` | M | Medium: must match the monthly page's output exactly (test both from one fixture) |
-| 4 | Weekly check-in on commitments (`family-plan.ts` rules), stored as an agreement update, no new table | M | Medium: confirm storage fits `club_responsibilities` without a migration; if not, stop and ask |
-| 5 | Website-only Club discovery line, personalized with her children's ages and stated challenge | S | Low |
-| 6 | Club Home "what was prepared for your family and why" header from the month's snapshot (ages, priority) | S | Low |
-| 7 | Month-to-month continuity on Club Home (last month's commitments) | M | Medium |
-
-Tests for each: family e2e, Club journey (all six households, web + app, 393 / 1280), unit tests on the engine
-fixture, axe, iOS simulator, screenshots.
-
-## Decisions I need from you
-
-1. **October 2027:** Sunday Reset (your list) or the Daily Reset now in the repository?
-2. **Meeting part names:** keep Our Focus · Let's Talk · Everyone's Part · Let's Practice and map your five steps
-   into them (recommended), or rename (changes printed guides and January's kit)?
-3. **Free families answering the profile** (challenges, priority, who does what) in My Family: yes (recommended:
-   better free meeting, shorter Club intake, personalized Club discovery) or Club-only as today?
-4. **Club discovery stays website-only** and appears only after a first meeting (recommended; the iPhone app keeps
-   never mentioning the Club to free families)?
-5. **Audio coaching:** hide every mention until recordings exist (recommended)?
-6. **Migration 20261202** (January and September titles in production): still awaiting your separate approval.
