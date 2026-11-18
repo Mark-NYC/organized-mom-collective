@@ -11,9 +11,9 @@
  * edit and fulfillment prints: January 2027 is "Our Family Focus" and September "Our Family Habit Cards"
  * (the same as src/data/club/family-meeting.ts → resourceTitle and the public Club page; fixed Nov 2026).
  *
- * Known gap: `component` is the older member copy at /club/resources/<slug>, which still renders the earlier printables
- * for January (Habit Cards), February, March and September. Members are sent to the app tools instead (memberPlanHref);
- * repointing those old pages is a separate change.
+ * `component` is the older member copy at /club/resources/<slug>. Since Nov 2026 that page forwards to the app tool
+ * (memberPlanHref) for every month except November (whose tool it is) and January 2027 (two families saved Habit Cards
+ * there; kept until the owner decides how to carry that work over). docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §6b.
  */
 export interface ClubResource {
   slug: string;
