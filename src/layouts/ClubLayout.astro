@@ -1,7 +1,9 @@
 ---
 /**
- * Organized Family Club member pages (/club/…): noindex, no GA4 or Pinterest tag (family names are on these pages),
- * no site header, footer, sales elements, manifest or service worker. Security headers: public/_headers.
+ * Family Meeting Club member pages (/club/…): part of Organized Family, so the app's own header and four tabs (Nav)
+ * with the Club's bar under them (ClubNav), on the website and in the iPhone app (docs/ios/CLUB_INTEGRATION.md).
+ * Noindex, no GA4 or Pinterest tag (family names are on these pages), no site footer, sales elements, manifest or
+ * service worker. Security headers: public/_headers. An admin's fulfillment print view (?fulfillment=) is bare.
  *
  * Behind PUBLIC_CLUB_ENABLED (src/data/club/config.ts). Off, the page is a one-line notice: no member app code, no
  * kit content, nothing linked. `astro dev` always shows the pages.
@@ -10,7 +12,8 @@ import BaseLayout from './BaseLayout.astro';
 import { clubEnabled, CLUB_NAME } from '../data/club/config';
 import '@fontsource/kalam/latin-700.css';
 import '../styles/club.css';
-import AppTabBar from '../components/AppTabBar.astro';
+import Nav from '../components/Nav.astro';
+import '../styles/family-app-brand.css';
 
 interface Props {
   title: string;
@@ -24,7 +27,12 @@ const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 
 <BaseLayout title={`${title} · ${CLUB_NAME}`} description={`${CLUB_NAME} member pages.`} robots="noindex" tracking={false}>
   <meta slot="head" name="referrer" content="no-referrer" />
-  <div class="min-h-screen bg-ivory text-warm-ink">
+  <script is:inline slot="head">
+    // An admin's print view of a member's order: the printable only, no app chrome.
+    try { if (new URLSearchParams(location.search).has('fulfillment')) document.documentElement.classList.add('omc-bare'); } catch (e) {}
+  </script>
+  {enabled && <Nav club />}
+  <div class="of-club-layout min-h-screen bg-[var(--of-bg)] text-warm-ink">
     {
       enabled ? (
         <slot />
@@ -38,7 +46,6 @@ const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
       )
     }
   </div>
-  {appShell && enabled && <AppTabBar club />}
   {appShell && <script>import '../lib/native/init';</script>}
   {appShell && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); } html.omc-native body::before { content: ''; position: fixed; inset: 0 0 auto 0; height: env(safe-area-inset-top); background-color: inherit; z-index: 1000; pointer-events: none; }</style>}
 </BaseLayout>

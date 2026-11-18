@@ -105,3 +105,35 @@
   .family-brand .ofc-month-feature-preview{padding:6px}
   .family-brand .ofc-year-strip{grid-auto-columns:46%}
 }
+
+/* ===================================================================================================================
+   Family Meeting Club inside Organized Family (docs/ios/CLUB_INTEGRATION.md): Club Home and Monthly Resources on the
+   app's design system (family-app-brand.css: --of-* tokens, tiles, buttons). Presentation only; each month card keeps
+   its approved month color (src/theme.ts). The printables and kit artwork have their own styles and are untouched.
+   =================================================================================================================== */
+.family-brand :is(.ofc-home-hero,.ofc-this-week,.ofc-month-feature,.ofc-kit-band,.ofc-home-foot,.ofc-member-kit,.ofc-club-intro){
+  border:1px solid var(--of-rule);border-radius:var(--of-radius);background:var(--of-surface);box-shadow:var(--of-shadow);padding:clamp(20px,3.2vw,30px);margin-top:16px}
+.family-brand :is(.ofc-home-hero,.ofc-this-week){background:var(--of-month-wash);border-color:transparent}
+.family-brand .ofc-this-week{border-left:0}
+.family-brand .ofc-kit-band{background:var(--of-sage);border-color:transparent}
+.family-brand .ofc-club-intro{background:var(--of-month-wash);border-color:transparent}
+.family-brand :is(.ofc-home-hero,.ofc-this-week,.ofc-month-feature,.ofc-kit-band,.ofc-home-foot,.ofc-club-intro) .label{color:var(--of-month-accent);font-size:.68rem;letter-spacing:.18em}
+.family-brand .ofc-kit-band .label{color:var(--of-sage-ink)}
+.family-brand :is(.ofc-home-title,.ofc-this-week-title,.ofc-month-feature-title,.ofc-app-month-header h3,.ofc-year-title,.ofc-home-family-name){color:var(--of-ink)}
+.family-brand :is(.ofc-home-lede,.ofc-kit-status,.ofc-app-month-detail p){color:var(--of-soft)}
+.family-brand .ofc-member-cta{min-height:48px;padding:0 20px;border-radius:8px;background:var(--color-warm-button,#4a3f3e);font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.family-brand .ofc-member-cta:hover{background:#3a302f}
+.family-brand :is(.ofc-home-link,.ofc-app-month-detail a,.ofc-home-foot-links a,.ofc-home-start a,.ofc-home-list a){display:inline-flex;align-items:center;min-height:44px;color:var(--of-ink);font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}
+.family-brand :is(.ofc-home-link,.ofc-app-month-detail a,.ofc-home-foot-links a):hover{text-decoration:underline;text-underline-offset:5px}
+.family-brand .ofc-app-month-detail strong{color:var(--of-ink)}
+.family-brand .ofc-app-month{border:1px solid var(--of-rule);border-radius:var(--of-radius);box-shadow:var(--of-shadow);background:var(--of-surface)}
+.family-brand .ofc-app-month-name{color:var(--of-ink);opacity:.8}
+.family-brand :is(.ofc-app-month-tag,.ofc-year-tag){border-radius:6px;font-weight:600}
+.family-brand .ofc-year-strip a{border-radius:9px;border-color:var(--of-rule);background:var(--of-surface);box-shadow:var(--of-shadow)}
+.family-brand .ofc-year-strip [data-held] .ofc-year-tag{background:var(--of-sage);color:var(--of-sage-ink)}
+.family-brand .ofc-year-month{color:var(--of-soft)}
+.family-brand .ofc-month-feature-preview{background:#f6f2ec;border-radius:8px}
+.family-brand .ofc-family-people li{border-color:var(--of-rule);background:var(--of-surface)}
+.family-brand .ofc-tracker li[data-state="done"] > span:first-child,.family-brand .ofc-tracker li[data-state="done"]::before,.family-brand .ofc-tracker li[data-state="current"]::before{background:var(--of-sage-bar);border-color:var(--of-sage-bar)}
+.family-brand .ofc-tracker li[data-state="current"] > span:first-child{border-color:var(--of-sage-bar);box-shadow:0 0 0 4px var(--of-sage)}
+.family-brand [data-club-membership]{margin-top:16px}

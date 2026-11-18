@@ -154,3 +154,25 @@ a.of-list-item:hover{background:#faf6f0}
 .of-tile--sage .text-muted{color:#5c5754}
 /* Soft text on a month tile: a touch darker so every month's tint keeps AA (October's is the warmest). */
 .of-tile--month :is(.of-tile-sub,.text-warm-soft){color:#5f5754}
+
+/* The Family Meeting Club's bar under the app header (src/components/club/ClubNav.tsx) */
+.of-clubbar{max-width:72rem;margin:0 auto 22px;font-family:var(--font-sans);color:var(--of-ink)}
+.of-clubbar-trail a{color:inherit;text-decoration:none}
+.of-clubbar-trail a:hover{text-decoration:underline;text-underline-offset:4px}
+.of-clubbar-trail a:last-child{color:var(--of-month-accent)}
+.of-clubbar-seg{margin-top:10px;display:flex;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.of-clubbar-seg::-webkit-scrollbar{display:none}
+.of-clubbar-seg > a{flex:1 0 auto}
+.of-clubbar-row{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+/* On the Club's own pages (ClubLayout) the bar sits above each page's content, so it carries the page gutter. */
+.of-club-layout > .of-clubbar,.of-club-layout .of-clubbar:first-child{padding:22px 20px 0;margin-bottom:6px}
+@media(min-width:640px){.of-club-layout > .of-clubbar,.of-club-layout .of-clubbar:first-child{padding:30px 32px 0}}
+
+/* A month's page (/app/club/<month>): its interface on the app's controls, its own month color for the selected view.
+   The meeting content, the tool and the printable keep their own styles (ClubFamilyMeeting, the month's printable). */
+html .fm-switch{border-radius:12px;border-color:var(--of-rule);background:var(--of-surface);box-shadow:var(--of-shadow)}
+html .fm-switch button{border-radius:9px;letter-spacing:.06em;text-transform:none;font-size:.82rem}
+html .fm-switch button[aria-pressed="true"]{background:color-mix(in srgb,var(--fm-month,var(--of-month)) 45%,#fff);color:var(--of-ink)}
+html .fm-actions button,html .cp-primary,html .cp-square{border-radius:8px}
+html .fm-actions .fm-print,html .cp-primary:not([aria-disabled="true"]){background:var(--color-warm-button,#4a3f3e)}
+html .cp-bar{background:color-mix(in srgb,var(--of-bg) 96%,transparent);backdrop-filter:blur(8px)}

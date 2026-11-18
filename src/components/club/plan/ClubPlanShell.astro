@@ -17,6 +17,7 @@ import ClubPrintableProof from './ClubPrintableProof.astro';
 import ClubPrintStyles from './ClubPrintStyles.astro';
 import WelcomeKitConfirm from './WelcomeKitConfirm';
 import { ClubNavForMembers } from '../ClubNav';
+import { monthTints } from '../../../lib/club/month-tints';
 
 interface Props {
   /** The month's kit. Not used by the Welcome resource (context="welcome"). */
@@ -45,7 +46,14 @@ const { kitSlug, month, sides, storageKey, class: cls = '', meeting = true, cont
 const welcome = context === 'welcome';
 const kit = welcome ? null : kitBySlug(kitSlug ?? '');
 if (!welcome && !kit) throw new Error(`Unknown kit ${kitSlug}`);
+// This page's month sets the app's accent (the Club bar, selected states), so February looks like February whenever
+// it's opened (src/theme.ts via monthTints). Family member colors never change with the month.
+const t = kit ? monthTints(kit.month) : null;
+const PAGE_MONTH = t ? [t.base, t.weeks[0], t.accent] : null;
 ---
+{PAGE_MONTH && <script is:inline define:vars={{ PAGE_MONTH }}>
+  try { const r = document.documentElement.style; r.setProperty('--of-month', PAGE_MONTH[0]); r.setProperty('--of-month-wash', PAGE_MONTH[1]); r.setProperty('--of-month-accent', PAGE_MONTH[2]); } catch (e) {}
+</script>}
 <!-- A signed-in member: the Club nav, and her Welcome Kit confirmation when this is her first month (both render nothing otherwise). -->
 <ClubNavForMembers client:only="react" />
 {!welcome && <WelcomeKitConfirm client:only="react" kitSlug={kitSlug!} />}

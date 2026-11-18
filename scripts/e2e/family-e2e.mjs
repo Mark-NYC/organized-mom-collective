@@ -366,7 +366,16 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   const parts = await nora.locator('[data-meeting-part]').evaluateAll((els) => els.map((e) => e.getAttribute('data-meeting-part')));
   check('free: the weekly Family Meeting has the four parts in order', parts.join() === 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice', parts.join(' · '));
   await nora.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
-  const famText = await nora.locator('body').innerText();
+  // The website's Getting started list may name the Club once, as a step for a new family; never a card, never in the app.
+  const famText = await nora.evaluate((web) => {
+    const step = web ? [...document.querySelectorAll('[data-getting-started] [data-step="club"]')] : [];
+    step.forEach((e) => { e.style.display = 'none'; });
+    const text = document.body.innerText;
+    step.forEach((e) => { e.style.display = ''; });
+    return text;
+  }, WEB);
+  if (WEB) check('free (website): the Club appears only as a Getting started step, linking to the public page', (await nora.locator('[data-getting-started] [data-step="club"][href="/club"]').count()) <= 1);
+  else check('free (app): the Club is never mentioned', (await nora.locator('[data-step="club"]').count()) === 0);
   await nora.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
   check('free: no Family Meeting Club card on Today or Family for a family without the Club', (await nora.locator('[data-club-month], [data-family-club-card]').count()) === 0 && !/family meeting club|membership/i.test(famText) && !/family meeting club|membership/i.test(await nora.locator('body').innerText()));
   await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);

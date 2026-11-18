@@ -10,6 +10,7 @@ import { ageInMonth, monthOf, type Household } from '../lib/club/profile';
 import { SETUP_STEPS, type FamilyProfile } from '../lib/club/family-profile';
 import ClubNav from './club/ClubNav';
 import WelcomeKitItems from './club/WelcomeKitItems';
+import { MeetingConnect, MembershipTile } from './club/ClubHomeTiles';
 import KitPreview from './club/KitPreview';
 import { routes } from '../routes';
 import { memberPlanHref } from '../lib/club/plan/account';
@@ -151,11 +152,6 @@ export default function AppKitLibrary({ view = 'home' }: { view?: 'home' | 'mont
     <>
       {me && view === 'months' && <ClubNav current="months" />}
       <MonthGrid me={me} />
-      {me && (
-        <p className="ofc-member-account">
-          <a href={routes.appClub}>Club Home</a> · <a href={routes.clubFamily}>My Family</a> · <a href={routes.clubDashboard}>{import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'Account' : 'Account & Billing'}</a>
-        </p>
-      )}
     </>
   );
 }
@@ -353,6 +349,7 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
             <a className="ofc-member-cta" href={routes.clubMeeting(short(current.month).toLowerCase())}>Start the family meeting</a>
             <a className="ofc-home-link" href={routes.clubMeetingGuide}>Read the Meeting Guide</a>
           </div>
+          <MeetingConnect meetingHref={routes.clubMeeting(short(current.month).toLowerCase())} />
         </section>
       )}
 
@@ -396,6 +393,9 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
         </section>
       )}
 
+      {/* ------------------------------------------------ her membership */}
+      <MembershipTile me={me} />
+
       {/* ------------------------------------------------ her family and account */}
       <footer className="ofc-home-foot" data-club-home>
         <div className="ofc-home-family">
@@ -414,8 +414,8 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
         )}
         <p className="ofc-home-foot-links">
           {me.member && <><a href={routes.appClubFamilyRhythm}>Our Family Rhythm</a> · </>}
-          {me.welcome && !welcomeIsMonthly(me) && <><a href={welcomeItemHref(me)}>{welcomeIsRhythm(me) ? 'Your Family Rhythm' : 'Your Family Vision Print'}</a> · <a href={routes.clubMeetingGuide}>Family Meeting Guide</a> · </>}
-          <a href={routes.clubDashboard}>{import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'Account' : 'Account & Billing'}</a>
+          {me.welcome && !welcomeIsMonthly(me) && <><a href={welcomeItemHref(me)}>{welcomeIsRhythm(me) ? 'Your Family Rhythm' : 'Your Family Vision Print'}</a> · </>}
+          <a href={routes.clubMeetingGuide}>Family Meeting Guide</a>
         </p>
       </footer>
     </>
