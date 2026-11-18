@@ -52,4 +52,8 @@ begin
     ('00000000-0000-0000-0000-0000000c1b04', h_canceled, '2026-11-01', 'digital', 1, 'admin', 'admin', 'e2e: delivered before canceling');
   -- The returning members have finished their Welcome Kit setup; the trial is a new member.
   update public.club_households set onboarded_at = now() - interval '30 days', setup_completed_at = now() - interval '30 days', meeting_guide_seen_at = now() - interval '20 days', enrolled_at = now() - interval '40 days', first_paid_month = '2026-11-01' where id in (h_active, h_canceled);
+  -- A returning member has her mailing address on file (saved through the member's own function, as she would).
+  perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-0000-0000-0000000c1b03', 'role', 'authenticated')::text, true);
+  perform public.club_address_save(jsonb_build_object('name', 'The Active Family', 'line1', '1 Test Street', 'city', 'Testville', 'state', 'NY', 'postal_code', '10001'));
+  perform set_config('request.jwt.claims', '', true);
 end $d$;

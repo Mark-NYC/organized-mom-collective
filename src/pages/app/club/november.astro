@@ -9,10 +9,19 @@ import ClubFamilyMeeting from '../../../components/club/plan/ClubFamilyMeeting.a
 import ClubPrintStyles from '../../../components/club/plan/ClubPrintStyles.astro';
 import { kits } from '../../../data/club/kits';
 import { routes } from '../../../routes';
+import { ClubNavForMembers } from '../../../components/club/ClubNav';
+import { monthTints } from '../../../lib/club/month-tints';
 const kit = kits.find((k) => k.month === '2026-11');
 if (!kit) throw new Error('November 2026 kit missing from the registry');
+// The Club bar and November's own accent, like every month on the shared plan shell (ClubPlanShell.astro).
+const t = monthTints(kit.month);
+const PAGE_MONTH = [t.base, t.weeks[0], t.accent];
 ---
 <AppLayout title="November Family Meeting">
+  <script is:inline define:vars={{ PAGE_MONTH }}>
+    try { const r = document.documentElement.style; r.setProperty('--of-month', PAGE_MONTH[0]); r.setProperty('--of-month-wash', PAGE_MONTH[1]); r.setProperty('--of-month-accent', PAGE_MONTH[2]); } catch (e) {}
+  </script>
+  <ClubNavForMembers client:only="react" />
   <div class="club-plan nov-meeting family-brand" data-plan-state="loading" data-kit-slug={kit.slug} data-plan-month="November">
     <ClubFamilyGate />
     <ClubFamilyMeeting kitMonth={kit.month} toolHref={routes.clubWorksheetGenerator} memberToolHref={routes.clubResource(kit.slug)} />

@@ -41,8 +41,8 @@ const active = (href: string) => {
   aria-label="App navigation"
   class:list={[
     'fixed inset-x-0 bottom-0 z-40 border-t border-warm-rule bg-ivory/95 shadow-[0_-8px_25px_rgba(67,65,55,0.05)] backdrop-blur-md pb-[env(safe-area-inset-bottom)]',
-    // Wide screens get the tabs in the header (Nav.astro), except on the app's Club pages, whose header is the Club's.
-    calendar ? 'sm:hidden' : club ? 'print:hidden' : 'print:hidden lg:hidden',
+    // Wide screens get the tabs in the header (Nav.astro), Club pages included: the app header is always above them.
+    calendar ? 'sm:hidden' : 'print:hidden lg:hidden',
   ]}
 >
   <ul class:list={['grid grid-flow-col auto-cols-fr', !calendar && 'mx-auto max-w-xl']}>
@@ -56,7 +56,7 @@ const active = (href: string) => {
     <style is:global>
       /* Room for the fixed tab bar under a Club page (the app bundle only renders this). */
       body { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
-      @media print { body { padding-bottom: 0; } }
+      @media print, (min-width: 1024px) { body { padding-bottom: 0; } }
     </style>
     <script>
       // Show the Cleaning tab when this device or account has the wall calendar (same rule as every /app page).

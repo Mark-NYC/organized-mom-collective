@@ -101,10 +101,12 @@ for (const person of PEOPLE) {
   check(who, 'Family tab: the app', inApp(fam));
   const clubTile = await page.locator('[data-family-club-card]').count();
   check(who, person.club ? 'Family shows the Club tile' : 'Family shows no Club tile', person.club ? clubTile === 1 : clubTile === 0);
+  if (person.kept) check(who, 'Family shows the months the family kept (no price, no rejoin)', (await page.locator('[data-family-club-kept]').count()) === 1 && !/\$\d|join|subscribe/i.test(await page.locator('[data-family-club-kept]').innerText()));
+  if (!person.club && !person.kept) check(who, 'Family shows no kept-months tile', (await page.locator('[data-family-club-kept]').count()) === 0);
   await shot(page, `${tag}-01-family`);
 
   // Server-side: what may this person open or change?
-  const res = await rpc(token, 'club_resource_get', { p_slug: KIT });
+  const res = await rpc(token, 'club_resource_get', { p_kit: KIT });
   const opened = res.status < 300 && res.body && typeof res.body === 'object' && res.body.can;
   if (person.club || person.kept) check(who, `server opens November (${res.body?.can ?? res.status})`, Boolean(opened), JSON.stringify(res.body).slice(0, 120));
   else check(who, 'server refuses November', !opened, `${res.status} ${JSON.stringify(res.body).slice(0, 120)}`);
@@ -115,6 +117,11 @@ for (const person of PEOPLE) {
     check(who, 'server shows the second adult no billing', me.body?.household_role === 'partner' && me.body?.plan === null && me.body?.has_address === null);
   }
 
+  if (person.kept) {
+    await page.click('[data-family-club-kept]'); await page.waitForURL(/\/app\/club\/months/); await settle(page, 3500);
+    check(who, 'kept months open inside the app', inApp(await chrome(page)));
+    await shot(page, `${tag}-05-months`);
+  }
   if (person.club) {
     await page.click('[data-family-club-card] a.of-btn:not(.of-btn--soft)'); await page.waitForURL(new RegExp(`/app/club/${MONTH}`)); await settle(page, 4000);
     const month = await chrome(page);

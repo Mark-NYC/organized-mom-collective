@@ -83,7 +83,7 @@ export function MembershipTile({ me }: { me: Membership }) {
     !partner && me.renews && !me.ends ? `Renews ${fmt(me.renews)}` : null,
     me.ends && !partner ? 'Your months stay yours after it ends.' : null,
     me.next?.payment_on ? `${me.next.title ?? 'Next month'} opens ${fmt(me.next.payment_on)}` : null,
-    me.next?.regular_cutoff_at ? `Printed copy: approve by ${fmt(me.next.regular_cutoff_at)}` : null,
+    me.next?.regular_cutoff_at && Date.parse(me.next.regular_cutoff_at) > Date.now() && !partner ? `Printed copy: approve by ${fmt(me.next.regular_cutoff_at)}` : null,
   ].filter(Boolean) as string[];
   return (
     <section className={`of-tile ${me.payment_problem && !partner ? 'of-tile--month' : ''}`} aria-labelledby="club-membership-h" data-club-membership data-membership-status={partner ? 'partner' : me.status ?? (me.grant ? 'grant' : 'none')}>

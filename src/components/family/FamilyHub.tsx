@@ -12,7 +12,7 @@ import { agreementsByPerson } from '../../lib/family-meeting-support';
 import { householdAccess, type HouseholdAccess } from '../../lib/household/api';
 import { ageInMonth, monthOf } from '../../lib/club/profile';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
-import { useShowsClub } from '../app/TodayOverview';
+import { useKeptClubMonths, useShowsClub } from '../app/TodayOverview';
 import { Avatar, Chevron, Icon, TileHead } from '../app/ui';
 import { appShellBuild } from '../../lib/native/platform';
 
@@ -27,6 +27,7 @@ export default function FamilyHub() {
   const agreed = agreementsByPerson(household, profile);
   const members = (household?.members ?? []).filter((m) => !m.archived);
   const showsClub = useShowsClub();
+  const kept = useKeptClubMonths();
   const [access, setAccess] = useState<HouseholdAccess | null>(null);
   useEffect(() => {
     if (!cal.signedIn || isDemo()) return;
@@ -154,6 +155,13 @@ export default function FamilyHub() {
             <a href="/app/club/months" className="of-tile-action">Past and upcoming months <Chevron /></a>
           </div>
         </section>
+      )}
+
+      {!showsClub && kept > 0 && (
+        <a href="/app/club/months" className="of-tile of-span-2" data-family-club-kept>
+          <TileHead eyebrow="Family Meeting Club" title={`Your ${kept === 1 ? 'month stays' : `${kept} months stay`} yours`} chevron />
+          <p className="of-tile-sub">Every month your family received is still here to open, print and use.</p>
+        </a>
       )}
 
     </div>

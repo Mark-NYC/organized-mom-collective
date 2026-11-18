@@ -32,3 +32,19 @@ export function useShowsClub(): boolean {
   }, []);
   return has;
 }
+
+/**
+ * Months a household still holds after its membership ended (delivered months stay theirs). Family shows them a quiet
+ * way back to those months: never a rejoin prompt or price (nothing is sold in the app; owner decision 2026-11-17).
+ */
+export function useKeptClubMonths(): number {
+  const [kept, setKept] = useState(0);
+  useEffect(() => {
+    void getSession().then(async (s) => {
+      if (!s) return;
+      const me = await accountStore.me().catch(() => null);
+      setKept(me && !me.access ? me.kits.length : 0);
+    });
+  }, []);
+  return kept;
+}
