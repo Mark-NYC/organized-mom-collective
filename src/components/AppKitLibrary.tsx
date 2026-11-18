@@ -10,7 +10,7 @@ import { ageInMonth, monthOf, type Household } from '../lib/club/profile';
 import { SETUP_STEPS, type FamilyProfile } from '../lib/club/family-profile';
 import ClubNav from './club/ClubNav';
 import WelcomeKitItems from './club/WelcomeKitItems';
-import { MeetingConnect, MembershipTile } from './club/ClubHomeTiles';
+import { MeetingConnect, MembershipTile, PreparedFor } from './club/ClubHomeTiles';
 import KitPreview from './club/KitPreview';
 import { routes } from '../routes';
 import { memberPlanHref } from '../lib/club/plan/account';
@@ -273,8 +273,8 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
       <div className="ofc-month-feature-text">
         <p className="label text-[#71866c]">{current.month === me.current_month ? 'This month' : 'Your month'} · {monthName(current.month)}</p>
         <h2 id="ofc-current-title" className="ofc-month-feature-title">{title(current)}</h2>
-        {people.length > 0 && <p className="ofc-kit-status">Made for {listNames(people.map((p) => p.firstName))}.</p>}
         {mailingText(current.mailing) && <p className="ofc-kit-status">Printed copy: {mailingText(current.mailing)}</p>}
+        <PreparedFor household={household} profile={profile} month={current.month.slice(0, 7)} />
         <div className="ofc-actions">
           <a className="ofc-member-cta" href={memberPlanHref(current.slug)}>Open &amp; edit</a>
           <a className="ofc-home-link" href={memberPlanHref(current.slug)}>Print it at home</a>
@@ -344,10 +344,11 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
             ? `No need to wait for the mail. Ten minutes${people.length > 1 ? `, and ${listNames(people.map((p) => p.firstName))} each get a part` : ', and everyone gets a part'}.`
             : `Ten minutes to introduce ${title(current)} and give everyone a part.`}</p>
           <div className="ofc-actions">
-            <a className="ofc-member-cta" href={routes.clubMeeting(short(current.month).toLowerCase())}>Start the family meeting</a>
-            <a className="ofc-home-link" href={routes.clubMeetingGuide}>Read the Meeting Guide</a>
+            {/* One meeting (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2): the weekly page carries this month's plan. */}
+            <a className="ofc-member-cta" href={routes.familyMeeting} data-home-weekly-meeting>Start this week’s meeting</a>
+            <a className="ofc-home-link" href={routes.clubMeeting(short(current.month).toLowerCase())}>Print this month’s meeting sheet</a>
           </div>
-          <MeetingConnect meetingHref={routes.clubMeeting(short(current.month).toLowerCase())} />
+          <MeetingConnect meetingHref={routes.familyMeeting} />
         </section>
       )}
 

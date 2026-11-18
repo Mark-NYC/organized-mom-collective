@@ -10,6 +10,10 @@ import { monthAgreements, monthOf, weekAhead } from '../../lib/family-meeting-su
 import { shortDate, type Membership } from '../../lib/club/membership';
 import { routes } from '../../routes';
 import { Avatar, Chevron, TileHead } from '../app/ui';
+import { buildFamilyMeeting } from '../../lib/club/family-meeting';
+import { CHALLENGES, PRIORITIES } from '../../data/club/family-profile';
+import type { FamilyProfile } from '../../lib/club/family-profile';
+import type { Household } from '../../lib/club/profile';
 
 const dayName = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
 
@@ -105,5 +109,36 @@ export function MembershipTile({ me }: { me: Membership }) {
         <a href={routes.appAccount} className="of-tile-action">Account <Chevron /></a>
       </div>
     </section>
+  );
+}
+
+const labelOf = (list: { id: string; label: string }[], id: string) => list.find((c) => c.id === id)?.label ?? null;
+
+/**
+ * "Prepared for your family": what this month's plan was made from, in plain words, so she sees at a glance that it is
+ * hers: each child at their age this month, the priority and challenges she gave, and the month's theme. Read from
+ * the same engine and inputs that prepare the month's meeting (buildFamilyMeeting), so it can't claim more than was
+ * used; what's missing is named as an invitation, never a gap she has to fill.
+ */
+export function PreparedFor({ household, profile, month }: { household: Household | null; profile: FamilyProfile | null; month: string }) {
+  if (!household) return null;
+  const m = buildFamilyMeeting({ household, profile, month });
+  const kids = m.parts.people.filter((p) => p.kind === 'child');
+  const priority = profile?.priority ? labelOf(PRIORITIES, profile.priority) : null;
+  const challenges = (profile?.challenges ?? []).map((c) => labelOf(CHALLENGES, c)).filter(Boolean) as string[];
+  const rows: [string, string][] = [
+    ...(kids.length ? [['Your children', kids.map((k) => (k.age !== null ? `${k.firstName} (${k.age})` : k.firstName)).join(', ')] as [string, string]] : []),
+    ['This month', m.theme],
+    ...(priority && profile?.priority !== 'other' ? [['Your priority', priority] as [string, string]] : []),
+    ...(challenges.length ? [['What’s hard right now', challenges.join(', ')] as [string, string]] : []),
+  ];
+  return (
+    <div className="mt-4 rounded-[9px] bg-white/80 p-4" data-prepared-for>
+      <p className="of-eyebrow">Prepared for your family from</p>
+      <dl className="mt-2 grid gap-1.5 text-[0.9rem]">
+        {rows.map(([k, v]) => <div key={k} className="grid grid-cols-[9.5rem_minmax(0,1fr)] gap-2 max-sm:grid-cols-1 max-sm:gap-0"><dt className="text-warm-soft">{k}</dt><dd className="font-semibold">{v}</dd></div>)}
+      </dl>
+      {(!priority || !challenges.length) && <a href={`${routes.clubFamily}?setup=1`} className="of-tile-action mt-2">Tell us a little more for next month <Chevron /></a>}
+    </div>
   );
 }

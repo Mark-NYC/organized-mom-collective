@@ -113,9 +113,24 @@ export function nextStep(c: Pick<CheckIn, 'answer' | 'barrier'>): NextStep {
  * Whether to ask about a commitment: 6 weeks after it started or was last asked about, never for a retired one. Takes
  * a Commitment only, so a suggested idea can't be checked in on.
  */
-export function checkInDue(c: Pick<Commitment, 'status' | 'since' | 'progress' | 'lastCheckedOn'>, today: string): boolean {
+export function checkInDue(c: Pick<Commitment, 'status' | 'since' | 'progress' | 'lastCheckedOn'>, today: string, days = 42): boolean {
   if (c.status !== 'accepted' || c.progress === 'retired') return false;
   const from = Date.parse(`${(c.lastCheckedOn ?? c.since).slice(0, 10)}T12:00:00Z`);
   const now = Date.parse(`${today}T12:00:00Z`);
-  return Number.isFinite(from) && now - from >= 42 * 86400e3;
+  return Number.isFinite(from) && now - from >= days * 86400e3;
 }
+
+/**
+ * The weekly meeting's follow-through (owner decision 2026-11-18, docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §7): an
+ * agreement is asked about once a week from its second week, until the family says it's done on their own. The same
+ * rule as checkInDue, every 7 days instead of 42.
+ */
+export function weeklyCheckInDue(c: Pick<Commitment, 'since' | 'progress' | 'lastCheckedOn'>, today: string): boolean {
+  if (c.progress === 'independent') return false;
+  return checkInDue({ ...c, status: 'accepted' }, today, 7);
+}
+
+/** Stored progress for each answer (household_agreement_check_in uses the same mapping). */
+export const ANSWER_PROGRESS: Record<Exclude<CheckInAnswer, 'moved-on'>, ProgressStatus> = {
+  'on-own': 'independent', reminders: 'improving', struggling: 'struggling',
+};
