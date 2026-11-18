@@ -302,6 +302,21 @@ for (const person of PEOPLE) {
     check(who, 'a plan saved before the fix stays exactly as saved (its job and its saved version), with the right year label', text.includes('Prepare my school and activity gear') && text.includes('NOVEMBER 2026') && (await v()) === before, before);
     await t.ctx.close();
   }
+  // The second adult edits the household's shared November plan: it saves to the same copy, the owner's earlier work
+  // (Noah's saved job) stays, and nothing about printing approval moves to them (club_resource_save, 20261128).
+  {
+    const p = await session('partner@e2e.test', 1280);
+    const v = () => sql(`select v.revision || '|' || (v.state -> 'omc:club:member:${NOV['2026']}:v1' ->> 'v') from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '${NOV['2026']}' and v.household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b02')`);
+    const before = await v();
+    await p.page.goto(`${base}/club/resources/${NOV['2026']}`, { waitUntil: 'load' }); await settle(p.page, 6000);
+    const line = p.page.locator('[data-edit="familyLine"]').first();
+    await line.click(); await p.page.keyboard.press('Control+A'); await p.page.keyboard.type('Our plan, edited by Alex'); await line.evaluate((e) => e.blur()); await settle(p.page, 4000);
+    const after = await v();
+    const [r0] = before.split('|'); const [r1, saved] = [after.split('|')[0], after.slice(after.indexOf('|') + 1)];
+    check(who, `second adult: their edit saves to the household's shared copy (revision ${r0} → ${r1}), the owner's saved work kept`, Number(r1) === Number(r0) + 1 && saved.includes('Our plan, edited by Alex') && saved.includes('Prepare my school and activity gear'), after.slice(0, 120));
+    check(who, 'second adult: no print-approval button (owner only)', (await p.page.locator('button:has-text("Looks good, print it")').count()) === 0);
+    await p.ctx.close();
+  }
   // (A member's first save of a month resets that month's PENDING order to "not approved by her yet": the existing
   // rule in club_resource_save. Printed and mailed orders are never touched by it.)
   const ordersBeforeAdmin = await orders();

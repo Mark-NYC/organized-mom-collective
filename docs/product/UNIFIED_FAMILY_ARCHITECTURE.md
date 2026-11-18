@@ -489,6 +489,11 @@ and `club_admin_fulfillment_bundle` in `20261104000000_club_membership.sql`) and
 | Viewing a retired tool's saved work (January `?earlier`) | Nothing for the retired key (it is never written back; verified byte-identical). |
 | Billing, subscriptions, entitlements | Never written by any of the above. |
 
-**Found, not changed (existing, outside this PR):** `club_resource_save` finds the household by owner only
-(`club_households.owner_user_id = auth.uid()`), so a second adult can open and print a monthly resource but their edits
-don't save ("no_household"). Fixing it is a database change: needs your go.
+**Correction (2026-11-18):** an earlier version of this section said a second adult couldn't save monthly resources.
+That was wrong: it read the older definition in `20261108`. Production's `club_resource_save`, `club_resource_get` and
+`club_document_save` were patched by `20261128_household_club_access` (applied 2026-11-17) to act on the household's
+membership (`household_billing_user`), so **both adults edit and save the household's one shared copy**; print approval
+(`club_fulfillment_approve`) and the mailing address stay owner-only. Confirmed read-only in production (function
+definitions), by `supabase/tests/household-club-access.sql` ("partner edits the household's copy", "partner can't
+approve"), and in the browser by the Club journey (the second adult's edit saves, revision +1, the owner's saved work
+kept). **No database change is needed.**
