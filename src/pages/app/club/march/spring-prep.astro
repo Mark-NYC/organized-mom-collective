@@ -7,11 +7,20 @@ import MarchSpringPrep from '../../../../components/club/MarchSpringPrep.astro';
 import MarchTabs from '../../../../components/club/MarchTabs.astro';
 import { clubEditingDeadline } from '../../../../lib/club/deadline';
 import { kits } from '../../../../data/club/kits';
+import { ClubNavForMembers } from '../../../../components/club/ClubNav';
+import { monthTints } from '../../../../lib/club/month-tints';
 const kit=kits.find(k=>k.month==='2027-03');
 if(!kit)throw new Error('March kit missing');
 const deadline=clubEditingDeadline(kit.month);
+// The app's Club bar and March's accent, like /app/club/march (navigation only; the resource is unchanged).
+const t = monthTints(kit.month);
+const PAGE_MONTH = [t.base, t.weeks[0], t.accent];
 ---
 <AppLayout title="March Spring Prep">
+ <script is:inline define:vars={{ PAGE_MONTH }}>
+  try { const r = document.documentElement.style; r.setProperty('--of-month', PAGE_MONTH[0]); r.setProperty('--of-month-wash', PAGE_MONTH[1]); r.setProperty('--of-month-accent', PAGE_MONTH[2]); } catch (e) {}
+ </script>
+ <ClubNavForMembers client:only="react" />
  <div class="mar-app family-brand" data-slug={kit.slug} data-deadline={deadline}>
   <div class="mar-gate" data-gate role="status">Preparing your family’s plan…</div>
   <div class="mar-content" hidden>

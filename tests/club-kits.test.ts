@@ -58,8 +58,9 @@ describe('club kits: every kit is sound', () => {
   // The banner names each month's resource the way the member pages and the Family Meeting do, so nobody is sold
   // "Connection Cards" and mailed laundry guides.
   it('the public banner names every month’s real resource', () => {
+    // Words shared by the meeting sheet's approved name (owner, 2026-11-18) and the banner, case-insensitive.
     const key: Record<number, string> = { 1: 'Family', 2: 'Laundry Guides', 3: 'Family Rhythm', 4: 'Dinner Team', 5: 'Summer Day Rhythm', 6: 'Snack Station',
-      7: 'Activity Board', 8: 'School Day Routines', 9: 'Habit Cards', 10: '5-Minute Reset', 11: 'Ownership', 12: 'Christmas Mission' };
+      7: 'board', 8: 'back-to-school', 9: 'Habit Cards', 10: 'Daily Reset', 11: 'Ownership', 12: 'Christmas Mission' };
     const labels = new Set<string>();
     const lines = new Set<string>();
     for (let d = Date.UTC(2026, 11, 1); d < Date.UTC(2027, 11, 30); d += 7 * 86400000) {
@@ -69,9 +70,10 @@ describe('club kits: every kit is sound', () => {
     expect(labels.size).toBe(12);
     for (const m of MEETING_MONTHS) {
       const name = new Date(Date.UTC(2027, m.month - 1, 15)).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
-      expect(m.resourceTitle, `${name} resource`).toContain(key[m.month]);
-      expect([...labels].find((l) => l.startsWith(name)), `${name} mobile banner`).toContain(key[m.month]);
-      expect([...lines].find((l) => l.includes(`${name}’s`)), `${name} banner`).toContain(key[m.month]);
+      const k = key[m.month].toLowerCase();
+      expect(m.resourceTitle.toLowerCase(), `${name} resource`).toContain(k);
+      expect([...labels].find((l) => l.startsWith(name))?.toLowerCase(), `${name} mobile banner`).toContain(k);
+      expect([...lines].find((l) => l.includes(`${name}’s`))?.toLowerCase(), `${name} banner`).toContain(k);
     }
     expect([...labels, ...lines].join(' | ')).not.toMatch(/Connection Cards|Giving Cards|Sunday Reset|Chore Chart|Summer Day Planner|Activity Kit|School Routine Kit/);
   });

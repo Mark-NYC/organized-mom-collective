@@ -426,7 +426,7 @@ exports[`family meeting: samples > Rivera (complete profile) and a minimal famil
     },
     "practice": {
       "minutes": 2,
-      "resource": "My School Day Routines",
+      "resource": "our back-to-school plan and routines",
       "steps": [
         "Hold up Elena’s My School Day sheet.",
         "Elena reads or points to each morning step, in order.",
@@ -434,7 +434,7 @@ exports[`family meeting: samples > Rivera (complete profile) and a minimal famil
       ],
       "title": "Walk through tomorrow morning",
     },
-    "resourceTitle": "My School Day Routines",
+    "resourceTitle": "our back-to-school plan and routines",
     "route": "/app/club/august",
     "talk": {
       "minutes": 3,
@@ -536,7 +536,7 @@ exports[`family meeting: samples > Rivera (complete profile) and a minimal famil
     },
     "practice": {
       "minutes": 2,
-      "resource": "My School Day Routines",
+      "resource": "our back-to-school plan and routines",
       "steps": [
         "Hold up Kai’s My School Day sheet.",
         "Kai reads or points to each morning step, in order.",
@@ -544,7 +544,7 @@ exports[`family meeting: samples > Rivera (complete profile) and a minimal famil
       ],
       "title": "Walk through tomorrow morning",
     },
-    "resourceTitle": "My School Day Routines",
+    "resourceTitle": "our back-to-school plan and routines",
     "route": "/app/club/august",
     "talk": {
       "minutes": 3,

@@ -735,15 +735,14 @@
   .tool-email-submit { transition: none; }
 }
 
-/* A member's Club header replaces the companion's top bar on /app/club pages (src/components/club/ClubNav.tsx). */
-html[data-club-header] body > header[data-chrome] {
-  display: none;
-}
-/* Never in print: an empty block before a named landscape page (March's charts) would cost a blank page. */
+/* Club pages keep the app's header and tabs; never in print, and never on an admin's fulfillment print view. */
 @media print {
-  #club-header-slot {
+  body > header[data-chrome], nav[data-app-tabbar] {
     display: none !important;
   }
+}
+html.omc-bare :is(body > header[data-chrome], nav[data-app-tabbar], [data-club-chrome]) {
+  display: none !important;
 }
 
 /*

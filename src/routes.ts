@@ -172,6 +172,10 @@ export const routes = {
   today: '/app',
   cleaning: '/app/cleaning',
   appClub: '/app/club',
+  /** The Family tab (Family Meeting, the family, the Club). */
+  appFamily: '/app/family',
+  /** The one weekly Family Meeting, free and Club (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2). */
+  familyMeeting: '/app/family/meeting',
   appClubMonths: '/app/club/months',
   /** The Welcome Family Rhythm: every member's, whatever month she joins (docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md). */
   appClubFamilyRhythm: '/app/club/family-rhythm',

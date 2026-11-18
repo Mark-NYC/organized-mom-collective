@@ -89,6 +89,21 @@ export function useFamily(scope: string | null) {
       if (!scope) throw new Error('not_signed_in');
       ag.remove(id);
     },
+    /**
+     * One answer of the family profile (challenges or priority), from anywhere in the app, for free families too:
+     * the same function the Club's intake uses (club_focus_save). It replaces both answers, so the other one is sent
+     * back unchanged, and it marks that setup step, so a later Club intake skips it.
+     */
+    async saveFocus(step: 'challenges' | 'priority', change: { challenges?: string[]; priority?: string }) {
+      const cur = server ?? profile;
+      const input = {
+        challenges: change.challenges ?? cur?.challenges ?? [], challengeNote: cur?.challengeNote,
+        priority: step === 'priority' ? change.priority : cur?.priority, priorityNote: cur?.priorityNote,
+      };
+      if (sample) return setServer(await sample.saveFocus(step, input));
+      if (!scope) throw new Error('not_signed_in');
+      setServer(await accountStore.saveFocus(step, input));
+    },
     status: (demo ? 'none' : ag.status) as AgreementStatus,
     pending: demo ? 0 : ag.pending,
     conflicts: demo ? [] : ag.state?.conflicts ?? [],

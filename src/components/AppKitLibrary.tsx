@@ -5,11 +5,13 @@ import { getSession } from '../lib/account';
 import { loadMembership, mailingText, monthName, shortDate, type Membership, type MembershipMonth } from '../lib/club/membership';
 import { firstMonth, firstResourceReviewed, homeState, kitItems, kitText, loadMeetingGuideSeen, nextStep, profileDeferred } from '../lib/club/onboarding';
 import { clubResourceBySlug } from '../data/club/resources';
+import { MONTH_PAGES, monthPageName } from '../data/club/month-pages';
 import { accountStore } from '../lib/club/store';
 import { ageInMonth, monthOf, type Household } from '../lib/club/profile';
 import { SETUP_STEPS, type FamilyProfile } from '../lib/club/family-profile';
 import ClubNav from './club/ClubNav';
 import WelcomeKitItems from './club/WelcomeKitItems';
+import { MeetingConnect, MembershipTile, PreparedFor } from './club/ClubHomeTiles';
 import KitPreview from './club/KitPreview';
 import { routes } from '../routes';
 import { memberPlanHref } from '../lib/club/plan/account';
@@ -25,92 +27,62 @@ const icons = import.meta.glob('../../assets/icons/ofc/month-icons/*-OFC-icon.pn
   import: 'default',
 }) as Record<string, string>;
 
-const months = [
+const monthCopy = [
   {
     "month": "January",
-    "title": "Stop Being the Family's Calendar",
-    "responsibility": "Planning together",
-    "how": "Our Family Focus: one page with your family’s shared focus for the month, a small habit or two worth trying, and four Words of the Week.",
     "url": "/app/club/january/"
   },
   {
     "month": "February",
-    "title": "Laundry That Isn't All on You",
-    "responsibility": "Caring for their own things",
-    "how": "A picture laundry guide for each child, matched to their age: My Clothes, My Job or I Can Do My Own Laundry.",
     "url": "/app/club/february/"
   },
   {
     "month": "March",
-    "title": "Chores Without Chasing Everyone",
-    "responsibility": "Owning their chores",
-    "how": "A family chore chart shows who does what, with a cleaning plan that explains the steps and what finished looks like.",
     "url": "/app/club/march/"
   },
   {
     "month": "April",
-    "title": "Dinner Isn't All on You",
-    "responsibility": "Sharing meal ownership",
-    "how": "A prepared dinner plan gives family members roles from ingredients to cleanup.",
     "url": "/app/club/april/"
   },
   {
     "month": "May",
-    "title": "Summer Days Without Constant Questions",
-    "responsibility": "Managing their day",
-    "how": "A flexible daily rhythm and activity menu help kids choose what comes next.",
     "url": "/app/club/may/"
   },
   {
     "month": "June",
-    "title": "Snack Time Without Calling Mom",
-    "responsibility": "Making their own snacks",
-    "how": "An I Can Make My Own Snack guide gives kids simple snack choices and picture steps to practice making snacks themselves.",
     "url": "/app/club/june/"
   },
   {
     "month": "July",
-    "title": "Less ‘I’m Bored.’ More Independent Play.",
-    "responsibility": "Choosing something to do",
-    "how": "An I’m Bored! What Can I Do? activity board gives kids ideas they can choose themselves, so you don’t have to come up with something every time.",
     "url": "/app/club/july/"
   },
   {
     "month": "August",
-    "title": "Back to School Without the Scramble",
-    "responsibility": "Taking initiative",
-    "how": "A personalized countdown gives everyone their own school-ready responsibilities.",
     "url": "/app/club/august/"
   },
   {
     "month": "September",
-    "title": "School Routines Without the Nagging",
-    "responsibility": "Building independent routines",
-    "how": "Our Family Habit Cards: personalized reminder cards help kids practice one small school-day responsibility without constant reminders.",
     "url": "/app/club/september/"
   },
   {
     "month": "October",
-    "title": "Less Asking. More Doing.",
-    "responsibility": "Caring for shared spaces",
-    "how": "A daily reset with one familiar cue, picture jobs and a clear finish line kids can recognize.",
     "url": "/app/club/october/"
   },
   {
     "month": "November",
-    "title": "Stop Being Everyone's Reminder",
-    "responsibility": "Owning a whole responsibility",
-    "how": "Each family member gets a whole job with a clear owner, timing, and finish line.",
     "url": "/club/worksheet-generator/"
   },
   {
     "month": "December",
-    "title": "Raise Kids Who Love to Give",
-    "responsibility": "Being a blessing to others",
-    "how": "Two cards give kids space to draw a picture, write a poem, or share a letter, then send it to someone like a grandparent or teacher.",
     "url": "/app/club/december/"
   }
 ];
+
+/**
+ * Each month's name and lines come from the month's own page (src/data/club/month-pages.ts, owner decision
+ * 2026-11-18: the pages are the source of truth), never a separate list here. docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §13.
+ */
+export const months = monthCopy.map((m, i) => ({ ...m, title: MONTH_PAGES[i].name, responsibility: MONTH_PAGES[i].builds, how: MONTH_PAGES[i].how }));
 
 /** A member's month for a card (any year): the one she holds that's open now or soonest. */
 const heldMonth = (me: Membership | null, index: number) =>
@@ -151,11 +123,6 @@ export default function AppKitLibrary({ view = 'home' }: { view?: 'home' | 'mont
     <>
       {me && view === 'months' && <ClubNav current="months" />}
       <MonthGrid me={me} />
-      {me && (
-        <p className="ofc-member-account">
-          <a href={routes.appClub}>Club Home</a> · <a href={routes.clubFamily}>My Family</a> · <a href={routes.clubDashboard}>{import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'Account' : 'Account & Billing'}</a>
-        </p>
-      )}
     </>
   );
 }
@@ -264,10 +231,10 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
   const current = me.months.find((m) => m.month === me.current_month && m.state === 'available')
     ?? [...me.months].reverse().find((m) => m.state === 'available' && m.month <= me.current_month)
     ?? me.months.find((m) => m.state === 'available');
-  // The printed resource's name (src/data/club/resources.ts: what prints), else the month card's headline.
-  const title = (m: { month: string; slug?: string | null }) => clubResourceBySlug(m.slug)?.title ?? months[Number(m.month.slice(5, 7)) - 1]?.title ?? 'Monthly resource';
+  // The month's own page names it (src/data/club/month-pages.ts).
+  const title = (m: { month: string; slug?: string | null }) => monthPageName(m.month) ?? 'Monthly resource';
   const short = (iso: string) => monthName(iso).split(' ')[0];
-  const items = me.welcome ? kitItems(me, firstResourceReviewed(first?.slug, uid), (slug) => clubResourceBySlug(slug)?.title ?? null) : [];
+  const items = me.welcome ? kitItems(me, firstResourceReviewed(first?.slug, uid), (slug) => { const r = clubResourceBySlug(slug); return r ? monthPageName(r.month) : null; }) : [];
   const kitOnItsWay = state === 'kit_submitted' || state === 'kit_mailed';
   const firstMeeting = kitOnItsWay && current && first && current.month === first.month;
 
@@ -279,8 +246,8 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
       <div className="ofc-month-feature-text">
         <p className="label text-[#71866c]">{current.month === me.current_month ? 'This month' : 'Your month'} · {monthName(current.month)}</p>
         <h2 id="ofc-current-title" className="ofc-month-feature-title">{title(current)}</h2>
-        {people.length > 0 && <p className="ofc-kit-status">Made for {listNames(people.map((p) => p.firstName))}.</p>}
         {mailingText(current.mailing) && <p className="ofc-kit-status">Printed copy: {mailingText(current.mailing)}</p>}
+        <PreparedFor household={household} profile={profile} month={current.month.slice(0, 7)} />
         <div className="ofc-actions">
           <a className="ofc-member-cta" href={memberPlanHref(current.slug)}>Open &amp; edit</a>
           <a className="ofc-home-link" href={memberPlanHref(current.slug)}>Print it at home</a>
@@ -350,9 +317,11 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
             ? `No need to wait for the mail. Ten minutes${people.length > 1 ? `, and ${listNames(people.map((p) => p.firstName))} each get a part` : ', and everyone gets a part'}.`
             : `Ten minutes to introduce ${title(current)} and give everyone a part.`}</p>
           <div className="ofc-actions">
-            <a className="ofc-member-cta" href={routes.clubMeeting(short(current.month).toLowerCase())}>Start the family meeting</a>
-            <a className="ofc-home-link" href={routes.clubMeetingGuide}>Read the Meeting Guide</a>
+            {/* One meeting (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2): the weekly page carries this month's plan. */}
+            <a className="ofc-member-cta" href={routes.familyMeeting} data-home-weekly-meeting>Start this week’s meeting</a>
+            <a className="ofc-home-link" href={routes.clubMeeting(short(current.month).toLowerCase())}>Print this month’s meeting sheet</a>
           </div>
+          <MeetingConnect meetingHref={routes.familyMeeting} />
         </section>
       )}
 
@@ -396,6 +365,9 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
         </section>
       )}
 
+      {/* ------------------------------------------------ her membership */}
+      <MembershipTile me={me} />
+
       {/* ------------------------------------------------ her family and account */}
       <footer className="ofc-home-foot" data-club-home>
         <div className="ofc-home-family">
@@ -409,14 +381,15 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
           )}
           <a className="ofc-home-link" href={routes.clubFamily}>Edit my family</a>
         </div>
-        {profileLeft > 0 && state !== 'setup' && state !== 'starts' && (
+        {/* Not twice: "Prepared for your family" on this month's card already asks for what's missing. */}
+        {profileLeft > 0 && state !== 'setup' && state !== 'starts' && state !== 'ongoing' && (
           <p className="ofc-kit-status">{profileLeft} optional family {profileLeft === 1 ? 'question' : 'questions'} left. <a className="ofc-home-link" href={`${routes.clubFamily}?setup=1`}>Finish your family profile</a></p>
         )}
-        <p className="ofc-home-foot-links">
-          {me.member && <><a href={routes.appClubFamilyRhythm}>Our Family Rhythm</a> · </>}
-          {me.welcome && !welcomeIsMonthly(me) && <><a href={welcomeItemHref(me)}>{welcomeIsRhythm(me) ? 'Your Family Rhythm' : 'Your Family Vision Print'}</a> · <a href={routes.clubMeetingGuide}>Family Meeting Guide</a> · </>}
-          <a href={routes.clubDashboard}>{import.meta.env.PUBLIC_APP_SHELL === 'ios' ? 'Account' : 'Account & Billing'}</a>
-        </p>
+        {/* Only what isn't already above: the Family Rhythm has its own section and the Meeting Guide is on the
+            membership tile; a Welcome print that isn't the Family Rhythm is linked here. */}
+        {me.welcome && !welcomeIsMonthly(me) && !welcomeIsRhythm(me) && (
+          <p className="ofc-home-foot-links"><a href={welcomeItemHref(me)}>Your Family Vision Print</a></p>
+        )}
       </footer>
     </>
   );

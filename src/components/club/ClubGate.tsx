@@ -7,7 +7,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { CLUB_NAME, clubAccountsEnabled } from '../../data/club/config';
 import { sampleHouseholds } from '../../data/club/samples';
 import { getSession, requestCode, verifyCode, type AccountSession } from '../../lib/account';
-import ClubNav from './ClubNav';
+import ClubNav, { ClubBarSignedOut } from './ClubNav';
 import { accountStore, clubHref, resetSample, sampleFromUrl, sampleStore, type ClubStore } from '../../lib/club/store';
 import { routes } from '../../routes';
 import { clubNav } from '../../lib/club/nav';
@@ -59,27 +59,11 @@ export default function ClubGate({ page, children, signInIntro, bare = false }: 
 }
 
 /** Signed in: the one Club nav (ClubNav). Signed out (or a sample): the sign-in pages' own short header. */
-// In the iPhone app, billing (/club/dashboard) is on the website: keep the signed-out header's links inside the app.
-const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 
-function MemberHeader({ page, href, signedIn }: { page: Page; href: (p: string) => string; signedIn: boolean }) {
+function MemberHeader({ page, signedIn }: { page: Page; href: (p: string) => string; signedIn: boolean }) {
+  // The app header and tabs are always above (ClubLayout); this is the Club's own bar under them.
   if (signedIn) return <ClubNav current={page === 'dashboard' ? 'account' : page === 'family' ? 'family' : null} />;
-  const link = (p: Page, to: string, label: string) => (
-    <a href={href(to)} aria-current={page === p ? 'page' : undefined} className="rounded-[3px] px-2.5 py-2 text-[0.82rem] font-semibold text-warm-ink aria-[current=page]:underline aria-[current=page]:underline-offset-[6px]">
-      {label}
-    </a>
-  );
-  return (
-    <header data-club-chrome className="border-b border-warm-rule bg-ivory">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-8">
-        <a href={href(appShell ? routes.appClub : routes.clubDashboard)} aria-label="Family Meeting Club home" className="flex min-w-0 items-center"><img src="/images/club/family-meeting-club-horizontal-logo.webp" alt="The Family Meeting Club" width={2027} height={570} className="block h-auto w-[148px] max-w-[48vw] object-contain object-left sm:w-[190px]" /></a>
-        <nav aria-label="Club" className="-mr-2 flex items-center gap-1">
-          {link('dashboard', appShell ? routes.appClubMonths : routes.clubDashboard, 'Your months')}
-          {link('family', routes.clubFamily, 'Family')}
-        </nav>
-      </div>
-    </header>
-  );
+  return <ClubBarSignedOut />;
 }
 
 function SampleBanner({ id, label }: { id: string; label: string }) {

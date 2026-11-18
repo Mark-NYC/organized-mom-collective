@@ -233,7 +233,7 @@ export function startPlanFamily(root: HTMLElement) {
           root.dispatchEvent(new Event(PLAN_SAVE));
         },
       });
-      if (account.earlierCopy) root.dataset.planEarlier = routes.clubResource(slug);
+      if (account.earlierCopy) root.dataset.planEarlier = `${routes.clubResource(slug)}?earlier`;
     }
     root.dataset.planFor = planFor;
     root.dataset.planSource = result.source;

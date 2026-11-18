@@ -17,6 +17,7 @@ import { keys, readList } from '../../lib/storage';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
 import { visibleFeatures } from '../../data/app/features';
 import { routes } from '../../routes';
+import { monthPageName } from '../../data/club/month-pages';
 import { useShowsClub } from './TodayOverview';
 import { Avatar, Chevron, Progress, TileHead } from './ui';
 
@@ -47,7 +48,7 @@ export default function TodayDashboard() {
       </div>
       <div className="of-dash-col">
         <TodayReset today={today} style={{ order: 2 }} />
-        {showsClub && <ClubMonth month={month} title={agreed?.resourceTitle} style={{ order: 4 }} />}
+        {showsClub && <ClubMonth month={month} title={monthPageName(monthOf(today))} style={{ order: 4 }} />}
         {agreed && <EveryonesPart agreed={agreed} colors={cal.colors} month={month} style={{ order: 5 }} />}
       </div>
     </div>
@@ -143,7 +144,8 @@ function TodayReset({ today, style }: { today: Date; style: Style }) {
 
 /** This week's Family Meeting preparation: what's on the calendar, what's new or changed, what nobody has picked up. */
 function MeetingWeek({ week, agreedRoute, style }: { week: Week; agreedRoute?: string; style: Style }) {
-  const meetingHref = agreedRoute ? `${agreedRoute}?view=meeting` : '/app/family/meeting';
+  // One meeting for everyone: the weekly page carries the Club's month (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2).
+  const meetingHref = '/app/family/meeting';
   const stats = [
     { n: week.count, label: week.count === 1 ? 'plan' : 'plans' },
     { n: week.changes.length, label: 'new or changed' },
@@ -179,7 +181,7 @@ function MeetingWeek({ week, agreedRoute, style }: { week: Week; agreedRoute?: s
         </ol>
       )}
       <div className="mt-4 flex flex-wrap gap-x-5">
-        <a href={meetingHref} className="of-tile-action" data-open-meeting>{agreedRoute ? 'This month’s Family Meeting' : 'Start our Family Meeting'} <Chevron /></a>
+        <a href={meetingHref} className="of-tile-action" data-open-meeting>Start our Family Meeting <Chevron /></a>
         {week.count > 0 && <a href={routes.familyCalendar} className="of-tile-action">See the week <Chevron /></a>}
       </div>
     </section>

@@ -90,7 +90,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 1,
     theme: 'Weekly Family Meeting and shared planning',
-    resourceTitle: 'Our Family Weekly Meeting',
+    resourceTitle: 'Our Family Focus',
     route: '/app/club/january',
     challenge: 'Everyone knowing what’s coming this week, instead of one person carrying the whole calendar.',
     principle: 'When we look ahead together, everyone can get ready for their own part.',
@@ -287,7 +287,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 7,
     theme: 'Independent activities and responding to boredom',
-    resourceTitle: 'What Can I Do Right Now? Activity Board',
+    resourceTitle: 'our I’m Bored! What Can I Do? board',
     route: '/app/club/july',
     challenge: 'Kids who can answer “I’m bored” themselves.',
     principle: 'Bored is a starting point. Check your board, pick one, and start.',
@@ -318,7 +318,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 8,
     theme: 'School-day preparation',
-    resourceTitle: 'My School Day Routines',
+    resourceTitle: 'our back-to-school plan and routines',
     route: '/app/club/august',
     challenge: 'Mornings and afternoons kids can run with their own routine.',
     principle: 'A routine we can see is a routine we can follow without reminders.',
@@ -382,7 +382,7 @@ export const MEETING_MONTHS: readonly MeetingMonth[] = [
   {
     month: 10,
     theme: 'Daily home reset and shared spaces',
-    resourceTitle: 'Our 5-Minute Reset',
+    resourceTitle: 'Our Daily Reset',
     route: '/app/club/october',
     challenge: 'Shared spaces that get reset every day, by everyone, in five minutes.',
     principle: 'Same cue, same jobs, same finish line. Everyone resets, every day.',

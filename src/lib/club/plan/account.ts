@@ -34,6 +34,16 @@ export const SAME_TOOL_AS_COPY = new Set([
   '2027-05-finish-the-school-year', '2027-06-summer-with-a-plan', '2027-07-ready-to-go', '2027-08-school-year', '2027-10-home-works-together',
 ]);
 
+/**
+ * Work families saved on tools a month no longer uses, kept and reachable (owner, 2026-11-18: preserve both January
+ * families' saved work, including resources on retired tools; never migrate or delete it). January 2027 had a "Weekly
+ * Meeting" tool before it became Our Family Focus; its saves stay under this key in the month's saved version.
+ * /club/resources/<slug>?earlier opens them (src/pages/club/resources/[slug].astro).
+ */
+export const EARLIER_KEYS: Record<string, string[]> = {
+  '2027-01-fresh-start-together': ['omc:club:january-weekly-meeting:v1'],
+};
+
 export interface PlanAccountDeps {
   load(slug: string): Promise<ResourceVersion>;
   save(slug: string, state: ResourceVersion['state'], revision: number): Promise<number>;
@@ -95,7 +105,10 @@ export async function connectPlanAccount(slug: string, key: string, deps: PlanAc
   const loaded = res as ResourceVersion & { approved_fingerprint?: string | null };
   if (loaded.approved_at && loaded.approved_fingerprint) result.approval = { at: loaded.approved_at, print: loaded.approved_fingerprint };
   const copy = saved[memberStorageKey(slug)];
-  result.earlierCopy = Boolean(copy && !SAME_TOOL_AS_COPY.has(slug) && !saved[key]);
+  // A different tool's copy (or a retired tool's save) is offered whenever it exists for a month with earlier keys;
+  // otherwise, as before, only until she has saved on this tool.
+  const earlierSaved = (EARLIER_KEYS[slug] ?? []).some((k) => saved[k]);
+  result.earlierCopy = earlierSaved || Boolean(copy && !SAME_TOOL_AS_COPY.has(slug) && (!saved[key] || slug in EARLIER_KEYS));
 
   const original = Object.getPrototypeOf(storage).setItem as Storage['setItem'];
   const start = initialValue(saved, key, slug);

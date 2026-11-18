@@ -1,28 +1,28 @@
 ---
 import Layout from '../../layouts/AppLayout.astro';
 import '../../styles/family-app-brand.css';
+import { MONTH_PAGES } from '../../data/club/month-pages';
 
-const months = [
-  ['January', 'The Family Routine Reset'],
-  ['February', 'Family Connection Made Easy'],
-  ['March', 'Spring Cleaning as a Family'],
-  ['April', "Dinner Isn’t Just Mom’s Job"],
-  ['May', 'Our Family Summer Rhythm'],
-  ['June', 'Our Family Summer Plan'],
-  ['July', 'Pack Your Own Bag'],
-  ['August', 'Back-to-School Without the Scramble'],
-  ['September', 'The Family Weekly Plan'],
-  ['October', 'Get Ready Before the Busy Season'],
-  ['November', 'One Whole Job, Handed Off'],
-  ['December', 'Christmas Is a Family Affair'],
-];
+// Each month's topic is its page's name (src/data/club/month-pages.ts): the pages are the source of truth.
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const months = MONTH_PAGES.map((p) => [MONTH_NAMES[p.month - 1], p.name]);
 const audioFiles = import.meta.glob('/public/audio/coaching/*.{mp3,m4a,ogg,wav}', { eager: true, query: '?url', import: 'default' });
 const hasAudio = (month: string) => Object.keys(audioFiles).some(path => path.toLowerCase().endsWith('/' + month.toLowerCase() + '.mp3') || path.toLowerCase().endsWith('/' + month.toLowerCase() + '.m4a') || path.toLowerCase().endsWith('/' + month.toLowerCase() + '.ogg') || path.toLowerCase().endsWith('/' + month.toLowerCase() + '.wav'));
 const audioUrl = (month: string) => {
   const match = Object.keys(audioFiles).find(path => /\.(mp3|m4a|ogg|wav)$/i.test(path) && path.split('/').pop()?.split('.')[0].toLowerCase() === month.toLowerCase());
   return match ? match.replace('/public', '') : null;
 };
+// Owner decision 2026-11-18: no audio promises until a real recording exists. With none in public/audio/coaching/,
+// this page shows nothing about audio and sends the visitor to Club Home; the moment a file is added it lists only
+// the months that have one (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §0, decision 5).
+const anyAudio = months.some(([m]) => audioUrl(m));
 ---
+{!anyAudio ? (
+<Layout title="Family Meeting Club" description="Family Meeting Club.">
+  <script is:inline>location.replace('/app/club');</script>
+  <p class="mx-auto max-w-3xl"><a class="family-link" href="/app/club">Go to Club Home →</a></p>
+</Layout>
+) : (
 <Layout title="Monthly Audio Coaching" description="A few helpful minutes with Megan for each Family Meeting Club monthly tool.">
   <div class="family-brand mx-auto max-w-3xl">
     <header class="mb-9">
@@ -31,15 +31,16 @@ const audioUrl = (month: string) => {
       <p class="family-lede mt-4">Your monthly tool is ready. Take a few minutes with Megan to see how to use it with your family. Nothing to prepare, nothing to keep up with.</p>
     </header>
     <section aria-label="Monthly recordings" class="grid gap-4 sm:grid-cols-2">
-      {months.map(([month, topic], i) => {
+      {months.filter(([month]) => audioUrl(month)).map(([month, topic], i) => {
         const src = audioUrl(month);
         return <article id={month.toLowerCase()} class="family-panel scroll-mt-8">
           <p class="label text-[#71866c]">{String(i + 1).padStart(2, '0')} · {month.toUpperCase()}</p>
           <h2 class="family-panel-title mt-3">{topic}</h2>
-          {src ? <div class="mt-5"><audio class="w-full" controls preload="none" src={src} aria-label={month + ' coaching audio'}>Your browser does not support audio playback.</audio><a class="family-link mt-3 inline-block" href={src} download>Download audio ↓</a></div> : <p class="mt-4 text-sm text-warm-soft">Audio coaching coming soon.</p>}
+          {src ? <div class="mt-5"><audio class="w-full" controls preload="none" src={src} aria-label={month + ' coaching audio'}>Your browser does not support audio playback.</audio><a class="family-link mt-3 inline-block" href={src} download>Download audio ↓</a></div> : null}
         </article>;
       })}
     </section>
     <p class="mt-8 text-center text-sm text-warm-soft">Every month stands on its own. Start with the tool you received.</p>
   </div>
 </Layout>
+)}

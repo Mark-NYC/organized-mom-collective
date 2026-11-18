@@ -75,7 +75,7 @@ describe('family meeting: shape, for all 12 monthly themes', () => {
 
   it('January introduces the Weekly Meeting; it never replaces it', () => {
     const m = buildFamilyMeeting({ household: rivera, profile: riveraProfile, month: '2027-01' });
-    expect(m.resourceTitle).toBe('Our Family Weekly Meeting');
+    expect(m.resourceTitle).toBe('Our Family Focus'); // the January page's name (owner-approved, 2026-11-18)
     expect(m.practice.steps.join(' ')).toMatch(/weekly meeting time/);
   });
 

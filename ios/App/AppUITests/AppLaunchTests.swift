@@ -263,15 +263,16 @@ final class AppLaunchTests: XCTestCase {
         // "We agreed" in this month's Family Meeting.
         goTo("Family")
         waitFor(text("plays a part"), "Family tab")
-        // The free weekly meeting (Our Week), then this month's Club meeting (Jen's household is a member).
-        waitFor(control("Start our Family Meeting"), "free weekly meeting").tap()
+        // One Family Meeting (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2): the weekly page, with this month's Club
+        // plan inside its four parts for a member household (Jen's is). "We agreed" on Maya's age-fit idea saves it.
+        waitFor(control("Start our Family Meeting"), "the weekly Family Meeting").tap()
         waitFor(text("Let’s Practice"), "the four parts")
-        shot("e2e-03a-free-weekly-meeting")
-        waitFor(text("This month’s Family Focus"), "Club month meeting (member)").tap()
+        waitFor(text("Prepared for your family"), "this month's plan inside the meeting (member)", timeout: 30)
+        shot("e2e-03a-weekly-meeting-with-month")
         let agree = waitFor(button("We agreed: Maya"), "We agreed for Maya", timeout: 30)
         agree.tap()
-        waitFor(button("Undo the agreement: Maya"), "agreed for Maya")
-        shot("e2e-03b-club-meeting-we-agreed")
+        waitFor(text("Saved: agreed by our family."), "agreed for Maya")
+        shot("e2e-03b-meeting-we-agreed")
 
         // Today and the calendar show it.
         goTo("Today")

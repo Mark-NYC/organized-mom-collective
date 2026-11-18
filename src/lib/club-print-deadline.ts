@@ -47,9 +47,9 @@ const MONTHLY_OFFERS = [
  'Give your family a simple summer rhythm. Get May’s Summer Day Rhythm',
  'Help your kids make their own snacks. Get June’s Snack Station Kit',
  'Give bored kids ideas they can use on their own. Get July’s Activity Board',
- 'Make back-to-school mornings easier. Get August’s School Day Routines',
+ 'Make back-to-school mornings easier. Get August’s Back-to-School Routines',
  'Help your kids build better morning and bedtime habits. Get September’s Habit Cards',
- 'Reset the house together in five minutes a day. Get October’s 5-Minute Reset',
+ 'Reset the house together in five minutes a day. Get October’s Daily Reset',
  'Share responsibility at home. Get November’s Family Ownership Kit',
  'Help your kids bless someone else. Get December’s Christmas Mission',
 ] as const;
@@ -63,9 +63,9 @@ const MOBILE_OFFERS = [
  'May Summer Day Rhythm',
  'June Snack Station Kit',
  'July Activity Board',
- 'August School Day Routines',
+ 'August Back-to-School Routines',
  'September Habit Cards',
- 'October 5-Minute Reset',
+ 'October Daily Reset',
  'November Family Ownership Kit',
  'December Christmas Mission',
 ] as const;
