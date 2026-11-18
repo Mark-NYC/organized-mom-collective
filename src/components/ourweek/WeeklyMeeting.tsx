@@ -40,6 +40,8 @@ const FREE_TEXT: Record<string, string> = {
   'Our Focus': 'Look at the week ahead together: what’s coming, and what does it need from us?',
   'Let’s Talk': 'Start with what went well since last time. Then each person names one thing that was hard. Everyone answers, the youngest first. No wrong answers, no fixing anyone.',
 };
+/** The guide's Let's Talk, where this month's questions are on this page rather than a separate sheet. */
+const CLUB_TALK = 'Ask this month’s questions below. Everyone answers, the youngest first. No wrong answers, no fixing anyone.';
 
 export default function WeeklyMeeting() {
   const today = useToday();
@@ -118,7 +120,7 @@ export default function WeeklyMeeting() {
               {fam.profile?.priority && fam.profile.priority !== 'other' && <p className="mt-3 rounded-[9px] bg-[var(--of-surface)] px-3 py-2.5 text-[0.95rem]" data-meeting-priority>Our family is working on: <strong>{label(PRIORITIES, fam.profile.priority)}</strong>. What would help with it this week?</p>}
             </>
           ))}
-          {p.title !== 'Our Focus' && !(meeting && p.title === 'Let’s Practice') && <p className="mt-2 text-[0.95rem] leading-relaxed">{!meeting && FREE_TEXT[p.title] ? FREE_TEXT[p.title] : p.text}</p>}
+          {p.title !== 'Our Focus' && !(meeting && p.title === 'Let’s Practice') && <p className="mt-2 text-[0.95rem] leading-relaxed">{!meeting && FREE_TEXT[p.title] ? FREE_TEXT[p.title] : meeting && p.title === 'Let’s Talk' ? CLUB_TALK : p.text}</p>}
 
           {p.title === 'Our Focus' && week.count > 0 && (
             <details className="mt-4" data-meeting-week open={!meeting}>
@@ -154,12 +156,14 @@ export default function WeeklyMeeting() {
                   <p className="of-eyebrow">Ideas for this month, by age</p>
                   <ul className="mt-2 space-y-2">
                     {suggestions.map((person) => person.suggested.slice(0, 1).map((r) => (
-                      <li key={person.memberId + r.description} className="flex items-start gap-3 rounded-[9px] border border-[var(--of-rule)] px-3 py-2.5" data-meeting-suggestion={person.firstName}>
-                        <Avatar name={person.firstName} color={cal.colors[person.memberId]} size="sm" />
-                        <span className="min-w-0 flex-1"><span className="block font-semibold">{person.firstName}{person.age !== null && person.kind === 'child' ? <span className="font-normal text-warm-soft"> · {person.age}</span> : null}</span>
-                          <span className="block text-[0.92rem]">{r.description}</span>
-                          {r.finished && <span className="block text-[0.8rem] text-warm-soft">Done when {r.finished.replace(/^done when\s*/i, '')}</span>}</span>
-                        <button type="button" className="of-btn of-btn--soft !min-h-[44px] !px-3" onClick={() => void agreeTo(person.memberId, r)} data-agree-suggestion>We agreed</button>
+                      <li key={person.memberId + r.description} className="rounded-[9px] border border-[var(--of-rule)] px-3 py-3" data-meeting-suggestion={person.firstName}>
+                        <div className="flex items-start gap-3">
+                          <Avatar name={person.firstName} color={cal.colors[person.memberId]} size="sm" />
+                          <span className="min-w-0 flex-1"><span className="block font-semibold">{person.firstName}{person.age !== null && person.kind === 'child' ? <span className="font-normal text-warm-soft"> · {person.age}</span> : null}</span>
+                            <span className="block text-[0.92rem]">{r.description}</span>
+                            {r.finished && <span className="mt-0.5 block text-[0.8rem] text-warm-soft">{r.finished}</span>}</span>
+                        </div>
+                        <button type="button" className="of-btn of-btn--soft mt-3 !min-h-[44px] w-full sm:w-auto" onClick={() => void agreeTo(person.memberId, r)} data-agree-suggestion>We agreed</button>
                       </li>
                     )))}
                   </ul>

@@ -252,9 +252,80 @@ members' answers and rules are untouched.
 Out of scope without separate approval: applying any migration, production title changes, February and March content,
 the October mailer's final copy, any App Store-facing purchase change.
 
-## 10. Migration 20261202: preparation package
+## 10. Migration 20261202: preparation package (decision 6: prepared, NOT executed)
 
-Filled in as the preparation runs; see §10 in the next revision.
+**Exact change** (`supabase/migrations/20261202000000_club_kit_titles_january_september.sql`, unchanged since it was
+written on 2026-11-16):
+
+```sql
+begin;
+update public.club_kits set title = 'Our First Family Meeting'
+ where slug = '2027-01-fresh-start-together' and title in ('A Fresh Start, Together', 'A Week Everyone Can See');
+update public.club_kits set title = 'Our Family Habit Cards'
+ where slug = '2027-09-a-week-everyone-can-see' and title = 'A Week Everyone Can See';
+commit;
+```
+
+**Expected effect in production** (read-only, 2026-11-18): exactly two rows of `club_kits`.
+
+| Slug | Before | After | Status | Holders / saved |
+| --- | --- | --- | --- | --- |
+| 2027-01-fresh-start-together | A Fresh Start, Together | Our First Family Meeting | scheduled (unchanged) | 12 / 2 (unchanged) |
+| 2027-09-a-week-everyone-can-see | A Week Everyone Can See | Our Family Habit Cards | draft (unchanged) | 0 / 0 |
+
+Where members see it: `club_me` month titles (Club Home, Monthly resources, membership tile), the admin kit list,
+the fulfillment queue and Club emails. Slugs, release dates, cutoffs, entitlements, saved work, orders and QR codes
+are untouched. A title an admin already changed by hand is never overwritten.
+
+**Rollback:** `supabase/rollout/kit-titles/rollback-20261202.sql` puts back the two seed titles, only on a row still
+carrying the new title. **Preflight / post-check:** `supabase/rollout/kit-titles/preflight.sql` (read-only; titles,
+statuses, holders and saved versions per kit) run before and after; the only difference must be the two titles.
+
+**Rehearsal** (`scripts/rehearse-kit-titles.sh`, throwaway database with production's exact migration set, production's
+kit titles and statuses, 12 January holders with 2 saved versions), 2026-11-18:
+
+```
+ok - migration applies
+ok - exactly 2 kit rows changed
+ok - January stays scheduled (status, release and cutoff untouched)
+ok - member data unchanged (households, members, orders, entitlements, versions, subscriptions, addresses, emails)
+ok - applying again changes nothing
+ok - an admin-edited title is left alone by the migration
+ok - and by the rollback
+ok - rollback restores every title exactly
+ok - member data unchanged after rollback
+ok - applies again after a rollback
+rehearsal passed
+```
+
+**Verified backup:** `backups/20261118T062538Z` (Database backup run 20, 2026-11-18 06:25 UTC): encrypted, downloaded
+back, restored into a throwaway Supabase, "104 tables and 989 rows restored exactly; structure identical to the
+source". Take one more right before execution.
+
+**To execute (needs your final go):** fresh backup → preflight → apply the migration → preflight again (diff = the two
+titles) → record it in `docs/ios/MIGRATION_DEPLOYMENT_PLAN.md`.
+
+## 12. Stage 2 status (2026-11-18, branch `claude/unified-family-meeting`)
+
+| Step | Status |
+| --- | --- |
+| 1a Titles in the app | **Done.** Club Home's year strip and Monthly resources read the resource registry (`tests/club-month-names.test.ts`). Old `/club/resources/<slug>` links forward to the member page, keeping the query, **except January 2027**: both families who saved January work saved Habit Cards on that old copy (production, keys read only), so forwarding would hide it. **Decide:** carry that work over, or leave January's old page as is |
+| 1b Migration 20261202 | **Prepared** (§10). Not executed |
+| 1c October | **Audited, not switched.** The Sunday Reset printable has since been relabelled as a January "Our Family Weekly Meeting" sheet (`SeptemberSundayReset.astro`: "FAMILY MEETING CLUB · JANUARY 2027", "Our Family Weekly Meeting", 17 mentions; its phone screen likewise). Making it October's means rewriting printed copy (kicker, title, intro, editor labels, "why this matters"), the registry entry, month 10's meeting content and the mailer. That's a change to a printable's words, so it waits for your copy approval. Nothing for members changes before October 2027 |
+| 2 One weekly meeting | **Done.** `/app/family/meeting` is the meeting for everyone; Family's Club tile and Club Home's button open it; the month's page keeps its printable meeting sheet |
+| 3 Club personalization | **Done.** Members' weekly meeting shows the month's focus, its prepared questions, one age-fit suggestion per person ("We agreed" saves it with the month's source key) and the practice step with the month's resource. Same engine call as the month's page (test) |
+| 4 Follow-through | **Done in the app; migration `20261204000000_agreement_follow_through.sql` prepared, not applied.** Leaves every existing function exactly as in production (a client echoing the old read shape keeps working); adds three nullable columns and two functions. 21 SQL checks, also on production's exact migration set. Until applied, the check-ins simply don't show |
+| 5 Club Home | **Done.** "Prepared for your family from" (children with ages this month, the month's theme, her priority and challenges, from the engine); "Start this week's meeting"; `/app/coaching` no longer says "Audio coaching coming soon" (12 months, 0 recordings): it shows only months that have a file and otherwise goes to Club Home |
+| 6 Progressive profiling | **Done for the meeting:** after a meeting with agreements, a free family gets one optional question (challenges, then priority), saved with the Club intake's own function, marking its step; next meeting uses it. **Not built:** the third moment ("who already does what" in My Family) |
+
+**New words for your review** (short, in the app only, no printed copy): the free meeting's Our Focus and Let's Talk
+guidance, the Club Let's Talk line ("Ask this month's questions below…"), the follow-through answers and the six
+"Try this week" adjustments, the profile question's two prompts.
+
+**Tests:** unit 1224 passed; Club journey 95 checks (website) and 91 (iPhone app bundle): free, trial with a second
+adult, active returning, canceled with kept months, beta grant, phone and desktop, including the weekly meeting,
+follow-through for both adults, suggestions becoming agreements and the free profile question, all checked in the
+database; family e2e (website and app); household SQL suite (all, plus the new 21); app-shell smoke.
 
 ## 11. Preservation plan: must not change
 

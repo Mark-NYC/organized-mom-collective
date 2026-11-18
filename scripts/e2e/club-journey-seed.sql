@@ -57,3 +57,21 @@ begin
   perform public.club_address_save(jsonb_build_object('name', 'The Active Family', 'line1', '1 Test Street', 'city', 'Testville', 'state', 'NY', 'postal_code', '10001'));
   perform set_config('request.jwt.claims', '', true);
 end $d$;
+
+-- Agreements from an earlier meeting, so this week's meeting has something to follow through on
+-- (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §7): agreed 8 days ago, never checked in on.
+do $a$
+declare r record; kid uuid;
+begin
+  for r in select * from (values ('00000000-0000-0000-0000-0000000c1b01'::uuid, 'Put my shoes by the door'),
+                                 ('00000000-0000-0000-0000-0000000c1b02'::uuid, 'Feed the fish after breakfast'),
+                                 ('00000000-0000-0000-0000-0000000c1b03'::uuid, 'Pack my school bag before bed')) v(uid, txt) loop
+    perform set_config('request.jwt.claims', json_build_object('sub', r.uid, 'role', 'authenticated')::text, true);
+    select m.id into kid from public.club_family_members m where m.household_id = public.household_id_for(r.uid) and m.kind = 'child' limit 1;
+    perform public.household_agreement_save(jsonb_build_object('id', gen_random_uuid(), 'category', 'other', 'text', r.txt,
+      'owner_ids', jsonb_build_array(kid), 'month', to_char(now() - interval '8 days', 'YYYY-MM')), null);
+  end loop;
+  perform set_config('request.jwt.claims', '', true);
+  update public.club_responsibilities set confirmed_at = now() - interval '8 days', updated_at = now() - interval '8 days'
+   where status = 'confirmed' and agreed_text in ('Put my shoes by the door', 'Feed the fish after breakfast', 'Pack my school bag before bed');
+end $a$;

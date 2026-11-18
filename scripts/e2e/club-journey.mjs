@@ -49,6 +49,7 @@ const rpc = async (token, fn, body = {}) => {
   return { status: r.status, body: json };
 };
 
+const sql = async (q) => (await (await fetch(`${API}/__test/sql`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sql: q }) })).json()).out?.trim() ?? '';
 const browser = await chromium.launch();
 async function session(email, width = 393) {
   const mobile = width < 600;
@@ -117,12 +118,61 @@ for (const person of PEOPLE) {
     check(who, 'server shows the second adult no billing', me.body?.household_role === 'partner' && me.body?.plan === null && me.body?.has_address === null);
   }
 
+  // THE weekly meeting (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2): one page; the Club's month inside it.
+  await page.goto(`${base}/app/family/meeting`, { waitUntil: 'load' }); await settle(page, 3500);
+  const kind = await page.locator('[data-weekly-meeting]').getAttribute('data-meeting-kind');
+  const parts = await page.locator('[data-meeting-part]').evaluateAll((els) => els.map((e) => e.getAttribute('data-meeting-part')));
+  check(who, 'weekly meeting: the four approved parts, in order', parts.join() === 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice' && inApp(await chrome(page)));
+  if (person.club) {
+    check(who, `weekly meeting carries this month's prepared plan (${kind})`, kind === 'club' && (await page.locator('[data-meeting-focus]').count()) === 1 && (await page.locator('[data-meeting-questions] li').count()) > 0 && (await page.locator('[data-meeting-practice]').count()) === 1);
+  } else {
+    const body = await page.locator('body').innerText();
+    check(who, `weekly meeting: basic guidance, no Club content or selling (${kind})`, kind === 'free' && (await page.locator('[data-meeting-focus], [data-meeting-suggestions], [data-meeting-practice]').count()) === 0 && !/upgrade|subscribe|join the club|family meeting club/i.test(body));
+  }
+  // Follow-through in weeks 2–4: the family's agreement from 8 days ago comes up in Let's Talk.
+  const due = page.locator('[data-check-in]');
+  if (['free', 'trial (new member)', 'active (returning)'].includes(who)) {
+    const answer = who === 'free' ? 'on-own' : who === 'active (returning)' ? 'struggling' : 'reminders';
+    check(who, 'follow-through: last week’s agreement asks “How did it go?”', (await due.count()) === 1);
+    await shot(page, `${tag}-07-weekly-meeting`);
+    if (await due.count()) {
+      await due.first().locator(`[data-check-in-answer="${answer}"]`).click(); await settle(page, 1500);
+      if (answer === 'struggling') { await page.click('[data-check-in-barrier="forgets"]'); await settle(page, 1500); }
+      const prog = await sql(`select progress || '|' || coalesce(barrier, '') from public.club_responsibilities r where r.status = 'confirmed' and r.household_id = (select household_id from public.household_adults a join auth.users u on u.id = a.user_id where u.email = '${person.email}') and r.agreed_text is not null and r.checked_on is not null limit 1`);
+      const want = { 'on-own': 'independent|', reminders: 'improving|', struggling: 'struggling|forgets' }[answer];
+      check(who, `follow-through saved for the household: ${answer} → ${prog}`, prog === want);
+      if (answer === 'struggling') check(who, 'struggling shows one adjustment for what gets in the way', (await page.locator('[data-check-in-adjustment]').count()) === 1);
+      await shot(page, `${tag}-08-follow-through`);
+    }
+  }
+  if (who === 'second adult') check(who, 'follow-through: the other adult sees the household’s answer (asked once a week, not again)', (await due.count()) === 0);
+  if (person.club && (await page.locator('[data-agree-suggestion]').count())) {
+    await page.locator('[data-agree-suggestion]').first().click(); await settle(page, 2500);
+    const src = await sql(`select count(*) from public.club_responsibilities r where r.status = 'confirmed' and r.agreed_source like 'month:%' and r.household_id = (select household_id from public.household_adults a join auth.users u on u.id = a.user_id where u.email = '${person.email}')`);
+    check(who, 'an age-fit suggestion becomes an agreement with the month’s source key', Number(src) >= 1, src);
+  }
+  // Progressive profiling, free only: one question, saved to the same profile the Club intake uses.
+  if (who === 'free') {
+    const q = page.locator('[data-profile-question="challenges"]');
+    check(who, 'one optional profile question after the meeting (never the five-step intake)', (await q.count()) === 1 && (await page.locator('[data-profile-question]').count()) === 1);
+    if (await q.count()) {
+      await page.click('[data-profile-choice="routines"]'); await page.click('[data-profile-save]'); await settle(page, 2000);
+      const saved = await sql(`select array_to_string(challenges, ',') || '|' || array_to_string(setup_done, ',') from public.club_households h join public.household_adults a on a.household_id = h.id join auth.users u on u.id = a.user_id where u.email = 'free@e2e.test'`);
+      check(who, `saved to the family profile and marks the Club intake step (${saved})`, saved === 'routines|challenges');
+      await page.reload({ waitUntil: 'load' }); await settle(page, 3000);
+      check(who, 'next meeting’s Let’s Talk asks about it; the next question is priority', (await page.locator('[data-meeting-challenge]').count()) === 1 && (await page.locator('[data-profile-question="priority"]').count()) === 1);
+      await shot(page, `${tag}-09-profile-question`);
+    }
+  }
+
   if (person.kept) {
+    await page.goto(`${base}/app/family`, { waitUntil: 'load' }); await settle(page);
     await page.click('[data-family-club-kept]'); await page.waitForURL(/\/app\/club\/months/); await settle(page, 3500);
     check(who, 'kept months open inside the app', inApp(await chrome(page)));
     await shot(page, `${tag}-05-months`);
   }
   if (person.club) {
+    await page.goto(`${base}/app/family`, { waitUntil: 'load' }); await settle(page);
     await page.click('[data-family-club-card] a.of-btn:not(.of-btn--soft)'); await page.waitForURL(new RegExp(`/app/club/${MONTH}`)); await settle(page, 4000);
     const month = await chrome(page);
     check(who, `${MONTH}'s plan opens inside the app (header, tabs, Club bar)`, inApp(month) && month.clubBar, JSON.stringify(month).slice(0, 160));
@@ -135,6 +185,9 @@ for (const person of PEOPLE) {
     check(who, 'Club Home from the Club bar: inside the app', inApp(home) && home.clubBar);
     const status = await page.locator('[data-club-membership]').getAttribute('data-membership-status').catch(() => null);
     check(who, `Club Home shows the membership (${status})`, Boolean(status));
+    if (await page.locator('[data-home-weekly-meeting]').count()) check(who, 'Club Home’s meeting button opens THE weekly meeting', (await page.locator('[data-home-weekly-meeting]').getAttribute('href')) === '/app/family/meeting');
+    if (await page.locator('[data-home-current]').count()) check(who, 'Club Home: what this month was prepared from (ages, theme)', /\(\d+\)/.test(await page.locator('[data-prepared-for]').innerText().catch(() => '')));
+    check(who, 'no audio promises anywhere on Club Home', !/audio/i.test(await page.locator('body').innerText()));
     if (!person.owner) check(who, 'Club Home shows the second adult no billing link', (await page.locator('[data-club-membership] a[href="/club/dashboard"]').count()) === 0);
     await shot(page, `${tag}-04-club-home`);
     await page.click('[data-club-nav] a[href="/app/club/months"]'); await page.waitForURL(/\/app\/club\/months/); await settle(page, 3000);
