@@ -27,6 +27,7 @@ import { accountStore } from '../../lib/club/store';
 import { getSession } from '../../lib/account';
 import { buildFamilyMeeting, suggestionKey, type FamilyMeeting, type PartRecommendation } from '../../lib/club/family-meeting';
 import AgreedParts from '../family/AgreedParts';
+import { monthPage } from '../../data/club/month-pages';
 import FollowThrough from '../family/FollowThrough';
 import ProfileQuestion from '../family/ProfileQuestion';
 import { Avatar } from '../app/ui';
@@ -204,7 +205,10 @@ export default function WeeklyMeeting() {
             <div className="mt-3" data-meeting-practice>
               <p className="font-semibold">{meeting.practice.title}</p>
               <ol className="mt-2 list-decimal space-y-1 pl-5 text-[0.95rem]">{meeting.practice.steps.map((s) => <li key={s}>{s}</li>)}</ol>
-              <a href={meeting.route} className="of-btn of-btn--soft mt-4" data-meeting-resource>Open {meeting.resourceTitle}</a>
+              {/* The month's own page names and opens its resources (src/data/club/month-pages.ts). */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {monthPage(today.getMonth() + 1).resources.map((r, i) => <a key={r.route} href={r.route} className={`of-btn ${i ? 'of-btn--soft' : ''} !normal-case !tracking-normal`} data-meeting-resource>{r.name}</a>)}
+              </div>
             </div>
           )}
         </section>

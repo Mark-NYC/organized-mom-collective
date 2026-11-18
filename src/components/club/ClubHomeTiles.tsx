@@ -8,6 +8,7 @@ import { useFamilyProfile } from '../../lib/family-meeting-client';
 import { localToday } from '../../lib/calendar/recurrence';
 import { monthAgreements, monthOf, weekAhead } from '../../lib/family-meeting-support';
 import { shortDate, type Membership } from '../../lib/club/membership';
+import { monthPage, monthPageName } from '../../data/club/month-pages';
 import { routes } from '../../routes';
 import { Avatar, Chevron, TileHead } from '../app/ui';
 import { buildFamilyMeeting } from '../../lib/club/family-meeting';
@@ -86,7 +87,7 @@ export function MembershipTile({ me }: { me: Membership }) {
   const lines = [
     !partner && me.renews && !me.ends ? `Renews ${fmt(me.renews)}` : null,
     me.ends && !partner ? 'Your months stay yours after it ends.' : null,
-    me.next?.payment_on ? `${me.next.title ?? 'Next month'} opens ${fmt(me.next.payment_on)}` : null,
+    me.next?.payment_on ? `${monthPageName(me.next.month) ?? me.next.title ?? 'Next month'} opens ${fmt(me.next.payment_on)}` : null,
     me.next?.regular_cutoff_at && Date.parse(me.next.regular_cutoff_at) > Date.now() && !partner ? `Printed copy: approve by ${fmt(me.next.regular_cutoff_at)}` : null,
   ].filter(Boolean) as string[];
   return (
@@ -128,7 +129,7 @@ export function PreparedFor({ household, profile, month }: { household: Househol
   const challenges = (profile?.challenges ?? []).map((c) => labelOf(CHALLENGES, c)).filter(Boolean) as string[];
   const rows: [string, string][] = [
     ...(kids.length ? [['Your children', kids.map((k) => (k.age !== null ? `${k.firstName} (${k.age})` : k.firstName)).join(', ')] as [string, string]] : []),
-    ['This month', m.theme],
+    ['This month', `${monthPage(Number(month.slice(5, 7))).name} · ${monthPage(Number(month.slice(5, 7))).builds}`],
     ...(priority && profile?.priority !== 'other' ? [['Your priority', priority] as [string, string]] : []),
     ...(challenges.length ? [['What’s hard right now', challenges.join(', ')] as [string, string]] : []),
   ];

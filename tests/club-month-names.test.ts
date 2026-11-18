@@ -15,7 +15,6 @@ const copy = library.slice(library.indexOf('const monthCopy = ['), library.index
 describe('monthly names', () => {
   it('Club Home carries no month names of its own', () => {
     expect(copy).not.toMatch(/"title"\s*:/);
-    expect(library).toMatch(/clubResources\.find\(/);
   });
   it('the resource registry names each calendar month exactly once', () => {
     const months = clubResources.map((r) => Number(r.month.slice(5, 7)));
@@ -24,7 +23,7 @@ describe('monthly names', () => {
   });
   it('keeps the owner-approved January and September', () => {
     const by = (m: string) => clubResources.find((r) => r.month === m)!;
-    expect(by('2027-01').title).toBe('Our Family Focus');
+    expect(by('2027-01').title).toBe('Our Family Focus'); // the January page's own name
     expect(kits.find((k) => k.month === '2027-01')!.theme).toBe('Our First Family Meeting');
     expect(by('2027-09').title).toBe('Our Family Habit Cards');
     expect(kits.find((k) => k.month === '2027-09')!.theme).toBe('Our Family Habit Cards');

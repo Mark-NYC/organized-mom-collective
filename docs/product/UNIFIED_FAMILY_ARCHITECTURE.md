@@ -135,9 +135,10 @@ Nothing free gets restricted. The difference is personalization and the printed,
 
 ## 6. Approved monthly content
 
-Superseded by the fuller audit in §6a (October) and §6b (every month, including production).
+**Superseded by §13 (owner, 2026-11-18): the twelve monthly pages are the source of truth.** §6a and §6b below are kept
+for the record; where they compare the pages with planning documents or the kit registry, the pages win.
 
-## 6a. October: Daily Reset vs the approved Sunday Reset (decision 1)
+## 6a. October: Daily Reset vs the approved Sunday Reset (decision 1; superseded, see §13)
 
 Three different Octobers exist in the repository today:
 
@@ -166,7 +167,7 @@ existing printable October uses, not writing a new one. Exactly what changes:
 
 Risk: none for members (October 2027 is a draft; 0 holders, 0 saved versions in production, read 2026-11-18).
 
-## 6b. What members actually open, month by month (repository vs your list vs production)
+## 6b. What members actually open, month by month (superseded by §13)
 
 Production `club_kits` read-only on 2026-11-18. "Member page" is what `memberPlanHref` opens.
 
@@ -338,3 +339,83 @@ purchasing or Club selling in the iPhone app.
 
 Verified on the test backend: free refused November; trial, active, partner, beta grant open it; canceled keeps
 November read-only; partner refused the mailing address and shown no billing.
+
+## 13. The monthly pages are the source of truth (owner, 2026-11-18)
+
+"All 12 monthly Family Meeting Club pages are already correct": `/app/club/january` … `/app/club/december` are the
+approved themes, resources and content. Everything around them follows them; nothing here rewrites or regenerates a
+kit, a generator, a printable or saved work.
+
+### 13a. Inventory of the twelve pages (read from the page files)
+
+| Month | Page | Heading the page opens with | Resources the page offers (generator / printable) | Saves under |
+| --- | --- | --- | --- | --- |
+| Jan | `/app/club/january` | Our Family Focus | The family's one-page focus, habit ideas, four Words of the Week (`MeetingGuidePrintable`, `MeetingGuideMobile`; the page is also the month's meeting) | `omc:club:january-family-meeting:v1` |
+| Feb | `/app/club/february` | My Laundry, My Job. | A picture laundry guide per child by age, laundry days, machine operator (`FebruaryLaundryGuides`, `FebruaryPlanMobile`) | `omc:club:february-laundry-app:v1` |
+| Mar | `/app/club/march` + `/app/club/march/spring-prep` | Our Family Rhythm · Our Family Spring Prep | Whole-family rhythm chart: two daily moments, everyone's part (`MarchFamilyRhythm`); Spring Prep jobs with owners (`MarchSpringPrep`), as a second tab | `omc:club:march-chore-charts:v2`; Spring Prep `omc:club:march-mobile:v1` |
+| Apr | `/app/club/april` | Tonight, we've got dinner. | One prepared dinner plus a reusable four-role Dinner Team (`AprilDinnerPlan`) | `omc:club:april-app:v1` |
+| May | `/app/club/may` | Our Summer Day | Picture-led summer rhythm (`MaySummerRhythm`) | `omc:club:may-app:v1` |
+| Jun | `/app/club/june` | The snacks are handled. By the kids. | Snack station (`JuneSnackStation`) | `omc:club:june-app:v1` |
+| Jul | `/app/club/july` | I'm Bored! What Can I Do? | Activity board (`JulyActivityBoard`) | `omc:club:july-app:v1` |
+| Aug | `/app/club/august` | Back to School Without the Scramble | Back-to-school plan, Morning and After-School routines (`AugustSchoolRoutines`) | `omc:club:august-app:v1` |
+| Sep | `/app/club/september` | Our Family Habit Cards | Habit cards (`JanuaryHabitCards`, the component's legacy name) | `omc:preview:september-habit-cards:v3` |
+| Oct | `/app/club/october` | Less asking. More doing. | Daily Reset: one cue, picture jobs, a finish line, parent back page (`OctoberDailyReset`) | `omc:club:october-daily-reset:v1` |
+| Nov | `/app/club/november` | Our Family Meeting (the page is the meeting) | Our Family Ownership Plan at `/club/resources/2026-11-family-ownership` (`NovemberOwnershipPrintable`) | the resource route's member key |
+| Dec | `/app/club/december` | Your Christmas Mission Has Arrived! | One kindness mission and two Christmas cards (`DecemberMissionPrototype`) | `omc:club:december-app:v1` |
+
+Not a monthly page: `/app/club/march/spring-clean` ("Spring Clean as a Team", marked IN REVIEW, browser tab only,
+unlinked). Left as is.
+
+### 13b. What changed (infrastructure only)
+
+- **`src/data/club/month-pages.ts`**: one record per page (route, the name it opens with, its resources, two plain
+  lines). `tests/club-month-pages.test.ts` reads each page's own source and fails if a name drifts.
+- **Named from the pages:** Club Home's month card and year strip, Monthly resources, the membership tile's "next
+  month", the Welcome Kit item names, Today's and Family's Club tiles, the weekly meeting's resource buttons and
+  "Prepared for your family", the admin and fulfillment screens (the resource registry's `title` now comes from the
+  pages: `src/data/club/resources.ts`), and the hidden audio page's month list.
+- **March:** Family's Club tile and the weekly meeting offer both resources (Family Rhythm, Spring Prep). Spring Prep
+  now has the app's Club bar and March's accent, like the March page (chrome only).
+- **Navigation verified:** all twelve pages and Spring Prep open inside the app with the header, the four tabs and
+  the Club bar, on the website and in the iPhone app bundle (Club journey).
+- **Reverted from my earlier plan:** the October Sunday Reset switch is dropped (the October page is the Daily Reset),
+  and the year strip no longer uses the resource registry's older names.
+
+**Unchanged:** every page, generator, printable, storage key and saved version; the kit registry
+(`src/data/club/kits/*.ts`) and the monthly meeting content (`src/data/club/family-meeting.ts`), because both are
+printed (below); production data.
+
+### 13c. Saved member work (production, read-only, 2026-11-18)
+
+| Month | Saved versions | Storage keys in them | Conflict |
+| --- | --- | --- | --- |
+| January 2027 | 2 households | Household A: the current January page's key + the old `/club/resources` copy's key. Household B: `omc:club:january-weekly-meeting:v1` (a retired January "Weekly Meeting" tool) + the old copy's key | **Household B has no work on the current January page.** Its saved work is on two retired January tools. Nothing in this change touches it; the old January resource link stays unforwarded so it remains reachable |
+| Every other month | 0 | — | None |
+
+Fulfillment: 5 pending and 1 skipped January monthly orders print `/app/club/january` (unchanged; admin already calls
+it "Our Family Focus"); 6 Welcome prints. Entitlements: 12, all January. No change affects any of them.
+
+### 13d. Conflicts that need your decision
+
+1. **October:** your earlier decision named "Our Family Sunday Reset"; the October page is the Daily Reset ("Less
+   asking. More doing."). Under today's rule the page wins, so everything now follows the Daily Reset and the Sunday
+   Reset switch is dropped. Confirm.
+2. **Printed text that names a month differently from its page** (not changed, because it's printed):
+   - The monthly meeting sheet says "Introducing {resource}" from `family-meeting.ts`: July "What Can I Do Right Now?
+     Activity Board" (page: I'm Bored! What Can I Do?), October "Our 5-Minute Reset" (page: Less asking. More doing.),
+     August "My School Day Routines", January "Our Family Weekly Meeting" (January has no separate meeting sheet).
+   - The kit registry's `theme` prints on the mailer letter printables (`LetterPrintables`, all mailers still drafts)
+     and the older kit editor's chart footer: February "Better Together", March "Our Family Spring Prep", October "A
+     Home That Works Together" (with a chore-chart tool and its draft mailer), July "What Can I Do Right Now?", April
+     "Everybody Helps at Mealtime". Members don't see these today (below), but a mailer printed from them would.
+   Choose: align those printed names (and the October and February mailer drafts) to the pages, or leave them.
+3. **Migration 20261202** would set January's production title to "Our First Family Meeting", which the page doesn't
+   use. Production titles no longer reach members on screen (the app names months from the pages; Club emails use
+   only the month), so I recommend **holding it**, or replacing it with page names if the admin's raw kit list matters
+   to you.
+4. **January Household B** (13c): leave its work on the retired tools, or carry it into the current January page
+   (that would change saved member data, so it needs your go).
+
+Checked and fine: the mailed QR codes open `/club/kits/<slug>`, which already sends a member with access straight on
+to the month's page (every month except November, whose tool that page is). Only its browser-tab title used the kit
+theme; it now uses the page's name.

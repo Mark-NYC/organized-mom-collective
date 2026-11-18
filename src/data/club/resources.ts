@@ -15,6 +15,7 @@
  * (memberPlanHref) for every month except November (whose tool it is) and January 2027 (two families saved Habit Cards
  * there; kept until the owner decides how to carry that work over). docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §6b.
  */
+import { monthPageName } from './month-pages';
 export interface ClubResource {
   slug: string;
   /** YYYY-MM */
@@ -38,7 +39,7 @@ export interface ClubResource {
   dailyRhythm?: true;
 }
 
-export const clubResources: readonly ClubResource[] = [
+const RESOURCES: readonly ClubResource[] = [
   { slug: '2026-11-family-ownership', month: '2026-11', title: 'Our Family Ownership Plan', problem: 'Who owns which jobs, start to finish', component: 'november', preview: '/club/worksheet-generator' },
   { slug: '2026-12-christmas-mission', month: '2026-12', title: 'Your Christmas Mission', problem: 'A kindness mission the kids lead', component: 'december', preview: '/club/december-preview' },
   { slug: '2027-01-fresh-start-together', month: '2027-01', title: 'Our Family Focus', problem: 'One shared focus, a habit or two and four Words of the Week', component: 'january', preview: '/app/club/january?sample=rivera',
@@ -58,6 +59,12 @@ export const clubResources: readonly ClubResource[] = [
   { slug: '2027-09-a-week-everyone-can-see', month: '2027-09', title: 'Our Family Habit Cards', problem: 'One small school-day habit, without the reminders', component: 'september', preview: '/club/september-preview' },
   { slug: '2027-10-home-works-together', month: '2027-10', title: 'Our 5-Minute Reset', problem: 'A daily reset with a clear finish line', component: 'october', preview: '/club/october-preview' },
 ];
+/**
+ * Each month's name is its page's (src/data/club/month-pages.ts; owner decision 2026-11-18: the monthly pages are the
+ * source of truth). The `title` written above is the earlier registry name, kept only as a fallback for a month
+ * without a page. Screen-only: admin, fulfillment queue and CSV, Welcome Kit, dashboards. Nothing printed reads it.
+ */
+export const clubResources: readonly ClubResource[] = RESOURCES.map((r) => ({ ...r, title: monthPageName(r.month) ?? r.title }));
 
 export const clubResourceBySlug = (slug: string | null | undefined) => clubResources.find((r) => r.slug === slug);
 

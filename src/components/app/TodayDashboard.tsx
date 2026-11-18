@@ -17,6 +17,7 @@ import { keys, readList } from '../../lib/storage';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
 import { visibleFeatures } from '../../data/app/features';
 import { routes } from '../../routes';
+import { monthPageName } from '../../data/club/month-pages';
 import { useShowsClub } from './TodayOverview';
 import { Avatar, Chevron, Progress, TileHead } from './ui';
 
@@ -47,7 +48,7 @@ export default function TodayDashboard() {
       </div>
       <div className="of-dash-col">
         <TodayReset today={today} style={{ order: 2 }} />
-        {showsClub && <ClubMonth month={month} title={agreed?.resourceTitle} style={{ order: 4 }} />}
+        {showsClub && <ClubMonth month={month} title={monthPageName(monthOf(today))} style={{ order: 4 }} />}
         {agreed && <EveryonesPart agreed={agreed} colors={cal.colors} month={month} style={{ order: 5 }} />}
       </div>
     </div>

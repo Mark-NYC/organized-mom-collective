@@ -1,21 +1,11 @@
 ---
 import Layout from '../../layouts/AppLayout.astro';
 import '../../styles/family-app-brand.css';
+import { MONTH_PAGES } from '../../data/club/month-pages';
 
-const months = [
-  ['January', 'The Family Routine Reset'],
-  ['February', 'Family Connection Made Easy'],
-  ['March', 'Spring Cleaning as a Family'],
-  ['April', "Dinner Isn’t Just Mom’s Job"],
-  ['May', 'Our Family Summer Rhythm'],
-  ['June', 'Our Family Summer Plan'],
-  ['July', 'Pack Your Own Bag'],
-  ['August', 'Back-to-School Without the Scramble'],
-  ['September', 'The Family Weekly Plan'],
-  ['October', 'Get Ready Before the Busy Season'],
-  ['November', 'One Whole Job, Handed Off'],
-  ['December', 'Christmas Is a Family Affair'],
-];
+// Each month's topic is its page's name (src/data/club/month-pages.ts): the pages are the source of truth.
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const months = MONTH_PAGES.map((p) => [MONTH_NAMES[p.month - 1], p.name]);
 const audioFiles = import.meta.glob('/public/audio/coaching/*.{mp3,m4a,ogg,wav}', { eager: true, query: '?url', import: 'default' });
 const hasAudio = (month: string) => Object.keys(audioFiles).some(path => path.toLowerCase().endsWith('/' + month.toLowerCase() + '.mp3') || path.toLowerCase().endsWith('/' + month.toLowerCase() + '.m4a') || path.toLowerCase().endsWith('/' + month.toLowerCase() + '.ogg') || path.toLowerCase().endsWith('/' + month.toLowerCase() + '.wav'));
 const audioUrl = (month: string) => {

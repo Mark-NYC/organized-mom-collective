@@ -4,6 +4,7 @@
  * family data; the island loads it (src/lib/club/store.ts) and the database decides access. Noindex, not linked;
  * behind PUBLIC_CLUB_ENABLED.
  */
+import { monthPageName } from '../../../data/club/month-pages';
 import ClubLayout from '../../../layouts/ClubLayout.astro';
 import KitPage from '../../../components/club/KitPage';
 import { kits } from '../../../data/club/kits';
@@ -22,10 +23,12 @@ import JulyActivityBoard from '../../../components/club/JulyActivityBoard.astro'
 import AugustSchoolRoutines from '../../../components/club/AugustSchoolRoutines.astro';
 
 export function getStaticPaths() {
-  return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme } }));
+  return kits.map((k) => ({ params: { slug: k.slug }, props: { slug: k.slug, theme: k.theme, kitMonth: k.month } }));
 }
 
-const { slug, theme } = Astro.props;
+const { slug, theme, kitMonth } = Astro.props;
+// The tab title names the month as its page does (src/data/club/month-pages.ts); the kit registry's theme is a fallback.
+const title = monthPageName(kitMonth) ?? theme;
 // Where the mailed QR code lands: the month's own member page when it has one (every month in the app's year except
 // November, whose tool is this page). The older per-month copies below stay only for months without one.
 const plan = memberPlanHref(slug);
@@ -34,7 +37,7 @@ const planHref = plan.startsWith(`${routes.appClub}/`) ? plan : null;
 const month = slug === "2026-11-family-ownership" ? "november" : slug === "2027-01-fresh-start-together" ? "january" : slug === "2026-12-christmas-mission" ? "december" : slug === "2027-02-better-together" ? "february" : slug === "2027-03-spring-clean-together" ? "march" : slug === "2027-04-everybody-helps-at-mealtime" ? "april" : slug === "2027-05-finish-the-school-year" ? "may" : slug === "2027-06-summer-with-a-plan" ? "june" : slug === "2027-07-ready-to-go" ? "july" : slug === "2027-08-school-year" ? "august" : null;
 ---
 
-<ClubLayout title={theme}>
+<ClubLayout title={title}>
   {planHref ? (
     <ClubMonthAccess client:only="react" slug={slug} planHref={planHref} />
   ) : month ? (

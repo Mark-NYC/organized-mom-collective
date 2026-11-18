@@ -4,7 +4,8 @@ import { clubAccountsEnabled } from '../data/club/config';
 import { getSession } from '../lib/account';
 import { loadMembership, mailingText, monthName, shortDate, type Membership, type MembershipMonth } from '../lib/club/membership';
 import { firstMonth, firstResourceReviewed, homeState, kitItems, kitText, loadMeetingGuideSeen, nextStep, profileDeferred } from '../lib/club/onboarding';
-import { clubResourceBySlug, clubResources } from '../data/club/resources';
+import { clubResourceBySlug } from '../data/club/resources';
+import { MONTH_PAGES, monthPageName } from '../data/club/month-pages';
 import { accountStore } from '../lib/club/store';
 import { ageInMonth, monthOf, type Household } from '../lib/club/profile';
 import { SETUP_STEPS, type FamilyProfile } from '../lib/club/family-profile';
@@ -29,87 +30,59 @@ const icons = import.meta.glob('../../assets/icons/ofc/month-icons/*-OFC-icon.pn
 const monthCopy = [
   {
     "month": "January",
-    "responsibility": "Planning together",
-    "how": "Our Family Focus: one page with your family’s shared focus for the month, a small habit or two worth trying, and four Words of the Week.",
     "url": "/app/club/january/"
   },
   {
     "month": "February",
-    "responsibility": "Caring for their own things",
-    "how": "A picture laundry guide for each child, matched to their age: My Clothes, My Job or I Can Do My Own Laundry.",
     "url": "/app/club/february/"
   },
   {
     "month": "March",
-    "responsibility": "Owning their chores",
-    "how": "A family chore chart shows who does what, with a cleaning plan that explains the steps and what finished looks like.",
     "url": "/app/club/march/"
   },
   {
     "month": "April",
-    "responsibility": "Sharing meal ownership",
-    "how": "A prepared dinner plan gives family members roles from ingredients to cleanup.",
     "url": "/app/club/april/"
   },
   {
     "month": "May",
-    "responsibility": "Managing their day",
-    "how": "A flexible daily rhythm and activity menu help kids choose what comes next.",
     "url": "/app/club/may/"
   },
   {
     "month": "June",
-    "responsibility": "Making their own snacks",
-    "how": "An I Can Make My Own Snack guide gives kids simple snack choices and picture steps to practice making snacks themselves.",
     "url": "/app/club/june/"
   },
   {
     "month": "July",
-    "responsibility": "Choosing something to do",
-    "how": "An I’m Bored! What Can I Do? activity board gives kids ideas they can choose themselves, so you don’t have to come up with something every time.",
     "url": "/app/club/july/"
   },
   {
     "month": "August",
-    "responsibility": "Taking initiative",
-    "how": "A personalized countdown gives everyone their own school-ready responsibilities.",
     "url": "/app/club/august/"
   },
   {
     "month": "September",
-    "responsibility": "Building independent routines",
-    "how": "Our Family Habit Cards: personalized reminder cards help kids practice one small school-day responsibility without constant reminders.",
     "url": "/app/club/september/"
   },
   {
     "month": "October",
-    "responsibility": "Caring for shared spaces",
-    "how": "A daily reset with one familiar cue, picture jobs and a clear finish line kids can recognize.",
     "url": "/app/club/october/"
   },
   {
     "month": "November",
-    "responsibility": "Owning a whole responsibility",
-    "how": "Each family member gets a whole job with a clear owner, timing, and finish line.",
     "url": "/club/worksheet-generator/"
   },
   {
     "month": "December",
-    "responsibility": "Being a blessing to others",
-    "how": "Two cards give kids space to draw a picture, write a poem, or share a letter, then send it to someone like a grandparent or teacher.",
     "url": "/app/club/december/"
   }
 ];
 
 /**
- * Each month's name is the name of what prints (src/data/club/resources.ts, the source the Welcome Kit, plan pages and
- * fulfillment already use), never a separate list: until Nov 2026 this card carried older headlines that disagreed with
- * the approved months (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §6b).
+ * Each month's name and lines come from the month's own page (src/data/club/month-pages.ts, owner decision
+ * 2026-11-18: the pages are the source of truth), never a separate list here. docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §13.
  */
-export const months = monthCopy.map((m, i) => {
-  const r = clubResources.find((x) => Number(x.month.slice(5, 7)) === i + 1);
-  return { ...m, title: r?.title ?? m.month };
-});
+export const months = monthCopy.map((m, i) => ({ ...m, title: MONTH_PAGES[i].name, responsibility: MONTH_PAGES[i].builds, how: MONTH_PAGES[i].how }));
 
 /** A member's month for a card (any year): the one she holds that's open now or soonest. */
 const heldMonth = (me: Membership | null, index: number) =>
@@ -258,10 +231,10 @@ function ClubHome({ me, household, profile, deferred, guideSeen, uid }: { me: Me
   const current = me.months.find((m) => m.month === me.current_month && m.state === 'available')
     ?? [...me.months].reverse().find((m) => m.state === 'available' && m.month <= me.current_month)
     ?? me.months.find((m) => m.state === 'available');
-  // The printed resource's name (src/data/club/resources.ts: what prints), else the month card's headline.
-  const title = (m: { month: string; slug?: string | null }) => clubResourceBySlug(m.slug)?.title ?? months[Number(m.month.slice(5, 7)) - 1]?.title ?? 'Monthly resource';
+  // The month's own page names it (src/data/club/month-pages.ts).
+  const title = (m: { month: string; slug?: string | null }) => monthPageName(m.month) ?? 'Monthly resource';
   const short = (iso: string) => monthName(iso).split(' ')[0];
-  const items = me.welcome ? kitItems(me, firstResourceReviewed(first?.slug, uid), (slug) => clubResourceBySlug(slug)?.title ?? null) : [];
+  const items = me.welcome ? kitItems(me, firstResourceReviewed(first?.slug, uid), (slug) => { const r = clubResourceBySlug(slug); return r ? monthPageName(r.month) : null; }) : [];
   const kitOnItsWay = state === 'kit_submitted' || state === 'kit_mailed';
   const firstMeeting = kitOnItsWay && current && first && current.month === first.month;
 

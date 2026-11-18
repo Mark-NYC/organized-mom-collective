@@ -206,6 +206,24 @@ for (const person of PEOPLE) {
   await ctx.close();
 }
 
+// Every monthly page (the source of truth for its month) opens inside the app: header, four tabs, Club bar, and
+// Club Home's year strip calls each month what its page calls it (src/data/club/month-pages.ts).
+{
+  const names = readFileSync('src/data/club/month-pages.ts', 'utf8');
+  const pageNames = [...names.matchAll(/route: '(\/app\/club\/[a-z]+)', name: '([^']+)'/g)].map((m) => ({ route: m[1], name: m[2] }));
+  const { ctx, page } = await session('active@e2e.test');
+  await page.goto(`${base}/app/club`, { waitUntil: 'load' }); await settle(page, 3500);
+  const strip = await page.locator('[data-home-year] .ofc-year-title').allInnerTexts();
+  check('active', `Club Home year strip names all 12 months as their pages do (${strip.length})`, strip.length === 12 && pageNames.every((p, i) => strip[i].replace(/[‘’]/g, "'") === p.name.replace(/[‘’]/g, "'")), strip.join(' | '));
+  for (const route of [...pageNames.map((p) => p.route), '/app/club/march/spring-prep']) {
+    await page.goto(base + route, { waitUntil: 'load' }); await settle(page, 3000);
+    const c = await chrome(page);
+    check('active', `${route}: inside the app with the Club bar`, inApp(c) && c.clubBar, JSON.stringify(c).slice(0, 140));
+  }
+  await shot(page, 'phone-march-spring-prep');
+  await ctx.close();
+}
+
 // Desktop: the same journey keeps the header tabs (no stretched phone, no lost navigation).
 {
   const { ctx, page } = await session('active@e2e.test', 1280);
