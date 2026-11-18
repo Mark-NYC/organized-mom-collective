@@ -271,7 +271,12 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertFalse(control("Save").exists, "no edit sheet for an imported event")
         shot("e2e-02c-imported-event")
         waitFor(control("Done"), "close the imported event").tap()
-        waitFor(control("Calendars · 2"), "the Calendars panel entry").tap()
+        // Back to the top of the page: after opening an event further down, the Calendars link is scrolled off screen.
+        goTo("Calendar")
+        let entry = waitFor(control("Calendars · 2"), "the Calendars panel entry")
+        for _ in 0..<4 where !entry.isHittable { web.swipeDown() }
+        XCTAssertTrue(entry.isHittable, "the Calendars entry is on screen")
+        entry.tap()
         waitFor(text("Who sees it"), "the Calendars panel")
         shot("e2e-02d-calendars-panel")
         waitFor(control("Done"), "close the Calendars panel").tap()
