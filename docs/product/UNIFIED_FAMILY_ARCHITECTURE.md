@@ -456,3 +456,19 @@ Who does what.
 **Left as is, on purpose:** Today's "Who's doing what" and Family's "Who does what" (a summary and the full list); the
 four meeting parts shown on Today and Family (a preview of the meeting); the Getting started checklist (a done step
 links to the meeting, as a checklist should).
+
+## 15. November editions (2026 and 2027)
+
+Owner, 2026-11-18: "The November resource must support the correct year … do not hard-code either year." Narrow fix:
+`NovemberOwnershipPrintable` takes the kit period (`kitMonth`) from its page and prints "NOVEMBER {year}" on its three
+headers and works out every child's age for that November (same age rule as before). `/club/resources/<slug>` passes
+the resource's month; November 2027 is a second entry in `src/data/club/resources.ts`, so it has its own member route,
+saved version (per kit) and orders. Nobody held November 2026 or had saved it in production (read-only, 2026-11-18),
+so no saved work or order was affected. Details and test evidence: `PRINTED_WORDING_PROPOSAL.md` §C.
+
+**Still to decide or do (not in this fix):**
+- `/app/club/november` (the November meeting page) is built for the November 2026 kit, so in November 2027 its
+  meeting would use 2026 ages. Fix when November 2027 is scheduled: choose the edition from the member's held
+  November kit (same idea as the printable). Not urgent before autumn 2027.
+- The kit registry (`src/data/club/kits/`) has no November 2027 kit yet (production has the row, draft), so its mailer
+  QR page `/club/kits/2027-11-family-ownership` isn't built. Add it with that mailer.
