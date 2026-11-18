@@ -234,7 +234,7 @@ grant execute on function public.calendar_feed_claim(int, uuid, uuid) to service
 
 -- Store one fetch. p: { result: 'ok' | 'not_modified' | 'error' | 'gone', error?, etag?, last_modified?, events? }.
 -- 'ok' replaces the feed's events in one step (a refresh never shows half a calendar); 'error' keeps the last good
--- events and counts the failure; 'gone' (the calendar no longer exists, 404/410) disconnects it.
+-- events and counts the failure; 'gone' (the link no longer works: 401/403/404/410) disconnects it and clears its events.
 create function public.calendar_feed_store(p_feed uuid, p jsonb) returns int
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -259,8 +259,10 @@ begin
     update public.calendar_feeds set status = 'ok', last_error = null, failures = 0, last_success_at = now(), updated_at = now() where id = p_feed;
     n := f.event_count;
   elsif p ->> 'result' = 'gone' then
+    -- Its link no longer works: its old events would go stale silently, so they leave the calendar until it's fixed.
+    delete from public.calendar_feed_events where feed_id = p_feed;
     update public.calendar_feeds set status = 'disconnected', last_error = left(coalesce(p ->> 'error', 'This calendar is no longer available.'), 200),
-           failures = failures + 1, updated_at = now() where id = p_feed;
+           failures = failures + 1, event_count = 0, etag = null, last_modified = null, updated_at = now() where id = p_feed;
   else
     update public.calendar_feeds set status = 'error', last_error = left(coalesce(p ->> 'error', 'Couldn’t refresh this calendar.'), 200),
            failures = failures + 1, updated_at = now() where id = p_feed;

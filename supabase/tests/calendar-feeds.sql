@@ -23,18 +23,18 @@ begin
 end $$;
 
 insert into auth.users (id, email, email_confirmed_at) values
-  ('00000000-0000-0000-0000-0000000ca101', 'cal-mom@example.com', now()),
-  ('00000000-0000-0000-0000-0000000ca102', 'cal-dad@example.com', now()),
-  ('00000000-0000-0000-0000-0000000ca103', 'cal-other@example.com', now());
-\set MOM '''00000000-0000-0000-0000-0000000ca101'''
-\set DAD '''00000000-0000-0000-0000-0000000ca102'''
-\set OTHER '''00000000-0000-0000-0000-0000000ca103'''
+  ('00000000-0000-0000-0000-0000000cf101', 'feed-mom@example.com', now()),
+  ('00000000-0000-0000-0000-0000000cf102', 'feed-dad@example.com', now()),
+  ('00000000-0000-0000-0000-0000000cf103', 'feed-other@example.com', now());
+\set MOM '''00000000-0000-0000-0000-0000000cf101'''
+\set DAD '''00000000-0000-0000-0000-0000000cf102'''
+\set OTHER '''00000000-0000-0000-0000-0000000cf103'''
 
 select pg_temp.as_user('authenticated', :MOM);
 select public.club_household_save('The Calendars', '{}',
   '[{"first_name":"Rosa","kind":"adult","role":"parent","is_account_holder":true},{"first_name":"Ben","kind":"adult","role":"partner"},
     {"first_name":"Lia","kind":"child","role":"child","birth_year":2016,"birth_month":3}]');
-create temp table inv as select public.household_invite_create((select id from public.club_family_members where first_name = 'Ben' and household_id = public.household_id_for(auth.uid())), 'cal-dad@example.com') as i;
+create temp table inv as select public.household_invite_create((select id from public.club_family_members where first_name = 'Ben' and household_id = public.household_id_for(auth.uid())), 'feed-dad@example.com') as i;
 reset role;
 grant select on inv to authenticated;
 select pg_temp.as_user('authenticated', :DAD);
@@ -47,7 +47,7 @@ reset role;
 create temp table ola as select id from public.club_family_members where first_name = 'Ola';
 grant select on ola to authenticated, anon;
 \set OLA '(select id from ola)'
-\set HID '(select household_id from public.household_adults where user_id = ''00000000-0000-0000-0000-0000000ca101'')'
+\set HID '(select household_id from public.household_adults where user_id = ''00000000-0000-0000-0000-0000000cf101'')'
 
 -- Subscribe (private by default), webcal:// becomes https://, the same URL twice is one subscription.
 select pg_temp.as_user('authenticated', :MOM);
@@ -116,7 +116,8 @@ select pg_temp.expect((select status = 'error' and event_count = 2 and failures 
 select public.calendar_feed_store(:F1, '{"result":"not_modified"}');
 select pg_temp.expect((select status = 'ok' and failures = 0 from public.calendar_feeds where id = :F1), 'unchanged since last time: ok, events kept');
 select public.calendar_feed_store(:F1, '{"result":"gone"}');
-select pg_temp.expect((select status from public.calendar_feeds where id = :F1) = 'disconnected', 'a calendar that''s gone is disconnected');
+select pg_temp.expect((select status = 'disconnected' and event_count = 0 and etag is null from public.calendar_feeds where id = :F1)
+  and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 0, 'a calendar that''s gone is disconnected and its stale events leave the calendar');
 select pg_temp.expect(jsonb_array_length(public.calendar_feed_claim(50)) = 0 or not exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50)) c where (c ->> 'id')::uuid = :F1), 'a disconnected one isn''t refreshed');
 select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(public.calendar_feed_retry(:F1) ->> 'status' = 'pending', 'its owner can retry it');

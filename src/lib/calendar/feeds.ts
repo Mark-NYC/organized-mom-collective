@@ -10,7 +10,7 @@
  * Until the database has the feed functions (migration 20261205), every call fails and `available` stays false:
  * the calendar looks and works exactly as before.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { accountFunction, accountRpc, getSession } from '../account';
 import { APP_RESUME_EVENT } from '../native/platform';
 import { addDays, localToday, type CalendarEvent } from './recurrence';
@@ -88,6 +88,26 @@ const readCache = (scope: string, which: string): Cached | null => {
 };
 const writeCache = (c: Cached) => { try { localStorage.setItem(`${CACHE}:${c.which}`, JSON.stringify(c)); } catch { /* this visit only */ } };
 
+const windowFor = () => { const t = localToday(); return { from: `${addDays(t, -35)}T00:00:00Z`, to: `${addDays(t, 130)}T00:00:00Z` }; };
+
+/**
+ * Outside React (the Club's month meeting page): a household's imported events for `which`, the copy on this device
+ * first (`onCached`), then fresh from the server. Resolves to [] when calendar subscriptions aren't set up.
+ */
+export async function loadExternalEvents(scope: string, which: 'mine' | 'household', onCached?: (e: CalendarEvent[]) => void): Promise<CalendarEvent[]> {
+  const c = readCache(scope, which);
+  if (c && onCached) onCached(toCalendarEvents(c.events, c.feeds));
+  try {
+    if (!(await getSession())) return c ? toCalendarEvents(c.events, c.feeds) : [];
+    const { from, to } = windowFor();
+    const [f, ev] = await Promise.all([feedsApi.list(), feedsApi.events(from, to, which)]);
+    writeCache({ scope, which, feeds: f, events: ev, at: new Date().toISOString() });
+    return toCalendarEvents(ev, f);
+  } catch {
+    return c ? toCalendarEvents(c.events, c.feeds) : [];
+  }
+}
+
 export interface ExternalCalendars {
   /** The server has calendar subscriptions (and she's signed in to a household). */
   available: boolean;
@@ -109,14 +129,15 @@ export function useExternalCalendars(scope: string | null, which: 'mine' | 'hous
   const [available, setAvailable] = useState(Boolean(cached));
   const [loading, setLoading] = useState(false);
   const busy = useRef(false);
-  const reload = useCallback(async () => {
-    if (!scope || scope === 'local' || busy.current || !(await getSession())) return;
+  const again = useRef(false);
+  const reload = useCallback(async (): Promise<void> => {
+    if (!scope || scope === 'local') return;
+    if (busy.current) { again.current = true; return; }
+    if (!(await getSession())) return;
     busy.current = true;
     setLoading(true);
     try {
-      const today = localToday();
-      const from = `${addDays(today, -35)}T00:00:00Z`;
-      const to = `${addDays(today, 130)}T00:00:00Z`;
+      const { from, to } = windowFor();
       const [f, ev] = await Promise.all([feedsApi.list(), feedsApi.events(from, to, which)]);
       setFeeds(f); setRaw(ev); setAvailable(true);
       writeCache({ scope, which, feeds: f, events: ev, at: new Date().toISOString() });
@@ -127,6 +148,8 @@ export function useExternalCalendars(scope: string | null, which: 'mine' | 'hous
       busy.current = false;
       setLoading(false);
     }
+    // A change made while it was loading (added, removed, made private): load once more so it shows.
+    if (again.current) { again.current = false; await reload(); }
   }, [scope, which]);
   useEffect(() => {
     void reload();
@@ -136,5 +159,6 @@ export function useExternalCalendars(scope: string | null, which: 'mine' | 'hous
     const t = window.setInterval(again, 5 * 60_000);
     return () => { window.removeEventListener(APP_RESUME_EVENT, again); document.removeEventListener('visibilitychange', again); window.clearInterval(t); };
   }, [reload]);
-  return { available, feeds, events: toCalendarEvents(raw, feeds), loading, reload };
+  const events = useMemo(() => toCalendarEvents(raw, feeds), [raw, feeds]);
+  return { available, feeds, events, loading, reload };
 }

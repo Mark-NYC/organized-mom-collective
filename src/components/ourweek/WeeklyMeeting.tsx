@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
 import { CHALLENGES, PRIORITIES, RESPONSIBILITY_CATEGORIES } from '../../data/club/family-profile';
 import { useCalendar } from '../../lib/calendar/client';
+import { useExternalCalendars } from '../../lib/calendar/feeds';
 import { localToday } from '../../lib/calendar/recurrence';
 import { useToday } from '../../lib/hooks';
 import { agreementsByPerson, monthOf, weekAhead } from '../../lib/family-meeting-support';
@@ -54,7 +55,9 @@ export default function WeeklyMeeting() {
   useEffect(() => {
     void getSession().then(async (s) => { if (s) setClub(Boolean((await accountStore.me().catch(() => null))?.access)); });
   }, []);
-  const week = weekAhead(Object.values(cal.state.events), localToday(today), today);
+  // Only calendars an adult shared with the household: a meeting is for everyone, so private ones stay out.
+  const shared = useExternalCalendars(scope && cal.signedIn ? scope : null, 'household');
+  const week = weekAhead([...Object.values(cal.state.events), ...shared.events], localToday(today), today);
   const people = (cal.household?.members ?? []).filter((m) => !m.archived && m.firstName.trim());
   const agreed = agreementsByPerson(cal.household, fam.profile);
   // The Club's month, prepared from this family: the same call the month's meeting page makes.
@@ -131,7 +134,7 @@ export default function WeeklyMeeting() {
                   <li key={d.date}><strong className="text-sm">{d.label}</strong>{d.items.map((x) => (
                     <span key={x.id + x.date} className="ml-2 inline-flex items-center gap-1.5 text-warm-soft">
                       <span aria-hidden="true" className="inline-block size-2 rounded-full" style={{ background: cal.colors[x.memberIds[0] ?? x.ownerId ?? '']?.hex ?? '#9aab8f' }} />
-                      {x.time === 'All day' ? '' : `${x.time} `}{x.title}{!x.ownerId ? ' · nobody handling it yet' : ''}</span>))}</li>
+                      {x.time === 'All day' ? '' : `${x.time} `}{x.title}{x.source ? ` · ${x.source}` : !x.ownerId ? ' · nobody handling it yet' : ''}</span>))}</li>
                 ))}
               </ul>
             </details>

@@ -295,11 +295,17 @@ jobs:
           node scripts/e2e/test-backend.mjs > backend.log 2>&1 &
           sleep 1
           node scripts/e2e/family-e2e.mjs app-www e2e-family
+      - name: Calendar subscriptions (iCal fixtures, privacy, duplicates, meeting), on a fresh test database
+        run: |
+          bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+          node scripts/e2e/calendar-e2e.mjs app-www e2e-calendar
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: family-e2e
-          path: e2e-family/
+          path: |
+            e2e-family/
+            e2e-calendar/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:

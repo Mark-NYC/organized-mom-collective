@@ -171,7 +171,9 @@ const server = createServer(async (req, res) => {
       calendarFeeds ??= (await import('../../supabase/functions/_shared/handlers/calendar-feeds.ts')).createCalendarFeedsHandler({
         db: { rpc: async (name, args = {}) => JSON.parse(psql(callSql(name, args)) || 'null') },
         getUser: async (t) => { const s = tokens.get(t); return s && s.exp > Date.now() ? { id: s.sub } : null; },
-        fetch, now: () => Date.now(), cronSecret: 'e2e-cron', allowPrivateHosts: true,
+        // Calendar links at *.calendar.e2e.test are the e2e fixtures on this machine (E2E_CAL_FIXTURES, default :54322).
+        fetch: (u, init) => fetch(String(u).replace(/^https?:\/\/[a-z0-9-]+\.calendar\.e2e\.test(:\d+)?/i, process.env.E2E_CAL_FIXTURES ?? 'http://127.0.0.1:54322'), init),
+        now: () => Date.now(), cronSecret: 'e2e-cron', allowPrivateHosts: true,
       });
       const r = await calendarFeeds(new Request(`http://127.0.0.1${url.pathname}`, { method: req.method, headers: Object.fromEntries(Object.entries(req.headers).filter(([, v]) => typeof v === 'string')), body: req.method === 'POST' ? raw : undefined }));
       res.writeHead(r.status, { 'Content-Type': 'application/json' });
