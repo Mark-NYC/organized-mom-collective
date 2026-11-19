@@ -98,13 +98,18 @@ Use the Google account that should own the app; it's best to use a Google Worksp
 7. **Clients → Create client:** <https://console.cloud.google.com/auth/clients/create>
    - Application type: **Web application**; name: `Organized Family web`
    - Authorized JavaScript origins: none needed
-   - Authorized redirect URIs: `https://www.organizedmomcollective.com/app/google-callback/` (exactly, with the trailing slash)
+   - Authorized redirect URIs (both, exactly):
+     - `https://www.organizedmomcollective.com/app/google-callback/` (production; the relay page on our verified domain)
+     - `https://uvqhmlqwmgnohhduttip.supabase.co/functions/v1/calendar-google/callback` (the staged test only, before the PR is merged: the relay page isn't on the live site yet). Remove it before submitting for verification.
    - Create, then copy the **Client ID** and **Client secret** (shown once; download the JSON if offered).
 8. **Domain ownership:** <https://search.google.com/search-console>. Verify `organizedmomcollective.com` with the same Google account (DNS TXT record at your DNS host, Cloudflare). Verification requires it.
 9. **Supabase function secrets:** <https://supabase.com/dashboard/project/uvqhmlqwmgnohhduttip/functions/secrets>. Add:
    - `CALENDAR_GOOGLE_CLIENT_ID` = the Client ID
    - `CALENDAR_GOOGLE_CLIENT_SECRET` = the Client secret
-   - optional `CALENDAR_GOOGLE_REDIRECT_URI` = `https://www.organizedmomcollective.com/app/google-callback/` (this is already the default)
+   - **for the staged test (Stage G, before merge):**
+     - `CALENDAR_GOOGLE_REDIRECT_URI` = `https://uvqhmlqwmgnohhduttip.supabase.co/functions/v1/calendar-google/callback`
+     - `CALENDAR_GOOGLE_RETURN_ORIGINS` = `https://claude-google-calendar-conne.organized-mom-collective.pages.dev,https://www.organizedmomcollective.com,https://organizedmomcollective.com`
+   - **after merge (Stage H):** delete both. The defaults are the www relay page and the production origins.
 
    These names are new and don't touch any existing Google or Supabase credential.
 10. Tell Claude "Google client configured". Claude never needs to see the values.
@@ -150,8 +155,8 @@ Use the Google account that should own the app; it's best to use a Google Worksp
 | D. Apply migration 20261206 | Only this migration | `verify.sql` all ok; preflight snapshot identical (family data, iCal subscription, 12 functions) |
 | E. Deploy `calendar-google` | `verify_jwt = false` (Google's redirect carries no session) | POST without sign-in → 401; forged callback → back to the app with "expired" |
 | F. Switch on Google for your test household | `update public.calendar_feed_testers set google = true where user_id = (select id from auth.users where email = '<test email>');` | Only that household sees Connect Google Calendar |
-| G. Test on the PR preview (no merge) | Connect, pick calendars, check events, Only me / Our household, a second account, Disconnect, Reconnect. In the iPhone app later, via TestFlight. | All work; the DB shows tokens only in Vault; other households unaffected |
-| H. Release | Merge the PR (the website deploys); TestFlight build (approval); still test households only | Smoke test passes |
+| G. Test on the PR preview (no merge) | On <https://claude-google-calendar-conne.organized-mom-collective.pages.dev/app/family-calendar>, with the two staged-test secrets from §5 step 9 (Google returns straight to the function, then to the preview): Connect, pick calendars, check events, Only me / Our household, a second account, Disconnect, Reconnect. | All work; the DB shows tokens only in Vault; other households unaffected |
+| H. Release | Merge the PR (the website deploys, including the relay page); delete the two staged-test secrets so Google returns to the www relay page; test Connect once more on www; TestFlight build (approval) to check the Safari sheet on a phone; still test households only | Connect works on www; smoke test passes |
 | I. Verification | Submit sensitive-scope verification (§6); publish the app "In production" when approved | Google approves |
 | J. Everyone | `update public.calendar_feed_rollout set google_everyone = true where id;`. This **also needs** `everyone = true` for calendars, a separate decision. | 2 weeks of watching account statuses, refresh health, quota |
 
