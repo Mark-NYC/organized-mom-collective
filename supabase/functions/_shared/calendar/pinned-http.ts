@@ -82,8 +82,21 @@ export async function httpGet(conn: ByteConn, url: URL, headers: Record<string, 
   const parts: Uint8Array[] = [];
   let size = 0;
   const buf = new Uint8Array(64 * 1024);
+  let tlsUnexpectedEof = false;
   for (;;) {
-    const n = await conn.read(buf);
+    let n: number | null;
+    try {
+      n = await conn.read(buf);
+    } catch (e) {
+      // Some TLS servers close without close_notify. Deno reports UnexpectedEof
+      // even after the complete HTTP response. Only accept it if HTTP framing
+      // below proves the entire body arrived (Content-Length or final chunk).
+      if (e instanceof Error && e.name === 'UnexpectedEof') {
+        tlsUnexpectedEof = true;
+        break;
+      }
+      throw e;
+    }
     if (n === null) break;
     size += n;
     if (size > cap) throw new Error('too_big');
@@ -111,12 +124,16 @@ export async function httpGet(conn: ByteConn, url: URL, headers: Record<string, 
     const i = l.indexOf(':');
     if (i > 0) { try { h.append(l.slice(0, i).trim(), l.slice(i + 1).trim()); } catch { /* skip a malformed header */ } }
   }
-  if ((h.get('transfer-encoding') ?? '').toLowerCase().includes('chunked')) body = dechunk(body);
+  const chunked = (h.get('transfer-encoding') ?? '').toLowerCase().includes('chunked');
+  if (chunked) body = dechunk(body);
   else if (h.has('content-length')) {
     const len = Number(h.get('content-length'));
     if (!Number.isFinite(len) || len < 0) throw new Error('bad_response');
     if (body.length < len) throw new Error('incomplete');
     body = body.subarray(0, len);
+  } else if (tlsUnexpectedEof && status !== 204 && status !== 304 && !(status >= 300 && status < 400)) {
+    // Without a length or terminal chunk, truncated TLS data looks complete.
+    throw new Error('incomplete');
   }
   if (body.length > maxBytes) throw new Error('too_big');
   const coding = (h.get('content-encoding') ?? '').toLowerCase();
