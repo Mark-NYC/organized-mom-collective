@@ -1,0 +1,85 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import { SUPPORT_EMAIL } from '../data/support';
+import { routes } from '../routes';
+
+const UPDATED = '2026-11-19';
+const h2 = 'serif-title mt-12 text-[1.5rem] sm:text-[1.75rem]';
+const p = 'mt-3 text-[1rem] leading-relaxed text-warm-ink';
+const a = 'underline decoration-warm-rule decoration-1 underline-offset-4 hover:decoration-warm-ink';
+const list = 'mt-3 list-disc space-y-2 pl-6 text-[1rem] leading-relaxed text-warm-ink';
+const sections = [
+  { id: 'acceptance', label: 'Using our services' },
+  { id: 'accounts', label: 'Accounts and family information' },
+  { id: 'calendars', label: 'Connected calendars' },
+  { id: 'purchases', label: 'Orders, subscriptions and refunds' },
+  { id: 'content', label: 'Your content and our materials' },
+  { id: 'availability', label: 'Availability and third-party services' },
+  { id: 'responsibility', label: 'Your responsibilities' },
+  { id: 'disclaimers', label: 'Disclaimers and limits' },
+  { id: 'termination', label: 'Closing accounts and changes' },
+  { id: 'contact', label: 'Contact and governing law' },
+];
+---
+
+<PublicLayout title="Terms of Service" description="Terms for using Organized Mom Collective's website, family tools, Organized Family App, calendar connections, and purchases." width="full">
+  <section aria-labelledby="terms-h" class="public-panel public-intro">
+    <div class="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
+      <p class="label text-warm-soft">Policies</p>
+      <h1 id="terms-h" class="serif-hero mt-3">Terms of Service</h1>
+      <p class="lede mt-5 text-warm-ink">These terms explain what to expect when you use Organized Mom Collective products, resources, and the Organized Family App.</p>
+      <p class="mt-6 text-[0.9rem] text-warm-soft">Effective <time datetime={UPDATED}>November 19, 2026</time>.</p>
+    </div>
+  </section>
+  <article class="mx-auto max-w-3xl px-5 pt-10 pb-16 sm:px-8 sm:pb-24">
+    <nav aria-labelledby="terms-toc" class="border-y border-warm-rule py-5">
+      <h2 id="terms-toc" class="label text-warm-soft">On this page</h2>
+      <ul class="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+        {sections.map(section => <li><a href={`#${section.id}`} class={a}>{section.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <h2 id="acceptance" class={h2}>Using our services</h2>
+    <p class={p}>Organized Mom Collective (“we,” “us,” or “our”) provides family organization products and digital services, including this website, printable resources, the Organized Family App, family calendars, and the Family Meeting Club. By accessing or using these services, you agree to these Terms of Service. If you do not agree, please do not use them.</p>
+    <p class={p}>Our services are intended for adults managing their own households. Parents and caregivers are responsible for deciding what information to enter about children and family members.</p>
+
+    <h2 id="accounts" class={h2}>Accounts and family information</h2>
+    <p class={p}>You agree to provide accurate account information, keep access to your sign-in email secure, and notify us if you suspect unauthorized access. You are responsible for activity under your account, except where the law provides otherwise.</p>
+    <p class={p}>You may invite another adult to a shared household. Only invite people authorized to participate, and understand that content you choose to share with your household may become visible to its other adult members. You remain responsible for the details you enter and how you use generated plans and reminders.</p>
+
+    <h2 id="calendars" class={h2}>Connected calendars</h2>
+    <p class={p}>The Organized Family Calendar may let you add an iCal subscription link or connect a Google Calendar. Calendar imports are <strong>read-only</strong>: we display selected event information in your family calendar but do not change, create, or delete events in the source calendar.</p>
+    <ul class={list}>
+      <li>You must have permission to access and import any calendar you connect, including school, team, or shared calendars.</li>
+      <li>Calendars are private by default unless you choose to share them with your household. Only share event information you have permission to share.</li>
+      <li>You can remove imported calendars or disconnect supported accounts from the calendar settings. Removing a connection does not delete events in the source calendar.</li>
+      <li>Updates depend on the source provider, connectivity, permissions, and the refresh system. Imported events can be delayed or incomplete. Check the original calendar for time-sensitive appointments or schedule changes.</li>
+      <li>Google Calendar connections require your separate consent through Google. Google account access and use are also subject to Google's terms and policies.</li>
+    </ul>
+    <p class={p}>For details about data handling and your choices, please read our <a href={routes.privacy} class={a}>Privacy Policy</a>.</p>
+
+    <h2 id="purchases" class={h2}>Orders, subscriptions and refunds</h2>
+    <p class={p}>Product prices, shipping costs, taxes, subscription terms, and any trial offers are shown before checkout. For paid memberships, recurring charges continue according to the billing terms presented at checkout until canceled. You can manage or cancel eligible subscriptions through your account or contact <a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a> for help.</p>
+    <p class={p}>Our <a href={routes.returns} class={a}>Returns &amp; Refunds Policy</a> explains applicable return windows and refund procedures for purchases from this website. If you buy through Etsy or another marketplace, that marketplace's checkout and applicable policies also apply. Nothing in these terms limits your statutory consumer rights.</p>
+
+    <h2 id="content" class={h2}>Your content and our materials</h2>
+    <p class={p}>You keep your rights to names, schedules, plans, and other information you submit. You permit us to host, process, and display that information only as reasonably needed to provide the services you use, subject to our Privacy Policy and your chosen sharing settings.</p>
+    <p class={p}>Our website designs, original illustrations, templates, printables, software, and branding belong to Organized Mom Collective or their respective licensors. You may use purchased and free family resources for personal household purposes, but you may not resell, redistribute, or commercially reproduce them without permission.</p>
+
+    <h2 id="availability" class={h2}>Availability and third-party services</h2>
+    <p class={p}>We work to keep our services available and accurate, but features may change, require maintenance, or be unavailable. Some functions rely on outside providers, including Google, Supabase, Stripe, shipping services, and printing partners. We are not responsible for changes or outages in systems we do not control, subject to applicable law.</p>
+
+    <h2 id="responsibility" class={h2}>Your responsibilities</h2>
+    <p class={p}>Please use the services lawfully and respectfully. Do not access other people's accounts without authorization, attempt to bypass security controls, upload malicious code, or use our services to violate anyone else's privacy or intellectual property rights. Do not rely on family routines or printed tools as professional medical, legal, or safety advice.</p>
+
+    <h2 id="disclaimers" class={h2}>Disclaimers and limits</h2>
+    <p class={p}>To the extent permitted by applicable law, digital services and organizational guidance are provided on an “as available” basis without a promise of uninterrupted access or a particular outcome. We are not liable for indirect or consequential losses arising from service interruptions or inaccurate third-party calendar information, where such limitations are allowed by law. We do not exclude liability or consumer remedies that cannot legally be excluded.</p>
+
+    <h2 id="termination" class={h2}>Closing accounts and changes</h2>
+    <p class={p}>You may stop using our services or request account deletion. If you have a paid membership, cancel it before deleting your account to avoid further charges. We may suspend access if necessary to protect users, prevent abuse, or comply with law, and will act fairly and consistently with applicable law.</p>
+    <p class={p}>We may update these terms as services change. We will post an updated effective date here and provide additional notice when required. Continued use after new terms take effect means you accept them, where permitted by law.</p>
+
+    <h2 id="contact" class={h2}>Contact and governing law</h2>
+    <p class={p}>These terms are governed by the laws of the State of New York, United States, except where mandatory laws applicable to you provide otherwise. For questions or concerns, contact Organized Mom Collective at <a href={`mailto:${SUPPORT_EMAIL}`} class={a}>{SUPPORT_EMAIL}</a> or visit <a href={routes.support} class={a}>Help &amp; Support</a>.</p>
+  </article>
+</PublicLayout>
