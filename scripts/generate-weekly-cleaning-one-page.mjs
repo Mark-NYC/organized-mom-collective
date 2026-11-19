@@ -78,7 +78,9 @@ text('CHECK OFF EACH DAY', 383, 685, 8, bold, muted);
 });
 dailyEssentials.tasks.forEach((task, i) => {
   const col = i < 3 ? 0 : 1, row = i < 3 ? i : i - 3;
-  const x = 44 + col * 266, y = 638 - row * 17.5;
+  const x = 44 + col * 266, y = 647 - row * 16;
+  // Keep the entire checkbox and task text clear of the card border and blue header.
+  if (y - 2 < 604 + 8 || y + 9.5 > 658 - 1) throw new Error('Daily Reset row overlaps its frame: ' + task.label);
   checkbox(x, y - 2, 11);
   fitted(task.label, x + 19, y, 244, 10.1, regular, 9.6);
 });
@@ -92,14 +94,19 @@ async function zone(day, x, top, height = 213) {
   text(day.dayLabel.toUpperCase(), x + 55, top - 17, 9.1, bold, muted);
   fitted(day.zone, x + 55, top - 35, width - 66, 16, serif, 13.6);
   const count = day.tasks.length;
-  const gap = count >= 8 ? 17.7 : count === 7 ? 20.5 : 26;
+  const gap = count >= 8 ? 16.5 : count === 7 ? 19 : 26;
   const start = top - 61;
+  const ownerY = top - height + 15;
+  // Reserve an actual gutter above the owner label and underline. No task may enter it.
+  const finalCheckboxBottom = start - (count - 1) * gap - 2;
+  if (finalCheckboxBottom < ownerY + 18) {
+    throw new Error(day.dayLabel + ' checklist overlaps its owner line');
+  }
   day.tasks.forEach((task, i) => {
     const y = start - i * gap;
     checkbox(x + 12, y - 2, 11.5);
     fitted(task.label, x + 32, y, width - 44, 10.25, regular, 9.65);
   });
-  const ownerY = top - height + 15;
   text('OWNER:', x + 12, ownerY, 9.1, bold, muted);
   page.drawLine({
     start: { x: x + 65, y: ownerY - 1 },
