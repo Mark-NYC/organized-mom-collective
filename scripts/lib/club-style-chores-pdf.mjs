@@ -79,7 +79,10 @@ async function build(guide){
  const regular=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-400-normal.woff2'),{subset:false});
  const semibold=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-600-normal.woff2'),{subset:false});
  const clean=v=>String(v).replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/[\u2013\u2014]/g,'-');
- // The no-reminders sheet uses StandardFonts to avoid WOFF2 ligature corruption\n // (missing glyphs in 'Define', 'finished' and 'prompting' in several PDF viewers).\n const noReminders=guide.slug==='kids-chores-without-reminders';\n const bodyFonts=noReminders?{}:{regular,bold:semibold};
+ // The no-reminders sheet uses StandardFonts to avoid WOFF2 ligature corruption
+ // (missing glyphs in 'Define', 'finished' and 'prompting' in several PDF viewers).
+ const noReminders=guide.slug==='kids-chores-without-reminders';
+ const bodyFonts=noReminders?{}:{regular,bold:semibold};
  const text=(page,value,x,y,size=10,font='regular',fill=c.ink)=>{
    if(!bodyFonts[font])return standardText(page,value,x,y,size,font,fill);
    page.drawText(clean(value),{x,y,size,font:bodyFonts[font],color:fill});
@@ -147,7 +150,8 @@ async function build(guide){
     const y=371-j*25;
     bulletSquare(p,x+11,y-2,c.ink);
     // Start shortly below the heading/icon block. Montserrat rows use a 25pt rhythm.
-    const listSize=noReminders?9.35:8.35;\n    const rows=wrap(cat.jobs[j],'regular',listSize,128);
+    const listSize=noReminders?9.35:8.35;
+    const rows=wrap(cat.jobs[j],'regular',listSize,128);
     if(rows.length>2)throw new Error('Chore label overflows: '+cat.jobs[j]);
     rows.forEach((line,k)=>text(p,line,x+27,y-k*10.6,listSize));
   }
