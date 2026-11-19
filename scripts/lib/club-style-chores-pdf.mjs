@@ -79,7 +79,7 @@ async function build(guide){
  const regular=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-400-normal.woff2'),{subset:false});
  const semibold=await pdf.embedFont(await readFile(fontRoot+'montserrat-latin-600-normal.woff2'),{subset:false});
  const clean=v=>String(v).replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/[\u2013\u2014]/g,'-');
- const bodyFonts={regular,bold:semibold};
+ // The no-reminders sheet uses StandardFonts to avoid WOFF2 ligature corruption\n // (missing glyphs in 'Define', 'finished' and 'prompting' in several PDF viewers).\n const noReminders=guide.slug==='kids-chores-without-reminders';\n const bodyFonts=noReminders?{}:{regular,bold:semibold};
  const text=(page,value,x,y,size=10,font='regular',fill=c.ink)=>{
    if(!bodyFonts[font])return standardText(page,value,x,y,size,font,fill);
    page.drawText(clean(value),{x,y,size,font:bodyFonts[font],color:fill});
@@ -95,7 +95,6 @@ async function build(guide){
  };
  const p=pdf.addPage([612,792]);
  const design=ageGuides[guide.slug];
- const noReminders=guide.slug==='kids-chores-without-reminders';
  if(!design)throw new Error('No approved design: '+guide.slug);
  p.drawRectangle({x:0,y:0,width:612,height:792,color:c.white});
 
@@ -112,17 +111,17 @@ async function build(guide){
  rounded(p,43,507,205,111,13,paleGreen);
  rounded(p,260,507,309,111,13,paleBlush);
  text(p,noReminders?"WHY REMINDERS DON'T STICK":'AT THIS AGE...',56,593,noReminders?11.4:13.0,'serifBold');
- const introLines=wrap(design.intro,'regular',9.8,177);
+ const introLines=wrap(design.intro,'regular',noReminders?10.2:9.8,177);
  if(introLines.length>5)throw new Error('Intro overflows for '+guide.slug);
- introLines.forEach((l,i)=>text(p,l,56,571-i*13.5,9.8));
+ introLines.forEach((l,i)=>text(p,l,56,571-i*13.5,noReminders?10.2:9.8));
  text(p,noReminders?'HOW TO HAND OFF A JOB':'HOW TO BUILD OWNERSHIP',272,591,13.5,'serifBold');
  design.bullets.forEach((item,i)=>{
    const y=568-i*17;
    bulletSquare(p,273,y-3,c.ink);
    // Keep every bullet within the right panel. Never join wrapped lines back together.
-   const rows=wrap(item,'regular',9.0,266);
+   const rows=wrap(item,'regular',noReminders?10:9.0,266);
    if(rows.length>2)throw new Error('Ownership bullet is too long: '+item);
-   rows.forEach((line,j)=>text(p,line,289,y-j*10,9.0));
+   rows.forEach((line,j)=>text(p,line,289,y-j*11,noReminders?10:9.0));
  });
 
  // Three colored chore/action cards. All lists are editorial text, not flattened imagery.
@@ -148,9 +147,9 @@ async function build(guide){
     const y=371-j*25;
     bulletSquare(p,x+11,y-2,c.ink);
     // Start shortly below the heading/icon block. Montserrat rows use a 25pt rhythm.
-    const rows=wrap(cat.jobs[j],'regular',8.35,128);
+    const listSize=noReminders?9.35:8.35;\n    const rows=wrap(cat.jobs[j],'regular',listSize,128);
     if(rows.length>2)throw new Error('Chore label overflows: '+cat.jobs[j]);
-    rows.forEach((line,k)=>text(p,line,x+27,y-k*10.2,8.35));
+    rows.forEach((line,k)=>text(p,line,x+27,y-k*10.6,listSize));
   }
  }
 
