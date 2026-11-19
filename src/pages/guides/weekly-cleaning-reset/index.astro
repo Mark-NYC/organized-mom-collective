@@ -1,10 +1,9 @@
 ---
 import PublicLayout from '../../../layouts/PublicLayout.astro';
-import { dailyEssentials, weeklySchedule, weekend, monthlyDeepClean } from '../../../data/cleaning';
+import { dailyEssentials, weeklySchedule, weekend } from '../../../data/cleaning';
 
 const dayGroups = [weeklySchedule.slice(0,2), weeklySchedule.slice(2,4)];
-const printPdf = '/downloads/weekly-cleaning-zones.pdf';
-const month = monthlyDeepClean;
+const printPdf = '/downloads/weekly-cleaning-reset-one-page.pdf';
 ---
 <PublicLayout
   title="Weekly Cleaning Reset: Free Illustrated Family Cleaning Guide"
@@ -25,7 +24,7 @@ const month = monthlyDeepClean;
               <a href={printPdf} download="OMC-Weekly-Cleaning-Reset.pdf" class="inline-flex min-h-12 items-center justify-center bg-[#545454] px-6 py-3 text-sm font-bold text-white">Download the illustrated PDF</a>
               <button id="print-cleaning-guide" type="button" class="min-h-12 border border-[#545454] bg-white px-6 py-3 text-sm font-bold">Print this guide</button>
             </div>
-            <p class="mt-3 text-xs text-[#68615c]">US Letter · Two pages · No signup · Reprint each week</p>
+            <p class="mt-3 text-xs text-[#68615c]">US Letter · One page · No signup · Reprint each week</p>
           </div>
           <div class="border border-[#d5c5b8] bg-white p-7">
             <img src={dailyEssentials.icon} alt="Original hand-drawn Daily Reset illustration" width="150" height="150" class="mx-auto h-32 w-32 object-contain" />
@@ -47,67 +46,31 @@ const month = monthlyDeepClean;
           <div class="border-t-4 border-[#D4DFC4] bg-[#FBF7F1] p-5"><h3 class="font-serif text-xl">2. Do today's zone</h3><p class="mt-2 text-sm leading-relaxed">Monday through Thursday, use the checklist or stop when the timer ends. Name an owner and don't silently take the job back.</p></div>
           <div class="border-t-4 border-[#F1D8A8] bg-[#FBF7F1] p-5"><h3 class="font-serif text-xl">3. Keep weekends flexible</h3><p class="mt-2 text-sm leading-relaxed">Friday is deep cleaning, Saturday is a home project, and Sunday is catch-up or reset. Skip what doesn't fit. Never stack missed zones.</p></div>
         </div>
-        <p class="mt-6 text-sm leading-relaxed">The checklist below reads from the same cleaning schedule as our <a class="underline underline-offset-4" href="/app/calendar/">cleaning companion</a>. It stays in sync when the core tasks change. The monthly home project changes by month, so the printed guide lists the rotation separately.</p>
+        <p class="mt-6 text-sm leading-relaxed">The checklist below reads from the same cleaning schedule as our <a class="underline underline-offset-4" href="/app/calendar/">cleaning companion</a>. It stays in sync when the core tasks change. The monthly home project changes by month; find its detailed tasks in the companion app.</p>
       </div>
     </section>
 
     <section class="print-sheets bg-[#edeae6] px-3 py-9 sm:px-8">
       <div class="mx-auto max-w-5xl">
         <div class="web-only mb-5 flex items-center justify-between gap-3">
-          <h2 class="font-serif text-2xl">Your printable checklist</h2>
-          <button type="button" class="print-trigger border border-[#545454] bg-white px-5 py-3 text-sm font-bold">Print the two-page checklist</button>
+          <h2 class="font-serif text-2xl">One-page printable checklist</h2>
+          <button type="button" class="print-trigger border border-[#545454] bg-white px-5 py-3 text-sm font-bold">Print one page</button>
         </div>
-        <div class="sheet bg-white">
-          <header class="sheet-head">
-            <p class="overline">ORGANIZED MOM COLLECTIVE · YOUR WEEKLY CLEANING PLAN</p>
-            <h2>Our Weekly Cleaning Reset</h2>
-            <p>Start with the 15-minute Daily Reset, then add today's cleaning zone.</p>
-          </header>
-          <div class="daily-block">
-            <div class="block-heading">
-              <img src={dailyEssentials.icon} alt="" width="54" height="54" />
-              <div><p class="overline">EVERY DAY · {dailyEssentials.minutes}</p><h3>{dailyEssentials.title}</h3></div>
-            </div>
-            <ul class="daily-tasks">{dailyEssentials.tasks.map(t => <li><span class="square"></span>{t.label}</li>)}</ul>
-            <div class="daily-days"><span>CHECK OFF EACH DAY</span>{['M','T','W','T','F','S','S'].map((d,i) => <label><span>{d}<span class="sr-only"> day {i+1}</span></span><span class="square"></span></label>)}</div>
+        <div class="single-sheet bg-white">
+          <header><p class="overline">ORGANIZED MOM COLLECTIVE · YOUR FAMILY CLEANING PLAN</p><h2>Our Weekly Cleaning Reset</h2><p>15-minute Daily Reset + one zone each weekday + a flexible weekend</p></header>
+          <section class="one-daily">
+            <div class="one-heading"><img src={dailyEssentials.icon} alt="" width="34" height="34"/><div><strong>{dailyEssentials.title}</strong><span>EVERY DAY · {dailyEssentials.minutes}</span></div></div>
+            <div class="one-daily-grid"><ul>{dailyEssentials.tasks.map(t=><li><span class="one-check"></span>{t.label}</li>)}</ul><div class="one-tracker"><span>DAILY CHECKOFF</span><div>{['M','T','W','T','F','S','S'].map(d=><label>{d}<span class="one-check"></span></label>)}</div></div></div>
+          </section>
+          <div class="one-zone-grid">
+            {weeklySchedule.map(d=><section class="one-zone">
+              <div class="one-heading"><img src={d.icon} alt="" width="32" height="32"/><div><span>{d.dayLabel.toUpperCase()} · {d.minutes}</span><strong>{d.zone}</strong></div></div>
+              <ul>{d.tasks.map(t=><li><span class="one-check"></span>{t.label}</li>)}</ul>
+              <p class="one-owner">OWNER: <span></span></p>
+            </section>)}
           </div>
-          <div class="zone-grid">
-            {dayGroups[0].map(d => <article class="zone-block">
-              <div class="block-heading"><img src={d.icon} alt="" width="50" height="50"/><div><p class="overline">{d.dayLabel.toUpperCase()} · {d.minutes}</p><h3>{d.zone}</h3></div></div>
-              <ul>{d.tasks.map(t => <li><span class="square"></span><span>{t.label}</span></li>)}</ul>
-              <div class="owner">ZONE OWNER <span></span></div>
-            </article>)}
-          </div>
-          <footer class="sheet-foot"><span>Stop when the timer ends. Missed a zone? Resume on the next day.</span><span>1 / 2</span></footer>
-        </div>
-
-        <div class="sheet bg-white">
-          <header class="sheet-head">
-            <p class="overline">ORGANIZED MOM COLLECTIVE · YOUR WEEKLY CLEANING PLAN</p>
-            <h2>The Rest of the Week</h2>
-            <p>One zone at a time. Friday through Sunday stay flexible.</p>
-          </header>
-          <div class="zone-grid second-page">
-            {dayGroups[1].map(d => <article class="zone-block">
-              <div class="block-heading"><img src={d.icon} alt="" width="50" height="50"/><div><p class="overline">{d.dayLabel.toUpperCase()} · {d.minutes}</p><h3>{d.zone}</h3></div></div>
-              <ul>{d.tasks.map(t => <li><span class="square"></span><span>{t.label}</span></li>)}</ul>
-              <div class="owner">ZONE OWNER <span></span></div>
-            </article>)}
-          </div>
-          <div class="weekend-block">
-            <p class="overline">FRIDAY THROUGH SUNDAY · FLEXIBLE</p>
-            {weekend.days.map((d,i) => <div class="weekend-row">
-              <img src={weekend.icon} alt="" width="36" height="36"/>
-              <div><span class="overline">{d.dayLabel.toUpperCase()}</span><h3>{d.zone}</h3><p>{i === 0 ? 'Choose one deeper cleaning task.' : i === 1 ? 'Do one task from this month’s home project.' : 'Catch up on one zone, reset, or rest.'}</p></div>
-              <span class="square"></span>
-            </div>)}
-          </div>
-          <div class="monthly-block">
-            <p class="overline">MONTHLY HOME PROJECT ROTATION</p>
-            <div>{month.map(m => <span><strong>{m.name.slice(0,3)}</strong> {m.title}</span>)}</div>
-            <p>For the complete monthly task list, use the cleaning companion. You do not have to finish the whole project in one weekend.</p>
-          </div>
-          <footer class="sheet-foot"><span>Share ownership at your family meeting. Small wins count.</span><span>2 / 2</span></footer>
+          <section class="one-weekend"><p class="overline">FRIDAY THROUGH SUNDAY · FLEXIBLE</p><div>{weekend.days.map((d,i)=><article><img src={weekend.icon} alt="" width="26" height="26"/><span><strong>{d.dayLabel}: {d.zone}</strong><small>{['Choose one deeper cleaning task','Do one task from the monthly home project','Catch up on one zone, reset, or rest'][i]}</small></span><span class="one-check"></span></article>)}</div></section>
+          <footer>Missed a zone? Don't stack it. The monthly project checklist lives in the cleaning companion. · organizedmomcollective.com</footer>
         </div>
       </div>
     </section>
@@ -123,8 +86,56 @@ const month = monthlyDeepClean;
   document.querySelectorAll('.print-trigger').forEach(button => button.addEventListener('click', () => window.print()));
 </script>
 <style is:global>
-.cleaning-guide{font-family:Montserrat,Arial,sans-serif}.cleaning-guide .eyebrow,.cleaning-guide .overline{font-size:10px;font-weight:700;letter-spacing:.1em}.cleaning-guide .sheet{box-sizing:border-box;position:relative;width:100%;max-width:816px;min-height:1056px;margin:0 auto 24px;padding:52px 49px 52px;color:#545454;box-shadow:0 3px 16px #0001}.cleaning-guide .sheet-head{border-bottom:2px solid #545454;padding-bottom:15px}.cleaning-guide .sheet-head h2{font:normal 34px/1.15 Georgia,serif;margin:10px 0 5px}.cleaning-guide .sheet-head>p:last-child{font-size:12px}.cleaning-guide .block-heading{display:flex;align-items:center;gap:12px;background:#FBF7F1;padding:9px}.cleaning-guide .block-heading img{object-fit:contain;flex-shrink:0}.cleaning-guide .block-heading h3{font:normal 22px/1.15 Georgia,serif;margin-top:3px}.cleaning-guide .daily-block{margin-top:19px;border:1px solid #d5c5b8}.cleaning-guide .daily-block .block-heading{background:#CDDDE1}.cleaning-guide .daily-tasks{padding:12px 18px;display:grid;grid-template-columns:1fr 1fr;gap:11px}.cleaning-guide li{display:flex;align-items:flex-start;gap:9px;font-size:11px;line-height:1.4}.cleaning-guide .square{display:inline-block;flex:0 0 12px;width:12px;height:12px;border:1px solid #545454;margin-top:1px}.cleaning-guide .daily-days{display:flex;align-items:center;justify-content:space-between;gap:5px;border-top:1px solid #d5c5b8;padding:9px 17px}.cleaning-guide .daily-days>span{font-size:9px;font-weight:700;letter-spacing:.06em}.cleaning-guide .daily-days label{display:flex;align-items:center;flex-direction:column;gap:5px;font-size:10px;font-weight:700}.cleaning-guide .zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:18px}.cleaning-guide .zone-block{border:1px solid #d5c5b8;display:flex;flex-direction:column;min-height:410px}.cleaning-guide .zone-block ul{padding:13px 14px;display:flex;flex-direction:column;gap:12px;flex:1}.cleaning-guide .owner{display:flex;align-items:center;gap:8px;border-top:1px solid #d5c5b8;margin:0 14px;padding:13px 0;font-size:9px;font-weight:700}.cleaning-guide .owner span{flex:1;border-bottom:1px solid #545454;height:11px}.cleaning-guide .sheet-foot{position:absolute;bottom:21px;left:49px;right:49px;display:flex;justify-content:space-between;gap:8px;font-size:10px;border-top:1px solid #d5c5b8;padding-top:7px}.cleaning-guide .second-page .zone-block{min-height:392px}.cleaning-guide .weekend-block{margin-top:17px;border:1px solid #d5c5b8}.cleaning-guide .weekend-block>.overline{background:#CDDDE1;padding:9px 12px}.cleaning-guide .weekend-row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-top:1px solid #eee}.cleaning-guide .weekend-row img{object-fit:contain}.cleaning-guide .weekend-row div{flex:1}.cleaning-guide .weekend-row h3{font:normal 17px Georgia,serif}.cleaning-guide .weekend-row p{font-size:10px;margin-top:2px}.cleaning-guide .monthly-block{margin-top:14px;border-top:1px solid #d5c5b8;padding-top:11px}.cleaning-guide .monthly-block>div{display:grid;grid-template-columns:repeat(3,1fr);gap:5px 10px;margin-top:9px}.cleaning-guide .monthly-block span{font-size:9px}.cleaning-guide .monthly-block p:last-child{font-size:9px;margin-top:9px;color:#68615c}
+.cleaning-guide{font-family:Montserrat,Arial,sans-serif}
+.cleaning-guide .eyebrow,.cleaning-guide .overline{font-size:10px;font-weight:700;letter-spacing:.1em}
+.cleaning-guide .single-sheet{box-sizing:border-box;width:100%;max-width:816px;min-height:1056px;margin:auto;padding:40px 38px 28px;color:#545454;box-shadow:0 3px 16px #0001}
+.cleaning-guide .single-sheet header{border-bottom:2px solid #545454;padding-bottom:9px}
+.cleaning-guide .single-sheet header h2{font:normal 30px/1.15 Georgia,serif;margin:5px 0}
+.cleaning-guide .single-sheet header>p:last-child{font-size:11px}
+.cleaning-guide .one-daily{margin-top:12px;border:1px solid #D5C5B8}
+.cleaning-guide .one-heading{display:flex;align-items:center;gap:9px;padding:6px 8px;background:#FBF7F1}
+.cleaning-guide .one-heading img{object-fit:contain;flex-shrink:0}
+.cleaning-guide .one-heading div{display:flex;flex-direction:column;gap:2px}
+.cleaning-guide .one-heading strong{font:normal 16px Georgia,serif}
+.cleaning-guide .one-heading span{font-size:9px;font-weight:700}
+.cleaning-guide .one-daily .one-heading{background:#CDDDE1}
+.cleaning-guide .one-daily-grid{padding:9px;display:grid;grid-template-columns:1fr 190px;gap:10px}
+.cleaning-guide .one-daily-grid ul{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cleaning-guide .one-check{width:10px;height:10px;border:1px solid #545454;display:inline-block;flex-shrink:0}
+.cleaning-guide .single-sheet li{display:flex;align-items:flex-start;gap:7px;font-size:10px;line-height:1.3}
+.cleaning-guide .one-tracker>span{font-size:8px;font-weight:700}
+.cleaning-guide .one-tracker>div{display:flex;justify-content:space-between;margin-top:4px}
+.cleaning-guide .one-tracker label{font-size:9px;font-weight:700;display:flex;flex-direction:column;gap:4px;align-items:center}
+.cleaning-guide .one-zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}
+.cleaning-guide .one-zone{min-width:0;border:1px solid #D5C5B8;display:flex;flex-direction:column;min-height:273px}
+.cleaning-guide .one-zone ul{padding:9px 11px;display:flex;flex-direction:column;gap:9px;flex:1}
+.cleaning-guide .one-owner{margin:0 11px 8px;font-size:8px;font-weight:700;display:flex;gap:5px;align-items:center}
+.cleaning-guide .one-owner span{flex:1;border-bottom:1px solid #545454;height:9px}
+.cleaning-guide .one-weekend{border:1px solid #D5C5B8;margin-top:11px}
+.cleaning-guide .one-weekend>.overline{background:#CDDDE1;padding:7px 10px}
+.cleaning-guide .one-weekend>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.cleaning-guide .one-weekend article{display:flex;align-items:center;gap:6px;padding:9px 6px}
+.cleaning-guide .one-weekend article+article{border-left:1px solid #D5C5B8}
+.cleaning-guide .one-weekend article>img{object-fit:contain;flex-shrink:0}
+.cleaning-guide .one-weekend article>span:nth-child(2){flex:1}
+.cleaning-guide .one-weekend article strong{display:block;font:normal 11px Georgia,serif}
+.cleaning-guide .one-weekend article small{display:block;font-size:8px;margin-top:4px;line-height:1.3}
+.cleaning-guide .single-sheet footer{margin-top:10px;border-top:1px solid #D5C5B8;padding-top:7px;font-size:8px}
 @page{size:letter;margin:0}
-@media print{body{background:white!important}.cleaning-guide .web-only,body>header,body>footer,nav,dialog{display:none!important}.cleaning-guide .print-sheets{background:white!important;padding:0!important;margin:0!important}.cleaning-guide .print-sheets>div{max-width:none!important}.cleaning-guide .sheet{width:8.5in!important;height:11in!important;min-height:0!important;max-width:none!important;margin:0!important;padding:42px 42px 45px!important;box-shadow:none!important;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}.cleaning-guide .sheet:last-child{break-after:auto;page-break-after:auto}.cleaning-guide .sheet-foot{left:42px;right:42px}.cleaning-guide .zone-block{min-height:405px}.cleaning-guide .second-page .zone-block{min-height:386px}.cleaning-guide .monthly-block span{font-size:8.5px}}
-@media screen and (max-width:650px){.cleaning-guide .sheet{padding:20px 14px 45px;min-height:auto}.cleaning-guide .sheet-head h2{font-size:25px}.cleaning-guide .zone-grid{grid-template-columns:1fr}.cleaning-guide .zone-block,.cleaning-guide .second-page .zone-block{min-height:auto}.cleaning-guide .daily-tasks{grid-template-columns:1fr}.cleaning-guide .sheet-foot{position:static;margin-top:20px}.cleaning-guide .monthly-block>div{grid-template-columns:repeat(2,1fr)}}
+@media print{
+body{background:white!important}
+.cleaning-guide .web-only,body>header,body>footer,nav,dialog{display:none!important}
+.cleaning-guide .print-sheets{background:white!important;padding:0!important;margin:0!important}
+.cleaning-guide .print-sheets>div{max-width:none!important}
+.cleaning-guide .single-sheet{width:8.5in!important;max-width:none!important;height:11in!important;min-height:0!important;margin:0!important;padding:31px 33px 20px!important;box-shadow:none!important;break-inside:avoid;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cleaning-guide .one-zone{min-height:273px}
+}
+@media screen and (max-width:650px){
+.cleaning-guide .single-sheet{padding:18px 12px;min-height:0}
+.cleaning-guide .one-daily-grid{grid-template-columns:1fr}
+.cleaning-guide .one-zone-grid{grid-template-columns:1fr}
+.cleaning-guide .one-zone{min-height:0}
+.cleaning-guide .one-weekend>div{grid-template-columns:1fr}
+.cleaning-guide .one-weekend article+article{border-left:0;border-top:1px solid #D5C5B8}
+}
 </style>
