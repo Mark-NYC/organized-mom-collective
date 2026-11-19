@@ -46,6 +46,7 @@
  *           /support           Help & Support: topics, FAQs, contact form (src/data/support.ts)
  *           /returns           Returns & Refunds policy (/refunds redirects here)
  *           /privacy           Privacy Policy, incl. the Club's family and children's information
+ *           /terms             Public Terms of Service for website, app, calendars and purchases
  *           /survey            customer discovery survey (noindex, shared by link)
  *           /survey/admin      survey results, admins only (noindex; AdminLayout)
  *   SHOP    /checkout           direct checkout (noindex; off unless PUBLIC_SHOP_ENABLED). Linked from the offer pages, the calendar
@@ -161,6 +162,7 @@ export const routes = {
   /** Returns & Refunds policy, linked from the footer, /calendar and the checkout. The old /refunds redirects here. */
   returns: '/returns',
   privacy: '/privacy',
+  terms: '/terms',
   /** Direct website checkout: the offer pages, the calendar options and (once on sale) the mug page link here, in shop-enabled builds. */
   checkout: '/checkout',
   checkoutComplete: '/checkout/complete',
