@@ -30,7 +30,7 @@ export function initChoreBuilder(host: HTMLElement) {
   const zoom=$<HTMLElement>('[data-cb-zoom-overlay]');
   const zoomStage=$<HTMLElement>('[data-cb-zoom-stage]');
   const downloadButtons=host.querySelectorAll<HTMLButtonElement>('[data-cb-download],[data-cb-mobile-download]');
-  const fitPreview=()=>{if(window.innerWidth>800){sheet.style.transform='';frame.style.height='';return;}const available=frame.clientWidth;if(!available)return;const scale=available/1056;sheet.style.transform=`scale(${scale})`;frame.style.height=`${Math.ceil(Math.max(816,sheet.scrollHeight)*scale)}px`;};
+  const fitPreview=()=>{if(window.innerWidth>800){sheet.style.transform='';frame.style.height='';return;}const available=frame.clientWidth;if(!available)return;const scale=available/816;sheet.style.transform=`scale(${scale})`;frame.style.height=`${Math.ceil(Math.max(1056,sheet.scrollHeight)*scale)}px`;};
   const schedulePreview=()=>requestAnimationFrame(fitPreview);
   const status=$<HTMLElement>('[data-cb-status]');
   const panel=$<HTMLElement>('[data-cb-panel]');
@@ -221,7 +221,7 @@ export function initChoreBuilder(host: HTMLElement) {
     const previous=sheet.style.transform;
     sheet.style.transform='none';
     try{
-      const downloaded=await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:1056,height:816,layoutHost:results,exportClass:'cb-exporting',button});
+      const downloaded=await downloadPng(sheet,{filename:(state.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')||'my')+'-chore-chart.png',width:816,height:1056,layoutHost:results,exportClass:'cb-exporting',button});
       if (downloaded && host.closest('[data-chart-modern]')) {
         window.dispatchEvent(new CustomEvent('omc:chore-chart-downloaded',{detail:{
           name:state.name, age:String(state.age), chores:state.jobs.map(job=>job.title.trim()).filter(Boolean),
