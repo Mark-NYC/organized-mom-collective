@@ -29,6 +29,16 @@ const ageCards=ageCardGuides[slug as keyof typeof ageCardGuides];
 <p class="mt-3 text-center text-sm leading-[1.6]">{ageCards?ageCards.subtitle:guide.printableNote}</p>
 </div>
 </div></div></section>
+{slug === 'chores-for-4-5-year-olds' && (
+  <section aria-label="Chores for 4–5-year-olds printable in a real home" class="w-full overflow-hidden">
+    <picture>
+      <source media="(min-width: 640px)" srcset="/images/guides/4-5-desktop.webp" />
+      <img src="/images/guides/4-5-mobile.webp"
+        alt="A printed chores chart for 4–5-year-olds on a wooden kitchen table"
+        width="1024" height="1024" loading="lazy" decoding="async" class="block h-auto w-full" />
+    </picture>
+  </section>
+)}
 {ageCards && <section aria-labelledby="age-card-chores-title" class="bg-white px-5 py-12 sm:px-8 sm:py-16"><div class="mx-auto max-w-5xl">
 <p class="text-xs font-bold uppercase tracking-[.16em]">PICTURE THE POSSIBILITIES</p>
 <h2 id="age-card-chores-title" class="mt-3 max-w-3xl font-serif text-3xl sm:text-4xl">Nine responsibilities to practice.</h2>
