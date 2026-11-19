@@ -1,46 +1,138 @@
-/** One-page Letter checklist, using exactly the app's cleaning data and PNG icons. */
-import {readFile,mkdir,writeFile} from 'node:fs/promises';
-import {resolve,dirname,join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+/**
+ * Print-first, one-page US Letter checklist.
+ * All tasks and original zone artwork come directly from the cleaning companion.
+ * Dimensions in PDF points (72 pt = 1 inch). This remains a single page.
+ */
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { resolve, dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
-const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const src=await readFile(join(root,'src/data/cleaning.ts'),'utf8');
-const compiled=ts.transpileModule(src,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
-const {dailyEssentials,weeklySchedule,weekend}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
-if(weeklySchedule.length!==4||dailyEssentials.tasks.length!==5||weekend.days.length!==3)throw Error('Cleaning content changed: review one-page layout');
-const doc=await PDFDocument.create();doc.setTitle('Our Weekly Cleaning Reset | One Page');doc.setAuthor('Organized Mom Collective');
-const page=doc.addPage([612,792]),regular=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold),serif=await doc.embedFont(StandardFonts.TimesRomanBold);
-const color=(h)=>rgb(...[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255));
-const ink=color('545454'),muted=color('6E6863'),rule=color('D5C5B8'),pale=color('FBF7F1'),blue=color('CDDDE1'),white=rgb(1,1,1);
-const clean=s=>String(s).replace(/[\u2013\u2014]/g,'-').replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"');
-function txt(str,x,y,size=9,font=regular,col=ink){page.drawText(clean(str),{x,y,size,font,color:col})}
-function fit(s,x,y,max,size=9,font=regular,min=7.3){while(font.widthOfTextAtSize(clean(s),size)>max&&size>min)size-=.15;txt(s,x,y,size,font)}
-function rect(x,y,w,h,fill=white,border=rule){page.drawRectangle({x,y,width:w,height:h,color:fill,borderColor:border,borderWidth:.7})}
-function check(x,y,size=9){page.drawRectangle({x,y,width:size,height:size,borderColor:ink,borderWidth:.75})}
-const imageCache=new Map();
-async function icon(path,x,y,size){if(!imageCache.has(path))imageCache.set(path,await doc.embedPng(await readFile(join(root,'public',path.slice(1)))));const img=imageCache.get(path);let scale=Math.min(size/img.width,size/img.height);page.drawImage(img,{x:x+(size-img.width*scale)/2,y:y+(size-img.height*scale)/2,width:img.width*scale,height:img.height*scale})}
-page.drawRectangle({x:0,y:0,width:612,height:792,color:white});
-page.drawRectangle({x:0,y:772,width:612,height:20,color:pale});
-txt('ORGANIZED MOM COLLECTIVE  /  FREE FAMILY PRINTABLE',30,759,8,bold,muted);
-txt('Our Weekly Cleaning Reset',30,727,24,serif);
-txt('15-minute Daily Reset + one small zone Monday through Thursday + a flexible weekend',30,711,8.5);
-rect(30,598,552,100,white);
-rect(30,656,552,42,blue);
-await icon(dailyEssentials.icon,40,660,32);txt('DAILY RESET',80,674,14,serif);txt('15 MINUTES · EVERY DAY',80,662,8,bold);
-dailyEssentials.tasks.forEach((t,i)=>{const col=i<3?0:1;const idx=i<3?i:i-3;const x=43+col*267,y=638-idx*17;check(x,y-2);fit(t.label,x+16,y,244,9)});
-txt('MON',386,672,7,bold); // daily tracking boxes
-['M','T','W','T','F','S','S'].forEach((d,i)=>{let x=386+i*26;txt(d,x,670,7,bold);check(x-1,657,9)});
-function rowBox(x,top,w,h){rect(x,top-h,w,h)}
-async function zone(d,x,top,w,h){rowBox(x,top,w,h);rect(x,top-43,w,43,pale);await icon(d.icon,x+8,top-37,30);txt(d.dayLabel.toUpperCase(),x+45,top-16,7,bold,muted);fit(d.zone,x+45,top-32,w-56,13,serif,10);let y=top-58;const gap=d.tasks.length>7?18.5:20;d.tasks.forEach(t=>{check(x+11,y-1,8.5);fit(t.label,x+25,y,w-38,8.6,regular,7.4);y-=gap});txt('OWNER:',x+11,top-h+15,7.5,bold,muted);page.drawLine({start:{x:x+55,y:top-h+15},end:{x:x+w-12,y:top-h+15},thickness:.5,color:ink})}
-const gap=10,w=271;
-await zone(weeklySchedule[0],30,585,w,205);
-await zone(weeklySchedule[1],311,585,w,205);
-await zone(weeklySchedule[2],30,369,w,218);
-await zone(weeklySchedule[3],311,369,w,218);
-rect(30,55,552,88,white);rect(30,123,552,20,blue);txt('FRIDAY - SUNDAY  /  FLEXIBLE',40,130,8.5,bold);
-const descriptions=['Choose one deep-cleaning task','Work on one monthly home project','Catch up on one zone, reset, or rest'];
-for(let i=0;i<3;i++){const x=40+i*181;await icon(weekend.icon,x,91,23);txt(weekend.days[i].dayLabel.toUpperCase(),x+30,106,7,bold);fit(weekend.days[i].zone,x+30,94,139,10,serif,8);fit(descriptions[i],x,71,166,7.4);check(x+157,105,9)}
-txt('Skip missed zones rather than stacking them. Share responsibilities; see the app for monthly project tasks.',30,40,8,regular,muted);
-txt('organizedmomcollective.com',30,23,7.5,bold,ink);
-const dest=join(root,'public/downloads/weekly-cleaning-reset-one-page.pdf');await mkdir(dirname(dest),{recursive:true});await writeFile(dest,await doc.save());console.log('Generated '+dest);
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const source = await readFile(join(root, 'src/data/cleaning.ts'), 'utf8');
+const compiled = ts.transpileModule(source, {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+const { dailyEssentials, weeklySchedule, weekend } = await import(
+  'data:text/javascript;base64,' + Buffer.from(compiled).toString('base64')
+);
+if (dailyEssentials.tasks.length !== 5 || weeklySchedule.length !== 4 || weekend.days.length !== 3) {
+  throw new Error('Cleaning schedule changed; review the one-page printable layout.');
+}
+
+const pdf = await PDFDocument.create();
+pdf.setTitle('Our Weekly Cleaning Reset | One-Page Printable');
+pdf.setAuthor('Organized Mom Collective');
+pdf.setSubject('Original illustrated seven-day household cleaning checklist');
+const page = pdf.addPage([612, 792]);
+const regular = await pdf.embedFont(StandardFonts.Helvetica);
+const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+const serif = await pdf.embedFont(StandardFonts.TimesRomanBold);
+const hex = h => rgb(...[0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255));
+const ink = hex('545454'), muted = hex('66615C'), border = hex('CCC6C0');
+const ivory = hex('FBF7F1'), blue = hex('CDDDE1'), white = rgb(1, 1, 1);
+const safe = value => String(value).replace(/[\u2013\u2014]/g, '-').replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"');
+function text(value, x, y, size = 10, font = regular, color = ink) {
+  page.drawText(safe(value), { x, y, size, font, color });
+}
+function fitted(value, x, y, maxWidth, fontSize = 10.3, font = regular, minimum = 9.6) {
+  let size = fontSize;
+  while (font.widthOfTextAtSize(safe(value), size) > maxWidth && size > minimum) size -= 0.1;
+  if (font.widthOfTextAtSize(safe(value), size) > maxWidth) {
+    throw new Error('Text too wide for one-page cleaning printable: ' + value);
+  }
+  text(value, x, y, size, font);
+}
+function rectangle(x, y, width, height, color = white, stroke = border) {
+  page.drawRectangle({ x, y, width, height, color, borderColor: stroke, borderWidth: 0.65 });
+}
+function checkbox(x, y, size = 12) {
+  page.drawRectangle({ x, y, width: size, height: size, borderColor: ink, borderWidth: 0.9 });
+}
+const icons = new Map();
+async function icon(path, x, y, size = 36) {
+  if (!icons.has(path)) icons.set(path, await pdf.embedPng(await readFile(join(root, 'public', path.replace(/^\//, '')))));
+  const image = icons.get(path);
+  const scale = Math.min(size / image.width, size / image.height);
+  const w = image.width * scale, h = image.height * scale;
+  page.drawImage(image, { x: x + (size - w) / 2, y: y + (size - h) / 2, width: w, height: h });
+}
+
+rectangle(0, 0, 612, 792);
+text('ORGANIZED MOM COLLECTIVE  /  FREE FAMILY PRINTABLE', 32, 763, 8.3, bold, muted);
+text('Our Weekly Cleaning Reset', 32, 731, 25, serif);
+text('15-minute Daily Reset  +  one weekday zone  +  a flexible weekend', 32, 712, 10);
+
+// The blue band leads. A compact task area leaves the bulk of the page for larger weekday type.
+rectangle(32, 604, 548, 96);
+rectangle(32, 658, 548, 42, blue);
+await icon(dailyEssentials.icon, 43, 663, 32);
+text('DAILY RESET', 85, 679, 15, serif);
+text('15 MINUTES  /  EVERY DAY', 85, 665, 8.7, bold, muted);
+text('CHECK OFF EACH DAY', 383, 685, 8, bold, muted);
+['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach((d, i) => {
+  const x = 392 + i * 25.4;
+  text(d, x, 672, 8, bold);
+  checkbox(x - 1, 659, 10.5);
+});
+dailyEssentials.tasks.forEach((task, i) => {
+  const col = i < 3 ? 0 : 1, row = i < 3 ? i : i - 3;
+  const x = 44 + col * 266, y = 638 - row * 17.5;
+  checkbox(x, y - 2, 11);
+  fitted(task.label, x + 19, y, 244, 10.1, regular, 9.6);
+});
+
+// Balanced cards: five-item days get more breathing room; the eight-item day remains readable.
+async function zone(day, x, top, height = 213) {
+  const width = 269;
+  rectangle(x, top - height, width, height);
+  rectangle(x, top - 44, width, 44, ivory);
+  await icon(day.icon, x + 11, top - 39, 34);
+  text(day.dayLabel.toUpperCase(), x + 55, top - 17, 9.1, bold, muted);
+  fitted(day.zone, x + 55, top - 35, width - 66, 16, serif, 13.6);
+  const count = day.tasks.length;
+  const gap = count >= 8 ? 17.7 : count === 7 ? 20.5 : 26;
+  const start = top - 61;
+  day.tasks.forEach((task, i) => {
+    const y = start - i * gap;
+    checkbox(x + 12, y - 2, 11.5);
+    fitted(task.label, x + 32, y, width - 44, 10.25, regular, 9.65);
+  });
+  const ownerY = top - height + 15;
+  text('OWNER:', x + 12, ownerY, 9.1, bold, muted);
+  page.drawLine({
+    start: { x: x + 65, y: ownerY - 1 },
+    end: { x: x + width - 13, y: ownerY - 1 },
+    color: ink, thickness: 0.65,
+  });
+}
+await zone(weeklySchedule[0], 32, 594);
+await zone(weeklySchedule[1], 311, 594);
+await zone(weeklySchedule[2], 32, 371);
+await zone(weeklySchedule[3], 311, 371);
+
+// Weekend is useful but secondary. Drop repetitive weekend icons to free space for legible copy.
+rectangle(32, 64, 548, 84);
+rectangle(32, 126, 548, 22, blue);
+text('FRIDAY - SUNDAY   /   FLEXIBLE', 43, 133, 9, bold);
+const actions = [
+  'Choose one deeper cleaning task',
+  'One monthly home project task',
+  'Catch up on one zone, reset, or rest',
+];
+for (let i = 0; i < 3; i++) {
+  const x = 43 + i * 179;
+  const d = weekend.days[i];
+  if (i > 0) page.drawLine({ start: { x: x - 8, y: 71 }, end: { x: x - 8, y: 120 }, color: border, thickness: 0.6 });
+  text(d.dayLabel.toUpperCase(), x, 112, 9.2, bold, muted);
+  checkbox(x + 148, 105, 12);
+  fitted(d.zone, x, 94, 141, 12.8, serif, 11);
+  fitted(actions[i], x, 76, 163, 9.35, regular, 8.9);
+}
+text('Missed a day? Skip, don\'t stack. Find monthly project tasks in the cleaning companion.', 32, 45, 8.9, regular, muted);
+text('organizedmomcollective.com', 32, 25, 8.3, bold);
+const destination = join(root, 'public/downloads/weekly-cleaning-reset-one-page.pdf');
+await mkdir(dirname(destination), { recursive: true });
+await writeFile(destination, await pdf.save());
+console.log('Generated one-page Letter cleaning reset from live tasks and original zone icons.');
