@@ -142,7 +142,7 @@ for (let i = 0; i < 3; i++) {
 }
 text('Missed a day? Skip, don\'t stack. Find monthly project tasks in the cleaning companion.', 32, 45, 8.9, regular, muted);
 text('organizedmomcollective.com', 32, 25, 8.3, bold);
-const destination = join(root, 'public/downloads/weekly-cleaning-reset-one-page.pdf');
+const destination = join(root, 'public/downloads/weekly-cleaning-reset-one-page-v2.pdf');
 await mkdir(dirname(destination), { recursive: true });
 await writeFile(destination, await pdf.save());
 console.log('Generated one-page Letter cleaning reset from live tasks and original zone icons.');
