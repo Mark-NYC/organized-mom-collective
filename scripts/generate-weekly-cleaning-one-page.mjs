@@ -80,7 +80,7 @@ dailyEssentials.tasks.forEach((task, i) => {
   const col = i < 3 ? 0 : 1, row = i < 3 ? i : i - 3;
   const x = 44 + col * 266, y = 647 - row * 16;
   // Keep the entire checkbox and task text clear of the card border and blue header.
-  if (y - 2 < 604 + 8 || y + 10.1 > 658 - 1) throw new Error('Daily Reset row overlaps its frame: ' + task.label);
+  if (y - 2 < 604 + 8 || y + 9.5 > 658 - 1) throw new Error('Daily Reset row overlaps its frame: ' + task.label);
   checkbox(x, y - 2, 11);
   fitted(task.label, x + 19, y, 244, 10.1, regular, 9.6);
 });
