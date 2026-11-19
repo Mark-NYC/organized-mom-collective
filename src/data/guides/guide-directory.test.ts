@@ -22,7 +22,7 @@ describe('Practical Guide library', () => {
     for (const guide of guides) {
       expect(guide.title.length).toBeGreaterThan(3);
       expect(guide.teaser.length).toBeGreaterThan(3);
-      expect(guide.image).toMatch(/^\/images\/guides\/.+\.webp$/);
+      expect(guide.image).toMatch(/^\/(?:images\/guides\/.+\.webp|icons\/zones\/.+\.png)$/);
       expect(guide.pdf).toMatch(/^\/downloads\/.+\.pdf$/);
       expect(guide.pages).toBeGreaterThan(0);
     }
