@@ -26,7 +26,7 @@ export const guides: Guide[] = [
     kicker: 'Seven-day rhythm · Original cleaning icons · Print-ready checklist',
     image: '/icons/zones/daily.png',
     imageAlt: 'Original illustrated Daily Reset icon',
-    pdf: '/downloads/weekly-cleaning-reset-one-page.pdf',
+    pdf: '/downloads/weekly-cleaning-reset-one-page-v2.pdf',
     pages: 1,
   },
   {

@@ -65,7 +65,7 @@ text('Our Weekly Cleaning Reset', 32, 731, 25, serif);
 text('15-minute Daily Reset  +  one weekday zone  +  a flexible weekend', 32, 712, 10);
 
 // The blue band leads. A compact task area leaves the bulk of the page for larger weekday type.
-rectangle(32, 604, 548, 96);
+rectangle(32, 598, 548, 102);
 rectangle(32, 658, 548, 42, blue);
 await icon(dailyEssentials.icon, 43, 663, 32);
 text('DAILY RESET', 85, 679, 15, serif);
@@ -78,9 +78,9 @@ text('CHECK OFF EACH DAY', 383, 685, 8, bold, muted);
 });
 dailyEssentials.tasks.forEach((task, i) => {
   const col = i < 3 ? 0 : 1, row = i < 3 ? i : i - 3;
-  const x = 44 + col * 266, y = 647 - row * 16;
+  const x = 44 + col * 266, y = 644 - row * 16;
   // Keep the entire checkbox and task text clear of the card border and blue header.
-  if (y - 2 < 604 + 8 || y + 9.5 > 658 - 1) throw new Error('Daily Reset row overlaps its frame: ' + task.label);
+  if (y - 2 < 598 + 11 || y + 9.5 > 658 - 3) throw new Error('Daily Reset row overlaps its frame: ' + task.label);
   checkbox(x, y - 2, 11);
   fitted(task.label, x + 19, y, 244, 10.1, regular, 9.6);
 });
@@ -94,12 +94,14 @@ async function zone(day, x, top, height = 213) {
   text(day.dayLabel.toUpperCase(), x + 55, top - 17, 9.1, bold, muted);
   fitted(day.zone, x + 55, top - 35, width - 66, 16, serif, 13.6);
   const count = day.tasks.length;
-  const gap = count >= 8 ? 16.5 : count === 7 ? 19 : 26;
+  const gap = count >= 8 ? 15.7 : count === 7 ? 18.5 : 26;
   const start = top - 61;
   const ownerY = top - height + 15;
   // Reserve an actual gutter above the owner label and underline. No task may enter it.
   const finalCheckboxBottom = start - (count - 1) * gap - 2;
-  if (finalCheckboxBottom < ownerY + 18) {
+  const zoneHeaderBottom = top - 44;
+  if (start + 11.5 > zoneHeaderBottom - 3) throw new Error(day.dayLabel + ' first checkbox touches header');
+  if (finalCheckboxBottom < ownerY + 22) {
     throw new Error(day.dayLabel + ' checklist overlaps its owner line');
   }
   day.tasks.forEach((task, i) => {
@@ -107,6 +109,7 @@ async function zone(day, x, top, height = 213) {
     checkbox(x + 12, y - 2, 11.5);
     fitted(task.label, x + 32, y, width - 44, 10.25, regular, 9.65);
   });
+  if (finalCheckboxBottom < ownerY + 22) throw new Error('Owner gutter too small: ' + day.dayLabel);
   text('OWNER:', x + 12, ownerY, 9.1, bold, muted);
   page.drawLine({
     start: { x: x + 65, y: ownerY - 1 },
@@ -114,15 +117,15 @@ async function zone(day, x, top, height = 213) {
     color: ink, thickness: 0.65,
   });
 }
-await zone(weeklySchedule[0], 32, 594);
-await zone(weeklySchedule[1], 311, 594);
-await zone(weeklySchedule[2], 32, 371);
-await zone(weeklySchedule[3], 311, 371);
+await zone(weeklySchedule[0], 32, 588);
+await zone(weeklySchedule[1], 311, 588);
+await zone(weeklySchedule[2], 32, 365);
+await zone(weeklySchedule[3], 311, 365);
 
 // Weekend is useful but secondary. Drop repetitive weekend icons to free space for legible copy.
-rectangle(32, 64, 548, 84);
-rectangle(32, 126, 548, 22, blue);
-text('FRIDAY - SUNDAY   /   FLEXIBLE', 43, 133, 9, bold);
+rectangle(32, 56, 548, 86);
+rectangle(32, 120, 548, 22, blue);
+text('FRIDAY - SUNDAY   /   FLEXIBLE', 43, 127, 9, bold);
 const actions = [
   'Choose one deeper cleaning task',
   'One monthly home project task',
@@ -131,15 +134,15 @@ const actions = [
 for (let i = 0; i < 3; i++) {
   const x = 43 + i * 179;
   const d = weekend.days[i];
-  if (i > 0) page.drawLine({ start: { x: x - 8, y: 71 }, end: { x: x - 8, y: 120 }, color: border, thickness: 0.6 });
-  text(d.dayLabel.toUpperCase(), x, 112, 9.2, bold, muted);
-  checkbox(x + 148, 105, 12);
-  fitted(d.zone, x, 94, 141, 12.8, serif, 11);
-  fitted(actions[i], x, 76, 163, 9.35, regular, 8.9);
+  if (i > 0) page.drawLine({ start: { x: x - 8, y: 64 }, end: { x: x - 8, y: 114 }, color: border, thickness: 0.6 });
+  text(d.dayLabel.toUpperCase(), x, 105, 9.2, bold, muted);
+  checkbox(x + 148, 98, 12);
+  fitted(d.zone, x, 87, 141, 12.8, serif, 11);
+  fitted(actions[i], x, 69, 163, 9.35, regular, 8.9);
 }
 text('Missed a day? Skip, don\'t stack. Find monthly project tasks in the cleaning companion.', 32, 45, 8.9, regular, muted);
 text('organizedmomcollective.com', 32, 25, 8.3, bold);
-const destination = join(root, 'public/downloads/weekly-cleaning-reset-one-page.pdf');
+const destination = join(root, 'public/downloads/weekly-cleaning-reset-one-page-v2.pdf');
 await mkdir(dirname(destination), { recursive: true });
 await writeFile(destination, await pdf.save());
 console.log('Generated one-page Letter cleaning reset from live tasks and original zone icons.');
