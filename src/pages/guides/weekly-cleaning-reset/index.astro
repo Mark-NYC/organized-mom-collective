@@ -22,7 +22,7 @@ const printPdf = '/downloads/weekly-cleaning-reset-one-page.pdf';
             <p class="mt-5 max-w-xl text-base leading-[1.85]">A realistic cleaning rhythm for the whole family. Five small things every day, a different room Monday through Thursday, and flexible plans for Friday, Saturday and Sunday.</p>
             <div class="mt-7 flex flex-wrap gap-3">
               <a href={printPdf} download="OMC-Weekly-Cleaning-Reset.pdf" class="inline-flex min-h-12 items-center justify-center bg-[#545454] px-6 py-3 text-sm font-bold text-white">Download the illustrated PDF</a>
-              <button id="print-cleaning-guide" type="button" class="min-h-12 border border-[#545454] bg-white px-6 py-3 text-sm font-bold">Print this guide</button>
+              <a href={printPdf} target="_blank" rel="noopener" class="inline-flex min-h-12 items-center justify-center border border-[#545454] bg-white px-6 py-3 text-sm font-bold">Open print-ready PDF</a>
             </div>
             <p class="mt-3 text-xs text-[#68615c]">US Letter · One page · No signup · Reprint each week</p>
           </div>
@@ -54,8 +54,9 @@ const printPdf = '/downloads/weekly-cleaning-reset-one-page.pdf';
       <div class="mx-auto max-w-5xl">
         <div class="web-only mb-5 flex items-center justify-between gap-3">
           <h2 class="font-serif text-2xl">One-page printable checklist</h2>
-          <button type="button" class="print-trigger border border-[#545454] bg-white px-5 py-3 text-sm font-bold">Print one page</button>
+          <a href={printPdf} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center border border-[#545454] bg-white px-5 py-3 text-sm font-bold">Open one-page PDF</a>
         </div>
+<!-- The PDF is the print source of truth: opening it avoids browser-specific CSS page breaks. -->
         <div class="single-sheet bg-white">
           <header><p class="overline">ORGANIZED MOM COLLECTIVE · YOUR FAMILY CLEANING PLAN</p><h2>Our Weekly Cleaning Reset</h2><p>15-minute Daily Reset + one zone each weekday + a flexible weekend</p></header>
           <section class="one-daily">
@@ -81,10 +82,7 @@ const printPdf = '/downloads/weekly-cleaning-reset-one-page.pdf';
     </div></section>
   </main>
 </PublicLayout>
-<script>
-  document.getElementById('print-cleaning-guide')?.addEventListener('click', () => window.print());
-  document.querySelectorAll('.print-trigger').forEach(button => button.addEventListener('click', () => window.print()));
-</script>
+
 <style is:global>
 .cleaning-guide{font-family:Montserrat,Arial,sans-serif}
 .cleaning-guide .eyebrow,.cleaning-guide .overline{font-size:10px;font-weight:700;letter-spacing:.1em}
@@ -96,31 +94,31 @@ const printPdf = '/downloads/weekly-cleaning-reset-one-page.pdf';
 .cleaning-guide .one-heading{display:flex;align-items:center;gap:9px;padding:6px 8px;background:#FBF7F1}
 .cleaning-guide .one-heading img{object-fit:contain;flex-shrink:0}
 .cleaning-guide .one-heading div{display:flex;flex-direction:column;gap:2px}
-.cleaning-guide .one-heading strong{font:normal 16px Georgia,serif}
-.cleaning-guide .one-heading span{font-size:9px;font-weight:700}
+.cleaning-guide .one-heading strong{font:normal 17px Georgia,serif}
+.cleaning-guide .one-heading span{font-size:10px;font-weight:700}
 .cleaning-guide .one-daily .one-heading{background:#CDDDE1}
 .cleaning-guide .one-daily-grid{padding:9px;display:grid;grid-template-columns:1fr 190px;gap:10px}
 .cleaning-guide .one-daily-grid ul{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.cleaning-guide .one-check{width:10px;height:10px;border:1px solid #545454;display:inline-block;flex-shrink:0}
-.cleaning-guide .single-sheet li{display:flex;align-items:flex-start;gap:7px;font-size:10px;line-height:1.3}
+.cleaning-guide .one-check{width:12px;height:12px;border:1px solid #545454;display:inline-block;flex-shrink:0}
+.cleaning-guide .single-sheet li{display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.4}
 .cleaning-guide .one-tracker>span{font-size:8px;font-weight:700}
 .cleaning-guide .one-tracker>div{display:flex;justify-content:space-between;margin-top:4px}
-.cleaning-guide .one-tracker label{font-size:9px;font-weight:700;display:flex;flex-direction:column;gap:4px;align-items:center}
+.cleaning-guide .one-tracker label{font-size:10px;font-weight:700;display:flex;flex-direction:column;gap:4px;align-items:center}
 .cleaning-guide .one-zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}
-.cleaning-guide .one-zone{min-width:0;border:1px solid #D5C5B8;display:flex;flex-direction:column;min-height:273px}
-.cleaning-guide .one-zone ul{padding:9px 11px;display:flex;flex-direction:column;gap:9px;flex:1}
-.cleaning-guide .one-owner{margin:0 11px 8px;font-size:8px;font-weight:700;display:flex;gap:5px;align-items:center}
+.cleaning-guide .one-zone{min-width:0;border:1px solid #D5C5B8;display:flex;flex-direction:column;min-height:281px}
+.cleaning-guide .one-zone ul{padding:9px 11px;display:flex;flex-direction:column;gap:12px;flex:1}
+.cleaning-guide .one-owner{margin:0 11px 8px;font-size:9px;font-weight:700;display:flex;gap:5px;align-items:center}
 .cleaning-guide .one-owner span{flex:1;border-bottom:1px solid #545454;height:9px}
 .cleaning-guide .one-weekend{border:1px solid #D5C5B8;margin-top:11px}
-.cleaning-guide .one-weekend>.overline{background:#CDDDE1;padding:7px 10px}
+.cleaning-guide .one-weekend>.overline{background:#CDDDE1;padding:8px 10px}
 .cleaning-guide .one-weekend>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .cleaning-guide .one-weekend article{display:flex;align-items:center;gap:6px;padding:9px 6px}
 .cleaning-guide .one-weekend article+article{border-left:1px solid #D5C5B8}
 .cleaning-guide .one-weekend article>img{object-fit:contain;flex-shrink:0}
 .cleaning-guide .one-weekend article>span:nth-child(2){flex:1}
-.cleaning-guide .one-weekend article strong{display:block;font:normal 11px Georgia,serif}
-.cleaning-guide .one-weekend article small{display:block;font-size:8px;margin-top:4px;line-height:1.3}
-.cleaning-guide .single-sheet footer{margin-top:10px;border-top:1px solid #D5C5B8;padding-top:7px;font-size:8px}
+.cleaning-guide .one-weekend article strong{display:block;font:normal 13px Georgia,serif}
+.cleaning-guide .one-weekend article small{display:block;font-size:9.5px;margin-top:4px;line-height:1.3}
+.cleaning-guide .single-sheet footer{margin-top:10px;border-top:1px solid #D5C5B8;padding-top:7px;font-size:9px}
 @page{size:letter;margin:0}
 @media print{
 body{background:white!important}
@@ -128,7 +126,7 @@ body{background:white!important}
 .cleaning-guide .print-sheets{background:white!important;padding:0!important;margin:0!important}
 .cleaning-guide .print-sheets>div{max-width:none!important}
 .cleaning-guide .single-sheet{width:8.5in!important;max-width:none!important;height:11in!important;min-height:0!important;margin:0!important;padding:31px 33px 20px!important;box-shadow:none!important;break-inside:avoid;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.cleaning-guide .one-zone{min-height:273px}
+.cleaning-guide .one-zone{min-height:281px}
 }
 @media screen and (max-width:650px){
 .cleaning-guide .single-sheet{padding:18px 12px;min-height:0}
