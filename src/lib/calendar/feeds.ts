@@ -22,9 +22,10 @@ export interface Feed {
   name: string;
   visibility: FeedVisibility;
   member_id: string | null;
-  /** Added by this adult (they can change or remove it; they alone see its link and errors). */
+  /** Added by this adult (they can change or remove it; they alone see its host and errors). */
   mine: boolean;
-  url: string | null;
+  /** The link's host name, for its owner only (the link itself stays encrypted on the server). */
+  url_host: string | null;
   status: 'pending' | 'ok' | 'error' | 'disconnected';
   last_error: string | null;
   event_count: number;
@@ -102,11 +103,12 @@ async function fetchFresh(scope: string, which: 'mine' | 'household'): Promise<{
 const readCache = (scope: string, which: string): Cached | null => {
   try { const c = JSON.parse(localStorage.getItem(`${CACHE}:${which}`) ?? 'null') as Cached | null; return c && c.scope === scope ? c : null; } catch { return null; }
 };
-// Calendar links can carry a private token: they're never kept on the device, only fetched when the panel shows them.
+// Calendar links never reach the app at all (encrypted on the server); even the host name isn't kept on the device.
 /** The server has no calendar subscriptions (not set up, or rolled back): nothing imported is shown, even offline later. */
-const gone = (e: unknown) => /could not find the function|schema cache|404/i.test((e as Error)?.message ?? '');
+// Also 'not_enabled': calendar subscriptions are switched on only for test households during the staged rollout.
+const gone = (e: unknown) => /could not find the function|schema cache|404|not_enabled/i.test((e as Error)?.message ?? '');
 const dropCache = (scope: string, _which?: string) => { try { for (const w of ['mine', 'household']) if (readCache(scope, w)) localStorage.removeItem(`${CACHE}:${w}`); } catch { /* nothing kept */ } };
-const writeCache = (c: Cached) => { try { localStorage.setItem(`${CACHE}:${c.which}`, JSON.stringify({ ...c, feeds: c.feeds.map((f) => ({ ...f, url: null })) })); } catch { /* this visit only */ } };
+const writeCache = (c: Cached) => { try { localStorage.setItem(`${CACHE}:${c.which}`, JSON.stringify({ ...c, feeds: c.feeds.map((f) => ({ ...f, url_host: null })) })); } catch { /* this visit only */ } };
 
 const windowFor = () => { const t = localToday(); return { from: `${addDays(t, -35)}T00:00:00Z`, to: `${addDays(t, 130)}T00:00:00Z` }; };
 

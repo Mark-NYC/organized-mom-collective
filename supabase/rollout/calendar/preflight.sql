@@ -10,9 +10,22 @@ select 'club_family_members.archived_at exists', exists (select 1 from informati
 union all
 select 'gen_random_uuid available', exists (select 1 from pg_proc where proname = 'gen_random_uuid')
 union all
-select 'new tables not there yet', to_regclass('public.calendar_feeds') is null and to_regclass('public.calendar_feed_events') is null
+select 'Vault installed; the migration owner (postgres) can store, read and delete secrets',
+       to_regclass('vault.secrets') is not null
+       and has_function_privilege('postgres', 'vault.create_secret(text,text,text,uuid)', 'execute')
+       and has_table_privilege('postgres', 'vault.decrypted_secrets', 'select') and has_table_privilege('postgres', 'vault.secrets', 'delete')
 union all
-select 'no function name collides', not exists (select 1 from pg_proc where pronamespace = 'public'::regnamespace and proname like 'calendar_feed%')
+select 'app roles cannot reach Vault', not has_table_privilege('authenticated', 'vault.decrypted_secrets', 'select') and not has_table_privilege('anon', 'vault.decrypted_secrets', 'select')
+       and not has_function_privilege('authenticated', 'vault.create_secret(text,text,text,uuid)', 'execute')
+union all
+select 'pgcrypto digest available', exists (select 1 from pg_proc where pronamespace = 'extensions'::regnamespace and proname = 'digest')
+union all
+select 'no calendar links in Vault yet', not exists (select 1 from vault.secrets where name like 'calendar\_feed:%')
+union all
+select 'new tables not there yet', to_regclass('public.calendar_feeds') is null and to_regclass('public.calendar_feed_events') is null
+       and to_regclass('public.calendar_feed_rollout') is null and to_regclass('public.calendar_feed_testers') is null
+union all
+select 'no function name collides', not exists (select 1 from pg_proc where pronamespace = 'public'::regnamespace and (proname like 'calendar_feed%' or proname = 'calendar_feeds'))
 union all
 select 'migration not recorded yet', case when to_regclass('supabase_migrations.schema_migrations') is null then true
   else ((xpath('/row/n/text()', query_to_xml('select count(*) as n from supabase_migrations.schema_migrations where name like ''%calendar_feeds%''', false, true, '')))[1])::text::int = 0 end
@@ -25,6 +38,7 @@ union all select 'rows: calendar_events deleted', count(*)::text from public.cal
 union all select 'rows: households', count(*)::text from public.club_households
 union all select 'rows: household_adults', count(*)::text from public.household_adults
 union all select 'rows: family members', count(*)::text from public.club_family_members
+union all select 'rows: vault secrets (other features)', count(*)::text from vault.secrets where name not like 'calendar\_feed:%'
 union all select 'max calendar_events.updated_at', coalesce(max(updated_at)::text, '-') from public.calendar_events
 union all
 select p.oid::regprocedure::text, md5(pg_get_functiondef(p.oid)) from pg_proc p

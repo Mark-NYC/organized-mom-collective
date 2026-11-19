@@ -99,6 +99,7 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
               <div className="min-w-0">
                 <p className="flex items-center gap-2 font-semibold"><span aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ background: f.member_id ? colors[f.member_id]?.hex : '#9aab8f' }} />{f.name}</p>
                 <p className="mt-0.5 text-[0.8rem] text-warm-soft" data-feed-status={f.status}>
+                  {f.url_host && <span className="block" data-feed-host>{f.url_host}</span>}
                   {f.status === 'ok' ? `${f.event_count} events · updated ${ago(f.last_success_at) ?? ''}` : f.status === 'pending' ? 'Getting its events…' : f.last_error ?? 'Couldn’t refresh it.'}
                 </p>
               </div>

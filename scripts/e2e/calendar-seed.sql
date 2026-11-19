@@ -5,6 +5,8 @@
 -- refresher's store step is called here directly, as the service role would.
 \set ON_ERROR_STOP 1
 \set QUIET 1
+-- Jen's household is the test household (the staged rollout's calendar_feed_testers).
+insert into public.calendar_feed_testers (user_id, note) values ('00000000-0000-0000-0000-00000000e2e1', 'e2e test account');
 set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000e2e1"}', false) \g /dev/null
 create temp table seeded as

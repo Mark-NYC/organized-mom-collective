@@ -54,7 +54,7 @@ const fixtures = createServer((req, res) => {
   }
   const body = FIX[p];
   if (!body) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': 'text/calendar', ETag: `"${p}-1"` });
+  res.writeHead(200, { 'Content-Type': 'text/calendar', ETag: `"v1-${p.length}"` });
   res.end(body);
 });
 await new Promise((r) => fixtures.listen(54322, '127.0.0.1', r));
@@ -115,6 +115,10 @@ const jenCtx = await browser.newContext(phone);
 const jen = await jenCtx.newPage();
 const jenToken = await signIn(jen, 'jen@e2e.test');
 const maya = await sql(`select id from public.club_family_members where first_name = 'Maya'`);
+// Staged rollout: off until the household has a tester (calendar_feed_testers), like production's test account.
+await openCalendar(jen);
+check('staged rollout: no Calendars entry before the household is a test household', (await jen.locator('[data-open-calendars]').count()) === 0);
+await sql(`insert into public.calendar_feed_testers (user_id, note) values ('00000000-0000-0000-0000-00000000e2e1', 'e2e test account')`);
 const ownSave = await rpc(jenToken, 'calendar_event_save', { p_event: { id: 'ca000000-0000-0000-0000-000000000001', title: 'Dentist', starts_on: day(0), start_time: '09:00', timezone: 'America/New_York', member_ids: [maya] }, p_base_revision: null });
 check('a family event saves as before (existing calendar unchanged)', ownSave.status === 200, `status ${ownSave.status}`);
 await openCalendar(jen);
@@ -130,7 +134,7 @@ await jen.click('[data-feed-add] [data-visibility="household"]');
 await shot(jen, '01-add-calendar');
 await jen.click('[data-feed-save]');
 await jen.waitForSelector('[data-feed="Lincoln Elementary"] [data-feed-status="ok"]', { timeout: 15000 }).catch(() => {});
-check('webcal link accepted, stored as https, fetched at once', (await sql(`select url || '|' || status || '|' || visibility from public.calendar_feeds where name = 'Lincoln Elementary'`)) === 'https://lincoln.calendar.e2e.test/school.ics|ok|household');
+check('webcal link accepted, stored as https (encrypted, in Vault), fetched at once', (await sql(`select ds.decrypted_secret || '|' || f.status || '|' || f.visibility from public.calendar_feeds f join vault.decrypted_secrets ds on ds.id = f.url_secret_id where f.name = 'Lincoln Elementary'`)) === 'https://lincoln.calendar.e2e.test/school.ics|ok|household');
 check('its status shows in the panel', /events · updated/.test(await jen.locator('[data-feed="Lincoln Elementary"] [data-feed-status]').innerText()));
 await shot(jen, '02-calendars-panel');
 await jen.click('[data-calendar-sources] button:has-text("Done")');
@@ -187,7 +191,11 @@ check('the same calendar subscribed twice shows once', st.filter((x) => x === 'C
 check('Jen’s private work calendar is not in Sam’s calendar', !st.includes('Board review'));
 const samFeeds = await rpc(samToken, 'calendar_feeds');
 const jenSchool = samFeeds.body?.find((f) => f.name === 'Lincoln Elementary');
-check('Sam never gets Jen’s calendar link', jenSchool && jenSchool.url === null && jenSchool.mine === false);
+check('Sam never gets Jen’s calendar link (or even its host)', jenSchool && !('url' in jenSchool) && jenSchool.url_host == null && jenSchool.mine === false && !/https?:|webcal|school\.ics/.test(JSON.stringify(samFeeds.body)) && samFeeds.body.filter((f) => !f.mine).every((f) => f.url_host == null));
+const jenFeeds = await rpc(jenToken, 'calendar_feeds');
+check('even Jen gets only the host of her own link, never the link', jenFeeds.body?.find((f) => f.name === 'Lincoln Elementary')?.url_host === 'lincoln.calendar.e2e.test' && !/https?:|webcal|school\.ics/.test(JSON.stringify(jenFeeds.body)));
+check('the link is stored encrypted in Vault, not in the subscriptions table', (await sql(`select count(*) from public.calendar_feeds f where to_jsonb(f)::text like '%school.ics%'`)) === '0'
+  && (await sql(`select count(*) from vault.decrypted_secrets where decrypted_secret = 'https://lincoln.calendar.e2e.test/school.ics'`)) === '2', await sql(`select (select count(*) from public.calendar_feeds f where to_jsonb(f)::text like '%school.ics%') || ' rows with link; vault: ' || (select string_agg(decrypted_secret, ', ') from vault.decrypted_secrets)`)); // Jen's and Sam's own subscriptions
 check('Sam can’t change or remove Jen’s calendar', (await rpc(samToken, 'calendar_feed_update', { p_id: jenSchool?.id, p: { visibility: 'private' } })).status >= 400
   && (await rpc(samToken, 'calendar_feed_remove', { p_id: jenSchool?.id })).body !== true);
 check('Sam can’t refresh Jen’s calendar', (await call('/functions/v1/calendar-feeds', samToken, { feed_id: jenSchool?.id })).status === 404);
@@ -201,8 +209,11 @@ await sam.click('[data-calendar-sources] button:has-text("Done")');
 const rosaCtx = await browser.newContext(phone);
 const rosa = await rosaCtx.newPage();
 const rosaToken = await signIn(rosa, 'rosa@e2e.test');
+const rosaOff = await rpc(rosaToken, 'calendar_feeds');
+check('staged rollout: a household that isn’t a test household is refused', rosaOff.status >= 400 && /not_enabled/.test(JSON.stringify(rosaOff.body)));
+await sql(`insert into public.calendar_feed_testers (user_id) values ('00000000-0000-0000-0000-00000000e2e3')`);
 const rosaEvents = await rpc(rosaToken, 'calendar_feed_events', { p_from: `${day(-1)}T00:00:00Z`, p_to: `${day(10)}T00:00:00Z`, p_scope: 'mine' });
-check('another household sees none of the Parks’ calendars', Array.isArray(rosaEvents.body) && rosaEvents.body.length === 0 && (await rpc(rosaToken, 'calendar_feeds')).body?.length === 0);
+check('another household, switched on too, sees none of the Parks’ calendars', Array.isArray(rosaEvents.body) && rosaEvents.body.length === 0 && (await rpc(rosaToken, 'calendar_feeds')).body?.length === 0);
 
 // ------------------------------------------------------------------ 6. Jen's view: private too
 await openCalendar(jen);

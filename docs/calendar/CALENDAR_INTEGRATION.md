@@ -1,7 +1,9 @@
 # Calendar integration
 
-Status (2026-11-18): **iCal subscriptions and the unified calendar are built, security-reviewed and tested on branch
-`claude/calendar-integration` (PR open, not merged). Nothing is deployed, and migration 20261205 has not been applied.** Google Calendar
+Status (2026-11-19): **iCal subscriptions and the unified calendar are built, security-reviewed and tested on branch
+`claude/calendar-integration` (PR open, not merged). Nothing is deployed, and migration 20261205 has not been applied.**
+Links are encrypted in Vault, fetches are pinned to the checked address (no DNS rebinding), and a server-side flag limits
+the feature to test households first ([ROLLOUT.md](ROLLOUT.md), [SECURITY_REVIEW.md](SECURITY_REVIEW.md)). Google Calendar
 OAuth is not built yet; it needs the owner's Google Cloud credentials first (see "Google Calendar" below).
 
 Until the migration and function are live, the app checks for the feed functions, doesn't find them, and hides the
@@ -153,7 +155,7 @@ Families can add Google calendars today, read-only, through iCal: Google Calenda
 | --- | --- | --- |
 | Setup for mom | Desktop or browser only (not the Google Calendar phone app); find Settings → the calendar → copy a long link; once per calendar | One "Connect Google" tap; pick calendars |
 | What the link grants | **Anyone who has the link can read that whole calendar, with details**, until it's reset. Google itself warns not to share it. | A read-only token scoped to our app, revocable from her Google account |
-| Where it's kept | Our database (owner-only in the app, never shown to the other adult, never on the device, never logged; plain text at rest, readable by the project owner/service role) | Encrypted refresh token |
+| Where it's kept | Encrypted in Supabase Vault. No app response returns it, not even to its owner (they see the host name only); never on the device, never logged | Encrypted refresh token |
 | Revoking | She resets the secret address in Google; our copy stops working and is disconnected | Remove in the app or in her Google account |
 | Freshness | Our schedule: within ~3 h, or right away with Refresh | Same schedule, or push notifications later |
 | Work/school accounts | Google Workspace admins can disable secret addresses | Admin approval may be needed |

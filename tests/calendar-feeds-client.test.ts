@@ -4,7 +4,7 @@ import { toCalendarEvents, type Feed, type FeedEvent } from '../src/lib/calendar
 import { occurrences } from '../src/lib/calendar/recurrence';
 import { weekAhead } from '../src/lib/family-meeting-support';
 
-const feed: Feed = { id: 'f1', kind: 'ical', name: 'Lincoln Elementary', visibility: 'household', member_id: 'maya', mine: true, url: null, status: 'ok', last_error: null, event_count: 2, last_success_at: null };
+const feed: Feed = { id: 'f1', kind: 'ical', name: 'Lincoln Elementary', visibility: 'household', member_id: 'maya', mine: true, url_host: null, status: 'ok', last_error: null, event_count: 2, last_success_at: null };
 const ev = (o: Partial<FeedEvent>): FeedEvent => ({ feed_id: 'f1', uid: 'u', instance_key: 'k', title: 'Choir', location: null, all_day: false, starts_at: null, ends_at: null, start_date: null, end_date: null, status: 'confirmed', ...o });
 
 describe('imported calendar events', () => {

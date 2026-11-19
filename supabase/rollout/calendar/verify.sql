@@ -1,7 +1,17 @@
 -- 20261205_calendar_feeds: READ-ONLY checks right after applying. Every row must say ok = t; then re-run the snapshot
 -- half of preflight.sql and compare (identical). docs/calendar/ROLLOUT.md
 select 'tables exist, RLS on' as check_,
-       (select bool_and(relrowsecurity) from pg_class where oid in ('public.calendar_feeds'::regclass, 'public.calendar_feed_events'::regclass)) as ok
+       (select bool_and(relrowsecurity) from pg_class where oid in ('public.calendar_feeds'::regclass, 'public.calendar_feed_events'::regclass,
+         'public.calendar_feed_rollout'::regclass, 'public.calendar_feed_testers'::regclass)) as ok
+union all
+select 'rollout: off for everyone; no testers yet', (select not everyone from public.calendar_feed_rollout where id) and (select count(*) from public.calendar_feed_testers) = 0
+union all
+select 'rollout tables: no app access', not has_table_privilege('authenticated', 'public.calendar_feed_testers', 'select') and not has_table_privilege('authenticated', 'public.calendar_feed_rollout', 'select')
+       and not has_table_privilege('anon', 'public.calendar_feed_testers', 'select')
+union all
+select 'no link column: links live only in Vault', not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'calendar_feeds' and column_name = 'url')
+union all
+select 'Vault deletion trigger in place', exists (select 1 from pg_trigger where tgname = 'calendar_feed_forget_link' and tgrelid = 'public.calendar_feeds'::regclass)
 union all
 select 'no direct table access for app roles',
        not has_table_privilege('authenticated', 'public.calendar_feeds', 'select') and not has_table_privilege('anon', 'public.calendar_feeds', 'select')
@@ -18,11 +28,11 @@ select 'refresher functions: service role only',
 union all
 select 'helpers not callable by app roles',
        bool_and(not has_function_privilege('authenticated', p.oid, 'execute') and not has_function_privilege('anon', p.oid, 'execute'))
-  from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('calendar_feed_json', 'calendar_feeds_visible')
+  from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('calendar_feed_json', 'calendar_feeds_visible', 'calendar_feeds_enabled', 'calendar_feed_forget_link')
 union all
 select 'every security definer function pins search_path',
        bool_and(p.proconfig @> array['search_path=""'])
-  from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname like 'calendar_feed%' and p.prosecdef
+  from pg_proc p where p.pronamespace = 'public'::regnamespace and (p.proname like 'calendar_feed%' or p.proname = 'calendar_feeds') and p.prosecdef
 union all
 select 'no subscriptions yet (fresh)', (select count(*) from public.calendar_feeds) = 0
 order by 1;

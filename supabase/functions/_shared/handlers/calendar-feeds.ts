@@ -8,6 +8,8 @@
  * - Only http(s). Never a private, loopback, link-local, carrier-grade NAT, multicast or metadata address: checked on
  *   the URL's host AND on every address the host resolves to, before the first request and again on every redirect
  *   (at most 3). If the name can't be resolved, nothing is fetched.
+ * - DNS rebinding: in production (`pinnedFetch`) the request goes to the exact address that passed the check (TLS is
+ *   verified for the real host name over that connection), so a second, different DNS answer can't be used.
  * - 15 s timeout, 5 MB limit, and a calendar cut off mid-download is never stored.
  * - Conditional requests (ETag / Last-Modified) and a content hash, so an unchanged calendar is neither re-parsed nor
  *   rewritten.
@@ -26,6 +28,10 @@ export interface CalendarFeedsDeps {
   fetch: typeof fetch;
   /** Every IP address a host name resolves to (A and AAAA). Throws if it can't be resolved. */
   resolve?(host: string): Promise<string[]>;
+  /** Which resolver answered last ('deno' or 'doh'), for the self-test. */
+  resolverName?(): string | null;
+  /** Production: GET over a connection opened to this checked IP (../calendar/pinned-http.ts). Without it, `fetch`. */
+  pinnedFetch?(url: URL, ip: string, init: { headers: Record<string, string>; signal: AbortSignal }): Promise<Response>;
   now(): number;
   cronSecret: string | null;
   /** Tests only: let fixtures on 127.0.0.1 through. */
@@ -75,19 +81,25 @@ export function privateHost(host: string): boolean {
 
 const isIp = (h: string) => /^\d{1,3}(\.\d{1,3}){3}$/.test(h) || h.includes(':');
 
-/** null = fine; otherwise why this URL may not be fetched. */
-async function blocked(url: URL, deps: CalendarFeedsDeps): Promise<StoreResult | null> {
-  if (!/^https?:$/.test(url.protocol)) return { result: 'gone', error: 'That calendar link isn’t a web address.' };
-  if (url.username || url.password) return { result: 'gone', error: 'Calendar links with a user name or password aren’t supported.' };
-  if (deps.allowPrivateHosts) return null;
+const NOT_FOUND: StoreResult = { result: 'error', error: 'We couldn’t find that calendar’s website. We’ll try again later.' };
+const PRIVATE: StoreResult = { result: 'gone', error: 'That calendar link points somewhere we can’t read.' };
+
+/** `stop`: why this URL may not be fetched. Otherwise `ip`: the checked address to connect to (when resolving). */
+async function check(url: URL, deps: CalendarFeedsDeps): Promise<{ stop?: StoreResult; ip?: string }> {
+  if (!/^https?:$/.test(url.protocol)) return { stop: { result: 'gone', error: 'That calendar link isn’t a web address.' } };
+  if (url.username || url.password) return { stop: { result: 'gone', error: 'Calendar links with a user name or password aren’t supported.' } };
   const host = url.hostname.replace(/^\[|\]$/g, '');
-  if (privateHost(host)) return { result: 'gone', error: 'That calendar link points somewhere we can’t read.' };
-  if (isIp(host) || !deps.resolve) return null;
+  if (deps.allowPrivateHosts) return { ip: host };
+  if (privateHost(host)) return { stop: PRIVATE };
+  if (isIp(host)) return { ip: host };
+  if (!deps.resolve) return deps.pinnedFetch ? { stop: NOT_FOUND } : {};
   let addrs: string[];
-  try { addrs = await deps.resolve(host); } catch { return { result: 'error', error: 'We couldn’t find that calendar’s website. We’ll try again later.' }; }
-  if (!addrs.length) return { result: 'error', error: 'We couldn’t find that calendar’s website. We’ll try again later.' };
-  if (addrs.some(privateHost)) return { result: 'gone', error: 'That calendar link points somewhere we can’t read.' };
-  return null;
+  try { addrs = await deps.resolve(host); } catch { return { stop: NOT_FOUND }; }
+  if (!addrs.length) return { stop: NOT_FOUND };
+  // Every answer must be public: one private answer is enough to refuse (a name can't hedge between the two).
+  if (addrs.some(privateHost)) return { stop: PRIVATE };
+  // Prefer IPv4 (reachable from every runtime), else the first IPv6.
+  return { ip: addrs.find((a) => !a.includes(':')) ?? addrs[0] };
 }
 
 async function readLimited(res: Response): Promise<string> {
@@ -125,9 +137,11 @@ export async function syncFeed(feed: ClaimedFeed, deps: CalendarFeedsDeps): Prom
   try {
     let res: Response | null = null;
     for (let hop = 0; hop <= 3; hop++) {
-      const stop = await blocked(url, deps);
+      const { stop, ip } = await check(url, deps);
       if (stop) return stop;
-      res = await deps.fetch(url.toString(), { headers, redirect: 'manual', signal: ctl.signal });
+      res = deps.pinnedFetch && ip
+        ? await deps.pinnedFetch(url, ip, { headers, signal: ctl.signal })
+        : await deps.fetch(url.toString(), { headers, redirect: 'manual', signal: ctl.signal });
       if (res.status >= 300 && res.status < 400 && res.status !== 304) {
         const loc = res.headers.get('location');
         await res.body?.cancel();
@@ -156,6 +170,7 @@ export async function syncFeed(feed: ClaimedFeed, deps: CalendarFeedsDeps): Prom
     if (m === 'not_ical') return { result: 'error', error: 'That link didn’t return a calendar. Check it’s the iCal (.ics) link.' };
     if (m === 'incomplete') return { result: 'error', error: 'The calendar didn’t finish downloading. We’ll try again later.' };
     if (m === 'too_big') return { result: 'error', error: 'This calendar is too big to import.' };
+    if (m === 'bad_response') return { result: 'error', error: 'The calendar’s website sent something we couldn’t read. We’ll try again later.' };
     return { result: 'error', error: 'The calendar didn’t answer. We’ll try again later.' };
   } finally {
     clearTimeout(timer);
@@ -176,6 +191,22 @@ export function createCalendarFeedsHandler(deps: CalendarFeedsDeps) {
     if (req.method !== 'POST') return json(405, { error: 'method' });
     let body: { feed_id?: string; mode?: string } = {};
     try { body = await req.json(); } catch { /* empty */ }
+
+    // Self-test on the real runtime, before any family uses it (docs/calendar/ROLLOUT.md): public Google calendar,
+    // refusals of a private name and a private address. Touches no database and stores nothing.
+    if (body.mode === 'selftest') {
+      const secret = req.headers.get('x-calendar-cron') ?? '';
+      if (!deps.cronSecret || !safeEqual(secret, deps.cronSecret)) return json(401, { error: 'unauthorized' });
+      const probe = (url: string) => syncFeed({ id: 'selftest', url, etag: null, last_modified: null, timezone: 'America/New_York', content_hash: null }, deps);
+      const google = await probe('https://calendar.google.com/calendar/ical/en.usa%23holiday%40group.v.calendar.google.com/public/basic.ics');
+      const privateName = await probe('https://10.0.0.1.sslip.io/calendar.ics');
+      const privateIp = await probe('http://169.254.169.254/latest/meta-data/');
+      return json(200, {
+        pinned: Boolean(deps.pinnedFetch), resolver: deps.resolverName?.() ?? null,
+        public_calendar: { result: google.result, events: google.events?.length ?? 0, ...(google.error ? { error: google.error } : {}) },
+        private_name_refused: privateName.result === 'gone', private_address_refused: privateIp.result === 'gone',
+      });
+    }
 
     if (body.mode === 'due') {
       const secret = req.headers.get('x-calendar-cron') ?? '';

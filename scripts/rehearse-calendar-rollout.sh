@@ -63,6 +63,8 @@ grep -v '^rows: \|^max ' "$WORK/snapshot-before.txt" > "$WORK/fns-before.txt"
 diff -u "$WORK/fns-before.txt" "$WORK/fns-in-use.txt" || { echo "EXISTING FUNCTIONS CHANGED WHILE IN USE"; exit 1; }
 echo "rolled back: schema identical to before 20261205 ($(wc -l < "$WORK/fp-before.txt") objects); family calendar functions unchanged"
 [[ "$(psql_ -d "$DB" -At -c "select count(*) from public.calendar_events where title = 'Ruiz private appointment'")" == "1" ]] || { echo "ROLLBACK LOST A FAMILY EVENT"; exit 1; }
+[[ "$(psql_ -d "$DB" -At -c "select count(*) from vault.secrets where name like 'calendar\\_feed:%'")" == "0" ]] || { echo "ROLLBACK LEFT CALENDAR LINKS IN VAULT"; exit 1; }
+echo "rollback left no calendar links in Vault"
 
 psql_ -d "$DB" -f "$M" >/dev/null
 v=$(psql_ -d "$DB" -At -F ' | ' -f "$R/verify.sql")

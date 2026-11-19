@@ -55,13 +55,30 @@ select public.calendar_event_save(jsonb_build_object('id', 'cf000000-0000-0000-0
 reset role;
 create temp table own_before as select id, title, revision, deleted_at from public.calendar_events;
 
+-- Staged rollout: off until a tester is in the household (or it's turned on for everyone).
+select pg_temp.as_user('authenticated', :MOM);
+select pg_temp.expect(pg_temp.fails($q$select public.calendar_feed_add('{"url":"https://school.example.org/a.ics"}')$q$, 'not_enabled') and pg_temp.fails('select public.calendar_feeds()', 'not_enabled'), 'off by default: nobody can subscribe or list');
+reset role;
+insert into public.calendar_feed_testers (user_id, note) values ('00000000-0000-0000-0000-0000000cf101', 'test account');
+select pg_temp.as_user('authenticated', :DAD);
+select pg_temp.expect(jsonb_array_length(public.calendar_feeds()) = 0, 'a tester''s household: both adults have it (sharing can be tested)');
+reset role;
+select pg_temp.as_user('authenticated', :OTHER);
+select pg_temp.expect(pg_temp.fails('select public.calendar_feeds()', 'not_enabled'), 'other households still don''t');
+reset role;
+select pg_temp.as_user('authenticated', :MOM);
+select pg_temp.expect(pg_temp.fails('select * from public.calendar_feed_testers'), 'adults can''t read or add testers');
+reset role;
+
 -- Subscribe (private by default), webcal:// becomes https://, the same URL twice is one subscription.
 select pg_temp.as_user('authenticated', :MOM);
 create temp table f1 as select public.calendar_feed_add(jsonb_build_object('url', 'webcal://school.example.org/cal.ics?token=SECRET', 'name', 'Lincoln Elementary', 'member_id', :LIA, 'timezone', 'America/Chicago')) as j;
 reset role;
 grant select on f1 to authenticated, anon;
 \set F1 '(select (j ->> ''id'')::uuid from f1)'
-select pg_temp.expect((select j ->> 'url' from f1) = 'https://school.example.org/cal.ics?token=SECRET' and (select j ->> 'visibility' from f1) = 'private' and (select (j ->> 'mine')::boolean from f1), 'subscribe: private by default, webcal becomes https, owner sees the URL');
+select pg_temp.expect((select j ->> 'url_host' from f1) = 'school.example.org' and not (select j::text from f1) ~ 'token|SECRET|https?:' and (select j ->> 'visibility' from f1) = 'private' and (select (j ->> 'mine')::boolean from f1), 'subscribe: private by default; the answer carries the host, never the link');
+select pg_temp.expect((select ds.decrypted_secret from public.calendar_feeds f join vault.decrypted_secrets ds on ds.id = f.url_secret_id where f.id = :F1) = 'https://school.example.org/cal.ics?token=SECRET', 'the link is in Vault (webcal became https)');
+select pg_temp.expect(not exists (select 1 from public.calendar_feeds f where to_jsonb(f)::text ~ 'SECRET|cal\.ics'), 'and nowhere in the subscriptions table');
 select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect((public.calendar_feed_add('{"url":"https://school.example.org/cal.ics?token=SECRET"}') ->> 'id')::uuid = :F1, 'the same URL again is the same subscription');
 select pg_temp.expect(pg_temp.fails($q$select public.calendar_feed_add('{"url":"http://localhost:8080/x.ics"}')$q$, 'invalid_url'), 'a local address is refused');
@@ -92,7 +109,7 @@ select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(public.calendar_feed_update(:F1, '{"visibility":"household"}') ->> 'visibility' = 'household', 'the owner shares it with the household');
 reset role;
 select pg_temp.as_user('authenticated', :DAD);
-select pg_temp.expect((public.calendar_feeds() -> 0 ->> 'name') = 'Lincoln Elementary' and (public.calendar_feeds() -> 0 -> 'url') = 'null'::jsonb and not (public.calendar_feeds() -> 0 ->> 'mine')::boolean, 'the other adult sees a shared calendar''s name, never its URL');
+select pg_temp.expect((public.calendar_feeds() -> 0 ->> 'name') = 'Lincoln Elementary' and (public.calendar_feeds() -> 0 -> 'url_host') = 'null'::jsonb and not (public.calendar_feeds()::text ~ 'SECRET|token|https?:') and not (public.calendar_feeds() -> 0 ->> 'mine')::boolean, 'the other adult sees a shared calendar''s name, never its URL');
 select pg_temp.expect(jsonb_array_length(public.calendar_feed_events('2026-11-01', '2026-11-30', 'household')) = 2, 'and its events, in the Family Meeting view too');
 -- Ben subscribes to the same school calendar himself (his own URL), shares it: one copy of each occurrence.
 create temp table f2 as select public.calendar_feed_add('{"url":"https://school.example.org/cal.ics?token=BENS","name":"School","visibility":"household"}') as j;
@@ -104,7 +121,8 @@ select pg_temp.as_user('authenticated', :DAD);
 select pg_temp.expect(jsonb_array_length(public.calendar_feed_events('2026-11-01', '2026-11-30')) = 2, 'the same occurrence from two subscriptions shows once');
 reset role;
 
--- Other households see nothing.
+-- Other households see nothing, even with calendars switched on for them too.
+insert into public.calendar_feed_testers (user_id) values ('00000000-0000-0000-0000-0000000cf103');
 select pg_temp.as_user('authenticated', :OTHER);
 select pg_temp.expect(jsonb_array_length(public.calendar_feeds()) = 0 and jsonb_array_length(public.calendar_feed_events('2026-11-01', '2026-11-30')) = 0, 'another family sees nothing');
 reset role;
@@ -138,7 +156,7 @@ select pg_temp.expect(jsonb_array_length(public.calendar_feed_claim(50)) = 0 or 
 select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(public.calendar_feed_retry(:F1) ->> 'status' = 'pending', 'its owner can retry it');
 reset role;
-select pg_temp.expect(exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50, :F1, :MOM)) c where (c ->> 'id')::uuid = :F1 and c ? 'url'), 'Refresh now: the named feed, for its owner');
+select pg_temp.expect(exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50, :F1, :MOM)) c where (c ->> 'id')::uuid = :F1 and c ->> 'url' = 'https://school.example.org/cal.ics?token=SECRET'), 'Refresh now: the named feed with its decrypted link, for the refresher only');
 select pg_temp.expect((public.calendar_feed_claim(1, :F1, :MOM) -> 0 ->> 'recent')::boolean and not (public.calendar_feed_claim(1, :F1, :MOM) -> 0 ? 'url'), 'refreshed seconds ago: not fetched again (a double tap)');
 select pg_temp.as_user('authenticated', :MOM);
 select public.calendar_feed_retry(:F1);
@@ -154,6 +172,7 @@ select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(jsonb_array_length(public.calendar_feeds()) = 1 and (public.calendar_feeds() -> 0 ->> 'name') = 'Lincoln Elementary', 'an adult who left: their calendars leave with them');
 reset role;
 select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50)) c where (c ->> 'id')::uuid = (select (j ->> 'id')::uuid from f2)), 'and are no longer fetched for that household');
+insert into public.calendar_feed_testers (user_id) values ('00000000-0000-0000-0000-0000000cf102');
 select pg_temp.as_user('authenticated', :DAD);
 select public.club_household_save('Ben''s', '{}', '[{"first_name":"Ben","kind":"adult","role":"parent","is_account_holder":true}]');
 create temp table f2b as select public.calendar_feed_add('{"url":"https://school.example.org/cal.ics?token=BENS","name":"School"}') as j;
@@ -166,5 +185,21 @@ select pg_temp.as_user('authenticated', :MOM);
 create temp table removed as select public.calendar_feed_remove(:F1) as ok;
 reset role;
 select pg_temp.expect((select ok from removed) and (select count(*) from public.calendar_feed_events where feed_id = :F1) = 0, 'unsubscribing removes its imported events');
+select pg_temp.expect(not exists (select 1 from vault.secrets where name = 'calendar_feed:' || :F1), 'and its encrypted link');
+-- Turning the test off for Ben's household: his calendars are neither listed nor refreshed.
+delete from public.calendar_feed_testers where user_id = '00000000-0000-0000-0000-0000000cf102';
+select pg_temp.expect(not exists (select 1 from jsonb_array_elements(public.calendar_feed_claim(50)) c where (c ->> 'id')::uuid = (select (j ->> 'id')::uuid from f2)), 'switched off: never refreshed');
+select pg_temp.as_user('authenticated', :DAD);
+select pg_temp.expect(pg_temp.fails('select public.calendar_feeds()', 'not_enabled'), 'outside a tester''s household: off');
+select pg_temp.expect(public.calendar_feed_remove((select (j ->> 'id')::uuid from f2)), 'but he can still remove his own subscription');
+reset role;
+select pg_temp.expect(not exists (select 1 from vault.secrets where name = 'calendar_feed:' || (select j ->> 'id' from f2)), 'removed: its link is gone from Vault');
 select pg_temp.expect((select count(*) from public.calendar_events) = (select count(*) from own_before)
   and not exists (select id, title, revision, deleted_at from public.calendar_events except select * from own_before), 'the family''s own events are untouched by all of this');
+
+-- Last (it removes a whole family): deleting an account deletes its subscriptions and their encrypted links.
+select pg_temp.as_user('authenticated', :MOM);
+select public.calendar_feed_add('{"url":"https://work.example.org/w.ics","name":"Work"}');
+reset role;
+delete from auth.users where id = '00000000-0000-0000-0000-0000000cf101';
+select pg_temp.expect((select count(*) from vault.secrets where name like 'calendar_feed:%') = (select count(*) from public.calendar_feeds), 'deleting an account deletes its subscriptions and their links');

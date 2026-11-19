@@ -9,9 +9,43 @@
 --
 -- Privacy, per adult: each subscription belongs to the adult who added it and is PRIVATE by default (only they see it).
 -- They can share it with the household (both adults see it, and it appears in the weekly Family Meeting). The feed's
--- URL can contain a private token, so only its owner can ever read it, shared or not. When an adult leaves the
--- household, their subscriptions stop showing to it at once; deleting the account deletes them.
+-- URL can contain a private token, so it is stored ENCRYPTED in Supabase Vault (never in these tables), only the
+-- refresher (service role) decrypts it, and no app response ever carries it: its owner sees the host name only.
+-- When an adult leaves the household, their subscriptions stop showing to it at once; deleting the account deletes
+-- them and their Vault entries.
+--
+-- Staged rollout: off for everyone except households with a tester (calendar_feed_testers) until
+-- calendar_feed_rollout.everyone is turned on (docs/calendar/ROLLOUT.md).
 begin;
+
+-- ---------------------------------------------------------------- rollout flag (server-enforced)
+create table public.calendar_feed_rollout (
+  id boolean primary key default true check (id),
+  everyone boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+insert into public.calendar_feed_rollout (id, everyone) values (true, false);
+create table public.calendar_feed_testers (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  note text check (char_length(note) <= 200),
+  added_at timestamptz not null default now()
+);
+alter table public.calendar_feed_rollout enable row level security;
+alter table public.calendar_feed_testers enable row level security;
+revoke all on public.calendar_feed_rollout, public.calendar_feed_testers from public, anon, authenticated;
+grant all on public.calendar_feed_rollout, public.calendar_feed_testers to service_role;
+
+-- Calendar subscriptions are on for this adult: for everyone once rolled out; before that, for a tester's household
+-- (both adults, so sharing can be tested).
+create function public.calendar_feeds_enabled(p_uid uuid) returns boolean
+language sql stable security definer set search_path = '' as $$
+  select p_uid is not null and (
+    coalesce((select everyone from public.calendar_feed_rollout where id), false)
+    or exists (select 1 from public.calendar_feed_testers t where t.user_id = p_uid)
+    or exists (select 1 from public.calendar_feed_testers t join public.household_adults a on a.user_id = t.user_id
+                where a.household_id = public.household_id_for(p_uid)))
+$$;
+revoke execute on function public.calendar_feeds_enabled(uuid) from public, anon, authenticated;
 
 create table public.calendar_feeds (
   id uuid primary key default gen_random_uuid(),
@@ -19,8 +53,11 @@ create table public.calendar_feeds (
   owner_user_id uuid not null references auth.users (id) on delete cascade,
   kind text not null default 'ical' check (kind in ('ical', 'google')),
   name text not null check (char_length(btrim(name)) between 1 and 80),
-  -- iCal only. Owner-only (may carry a private token).
-  url text check (url is null or (char_length(url) <= 2000 and url ~* '^https?://')),
+  -- iCal only. The link itself is in Vault (vault.secrets, encrypted); here only its id, a SHA-256 of it (to spot the
+  -- same link twice) and its host name (shown to its owner).
+  url_secret_id uuid,
+  url_hash text check (url_hash ~ '^[0-9a-f]{64}$'),
+  url_host text check (char_length(url_host) <= 255),
   visibility text not null default 'private' check (visibility in ('private', 'household')),
   -- Whose calendar it is in the family (their permanent color); null = the whole family.
   member_id uuid references public.club_family_members (id) on delete set null,
@@ -40,9 +77,9 @@ create table public.calendar_feeds (
   last_success_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  check (kind <> 'ical' or url is not null)
+  check (kind <> 'ical' or (url_secret_id is not null and url_hash is not null))
 );
-create unique index calendar_feeds_owner_url on public.calendar_feeds (owner_user_id, lower(url)) where url is not null;
+create unique index calendar_feeds_owner_url on public.calendar_feeds (owner_user_id, url_hash) where url_hash is not null;
 create index calendar_feeds_household on public.calendar_feeds (household_id);
 
 create table public.calendar_feed_events (
@@ -76,7 +113,7 @@ grant all on public.calendar_feeds, public.calendar_feed_events to service_role;
 create function public.calendar_feed_json(f public.calendar_feeds, p_uid uuid) returns jsonb
 language sql stable set search_path = '' as $$
   select jsonb_build_object('id', f.id, 'kind', f.kind, 'name', f.name, 'visibility', f.visibility, 'member_id', f.member_id,
-    'mine', f.owner_user_id = p_uid, 'url', case when f.owner_user_id = p_uid then f.url end, 'timezone', f.timezone,
+    'mine', f.owner_user_id = p_uid, 'url_host', case when f.owner_user_id = p_uid then f.url_host end, 'timezone', f.timezone,
     'status', f.status, 'last_error', case when f.owner_user_id = p_uid then f.last_error end, 'event_count', f.event_count,
     'last_success_at', f.last_success_at, 'events_at', f.events_at, 'updated_at', f.updated_at)
 $$;
@@ -101,10 +138,14 @@ declare
   uid uuid := auth.uid();
   hid uuid;
   u text;
+  h text;
+  fid uuid := gen_random_uuid();
+  sid uuid;
   f public.calendar_feeds%rowtype;
   mid uuid;
 begin
   if uid is null then raise exception 'not_signed_in'; end if;
+  if not public.calendar_feeds_enabled(uid) then raise exception 'not_enabled'; end if;
   hid := public.household_id_for(uid);
   if hid is null then raise exception 'no_household'; end if;
   u := btrim(coalesce(p ->> 'url', ''));
@@ -114,7 +155,8 @@ begin
   if u ~* '^https?://([^/@]*@)?(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2[0-9]|3[01])\.|0\.|\[|[^/]*\.(local|internal|localhost)([:/]|$))' then
     raise exception 'invalid_url';
   end if;
-  select * into f from public.calendar_feeds where owner_user_id = uid and lower(url) = lower(u);
+  h := encode(extensions.digest(u, 'sha256'), 'hex');
+  select * into f from public.calendar_feeds where owner_user_id = uid and url_hash = h;
   if found and f.household_id = hid then return public.calendar_feed_json(f, uid); end if;
   if found then
     -- Added before in a household they've since left: it moves with them, private again, and is fetched afresh.
@@ -129,8 +171,11 @@ begin
   if mid is not null and not exists (select 1 from public.club_family_members m where m.id = mid and m.household_id = hid and m.archived_at is null) then
     raise exception 'invalid';
   end if;
-  insert into public.calendar_feeds (household_id, owner_user_id, kind, name, url, visibility, member_id, timezone)
-  values (hid, uid, 'ical', btrim(coalesce(nullif(p ->> 'name', ''), 'Calendar')), u,
+  -- The link goes into Vault, encrypted; the row keeps only its id, hash and host.
+  sid := vault.create_secret(u, 'calendar_feed:' || fid, 'Calendar subscription link (owner-only): docs/calendar/SECURITY_REVIEW.md');
+  insert into public.calendar_feeds (id, household_id, owner_user_id, kind, name, url_secret_id, url_hash, url_host, visibility, member_id, timezone)
+  values (fid, hid, uid, 'ical', btrim(coalesce(nullif(p ->> 'name', ''), 'Calendar')), sid, h,
+          lower(substring(u from '^https?://(?:[^/@]*@)?([^/:?#]+)')),
           coalesce(nullif(p ->> 'visibility', ''), 'private'), mid, coalesce(nullif(p ->> 'timezone', ''), 'America/New_York'))
   returning * into f;
   return public.calendar_feed_json(f, uid);
@@ -150,6 +195,7 @@ declare
   mid uuid;
 begin
   if uid is null then raise exception 'not_signed_in'; end if;
+  if not public.calendar_feeds_enabled(uid) then raise exception 'not_enabled'; end if;
   select * into f from public.calendar_feeds where id = p_id and owner_user_id = uid;
   if not found then raise exception 'not_found'; end if;
   if p ? 'member_id' then
@@ -188,6 +234,7 @@ language plpgsql stable security definer set search_path = '' as $$
 declare uid uuid := auth.uid();
 begin
   if uid is null then raise exception 'not_signed_in'; end if;
+  if not public.calendar_feeds_enabled(uid) then raise exception 'not_enabled'; end if;
   return coalesce((select jsonb_agg(public.calendar_feed_json(f, uid) order by f.owner_user_id <> uid, f.created_at)
                      from public.calendar_feeds_visible(uid) f), '[]');
 end $$;
@@ -202,6 +249,7 @@ language plpgsql stable security definer set search_path = '' as $$
 declare v_uid uuid := auth.uid();
 begin
   if v_uid is null then raise exception 'not_signed_in'; end if;
+  if not public.calendar_feeds_enabled(v_uid) then raise exception 'not_enabled'; end if;
   if p_scope not in ('mine', 'household') or p_to < p_from or p_to - p_from > interval '400 days' then raise exception 'invalid'; end if;
   return coalesce((
     select jsonb_agg(x.j order by x.k) from (
@@ -240,6 +288,7 @@ begin
     select f.id from public.calendar_feeds f
      where f.kind = 'ical' and f.status <> 'disconnected'
        and exists (select 1 from public.household_adults a where a.household_id = f.household_id and a.user_id = f.owner_user_id)
+       and public.calendar_feeds_enabled(f.owner_user_id)
        and (case when p_feed is not null then f.id = p_feed and f.owner_user_id = p_owner
                  else (f.last_attempt_at is null
                        or f.last_attempt_at <= now() - least(interval '3 hours' * power(2, least(f.failures, 3)), interval '24 hours')) end)
@@ -248,9 +297,12 @@ begin
      for update skip locked
   ), marked as (
     update public.calendar_feeds f set last_attempt_at = now() from due where f.id = due.id
-    returning f.id, f.url, f.etag, f.last_modified, f.timezone, f.content_hash
+    returning f.id, f.url_secret_id, f.etag, f.last_modified, f.timezone, f.content_hash
   )
-  select coalesce(jsonb_agg(to_jsonb(marked)), '[]') into out from marked;
+  -- The only place a link is decrypted: for the refresher (service role), never logged or returned to the app.
+  select coalesce(jsonb_agg(jsonb_build_object('id', m.id, 'url', ds.decrypted_secret, 'etag', m.etag, 'last_modified', m.last_modified,
+           'timezone', m.timezone, 'content_hash', m.content_hash)), '[]') into out
+    from marked m join vault.decrypted_secrets ds on ds.id = m.url_secret_id;
   return out;
 end $$;
 revoke execute on function public.calendar_feed_claim(int, uuid, uuid) from public, anon, authenticated;
@@ -316,6 +368,7 @@ language plpgsql security definer set search_path = '' as $$
 declare f public.calendar_feeds%rowtype;
 begin
   if auth.uid() is null then raise exception 'not_signed_in'; end if;
+  if not public.calendar_feeds_enabled(auth.uid()) then raise exception 'not_enabled'; end if;
   select * into f from public.calendar_feeds where id = p_id and owner_user_id = auth.uid();
   if not found then raise exception 'not_found'; end if;
   if f.status <> 'disconnected' then return public.calendar_feed_json(f, auth.uid()); end if;
@@ -325,5 +378,16 @@ begin
 end $$;
 revoke execute on function public.calendar_feed_retry(uuid) from public, anon;
 grant execute on function public.calendar_feed_retry(uuid) to authenticated;
+
+-- However a subscription goes (Remove, the account deleted, the household deleted), its encrypted link goes too.
+create function public.calendar_feed_forget_link() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  if old.url_secret_id is not null then delete from vault.secrets where id = old.url_secret_id; end if;
+  return old;
+end $$;
+revoke execute on function public.calendar_feed_forget_link() from public, anon, authenticated;
+create trigger calendar_feed_forget_link after delete on public.calendar_feeds
+  for each row execute function public.calendar_feed_forget_link();
 
 commit;

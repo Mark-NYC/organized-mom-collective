@@ -14,6 +14,10 @@ begin;
 -- ---- 20261205 calendar subscriptions (independent; safe to run alone: supabase/rollout/calendar/rollback.sql).
 -- Removes subscriptions and imported events; the family calendar and every other table are untouched.
 do $$ begin if exists (select 1 from pg_extension where extname = 'pg_cron') then perform cron.unschedule('omc-calendar-feeds-refresh'); end if; exception when others then null; end $$;
+-- The encrypted links first (Vault), then everything the migration created.
+do $$ begin if to_regclass('vault.secrets') is not null then delete from vault.secrets where name like 'calendar\_feed:%'; end if; end $$;
+drop trigger if exists calendar_feed_forget_link on public.calendar_feeds;
+drop function if exists public.calendar_feed_forget_link();
 drop function if exists public.calendar_feed_retry(uuid);
 drop function if exists public.calendar_feed_store(uuid, jsonb);
 drop function if exists public.calendar_feed_claim(int, uuid, uuid);
@@ -24,8 +28,11 @@ drop function if exists public.calendar_feed_update(uuid, jsonb);
 drop function if exists public.calendar_feed_add(jsonb);
 drop function if exists public.calendar_feeds_visible(uuid);
 drop function if exists public.calendar_feed_json(public.calendar_feeds, uuid);
+drop function if exists public.calendar_feeds_enabled(uuid);
 drop table if exists public.calendar_feed_events;
 drop table if exists public.calendar_feeds;
+drop table if exists public.calendar_feed_testers;
+drop table if exists public.calendar_feed_rollout;
 
 -- ---- 20261204 follow-through on agreements (independent; safe to run alone). Removes the check-in answers families
 -- gave (progress, checked_on, barrier); the agreements themselves stay exactly as they are.

@@ -35,3 +35,25 @@ $$;
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+
+-- Supabase Vault's interface (vault.create_secret, vault.secrets, vault.decrypted_secrets) for local tests only. The
+-- real Vault encrypts `secret`; this stand-in does not. Like the real one, the app roles can't reach it.
+create schema if not exists vault;
+create table vault.secrets (
+  id uuid primary key default gen_random_uuid(),
+  name text unique,
+  description text not null default '',
+  secret text not null,
+  key_id uuid,
+  nonce bytea,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create function vault.create_secret(new_secret text, new_name text default null, new_description text default '', new_key_id uuid default null)
+returns uuid language sql as $$ insert into vault.secrets (secret, name, description) values (new_secret, new_name, coalesce(new_description, '')) returning id $$;
+create view vault.decrypted_secrets as select s.*, s.secret as decrypted_secret from vault.secrets s;
+revoke all on schema vault from public;
+revoke all on all tables in schema vault from public, anon, authenticated;
+revoke all on all functions in schema vault from public, anon, authenticated;
+grant usage on schema vault to service_role;
+grant select on vault.decrypted_secrets to service_role;
