@@ -50,3 +50,7 @@ verify_jwt = false
 
 [functions.resend-contact-sync]
 verify_jwt = false
+
+[functions.calendar-feeds]
+# Does its own auth: an adult's sign-in for Refresh, the x-calendar-cron secret for the schedule (docs/calendar/SECURITY_REVIEW.md).
+verify_jwt = false

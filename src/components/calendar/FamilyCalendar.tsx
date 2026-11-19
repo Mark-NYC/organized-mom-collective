@@ -17,6 +17,8 @@ import { routes } from '../../routes';
 import { agreementsByPerson, changeOf, type Change } from '../../lib/family-meeting-support';
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import AgreedParts from '../family/AgreedParts';
+import { useExternalCalendars } from '../../lib/calendar/feeds';
+import { CalendarSources, ExternalEventSheet } from './CalendarSources';
 import { tint } from '../app/ui';
 
 // In Our Week (the iPhone app) the calendar is free: its sign-in and family setup are Our Week's own, never the Club's.
@@ -48,7 +50,12 @@ export default function FamilyCalendar() {
   const [picked, setPicked] = useState(today);
   const [editing, setEditing] = useState<{ event: CalendarEvent; date: string; isNew: boolean } | null>(null);
   const [importMsg, setImportMsg] = useState('');
-  const events = useMemo(() => Object.values(cal.state.events), [cal.state.events]);
+  const [viewing, setViewing] = useState<Occurrence | null>(null);
+  const [sources, setSources] = useState(false);
+  // Subscribed calendars (school, sports, work): read-only, beside the family's own plans. Hidden until set up.
+  const ext = useExternalCalendars(cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null, 'mine');
+  const own = useMemo(() => Object.values(cal.state.events), [cal.state.events]);
+  const events = useMemo(() => [...own, ...ext.events], [own, ext.events]);
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i));
   const list = occurrences(events, days[0], days[6]);
   const people = (cal.household?.members ?? []).filter((m) => !m.archived);
@@ -65,8 +72,8 @@ export default function FamilyCalendar() {
     recurrence: null, skip_dates: [], member_ids: [], owner_member_id: null, revision: 0,
   });
   const add = (date: string) => setEditing({ event: blank(date), date, isNew: true });
-  const open = (o: Occurrence) => setEditing({ event: cal.state.events[o.event.id], date: o.date, isNew: false });
-  const row = (o: Occurrence) => <EventRow key={`${o.event.id}-${o.date}`} o={o} change={changeOf(o.event, now)} colors={cal.colors} household={cal.household} onOpen={() => open(o)} />;
+  const open = (o: Occurrence) => (o.event.external ? setViewing(o) : setEditing({ event: cal.state.events[o.event.id], date: o.date, isNew: false }));
+  const row = (o: Occurrence) => <EventRow key={`${o.event.id}-${o.date}`} o={o} change={o.event.external ? undefined : changeOf(o.event, now)} colors={cal.colors} household={cal.household} onOpen={() => open(o)} />;
 
   const title = view === 'week'
     ? `${fmt(days[0], { month: 'short', day: 'numeric' })} – ${fmt(days[6], { month: days[0].slice(5, 7) === days[6].slice(5, 7) ? undefined : 'short', day: 'numeric' })}`
@@ -94,7 +101,10 @@ export default function FamilyCalendar() {
             </div>
           )}
         </div>
-        {meetingHref && <a href={meetingHref} className="of-tile-action mt-1" data-open-meeting>This month’s Family Meeting <span aria-hidden="true">›</span></a>}
+        <div className="flex flex-wrap items-center gap-x-5">
+          {meetingHref && <a href={meetingHref} className="of-tile-action mt-1" data-open-meeting>This month’s Family Meeting <span aria-hidden="true">›</span></a>}
+          {ext.available && <button type="button" className="of-tile-action mt-1" onClick={() => setSources(true)} data-open-calendars>Calendars{ext.feeds.length ? ` · ${ext.feeds.length}` : ''} <span aria-hidden="true">›</span></button>}
+        </div>
       </header>
 
       {isDemo() && (
@@ -161,7 +171,7 @@ export default function FamilyCalendar() {
 
       {view === 'agenda' && <Agenda today={today} events={events} row={row} onAdd={() => add(today)} />}
 
-      {events.length === 0 && (
+      {own.length === 0 && (
         <div className="of-tile of-tile--month mt-6" data-calendar-empty>
           <h2 className="of-tile-title !mt-0">Put this week where everyone can see it</h2>
           <p className="of-tile-sub">Add practices, appointments and early pickups. Give each one the people it’s for and who’s handling it, so the plan doesn’t live only in your head.</p>
@@ -198,6 +208,8 @@ export default function FamilyCalendar() {
           }}
         />
       )}
+      {viewing && <ExternalEventSheet e={viewing.event} date={viewing.date} household={cal.household} onClose={() => setViewing(null)} />}
+      {sources && <CalendarSources feeds={ext.feeds} people={people} colors={cal.colors} onClose={() => setSources(false)} onChanged={ext.reload} />}
       <style>{`
         .cal-nav{display:inline-flex;min-width:44px;min-height:44px;align-items:center;justify-content:center;border:1px solid var(--of-rule);border-radius:9px;background:var(--of-surface);font-size:1.3rem;color:var(--of-ink)}
         .cal-today{display:inline-flex;min-height:44px;align-items:center;justify-content:center;border:1px solid var(--of-rule);border-radius:9px;background:var(--of-surface);padding:0 .9rem;font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--of-ink)}
@@ -305,7 +317,7 @@ function EventRow({ o, change, colors, household, onOpen }: { o: Occurrence; cha
       <button type="button" onClick={onOpen} className="flex w-full items-stretch gap-3 overflow-hidden rounded-[8px] border border-[var(--of-rule)] text-left transition-colors hover:border-[var(--of-rule-strong)]" style={{ background: tint(bar, 0.07) }} data-calendar-event={e.title}>
         <span aria-hidden="true" className="w-[5px] shrink-0" style={{ background: bar }} />
         <span className="min-w-0 flex-1 py-2.5 pr-3">
-          <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(e)}{e.recurrence ? ' · repeats' : ''}{change && <span className="cal-change ml-2 align-[1px]" data-change={change}>{change === 'new' ? 'New' : 'Changed'}</span>}</span>
+          <span className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">{o.continued ? 'Continues' : timeLabel(e)}{e.recurrence ? ' · repeats' : ''}{e.external && <span className="ml-2 normal-case tracking-normal" data-event-source>· {e.external.name}</span>}{change && <span className="cal-change ml-2 align-[1px]" data-change={change}>{change === 'new' ? 'New' : 'Changed'}</span>}</span>
           <span className="mt-0.5 block font-semibold text-warm-ink">{e.title}</span>
           {(who.length > 0 || owner) && (
             <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8rem] text-warm-soft">

@@ -38,6 +38,8 @@ export interface CalendarEvent {
   revision: number;
   deleted?: boolean;
   updated_at?: string;
+  /** Imported from a calendar subscription (src/lib/calendar/feeds.ts): read-only, never synced back. */
+  external?: { feed_id: string; name: string; visibility: 'private' | 'household'; mine: boolean; tentative: boolean };
 }
 
 export interface Occurrence {

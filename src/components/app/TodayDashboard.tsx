@@ -7,7 +7,8 @@
 import { useEffect, useState } from 'react';
 import { useToday } from '../../lib/hooks';
 import { isDemo, useCalendar } from '../../lib/calendar/client';
-import { localToday, occurrences, timeLabel } from '../../lib/calendar/recurrence';
+import { localToday, occurrences, timeLabel, type CalendarEvent } from '../../lib/calendar/recurrence';
+import { useExternalCalendars } from '../../lib/calendar/feeds';
 import { monthAgreements, monthOf, weekAhead } from '../../lib/family-meeting-support';
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import { planFor } from '../../lib/schedule';
@@ -30,7 +31,9 @@ export default function TodayDashboard() {
   const cal = useCalendar();
   const profile = useFamilyProfile(cal.state.scope !== 'local' ? cal.state.scope : null);
   const date = localToday(today);
-  const events = Object.values(cal.state.events);
+  // Her subscribed calendars too (private ones are hers to see); read-only.
+  const ext = useExternalCalendars(cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null, 'mine');
+  const events = [...Object.values(cal.state.events), ...ext.events];
   const week = weekAhead(events, date, today);
   const agreed = monthAgreements(cal.household, profile, monthOf(today));
   const showsClub = useShowsClub() && visibleFeatures().some((f) => f.id === 'club');
@@ -43,7 +46,7 @@ export default function TodayDashboard() {
         <div className="family-note of-span-all" data-today-demo><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm">A made-up family, to show how Today looks. Nothing here is shared or synced. <a href="/app" className="underline">Leave the demo</a>.</p></div>
       )}
       <div className="of-dash-col">
-        <TodayPlans date={date} cal={cal} week={week} style={{ order: 1 }} />
+        <TodayPlans date={date} cal={cal} events={events} week={week} style={{ order: 1 }} />
         <MeetingWeek week={week} agreedRoute={agreed?.route} style={{ order: 3 }} />
       </div>
       <div className="of-dash-col">
@@ -59,8 +62,8 @@ type Cal = ReturnType<typeof useCalendar>;
 type Week = ReturnType<typeof weekAhead>;
 type Style = { order: number };
 
-function TodayPlans({ date, cal, week, style }: { date: string; cal: Cal; week: Week; style: Style }) {
-  const list = occurrences(Object.values(cal.state.events), date, date);
+function TodayPlans({ date, cal, events, week, style }: { date: string; cal: Cal; events: CalendarEvent[]; week: Week; style: Style }) {
+  const list = occurrences(events, date, date);
   const name = (id?: string | null) => (id ? cal.household?.members.find((m) => m.id === id)?.firstName : undefined);
   const color = (id?: string | null) => cal.colors[id ?? '']?.hex ?? '#8fa686';
   // Nothing today: the next plan this week, so the tile still says something useful.
@@ -78,12 +81,12 @@ function TodayPlans({ date, cal, week, style }: { date: string; cal: Cal; week: 
             const who = o.event.member_ids.map(name).filter(Boolean);
             const owner = name(o.event.owner_member_id);
             return (
-              <li key={o.event.id} className="of-row">
+              <li key={o.event.id} className="of-row" data-today-event={o.event.title}>
                 <span className="of-time">{o.continued ? 'Continues' : timeLabel(o.event)}</span>
                 <span aria-hidden="true" className="of-swatch" style={{ background: color(o.event.member_ids[0] ?? o.event.owner_member_id) }} />
                 <span className="min-w-0">
                   <span className="of-row-title">{o.event.title}</span>
-                  {(who.length > 0 || owner) && <span className="of-row-meta">{[who.join(', '), owner ? `${owner} handles it` : ''].filter(Boolean).join(' · ')}</span>}
+                  {(who.length > 0 || owner || o.event.external) && <span className="of-row-meta">{[who.join(', '), owner ? `${owner} handles it` : '', o.event.external?.name ?? ''].filter(Boolean).join(' · ')}</span>}
                 </span>
               </li>
             );

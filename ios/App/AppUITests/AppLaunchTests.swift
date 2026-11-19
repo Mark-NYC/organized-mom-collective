@@ -55,6 +55,22 @@ final class AppLaunchTests: XCTestCase {
         origin.withOffset(CGVector(dx: window.width * (CGFloat(i) + 0.5) / 4, dy: window.maxY - 34 - 25)).tap()
     }
 
+    /// Tap something on the page that may sit under the fixed tab bar (or above the screen): first drag the page in
+    /// small steps until it is clear of the bar's 120 pt and below the top, then tap its center. A plain tap on a
+    /// covered element lands on whatever covers it (run 44427790009: today's "+" was under the bar, the tap opened Family).
+    private func tapClear(_ e: XCUIElement) {
+        let window = app.windows.firstMatch.frame
+        for _ in 0..<8 {
+            let f = e.frame
+            if f.minY > window.minY + 100 && f.maxY < window.maxY - 120 { break }
+            let up = f.maxY >= window.maxY - 120
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.6 : 0.35))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.35 : 0.6)))
+        }
+        let f = e.frame
+        app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: f.midX, dy: f.midY)).tap()
+    }
+
     /// A cold launch (process start, web view, first page) on a shared CI Mac, as opposed to moving between pages.
     private let launchTimeout: TimeInterval = 45
 
@@ -252,13 +268,32 @@ final class AppLaunchTests: XCTestCase {
         // A calendar event for Maya.
         goTo("Calendar")
         let f = DateFormatter(); f.locale = Locale(identifier: "en_US"); f.dateFormat = "EEEE, MMMM d"
-        waitFor(web.buttons.matching(NSPredicate(format: "label == %@", "Add to \(f.string(from: Date()))")).firstMatch, "add to today").tap()
+        tapClear(waitFor(web.buttons.matching(NSPredicate(format: "label == %@", "Add to \(f.string(from: Date()))")).firstMatch, "add to today"))
         typeInto(waitFor(web.textFields.firstMatch, "event title"), "Soccer practice")
         waitFor(text("All day"), "all day").tap()
         waitFor(chip("Maya"), "Maya chip").tap()
         waitFor(control("Save"), "save event").tap()
         waitFor(text("Soccer practice"), "the event on the calendar")
         shot("e2e-02-calendar-event")
+
+        // Imported calendars (scripts/e2e/calendar-seed.sql): Jen's shared school calendar and her private work one sit
+        // beside the family's events, labeled with their source, and open read-only (docs/calendar/CALENDAR_INTEGRATION.md).
+        let picture = waitFor(text("Picture day"), "imported school event on the calendar", timeout: 30)
+        waitFor(text("Board review"), "Jen's private imported event (hers to see)")
+        XCTAssertTrue(text("Lincoln Elementary").exists, "imported events name their calendar")
+        shot("e2e-02b-imported-calendars")
+        tapClear(picture)
+        waitFor(text("read-only here"), "an imported event opens read-only")
+        XCTAssertFalse(control("Save").exists, "no edit sheet for an imported event")
+        shot("e2e-02c-imported-event")
+        waitFor(control("Done"), "close the imported event").tap()
+        // Back to the top of the page: after opening an event further down, the Calendars link is scrolled off screen.
+        goTo("Calendar")
+        let entry = waitFor(control("Calendars · 2"), "the Calendars panel entry")
+        tapClear(entry)
+        waitFor(text("Who sees it"), "the Calendars panel")
+        shot("e2e-02d-calendars-panel")
+        waitFor(control("Done"), "close the Calendars panel").tap()
 
         // "We agreed" in this month's Family Meeting.
         goTo("Family")
@@ -314,6 +349,7 @@ final class AppLaunchTests: XCTestCase {
         shot("e2e-08-today-after-relaunch")
         goTo("Calendar")
         waitFor(text("Soccer practice"), "event after relaunch")
+        waitFor(text("Picture day"), "imported event after relaunch")
         shot("e2e-09-calendar-after-relaunch")
     }
 }

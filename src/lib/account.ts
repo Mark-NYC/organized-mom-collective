@@ -462,3 +462,17 @@ export function shouldNudge(now = Date.now()): boolean {
   return !dismissed || now - dismissed > 14 * 24 * 60 * 60 * 1000;
 }
 export const dismissNudge = (now = Date.now()) => write(NUDGE_KEY, now);
+
+/** Call one of our Edge Functions as the signed-in adult (e.g. calendar-feeds). Throws with the function's error code. */
+export async function accountFunction<T>(name: string, body: unknown): Promise<T> {
+  const s = await getSession();
+  if (!s) throw new Error('not_signed_in');
+  const res = await fetch(`${URL_}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: { apikey: KEY, Authorization: `Bearer ${s.access_token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(typeof data?.error === 'string' ? data.error : `function_${res.status}`);
+  return data as T;
+}

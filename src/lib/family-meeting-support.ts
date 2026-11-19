@@ -30,6 +30,8 @@ export interface WeekItem {
   memberIds: string[];
   ownerId: string | null;
   change?: Change;
+  /** From a subscribed calendar (its name): read-only. */
+  source?: string;
 }
 export interface WeekDay { date: string; label: string; items: WeekItem[] }
 export interface WeekAhead {
@@ -82,14 +84,16 @@ export function weekAhead(events: CalendarEvent[], today: string, now = new Date
   const unhandled = new Set<string>();
   for (const o of occ) {
     const e = o.event;
-    const change = changeOf(e, now);
+    // Imported (school, sports, work) calendars are read-only here: not "new/changed", and nobody can be assigned.
+    const change = e.external ? undefined : changeOf(e, now);
     if (change && !changes.has(e.id)) changes.set(e.id, { id: e.id, title: e.title, change });
-    if (!e.owner_member_id && !o.continued) unhandled.add(e.id);
+    if (!e.owner_member_id && !o.continued && !e.external) unhandled.add(e.id);
     days[(Date.parse(`${o.date}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000]?.items.push({
       id: e.id, date: o.date,
       time: o.continued ? 'Continues' : timeLabel(e),
       title: e.title, memberIds: e.member_ids, ownerId: e.owner_member_id ?? null,
       ...(change ? { change } : {}),
+      ...(e.external ? { source: e.external.name } : {}),
     });
   }
   return { from, to, days, count: occ.length, changes: [...changes.values()], unhandled: unhandled.size };
