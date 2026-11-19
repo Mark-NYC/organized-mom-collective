@@ -1,10 +1,9 @@
 ---
 import PublicLayout from '../../../layouts/PublicLayout.astro';
-import { dailyEssentials, weeklySchedule, weekend, monthlyDeepClean } from '../../../data/cleaning';
+import { dailyEssentials, weeklySchedule, weekend } from '../../../data/cleaning';
 
 const dayGroups = [weeklySchedule.slice(0,2), weeklySchedule.slice(2,4)];
 const printPdf = '/downloads/weekly-cleaning-reset-one-page.pdf';
-const month = monthlyDeepClean;
 ---
 <PublicLayout
   title="Weekly Cleaning Reset: Free Illustrated Family Cleaning Guide"
@@ -47,7 +46,7 @@ const month = monthlyDeepClean;
           <div class="border-t-4 border-[#D4DFC4] bg-[#FBF7F1] p-5"><h3 class="font-serif text-xl">2. Do today's zone</h3><p class="mt-2 text-sm leading-relaxed">Monday through Thursday, use the checklist or stop when the timer ends. Name an owner and don't silently take the job back.</p></div>
           <div class="border-t-4 border-[#F1D8A8] bg-[#FBF7F1] p-5"><h3 class="font-serif text-xl">3. Keep weekends flexible</h3><p class="mt-2 text-sm leading-relaxed">Friday is deep cleaning, Saturday is a home project, and Sunday is catch-up or reset. Skip what doesn't fit. Never stack missed zones.</p></div>
         </div>
-        <p class="mt-6 text-sm leading-relaxed">The checklist below reads from the same cleaning schedule as our <a class="underline underline-offset-4" href="/app/calendar/">cleaning companion</a>. It stays in sync when the core tasks change. The monthly home project changes by month, so the printed guide lists the rotation separately.</p>
+        <p class="mt-6 text-sm leading-relaxed">The checklist below reads from the same cleaning schedule as our <a class="underline underline-offset-4" href="/app/calendar/">cleaning companion</a>. It stays in sync when the core tasks change. The monthly home project changes by month; find its detailed tasks in the companion app.</p>
       </div>
     </section>
 
