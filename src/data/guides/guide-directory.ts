@@ -18,6 +18,18 @@ export type Guide = {
 };
 export const guides: Guide[] = [
   {
+    slug: 'weekly-cleaning-reset',
+    browseCategory: 'room-resets',
+    title: 'Our Weekly Cleaning Reset',
+    teaser: 'The complete daily reset, four weekday cleaning zones, and a flexible Friday through Sunday, with original illustrations and a two-page print layout.',
+    area: 'Cleaning & resets',
+    kicker: 'Seven-day rhythm · Original cleaning icons · Print-ready checklist',
+    image: '/icons/zones/daily.png',
+    imageAlt: 'Original illustrated Daily Reset icon',
+    pdf: '/downloads/weekly-cleaning-zones.pdf',
+    pages: 2,
+  },
+  {
     slug: 'chores-for-4-5-year-olds',
     browseCategory: 'family-systems',
     title: 'Chores for 4–5-Year-Olds',
