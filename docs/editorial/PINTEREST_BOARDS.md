@@ -1,6 +1,6 @@
 # Organized Mom Collective: actual Pinterest boards
 
-**Status:** Owner-provided account screenshot, October 19, 2026; new holiday board confirmed created by owner November 4, 2026. This is the authoritative board-name registry for writing pin metadata and Pinterest Import Content CSVs.
+**Status:** Owner-provided board history (October 19 onward), holiday board confirmed November 4, 2026, and four additional boards explicitly confirmed created by owner November 19, 2026. This is the authoritative board-name registry for writing pin metadata and Pinterest Import Content CSVs.
 
 **Pinterest account:** `organizedmomcollective`
 
@@ -17,6 +17,10 @@ These are the board names to use, **exactly as written**, unless a newer owner s
 | **Cleaning Schedules for Busy Moms** | Cleaning zones, daily and weekly cleaning, household reset routines | Zone cleaning schedule, missed cleaning day, daily reset |
 | **Mom Life & Mental Load** | Family ownership and mental load, family communication and shared responsibility | Get plans out of mom's head, shared responsibility |
 | **Weekly Reset Routines** | Sunday/weekly planning and reset routines | 15 minutes on Sunday, weekly family reset |
+| **Family Command Center Ideas** | Family command center walls, school-paper stations, hooks, calendar setups, kitchens and mudrooms | Family organization wall, kitchen command center, small-space command center |
+| **Cleaning Checklists for Busy Moms** | Daily and weekly cleaning checklists, room-by-room plans, practical family cleaning systems | Weekly cleaning checklist, kitchen cleaning checklist, weekend cleaning checklist |
+| **Family Calendars & Planners** | Family wall calendars, weekly planners, 2027 calendars and planning stations | Family wall calendar, 2027 weekly planner, kitchen wall calendar |
+| **Decluttering & Home Reset Ideas** | Decluttering tips, January home resets, counter clutter and room-by-room organization | New year declutter, January reset, home decluttering checklist |
 
 ### Pinterest-owned collection
 
@@ -30,9 +34,25 @@ These are the board names to use, **exactly as written**, unless a newer owner s
 - **Mom Life & Mental Load** and **Weekly Reset Routines** are readable in the screenshot.
 - Do not substitute older planning names from historical strategy tables.
 
+
+## New boards confirmed November 19, 2026
+
+The owner explicitly confirmed the following four **public boards are created**. Use these exact strings in future pin metadata and import CSVs. This confirmation supersedes older advice to send all calendar, command center, checklist or decluttering pins to broad legacy boards.
+
+| Board | Pinterest description (owner-approved copy) |
+| --- | --- |
+| **Family Command Center Ideas** | Family command center ideas for kitchens, mudrooms and small spaces. Discover wall calendars, school paper organizers, backpack hooks, family schedules and practical organization walls that help busy families stay on track. |
+| **Cleaning Checklists for Busy Moms** | Simple cleaning checklists for busy moms and families. Find daily cleaning routines, weekly cleaning schedules, room-by-room checklists, printable cleaning plans and easy home reset ideas to keep your house clean without spending all day cleaning. |
+| **Family Calendars & Planners** | Family calendar ideas, weekly planners and wall calendars for busy households. Discover 2027 family calendars, kitchen planning stations, color-coded schedules, meal planning ideas and simple ways to organize your family's week. |
+| **Decluttering & Home Reset Ideas** | Decluttering ideas and home reset routines for busy families. Find January home organization ideas, room-by-room decluttering checklists, kitchen counter organization, small-space storage solutions and simple ways to create a calmer, more organized home. |
+
+Board targeting: dedicated family command center content → **Family Command Center Ideas**; checklist-first cleaning content → **Cleaning Checklists for Busy Moms**; calendar and planner product/usage content → **Family Calendars & Planners**; decluttering and home-reset ideas → **Decluttering & Home Reset Ideas**. Other topics continue to use the most specific existing board. Existing 2026 import batches and historical assignments are unchanged.
+
+**Chore-board naming caution:** October's verified board was **Chores & Shared Responsibilities**. Some later production plans use **Chore Charts by Age**; that exact name is not confirmed by this November 19 board-creation message. Verify it in Pinterest before importing rather than silently treating the two names as interchangeable.
+
 ## Board assignment rules
 
-1. Select the most specific relevant **existing board**; do not invent new boards to fit a pin.
+1. Select the most specific confirmed **existing board**; do not invent new boards to fit a pin.
 2. Kids' chore charts and teaching responsibility → **Chores & Shared Responsibilities**.
 3. A free morning routine chart, family command center, entryway launch pad, or wall calendar → **Family Organization Ideas**.
 4. Weekly cleaning zones, the daily cleaning reset, and cleaning fallback advice → **Cleaning Schedules for Busy Moms**.
@@ -40,7 +60,7 @@ These are the board names to use, **exactly as written**, unless a newer owner s
 6. Mental-load storytelling → **Mom Life & Mental Load**, unless it is primarily a hands-on chore or family planning tutorial.
 7. Meal and grocery content → **Meal Planning for Families**.
 8. **Seasonal Thanksgiving and Christmas content whose main promise is a holiday-specific solution** → **Holiday Organization & Family Traditions**, even when the underlying system is a family reset, responsibility handoff, or mental-load tip. Keep evergreen versions of those themes on the appropriate evergreen boards.
-9. A primarily year-round calendar product Pin → **Family Organization Ideas**, even when its photo is seasonally styled.
+9. A primarily year-round calendar product Pin → **Family Calendars & Planners**. Historical batches retain their original assignments.
 10. Preserve the exact board spelling in Pinterest import CSV `Pinterest board` column. The board must exist in the actual Pinterest account.
 11. Re-check the account screenshot or board list when the owner reports a rename or new board.
 
