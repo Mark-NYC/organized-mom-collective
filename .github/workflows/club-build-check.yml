@@ -4,10 +4,15 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   build:
+    name: build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,6 +20,13 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      # Every pull request: the whole unit suite must pass. There is no list of accepted failures.
-      - run: npm test
-      - run: npm run build
+      # Catch invalid JavaScript in PDF and asset scripts before the expensive build.
+      - name: Check script syntax
+        run: find scripts -type f \( -name '*.mjs' -o -name '*.cjs' -o -name '*.js' \) -print0 | xargs -0 -r -n 1 node --check
+      # Exactly match the production Pages build command. Includes asset generation,
+      # artwork audit, Astro diagnostics and Astro production compilation.
+      - name: Production-equivalent build
+        run: npm run build
+      # Both build AND unit tests must pass on the same PR head.
+      - name: Unit tests
+        run: npm test
