@@ -5,10 +5,11 @@
  * refresh now; unsubscribe. The other adult's shared calendars are listed by name only (never their link).
  * Also: the read-only sheet for an imported event.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Household } from '../../lib/club/profile';
 import type { MarkerColor } from '../../data/club/family-colors';
-import { feedsApi, type Feed, type FeedVisibility } from '../../lib/calendar/feeds';
+import { GOOGLE_RESULT, feedsApi, type Feed, type FeedVisibility } from '../../lib/calendar/feeds';
+import { GooglePicker, GoogleSection, useGoogleAccounts, useGoogleReturn } from './GoogleCalendars';
 import { timeLabel, type CalendarEvent } from '../../lib/calendar/recurrence';
 
 const zone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York'; } catch { return 'America/New_York'; } };
@@ -61,10 +62,21 @@ function Visibility({ value, onChange, name }: { value: FeedVisibility; onChange
   );
 }
 
-export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
+export function CalendarSources({ feeds, people, colors, onClose, onChanged, googleReturn }: {
   feeds: Feed[]; people: Household['members']; colors: Record<string, MarkerColor>; onClose: () => void; onChanged: () => Promise<void>;
+  /** Back from Google's screen on the website: ?google=<result>&account=<id>. */
+  googleReturn?: { result: string; account: string | null } | null;
 }) {
-  const [adding, setAdding] = useState(feeds.length === 0);
+  const google = useGoogleAccounts();
+  const [picker, setPicker] = useState<string | null>(null);
+  useGoogleReturn(google.reload, setPicker);
+  useEffect(() => {
+    if (!googleReturn) return;
+    setMsg(GOOGLE_RESULT[googleReturn.result] ?? GOOGLE_RESULT.error);
+    if (googleReturn.result === 'connected' && googleReturn.account) setPicker(googleReturn.account);
+  }, [googleReturn]);
+  const [adding, setAdding] = useState(false);
+  const linkFirst = !google.available && feeds.length === 0;
   const [url, setUrl] = useState('');
   const [name, setName] = useState('');
   const [member, setMember] = useState<string | null>(null);
@@ -89,7 +101,11 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
   const shared = feeds.filter((f) => !f.mine);
   return (
     <Sheet title="Calendars" onClose={onClose} data="calendar-sources">
-      <p className="mt-1 text-[0.9rem] text-warm-soft">School, sports and work calendars, read-only beside your family’s plans. They refresh on their own.</p>
+      <p className="mt-1 text-[0.9rem] text-warm-soft">Your Google, school, sports and work calendars, read-only beside your family’s plans. They refresh on their own.</p>
+      {google.available && (
+        <GoogleSection accounts={google.accounts} onPick={setPicker} setMsg={setMsg}
+          onChanged={async () => { await google.reload(); await onChanged(); }} />
+      )}
 
       {mine.length > 0 && <p className="of-eyebrow mt-5">Yours</p>}
       <ul className="mt-2 space-y-3">
@@ -99,7 +115,9 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
               <div className="min-w-0">
                 <p className="flex items-center gap-2 font-semibold"><span aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ background: f.member_id ? colors[f.member_id]?.hex : '#9aab8f' }} />{f.name}</p>
                 <p className="mt-0.5 text-[0.8rem] text-warm-soft" data-feed-status={f.status}>
-                  {f.url_host && <span className="block" data-feed-host>{f.url_host}</span>}
+                  {f.kind === 'google'
+                    ? <span className="block" data-feed-host>Google · {google.accounts.find((a) => a.id === f.google_account_id)?.email ?? 'connected account'}</span>
+                    : f.url_host && <span className="block" data-feed-host>{f.url_host}</span>}
                   {f.status === 'ok' ? `${f.event_count} events · updated ${ago(f.last_success_at) ?? ''}` : f.status === 'pending' ? 'Getting its events…' : f.last_error ?? 'Couldn’t refresh it.'}
                 </p>
               </div>
@@ -132,7 +150,7 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
         </>
       )}
 
-      {adding ? (
+      {adding || linkFirst ? (
         <form onSubmit={add} className="of-tile mt-5 !p-4" data-feed-add>
           <p className="font-semibold">Add a calendar</p>
           <label className="mt-3 block"><span className="label">CALENDAR LINK</span>
@@ -148,9 +166,16 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged }: {
           <button type="submit" className="of-btn mt-4" disabled={busy === 'add'} data-feed-save>{busy === 'add' ? 'Adding…' : 'Add calendar'}</button>
         </form>
       ) : (
-        <button type="button" className="of-btn of-btn--soft mt-5" onClick={() => setAdding(true)} data-feed-new>Add a calendar</button>
+        google.available
+          ? <button type="button" className="mt-5 min-h-11 text-[0.92rem] text-warm-ink underline underline-offset-4" onClick={() => setAdding(true)} data-feed-new>Add a calendar by link (school, sports, iCal)</button>
+          : <button type="button" className="of-btn of-btn--soft mt-5" onClick={() => setAdding(true)} data-feed-new>Add a calendar</button>
       )}
       <p role="status" className="mt-3 text-sm text-[var(--of-sage-ink)]" data-feed-msg>{msg}</p>
+      {picker && (
+        <GooglePicker account={google.accounts.find((a) => a.id === picker) ?? null} people={people} colors={colors}
+          onClose={() => setPicker(null)}
+          onSaved={async (m) => { setPicker(null); await google.reload(); await onChanged(); setMsg(m); }} />
+      )}
       <style>{`.cal-input{display:block;width:100%;min-height:46px;margin-top:4px;border:1px solid var(--of-rule);border-radius:8px;background:#fff;padding:0 .7rem;font-size:1rem;color:var(--of-ink)}`}</style>
     </Sheet>
   );

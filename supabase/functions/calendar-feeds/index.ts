@@ -65,4 +65,8 @@ Deno.serve(createCalendarFeedsHandler({
   pinnedFetch,
   now: () => Date.now(),
   cronSecret: env('CALENDAR_CRON_SECRET') || null,
+  // Connected Google calendars (docs/calendar/GOOGLE_CALENDAR.md). Without the OAuth client, Google calendars just wait.
+  google: env('CALENDAR_GOOGLE_CLIENT_ID') && env('CALENDAR_GOOGLE_CLIENT_SECRET')
+    ? { clientId: env('CALENDAR_GOOGLE_CLIENT_ID'), clientSecret: env('CALENDAR_GOOGLE_CLIENT_SECRET'), redirectUri: env('CALENDAR_GOOGLE_REDIRECT_URI') || 'https://www.organizedmomcollective.com/app/google-callback/' }
+    : null,
 }));

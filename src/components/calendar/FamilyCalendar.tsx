@@ -7,7 +7,7 @@
  * signing in (saved on this phone); signed in, it's the household's calendar, shared by both grown-ups.
  */
 import { thisDevice } from '../../lib/native/platform';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCalendar, importTypicalWeek, isDemo, type SyncStatus } from '../../lib/calendar/client';
 import { addDays, localToday, occurrences, repeatLabel, timeLabel, weekStart, type CalendarEvent, type Freq, type Occurrence } from '../../lib/calendar/recurrence';
 import { newEventId } from '../../lib/calendar/store';
@@ -52,6 +52,17 @@ export default function FamilyCalendar() {
   const [importMsg, setImportMsg] = useState('');
   const [viewing, setViewing] = useState<Occurrence | null>(null);
   const [sources, setSources] = useState(false);
+  // Back from Google's permission screen (website): open Calendars on the new account's calendar picker.
+  const [googleReturn, setGoogleReturn] = useState<{ result: string; account: string | null } | null>(null);
+  useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    const result = q.get('google');
+    if (!result) return;
+    setGoogleReturn({ result, account: q.get('account') });
+    setSources(true);
+    q.delete('google'); q.delete('account');
+    history.replaceState(history.state, '', `${location.pathname}${q.size ? `?${q}` : ''}${location.hash}`);
+  }, []);
   // Subscribed calendars (school, sports, work): read-only, beside the family's own plans. Hidden until set up.
   const ext = useExternalCalendars(cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null, 'mine');
   const own = useMemo(() => Object.values(cal.state.events), [cal.state.events]);
@@ -209,7 +220,7 @@ export default function FamilyCalendar() {
         />
       )}
       {viewing && <ExternalEventSheet e={viewing.event} date={viewing.date} household={cal.household} onClose={() => setViewing(null)} />}
-      {sources && <CalendarSources feeds={ext.feeds} people={people} colors={cal.colors} onClose={() => setSources(false)} onChanged={ext.reload} />}
+      {sources && <CalendarSources feeds={ext.feeds} people={people} colors={cal.colors} onClose={() => { setSources(false); setGoogleReturn(null); }} onChanged={ext.reload} googleReturn={googleReturn} />}
       <style>{`
         .cal-nav{display:inline-flex;min-width:44px;min-height:44px;align-items:center;justify-content:center;border:1px solid var(--of-rule);border-radius:9px;background:var(--of-surface);font-size:1.3rem;color:var(--of-ink)}
         .cal-today{display:inline-flex;min-height:44px;align-items:center;justify-content:center;border:1px solid var(--of-rule);border-radius:9px;background:var(--of-surface);padding:0 .9rem;font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--of-ink)}

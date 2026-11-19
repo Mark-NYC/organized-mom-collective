@@ -1,0 +1,28 @@
+---
+/** /app/google-connected: where Google's permission screen returns in the iPhone app's Safari sheet
+ * (docs/calendar/GOOGLE_CALENDAR.md). Tapping Done closes the sheet; the app then opens the calendar picker. */
+import Layout from '../../layouts/AppLayout.astro';
+import '../../styles/family-app-brand.css';
+---
+<Layout title="Google Calendar" description="Connecting Google Calendar to your family calendar.">
+  <div class="family-brand of-page max-w-xl" data-google-connected>
+    <p class="of-eyebrow">Google Calendar</p>
+    <h1 class="of-page-title mt-2" data-google-title>Connected</h1>
+    <p class="mt-3 text-[1rem]" data-google-text>Tap <strong>Done</strong> at the top to go back to Organized Family and choose which calendars to show.</p>
+    <a href="/app/family-calendar" class="of-btn of-btn--soft mt-6" data-google-open-calendar>Open the family calendar</a>
+  </div>
+  <script>
+    const messages: Record<string, [string, string]> = {
+      connected: ['Connected', 'Tap Done at the top to go back to Organized Family and choose which calendars to show.'],
+      cancelled: ['Not connected', 'You didn’t connect Google. Nothing changed. Tap Done to go back.'],
+      permissions: ['Not connected', 'To import your calendars, allow both calendar permissions on Google’s screen. Tap Done, then try again.'],
+      expired: ['Not connected', 'That attempt expired. Tap Done, then tap Connect Google Calendar again.'],
+      error: ['Not connected', 'Google Calendar couldn’t be connected. Tap Done and try again in a minute.'],
+    };
+    const r = new URLSearchParams(location.search).get('google') ?? 'error';
+    const [title, text] = messages[r] ?? messages.error;
+    document.querySelector('[data-google-title]')!.textContent = title;
+    document.querySelector('[data-google-text]')!.textContent = text;
+    history.replaceState(null, '', location.pathname);
+  </script>
+</Layout>

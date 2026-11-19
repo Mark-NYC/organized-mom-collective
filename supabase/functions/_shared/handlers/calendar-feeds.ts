@@ -19,6 +19,7 @@
  *   own events are never touched. The feed URL is never logged or returned.
  */
 import { parseIcs } from '../calendar/ics.ts';
+import { type GoogleConfig, GoogleError, listEvents, refreshAccessToken } from '../calendar/google.ts';
 
 export interface CalendarFeedsDeps {
   /** Service-role database calls. */
@@ -38,9 +39,11 @@ export interface CalendarFeedsDeps {
   allowPrivateHosts?: boolean;
   /** Scheduled run budget (defaults: 900 ms of parsing, 90 s wall clock, 25 feeds). */
   budget?: { parseMs?: number; wallMs?: number; feeds?: number };
+  /** Connected Google calendars (docs/calendar/GOOGLE_CALENDAR.md); null until the OAuth client is configured. */
+  google?: GoogleConfig | null;
 }
 
-interface ClaimedFeed { id: string; url: string; etag: string | null; last_modified: string | null; timezone: string; content_hash: string | null; recent?: boolean; event_count?: number }
+interface ClaimedFeed { id: string; kind?: 'ical' | 'google'; google_account_id?: string; google_calendar_id?: string; refresh_token?: string; url: string; etag: string | null; last_modified: string | null; timezone: string; content_hash: string | null; recent?: boolean; event_count?: number }
 type StoreResult = { result: 'ok' | 'not_modified' | 'error' | 'gone'; error?: string; etag?: string | null; last_modified?: string | null; content_hash?: string; events?: unknown[]; parse_ms?: number };
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -177,8 +180,42 @@ export async function syncFeed(feed: ClaimedFeed, deps: CalendarFeedsDeps): Prom
   }
 }
 
-async function refreshOne(f: ClaimedFeed, deps: CalendarFeedsDeps) {
-  const r = await syncFeed(f, deps);
+/** Access tokens for this run only (one refresh per Google account, however many of its calendars are due). */
+type TokenCache = Map<string, Promise<string>>;
+
+/** One connected Google calendar → what calendar_feed_store records. Never throws. Same rules as iCal: errors keep
+ *  the last good events; a calendar deleted or no longer shared with her counts toward disconnection. A token Google
+ *  stops accepting marks her account "reconnect" (its calendars keep their events and aren't refreshed meanwhile). */
+export async function syncGoogleFeed(feed: ClaimedFeed, deps: CalendarFeedsDeps, tokens: TokenCache): Promise<StoreResult> {
+  const g = deps.google;
+  if (!g) return { result: 'error', error: 'Google Calendar isn’t set up yet.' };
+  if (!feed.refresh_token || !feed.google_account_id || !feed.google_calendar_id) return { result: 'error', error: 'Reconnect Google to refresh this calendar.' };
+  try {
+    let token = tokens.get(feed.google_account_id);
+    if (!token) {
+      token = refreshAccessToken(g, deps.fetch, feed.refresh_token).then((t) => t.accessToken);
+      tokens.set(feed.google_account_id, token);
+    }
+    const now = deps.now();
+    const t0 = performance.now();
+    const events = await listEvents(g, deps.fetch, await token, feed.google_calendar_id, now - 30 * DAY, now + 365 * DAY);
+    const hash = await sha256(JSON.stringify(events));
+    if (feed.content_hash && hash === feed.content_hash) return { result: 'not_modified' };
+    return { result: 'ok', content_hash: hash, events, parse_ms: performance.now() - t0 };
+  } catch (e) {
+    const k = e instanceof GoogleError ? e.kind : 'unavailable';
+    if (k === 'invalid_grant') {
+      await deps.db.rpc('calendar_google_account_status', { p_account: feed.google_account_id, p_status: 'reconnect', p_error: 'Google stopped accepting this connection. Reconnect it to keep your calendars up to date.' }).catch(() => {});
+      return { result: 'error', error: 'Google stopped accepting this connection. Reconnect Google to keep it up to date.' };
+    }
+    if (k === 'gone') return { result: 'gone', error: 'This Google calendar was deleted or is no longer shared with you.' };
+    if (k === 'rate_limited') return { result: 'error', error: 'Google asked us to slow down. We’ll try again later.' };
+    return { result: 'error', error: 'Google didn’t answer. We’ll try again later.' };
+  }
+}
+
+async function refreshOne(f: ClaimedFeed, deps: CalendarFeedsDeps, tokens: TokenCache = new Map()) {
+  const r = f.kind === 'google' ? await syncGoogleFeed(f, deps, tokens) : await syncFeed(f, deps);
   const { parse_ms: parseMs = 0, ...stored } = r;
   const count = await deps.db.rpc<number>('calendar_feed_store', { p_feed: f.id, p: stored });
   return { id: f.id, result: r.result, count, parseMs, ...(r.error ? { error: r.error } : {}) };
@@ -215,10 +252,11 @@ export function createCalendarFeedsHandler(deps: CalendarFeedsDeps) {
       const started = deps.now();
       let parsed = 0;
       let refreshed = 0;
+      const tokens: TokenCache = new Map();
       while (refreshed < budget.feeds && parsed < budget.parseMs && deps.now() - started < budget.wallMs) {
         const [f] = await deps.db.rpc<ClaimedFeed[]>('calendar_feed_claim', { p_limit: 1 });
         if (!f) break;
-        const r = await refreshOne(f, deps);
+        const r = await refreshOne(f, deps, tokens);
         parsed += r.parseMs;
         refreshed++;
       }

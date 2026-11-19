@@ -1,4 +1,4 @@
--- Rolls back 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,28 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261206 Connect Google Calendar (independent of the steps below; alone: supabase/rollout/calendar-google/rollback.sql).
+-- The encrypted Google tokens first (Vault), then the Google calendars (their imported events go with them).
+do $$ begin if to_regclass('vault.secrets') is not null then delete from vault.secrets where name like 'calendar\_google:%'; end if; end $$;
+do $$ begin if to_regclass('public.calendar_google_accounts') is not null then delete from public.calendar_feeds where kind = 'google'; end if; end $$;
+drop trigger if exists calendar_google_forget_token on public.calendar_google_accounts;
+drop function if exists public.calendar_google_forget_token();
+drop function if exists public.calendar_google_forget(uuid, uuid);
+drop function if exists public.calendar_google_account_status(uuid, text, text);
+drop function if exists public.calendar_google_account_token(uuid, uuid);
+drop function if exists public.calendar_google_account_save(uuid, text, text, text, text);
+drop function if exists public.calendar_google_state_take(text);
+drop function if exists public.calendar_google_state_save(text, uuid, text, text, text);
+drop function if exists public.calendar_google_select(uuid, jsonb);
+drop function if exists public.calendar_google_accounts();
+drop index if exists public.calendar_feeds_google_calendar;
+alter table if exists public.calendar_feeds drop constraint if exists calendar_feeds_google_ref, drop column if exists google_calendar_id, drop column if exists google_account_id;
+drop table if exists public.calendar_google_oauth_states;
+drop table if exists public.calendar_google_accounts;
+drop function if exists public.calendar_google_enabled(uuid);
+alter table if exists public.calendar_feed_testers drop column if exists google;
+alter table if exists public.calendar_feed_rollout drop column if exists google_everyone;
 
 -- ---- 20261205 calendar subscriptions (independent; safe to run alone: supabase/rollout/calendar/rollback.sql).
 -- Removes subscriptions and imported events; the family calendar and every other table are untouched.

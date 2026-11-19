@@ -19,6 +19,9 @@ export type FeedVisibility = 'private' | 'household';
 export interface Feed {
   id: string;
   kind: 'ical' | 'google';
+  /** Google calendars: the connected account and calendar (owner only). */
+  google_account_id?: string | null;
+  google_calendar_id?: string | null;
   name: string;
   visibility: FeedVisibility;
   member_id: string | null;
@@ -56,6 +59,31 @@ export const feedsApi = {
   /** Fetch it now (the server checks it's this adult's). */
   refresh: (id: string) => accountFunction<{ result: string; count: number; error?: string }>('calendar-feeds', { feed_id: id }),
   events: (from: string, to: string, scope: 'mine' | 'household') => accountRpc<FeedEvent[]>('calendar_feed_events', { p_from: from, p_to: to, p_scope: scope }),
+};
+
+// ---------------------------------------------------------------- Connect Google Calendar (docs/calendar/GOOGLE_CALENDAR.md)
+export interface GoogleAccount { id: string; email: string | null; status: 'ok' | 'reconnect'; last_error: string | null; calendars: number; created_at: string }
+export interface GoogleCalendarChoice {
+  id: string; name: string; color: string | null; time_zone: string | null; primary: boolean; access_role: string;
+  imported: boolean; feed_id: string | null; visibility: FeedVisibility; member_id: string | null;
+}
+/** What Google's redirect back means, for her (the `google` query parameter). */
+export const GOOGLE_RESULT: Record<string, string> = {
+  connected: 'Google Calendar connected. Choose which calendars to show.',
+  cancelled: 'You didn’t connect Google. Nothing changed.',
+  permissions: 'To import your calendars, allow both calendar permissions on Google’s screen, then try again.',
+  expired: 'That connection attempt expired. Tap Connect Google Calendar again.',
+  error: 'Google Calendar couldn’t be connected. Try again in a minute.',
+};
+export const googleApi = {
+  /** Her connected Google accounts; throws not_enabled / missing-function errors when Google isn't on for her. */
+  accounts: () => accountRpc<GoogleAccount[]>('calendar_google_accounts'),
+  /** Google's consent screen URL (one-time state + PKCE; no tokens ever come to the app). */
+  start: (ret: 'web' | 'app', origin: string) => accountFunction<{ url: string }>('calendar-google', { action: 'start', return: ret, origin }),
+  calendars: (accountId: string) => accountFunction<{ calendars: GoogleCalendarChoice[]; missing: { id: string; name: string; feed_id: string }[] }>('calendar-google', { action: 'calendars', account_id: accountId }),
+  select: (accountId: string, calendars: { id: string; name: string; member_id: string | null; visibility: FeedVisibility; timezone: string | null }[]) =>
+    accountRpc<Feed[]>('calendar_google_select', { p_account: accountId, p_calendars: calendars }),
+  disconnect: (accountId: string) => accountFunction<{ ok: boolean; revoked: boolean }>('calendar-google', { action: 'disconnect', account_id: accountId }),
 };
 
 const zone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York'; } catch { return 'America/New_York'; } };

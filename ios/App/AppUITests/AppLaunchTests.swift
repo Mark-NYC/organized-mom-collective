@@ -280,6 +280,7 @@ final class AppLaunchTests: XCTestCase {
         // beside the family's events, labeled with their source, and open read-only (docs/calendar/CALENDAR_INTEGRATION.md).
         let picture = waitFor(text("Picture day"), "imported school event on the calendar", timeout: 30)
         waitFor(text("Board review"), "Jen's private imported event (hers to see)")
+        waitFor(text("Book club"), "an event from her connected Google Calendar (scripts/e2e/google-seed.sql)")
         XCTAssertTrue(text("Lincoln Elementary").exists, "imported events name their calendar")
         shot("e2e-02b-imported-calendars")
         tapClear(picture)
@@ -289,9 +290,12 @@ final class AppLaunchTests: XCTestCase {
         waitFor(control("Done"), "close the imported event").tap()
         // Back to the top of the page: after opening an event further down, the Calendars link is scrolled off screen.
         goTo("Calendar")
-        let entry = waitFor(control("Calendars · 2"), "the Calendars panel entry")
+        let entry = waitFor(control("Calendars · 3"), "the Calendars panel entry")
         tapClear(entry)
         waitFor(text("Who sees it"), "the Calendars panel")
+        waitFor(text("jen.parks@gmail.test"), "her connected Google account in the panel")
+        waitFor(control("Connect another account"), "Connect Google Calendar is offered (another account)")
+        waitFor(text("Add a calendar by link"), "adding by link stays as the secondary option")
         shot("e2e-02d-calendars-panel")
         waitFor(control("Done"), "close the Calendars panel").tap()
 
