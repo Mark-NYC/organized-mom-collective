@@ -4,7 +4,7 @@
 
 **Product aim:** The rhythms of the household become the habits of its children; through those habits, children develop skills and progressively own their part of family life.
 
-**Scope:** Organized Family (free), Family Meeting Club (personalized paid layer), weekly Family Meeting, and future seasonal kits. This file is the source of truth for future product, UX, recommendation, and data-model decisions. Related architecture: [UNIFIED_FAMILY_ARCHITECTURE.md](UNIFIED_FAMILY_ARCHITECTURE.md). Existing month resources and their approvals remain unchanged until a separately approved migration.
+**Scope:** Organized Family (free), Family Meeting Club (personalized paid layer), weekly Family Meeting, **existing Responsibility Cards, age-appropriate public guides, free charts and routines**, and future seasonal kits. This file is the source of truth for future product, UX, recommendation, and data-model decisions. Related architecture: [UNIFIED_FAMILY_ARCHITECTURE.md](UNIFIED_FAMILY_ARCHITECTURE.md). Existing month resources and their approvals remain unchanged until a separately approved migration.
 
 ## The model: Skill × MAWL × Habit × Context × Family choice
 
@@ -36,6 +36,12 @@
 10. The weekly meeting is the central ongoing interaction, with **Our Focus · Let's Talk · Everyone's Part · Let's Practice** in the existing ten-minute order. The paid Club supplies personalized guidance *inside* that meeting, not a second mandatory meeting.
 11. Family member data is shared for legitimate family features with existing account/household permissions; do not introduce child accounts or collect sensitive histories as a personalization shortcut.
 12. Printed seasonal kits may eventually align with late spring/summer transition, back-to-school, and new year. This is a **direction, not a shipping, billing, or fulfillment change**. The current twelve resource pages and approved print files are frozen for this initiative.
+
+## One pathway across every resource
+
+The public age-appropriate guides, printed Kids' Responsibility Cards, free chore/routine charts, family rhythm tools, the personalized app, the weekly Family Meeting and any future seasonal kits must all teach **one consistent skill-development progression**. They differ only in *how they help* the family: discover a starting skill → learn mechanics (Model/Assist) → anchor a habit → practice quality in varied circumstances (Watch) → family-chosen Launch. Each is independently useful; the next resource is not a required purchase.
+
+Do not fork the responsibility philosophy in separate content generators. Connect shared stable skill identities to existing card artwork, guide copy, chart options and personalized recommendations through reviewed aliases. Preserve all published URLs and source artwork. See the [resource alignment audit and mapping contract](RESOURCE_ALIGNMENT.md).
 
 ## Skill library contract
 
