@@ -69,6 +69,12 @@ export default function WeeklyMeeting() {
   const [text, setText] = useState('');
   const [category, setCategory] = useState<ResponsibilityCategory>('other');
   const [msg, setMsg] = useState('');
+  const [activeStep, setActiveStep] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const goStep = (index: number) => {
+    setActiveStep(Math.max(0, Math.min(MEETING_GUIDE.parts.length - 1, index)));
+    document.querySelector('[data-weekly-meeting]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   const Month = MONTHS[today.getMonth()][0].toUpperCase() + MONTHS[today.getMonth()].slice(1);
   const challenges = fam.profile?.challenges ?? [];
 
@@ -94,6 +100,7 @@ export default function WeeklyMeeting() {
     }
   };
   const suggestions = meeting?.parts.people.filter((p) => p.suggested.length) ?? [];
+  const weekHighlights = week.days.flatMap((d) => d.items.map((item) => ({ day: d.label, item }))).slice(0, 5);
 
   return (
     <div className="mx-auto max-w-3xl space-y-5" data-weekly-meeting data-meeting-kind={meeting ? 'club' : 'free'}>
@@ -104,7 +111,26 @@ export default function WeeklyMeeting() {
         <p className="mt-3 text-[1rem] leading-relaxed text-warm-soft">{MEETING_GUIDE.subtitle}</p>
       </header>
 
-      {MEETING_GUIDE.parts.map((p, i) => (
+      <nav className="of-tile !p-4 sm:!p-5" aria-label="Family Meeting steps" data-meeting-navigation>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <span className="of-eyebrow">Step {activeStep + 1} of {MEETING_GUIDE.parts.length}</span>
+          <span className="text-sm text-warm-soft">10 minutes together</span>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {MEETING_GUIDE.parts.map((part, i) => (
+            <button key={part.title} type="button" onClick={() => goStep(i)}
+              aria-current={activeStep === i ? 'step' : undefined}
+              aria-label={`Step ${i + 1}: ${part.title}, ${part.minutes} minutes`}
+              className={`min-h-[52px] rounded-[8px] border px-1.5 py-2 text-center text-[0.72rem] sm:text-[0.82rem] ${activeStep === i ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white text-warm-soft'}`}
+              data-meeting-step={i}>
+              <span className="block font-serif text-[1.05rem]">{i + 1}</span>
+              <span className="block leading-tight">{part.title}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {MEETING_GUIDE.parts.map((p, i) => activeStep === i && (
         <section key={p.title} className={`of-tile ${meeting && (p.title === 'Our Focus') ? 'of-tile--month' : ''}`} aria-labelledby={`wm-${i}`} data-meeting-part={p.title}>
           <div className="flex items-baseline justify-between gap-3">
             <h2 id={`wm-${i}`} className="of-tile-title"><span className="mr-2 font-serif text-[var(--of-month-accent)]">{i + 1}</span>{p.title}</h2>
@@ -127,26 +153,59 @@ export default function WeeklyMeeting() {
           {p.title !== 'Our Focus' && !(meeting && p.title === 'Let’s Practice') && <p className="mt-2 text-[0.95rem] leading-relaxed">{!meeting && FREE_TEXT[p.title] ? FREE_TEXT[p.title] : meeting && p.title === 'Let’s Talk' ? CLUB_TALK : p.text}</p>}
 
           {p.title === 'Our Focus' && week.count > 0 && (
-            <details className="mt-4" data-meeting-week open={!meeting}>
-              <summary className="cursor-pointer text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-warm-soft">This week on our calendar</summary>
-              <ul className="mt-2 space-y-1.5 text-[0.92rem]">
-                {week.days.filter((d) => d.items.length).map((d) => (
-                  <li key={d.date}><strong className="text-sm">{d.label}</strong>{d.items.map((x) => (
-                    <span key={x.id + x.date} className="ml-2 inline-flex items-center gap-1.5 text-warm-soft">
-                      <span aria-hidden="true" className="inline-block size-2 rounded-full" style={{ background: cal.colors[x.memberIds[0] ?? x.ownerId ?? '']?.hex ?? '#9aab8f' }} />
-                      {x.time === 'All day' ? '' : `${x.time} `}{x.title}{x.source ? ` · ${x.source}` : !x.ownerId ? ' · nobody handling it yet' : ''}</span>))}</li>
+            <div className="mt-5 rounded-[9px] border border-[var(--of-rule)] bg-white/70 p-3 sm:p-4" data-meeting-week>
+              <div className="flex items-center justify-between gap-3">
+                <p className="of-eyebrow">This week on our calendar</p>
+                <span className="text-xs text-warm-soft">{week.count} events</span>
+              </div>
+              <p className="mt-1 text-sm text-warm-soft">What needs our family's attention this week?</p>
+              <ul className="mt-3 space-y-2 text-[0.9rem]" data-meeting-week-highlights>
+                {weekHighlights.map(({ day, item }, i) => (
+                  <li key={item.id + item.date + i} className="flex items-start gap-2">
+                    <span aria-hidden="true" className="mt-1.5 inline-block size-2 shrink-0 rounded-full" style={{ background: cal.colors[item.memberIds[0] ?? item.ownerId ?? '']?.hex ?? '#9aab8f' }} />
+                    <span className="min-w-0"><strong>{day}</strong> · {item.time === 'All day' ? '' : `${item.time} · `}{item.title}</span>
+                  </li>
                 ))}
               </ul>
-            </details>
+              {week.count > 5 && (
+                <details className="mt-3 border-t border-[var(--of-rule)] pt-3" data-meeting-week-all>
+                  <summary className="cursor-pointer text-sm font-semibold">See the full week ({week.count} events)</summary>
+                  <ul className="mt-3 space-y-3 text-[0.88rem]">
+                    {week.days.filter((d) => d.items.length).map((d) => (
+                      <li key={d.date}><strong className="block">{d.label}</strong>
+                        <ul className="mt-1 space-y-1">
+                          {d.items.map((x) => (
+                            <li key={x.id + x.date} className="flex items-start gap-2 text-warm-soft">
+                              <span aria-hidden="true" className="mt-1.5 inline-block size-2 shrink-0 rounded-full" style={{ background: cal.colors[x.memberIds[0] ?? x.ownerId ?? '']?.hex ?? '#9aab8f' }} />
+                              <span>{x.time === 'All day' ? '' : `${x.time} · `}{x.title}{x.source ? ` · ${x.source}` : !x.ownerId ? ' · nobody handling it yet' : ''}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </div>
           )}
 
           {p.title === 'Let’s Talk' && (
             <div className="mt-4 space-y-4">
               <FollowThrough household={cal.household} profile={fam.profile} colors={cal.colors} />
               {meeting ? (
-                <ul className="space-y-2" data-meeting-questions>
-                  {meeting.talk.questions.map((q) => <li key={q.text} className="rounded-[9px] bg-[var(--of-surface)] px-3 py-2.5 text-[0.95rem]">{q.text}{q.audience !== 'everyone' && <span className="ml-2 text-[0.75rem] text-warm-soft">{q.audience === 'kids' ? 'for the kids' : 'for the grown-ups'}</span>}</li>)}
-                </ul>
+                <div className="rounded-[9px] bg-[var(--of-surface)] p-4" data-meeting-questions>
+                  <p className="of-eyebrow">Question {Math.min(questionIndex + 1, meeting.talk.questions.length)} of {meeting.talk.questions.length}</p>
+                  {meeting.talk.questions[questionIndex] && (
+                    <p className="mt-3 font-serif text-[1.15rem] leading-relaxed" data-meeting-question>
+                      {meeting.talk.questions[questionIndex].text}
+                      {meeting.talk.questions[questionIndex].audience !== 'everyone' && <span className="ml-2 font-sans text-[0.8rem] text-warm-soft">{meeting.talk.questions[questionIndex].audience === 'kids' ? 'for the kids' : 'for the grown-ups'}</span>}
+                    </p>
+                  )}
+                  {meeting.talk.questions.length > 1 && <div className="mt-4 flex items-center justify-between gap-3">
+                    <button type="button" className="of-btn of-btn--soft" disabled={questionIndex === 0} onClick={() => setQuestionIndex((i) => Math.max(0, i - 1))}>Previous question</button>
+                    <button type="button" className="of-btn of-btn--soft" disabled={questionIndex >= meeting.talk.questions.length - 1} onClick={() => setQuestionIndex((i) => Math.min(meeting.talk.questions.length - 1, i + 1))}>Next question</button>
+                  </div>}
+                </div>
               ) : challenges.length > 0 && (
                 <p className="rounded-[9px] bg-[var(--of-surface)] px-3 py-2.5 text-[0.95rem]" data-meeting-challenge>You said this is hard at home: <strong>{challenges.map((c) => label(CHALLENGES, c)).join(', ')}</strong>. What would make it a little easier this week?</p>
               )}
@@ -160,14 +219,22 @@ export default function WeeklyMeeting() {
                   <p className="of-eyebrow">Ideas for this month, by age</p>
                   <ul className="mt-2 space-y-2">
                     {suggestions.map((person) => person.suggested.slice(0, 1).map((r) => (
-                      <li key={person.memberId + r.description} className="rounded-[9px] border border-[var(--of-rule)] px-3 py-3" data-meeting-suggestion={person.firstName}>
-                        <div className="flex items-start gap-3">
-                          <Avatar name={person.firstName} color={cal.colors[person.memberId]} size="sm" />
-                          <span className="min-w-0 flex-1"><span className="block font-semibold">{person.firstName}{person.age !== null && person.kind === 'child' ? <span className="font-normal text-warm-soft"> · {person.age}</span> : null}</span>
-                            <span className="block text-[0.92rem]">{r.description}</span>
-                            {r.finished && <span className="mt-0.5 block text-[0.8rem] text-warm-soft">{r.finished}</span>}</span>
-                        </div>
-                        <button type="button" className="of-btn of-btn--soft mt-3 !min-h-[44px] w-full sm:w-auto" onClick={() => void agreeTo(person.memberId, r)} aria-label={`We agreed: ${person.firstName}`} data-agree-suggestion>We agreed</button>
+                      <li key={person.memberId + r.description} className="rounded-[9px] border border-[var(--of-rule)] px-3 py-2.5" data-meeting-suggestion={person.firstName}>
+                        <details className="group">
+                          <summary className="flex min-h-[44px] cursor-pointer list-none items-center gap-3">
+                            <Avatar name={person.firstName} color={cal.colors[person.memberId]} size="sm" />
+                            <span className="min-w-0 flex-1">
+                              <span className="block font-semibold">{person.firstName}{person.age !== null && person.kind === 'child' ? <span className="font-normal text-warm-soft"> · {person.age}</span> : null}</span>
+                              <span className="block truncate text-[0.88rem] text-warm-soft">{r.description}</span>
+                            </span>
+                            <span aria-hidden="true" className="text-warm-soft group-open:rotate-180">⌄</span>
+                          </summary>
+                          <div className="border-t border-[var(--of-rule)] pt-3">
+                            <p className="text-[0.95rem]">{r.description}</p>
+                            {r.finished && <p className="mt-1 text-[0.8rem] text-warm-soft">{r.finished}</p>}
+                            <button type="button" className="of-btn of-btn--soft mt-3 !min-h-[44px] w-full sm:w-auto" onClick={() => void agreeTo(person.memberId, r)} aria-label={`We agreed: ${person.firstName}`} data-agree-suggestion>We agreed</button>
+                          </div>
+                        </details>
                       </li>
                     )))}
                   </ul>
@@ -217,8 +284,16 @@ export default function WeeklyMeeting() {
         </section>
       ))}
 
+      <div className="flex items-center justify-between gap-3 pb-6" data-meeting-step-actions>
+        <button type="button" className="of-btn of-btn--soft" disabled={activeStep === 0} onClick={() => goStep(activeStep - 1)}>Back</button>
+        {activeStep < MEETING_GUIDE.parts.length - 1 ? (
+          <button type="button" className="of-btn" onClick={() => goStep(activeStep + 1)}>Next: {MEETING_GUIDE.parts[activeStep + 1].title} →</button>
+        ) : (
+          <a className="of-btn" href="/app/family">Finish meeting ✓</a>
+        )}
+      </div>
       {/* One question at a time for a free family, only once it pays off in the next meeting (§8). */}
-      {!meeting && cal.household && agreed.length > 0 && <ProfileQuestion profile={fam.profile} saveFocus={fam.saveFocus} />}
+      {!meeting && activeStep === 2 && cal.household && agreed.length > 0 && <ProfileQuestion profile={fam.profile} saveFocus={fam.saveFocus} />}
     </div>
   );
 }
