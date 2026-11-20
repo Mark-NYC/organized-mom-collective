@@ -34,7 +34,7 @@ export interface CuratedSkill extends SkillDefinition {
 }
 
 /** The library is append-only by ID. All strings are authored, never generated from child records. */
-export const skills = [
+const SKILLS = [
   {
     id: "toys", category: "personal-space", title: "Put toys away", outcome: "Toys go into their usual places after play.",
     typicalAge: { from: 2 }, finishLine: "Toys go into their usual places after play.",
@@ -512,7 +512,7 @@ export const skills = [
     launch: "The family decides when the child can initiate, complete, check and adapt this responsibility.",
     
     
-  }
+  },
   {
     id: 'hands', category: 'self-care', title: 'Wash my hands',
     outcome: 'Wash hands with soap and water as needed.', typicalAge: { from: 4 },
@@ -550,6 +550,8 @@ export const skills = [
     cardIllustrationId: 39,
   },
 ] as const satisfies readonly CuratedSkill[];
+/** Exported widened, so callers read every optional field (safety, supervision) without literal-type narrowing. */
+export const skills: readonly CuratedSkill[] = SKILLS;
 
 /** Alias crosswalk for the newer public chore chart. An alias can describe a
  * more specific/complex version of another skill; never merge records without
