@@ -16,6 +16,7 @@ import { resolveToolPalette } from '../../data/tool-palettes';
 import { kits } from '../../data/club/kits';
 import { sampleById } from '../../data/club/samples';
 import { accountRpc } from '../account';
+import { appShellBuild } from '../native/platform';
 import type { FamilyMember, Household, HouseholdPreferences, MemberKind, MemberRole } from './profile';
 import {
   activitiesToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
@@ -168,8 +169,11 @@ export const accountStore: ClubStore = {
   kind: 'account',
   label: '',
   async me() {
-    const r = await accountRpc<{ access: boolean; onboarded: boolean; kits: { slug: string; can: KitAccess | 'none' }[] }>('club_me');
-    return { access: r.access, onboarded: r.onboarded, kits: r.kits.filter((k): k is { slug: string; can: KitAccess } => k.can !== 'none') };
+    const r = await accountRpc<{ access: boolean; grant: string | null; onboarded: boolean; kits: { slug: string; can: KitAccess | 'none' }[] }>('club_me');
+    // The same backend membership can include Stripe access for the website, but on iOS Club is
+    // invitation-only. club_me supplies the live grant for both household adults (20261208).
+    const access = r.access && (!appShellBuild() || Boolean(r.grant));
+    return { access, onboarded: r.onboarded, kits: access ? r.kits.filter((k): k is { slug: string; can: KitAccess } => k.can !== 'none') : [] };
   },
   async household() {
     const r = await accountRpc<DbHousehold | null>('club_household');
