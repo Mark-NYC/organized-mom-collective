@@ -201,6 +201,12 @@ function OurWeekSignedIn({ email, role, shared }: { email: string; role: 'owner'
         </div>
       )}
     </section>
+    {/* Easy to find from the app (App Review 5.1.1(i)); they open on the website. */}
+    <nav className="mt-4 flex flex-wrap gap-x-5 text-sm" aria-label="Policies and help" data-account-policies>
+      <a href={routes.privacy} className="inline-flex min-h-[44px] items-center underline underline-offset-4">Privacy Policy</a>
+      <a href={routes.terms} className="inline-flex min-h-[44px] items-center underline underline-offset-4">Terms of Service</a>
+      <a href="/support" className="inline-flex min-h-[44px] items-center underline underline-offset-4">Help &amp; support</a>
+    </nav>
     </>
   );
 }

@@ -4,6 +4,7 @@
  * (docs/ios/FAMILY_E2E.md). Never point it at a real project: it signs anyone in with the test code.
  *
  *   /auth/v1/otp, /verify, /token, /logout   Supabase Auth's email-code flow. The code is always 123456; the user is
+ *                                            (/token?grant_type=password: any existing account, password e2e-test-password)
  *                                            created in auth.users on first sign-in, like create_user: true.
  *   /rest/v1/rpc/<fn>                        PostgREST's function call: runs public.<fn>(named args) in a transaction
  *                                            as role `authenticated` with request.jwt.claims.sub = the signed-in user
@@ -22,6 +23,8 @@ import { randomUUID, randomBytes } from 'node:crypto';
 const DB = process.env.E2E_DB ?? 'omc_family_e2e';
 const PORT = Number(process.env.E2E_PORT ?? 54321);
 const CODE = '123456';
+/** Test backend only: the password every existing test account accepts (admin dashboard, App Review sign-in). */
+const PASSWORD = 'e2e-test-password';
 const TOKEN_SECONDS = 3600;
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
@@ -145,6 +148,14 @@ const server = createServer(async (req, res) => {
       if (body.token !== CODE) return send(res, 400, { error: 'invalid', msg: 'Token has expired or is invalid' });
       const email = String(body.email).toLowerCase();
       return send(res, 200, session(userFor(email), email));
+    }
+    if (url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'password') {
+      // Password sign-in (the admin dashboard; the app's "Have a password?" for App Review accounts). Test backend only:
+      // one fixed test password, for accounts that already exist. Never a real password.
+      const email = String(body.email ?? '').toLowerCase();
+      const known = psql(`select id from auth.users where lower(email) = ${q(email)}`);
+      if (body.password !== PASSWORD || !known) return send(res, 400, { error: 'invalid_grant', msg: 'Invalid login credentials' });
+      return send(res, 200, session(known, email));
     }
     if (url.pathname === '/auth/v1/token') {
       const r = refresh.get(body.refresh_token);

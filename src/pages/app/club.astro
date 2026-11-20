@@ -3,13 +3,16 @@ import Layout from '../../layouts/AppLayout.astro';
 import '../../styles/family-app-brand.css';
 import '../../styles/club-app.css';
 import AppKitLibrary from '../../components/AppKitLibrary';
+import { CLUB_INVITATION, FREE_FOR_EVERYONE } from '../../data/club/invitation';
+// The iPhone app: Family Meeting Club is by invitation (nothing is sold in the app).
+const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
 
 ---
 <Layout title="Club" description="Monthly family tools and kit previews.">
 <div class="family-brand mx-auto max-w-4xl">
 <!-- Signed-out visitors (and accounts without a membership) see the preview; a member sees her own Club (AppKitLibrary hides this and draws hers). -->
 <div id="club-preview-intro">
-<header class="ofc-club-intro"><p class="label text-[#71866c]">FAMILY MEETING CLUB</p><h1 class="family-title mt-4">One small win <em class="ofc-rose-emphasis">each month.</em></h1><p class="family-lede mt-4">Practical, prepared tools that help everyone share the work. This is a preview library, not an active membership.</p></header>
+<header class="ofc-club-intro"><p class="label text-[#71866c]">FAMILY MEETING CLUB</p><h1 class="family-title mt-4">One small win <em class="ofc-rose-emphasis">each month.</em></h1><p class="family-lede mt-4">Practical, prepared tools that help everyone share the work. This is a preview library, not an active membership.</p>{appShell && <p class="family-lede mt-3" data-club-invitation>{CLUB_INVITATION} {FREE_FOR_EVERYONE}</p>}</header>
 <h2 class="family-panel-title mt-9">12 months. 12 things you shouldn’t have to carry alone.</h2><p class="mt-2 text-sm text-warm-soft">Every month helps your family own one more part of everyday life. Preview each personalized tool below.</p>
 </div>
 <section><AppKitLibrary client:only="react" view="home" /></section>

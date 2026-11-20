@@ -208,6 +208,28 @@ export async function verifyCode(email: string, code: string): Promise<VerifyRes
   }
 }
 
+export type PasswordResult = { ok: true; session: AccountSession } | { ok: false; error: 'wrong_password' | 'rate_limited' | 'error' };
+
+/**
+ * Sign in with an email and password. Families sign in with an emailed code and have no password; this is for accounts
+ * the owner gave a password in Supabase Auth: the App Review demo accounts (docs/ios/APP_STORE_LAUNCH.md), which can't
+ * receive an emailed code. Same session as a code sign-in. Supabase's password grant is already enabled (the admin
+ * dashboard signs in with it), so this opens nothing new on the server.
+ */
+export async function signInWithPassword(email: string, password: string): Promise<PasswordResult> {
+  const clean = email.trim().toLowerCase();
+  if (!clean || !password) return { ok: false, error: 'wrong_password' };
+  try {
+    const res = await auth('/token?grant_type=password', { email: clean, password });
+    if (!res.ok) return { ok: false, error: res.status === 429 ? 'rate_limited' : res.status >= 500 ? 'error' : 'wrong_password' };
+    const session = toSession((await res.json()) as AuthResponse, clean);
+    saveSession(session);
+    return { ok: true, session };
+  } catch {
+    return { ok: false, error: 'error' };
+  }
+}
+
 /**
  * The current session, refreshed when under five minutes are left. Null when signed out or revoked.
  *
