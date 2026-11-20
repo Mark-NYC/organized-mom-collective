@@ -29,6 +29,8 @@ meeting, carrying the family's personalized month (children's ages, the month's 
 and what they agree is followed through in weeks 2–4 with the existing framework (on my own · needs reminders ·
 struggling).
 
+**Update 2026-11-20:** child skill development (MAWL stage per child per skill, history, one next step per child) now has its own additive design inside this meeting: [FAMILY_DEVELOPMENT_ENGINE.md](FAMILY_DEVELOPMENT_ENGINE.md). Agreements stay in `club_responsibilities`.
+
 ## 1. Audit: how the app and the Club relate today (from the code)
 
 **The headline: the data is already one system. The experience isn't.**

@@ -62,7 +62,7 @@ Every mapped record needs a skill category, outcome, *typical* age guidance, saf
 - **Illustration crosswalk:** every illustration ID used in the existing 4–5, 6–7 and 10–12 age-guide card previews maps to a skill. These IDs are image references from `scripts/lib/age-chore-card-config.mjs`, **not verified printed physical-card identifiers**. No card text or print-ready artwork is recreated.
 - **Authoring rules:** each skill includes an observable finish line, suggested cue, natural benefit, Model/Assist/Watch/Launch guidance, a Watch variation and seasonal relevance; hazardous tasks explicitly retain adult-supervision guidance.
 - **Coverage tests:** `tests/family-skill-library.test.ts`; MAWL invariants remain in `tests/family-development-framework.test.ts`.
-- **Not connected:** current recommendations in public tools, family stages/progress persistence, and the live paid weekly meeting. Follow-on integration requires explicit review so existing customer data and fulfillment aren't disturbed.
+- **Not connected:** current recommendations in public tools. Family stage persistence and the paid weekly meeting integration are built but **not live** (migration 20261207 not applied): [FAMILY_DEVELOPMENT_ENGINE.md](FAMILY_DEVELOPMENT_ENGINE.md).
 
 ## Proposed QA crosswalk to curate
 

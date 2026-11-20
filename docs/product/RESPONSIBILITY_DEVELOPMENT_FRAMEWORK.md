@@ -102,6 +102,8 @@ This document is the **product guardrail**. For every personalization, family pr
 
 ## Implementation sequence (not yet shipped)
 
+Status 2026-11-20: library, development records, engine and Club meeting integration are built on a branch, migration not applied. How they work: [FAMILY_DEVELOPMENT_ENGINE.md](FAMILY_DEVELOPMENT_ENGINE.md). This status note doesn't change the doctrine above.
+
 **Foundation (this change):** versioned philosophy, typed MAWL and family-choice contracts, pure recommendation decision functions and invariant tests. No production migration and no change to month resources.
 
 **Next:** curated skill library; map existing desired/existing/confirmed responsibilities; design additive persistence and privacy review; connect selection into the unified weekly Family Meeting behind the Club entitlement.
