@@ -19,9 +19,12 @@ Related: [TESTFLIGHT.md](TESTFLIGHT.md) (signing and upload), [RELEASE_READINESS
   Account. The Club gates in the app point to Club Home, never to a sales page.
 - **Non-members see one plain line:** "Family Meeting Club is currently available by invitation." plus what stays free
   (`src/data/club/invitation.ts`). There's no price, trial, "join" or upgrade wording (unit-tested).
-- **Members are recognized** whether they pay on the website (Stripe, unchanged) or hold complimentary access. Both go
-  through the one entitlement that already exists, `club_has_access()`: a paid subscription OR a live
-  `club_access_grants` row.
+- **iPhone Club is invitation-only.** The iOS app's Club views require both `club_me().access` and a live
+  `club_me().grant`. A Stripe-only web membership does **not** unlock Club in the iOS UI. The website retains its
+  existing paid and complimentary access rules. This is a platform-specific presentation rule, not a claim that
+  Supabase can authenticate which physical platform calls a shared RPC.
+- **Complimentary grants include the second adult.** `20261208` makes the partner's `club_me().grant` reflect
+  the owner's live grant. Web subscribers can also be individually invited to iOS Club without changing their billing.
 - **Website billing is unchanged.** Checkout, the Stripe webhooks, invoices, monthly kits, PDFs, fulfillment and the
   Responsibility Card artwork are untouched.
 
@@ -70,23 +73,24 @@ Apple's App Review Guidelines were read on 2026-11-20 (page dated October 16, 20
 
 ### 3.1 The real risk: unlocking the Club without In-App Purchase
 
-Guideline 3.1.1 says apps "may not use their own mechanisms to unlock content or functionality". 3.1.3(b), multiplatform
-services, allows content bought elsewhere to be accessed in the app only if it is also offered through IAP. Club
-features in the app are unlocked for paying website members and for complimentary grants. Neither path uses IAP.
+Guideline 3.1.1 governs unlocking digital content and functionality, and 3.1.3(b) addresses multiplatform
+services. **For the initial iOS launch, the app shows Club content only when the household has a live manual Club grant.**
+A Stripe subscription alone works on the website but does not unlock the Club iOS interface. This reduces the
+external-purchase risk but Apple may still evaluate the complimentary digital feature under its own rules.
 
 What works in our favor:
 - The app never mentions a price, never links out to buy, and says the Club is by invitation.
 - Complimentary access is free. Nobody pays to unlock anything in the app.
 - The Club's core is physical (monthly mailed kits, the calendar). That falls under 3.1.3(e), physical goods.
 
-What could still draw a rejection: a reviewer may see a paid tier (the website Club) unlocking digital features in the
-app without IAP. **This is uncertain. I can't verify how Apple will rule.** Options, cheapest first:
+What could still draw a rejection: Apple may classify the Club as a digital premium tier even with free
+invitation grants. The app does not direct users to web purchases. Review notes should describe this accurately.
+If Apple objects, respond to the actual Guideline cited; do not imply that iOS unlocks paid web subscriptions.
 
-1. **Submit as is, with clear review notes** (below): the app is free, sells nothing, Club access is invitation-only and
-   complimentary in the app, and the paid Club is a physical mail subscription on the website.
-2. If rejected under 3.1.1: hide Club content in the app for paid website members, so the app shows only complimentary
-   grants. Small change, but it removes a member benefit.
-3. Add IAP for the Club's digital layer. That's a pricing, tax and fulfillment decision and out of scope here.
+**Technical limitation:** The iOS-only rule uses live grant data returned by Supabase and is enforced consistently
+by the app's membership and Club store screens. The shared Supabase Club RPCs also serve the website, where
+paid subscriptions remain valid. The mobile bundle is not a cryptographic authorization boundary. Do not
+describe the iOS filter as server-side platform enforcement.
 
 ## 4. Reviewer accounts (owner only, never in Git)
 
