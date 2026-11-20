@@ -8,27 +8,38 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 <PublicLayout title="Free Family Chore Chart | Organized Mom Collective" description="Make a free printable family chore chart. Choose shared daily moments, add family members, assign responsibilities and print a one-page family rhythm." width="full" showUpdatedDate={false}>
   <main class="fc-page" data-family-chart>
     <div class="fc-wrap">
-      <header class="fc-intro">
-        <p class="fc-eyebrow">FREE PRINTABLE FAMILY CHORE CHART</p>
-        <h1>Everyone has a part.</h1>
-        <p>Make a simple plan for the moments your family already shares. Add names, choose who owns what, then print it and hang it where everyone can see.</p>
-      </header>
       <div class="fc-layout">
-        <section class="fc-controls" aria-label="Customize your family chart">
-          <div class="fc-control-head"><span>1</span><div><h2>Your family</h2><p>Start with names. Everyone can have a part.</p></div></div>
-          <label class="fc-label" for="fc-family-name">Family name <input id="fc-family-name" data-family-name maxlength="55" placeholder="The Rivera Family" /></label>
-          <div data-people-list class="fc-fields"></div>
-          <button class="fc-subtle" type="button" data-add-person>+ Add family member</button>
-          <hr />
-          <div class="fc-control-head"><span>2</span><div><h2>Our shared moments</h2><p>Choose two or three moments, not a long list of chores.</p></div></div>
-          <div data-moments-editor class="fc-moments-editor"></div>
-          <button class="fc-subtle" type="button" data-add-moment>+ Add a moment</button>
-          <hr />
-          <div class="fc-control-head"><span>3</span><div><h2>Print your plan</h2><p>One page for the whole family. No sign-in needed.</p></div></div>
-          <button class="fc-print" type="button" data-print>Print or save as PDF</button>
-          <button class="fc-reset" type="button" data-reset>Start over</button>
-          <p class="fc-note" role="status" data-status>Changes save on this device.</p>
-        </section>
+        <aside class="fc-rail" aria-label="Your family rhythm editor">
+          <header class="fc-rail-head">
+            <p class="fc-crumb">FREE FAMILY TOOL</p>
+            <h1>Our Family <em>Rhythm</em></h1>
+            <p class="fc-rail-sub">Same moments. Everyone has a part.</p>
+          </header>
+          <p class="fc-ready">Ready to make yours</p>
+          <p class="fc-rail-description">Start with two moments your family already shares. Give everyone a clear part, then hang the finished plan where they can see it.</p>
+          <div class="fc-actions">
+            <button type="button" class="fc-edit-action" data-open-editor="family">Make changes</button>
+            <button type="button" class="fc-print-action" data-print>Download and print</button>
+          </div>
+          <div class="fc-rail-details">
+            <section class="fc-rail-block">
+              <p class="fc-rail-label">Your family</p>
+              <p data-rail-family class="fc-rail-summary"></p>
+              <button type="button" class="fc-link" data-open-editor="family">Change family members</button>
+            </section>
+            <section class="fc-rail-block">
+              <p class="fc-rail-label">Our moments</p>
+              <div data-rail-moments class="fc-rail-moment-list"></div>
+              <button type="button" class="fc-link" data-open-editor="moments">Change our moments</button>
+            </section>
+            <section class="fc-rail-block">
+              <p class="fc-rail-label">Who owns what</p>
+              <ul data-rail-people class="fc-rail-people"></ul>
+              <button type="button" class="fc-link" data-open-editor="jobs">Change who owns what</button>
+            </section>
+          </div>
+          <div class="fc-rail-help"><p><strong>No login. No deadline.</strong> This version is yours to make. Your changes are saved in this browser.</p><p>Start small. Choose only a few responsibilities and practice together first.</p></div>
+        </aside>
         <section class="fc-preview-area" aria-label="Live chart preview">
           <div class="fc-preview-heading"><span>YOUR PRINTABLE</span><span>US Letter · Portrait</span></div>
           <div class="fc-paper" data-paper>
@@ -44,6 +55,28 @@ import PublicLayout from '../layouts/PublicLayout.astro';
           <p class="fc-preview-tip">The printable updates as you make changes. You can also save it as a PDF from your browser's print dialog.</p>
         </section>
       </div>
+      <dialog class="fc-dialog" data-editor-dialog aria-labelledby="fc-editor-heading">
+        <div class="fc-dialog-head"><div><p class="fc-eyebrow">MAKE IT YOURS · FREE TOOL</p><h2 id="fc-editor-heading">Our family rhythm</h2></div><button type="button" data-close-editor class="fc-close" aria-label="Close editor">×</button></div>
+        <div class="fc-editor-tabs" role="tablist" aria-label="Edit your rhythm">
+          <button type="button" data-editor-tab="family" role="tab">1 · Your family</button>
+          <button type="button" data-editor-tab="moments" role="tab">2 · Our moments</button>
+          <button type="button" data-editor-tab="jobs" role="tab">3 · Who owns what</button>
+        </div>
+                <section class="fc-controls" aria-label="Customize your family chart">
+          <div class="fc-control-head"><span>1</span><div><h2>Your family</h2><p>Start with names. Everyone can have a part.</p></div></div>
+          <label class="fc-label" for="fc-family-name">Family name <input id="fc-family-name" data-family-name maxlength="55" placeholder="The Rivera Family" /></label>
+          <div data-people-list class="fc-fields"></div>
+          <button class="fc-subtle" type="button" data-add-person>+ Add family member</button>
+          <hr />
+          <div class="fc-control-head"><span>2</span><div><h2>Our shared moments</h2><p>Choose two or three moments, not a long list of chores.</p></div></div>
+          <div data-moments-editor class="fc-moments-editor"></div>
+          <button class="fc-subtle" type="button" data-add-moment>+ Add a moment</button>
+          <hr />
+          <button class="fc-reset" type="button" data-reset>Start over with the example
+          <p class="fc-note" role="status" data-status>Changes save on this device.</p>
+        </section>
+        <button type="button" data-close-editor class="fc-done">Done · See our rhythm</button>
+      </dialog>
       <aside class="fc-club-cta">
         <p class="fc-eyebrow">WANT THE THINKING DONE FOR YOU?</p>
         <h2>A family plan already prepared.</h2>
@@ -116,8 +149,82 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 @media(max-width:480px){.fc-page{padding:26px 12px}.fc-controls{padding:17px}.fc-paper-inner{padding:7% 6% 4%}.fc-print-moments{gap:9px;margin-top:12px}.fc-legend{margin-top:11px}.fc-print-job{gap:5px;grid-template-columns:3px minmax(48px,.29fr) 1fr;min-height:25px}.fc-paper-inner h2{font-size:20px}.fc-print-moment h3{font-size:15px}.fc-print-task{font-size:9px}.fc-print-owner{font-size:7px}.fc-paper-bottom p{font-size:9px}}
 @page{size:letter portrait;margin:0}
 @media print{body{background:white!important}body>*:not(:has(.fc-paper)){display:none!important}.fc-page{padding:0!important;margin:0!important;background:white!important}.fc-intro,.fc-controls,.fc-preview-heading,.fc-preview-tip,.fc-club-cta{display:none!important}.fc-wrap,.fc-layout,.fc-preview-area{display:block!important;margin:0!important;padding:0!important;max-width:none!important}.fc-paper{width:8.5in!important;height:11in!important;max-width:none!important;aspect-ratio:auto!important;box-shadow:none!important;break-inside:avoid}.fc-paper-inner h2{font-size:35px}.fc-print-eyebrow{font-size:11px}.fc-paper-motto{font-size:16px}.fc-print-moments{gap:22px;margin-top:28px}.fc-print-moment h3{font-size:25px}.fc-print-job{min-height:46px;gap:13px}.fc-print-owner{font-size:12px}.fc-print-task{font-size:16px}.fc-legend-item{font-size:10px}.fc-paper-bottom p{font-size:14px}.fc-paper-bottom small{font-size:10px}.fc-page header,.fc-page footer{display:none!important}html,body{padding:0!important;margin:0!important}}
+
+/* Mirror the March Club plan's document-centered rail and printable. */
+.fc-page{padding:0!important;background:#fbf9f5}
+.fc-wrap{max-width:none!important}
+.fc-layout{grid-template-columns:clamp(320px,30%,440px) minmax(0,1fr)!important;gap:0!important;align-items:stretch!important;min-height:calc(100vh - 90px)}
+.fc-rail{min-width:0;background:#fbf9f5;padding:27px clamp(20px,2.2vw,34px) 42px;border-right:1px solid #e4ddd6}
+.fc-rail-head{border-bottom:1px solid #e4ddd6;padding:0 0 18px;margin-bottom:18px}
+.fc-crumb{font-size:11px;font-weight:650;letter-spacing:.14em;color:#6e6461;margin:0;text-transform:uppercase}
+.fc-rail-head h1{font:400 clamp(26px,2.3vw,32px)/1.15 Georgia,serif;letter-spacing:-.015em;margin:9px 0}
+.fc-rail-head h1 em{font-weight:400}
+.fc-rail-sub{font-size:13px;color:#6e6461;margin:0}
+.fc-ready{display:inline-flex;align-items:center;gap:8px;background:#eef2ea;color:#354f42;font-size:12px;font-weight:650;border-radius:40px;padding:6px 12px;margin:0 0 13px}
+.fc-ready:before{content:'';width:7px;height:7px;border-radius:50%;background:#71866c}
+.fc-rail-description{font-size:13px;color:#706963;line-height:1.65;margin:0 0 18px}
+.fc-actions{display:grid;gap:8px}
+.fc-edit-action,.fc-print-action{min-height:46px;border-radius:3px!important;padding:10px 18px;cursor:pointer;text-transform:uppercase;font:650 12px Montserrat,Arial,sans-serif!important;letter-spacing:.12em}
+.fc-edit-action{background:#4a3f3e;border:1px solid #4a3f3e;color:#fff}
+.fc-print-action{background:transparent;border:1px solid #4a3f3e;color:#4a3f3e}
+.fc-rail-details{margin-top:27px;border-top:1px solid #e4ddd6}
+.fc-rail-block{padding:17px 0;border-bottom:1px solid #e4ddd6}
+.fc-rail-label{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:#6e6461}
+.fc-rail-summary{font-size:14px;line-height:1.5;margin:0}
+.fc-rail-moment-list{display:grid;gap:8px}
+.fc-rail-moment-list div{display:flex;justify-content:space-between;gap:12px;font-size:13px}
+.fc-rail-moment-list span{color:#736c65}
+.fc-rail-people{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.fc-rail-people li{display:flex;align-items:baseline;gap:8px;line-height:1.4;font-size:12px}
+.fc-rail-people strong{flex:none;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
+.fc-rail-people span{color:#77716b}
+.fc-link{display:block;min-height:36px;padding:6px 0;border:0;background:transparent;color:#536e4e;font-size:13px;font-weight:650;cursor:pointer;text-decoration:underline;text-underline-offset:4px;text-align:left;margin-top:6px}
+.fc-rail-help{font-size:12px;line-height:1.6;color:#706963;margin-top:20px}
+.fc-preview-area{min-height:0;background:#f1efec;padding:26px clamp(18px,3vw,45px) 44px!important}
+.fc-preview-heading{max-width:816px;margin:0 auto 13px!important}
+.fc-paper{max-width:816px!important;width:100%;box-shadow:0 10px 30px #3d38311f}
+.fc-paper-inner{padding:6.6% 7.8% 5%}
+.fc-paper-bottom p{margin:8px 0}
+.fc-print-moment{min-width:0}
+.fc-print-moment h3{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:2px solid #c7ded3;padding:0 0 7px}
+.fc-print-moment h3 small{color:#6e6461;font:500 clamp(7px,.9vw,11px) Montserrat,Arial,sans-serif}
+.fc-print-job{grid-template-columns:5px minmax(66px,.24fr) minmax(28px,.08fr) minmax(0,1fr)!important}
+.fc-job-art{width:clamp(23px,3.8vw,42px);height:clamp(23px,3.8vw,42px);object-fit:contain}
+.fc-job-art-empty{width:clamp(23px,3.8vw,42px)}
+.fc-print-finish{font:italic clamp(9px,1.3vw,14px)/1.4 Georgia,serif;color:#6e6461;margin:7px 0 0 19px}
+.fc-print-finish strong{font:700 clamp(7px,.8vw,10px) Montserrat,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#403d3b}
+.fc-dialog{position:fixed;inset:0;box-sizing:border-box;margin:auto;width:min(650px,calc(100vw - 24px));max-height:calc(100dvh - 30px);padding:24px 26px 28px;background:#fbf9f5;border:1px solid #e4ddd6;border-radius:3px;box-shadow:0 20px 65px #0003;overflow:auto;color:#4d4544;z-index:9999}
+.fc-dialog::backdrop{background:#211e1d88}
+.fc-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.fc-dialog-head h2{margin:5px 0 10px;font:400 29px Georgia,serif}
+.fc-close{border:0;background:transparent;font-size:30px;color:#4d4544;cursor:pointer;width:44px;height:44px}
+.fc-editor-tabs{display:flex;gap:7px 20px;flex-wrap:wrap;border-bottom:1px solid #e4ddd6;margin:10px 0 12px}
+.fc-editor-tabs button{border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:12px 2px;cursor:pointer;background:transparent;color:#6e6461;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.fc-editor-tabs button[aria-selected="true"]{border-bottom-color:#4a3f3e;color:#4a3f3e}
+.fc-dialog .fc-controls{display:grid;border:0;background:transparent;padding:0;gap:12px}
+.fc-dialog .fc-controls .fc-control-head{display:none}
+.fc-dialog .fc-controls hr{display:none}
+.fc-dialog .fc-controls > :where(.fc-label,.fc-fields,[data-add-person],.fc-moments-editor,[data-add-moment]){display:none}
+.fc-dialog[data-section="family"] .fc-controls > :where(.fc-label,.fc-fields,[data-add-person]){display:grid}
+.fc-dialog[data-section="moments"] .fc-controls > .fc-moments-editor,.fc-dialog[data-section="jobs"] .fc-controls > .fc-moments-editor{display:grid}
+.fc-dialog[data-section="moments"] .fc-controls > [data-add-moment]{display:block}
+.fc-dialog[data-section="family"] .fc-controls > [data-add-person]{display:block}
+.fc-dialog .fc-controls .fc-reset{justify-self:start}
+.fc-dialog .fc-controls .fc-note{text-align:left}
+.fc-dialog[data-section="moments"] .fc-job-editor,.fc-dialog[data-section="moments"] .fc-mini-add,.fc-dialog[data-section="moments"] .fc-moment-editor>.fc-label+div.fc-label{display:none}
+.fc-dialog[data-section="jobs"] .fc-moment-editor>.fc-label{display:none}
+.fc-done{display:block;width:100%;min-height:48px;margin-top:20px;border:0;border-radius:3px;background:#4a3f3e;color:#fff;font:700 12px Montserrat,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.fc-club-cta{margin:0 auto!important;max-width:none!important;padding:36px 20px!important;background:#eaf0e7}
+.fc-club-cta>p:not(.fc-eyebrow){max-width:590px;margin:10px auto}
+@media(min-width:1100px){.fc-layout{height:calc(100vh - 85px);min-height:680px;overflow:hidden}.fc-rail,.fc-preview-area{overflow-y:auto}}
+@media(max-width:1099px){.fc-layout{display:flex!important;flex-direction:column;min-height:0!important}.fc-rail{border-right:0;padding:24px max(18px,calc((100% - 640px)/2))}.fc-rail-details{display:grid}.fc-preview-area{padding:24px 16px 38px!important}.fc-paper{width:100%}.fc-paper-inner h2{font-size:clamp(20px,4vw,35px)}.fc-print-moment h3{font-size:clamp(15px,3vw,25px)}.fc-print-job{min-height:clamp(28px,6vw,46px)}.fc-print-owner{font-size:clamp(7px,1.5vw,12px)}.fc-print-task{font-size:clamp(9px,1.9vw,16px)}.fc-job-art{width:clamp(20px,4vw,36px);height:clamp(20px,4vw,36px)}}
+@media(max-width:480px){.fc-print-job{grid-template-columns:3px minmax(45px,.25fr) 22px minmax(0,1fr)!important}.fc-print-moment h3 small{font-size:7px}.fc-rail-head h1{font-size:30px}.fc-legend{gap:3px 8px}.fc-legend-item{font-size:7px}.fc-print-task{font-size:9px}.fc-job-art{width:21px;height:21px}}
+@media print{.fc-dialog,.fc-rail,.fc-club-cta,.fc-preview-heading,.fc-preview-tip{display:none!important}.fc-layout{display:block!important;min-height:0!important;height:auto!important;overflow:visible!important}.fc-preview-area{display:block!important;background:white!important;overflow:visible!important;padding:0!important}.fc-paper{width:8.5in!important;height:11in!important;max-width:none!important;box-shadow:none!important}.fc-print-job{grid-template-columns:5px 124px 42px 1fr!important;min-height:46px}.fc-job-art{width:42px!important;height:42px!important}.fc-print-moment h3{font-size:27px}.fc-print-moment h3 small{font-size:11px}.fc-print-owner{font-size:12px}.fc-print-task{font-size:17px}.fc-print-finish{font-size:14px}}
 </style>
 <script>
+import { marchIconArt, type MarchIcon } from '../data/club/march-chore-icons';
+const iconUrls:Record<string,string>={};
+for(const name of ['clear-dishes','wipe-surface','take-out-trash','clothes-away','make-bed','toys-away','clean-floor','shoes-away','feed-pets','empty-dishwasher'] as MarchIcon[]){const art=marchIconArt(name);if(art)iconUrls[name]=art.src;}
 type Person = {id:string;name:string;color:string};
 type Job = {id:string;title:string;personId:string};
 type Moment = {id:string;title:string;jobs:Job[]};
@@ -135,10 +242,24 @@ if(root){
  try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(valid(saved))state=saved}catch{}
  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch{};renderPreview()};
  const personName=(pid:string)=>state.people.find(p=>p.id===pid)?.name.trim()||'Unassigned';
+ const dialog=q<HTMLDialogElement>('[data-editor-dialog]');
+ const chooseSection=(section:string)=>{
+   dialog.dataset.section=section;
+   root.querySelectorAll<HTMLButtonElement>('[data-editor-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.editorTab===section)));
+ };
+ chooseSection('jobs');
+ root.querySelectorAll<HTMLButtonElement>('[data-open-editor]').forEach(b=>b.addEventListener('click',()=>{chooseSection(b.dataset.openEditor||'jobs');dialog.showModal()}));
+ root.querySelectorAll<HTMLButtonElement>('[data-editor-tab]').forEach(b=>b.addEventListener('click',()=>chooseSection(b.dataset.editorTab||'jobs')));
+ root.querySelectorAll<HTMLButtonElement>('[data-close-editor]').forEach(b=>b.addEventListener('click',()=>dialog.close()));
+ dialog.addEventListener('click',(e)=>{if(e.target===dialog)dialog.close()});
  const renderPreview=()=>{
    q('[data-preview-family]').textContent=state.family.trim()||'Our Family Rhythm';
+   q('[data-rail-family]').textContent=state.people.map(p=>p.name.trim()).filter(Boolean).join(' · ')||'Add your family';
+   q('[data-rail-moments]').innerHTML=state.moments.map(m=>'<div><span>'+text(m.title||'Untitled moment')+'</span><strong>'+m.jobs.length+' '+(m.jobs.length===1?'job':'jobs')+'</strong></div>').join('');
+   q('[data-rail-people]').innerHTML=state.people.map(p=>{const jobs=state.moments.flatMap(m=>m.jobs).filter(j=>j.personId===p.id&&j.title.trim()).map(j=>j.title);return '<li><strong style="color:'+p.color+'">'+text(p.name||'Family member')+'</strong><span>'+text(jobs.join(', ')||'No part yet')+'</span></li>'}).join('');
    q('[data-legend]').innerHTML=state.people.filter(p=>p.name.trim()).map(p=>'<span class="fc-legend-item"><i class="fc-legend-dot" style="background:'+p.color+'"></i>'+text(p.name)+'</span>').join('');
-   q('[data-preview-moments]').innerHTML=state.moments.map(m=>'<section class="fc-print-moment"><h3>'+text(m.title||'Our shared moment')+'</h3>'+m.jobs.map(j=>{const p=state.people.find(p=>p.id===j.personId);return '<div class="fc-print-job"><span class="fc-print-job-bar" style="background:'+(p?.color||'#aaa')+'"></span><span class="fc-print-owner" style="color:'+(p?.color||'#555')+'">'+text(personName(j.personId))+'</span><span class="fc-print-task">'+text(j.title||'Add a job')+'</span></div>'}).join('')+'</section>').join('');
+   const iconFor=(title:string)=>{const t=title.toLowerCase();const name=/dish|plate|table clear/.test(t)?'clear-dishes':/wipe|counter/.test(t)?'wipe-surface':/trash|garbage/.test(t)?'take-out-trash':/laundry|clothes/.test(t)?'clothes-away':/bed/.test(t)?'make-bed':/toys/.test(t)?'toys-away':/sweep|floor|vacuum/.test(t)?'clean-floor':/shoe/.test(t)?'shoes-away':/pet|dog|cat/.test(t)?'feed-pets':/dishwasher/.test(t)?'empty-dishwasher':null;return name?iconUrls[name]||'':''};
+   q('[data-preview-moments]').innerHTML=state.moments.map(m=>'<section class="fc-print-moment"><h3><span>'+text(m.title||'Our shared moment')+'</span><small>CUE · '+text(m.title||'Our moment')+'</small></h3>'+m.jobs.map(j=>{const p=state.people.find(p=>p.id===j.personId);const img=iconFor(j.title);return '<div class="fc-print-job"><span class="fc-print-job-bar" style="background:'+(p?.color||'#aaa')+'"></span><span class="fc-print-owner" style="color:'+(p?.color||'#555')+'">'+text(personName(j.personId))+'</span>'+(img?'<img class="fc-job-art" alt="" src="'+img+'"/>':'<span class="fc-job-art-empty"></span>')+'<span class="fc-print-task">'+text(j.title||'Add a job')+'</span></div>'}).join('')+'<p class="fc-print-finish"><strong>Finished when</strong> everyone has done their part.</p></section>').join('');
  };
  const renderEditors=()=>{
    (q<HTMLInputElement>('[data-family-name]')).value=state.family;
