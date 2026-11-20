@@ -328,6 +328,10 @@ jobs:
           node scripts/e2e/calendar-google-e2e.mjs app-www e2e-google
           bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
           node scripts/e2e/calendar-google-e2e.mjs dist e2e-google-web
+      - name: Free accounts and complimentary Club (admin grant, both adults, MAWL, expiry, revoke, paid), on a fresh test database
+        run: |
+          bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+          node scripts/e2e/club-access-e2e.mjs dist e2e-club-access
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -337,6 +341,7 @@ jobs:
             e2e-calendar/
             e2e-google/
             e2e-google-web/
+            e2e-club-access/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
