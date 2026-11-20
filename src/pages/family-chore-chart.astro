@@ -53,7 +53,8 @@ import PublicLayout from '../layouts/PublicLayout.astro';
     </div>
   </main>
 </PublicLayout>
-<style>
+<!-- Dynamic editor and print-preview nodes are created in client JavaScript, so CSS must be global. -->
+<style is:global>
 .fc-page{background:#fbf7f1;color:#403d3b;font-family:Montserrat,Arial,sans-serif;padding:38px 20px 70px}
 .fc-wrap{max-width:1290px;margin:0 auto}
 .fc-intro{max-width:780px;margin-bottom:36px}
