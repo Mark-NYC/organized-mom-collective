@@ -46,6 +46,47 @@ describe('Family Meeting Club by invitation, in the app', () => {
   });
 });
 
+describe('iOS Club access is complimentary-invitation only', () => {
+  it('does not unlock the iOS Club for a paid web membership without a live grant', async () => {
+    const { membershipForAppStore } = await import('../src/lib/club/membership');
+    const me = {
+      access: true, grant: null, member: true, plan: 'monthly' as const,
+      status: 'active', payment_problem: false, renews: null, ends: null,
+      ended_at: null, revoked: false, onboarded: true, has_address: true,
+      enrolled_at: null, first_paid_month: null, current_month: '2026-11',
+      membership_year: null, welcome: null, next: null, months: [],
+    };
+    const ios = membershipForAppStore(me, true);
+    expect(ios.access).toBe(false);
+    expect(ios.member).toBe(false);
+    expect(ios.grant).toBe(null);
+    expect(membershipForAppStore(me, false)).toEqual(me);
+  });
+
+  it('allows an explicit live grant, including when the household also pays on the web', async () => {
+    const { membershipForAppStore } = await import('../src/lib/club/membership');
+    const paidAndInvited = {
+      access: true, grant: 'complimentary', member: true, plan: 'monthly' as const,
+      status: 'active', payment_problem: false, renews: null, ends: null,
+      ended_at: null, revoked: false, onboarded: true, has_address: true,
+      enrolled_at: null, first_paid_month: null, current_month: '2026-11',
+      membership_year: null, welcome: null, next: null, months: [],
+    };
+    expect(membershipForAppStore(paidAndInvited, true).access).toBe(true);
+    expect(membershipForAppStore({ ...paidAndInvited, access: false }, true).access).toBe(false);
+  });
+
+  it('the app library and meeting entitlement checks both require a grant', () => {
+    const store = src('src/lib/club/store.ts');
+    expect(store).toMatch(/const access = r\.access && \(!appShellBuild\(\) \|\| Boolean\(r\.grant\)\)/);
+    expect(store).toMatch(/kits: access \? r\.kits\.filter/);
+    const membership = src('src/lib/club/membership.ts');
+    expect(membership).toMatch(/membershipForAppStore\(await accountRpc<Membership>\('club_me'\)\)/);
+    const meeting = src('src/components/ourweek/WeeklyMeeting.tsx');
+    expect(meeting).toContain('accountStore.me()');
+  });
+});
+
 describe('App Review basics in the app', () => {
   it('the Account page links the Privacy Policy, Terms and Help, and they open on the website', () => {
     const account = src('src/components/FamilySummary.tsx');
