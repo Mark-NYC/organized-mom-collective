@@ -1,6 +1,6 @@
 # Organized Family development instructions
 
-Read [docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md](docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md) **before** modifying Family, the weekly Family Meeting, Club personalization, onboarding, household responsibilities, recommendation content, child skill progression, or seasonal-kit strategy.
+Read [docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md](docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md) and [docs/product/RESOURCE_ALIGNMENT.md](docs/product/RESOURCE_ALIGNMENT.md) **before** modifying Family, the weekly Family Meeting, Club personalization, onboarding, household responsibilities, recommendation content, child skill progression, or seasonal-kit strategy, **including public age-based guides, printed Responsibility Cards, free chore charts, and routines**.
 
 This framework is the governing product contract. Preserve these invariants:
 - Age suggests a starting skill but never limits a child or automatically changes their MAWL stage.
