@@ -110,7 +110,7 @@ export default function FollowThrough({ household, profile, colors, skipSkillAgr
                 {ANSWERS.map((a) => <button key={a.id} type="button" className="min-h-[44px] rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.82rem] font-semibold" onClick={() => void answer(id, a.id)} data-check-in-answer={a.id}>{a.label}</button>)}
               </div>
             ) : st.answer === 'on-own' ? (
-              <p className="mt-2 text-[0.9rem] text-[var(--of-sage-ink)]" role="status" data-check-in-result="celebrate">{names.join(' & ')} {names.length > 1 ? 'own' : 'owns'} it now. Say so out loud. Nothing new gets added for it.</p>
+              <p className="mt-2 text-[0.9rem] text-[var(--of-sage-ink)]" role="status" data-check-in-result="celebrate">{names.join(' & ')} did it on their own. That’s real progress: say so out loud. Keep it going; nothing new gets added for it.</p>
             ) : st.answer === 'reminders' ? (
               <p className="mt-2 text-[0.9rem]" role="status" data-check-in-result="continue">Keep practicing. A little less reminding each week is progress.</p>
             ) : (
@@ -127,7 +127,7 @@ export default function FollowThrough({ household, profile, colors, skipSkillAgr
         );
       })}
       {owned.length > 0 && (
-        <p className="text-[0.88rem] text-warm-soft" data-follow-through-owned>On their own now: {owned.slice(0, 4).map((r) => `${r.ownerIds.map((o) => people.get(o)).filter(Boolean).join(' & ')} (${r.agreement!.text})`).join(' · ')}</p>
+        <p className="text-[0.88rem] text-warm-soft" data-follow-through-owned>Doing it on their own lately: {owned.slice(0, 4).map((r) => `${r.ownerIds.map((o) => people.get(o)).filter(Boolean).join(' & ')} (${r.agreement!.text})`).join(' · ')}</p>
       )}
     </div>
   );

@@ -19,6 +19,9 @@
  * next step per child in Everyone's Part, built once when the meeting opens from the family's saved development
  * records. A child with a development step gets no month suggestion as well (one next step per person). If the
  * records can't be read, the layer is absent and the meeting is exactly as before. Free families never see it.
+ * The plan is tied to who is signed in, the household, Club access and the day (meeting-plan.ts), never kept across
+ * them. "We agreed" for a skill is saved by the database with its agreement in one step; the returned agreement goes
+ * onto this phone's lists (fam.adoptAgreement), so there is no second agreement save that could fail on its own.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
@@ -30,8 +33,6 @@ import { useToday } from '../../lib/hooks';
 import { agreementsByPerson, monthOf, weekAhead } from '../../lib/family-meeting-support';
 import { useFamily } from '../../lib/family-meeting-client';
 import { conflictText } from '../../lib/agreements/client';
-import { accountStore } from '../../lib/club/store';
-import { getSession } from '../../lib/account';
 import { buildFamilyMeeting, suggestionKey, type FamilyMeeting, type PartRecommendation } from '../../lib/club/family-meeting';
 import AgreedParts from '../family/AgreedParts';
 import { monthPage } from '../../data/club/month-pages';
@@ -39,8 +40,9 @@ import FollowThrough from '../family/FollowThrough';
 import ProfileQuestion from '../family/ProfileQuestion';
 import { Avatar } from '../app/ui';
 import type { ResponsibilityCategory } from '../../data/club/family-profile';
-import { useDevelopment } from '../../lib/family-development/client';
-import { buildDevelopmentPlan, type DevelopmentPlan } from '../../lib/family-development/engine';
+import { useDevelopment, useMeetingAccess } from '../../lib/family-development/client';
+import { buildDevelopmentPlan } from '../../lib/family-development/engine';
+import { planKey, reconcilePlan, recordScope, type PlanSlot } from '../../lib/family-development/meeting-plan';
 import { DevelopmentCheckIns, DevelopmentNextSteps, DevelopmentPractice } from '../family/DevelopmentCoach';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
@@ -60,10 +62,9 @@ export default function WeeklyMeeting() {
   const cal = useCalendar();
   const scope = cal.state.scope !== 'local' ? cal.state.scope : null;
   const fam = useFamily(scope);
-  const [club, setClub] = useState(false);
-  useEffect(() => {
-    void getSession().then(async (s) => { if (s) setClub(Boolean((await accountStore.me().catch(() => null))?.access)); });
-  }, []);
+  // Who is signed in and whether they have Club, rechecked on resume, tab focus and sign-in/out in another tab.
+  const access = useMeetingAccess();
+  const club = access.club;
   // Only calendars an adult shared with the household: a meeting is for everyone, so private ones stay out.
   const shared = useExternalCalendars(scope && cal.signedIn ? scope : null, 'household');
   const week = weekAhead([...Object.values(cal.state.events), ...shared.events], localToday(today), today);
@@ -74,14 +75,20 @@ export default function WeeklyMeeting() {
     () => (club && cal.household ? buildFamilyMeeting({ household: cal.household, profile: fam.profile, month }) : null),
     [club, cal.household, fam.profile, month],
   );
-  // Development (Club only): the plan is built once, when household, profile and records are first all in hand, so a
-  // decision mid-meeting never swaps the next step on screen; the live records show each decision's result.
-  const dev = useDevelopment(club && Boolean(cal.household));
-  const [devPlan, setDevPlan] = useState<DevelopmentPlan | null>(null);
+  // Development (Club only; src/lib/family-development/meeting-plan.ts): one plan per signed-in adult, household, Club
+  // access and day. Same key: the same plan all meeting (a decision never swaps the step on screen; live records show
+  // its result). New key (sign-out, another account or household, access lost, a new day): the old plan is gone at
+  // once, and a new one is built only from records loaded for the new key.
+  const identity = { userId: access.userId, householdId: cal.household?.id ?? null, club, today: localToday(today) };
+  const key = planKey(identity);
+  const dev = useDevelopment(recordScope(identity));
+  const [slot, setSlot] = useState<PlanSlot | null>(null);
   useEffect(() => {
-    if (devPlan || !club || !dev.loaded || !dev.records || !cal.household || !fam.profile) return;
-    setDevPlan(buildDevelopmentPlan({ household: cal.household, profile: fam.profile, records: dev.records, today: localToday(today) }));
-  }, [devPlan, club, dev.loaded, dev.records, cal.household, fam.profile, today]);
+    setSlot((prev) => reconcilePlan(prev, identity, { records: dev.records, householdOnScreen: cal.household?.id ?? null, profileLoaded: Boolean(fam.profile) },
+      (records) => buildDevelopmentPlan({ household: cal.household, profile: fam.profile, records, today: identity.today })));
+  }, [key, dev.records, cal.household, fam.profile]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Checked at render time too, so not even one frame shows a plan that no longer matches who and where we are.
+  const devPlan = slot && slot.key === key ? slot.plan : null;
   const devLive = useMemo(() => new Map((dev.records ?? []).map((r) => [r.id, r] as const)), [dev.records]);
   const devStepFor = new Set(devPlan?.people.filter((p) => p.step).map((p) => p.memberId) ?? []);
   const [who, setWho] = useState<string[]>([]);
@@ -210,7 +217,7 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Let’s Talk' && (
             <div className="mt-4 space-y-4">
-              {devPlan && <DevelopmentCheckIns plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} />}
+              {devPlan && <DevelopmentCheckIns plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAccessLost={access.revoke} />}
               <FollowThrough household={cal.household} profile={fam.profile} colors={cal.colors} {...(devPlan ? { skipSkillAgreements: true } : {})} />
               {meeting ? (
                 <div className="rounded-[9px] bg-[var(--of-surface)] p-4" data-meeting-questions>
@@ -234,7 +241,7 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Everyone’s Part' && (
             <div className="mt-4" data-meeting-parts-agreed>
-              {devPlan && <DevelopmentNextSteps plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgree={(d) => fam.saveAgreement({ ...d, month })} />}
+              {devPlan && <DevelopmentNextSteps plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgreement={fam.adoptAgreement} onAccessLost={access.revoke} />}
               {suggestions.length > 0 && (
                 <div className="mb-5" data-meeting-suggestions>
                   <p className="of-eyebrow">Ideas for this month, by age</p>

@@ -16,13 +16,15 @@ const MEETING = src('src/components/ourweek/WeeklyMeeting.tsx');
 const COACH = src('src/components/family/DevelopmentCoach.tsx');
 const DEV_FILES = [
   'src/lib/family-development/engine.ts', 'src/lib/family-development/records.ts', 'src/lib/family-development/client.ts',
-  'src/components/family/DevelopmentCoach.tsx',
+  'src/components/family/DevelopmentCoach.tsx', 'src/lib/family-development/meeting-plan.ts',
 ];
 
 describe('free and Club boundary', () => {
   it('the meeting loads development records only for a Club household and builds the plan only then', () => {
-    expect(MEETING).toMatch(/useDevelopment\(club && Boolean\(cal\.household\)\)/);
-    expect(MEETING).toMatch(/if \(devPlan \|\| !club \|\| !dev\.loaded \|\| !dev\.records/);
+    expect(MEETING).toMatch(/useDevelopment\(recordScope\(identity\)\)/);
+    expect(MEETING).toMatch(/const devPlan = slot && slot\.key === key \? slot\.plan : null/);
+    expect(MEETING).toMatch(/const access = useMeetingAccess\(\);\n  const club = access\.club;/);
+    expect(MEETING).not.toMatch(/getSession\(\)\.then/); // the one-shot Club check is gone
     // Every development element is behind the plan.
     for (const c of ['DevelopmentCheckIns', 'DevelopmentNextSteps', 'DevelopmentPractice']) {
       expect(MEETING).toMatch(new RegExp(`\\{devPlan && <${c} `));
@@ -81,7 +83,10 @@ describe('existing products are untouched', () => {
     for (const f of DEV_FILES) expect(src(f)).not.toMatch(/reward|allowance|treat|screen time|sticker|prize/i);
   });
   it('says "We agreed" only for the family\'s explicit choice and offers Not now / Not for us', () => {
-    expect(COACH).toMatch(/data-development-agree>We agreed</);
+    expect(COACH).toMatch(/data-development-agree>\{s\.busy \? 'Saving…' : s\.error \? 'Try again: we agreed' : 'We agreed'\}</);
+    // Success is reported only from the database's answer, never after a fire-and-forget agreement save.
+    expect(COACH).not.toMatch(/\.catch\(\(\) => undefined\)/);
+    expect(COACH).not.toMatch(/saveAgreement/);
     expect(COACH).toMatch(/data-development-not-now>Not now</);
     expect(COACH).toMatch(/data-development-dismiss>Not for us</);
     expect(COACH).toMatch(/Nothing moves forward on its own/);
@@ -98,7 +103,7 @@ describe('the meeting UI renders the plan (server render)', async () => {
     { id: 'm', firstName: 'Mia', kind: 'child' as const, role: 'child' as const, birthYear: 2019, birthMonth: 1 },
     { id: 'n', firstName: 'Noah', kind: 'child' as const, role: 'child' as const, birthYear: 2015, birthMonth: 1 },
   ] };
-  const watch = { id: 'r1', memberId: 'n', skillId: 'school-bag', title: 'Pack my backpack', stage: 'watch' as const, status: 'active' as const, cue: 'After dinner', variationsPracticed: 0, libraryVersion: 1, revision: 3, history: [], lastCheckInOn: '2026-11-10', lastSignal: 'consistency' as const, lastValue: 'strong' as const };
+  const watch = { id: 'r1', memberId: 'n', skillId: 'school-bag', title: 'Pack my backpack', stage: 'watch' as const, status: 'active' as const, cue: 'After dinner', variationsPracticed: 0, category: 'school-prep', agreementId: 'a1', agreementLive: true, libraryVersion: 1, revision: 3, history: [], lastCheckInOn: '2026-11-10', lastSignal: 'consistency' as const, lastValue: 'strong' as const };
   const plan = buildDevelopmentPlan({ household, profile: null, records: [watch], today: '2026-11-20' });
   const props = { plan, live: new Map([[watch.id, watch]]), decide: async () => ({ ok: false as const, error: 'offline' as const }), colors: {} };
 
@@ -110,10 +115,10 @@ describe('the meeting UI renders the plan (server render)', async () => {
     expect(html).not.toMatch(/Mia/); // Mia has no record: nothing to check in on
   });
   it('Everyone\'s Part shows one step per child: coaching for Noah, one idea for Mia with the three choices', () => {
-    const html = renderToStaticMarkup(createElement(DevelopmentNextSteps, { ...props, onAgree: async () => undefined }));
+    const html = renderToStaticMarkup(createElement(DevelopmentNextSteps, props));
     expect(html.match(/data-development-person=/g)).toHaveLength(2);
     expect(html).toMatch(/data-development-next="school-bag"/);
-    expect(html).toMatch(/It’s theirs now/); // offered as the family's choice, never applied
+    expect(html).toMatch(/We’ve decided: it’s theirs/); // offered as the family's choice, never applied
     expect(html).toMatch(/data-development-suggest=/);
     expect(html).toMatch(/We’ll show them first/);
   });
@@ -122,7 +127,7 @@ describe('the meeting UI renders the plan (server render)', async () => {
   });
   it('renders nothing for an empty or unavailable plan', () => {
     const empty = buildDevelopmentPlan({ household, records: null, today: '2026-11-20' });
-    expect(renderToStaticMarkup(createElement(DevelopmentNextSteps, { ...props, plan: empty, onAgree: async () => undefined }))).toBe('');
+    expect(renderToStaticMarkup(createElement(DevelopmentNextSteps, { ...props, plan: empty }))).toBe('');
     expect(renderToStaticMarkup(createElement(DevelopmentCheckIns, { ...props, plan: empty }))).toBe('');
   });
 });
