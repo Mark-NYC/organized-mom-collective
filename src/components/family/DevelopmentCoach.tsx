@@ -15,7 +15,8 @@
  * Club families only (WeeklyMeeting checks club_me; the database checks again on every write).
  */
 import { useEffect, useRef, useState } from 'react';
-import type { MawlStage } from '../../lib/family-development/framework';
+import { MAWL_STAGES, type MawlStage } from '../../lib/family-development/framework';
+import { HAND_OVER_LABEL, LAUNCH_CONFIRMATION, MAWL_LABEL, WATCH_DISTINCTION, advanceLabel, stepBackLabel } from '../../lib/family-development/language';
 import type { CheckInStep, DevelopmentPlan, SuggestStep } from '../../lib/family-development/engine';
 import { responsibilityCategoryOf } from '../../lib/family-development/engine';
 import type { CheckValue, DbAgreement, DecisionInput, DevelopmentDecision, DevelopmentRecord } from '../../lib/family-development/records';
@@ -24,25 +25,10 @@ import { newRecordId } from '../../lib/family-development/client';
 import type { MarkerColor } from '../../data/club/family-colors';
 import { Avatar } from '../app/ui';
 
-/** MAWL in a parent's words. */
-export const STAGE_LABEL: Record<MawlStage, string> = {
-  model: 'Showing how',
-  assist: 'Doing it together',
-  watch: 'Practicing, you nearby',
-  launch: 'Theirs now',
-};
-const ADVANCE_LABEL: Record<MawlStage, string> = {
-  model: 'Start doing it together',
-  assist: 'Let them try, you watch',
-  watch: 'We’ve decided: it’s theirs',
-  launch: '',
-};
-const START_STAGES: { stage: MawlStage; label: string }[] = [
-  { stage: 'model', label: 'We’ll show them first' },
-  { stage: 'assist', label: 'We already do it together' },
-  { stage: 'watch', label: 'They do it, we watch' },
-  { stage: 'launch', label: 'It’s already theirs' },
-];
+/** MAWL in a parent's words: the approved terms, one source (src/lib/family-development/language.ts). */
+export const STAGE_LABEL = MAWL_LABEL;
+/** Where a child starts with a new skill: the same four terms, Model first. */
+const START_STAGES: { stage: MawlStage; label: string }[] = MAWL_STAGES.map((stage) => ({ stage, label: MAWL_LABEL[stage] }));
 export const ERROR_TEXT: Record<DecideError, string> = {
   conflict: 'The other grown-up just changed this. Here’s the latest.',
   club_required: 'This part of the meeting is for Family Meeting Club members.',
@@ -158,10 +144,11 @@ function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost 
     (r) => {
       if (r.agreement) onAgreement?.(r.agreement);
       setEditing(false);
-      const stage = r.record.stage ? STAGE_LABEL[r.record.stage].toLowerCase() : '';
+      const stage = r.record.stage ? `“${STAGE_LABEL[r.record.stage]}”` : '';
       switch (decision) {
-        case 'advance': return r.record.status === 'launched' ? `Saved: it’s ${firstName}’s now. It stays on the list as theirs.` : `Saved: ${stage}.`;
-        case 'step-back': return `Saved: back to ${stage}.`;
+        // Only after the database confirmed it: the confirmation is the family's Launch decision, saved.
+        case 'advance': return r.record.status === 'launched' ? LAUNCH_CONFIRMATION : `Saved. Now: ${stage}.`;
+        case 'step-back': return `Saved. Back to ${stage}.`;
         case 'pause': return 'Paused. It’s off everyone’s list until you bring it back.';
         case 'dismiss': return 'Set aside. It’s off the list, and we won’t suggest it again.';
         case 'modify': return 'Saved your words, here and on the list.';
@@ -192,13 +179,15 @@ function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost 
       <p className="text-[0.95rem]"><strong>{rec.title}</strong> <span className="text-warm-soft">· {STAGE_LABEL[stage]}</span></p>
       <p className="mt-1 text-[0.9rem] leading-relaxed">{step.coaching}</p>
       {step.watchVariation && <p className="mt-2 rounded-[9px] bg-[var(--of-surface)] px-3 py-2 text-[0.9rem]" data-development-variation-suggestion>Try a different kind of day: {step.watchVariation}</p>}
+      {stage === 'watch' && <p className="mt-2 text-[0.85rem] text-warm-soft" data-development-watch-distinction>{WATCH_DISTINCTION}</p>}
       {step.hint && <p className="mt-2 text-[0.85rem] text-warm-soft" data-development-hint>{step.hint}</p>}
       {step.safety && <p className="mt-2 text-[0.8rem] text-warm-soft">{step.safety}</p>}
       {!s.done && (
         <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label={`What's next for ${firstName}: ${rec.title}`} aria-busy={s.busy}>
           {offers.map((d) => (
-            <button key={d} type="button" disabled={s.busy} className={`of-btn ${d === 'stay' ? '' : 'of-btn--soft'} !min-h-[44px]`} onClick={() => void act(d)} data-development-decision={d}>
-              {d === 'stay' ? 'Stay here' : d === 'advance' ? ADVANCE_LABEL[stage] : d === 'step-back' ? 'Make it easier' : 'Pause for now'}
+            <button key={d} type="button" disabled={s.busy} className={`of-btn ${d === 'stay' ? '' : 'of-btn--soft'} !min-h-[44px]`} onClick={() => void act(d)} data-development-decision={d}
+              {...(d === 'advance' && stage === 'watch' ? { 'aria-label': `${HAND_OVER_LABEL} to ${firstName}: ${rec.title}` } : {})}>
+              {d === 'stay' ? 'Stay here' : d === 'advance' ? advanceLabel(stage) : d === 'step-back' ? stepBackLabel(stage) : 'Pause for now'}
             </button>
           ))}
           <button type="button" className="min-h-[44px] px-1 text-left text-[0.88rem] font-semibold text-warm-ink underline underline-offset-4" onClick={() => setEditing((e) => !e)} aria-expanded={editing} data-development-edit>Change the cue or finish line</button>
@@ -237,7 +226,7 @@ function SuggestNext({ step, memberId, firstName, decide, onAgreement, onAccessL
       if (decision !== 'start') return decision === 'pause' ? 'Not now. We won’t bring it up again until you do.' : 'Not for us. We won’t suggest it again.';
       const live = r.agreement && !r.agreement.deleted;
       if (r.adopted) return `Already agreed: the other grown-up saved “${r.record.title}” for ${firstName}. It’s on the list.`;
-      return live ? `Saved: agreed by our family. It’s on ${firstName}’s list. ${STAGE_LABEL[r.record.stage!]}.` : 'Saved here. It isn’t on the list yet: check Who does what.';
+      return live ? `Saved: agreed by our family. It’s on ${firstName}’s list. Starting with “${STAGE_LABEL[r.record.stage!]}”.` : 'Saved here. It isn’t on the list yet: check Who does what.';
     },
   );
   return (

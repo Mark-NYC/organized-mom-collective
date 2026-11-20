@@ -19,6 +19,7 @@
  * (pets, a yard, a dishwasher, school attendance for a homeschool family).
  */
 import type { MawlStage } from './framework';
+import { HAND_OVER_LABEL, MAWL_LABEL } from './language';
 import { SKILLS_LIBRARY_VERSION, skillById, skills, type CuratedSkill, type SkillCategory } from './skills';
 import { availableDecisions, type CheckSignal, type CheckValue, type DevelopmentDecision, type DevelopmentRecord } from './records';
 import { CHALLENGES, GROWTH_ITEMS, PRIORITIES, labelOf, type ResponsibilityCategory } from '../../data/club/family-profile';
@@ -222,7 +223,7 @@ const STAGE_COACH_FALLBACK: Record<MawlStage, string> = {
   model: 'Do it while they watch, and say out loud what finished looks like.',
   assist: 'Do it together. Hand over one step at a time.',
   watch: 'Let them do it while you stay nearby. Coach quality, and notice how it goes when the day is different.',
-  launch: 'It’s theirs. Notice it, thank them, and only step in if it slips for a while.',
+  launch: 'It’s their responsibility now. Notice it and thank them. If it slips for a while, you can always step back and practice together.',
 };
 
 export function checkInQuestion(record: Pick<DevelopmentRecord, 'stage' | 'title' | 'cue'>, firstName: string): CheckInQuestion {
@@ -281,7 +282,9 @@ function checkInFor(r: DevelopmentRecord, firstName: string, today: string): Che
   // The library's generated Watch line repeats its variation ("…practice a variation: X"); the variation gets its own
   // line below, so the coaching says what Watch is for instead of saying the same thing twice.
   const authored = skill?.[r.stage];
-  const coaching = authored && !(r.stage === 'watch' && /practice a variation:/.test(authored)) ? authored : STAGE_COACH_FALLBACK[r.stage];
+  // The library's Launch lines describe the decision to hand over ("The family decides when…"); once the family has
+  // made it, coach what comes after instead.
+  const coaching = authored && r.stage !== 'launch' && !(r.stage === 'watch' && /practice a variation:/.test(authored)) ? authored : STAGE_COACH_FALLBACK[r.stage];
   let watchVariation: string | undefined;
   let hint: string | undefined;
   if (r.stage === 'watch' && skill) {
@@ -291,7 +294,7 @@ function checkInFor(r: DevelopmentRecord, firstName: string, today: string): Che
       watchVariation = skill.watchVariations[r.variationsPracticed % skill.watchVariations.length];
     }
     if (r.lastValue === 'strong' && r.variationsPracticed >= 2) {
-      hint = `It’s held up in different situations. If you’re confident it’s ${firstName}’s, that’s your call to make, whenever you’re ready.`;
+      hint = `It’s held up in different situations. When you’re confident ${firstName} is ready, “${HAND_OVER_LABEL}” is your decision to make. There’s no rush.`;
     }
   }
   const recent = lastCheckValues(r);
@@ -300,7 +303,7 @@ function checkInFor(r: DevelopmentRecord, firstName: string, today: string): Che
       ? 'Two weeks of “not yet.” Pausing for now is fine, or try a different time of day.'
       : 'Two weeks of “not yet.” Stepping back a stage, or tying it to a different moment in the day, often helps.';
   } else if (!hint && (r.stage === 'model' || r.stage === 'assist') && r.lastValue === 'strong') {
-    hint = r.stage === 'model' ? 'When you’re ready, try doing it together.' : 'When you’re ready, let them try while you watch.';
+    hint = r.stage === 'model' ? `When you’re ready, move on to “${MAWL_LABEL.assist}”.` : `When you’re ready, move on to “${MAWL_LABEL.watch}”.`;
   }
   return {
     kind: 'check-in', record: r, skill, question: checkInQuestion(r, firstName), coaching,

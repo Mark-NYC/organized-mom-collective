@@ -217,7 +217,7 @@ describe('recommendation engine: one useful next step per child', () => {
     expect(s.question.signal).toBe('consistency');
     expect(s.question.text).toMatch(/after dinner/);
     expect(skillById('school-bag')!.watchVariations).toContain(s.watchVariation);
-    expect(s.hint).toMatch(/your call/);
+    expect(s.hint).toMatch(/your decision to make/);
     expect(s.decisions).toContain('advance'); // offered, never applied
     expect(s.record.stage).toBe('watch');
     const weekOne = rec({ memberId: NOAH.id, skillId: 'school-bag', stage: 'watch', lastCheckInOn: '2026-11-12', history: [] });
@@ -230,7 +230,7 @@ describe('recommendation engine: one useful next step per child', () => {
     const s = stepOf(plan({ household: household([ANA, NOAH]), records: [long] }), NOAH.id) as CheckInStep;
     expect(s.kind).toBe('check-in');
     expect(s.record.stage).toBe('watch');
-    expect(s.hint ?? '').not.toMatch(/Launch|your call/);
+    expect(s.hint ?? '').not.toMatch(/Launch|your decision|Hand over/);
   });
 
   it('suggests making it easier after two weeks of "not yet", without changing anything', () => {

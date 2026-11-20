@@ -181,10 +181,21 @@ with the same ids. Buttons are disabled while a request is out; focus moves to t
 | --- | --- |
 | Our Focus | Unchanged. |
 | Let's Talk | "What we're working on": one stage-appropriate question per child with a due check-in (three answers), plus "We tried it on a different kind of day" in Watch. One tap saves a `check-in`. Then the existing follow-through (minus `skill:` agreements) and the month's questions. |
-| Everyone's Part | "One next step each": for a check-in, the stage coaching, a Watch variation when due, the hint, and **Stay here · next stage (in plain words; from Watch: "We've decided: it's theirs") · Make it easier · Pause for now · Change the cue or finish line**. For a new skill: the reasons, a one-line summary (when · finished · where the child is, default *We'll show them first*), one "Adjust before agreeing" disclosure for the cue, finish line and starting stage, and **We agreed · Not now · Not for us**. A child with a development step gets no month suggestion as well. |
+| Everyone's Part | "One next step each": for a check-in, the stage coaching, a Watch variation when due, the hint, and **Stay here · Next: {stage} (from Watch: "Hand over responsibility") · Step back: {stage} · Pause for now · Change the cue or finish line**. In Watch it also says: "Doing it on their own is progress. Handing over responsibility is a separate choice you make, when you're ready." After a saved Launch, and only then: "Great! This is now their responsibility. You can always step back and practice together again if needed." For a new skill: the reasons, a one-line summary (when · finished · where the child is, default *I'll show them how*), one "Adjust before agreeing" disclosure for the cue, finish line and starting stage, and **We agreed · Not now · Not for us**. A child with a development step gets no month suggestion as well. |
 | Let's Practice | Up to two "practice it now" lines for skills in Model/Assist or just agreed. Then the month's practice step as before. |
 
-MAWL in parents' words: Showing how · Doing it together · Practicing, you nearby · Theirs now.
+MAWL in parents' words (owner decision 2026-11-20; one source: `src/lib/family-development/language.ts`; stored
+values unchanged):
+
+| Stage | Parents read |
+| --- | --- |
+| Model | I'll show them how |
+| Assist | We'll do it together |
+| Watch | They'll do it, I'll coach |
+| Launch | Ready to take full responsibility |
+
+The only way to Launch is the parent's **Hand over responsibility** (or choosing "Ready to take full responsibility"
+when agreeing to something the child already owns). "On my own" in a check-in is progress, never a Launch.
 
 Writes are online-only (like follow-through check-ins); errors are shown in place (`club_required`, `conflict` →
 reloads the other adult's change, `offline`).
@@ -244,12 +255,12 @@ rollback (the agreement survives) → re-apply → verify (5/5).
 ## 9. Verification and what is still unverified
 
 **Browser QA** (`scripts/e2e/family-development-qa.mjs`): a website build against the isolated test backend (real
-database functions, real migration 20261207, no mocks). 74 checks at 393px, 430px and 1440px: signed out, free family,
+database functions, real migration 20261207, no mocks). 93 checks at 393px, 430px and 1440px (re-run after the approved MAWL wording): signed out, free family,
 Club family without and with records, two children, one step per child and no duplicate month suggestion, "We agreed"
 saving record + agreement (one each, linked), a failed save (nothing claimed, nothing saved, retry), a lost answer +
 retry (still one of each), return later (not suggested again), a Watch check-in (no automatic Launch), pause taking
 the agreement off the list, a failed records load (meeting works without the layer), Club access lost and restored
-without a reload, sign-out and another account in another tab, the four parts with Next/Back, no horizontal
+without a reload, sign-out and another account in another tab, all four stages in the approved words, Hand over responsibility (a failed save shows no confirmation; a saved one shows the approved confirmation and keeps the agreement), ownership check-in and step back after Launch, the four parts with Next/Back, no horizontal
 overflow, 44px targets, keyboard save with focus on the result, axe WCAG 2.1 AA: no violations. The existing family
 end-to-end (`scripts/e2e/family-e2e.mjs`, web) passes too (108 checks), after updating it for #513's one-part-at-a-time
 meeting.

@@ -118,9 +118,12 @@ describe('the meeting UI renders the plan (server render)', async () => {
     const html = renderToStaticMarkup(createElement(DevelopmentNextSteps, props));
     expect(html.match(/data-development-person=/g)).toHaveLength(2);
     expect(html).toMatch(/data-development-next="school-bag"/);
-    expect(html).toMatch(/We’ve decided: it’s theirs/); // offered as the family's choice, never applied
+    expect(html).toMatch(/Hand over responsibility/); // offered as the family's choice, never applied
+    expect(html).toMatch(/Doing it on their own is progress\. Handing over responsibility is a separate choice/);
+    expect(html).toMatch(/Step back: We’ll do it together/);
+    expect(html).not.toMatch(/Great! This is now their responsibility/); // never before a save
     expect(html).toMatch(/data-development-suggest=/);
-    expect(html).toMatch(/We’ll show them first/);
+    expect(html).toMatch(/I’ll show them how/);
   });
   it('Let\'s Practice offers the new idea\'s Model step', () => {
     expect(renderToStaticMarkup(createElement(DevelopmentPractice, props))).toMatch(/Practice it now/);
