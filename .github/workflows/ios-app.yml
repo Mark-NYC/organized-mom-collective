@@ -82,12 +82,12 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/test-household-sql.sh
-      - name: 20261124-27 on production's current schema (without 20261121-23, and 28, 29 and 20261203, which need them)
+      - name: 20261124-27 on production's current schema (without 20261121-23, and 28, 29, 20261203 and 20261208, which need them)
         env:
           PGHOST: localhost
           PGUSER: postgres
           PGPASSWORD: ci-only
-          SKIP_MIGRATIONS: '^2026112[1238]|^20261129|^20261203'
+          SKIP_MIGRATIONS: '^2026112[1238]|^20261129|^20261203|^20261208'
           ONLY_TESTS: accounts-access club-access club-membership club-profile household-partners family-calendar household-colors family-agreements household-ownership household-join-from-own household-cleaning-progress
         run: bash scripts/test-household-sql.sh
       - name: Rollback rehearsal (preflight, apply, verify, roll back, schema identical to before)
