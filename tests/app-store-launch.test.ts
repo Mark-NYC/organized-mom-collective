@@ -83,7 +83,9 @@ describe('iOS Club access is complimentary-invitation only', () => {
     const membership = src('src/lib/club/membership.ts');
     expect(membership).toMatch(/membershipForAppStore\(await accountRpc<Membership>\('club_me'\)\)/);
     const meeting = src('src/components/ourweek/WeeklyMeeting.tsx');
-    expect(meeting).toContain('accountStore.me()');
+    const meetingClient = src('src/lib/family-development/client.ts');
+    expect(meeting).toContain('useMeetingAccess()');
+    expect(meetingClient).toContain('accountStore.me()');
   });
 });
 
