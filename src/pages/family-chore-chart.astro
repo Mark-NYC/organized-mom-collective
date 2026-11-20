@@ -1,0 +1,174 @@
+---
+/**
+ * Free, manually configured whole-family chart. Deliberately independent from
+ * Club profiles, generated plans, approval deadlines and member storage.
+ */
+import PublicLayout from '../layouts/PublicLayout.astro';
+---
+<PublicLayout title="Free Family Chore Chart | Organized Mom Collective" description="Make a free printable family chore chart. Choose shared daily moments, add family members, assign responsibilities and print a one-page family rhythm." width="full" showUpdatedDate={false}>
+  <main class="fc-page" data-family-chart>
+    <div class="fc-wrap">
+      <header class="fc-intro">
+        <p class="fc-eyebrow">FREE PRINTABLE FAMILY CHORE CHART</p>
+        <h1>Everyone has a part.</h1>
+        <p>Make a simple plan for the moments your family already shares. Add names, choose who owns what, then print it and hang it where everyone can see.</p>
+      </header>
+      <div class="fc-layout">
+        <section class="fc-controls" aria-label="Customize your family chart">
+          <div class="fc-control-head"><span>1</span><div><h2>Your family</h2><p>Start with names. Everyone can have a part.</p></div></div>
+          <label class="fc-label" for="fc-family-name">Family name <input id="fc-family-name" data-family-name maxlength="55" placeholder="The Rivera Family" /></label>
+          <div data-people-list class="fc-fields"></div>
+          <button class="fc-subtle" type="button" data-add-person>+ Add family member</button>
+          <hr />
+          <div class="fc-control-head"><span>2</span><div><h2>Our shared moments</h2><p>Choose two or three moments, not a long list of chores.</p></div></div>
+          <div data-moments-editor class="fc-moments-editor"></div>
+          <button class="fc-subtle" type="button" data-add-moment>+ Add a moment</button>
+          <hr />
+          <div class="fc-control-head"><span>3</span><div><h2>Print your plan</h2><p>One page for the whole family. No sign-in needed.</p></div></div>
+          <button class="fc-print" type="button" data-print>Print or save as PDF</button>
+          <button class="fc-reset" type="button" data-reset>Start over</button>
+          <p class="fc-note" role="status" data-status>Changes save on this device.</p>
+        </section>
+        <section class="fc-preview-area" aria-label="Live chart preview">
+          <div class="fc-preview-heading"><span>YOUR PRINTABLE</span><span>US Letter · Portrait</span></div>
+          <div class="fc-paper" data-paper>
+            <div class="fc-paper-inner">
+              <p class="fc-print-eyebrow">OUR FAMILY RHYTHM</p>
+              <h2 data-preview-family>Our Family Rhythm</h2>
+              <p class="fc-paper-motto">Same moments. Everyone has a part.</p>
+              <div class="fc-legend" data-legend></div>
+              <div data-preview-moments class="fc-print-moments"></div>
+              <div class="fc-paper-bottom"><p>Start small. Practice together. Then let everyone own their part.</p><small>ORGANIZED MOM COLLECTIVE</small></div>
+            </div>
+          </div>
+          <p class="fc-preview-tip">The printable updates as you make changes. You can also save it as a PDF from your browser's print dialog.</p>
+        </section>
+      </div>
+      <aside class="fc-club-cta">
+        <p class="fc-eyebrow">WANT THE THINKING DONE FOR YOU?</p>
+        <h2>A family plan already prepared.</h2>
+        <p>This free chart is yours to fill in. Family Meeting Club takes it further with personalized monthly tools prepared for your family.</p>
+        <a href="/club-2/">Explore Family Meeting Club →</a>
+      </aside>
+    </div>
+  </main>
+</PublicLayout>
+<style>
+.fc-page{background:#fbf7f1;color:#403d3b;font-family:Montserrat,Arial,sans-serif;padding:38px 20px 70px}
+.fc-wrap{max-width:1290px;margin:0 auto}
+.fc-intro{max-width:780px;margin-bottom:36px}
+.fc-eyebrow{font-size:11px;font-weight:750;letter-spacing:.18em;color:#6b766a}
+.fc-intro h1{font:400 clamp(35px,5vw,62px)/1.08 Georgia,serif;margin:12px 0 15px}
+.fc-intro>p:last-child{font-size:16px;line-height:1.7;max-width:650px;color:#6d6560}
+.fc-layout{display:grid;grid-template-columns:minmax(320px,425px) minmax(0,1fr);gap:32px;align-items:start}
+.fc-controls{background:#fff;border:1px solid #e7e0d7;padding:25px;display:grid;gap:14px}
+.fc-controls hr{width:100%;border:0;border-top:1px solid #e8e1d9;margin:12px 0}
+.fc-control-head{display:flex;gap:13px;align-items:flex-start}
+.fc-control-head>span{display:grid;place-items:center;flex:none;width:29px;height:29px;background:#d4dfc4;border-radius:50%;font-size:13px;font-weight:700}
+.fc-control-head h2{margin:0;font:400 24px/1.2 Georgia,serif}
+.fc-control-head p{margin:5px 0 2px;font-size:12px;line-height:1.55;color:#706963}
+.fc-label{display:grid;gap:6px;font-size:12px;font-weight:700}
+.fc-page input,.fc-page select{box-sizing:border-box;width:100%;min-width:0;min-height:42px;border:1px solid #d9d3cb;border-radius:3px;background:white;padding:9px 10px;color:#403d3b;font:400 14px Montserrat,Arial,sans-serif}
+.fc-page input:focus-visible,.fc-page select:focus-visible,.fc-page button:focus-visible{outline:2px solid #466857;outline-offset:2px}
+.fc-fields{display:grid;gap:8px}
+.fc-person-row{display:grid;grid-template-columns:16px minmax(0,1fr) 34px;gap:8px;align-items:center}
+.fc-person-color{height:24px;width:7px;border-radius:4px;justify-self:center}
+.fc-icon-button{background:transparent;border:0;color:#746f68;min-height:36px;cursor:pointer;font-size:23px}
+.fc-subtle{border:1px solid #c7cfc0;background:#f3f6ef;color:#394e3f;text-align:left;padding:11px 14px;cursor:pointer;font-size:13px;font-weight:700}
+.fc-subtle:disabled{opacity:.45;cursor:not-allowed}
+.fc-moments-editor{display:grid;gap:14px}
+.fc-moment-editor{border:1px solid #e5dfd7;background:#fdfbf8;padding:13px;display:grid;gap:10px}
+.fc-moment-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fc-moment-top strong{font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.fc-small-button{border:0;background:none;color:#78534d;text-decoration:underline;cursor:pointer;font-size:12px}
+.fc-job-editor{display:grid;grid-template-columns:minmax(0,1fr) minmax(105px,.55fr) 27px;align-items:center;gap:5px}
+.fc-job-editor input,.fc-job-editor select{font-size:12px;min-height:38px}
+.fc-mini-add{background:none;border:0;text-align:left;padding:5px 0;color:#3f6953;font-weight:700;cursor:pointer;font-size:12px}
+.fc-print{background:#4c4b45;border:0;color:white;font:700 13px Montserrat,Arial,sans-serif;padding:16px;cursor:pointer}
+.fc-reset{border:0;background:transparent;text-decoration:underline;text-underline-offset:3px;color:#706963;cursor:pointer;font-size:12px}
+.fc-note{font-size:11px;color:#77746d;margin:0;text-align:center}
+.fc-preview-area{min-width:0}
+.fc-preview-heading{display:flex;justify-content:space-between;gap:8px;font-size:11px;letter-spacing:.1em;color:#716e69;margin:0 0 13px}
+.fc-paper{width:100%;max-width:680px;aspect-ratio:8.5/11;background:white;margin:0 auto;box-shadow:0 10px 30px #39352e1d;overflow:hidden}
+.fc-paper-inner{height:100%;box-sizing:border-box;padding:7.6% 7.8% 5%;display:flex;flex-direction:column}
+.fc-print-eyebrow{font-size:clamp(7px,.9vw,11px);letter-spacing:.24em;font-weight:750;text-align:center;color:#3f6b5a;margin:0}
+.fc-paper-inner h2{text-align:center;font:400 clamp(19px,2.8vw,35px)/1.1 Georgia,serif;margin:10px 0 6px;overflow-wrap:anywhere}
+.fc-paper-motto{font:italic clamp(10px,1.3vw,16px) Georgia,serif;text-align:center;color:#80766e;margin:0}
+.fc-legend{display:flex;flex-wrap:wrap;gap:6px 13px;justify-content:center;margin:18px 0 4px}
+.fc-legend-item{font-size:clamp(7px,.87vw,10px);text-transform:uppercase;letter-spacing:.05em;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+.fc-legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.fc-print-moments{display:grid;gap:clamp(9px,1.9vw,22px);margin-top:clamp(12px,2.5vw,28px)}
+.fc-print-moment h3{font:400 clamp(14px,2vw,25px) Georgia,serif;margin:0;border-bottom:2px solid #c7ded3;padding:0 0 7px}
+.fc-print-job{display:grid;grid-template-columns:4px minmax(65px,.28fr) 1fr;gap:clamp(5px,1.1vw,13px);align-items:center;min-height:clamp(25px,4.7vw,46px);border-bottom:1px solid #e9e5df;padding:4px 0}
+.fc-print-job-bar{width:4px;height:100%;border-radius:2px}
+.fc-print-owner{font-weight:700;font-size:clamp(7px,1vw,12px);text-transform:uppercase;overflow-wrap:anywhere}
+.fc-print-task{font-size:clamp(9px,1.35vw,16px);line-height:1.35;overflow-wrap:anywhere}
+.fc-paper-bottom{margin:auto 0 0;text-align:center;padding-top:16px;color:#766f69}
+.fc-paper-bottom p{font:italic clamp(9px,1.2vw,14px) Georgia,serif}
+.fc-paper-bottom small{font-size:clamp(7px,.85vw,10px);letter-spacing:.18em;font-weight:700}
+.fc-preview-tip{font-size:12px;line-height:1.6;color:#77716b;max-width:660px;margin:14px auto}
+.fc-club-cta{margin:48px auto 0;padding:32px;max-width:760px;background:#eaf0e7;text-align:center}
+.fc-club-cta h2{font:400 30px Georgia,serif;margin:10px 0}
+.fc-club-cta>p:not(.fc-eyebrow){font-size:14px;line-height:1.6}
+.fc-club-cta a{display:inline-block;margin-top:12px;color:#3f4c3e;font-weight:700;text-decoration:underline}
+@media(max-width:900px){.fc-layout{grid-template-columns:1fr}.fc-controls{max-width:680px;width:100%;box-sizing:border-box;margin:auto}.fc-paper-inner h2{font-size:clamp(22px,4vw,35px)}.fc-print-moment h3{font-size:clamp(16px,3vw,25px)}.fc-print-owner{font-size:clamp(8px,1.6vw,12px)}.fc-print-task{font-size:clamp(10px,2vw,16px)}.fc-print-job{min-height:clamp(28px,6vw,46px)}}
+@media(max-width:480px){.fc-page{padding:26px 12px}.fc-controls{padding:17px}.fc-paper-inner{padding:7% 6% 4%}.fc-print-moments{gap:9px;margin-top:12px}.fc-legend{margin-top:11px}.fc-print-job{gap:5px;grid-template-columns:3px minmax(48px,.29fr) 1fr;min-height:25px}.fc-paper-inner h2{font-size:20px}.fc-print-moment h3{font-size:15px}.fc-print-task{font-size:9px}.fc-print-owner{font-size:7px}.fc-paper-bottom p{font-size:9px}}
+@page{size:letter portrait;margin:0}
+@media print{body{background:white!important}body>*:not(:has(.fc-paper)){display:none!important}.fc-page{padding:0!important;margin:0!important;background:white!important}.fc-intro,.fc-controls,.fc-preview-heading,.fc-preview-tip,.fc-club-cta{display:none!important}.fc-wrap,.fc-layout,.fc-preview-area{display:block!important;margin:0!important;padding:0!important;max-width:none!important}.fc-paper{width:8.5in!important;height:11in!important;max-width:none!important;aspect-ratio:auto!important;box-shadow:none!important;break-inside:avoid}.fc-paper-inner h2{font-size:35px}.fc-print-eyebrow{font-size:11px}.fc-paper-motto{font-size:16px}.fc-print-moments{gap:22px;margin-top:28px}.fc-print-moment h3{font-size:25px}.fc-print-job{min-height:46px;gap:13px}.fc-print-owner{font-size:12px}.fc-print-task{font-size:16px}.fc-legend-item{font-size:10px}.fc-paper-bottom p{font-size:14px}.fc-paper-bottom small{font-size:10px}.fc-page header,.fc-page footer{display:none!important}html,body{padding:0!important;margin:0!important}}
+</style>
+<script>
+type Person = {id:string;name:string;color:string};
+type Job = {id:string;title:string;personId:string};
+type Moment = {id:string;title:string;jobs:Job[]};
+type State = {family:string;people:Person[];moments:Moment[]};
+const root=document.querySelector<HTMLElement>('[data-family-chart]');
+if(root){
+ const KEY='omc:public-family-chore-chart:v1';
+ const colors=['#789D88','#C28B77','#879CC1','#B5A46C','#9D83A8','#7C9C9D','#D09CA3','#898F68'];
+ const id=()=>Math.random().toString(36).slice(2,10);
+ const defaultState=():State=>({family:'',people:[{id:'p1',name:'Mom',color:colors[0]},{id:'p2',name:'Dad',color:colors[1]},{id:'p3',name:'Child',color:colors[2]}],moments:[{id:'m1',title:'After breakfast',jobs:[{id:'j1',title:'Clear my dishes',personId:'p3'},{id:'j2',title:'Wipe the table',personId:'p2'}]},{id:'m2',title:'After dinner',jobs:[{id:'j3',title:'Clear the table',personId:'p3'},{id:'j4',title:'Load the dishwasher',personId:'p2'},{id:'j5',title:'Wipe the counters',personId:'p1'}]}]});
+ const text=(v:unknown)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c));
+ const q=<T extends Element=HTMLElement>(s:string)=>root.querySelector<T>(s)!;
+ const valid=(v:any):v is State=>!!v&&typeof v.family==='string'&&Array.isArray(v.people)&&Array.isArray(v.moments);
+ let state:State=defaultState();
+ try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(valid(saved))state=saved}catch{}
+ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch{};renderPreview()};
+ const personName=(pid:string)=>state.people.find(p=>p.id===pid)?.name.trim()||'Unassigned';
+ const renderPreview=()=>{
+   q('[data-preview-family]').textContent=state.family.trim()||'Our Family Rhythm';
+   q('[data-legend]').innerHTML=state.people.filter(p=>p.name.trim()).map(p=>'<span class="fc-legend-item"><i class="fc-legend-dot" style="background:'+p.color+'"></i>'+text(p.name)+'</span>').join('');
+   q('[data-preview-moments]').innerHTML=state.moments.map(m=>'<section class="fc-print-moment"><h3>'+text(m.title||'Our shared moment')+'</h3>'+m.jobs.map(j=>{const p=state.people.find(p=>p.id===j.personId);return '<div class="fc-print-job"><span class="fc-print-job-bar" style="background:'+(p?.color||'#aaa')+'"></span><span class="fc-print-owner" style="color:'+(p?.color||'#555')+'">'+text(personName(j.personId))+'</span><span class="fc-print-task">'+text(j.title||'Add a job')+'</span></div>'}).join('')+'</section>').join('');
+ };
+ const renderEditors=()=>{
+   (q<HTMLInputElement>('[data-family-name]')).value=state.family;
+   q('[data-people-list]').innerHTML=state.people.map((p,i)=>'<div class="fc-person-row"><span class="fc-person-color" style="background:'+p.color+'"></span><input aria-label="Family member '+(i+1)+'" maxlength="35" data-person-name="'+p.id+'" value="'+text(p.name)+'"/><button type="button" class="fc-icon-button" aria-label="Remove '+text(p.name)+'" data-remove-person="'+p.id+'" '+(state.people.length===1?'disabled':'')+'>×</button></div>').join('');
+   q<HTMLButtonElement>('[data-add-person]').disabled=state.people.length>=8;
+   q('[data-moments-editor]').innerHTML=state.moments.map((m,i)=>'<section class="fc-moment-editor"><div class="fc-moment-top"><strong>Moment '+(i+1)+'</strong>'+(state.moments.length>1?'<button type="button" class="fc-small-button" data-remove-moment="'+m.id+'">Remove</button>':'')+'</div><label class="fc-label">When it happens<input maxlength="55" data-moment-title="'+m.id+'" value="'+text(m.title)+'" /></label><div class="fc-label">Who does what</div>'+m.jobs.map(j=>'<div class="fc-job-editor"><input maxlength="65" aria-label="Responsibility" placeholder="Add a job" data-job-title="'+j.id+'" data-moment-id="'+m.id+'" value="'+text(j.title)+'"/><select aria-label="Person responsible" data-job-owner="'+j.id+'" data-moment-id="'+m.id+'">'+state.people.map(p=>'<option value="'+p.id+'" '+(j.personId===p.id?'selected':'')+'>'+text(p.name||'Family member')+'</option>').join('')+'</select><button type="button" class="fc-icon-button" data-remove-job="'+j.id+'" data-moment-id="'+m.id+'" aria-label="Remove responsibility">×</button></div>').join('')+'<button type="button" class="fc-mini-add" data-add-job="'+m.id+'" '+(m.jobs.length>=5?'disabled':'')+'>+ Add responsibility</button></section>').join('');
+   q<HTMLButtonElement>('[data-add-moment]').disabled=state.moments.length>=3;
+   renderPreview();
+ };
+ const getMoment=(mid:string)=>state.moments.find(m=>m.id===mid);
+ const getJob=(mid:string,jid:string)=>getMoment(mid)?.jobs.find(j=>j.id===jid);
+ root.addEventListener('input',(e)=>{
+   const t=e.target as HTMLInputElement;if(!t?.matches('input'))return;
+   if(t.hasAttribute('data-family-name'))state.family=t.value;
+   const pid=t.dataset.personName;if(pid){const p=state.people.find(p=>p.id===pid);if(p)p.name=t.value;}
+   const mid=t.dataset.momentTitle;if(mid){const m=getMoment(mid);if(m)m.title=t.value;}
+   const jid=t.dataset.jobTitle;if(jid){const j=getJob(t.dataset.momentId||'',jid);if(j)j.title=t.value;}
+   save();
+ });
+ root.addEventListener('change',(e)=>{const t=e.target as HTMLSelectElement;if(t?.dataset.jobOwner){const j=getJob(t.dataset.momentId||'',t.dataset.jobOwner);if(j)j.personId=t.value;save()}});
+ root.addEventListener('click',(e)=>{
+   const t=(e.target as HTMLElement).closest<HTMLButtonElement>('button');if(!t)return;
+   if(t.hasAttribute('data-add-person')){state.people.push({id:id(),name:'',color:colors[state.people.length%colors.length]});renderEditors();save()}
+   if(t.dataset.removePerson){if(state.people.length<=1)return;state.people=state.people.filter(p=>p.id!==t.dataset.removePerson);for(const m of state.moments)for(const j of m.jobs)if(!state.people.some(p=>p.id===j.personId))j.personId=state.people[0].id;renderEditors();save()}
+   if(t.hasAttribute('data-add-moment')){if(state.moments.length>=3)return;state.moments.push({id:id(),title:'Before bed',jobs:[]});renderEditors();save()}
+   if(t.dataset.removeMoment){state.moments=state.moments.filter(m=>m.id!==t.dataset.removeMoment);renderEditors();save()}
+   if(t.dataset.addJob){const m=getMoment(t.dataset.addJob);if(m&&m.jobs.length<5)m.jobs.push({id:id(),title:'',personId:state.people[0]?.id||''});renderEditors();save()}
+   if(t.dataset.removeJob){const m=getMoment(t.dataset.momentId||'');if(m)m.jobs=m.jobs.filter(j=>j.id!==t.dataset.removeJob);renderEditors();save()}
+   if(t.hasAttribute('data-print'))window.print();
+   if(t.hasAttribute('data-reset')&&window.confirm('Start over? This will clear your saved family chart.')){state=defaultState();renderEditors();save();}
+ });
+ renderEditors();
+}
+</script>
