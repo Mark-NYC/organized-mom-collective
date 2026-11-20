@@ -1,6 +1,6 @@
 # Family development engine: skills library × development records × weekly meeting
 
-**Status 2026-11-20: built on a branch, NOT live.** The code, tests and migration exist; the migration
+**Status 2026-11-20 (revised after the owner review of PR 515): built on a branch, NOT live.** The code, tests and migration exist; the migration
 (`20261207000000_family_development_records.sql`) is **not applied** to production. Until it is, the weekly Family
 Meeting behaves exactly as before for every family (the read fails and the layer renders nothing).
 
@@ -63,38 +63,59 @@ becoming agreements, and because MAWL is per child per skill while an agreement 
 | Column | Meaning |
 | --- | --- |
 | `skill_id` | Canonical id from the library. Records survive library updates; an unknown id still shows in the family's words. |
-| `title`, `cue`, `finish_line`, `note` | The family's words. Only a `modify` decision changes them. |
+| `title`, `cue`, `finish_line`, `note` | The family's words. Only a `modify` decision changes them (and the agreement's words follow). |
 | `stage` | `model` · `assist` · `watch` · `launch`, always family-chosen. **Null** for a suggestion paused or dismissed before it was started: nothing is inferred. |
 | `status` | `active` · `paused` · `launched` · `dismissed`. Launched ⇔ stage Launch (DB constraints). |
+| `category` | The `club_responsibilities.category` its agreement is filed under. |
+| `agreement_id` | The family agreement (a confirmed `club_responsibilities` row) that goes with it. Null for never-started ideas. |
 | `last_signal`, `last_value`, `last_check_in_on` | The last "how is it going?" answer: *performance* (can do the steps), *consistency* (happens at the cue without reminders) or *ownership* (still theirs), each strong · partial · not-yet. |
 | `variations_practiced` | Times the family said they practiced on a different kind of day (Watch). Counted, never converted into a stage. |
 | `library_version`, `revision` | Library version decided under; optimistic concurrency for two adults. |
 
 `household_development_events`: append-only history of every decision (from/to stage and status, answer, note,
-who, when). Families can read it; nobody can edit or delete it.
+what happened to the agreement, who, when). Families can read it; nobody can edit or delete it.
 
 **Functions** (security definer, the household-function pattern used since 20261124):
 
-- `household_development()`: every record with its last 12 events. Any adult of the household. **No Club check**:
-  a family whose membership lapses keeps and sees its history.
-- `household_development_decide(p, p_base)`: one decision. Requires a household **and** the household's Club access
-  (`club_has_access(household_billing_user(uid))`) → `club_required` otherwise. Revisions → `conflict`; duplicates →
-  `exists`; anything else malformed → `invalid`.
+- `household_development()`: every record with its last 12 events and `agreement_live` (is its agreement on the
+  lists right now). Any adult of the household. **No Club check**: a family whose membership lapses keeps and sees
+  its history, and its agreements stay on every list (free features).
+- `household_development_decide(p, p_base)`: one decision **and its agreement change, in one transaction**.
+  Requires a household **and** the household's Club access (`club_has_access(household_billing_user(uid))`) →
+  `club_required`. Stale revision → `conflict`; a duplicate the family set aside → `exists`; else `invalid`. Returns
+  the record plus the agreement as phones sync it (`household_agreement_json`), so the phone shows it at once.
+- `household_development_ensure_agreement(...)`: internal (not callable by users). Links the child's live
+  `skill:<id>` agreement if one exists, else creates one with the phone-made id.
 
-| Decision | Effect |
-| --- | --- |
-| `start` | New record at the stage the family chose (required). Choosing Launch records something the child already owns. |
-| `pause` / `dismiss` | "Not now" / "Not for us", new or existing. Never suggested again until the family resumes it. |
-| `resume` | Paused/dismissed → active (or launched). A never-started idea needs the family's stage. |
-| `advance` | Exactly one stage up, from active only. Watch → Launch is the only way to Launch an existing record. |
-| `step-back` | Exactly one stage down; a launched record becomes active Watch. |
-| `stay`, `check-in` | No stage change; record the week's answer and date. |
-| `modify` | Title, cue, finish line. |
+### 3a. Agreement lifecycle (owner review of PR 515)
+
+A development record and its agreement never contradict each other: the database changes both in the same
+transaction, and the existing agreement functions are not modified (they sync these agreements like any other).
+
+| Decision | Development record | Family agreement (`club_responsibilities`) |
+| --- | --- | --- |
+| **start** ("We agreed") | created at the family's stage | created (or the child's existing live `skill:` agreement linked) |
+| **advance / step-back / stay / check-in** | stage per decision | unchanged: still practicing, or theirs |
+| **Launch** (advance from Watch, or start at "It's already theirs") | launched | stays on the list, now as theirs |
+| **Revisit a launched skill** (step-back) | active Watch | unchanged |
+| **modify** | new words | its text, when and finished follow |
+| **pause** ("Pause for now") | paused, stage kept | removed from every list: a tombstone (`deleted_at`), never a hard delete |
+| **dismiss** ("Not for us") | dismissed, never suggested again | removed the same way |
+| **resume** | active/launched again | a **new** agreement (a removed one is never brought back silently) |
+| **agreement removed elsewhere** (Who does what → "We're done with this") | still active; read shows `agreement_live: false` | the meeting asks "Put it back on the list, or pause it here too?" → **restore** (new agreement) or **pause** |
+| "Not now" / "Not for us" on a new idea | paused/dismissed, no stage | none is created |
+
+**Retries and two adults.** The phone makes the record id and the agreement id once per card and resends them on
+every retry: a repeated start (an answer lost on the way back) returns what was saved; a retried resume/restore
+links the same agreement. Two adults agreeing to the same skill for the same child get one record and one agreement:
+the second gets the first adult's (`adopted`), and the meeting says so. Other decisions use the revision: the later
+adult gets `conflict` and the latest copy. A phone holding an offline edit to an agreement that a pause removed gets
+the existing `removed` answer from `household_agreement_save`.
 
 **Authorization:** RLS on both tables (select for the household's adults only); no insert/update/delete grants;
 writes only through the function, which resolves the household from `auth.uid()` (never from input), checks the
-child belongs to it, is current and is a child. Tested in `supabase/tests/family-development.sql` (56 checks: free
-vs Club, partner, other household, no household, anon, direct writes refused, history immutable, lapsed membership).
+child belongs to it, is current and is a child, and refuses another household's agreement id. Tested in
+`supabase/tests/family-development.sql` (94 checks).
 
 ## 4. Recommendation engine (`src/lib/family-development/engine.ts`)
 
@@ -103,20 +124,24 @@ plan. Every suggestion carries its reasons (`why`).
 
 **Per child, at most one step**, in this order:
 
-1. **Check-in that needs attention**: an active record whose last answer was *not yet* or *partly*.
+1. **Check-in that needs attention**: an active record whose last answer was *not yet* or *partly*, or whose
+   agreement was removed elsewhere (put it back, or pause it).
 2. **Due check-in**: active records weekly (6+ days), launched ones every 4 weeks. Never twice in a day.
-3. **No new skill** when the child has a record in Model or Assist (that's where adult time goes) or two active
-   records, or is under 3.
+3. **No new skill** when the child has a record in Model or Assist (that's where adult time goes), two
+   responsibilities in progress (active records **plus other current agreements**), an agreement made in the past
+   week (let it settle), or is under 3. Existing agreements come before new skills.
 4. **One new skill**, at most **two per meeting for the household**, children with the fewest active records first.
 
 **Candidate filters** (a skill is never suggested when): the child has any record for it (active, paused,
 dismissed, launched); the child already owns it (existing row or a `skill:` agreement); it needs adult supervision
 and the child is below its typical starting age; the child is more than one year below its typical starting age;
 it assumes facts the family didn't give (pets, a yard, a dishwasher, plants; school routines for a homeschool
-family); its foundation skill is still in progress (e.g. *Fold* waits while *Sort* is active).
+family); its foundation skill is still in progress (e.g. *Fold* waits while *Sort* is active) **unless the family
+said they want it for this child**: their judgment of what a capable child can take on wins over the default
+sequence. Nothing in the database enforces a sequence, so a family can always start any skill.
 
 **Ranking** (reasons shown to the family): the family said they want it for this child (+100) · builds on a
-launched foundation (+25) · matches the household priority (+30) · matches a stated challenge (+10) · fits the
+launched foundation (+25) · matches the household priority (+40, so it outranks a seasonal match) · matches a stated challenge (+10) · fits the
 season (+20) · age fit, as guidance (+15, fading for skills well below the child's age) · a category the child
 already owns (−20) · already offered to a sibling this meeting (−8). Score must be positive. Ties: library order.
 
@@ -139,14 +164,24 @@ anywhere in the engine or UI (tested). Performance, consistency and ownership ar
 
 ## 5. In the weekly Family Meeting (Club families only)
 
-`WeeklyMeeting.tsx` builds the plan **once**, when the household, profile and records are first all loaded, so a
-decision mid-meeting never swaps the step on screen. Free families: no records are loaded, nothing changes.
+**Plan lifecycle** (`src/lib/family-development/meeting-plan.ts`, tested in `tests/family-development-lifecycle.test.ts`
+and in the browser): a plan belongs to one signed-in adult, one household, Club access and one day (its key). Same
+key: the same plan all meeting, so a decision never swaps the step on screen (live records show each result). New key
+(sign-out, another account, another household, access lost, a new day): the old plan is dropped immediately (also
+checked at render time), records loaded for an older key are ignored, and a new plan is built only from records loaded
+for the new key. Club access is rechecked when the app resumes, the tab becomes visible, another tab signs in or out,
+or a write is refused with `club_required`; a new account starts without Club until the database confirms it; a
+network failure keeps the last confirmed answer for the same account. Free families: no records are loaded.
+
+**Saving.** "Saved" appears only after the database answered, with the agreement it returned (which goes straight onto
+the phone's lists through the existing agreement store). A failed save says "Not saved" and the same button retries
+with the same ids. Buttons are disabled while a request is out; focus moves to the result message.
 
 | Part | What a Club family sees (`src/components/family/DevelopmentCoach.tsx`) |
 | --- | --- |
 | Our Focus | Unchanged. |
 | Let's Talk | "What we're working on": one stage-appropriate question per child with a due check-in (three answers), plus "We tried it on a different kind of day" in Watch. One tap saves a `check-in`. Then the existing follow-through (minus `skill:` agreements) and the month's questions. |
-| Everyone's Part | "One next step each": for a check-in, the stage coaching, a Watch variation when due, the hint, and **Stay here · next stage (named in plain words, e.g. "It's theirs now") · Make it easier · Pause for now · Change the cue or finish line**. For a new skill: the reasons, cue choices, editable finish line, "Where is {child} with this?" (defaults to *We'll show them first*), and **We agreed · Not now · Not for us**. A child with a development step gets no month suggestion as well. |
+| Everyone's Part | "One next step each": for a check-in, the stage coaching, a Watch variation when due, the hint, and **Stay here · next stage (in plain words; from Watch: "We've decided: it's theirs") · Make it easier · Pause for now · Change the cue or finish line**. For a new skill: the reasons, a one-line summary (when · finished · where the child is, default *We'll show them first*), one "Adjust before agreeing" disclosure for the cue, finish line and starting stage, and **We agreed · Not now · Not for us**. A child with a development step gets no month suggestion as well. |
 | Let's Practice | Up to two "practice it now" lines for skills in Model/Assist or just agreed. Then the month's practice step as before. |
 
 MAWL in parents' words: Showing how · Doing it together · Practicing, you nearby · Theirs now.
@@ -189,29 +224,44 @@ them).
 
 Production (read-only, 2026-11-20): 20261124, 20261127, 20261128 applied; **20261204 (follow-through) not applied**.
 This migration depends only on what production has and was tested on production's exact migration set
-(20261130, 20261202–04 left out): household suite 56/56, plus the existing suites.
+(20261130, 20261202–04 left out): `family-development.sql` 94/94 plus the related suites. It needs 20261124, 20261127 and 20261128, which preflight checks.
 
 1. Owner approval.
 2. Fresh verified backup (`.github/db-backup-request`, `[db-backup]`), record its ID.
 3. `supabase/rollout/family-development/preflight.sql` on production: every `ok = t`; save the snapshot rows.
 4. Apply `20261207000000_family_development_records.sql` (one transaction).
 5. `verify.sql`: 5/5 `ok = t`; snapshot half of `preflight.sql` again: identical.
-6. Smoke test with the owner's Club account: open the weekly meeting, agree one skill, reload, confirm it shows as a
-   check-in next week (or change the date in a test account), pause one, confirm it isn't suggested again.
+6. Smoke test with the owner's Club account: open the weekly meeting, agree one skill, confirm it appears in Who does
+   what, reload, pause it, confirm it leaves Who does what and isn't suggested again. Then a free account: no
+   development guidance.
 7. Record in `docs/ios/MIGRATION_DEPLOYMENT_PLAN.md`.
 
-Rollback: `rollback.sql` (drops the two tables and three functions; agreements and the profile stay). Rehearsed
-locally: preflight → apply → verify → snapshot identical → rollback → re-apply → verify.
+Rollback: `rollback.sql` (drops the two tables and four functions). Agreements made through it stay as ordinary
+agreements on every list; the profile is untouched. Rehearsed locally on production's migration set: preflight
+(8/8) → apply → verify (5/5) → snapshot identical (row counts and 10 function fingerprints) → an agreement made →
+rollback (the agreement survives) → re-apply → verify (5/5).
 
-## 9. Not yet connected or verified
+## 9. Verification and what is still unverified
 
+**Browser QA** (`scripts/e2e/family-development-qa.mjs`): a website build against the isolated test backend (real
+database functions, real migration 20261207, no mocks). 74 checks at 393px, 430px and 1440px: signed out, free family,
+Club family without and with records, two children, one step per child and no duplicate month suggestion, "We agreed"
+saving record + agreement (one each, linked), a failed save (nothing claimed, nothing saved, retry), a lost answer +
+retry (still one of each), return later (not suggested again), a Watch check-in (no automatic Launch), pause taking
+the agreement off the list, a failed records load (meeting works without the layer), Club access lost and restored
+without a reload, sign-out and another account in another tab, the four parts with Next/Back, no horizontal
+overflow, 44px targets, keyboard save with focus on the result, axe WCAG 2.1 AA: no violations. The existing family
+end-to-end (`scripts/e2e/family-e2e.mjs`, web) passes too (108 checks), after updating it for #513's one-part-at-a-time
+meeting.
+
+Still not verified or connected:
 - Migration not applied; the layer is invisible in production until it is.
-- No rendered-browser QA of the new meeting UI yet (phone 393px and desktop), and no axe pass; unit and SQL tests
-  only. Needs `scripts/club-qa.mjs`-style screenshots with a Club test account.
-- The iPhone app gets the same component (it renders the same page) but hasn't been run in the simulator.
-- `FollowThrough`'s existing "On my own → owns it now" wording predates MAWL and reads like Launch; for
-  non-skill agreements it is unchanged. Worth an owner decision.
+- iOS simulator not run (this environment has no macOS). The app renders the same page; CI's simulator job or a Mac run
+  is still needed.
+- Screen reader tested only through axe and focus/role checks, not with VoiceOver.
+- The app-wide `of-eyebrow` section label is 10.9px uppercase on every screen; not changed here.
 - Month-suggestion agreements (`month:<example>` sources) aren't mapped to skills, so they can't be placed on the
-  MAWL path yet; a reviewed crosswalk from month example ids to skill ids is the next small step.
+  MAWL path yet.
 - The age-guide card crosswalk is from illustration ids, not verified printed cards (unchanged from #514).
 - Seasons assume a US school calendar by date; a family-chosen school start date would be better.
+- A day change at midnight during an open meeting rebuilds the plan (rare; deliberate).

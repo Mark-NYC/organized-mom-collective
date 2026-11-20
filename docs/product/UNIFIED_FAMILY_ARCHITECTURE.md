@@ -219,7 +219,7 @@ shared by both adults, synced offline with revisions. These are the commitments.
   other caller.
 - **In the meeting:** Let's Talk opens with "How did it go?" for each due agreement: three answers on screen
   (On my own · Needs reminders · Struggling). Struggling asks the optional barrier and shows the one adjustment from
-  `nextStep()`. "We're done with this" is the existing remove. On my own is celebrated ("Mia owns it now").
+  `nextStep()`. "We're done with this" is the existing remove. On my own is celebrated as progress ("Mia did it on their own"); it is evidence, not a Launch decision (owner review of PR 515).
 - **Through the week:** Today and Family show each agreement's progress dot, and Club Home's "what's next" uses it.
 - **Needs your approval to apply.** Until applied, the meeting hides check-ins (the function is absent) and
   everything else works.
