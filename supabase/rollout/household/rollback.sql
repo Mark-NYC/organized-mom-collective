@@ -1,4 +1,4 @@
--- Rolls back 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,16 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261207 Family development records (alone: supabase/rollout/family-development/rollback.sql). Removes the
+-- families' MAWL records and their history; agreements made through them are ordinary agreements and go with the
+-- 20261127 section below. First, because its RLS policies use household_id_for (20261124).
+drop function if exists public.household_development_decide(jsonb, int);
+drop function if exists public.household_development();
+drop function if exists public.household_development_json(public.household_development);
+drop function if exists public.household_development_ensure_agreement(public.household_development, uuid, uuid);
+drop table if exists public.household_development_events;
+drop table if exists public.household_development;
 
 -- ---- 20261206 Connect Google Calendar (independent of the steps below; alone: supabase/rollout/calendar-google/rollback.sql).
 -- The encrypted Google tokens first (Vault), then the Google calendars (their imported events go with them).
