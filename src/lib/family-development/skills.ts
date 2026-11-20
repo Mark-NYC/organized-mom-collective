@@ -69,8 +69,7 @@ export const skills = [
     watch: "Observe the child's initiation and quality; practice a variation: Straighten bedding when the morning is busy.",
     launch: "The family decides when the child can initiate, complete, check and adapt this responsibility.",
     
-    cardIllustrationId: 28,
-  },
+      },
   {
     id: "bed", category: "self-care", title: "Make my bed", outcome: "Straighten the bed without adult steps.",
     typicalAge: { from: 6 }, finishLine: "Straighten the bed without adult steps.",
@@ -93,8 +92,7 @@ export const skills = [
     watch: "Observe the child's initiation and quality; practice a variation: Sort unexpected items on a busy day.",
     launch: "The family decides when the child can initiate, complete, check and adapt this responsibility.",
     
-    cardIllustrationId: 32,
-  },
+      },
   {
     id: "room", category: "personal-space", title: "Reset my bedroom", outcome: "Notice and finish the room's agreed reset.",
     typicalAge: { from: 11 }, finishLine: "Notice and finish the room's agreed reset.",
@@ -237,8 +235,7 @@ export const skills = [
     watch: "Observe the child's initiation and quality; practice a variation: Choose settings for different fabrics with adult check.",
     launch: "The family decides when the child can initiate, complete, check and adapt this responsibility.",
     safety: "Adult trains and supervises machine use and chemicals; never assume independent access.", requiresAdultSupervision: true,
-    cardIllustrationId: 35,
-  },
+      },
   {
     id: "own-laundry", category: "laundry", title: "Manage my laundry start to finish", outcome: "Plan, wash, dry, fold and store own laundry safely.",
     typicalAge: { from: 14 }, finishLine: "Plan, wash, dry, fold and store own laundry safely.",
@@ -515,6 +512,42 @@ export const skills = [
     
     
   }
+  {
+    id: 'hands', category: 'self-care', title: 'Wash my hands',
+    outcome: 'Wash hands with soap and water as needed.', typicalAge: { from: 4 },
+    finishLine: 'Hands are washed thoroughly and dried.',
+    cueSuggestions: ['Before eating and after the bathroom'], naturalPayoff: 'Hands are clean before the next activity.',
+    watchVariations: ['Remember to wash hands after playing outside.'], seasons: ['everyday'],
+    model: 'Show thorough handwashing and explain when to do it.',
+    assist: 'Practice all steps together, adjusting for reach and access.',
+    watch: 'Notice whether the child initiates washing in different situations and washes thoroughly.',
+    launch: 'The adult chooses when the child independently notices and completes handwashing.',
+    cardIllustrationId: 24,
+  },
+  {
+    id: 'desk', category: 'personal-space', title: 'Tidy my desk',
+    outcome: 'Restore the study area after use.', typicalAge: { from: 6 },
+    finishLine: 'Supplies are put away and work space is clear.',
+    cueSuggestions: ['After homework'], naturalPayoff: 'The study area is ready for the next task.',
+    watchVariations: ['Tidy up after a larger school project.'], seasons: ['school-start', 'everyday'],
+    model: 'Show where supplies belong and what a ready desk looks like.',
+    assist: 'Put supplies away together after a short work session.',
+    watch: 'Coach consistency and adapting to a larger project or change in supplies.',
+    launch: 'The adult decides when the child can maintain the space without reminders.',
+    cardIllustrationId: 31,
+  },
+  {
+    id: 'entryway', category: 'home-care', title: 'Tidy the entryway',
+    outcome: 'Return shoes, coats and bags to their places.', typicalAge: { from: 6 },
+    finishLine: 'Walkway is clear and belongings are stored.',
+    cueSuggestions: ['When arriving home'], naturalPayoff: 'Everyone can find their things and move safely.',
+    watchVariations: ['Tidy up after a crowded or rainy arrival.'], seasons: ['school-start', 'everyday'],
+    model: 'Demonstrate the homes for shoes, coats and bags.',
+    assist: 'Put items away together after arriving home.',
+    watch: 'Practice the complete entryway reset on busy and unusual days.',
+    launch: 'The adult decides when the child can notice and handle the reset independently.',
+    cardIllustrationId: 39,
+  },
 ] as const satisfies readonly CuratedSkill[];
 
 /** Alias crosswalk for the newer public chore chart. An alias can describe a
@@ -585,10 +618,10 @@ export function skillsForContext(input: {
 
 /** Confirmed source mappings, not an inference based on display-name matching. */
 export const AGE_GUIDE_CARD_IMAGE_TO_SKILL: Readonly<Record<number, string>> = Object.freeze({
-  22: 'teeth', 23: 'dressed', 25: 'school-bag', 27: 'school-day-prep',
-  28: 'bed', 29: 'toys', 30: 'fold', 32: 'sweep',
-  33: 'table', 34: 'dishes', 35: 'load', 36: 'counters',
-  37: 'trash', 38: 'shared', 40: 'bath-sink', 41: 'pet',
+  22: 'teeth', 23: 'dressed', 24: 'hands', 25: 'school-bag', 27: 'school-day-prep',
+  28: 'bed', 29: 'toys', 30: 'fold', 31: 'desk', 32: 'sweep',
+  33: 'table', 34: 'dishes', 35: 'sort', 36: 'counters',
+  37: 'trash', 38: 'shared', 39: 'entryway', 40: 'bath-sink', 41: 'pet',
 });
 /** No card print-text mapping is claimed: only age-guide artwork references. */
 export function skillForCardIllustration(id: number): CuratedSkill | null {
