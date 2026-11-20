@@ -58,12 +58,14 @@ final class AppLaunchTests: XCTestCase {
     /// Tap something on the page that may sit under the fixed tab bar (or above the screen): first drag the page in
     /// small steps until it is clear of the bar's 120 pt and below the top, then tap its center. A plain tap on a
     /// covered element lands on whatever covers it (run 44427790009: today's "+" was under the bar, the tap opened Family).
-    private func tapClear(_ e: XCUIElement) {
+    /// Scrolls `e` clear of the top bar and the bottom chrome, then taps it. `bottom`: how much the bottom covers
+    /// (the tab bar and home indicator; 200 on the Family Meeting, whose Back/Next bar sits above the tab bar).
+    private func tapClear(_ e: XCUIElement, bottom: CGFloat = 120) {
         let window = app.windows.firstMatch.frame
         for _ in 0..<8 {
             let f = e.frame
-            if f.minY > window.minY + 100 && f.maxY < window.maxY - 120 { break }
-            let up = f.maxY >= window.maxY - 120
+            if f.minY > window.minY + 100 && f.maxY < window.maxY - bottom { break }
+            let up = f.maxY >= window.maxY - bottom
             app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.6 : 0.35))
                 .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: up ? 0.35 : 0.6)))
         }
@@ -303,23 +305,26 @@ final class AppLaunchTests: XCTestCase {
         goTo("Family")
         waitFor(text("plays a part"), "Family tab")
         // One Family Meeting (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2): the weekly page, with this month's Club
-        // plan inside its four parts for a member household (Jen's is). "We agreed" on Maya's age-fit idea saves it.
+        // plan inside its four parts for a member household (Jen's is). One part at a time (PR 513). In Everyone's Part,
+        // Maya's one next step is the skill the family asked for (seed: put-away-laundry → "Fold and put away my
+        // clothes"); "Add to our plan" saves it with its agreement (docs/product/FAMILY_DEVELOPMENT_ENGINE.md).
         waitFor(control("Start our Family Meeting"), "the weekly Family Meeting").tap()
         waitFor(text("Let’s Practice"), "the four parts")
         waitFor(text("Prepared for your family"), "this month's plan inside the meeting (member)", timeout: 30)
         shot("e2e-03a-weekly-meeting-with-month")
-        let agree = waitFor(button("We agreed: Maya"), "We agreed for Maya", timeout: 30)
-        agree.tap()
-        waitFor(text("Saved: agreed by our family."), "agreed for Maya")
+        tapClear(waitFor(button("Step 3: Everyone"), "Everyone's Part step"), bottom: 200)
+        let agree = waitFor(button("Add to our plan: Maya"), "Add to our plan for Maya", timeout: 30)
+        tapClear(agree, bottom: 200)
+        waitFor(text("Added to our plan: agreed by our family."), "agreed for Maya")
         shot("e2e-03b-meeting-we-agreed")
 
         // Today and the calendar show it.
         goTo("Today")
-        waitFor(text("trash"), "Today: the agreement")
+        waitFor(text("Fold and put away"), "Today: the agreement")
         shot("e2e-04-today-agreed")
         goTo("Calendar")
         waitFor(text("agreed in our Family Meeting"), "Calendar: agreements panel").tap()
-        waitFor(text("trash"), "Calendar: the agreement")
+        waitFor(text("Fold and put away"), "Calendar: the agreement")
         shot("e2e-05-calendar-agreed")
 
         // Cleaning (a calendar owner): Maya's cleaning part.

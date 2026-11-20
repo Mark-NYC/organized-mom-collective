@@ -22,6 +22,10 @@ select public.club_household_save('The Parks', '{}',
 select public.club_responsibilities_save('existing', jsonb_build_array(
   jsonb_build_object('category', 'meals', 'owner_ids', jsonb_build_array((select id from public.club_family_members where first_name = 'Jen')), 'helper_ids', '[]'::jsonb),
   jsonb_build_object('category', 'transportation', 'owner_ids', jsonb_build_array((select id from public.club_family_members where first_name = 'Sam')), 'helper_ids', '[]'::jsonb))) \g /dev/null
+-- What the family would like Maya to take on (onboarding's "Growing responsibility"): the development engine's next step
+-- for her is then the same skill on any date (put-away-laundry at 11 → "Fold and put away my clothes", a laundry part).
+select public.club_responsibilities_save('desired', jsonb_build_array(
+  jsonb_build_object('category', 'laundry', 'item', 'put-away-laundry', 'owner_ids', jsonb_build_array((select id from public.club_family_members where first_name = 'Maya')), 'helper_ids', '[]'::jsonb))) \g /dev/null
 reset role;
 
 -- The Ruizes: another family with its own calendar event and agreement.

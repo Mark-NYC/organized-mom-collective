@@ -278,3 +278,9 @@ Still not verified or connected:
 - The age-guide card crosswalk is from illustration ids, not verified printed cards (unchanged from #514).
 - Seasons assume a US school calendar by date; a family-chosen school start date would be better.
 - A day change at midnight during an open meeting rebuilds the plan (rare; deliberate).
+- Reassigning a skill's agreement to another person in Who does what (the existing edit) leaves the development
+  record with the original child; the agreement stays live, so the meeting doesn't flag it. A future "move to …"
+  decision could carry the record across.
+- The iOS simulator family flow (`ios/App/AppUITests/AppLaunchTests.swift`) now agrees to Maya's development step
+  ("Add to our plan: Maya", deterministic through the e2e seed's desired `put-away-laundry`). It runs only on CI push
+  builds (macOS); it was replayed in Chromium against the app bundle here, not run in a simulator.
