@@ -13,6 +13,12 @@
  * toddler, never making the account holder everyone's organizer), and the month's practice step. Suggestions stay
  * suggestions until the family taps "We agreed", which saves the same agreement, with the same source key, the
  * monthly page would. There is no second meeting system.
+ *
+ * Club families also get the development layer (src/components/family/DevelopmentCoach.tsx, engine in
+ * src/lib/family-development/engine.ts): what each child is learning, a MAWL-stage check-in in Let's Talk, and one
+ * next step per child in Everyone's Part, built once when the meeting opens from the family's saved development
+ * records. A child with a development step gets no month suggestion as well (one next step per person). If the
+ * records can't be read, the layer is absent and the meeting is exactly as before. Free families never see it.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
@@ -33,6 +39,9 @@ import FollowThrough from '../family/FollowThrough';
 import ProfileQuestion from '../family/ProfileQuestion';
 import { Avatar } from '../app/ui';
 import type { ResponsibilityCategory } from '../../data/club/family-profile';
+import { useDevelopment } from '../../lib/family-development/client';
+import { buildDevelopmentPlan, type DevelopmentPlan } from '../../lib/family-development/engine';
+import { DevelopmentCheckIns, DevelopmentNextSteps, DevelopmentPractice } from '../family/DevelopmentCoach';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 const label = (list: { id: string; label: string }[], id: string) => list.find((c) => c.id === id)?.label ?? id;
@@ -65,6 +74,16 @@ export default function WeeklyMeeting() {
     () => (club && cal.household ? buildFamilyMeeting({ household: cal.household, profile: fam.profile, month }) : null),
     [club, cal.household, fam.profile, month],
   );
+  // Development (Club only): the plan is built once, when household, profile and records are first all in hand, so a
+  // decision mid-meeting never swaps the next step on screen; the live records show each decision's result.
+  const dev = useDevelopment(club && Boolean(cal.household));
+  const [devPlan, setDevPlan] = useState<DevelopmentPlan | null>(null);
+  useEffect(() => {
+    if (devPlan || !club || !dev.loaded || !dev.records || !cal.household || !fam.profile) return;
+    setDevPlan(buildDevelopmentPlan({ household: cal.household, profile: fam.profile, records: dev.records, today: localToday(today) }));
+  }, [devPlan, club, dev.loaded, dev.records, cal.household, fam.profile, today]);
+  const devLive = useMemo(() => new Map((dev.records ?? []).map((r) => [r.id, r] as const)), [dev.records]);
+  const devStepFor = new Set(devPlan?.people.filter((p) => p.step).map((p) => p.memberId) ?? []);
   const [who, setWho] = useState<string[]>([]);
   const [text, setText] = useState('');
   const [category, setCategory] = useState<ResponsibilityCategory>('other');
@@ -99,7 +118,7 @@ export default function WeeklyMeeting() {
       setMsg('Couldn’t save that agreement. Try again.');
     }
   };
-  const suggestions = meeting?.parts.people.filter((p) => p.suggested.length) ?? [];
+  const suggestions = meeting?.parts.people.filter((p) => p.suggested.length && !devStepFor.has(p.memberId)) ?? [];
   const weekHighlights = week.days.flatMap((d) => d.items.map((item) => ({ day: d.label, item }))).slice(0, 5);
 
   return (
@@ -191,7 +210,8 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Let’s Talk' && (
             <div className="mt-4 space-y-4">
-              <FollowThrough household={cal.household} profile={fam.profile} colors={cal.colors} />
+              {devPlan && <DevelopmentCheckIns plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} />}
+              <FollowThrough household={cal.household} profile={fam.profile} colors={cal.colors} {...(devPlan ? { skipSkillAgreements: true } : {})} />
               {meeting ? (
                 <div className="rounded-[9px] bg-[var(--of-surface)] p-4" data-meeting-questions>
                   <p className="of-eyebrow">Question {Math.min(questionIndex + 1, meeting.talk.questions.length)} of {meeting.talk.questions.length}</p>
@@ -214,6 +234,7 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Everyone’s Part' && (
             <div className="mt-4" data-meeting-parts-agreed>
+              {devPlan && <DevelopmentNextSteps plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgree={(d) => fam.saveAgreement({ ...d, month })} />}
               {suggestions.length > 0 && (
                 <div className="mb-5" data-meeting-suggestions>
                   <p className="of-eyebrow">Ideas for this month, by age</p>
@@ -279,6 +300,7 @@ export default function WeeklyMeeting() {
               <div className="mt-4 flex flex-wrap gap-2">
                 {monthPage(today.getMonth() + 1).resources.map((r, i) => <a key={r.route} href={r.route} className={`of-btn ${i ? 'of-btn--soft' : ''} !normal-case !tracking-normal`} data-meeting-resource>{r.name}</a>)}
               </div>
+              {devPlan && <DevelopmentPractice plan={devPlan} live={devLive} />}
             </div>
           )}
         </section>

@@ -57,14 +57,19 @@ export function useFollowThrough() {
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-export default function FollowThrough({ household, profile, colors }: { household: Household | null; profile: FamilyProfile | null; colors: Record<string, MarkerColor> }) {
+/**
+ * `skipSkillAgreements`: a Club meeting with development records asks about agreements made from a canonical skill
+ * (agreed_source 'skill:…') in its own, stage-aware check-in instead, so the family is never asked twice.
+ */
+export default function FollowThrough({ household, profile, colors, skipSkillAgreements = false }: { household: Household | null; profile: FamilyProfile | null; colors: Record<string, MarkerColor>; skipSkillAgreements?: boolean }) {
   const ft = useFollowThrough();
   const [open, setOpen] = useState<Record<string, { answer?: CheckInAnswer; saved?: boolean; error?: string }>>({});
   if (!ft.rows || !household || !profile) return null;
   const today = iso(new Date());
   const byId = new Map(ft.rows.map((r) => [r.id, r]));
   const people = new Map(household.members.map((m) => [m.id, m.firstName]));
-  const agreements = profile.responsibilities.filter((r) => r.status === 'confirmed' && r.id && r.agreement && byId.has(r.id));
+  const agreements = profile.responsibilities.filter((r) => r.status === 'confirmed' && r.id && r.agreement && byId.has(r.id)
+    && !(skipSkillAgreements && r.agreement.source?.startsWith('skill:')));
   const due = agreements.filter((r) => {
     const f = byId.get(r.id!)!;
     const since = (r.agreement!.agreedAt ?? '').slice(0, 10);
