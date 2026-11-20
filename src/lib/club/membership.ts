@@ -5,6 +5,7 @@
  * question; nothing here is a security boundary. docs/club/MEMBERSHIP.md.
  */
 import { accountRpc, getSession } from '../account';
+import { appShellBuild } from '../native/platform';
 import { readEmailCheckoutAttribution } from '../email-checkout-attribution';
 import { MEMBER_STORAGE_PREFIX } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../supabase-config';
@@ -178,7 +179,37 @@ export interface Membership {
   intro?: { month: string; trial_ends: string | null } | null;
 }
 
-export const loadMembership = () => accountRpc<Membership>('club_me');
+/**
+ * App Store launch: digital Club content in the iOS bundle is offered only to accounts with
+ * an explicit, live Club grant. A Stripe subscription alone is not an iOS Club invitation.
+ * The server's club_me RPC determines whether the grant is live (including household partner grants).
+ * Website membership, checkout, billing and the underlying database entitlements are unchanged.
+ */
+export function membershipForAppStore(me: Membership, appShell = appShellBuild()): Membership {
+  if (!appShell || !me.access || !me.grant) {
+    if (!appShell) return me;
+    return {
+      ...me,
+      access: false,
+      grant: null,
+      member: false,
+      plan: null,
+      status: null,
+      payment_problem: false,
+      renews: null,
+      ends: null,
+      ended_at: null,
+      next: null,
+      intro: null,
+      welcome: null,
+      months: [],
+    };
+  }
+  return me;
+}
+
+export const loadMembership = async () =>
+  membershipForAppStore(await accountRpc<Membership>('club_me'));
 
 export interface Address {
   name: string;
