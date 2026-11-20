@@ -57,14 +57,19 @@ export function useFollowThrough() {
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-export default function FollowThrough({ household, profile, colors }: { household: Household | null; profile: FamilyProfile | null; colors: Record<string, MarkerColor> }) {
+/**
+ * `skipSkillAgreements`: a Club meeting with development records asks about agreements made from a canonical skill
+ * (agreed_source 'skill:…') in its own, stage-aware check-in instead, so the family is never asked twice.
+ */
+export default function FollowThrough({ household, profile, colors, skipSkillAgreements = false }: { household: Household | null; profile: FamilyProfile | null; colors: Record<string, MarkerColor>; skipSkillAgreements?: boolean }) {
   const ft = useFollowThrough();
   const [open, setOpen] = useState<Record<string, { answer?: CheckInAnswer; saved?: boolean; error?: string }>>({});
   if (!ft.rows || !household || !profile) return null;
   const today = iso(new Date());
   const byId = new Map(ft.rows.map((r) => [r.id, r]));
   const people = new Map(household.members.map((m) => [m.id, m.firstName]));
-  const agreements = profile.responsibilities.filter((r) => r.status === 'confirmed' && r.id && r.agreement && byId.has(r.id));
+  const agreements = profile.responsibilities.filter((r) => r.status === 'confirmed' && r.id && r.agreement && byId.has(r.id)
+    && !(skipSkillAgreements && r.agreement.source?.startsWith('skill:')));
   const due = agreements.filter((r) => {
     const f = byId.get(r.id!)!;
     const since = (r.agreement!.agreedAt ?? '').slice(0, 10);
@@ -105,7 +110,7 @@ export default function FollowThrough({ household, profile, colors }: { househol
                 {ANSWERS.map((a) => <button key={a.id} type="button" className="min-h-[44px] rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.82rem] font-semibold" onClick={() => void answer(id, a.id)} data-check-in-answer={a.id}>{a.label}</button>)}
               </div>
             ) : st.answer === 'on-own' ? (
-              <p className="mt-2 text-[0.9rem] text-[var(--of-sage-ink)]" role="status" data-check-in-result="celebrate">{names.join(' & ')} {names.length > 1 ? 'own' : 'owns'} it now. Say so out loud. Nothing new gets added for it.</p>
+              <p className="mt-2 text-[0.9rem] text-[var(--of-sage-ink)]" role="status" data-check-in-result="celebrate">{names.join(' & ')} did it on their own. That’s real progress: say so out loud. Keep it going; nothing new gets added for it.</p>
             ) : st.answer === 'reminders' ? (
               <p className="mt-2 text-[0.9rem]" role="status" data-check-in-result="continue">Keep practicing. A little less reminding each week is progress.</p>
             ) : (
@@ -122,7 +127,7 @@ export default function FollowThrough({ household, profile, colors }: { househol
         );
       })}
       {owned.length > 0 && (
-        <p className="text-[0.88rem] text-warm-soft" data-follow-through-owned>On their own now: {owned.slice(0, 4).map((r) => `${r.ownerIds.map((o) => people.get(o)).filter(Boolean).join(' & ')} (${r.agreement!.text})`).join(' · ')}</p>
+        <p className="text-[0.88rem] text-warm-soft" data-follow-through-owned>Doing it on their own lately: {owned.slice(0, 4).map((r) => `${r.ownerIds.map((o) => people.get(o)).filter(Boolean).join(' & ')} (${r.agreement!.text})`).join(' · ')}</p>
       )}
     </div>
   );

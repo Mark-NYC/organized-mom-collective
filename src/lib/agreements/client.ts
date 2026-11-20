@@ -11,7 +11,7 @@ import { accountRpc } from '../account';
 import { APP_RESUME_EVENT } from '../native/platform';
 import type { FamilyProfile, Responsibility } from '../club/family-profile';
 import {
-  adoptAgreements, emptyAgreements, liveAgreements, newAgreementId, removeLocal, saveLocal, syncAgreements,
+  adoptAgreements, emptyAgreements, liveAgreements, mergeRemote, newAgreementId, removeLocal, saveLocal, syncAgreements,
   type AgreementApi, type AgreementRow, type AgreementState,
 } from './store';
 
@@ -131,6 +131,8 @@ export function useAgreements(scope: string | null) {
     seed: (profile: FamilyProfile | null) => { if (scope) commit(seedFromProfile(ref.current, profile)); },
     save: (row: Omit<AgreementRow, 'revision' | 'id'> & { id?: string }) => change((s) => saveLocal(s, { ...row, id: row.id ?? newAgreementId() })),
     remove: (id: string) => change((s) => removeLocal(s, id)),
+    /** An agreement the server already saved (e.g. with a development decision): shown at once, merged by revision. */
+    adopt: (row: AgreementRow) => { if (scope) commit(mergeRemote(ref.current, [row])); },
     dismissConflicts: () => commit({ ...ref.current, conflicts: [] }),
     syncNow,
   };

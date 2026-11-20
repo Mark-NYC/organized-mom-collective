@@ -363,7 +363,9 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   for (let i = 0; i < 6 && (await nora.locator('[role="dialog"] .btn-primary').isVisible().catch(() => false)); i++) { await nora.locator('[role="dialog"] .btn-primary').click(); await nora.waitForTimeout(150); }
   check('free: the complete cleaning companion opens, no wall calendar needed', (await nora.locator('input[type="checkbox"]').count()) > 0 && /\/app\/cleaning/.test(nora.url()));
   await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
-  const parts = await nora.locator('[data-meeting-part]').evaluateAll((els) => els.map((e) => e.getAttribute('data-meeting-part')));
+  // One part at a time since PR 513: walk the four step buttons and read each part as it shows.
+  const parts = [];
+  for (let i = 0; i < 4; i++) { await nora.click(`[data-meeting-step="${i}"]`); parts.push(await nora.getAttribute('[data-meeting-part]', 'data-meeting-part')); }
   check('free: the weekly Family Meeting has the four parts in order', parts.join() === 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice', parts.join(' · '));
   await nora.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
   // The website's Getting started list may name the Club once, as a step for a new family; never a card, never in the app.
@@ -380,6 +382,7 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   check('free: no Family Meeting Club card on Today or Family for a family without the Club', (await nora.locator('[data-club-month], [data-family-club-card]').count()) === 0 && !/family meeting club|membership/i.test(famText) && !/family meeting club|membership/i.test(await nora.locator('body').innerText()));
   await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
   check('free: no Club card or upgrade on the free meeting', (await nora.locator('[data-club-month-meeting]').count()) === 0 && !/upgrade|subscribe|join the club/i.test(await nora.locator('body').innerText()));
+  await nora.click('[data-meeting-step="2"]'); // Everyone's Part, where "We agreed" is
   await nora.fill('[data-agreement-new]', 'Feed the cat before school');
   await nora.click('[data-owner-chip="Ada"]');
   await nora.click('[data-save-new-agreement]');

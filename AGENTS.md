@@ -1,6 +1,6 @@
 # Organized Family development instructions
 
-Read [docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md](docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md) **before** modifying Family, the weekly Family Meeting, Club personalization, onboarding, household responsibilities, recommendation content, child skill progression, or seasonal-kit strategy.
+Read [docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md](docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md) and [docs/product/RESOURCE_ALIGNMENT.md](docs/product/RESOURCE_ALIGNMENT.md) **before** modifying Family, the weekly Family Meeting, Club personalization, onboarding, household responsibilities, recommendation content, child skill progression, or seasonal-kit strategy, **including public age-based guides, printed Responsibility Cards, free chore charts, and routines**.
 
 This framework is the governing product contract. Preserve these invariants:
 - Age suggests a starting skill but never limits a child or automatically changes their MAWL stage.
@@ -14,4 +14,4 @@ This framework is the governing product contract. Preserve these invariants:
 
 For every related PR, document the affected skill, MAWL/habit/context/family-choice behavior, where choices are saved, safe fallbacks, and tests for minimal intake, age/ability variation, prolonged Watch, rejection and family override. Changes to this doctrine require an explicit owner decision and a versioned edit to its source document.
 
-Implementation contracts and tests: `src/lib/family-development/framework.ts`, `tests/family-development-framework.test.ts`. These are foundation code; do not claim the new engine is live until integrated and tested against actual household persistence.
+Implementation contracts and tests: `src/lib/family-development/framework.ts`, `tests/family-development-framework.test.ts`. Library `skills.ts`; family decisions `records.ts` (DB: `supabase/migrations/20261207000000_family_development_records.sql`, **not applied**); recommendations `engine.ts`; meeting UI `src/components/family/DevelopmentCoach.tsx`. How they fit: [docs/product/FAMILY_DEVELOPMENT_ENGINE.md](docs/product/FAMILY_DEVELOPMENT_ENGINE.md). Do not claim the engine is live until the migration is applied and the meeting is verified against real household persistence.

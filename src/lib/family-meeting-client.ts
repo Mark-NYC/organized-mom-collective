@@ -84,6 +84,10 @@ export function useFamily(scope: string | null) {
       if (!scope) throw new Error('not_signed_in');
       ag.save(toRow(d));
     },
+    /** An agreement the household database already saved (a development decision): onto this phone's lists now. */
+    adoptAgreement(row: AgreementRow) {
+      if (!demo) ag.adopt(row);
+    },
     async removeAgreement(id: string) {
       if (sample) return setServer(await sample.removeAgreement(id));
       if (!scope) throw new Error('not_signed_in');
