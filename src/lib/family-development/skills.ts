@@ -206,6 +206,7 @@ export const skills = [
     typicalAge: { from: 3 }, finishLine: "Group clean clothes with help as appropriate.",
     cueSuggestions: ["When laundry is folded"], naturalPayoff: "The sorted clothes are ready to put away.",
     watchVariations: ["Sort a new clothing type with guidance."], seasons: ['everyday'],
+    cardIllustrationId: 35,
     model: "Show how to sort clean laundry and point out the finish line.",
     assist: "Do sort clean laundry together, then let the child take over the steps.",
     watch: "Observe the child's initiation and quality; practice a variation: Sort a new clothing type with guidance.",
@@ -246,7 +247,7 @@ export const skills = [
     watch: "Observe the child's initiation and quality; practice a variation: Adjust the laundry plan when the schedule changes.",
     launch: "The family decides when the child can initiate, complete, check and adapt this responsibility.",
     safety: "Household adult confirms appliance, detergent and fabric safety before independent use.", requiresAdultSupervision: true,
-    cardIllustrationId: 35,
+    
   },
   {
     id: "dust", category: "home-care", title: "Dust bedroom furniture", outcome: "Dust approved low, stable surfaces with safe tools.",
