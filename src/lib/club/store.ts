@@ -17,6 +17,7 @@ import { kits } from '../../data/club/kits';
 import { sampleById } from '../../data/club/samples';
 import { accountRpc } from '../account';
 import { appShellBuild } from '../native/platform';
+import { requireAppClub } from './membership';
 import type { FamilyMember, Household, HouseholdPreferences, MemberKind, MemberRole } from './profile';
 import {
   activitiesToDb, emptyProfile, markStep, profileFromDb, responsibilitiesToDb, scopeOf,
@@ -234,6 +235,7 @@ export const accountStore: ClubStore = {
     }
   },
   async documents(slug) {
+    await requireAppClub(); // iOS: a grant, as for months (membership.ts)
     const r = await accountRpc<{ can: KitAccess; documents: Record<string, { edits: unknown; palette: string; revision: number; engine_version: number; profile_version: number }> }>('club_document_get', { p_kit: slug });
     return {
       can: r.can,
@@ -241,6 +243,7 @@ export const accountStore: ClubStore = {
     };
   },
   async saveDocument(slug, doc, saved, revision) {
+    await requireAppClub();
     try {
       return await accountRpc<number>('club_document_save', {
         p_kit: slug, p_doc: doc, p_edits: saved.edits, p_palette: saved.palette,

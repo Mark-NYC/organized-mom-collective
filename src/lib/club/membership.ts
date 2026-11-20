@@ -211,6 +211,32 @@ export function membershipForAppStore(me: Membership, appShell = appShellBuild()
 export const loadMembership = async () =>
   membershipForAppStore(await accountRpc<Membership>('club_me'));
 
+/**
+ * The same rule for the Club's own content in the iOS app: months (club_resource_*), the Welcome Family Rhythm
+ * (club_welcome_plan_*), the Family Vision print (club_welcome_*) and kit documents (club_document_*, store.ts) load
+ * only for an explicit live grant. Those RPCs are shared with the website, where a paid subscription opens them, so
+ * without this a paid-only member could still open a month from a link inside the app (/app/club/november links to
+ * /club/resources/…). Throws what the server throws a non-member ('not_found'), so each page shows its usual
+ * closed state. This shapes what the app shows; it is not a server-side platform check. Website: unchanged.
+ */
+let appAccess: { at: number; uid: string | null; ok: Promise<boolean> } | null = null;
+export async function appClubAllowed(): Promise<boolean> {
+  if (!appShellBuild()) return true;
+  const uid = (await getSession())?.user_id ?? null;
+  if (!appAccess || appAccess.uid !== uid || Date.now() - appAccess.at > 30_000) {
+    const ok = loadMembership().then((m) => Boolean(m.access), () => false);
+    appAccess = { at: Date.now(), uid, ok };
+  }
+  return appAccess.ok;
+}
+export async function requireAppClub(): Promise<void> {
+  if (!(await appClubAllowed())) throw new Error('not_found');
+}
+const appGated = <A extends unknown[], R>(fn: (...a: A) => Promise<R>) => async (...a: A): Promise<R> => {
+  await requireAppClub();
+  return fn(...a);
+};
+
 export interface Address {
   name: string;
   line1: string;
@@ -241,10 +267,10 @@ export interface ResourceVersion {
   approved_at: string | null;
   mailing: { status: string; readiness: string; approved: boolean } | null;
 }
-export const loadResource = (slug: string) => accountRpc<ResourceVersion>('club_resource_get', { p_kit: slug });
-export const saveResource = (slug: string, state: ResourceVersion['state'], revision: number) =>
-  accountRpc<number>('club_resource_save', { p_kit: slug, p_state: state, p_revision: revision });
-export const approveResource = (slug: string) => accountRpc<boolean>('club_fulfillment_approve', { p_kit: slug });
+export const loadResource = appGated((slug: string) => accountRpc<ResourceVersion>('club_resource_get', { p_kit: slug }));
+export const saveResource = appGated((slug: string, state: ResourceVersion['state'], revision: number) =>
+  accountRpc<number>('club_resource_save', { p_kit: slug, p_state: state, p_revision: revision }));
+export const approveResource = appGated((slug: string) => accountRpc<boolean>('club_fulfillment_approve', { p_kit: slug }));
 
 /**
  * Her Welcome Family Rhythm (club_welcome_plans; docs/club/WELCOME_MARCH_DECEMBER_MIGRATION.md → Phase 2b), in the same
@@ -255,12 +281,12 @@ export interface WelcomePlanVersion extends ResourceVersion {
 }
 interface WelcomePlanRow { can: 'edit' | 'read'; state: ResourceVersion['state']; revision: number; approved_at: string | null; approved_fingerprint: string | null }
 const welcomeVersion = (r: WelcomePlanRow): WelcomePlanVersion => ({ ...r, month: '', mailing: null });
-export const loadWelcomePlan = () => accountRpc<WelcomePlanRow>('club_welcome_plan_get').then(welcomeVersion);
-export const saveWelcomePlan = (state: ResourceVersion['state'], revision: number) =>
-  accountRpc<number>('club_welcome_plan_save', { p_state: state, p_revision: revision });
-export const approveWelcomePlan = (revision: number, fingerprint: string, state: ResourceVersion['state'] | null) =>
-  accountRpc<WelcomePlanRow>('club_welcome_plan_approve', { p_revision: revision, p_fingerprint: fingerprint, p_state: state }).then((r) => r.revision);
-export const unapproveWelcomePlan = (revision: number) => accountRpc<WelcomePlanRow>('club_welcome_plan_unapprove', { p_revision: revision }).then(() => undefined);
+export const loadWelcomePlan = appGated(() => accountRpc<WelcomePlanRow>('club_welcome_plan_get').then(welcomeVersion));
+export const saveWelcomePlan = appGated((state: ResourceVersion['state'], revision: number) =>
+  accountRpc<number>('club_welcome_plan_save', { p_state: state, p_revision: revision }));
+export const approveWelcomePlan = appGated((revision: number, fingerprint: string, state: ResourceVersion['state'] | null) =>
+  accountRpc<WelcomePlanRow>('club_welcome_plan_approve', { p_revision: revision, p_fingerprint: fingerprint, p_state: state }).then((r) => r.revision));
+export const unapproveWelcomePlan = appGated((revision: number) => accountRpc<WelcomePlanRow>('club_welcome_plan_unapprove', { p_revision: revision }).then(() => undefined));
 
 export interface Vision { family_name: string; value: string }
 export interface WelcomeOrder {
@@ -274,9 +300,10 @@ export interface WelcomeOrder {
   editable: boolean;
   display_name: string | null;
 }
-export const loadWelcome = () => accountRpc<WelcomeOrder | null>('club_welcome_get');
-export const saveWelcome = (v: Vision) => accountRpc<WelcomeOrder>('club_welcome_save', { p: v });
-export const approveWelcome = () => accountRpc<WelcomeOrder>('club_welcome_approve');
+// In the app without a grant: no welcome print to show (null, as for a family without one), never an error.
+export const loadWelcome = async () => ((await appClubAllowed()) ? accountRpc<WelcomeOrder | null>('club_welcome_get') : null);
+export const saveWelcome = appGated((v: Vision) => accountRpc<WelcomeOrder>('club_welcome_save', { p: v }));
+export const approveWelcome = appGated(() => accountRpc<WelcomeOrder>('club_welcome_approve'));
 
 /** Her welcome print's status, in plain words. */
 export function welcomeText(w: Pick<WelcomeOrder, 'status' | 'readiness' | 'approved'>): string {

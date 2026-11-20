@@ -206,3 +206,51 @@ describe('In the app, the Club opens only for an explicit live grant (owner deci
     expect((await accountStore.me())?.access).toBe(true);
   });
 });
+
+describe('In the app, the Club content loaders need the grant too (no side door through a direct link)', () => {
+  afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.resetModules(); });
+  const paid = { access: true, grant: null, member: true, months: [], kits: [{ slug: '2026-11-family-ownership', can: 'edit' }], onboarded: true };
+  const setup = (me: object, shell: string) => {
+    vi.stubEnv('PUBLIC_APP_SHELL', shell);
+    const data = new Map([['omc:account:session', JSON.stringify({ access_token: 'a', refresh_token: 'r', expires_at: Date.now() + 3600e3, user_id: 'u1', email: 'a@b.co' })]]);
+    vi.stubGlobal('localStorage', { getItem: (k: string) => data.get(k) ?? null, setItem: (k: string, v: string) => void data.set(k, v), removeItem: (k: string) => void data.delete(k), key: () => null, length: 0 });
+    const called: string[] = [];
+    vi.stubGlobal('fetch', async (url: string) => {
+      const fn = String(url).split('/rpc/')[1];
+      called.push(fn);
+      const body = fn === 'club_me' ? me : fn === 'club_document_get' ? { can: 'edit', documents: {} } : fn === 'club_welcome_get' ? { status: 'pending' } : { can: 'edit', state: {}, revision: 1, month: '2026-11-01', approved_at: null, mailing: null };
+      return new Response(JSON.stringify(body), { status: 200 });
+    });
+    return called;
+  };
+
+  it('a paid-only member: months, the welcome plan, Family Vision and kit documents stay closed, and never reach the server', async () => {
+    const called = setup(paid, 'ios');
+    const m = await import('../src/lib/club/membership');
+    const { accountStore } = await import('../src/lib/club/store');
+    await expect(m.loadResource('2026-11-family-ownership')).rejects.toThrow('not_found');
+    await expect(m.saveResource('2026-11-family-ownership', {}, 1)).rejects.toThrow('not_found');
+    await expect(m.loadWelcomePlan()).rejects.toThrow('not_found');
+    await expect(m.loadWelcome()).resolves.toBeNull();
+    await expect(m.saveWelcome({ family_name: 'X', value: 'Love' })).rejects.toThrow('not_found');
+    await expect(accountStore.documents('2026-11-family-ownership')).rejects.toThrow('not_found');
+    expect(called.filter((f) => f !== 'club_me')).toEqual([]);
+  });
+  it('with a grant they open in the app', async () => {
+    const called = setup({ ...paid, grant: 'complimentary' }, 'ios');
+    const m = await import('../src/lib/club/membership');
+    await expect(m.loadResource('2026-11-family-ownership')).resolves.toMatchObject({ can: 'edit' });
+    expect(called).toContain('club_resource_get');
+  });
+  it('on the website a paid member opens them exactly as before (no extra check)', async () => {
+    const called = setup(paid, '');
+    const m = await import('../src/lib/club/membership');
+    await expect(m.loadResource('2026-11-family-ownership')).resolves.toMatchObject({ can: 'edit' });
+    expect(called).toEqual(['club_resource_get']);
+  });
+  it('the month page shows the invitation in the app, never "the months you pay for"', () => {
+    const page = src('src/components/club/ClubResourceAccess.tsx');
+    expect(page).toMatch(/state === 'denied' && appShellBuild\(\)[\s\S]*CLUB_INVITATION_GATE[\s\S]*Go to Club Home/);
+    expect(page.indexOf("state === 'denied' && appShellBuild()")).toBeLessThan(page.indexOf('Members receive each month they pay for.'));
+  });
+});

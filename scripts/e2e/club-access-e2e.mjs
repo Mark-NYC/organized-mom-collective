@@ -111,6 +111,11 @@ await rpc(payTok, 'household_save', { p_expected_version: null, p_display_name: 
   { first_name: 'Pia', kind: 'adult', role: 'parent', is_account_holder: true }, { first_name: 'Ola', kind: 'child', role: 'child', birth_year: 2017, birth_month: 5 }] });
 await sql(`insert into public.club_subscriptions (stripe_subscription_id, stripe_customer_id, user_id, status, price_id, current_period_start, current_period_end, started_at, livemode)
   select 'sub_E2EPay', 'cus_E2EPay', id, 'active', 'price_1', now() - interval '2 days', now() + interval '28 days', now(), false from auth.users where email = 'payer@e2e.test'`);
+// The month that subscription paid for (what an invoice's entitlement is; test database only).
+await sql(`insert into public.club_entitlements (user_id, household_id, resource_month, kit_id, kind, membership_year, plan, source, note, subscription_id)
+  select u.id, h.id, k.month, k.id, 'digital', 1, 'monthly', 'admin', 'e2e: the paid month', s.id from auth.users u
+    join public.club_households h on h.owner_user_id = u.id join public.club_kits k on k.slug = '2026-11-family-ownership'
+    join public.club_subscriptions s on s.stripe_subscription_id = 'sub_E2EPay' where u.email = 'payer@e2e.test'`);
 const family = async () => JSON.parse(await sql(`select json_build_object('members', (select count(*) from public.club_family_members m join public.household_adults a on a.household_id = m.household_id join auth.users u on u.id = a.user_id where u.email = 'ana@e2e.test'),
   'adults', (select count(*) from public.household_adults a2 where a2.household_id = (select household_id from public.household_adults a join auth.users u on u.id = a.user_id where u.email = 'ana@e2e.test')))`));
 const familyBefore = await family();
@@ -237,13 +242,24 @@ if (appBase) {
     && /available by invitation/.test(await payerApp.locator('[data-club-invitation]').innerText()));
   const text = await payerApp.locator('main').innerText();
   check('app: no price, checkout or subscription wording on Club Home', !/\$\d|checkout|subscribe|upgrade|join the club/i.test(text));
-  await shot(payerApp, '06-app-paid-only-free');
+  // Not through another door either: a month opened directly (/app/club/november links to it), and Family Vision.
+  const month = async (page, at) => {
+    await page.goto(`${at}/club/resources/2026-11-family-ownership`, { waitUntil: 'networkidle' }); await settle(page, 2500);
+    return page.evaluate(() => ({ shown: document.getElementById('club-month-content')?.hidden === false, invite: Boolean(document.querySelector('[data-club-invitation]')), text: document.querySelector('main')?.innerText ?? '' }));
+  };
+  const web = await month(payer, base);
+  check('website: the paying member opens this month\'s Club resource', web.shown, web.text.replace(/\s+/g, ' ').slice(0, 100));
+  const inApp = await month(payerApp, appBase);
+  check('app: the same month, opened directly, stays closed with the invitation (no content, no payment words)', !inApp.shown && inApp.invite && !/pay for|membership/i.test(inApp.text), inApp.text.replace(/\s+/g, ' ').slice(0, 140));
+  await shot(payerApp, '07-app-paid-only-month');
 }
 admin.once('dialog', (d) => d.accept());
 await admin.click('[data-access-grant]'); await settle(admin, 1500);
 if (payerApp) {
   check('app: once the owner grants complimentary access, the Club meeting opens in the app', (await meetingKind(payerApp, appBase)) === 'club');
   check('app: and Club Home shows the membership', (await clubHome(payerApp, appBase)) === 'member');
+  await payerApp.goto(`${appBase}/club/resources/2026-11-family-ownership`, { waitUntil: 'networkidle' }); await settle(payerApp, 2500);
+  check('app: after the grant, the month opens in the app', await payerApp.evaluate(() => document.getElementById('club-month-content')?.hidden === false));
 }
 await sql(`update public.club_subscriptions set status = 'canceled', ended_at = now() where stripe_subscription_id = 'sub_E2EPay'`); // the subscription ends (test only)
 check('13. the subscription ends while complimentary is live: access stays', (await meetingKind(payer)) === 'club');

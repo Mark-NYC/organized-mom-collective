@@ -19,6 +19,8 @@ import { clubResourceBySlug, MEMBER_STORAGE_PREFIX } from '../../data/club/resou
 import { routes } from '../../routes';
 import { adminRpc, loadSession as loadAdminSession } from '../../lib/admin/session';
 import { welcomeIsMonthly, welcomeIsRhythm, welcomeItemHref, welcomeItemName } from '../../lib/club/welcome-item';
+import { appShellBuild } from '../../lib/native/platform';
+import { CLUB_INVITATION_GATE } from '../../data/club/invitation';
 
 const show = (household: Household, sample: string | null) => {
   window.dispatchEvent(new CustomEvent('omc:club-preview-household', { detail: { household, sample } }));
@@ -147,6 +149,17 @@ function Member({ ctx, slug }: { ctx: ClubContext; slug: string }) {
   }, [slug]);
 
   if (state === 'loading') return <p className="py-6 text-warm-soft">Preparing this month for your family…</p>;
+  if (state === 'denied' && appShellBuild()) {
+    // The app sells nothing: the Club is by invitation there (docs/ios/APP_STORE_LAUNCH.md).
+    const [title, text] = CLUB_INVITATION_GATE(clubResourceBySlug(slug)?.title ?? 'This month');
+    return (
+      <div className="max-w-xl py-6" data-club-invitation>
+        <p role="alert" className="text-warm-ink">{title}</p>
+        <p className="mt-2 text-warm-soft">{text}</p>
+        <a className="mt-4 inline-block font-semibold underline underline-offset-4" href={routes.appClub}>Go to Club Home</a>
+      </div>
+    );
+  }
   if (state === 'denied') {
     return (
       <div className="max-w-xl py-6">
