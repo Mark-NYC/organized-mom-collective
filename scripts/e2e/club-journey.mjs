@@ -232,7 +232,7 @@ for (const person of PEOPLE) {
   const sug = page.locator('[data-agree-suggestion]').first();
   const had = await sug.count();
   if (had) { await sug.click(); await settle(page, 2500); }
-  else { await page.fill('[data-agreement-new]', 'Set the table before dinner'); await page.click('[data-owner-chip="Mia"]'); await page.click('[data-save-new-agreement]'); await settle(page, 2500); }
+  else { if (await page.locator('[data-add-agreement-section]:not([open])').count()) await page.click('[data-add-agreement-section] summary'); await page.fill('[data-agreement-new]', 'Set the table before dinner'); await page.click('[data-owner-chip="Mia"]'); await page.click('[data-save-new-agreement]'); await settle(page, 2500); }
   const after = Number(await sql(`select count(*) from public.club_responsibilities where status = 'confirmed' and deleted_at is null and household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03')`));
   await step(`"We agreed" saves the agreement for the household (${had ? 'the month’s suggestion' : 'their own words'})`, after === before + 1, `${before} → ${after}`);
   // A week passes (test database only): the new agreement is 8 days old.

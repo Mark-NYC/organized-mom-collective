@@ -43,3 +43,41 @@ export function stepBackLabel(stage: MawlStage): string | null {
     case 'launch': return `Step back: ${MAWL_LABEL.watch}`;
   }
 }
+
+/** The small stage indicator on a card. The approved MAWL_LABEL stays the stage's full name. */
+export const STAGE_SHORT: Record<MawlStage, string> = {
+  model: 'Learning',
+  assist: 'Together',
+  watch: 'Practicing',
+  launch: 'Their responsibility',
+};
+
+/**
+ * One short line of coaching per stage, in the family's words. It never quotes the skill's title (titles are written
+ * as the child says them, "Reset my bedroom") and never guesses a child's pronouns.
+ */
+export function coachLine(stage: MawlStage, firstName: string): string {
+  switch (stage) {
+    case 'model': return `Show ${firstName} how it’s done, step by step, and what finished looks like.`;
+    case 'assist': return `Do it together, and hand ${firstName} one more step each time.`;
+    case 'watch': return `Let ${firstName} do it while you observe. Help them notice anything they miss, especially when the routine changes.`;
+    case 'launch': return `It’s ${firstName}’s responsibility now. Notice it and say thanks.`;
+  }
+}
+
+/** A new skill starts with Model: the first thing to do, in one line. */
+export const suggestCoachLine = (firstName: string) =>
+  `Start by showing ${firstName} how it’s done. Practice together before asking them to try it alone.`;
+
+/** The one obvious next action on an active responsibility (it keeps the stage). */
+export const keepLabel = (stage: MawlStage) => (stage === 'launch' ? 'Keep it as theirs' : 'Keep practicing');
+
+/** The quieter "move back one stage" action, named for where it goes, with the stage's full name as detail. */
+export function practiceBackLabel(stage: MawlStage): string | null {
+  switch (stage) {
+    case 'model': return null;
+    case 'assist': return 'Show them again';
+    case 'watch': return 'Practice together again';
+    case 'launch': return 'Coach them again';
+  }
+}

@@ -163,7 +163,7 @@ describe('agreement lifecycle: a record and its agreement never disagree', () =>
   it('the meeting reports "saved" only from the database\'s answer, with the agreement it returned', () => {
     const coach = readFileSync('src/components/family/DevelopmentCoach.tsx', 'utf8');
     expect(coach).toMatch(/const live = r\.agreement && !r\.agreement\.deleted;/);
-    expect(coach).toMatch(/Saved: agreed by our family\. It’s on \$\{firstName\}’s list\./);
+    expect(coach).toMatch(/Added to our plan: agreed by our family\. It’s on \$\{firstName\}’s list\./);
     expect(coach).toMatch(/useState\(\(\) => \(\{ record: newRecordId\(\), agreement: newRecordId\(\) \}\)\)/); // ids kept for retries
     expect(coach).toMatch(/if \(busy\) return;/); // no double submit
   });

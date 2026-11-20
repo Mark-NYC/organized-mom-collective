@@ -176,3 +176,5 @@ html .fm-switch button[aria-pressed="true"]{background:color-mix(in srgb,var(--f
 html .fm-actions button,html .cp-primary,html .cp-square{border-radius:8px}
 html .fm-actions .fm-print,html .cp-primary:not([aria-disabled="true"]){background:var(--color-warm-button,#4a3f3e)}
 html .cp-bar{background:color-mix(in srgb,var(--of-bg) 96%,transparent);backdrop-filter:blur(8px)}
+/* Weekly Family Meeting: the Back/Next bar sits above the tab bar, except while typing (the keyboard is up). */
+[data-weekly-meeting]:has(input:focus,select:focus,textarea:focus) [data-meeting-step-actions]{position:static}

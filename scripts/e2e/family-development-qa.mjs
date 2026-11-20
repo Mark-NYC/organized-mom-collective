@@ -66,6 +66,7 @@ async function signIn(page, email) {
 }
 const MEETING = '/app/family/meeting';
 const openMeeting = async (page) => { await page.goto(`${base}${MEETING}`, { waitUntil: 'networkidle' }); await settle(page, 1500); };
+const openSection = async (page, sel) => { if (await page.locator(`${sel}:not([open])`).count()) await page.click(`${sel} summary`); };
 const step = async (page, i) => { await page.click(`[data-meeting-step="${i}"]`); await settle(page, 400); };
 
 async function layout(page, label) {
@@ -112,6 +113,8 @@ console.log(`family development QA: site ${base}, isolated backend ${API}`);
   await openMeeting(page);
   check('free family: meeting is the free kind', (await page.getAttribute('[data-weekly-meeting]', 'data-meeting-kind')) === 'free');
   for (let i = 0; i < 4; i++) { await step(page, i); check(`free family: part ${i + 1} has no development guidance`, await devCount(page) === 0); }
+  await step(page, 2);
+  check('free family: "Add another responsibility" is open, as before', await page.locator('[data-add-agreement-section][open]').count() === 1);
   await shot(page, '02-free-everyones-part');
   await ctx.close();
 }
@@ -133,6 +136,25 @@ const monthDup = await jen.locator('[data-meeting-suggestion="Maya"], [data-meet
 check('no duplicate: a child with a development step gets no month suggestion too', monthDup === 0, `${monthDup}`);
 check('no records: each child has exactly one idea', await jen.locator('[data-development-person="Leo"] [data-development-suggest]').count() === 1 && await jen.locator('[data-development-person="Maya"] [data-development-suggest]').count() === 1);
 await layout(jen, 'phone 393 · Everyone\'s Part (ideas)');
+check('Club with next steps: "What we’ve already agreed" starts closed', await jen.locator('[data-agreed-section]:not([open])').count() === 1);
+check('Club with next steps: "Add another responsibility" starts closed', await jen.locator('[data-add-agreement-section]:not([open])').count() === 1);
+check('buttons use sentence case, not uppercase', await jen.locator('[data-development-next-steps] button, [data-meeting-step-actions] .of-btn').evaluateAll((els) => els.every((e) => getComputedStyle(e).textTransform === 'none')));
+const bars = await jen.evaluate(() => {
+  const a = document.querySelector('[data-meeting-step-actions]')?.getBoundingClientRect();
+  const t = document.querySelector('[data-app-tabbar]')?.getBoundingClientRect();
+  return a && t ? { actionsBottom: a.bottom, tabTop: t.top, visible: a.top < window.innerHeight } : null;
+});
+check('Back and Next sit just above the tab bar, never under it', !!bars && bars.visible && bars.actionsBottom <= bars.tabTop + 1, JSON.stringify(bars));
+await jen.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+await settle(jen, 300);
+const lastVisible = await jen.evaluate(() => {
+  const t = document.querySelector('[data-app-tabbar]')?.getBoundingClientRect().top ?? window.innerHeight;
+  const a = document.querySelector('[data-meeting-step-actions]')?.getBoundingClientRect().top ?? t;
+  const last = [...document.querySelectorAll('[data-meeting-part] summary')].pop()?.getBoundingClientRect();
+  return last ? last.bottom <= Math.min(t, a) + 1 : true;
+});
+check('scrolled to the end, the last control is not covered by Back/Next or the tab bar', lastVisible);
+await jen.evaluate(() => window.scrollTo(0, 0));
 await jen.click('[data-development-person="Leo"] [data-development-adjust] summary');
 const stages = await jen.locator('[data-development-person="Leo"] [data-development-stage]').allTextContents();
 check('all four MAWL stages in the approved words', JSON.stringify(stages) === JSON.stringify(['I’ll show them how', 'We’ll do it together', 'They’ll do it, I’ll coach', 'Ready to take full responsibility']), stages.join(' · '));
@@ -149,7 +171,7 @@ await jen.locator('[data-development-person="Leo"] [data-development-agree]').fo
 await jen.keyboard.press('Enter');
 await jen.waitForSelector('[data-development-person="Leo"] [data-development-saved]', { timeout: 10000 });
 const savedText = await jen.textContent('[data-development-person="Leo"] [data-development-saved]');
-check('We agreed: says it is saved and on the child\'s list', /Saved: agreed by our family\. It’s on Leo’s list/.test(savedText), savedText);
+check('Add to our plan: says it is saved and on the child\'s list', /Added to our plan: agreed by our family\. It’s on Leo’s list/.test(savedText), savedText);
 check('We agreed: focus moves to the result (screen readers hear it)', await jen.evaluate(() => document.activeElement?.hasAttribute('data-development-saved')));
 const db1 = JSON.parse(await sql(`select json_build_object('records', (select count(*) from household_development where member_id = '${kids.leo}' and skill_id = '${leoSkill}' and status = 'active'), 'agreements', (select count(*) from club_responsibilities where agreed_source = 'skill:${leoSkill}' and owner_ids = array['${kids.leo}']::uuid[] and deleted_at is null), 'linked', (select count(*) from household_development d join club_responsibilities a on a.id = d.agreement_id where d.member_id = '${kids.leo}'))`));
 check('We agreed: exactly one record and one agreement, linked', db1.records === 1 && db1.agreements === 1 && db1.linked === 1, JSON.stringify(db1));
@@ -180,11 +202,21 @@ await jen.waitForSelector('[data-development-person="Maya"] [data-development-sa
 await jenCtx.unroute(`${API}/rest/v1/rpc/household_development_decide`);
 const db2 = JSON.parse(await sql(`select json_build_object('records', (select count(*) from household_development where member_id = '${kids.maya}'), 'agreements', (select count(*) from club_responsibilities where owner_ids = array['${kids.maya}']::uuid[] and agreed_source = 'skill:${mayaSkill}'))`));
 check('lost answer + retry: one record and one agreement, not two', db2.records === 1 && db2.agreements === 1, JSON.stringify(db2));
-check('lost answer + retry: then says saved', /Saved: agreed by our family/.test(await jen.textContent('[data-development-person="Maya"] [data-development-saved]')));
+check('lost answer + retry: then says saved', /Added to our plan: agreed by our family/.test(await jen.textContent('[data-development-person="Maya"] [data-development-saved]')));
 
 // Return later: same responsibility, same stage; no repeated idea.
 await openMeeting(jen);
 await step(jen, 2);
+await openSection(jen, '[data-add-agreement-section]');
+await jen.fill('[data-agreement-new]', 'Water the plants on Saturday');
+check('keyboard up: Back/Next leave the bottom of the screen', await jen.evaluate(() => getComputedStyle(document.querySelector('[data-meeting-step-actions]')).position === 'static'));
+await jen.click('[data-owner-chip="Maya"]');
+await jen.click('[data-save-new-agreement]');
+await settle(jen, 2500);
+check('Club family: manual "Add another responsibility" still saves to the household', (await sql(`select count(*) from club_responsibilities where agreed_text = 'Water the plants on Saturday' and deleted_at is null`)) === '1');
+await openSection(jen, '[data-agreed-section]');
+check('existing agreements open with a count, and link to edit them', /What we’ve already agreed \(\d+\)/.test(await jen.textContent('[data-agreed-section] summary')) && await jen.locator('[data-agreed-edit][href="/app/family/responsibilities"]').count() === 1);
+await shot(jen, '05b-agreed-and-add-open');
 check('return later: the agreed skills are not suggested again', await jen.locator(`[data-development-suggest="${leoSkill}"], [data-development-suggest="${mayaSkill}"]`).count() === 0);
 await step(jen, 0); await step(jen, 3);
 await shot(jen, '05-club-lets-practice');
@@ -208,7 +240,7 @@ check('check-in "Usually": recorded, stage stays Watch (no automatic Launch)', a
 await step(jen, 2);
 const next = jen.locator(`[data-development-next="${leoSkill}"]`);
 check('Everyone\'s Part: Launch is offered only as the family\'s own decision', /Hand over responsibility/.test(await next.textContent()) && /Doing it on their own is progress/.test(await next.textContent()));
-check('Everyone\'s Part: the stage is in plain words', /They’ll do it, I’ll coach/.test(await next.textContent()));
+check('Everyone\'s Part: a small stage indicator in plain words', (await next.locator('[data-development-stage-pill]').textContent()) === 'Practicing');
 await shot(jen, '07-watch-next-step');
 await next.locator('[data-development-decision="pause"]').click();
 await jen.waitForSelector(`[data-development-next="${leoSkill}"] [data-development-saved]`);
@@ -222,6 +254,15 @@ check('after pause: no check-in for the paused skill', await jen.locator(`[data-
 await step(jen, 2);
 check('after pause: not suggested again', await jen.locator(`[data-development-suggest="${leoSkill}"]`).count() === 0);
 
+// ------------------------------------------------------------------ 3a. each stage offers only its valid moves
+for (const [st, expected] of [['model', 'stay,advance,pause'], ['assist', 'stay,step-back,advance,pause']]) {
+  await sql(`update household_development set stage = '${st}', last_check_in_on = current_date - 8 where member_id = '${kids.maya}'`);
+  await openMeeting(jen); await step(jen, 2);
+  const got = await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision]`).evaluateAll((els) => els.map((e) => e.getAttribute('data-development-decision')).join(','));
+  check(`${st}: only valid moves are offered (${expected})`, got === expected, got);
+  await layout(jen, `phone 393 · ${st} card`);
+  await shot(jen, `07a-${st}-card`);
+}
 // ------------------------------------------------------------------ 3b. Hand over responsibility (Launch) for Maya
 await sql(`update household_development set stage = 'watch', last_check_in_on = current_date - 8 where member_id = '${kids.maya}'`);
 await openMeeting(jen);
@@ -230,12 +271,16 @@ const handOver = jen.locator(`[data-development-next="${mayaSkill}"] [data-devel
 check('Launch: the button says "Hand over responsibility"', (await handOver.textContent())?.trim() === 'Hand over responsibility');
 check('Launch: its accessible name says what is handed to whom', /Hand over responsibility to Maya/.test(await handOver.getAttribute('aria-label') ?? ''));
 check('Launch: Watch says doing it alone is progress, handing over is a separate choice', await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-watch-distinction]`).count() === 1);
-check('Watch: staying in Watch and stepping back are both offered', await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="stay"]`).count() === 1 && /Step back: We’ll do it together/.test(await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="step-back"]`).textContent()));
+check('Watch: "Keep practicing" is the primary action; practicing together again is offered', (await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="stay"]`).textContent())?.trim() === 'Keep practicing' && /Practice together again/.test(await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="step-back"]`).textContent()));
+check('Watch: stage changes start hidden behind one control', !(await handOver.isVisible()) && (await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-change] summary`).textContent())?.includes('Change how we’re practicing'));
+await jen.click(`[data-development-next="${mayaSkill}"] [data-development-change] summary`);
+check('Watch: opening it shows Hand over responsibility', await handOver.isVisible());
 await layout(jen, 'phone 393 · Everyone\'s Part (Watch, hand over)');
 await shot(jen, '07b-watch-hand-over');
 await jenCtx.route(`${API}/rest/v1/rpc/household_development_decide`, (r) => r.abort('internetdisconnected'));
 await handOver.click();
 await jen.waitForSelector(`[data-development-next="${mayaSkill}"] [data-development-error]`, { timeout: 10000 });
+check('Launch failed to save: says it was not saved', /Not saved/.test(await jen.textContent(`[data-development-next="${mayaSkill}"] [data-development-error]`)));
 check('Launch failed to save: no confirmation shown', !/Great! This is now their responsibility/.test(await jen.locator(`[data-development-next="${mayaSkill}"]`).textContent()));
 check('Launch failed to save: still Watch in the database', (await sql(`select stage from household_development where member_id = '${kids.maya}'`)) === 'watch');
 await jenCtx.unroute(`${API}/rest/v1/rpc/household_development_decide`);
@@ -250,9 +295,10 @@ await sql(`update household_development set last_check_in_on = current_date - 30
 await openMeeting(jen);
 await step(jen, 1);
 check('after Launch: the check-in asks whether it is still theirs (ownership)', /still Maya’s/.test(await jen.textContent(`[data-development-check-in="${mayaSkill}"]`) ?? ''));
-check('after Launch: the stage reads "Ready to take full responsibility"', /Ready to take full responsibility/.test(await jen.textContent(`[data-development-check-in="${mayaSkill}"]`) ?? ''));
+check('after Launch: the stage reads "Their responsibility"', (await jen.textContent(`[data-development-check-in="${mayaSkill}"] [data-development-stage-pill]`)) === 'Their responsibility');
 await step(jen, 2);
-check('after Launch: moving back is still possible', /Step back: They’ll do it, I’ll coach/.test(await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="step-back"]`).textContent() ?? ''));
+check('after Launch: moving back is still possible', /Coach them again/.test(await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="step-back"]`).textContent() ?? ''));
+check('after Launch: the primary action keeps it theirs', (await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="stay"]`).textContent())?.trim() === 'Keep it as theirs');
 check('after Launch: no "hand over" offered again', await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="advance"]`).count() === 0);
 await shot(jen, '07d-launched-check-in');
 
@@ -284,6 +330,7 @@ for (const vp of ['large', 'desktop']) {
   check('records fail to load: no development guidance (nothing guessed)', await devCount(page) === 0);
   await step(page, 2);
   check('records fail to load: month ideas and "We agreed" still work as before', await page.locator('[data-add-agreement]').count() === 1);
+  check('no recommendations: the manual form and agreements are open, as before', await page.locator('[data-add-agreement-section][open]').count() === 1 && await page.locator('[data-agreed-section][open]').count() === 1);
   await shot(page, '10-records-unavailable');
   await ctx.close();
 }

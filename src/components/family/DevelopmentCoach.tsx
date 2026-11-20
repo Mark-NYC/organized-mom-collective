@@ -5,8 +5,11 @@
  * never reshuffles the rest of the meeting:
  *
  *   Let's Talk       DevelopmentCheckIns   "How's it going?" for a skill the family is already working on.
- *   Everyone's Part  DevelopmentNextSteps  stage coaching and the family's choice (stay, next step, easier, pause),
- *                                          or one new skill to agree on (We agreed · Not now · Not for us).
+ *   Everyone's Part  DevelopmentNextSteps  per child: who is learning what, how to help, and ONE obvious action.
+ *                                          Active: Keep practicing; stage changes behind "Change how we're
+ *                                          practicing" (only valid moves); Edit routine and Pause as text actions.
+ *                                          New skill: Add to our plan; Customize (stage, cue, finish line,
+ *                                          safety, Don't suggest again); Not now.
  *   Let's Practice   DevelopmentPractice   one thing to show or do together right now.
  *
  * Nothing is saved without a tap, and "Saved" is shown only after the database answered: the record and the family
@@ -16,7 +19,10 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { MAWL_STAGES, type MawlStage } from '../../lib/family-development/framework';
-import { HAND_OVER_LABEL, LAUNCH_CONFIRMATION, MAWL_LABEL, WATCH_DISTINCTION, advanceLabel, stepBackLabel } from '../../lib/family-development/language';
+import {
+  HAND_OVER_LABEL, LAUNCH_CONFIRMATION, MAWL_LABEL, STAGE_SHORT, WATCH_DISTINCTION, advanceLabel, coachLine, keepLabel, practiceBackLabel,
+  suggestCoachLine,
+} from '../../lib/family-development/language';
 import type { CheckInStep, DevelopmentPlan, SuggestStep } from '../../lib/family-development/engine';
 import { responsibilityCategoryOf } from '../../lib/family-development/engine';
 import type { CheckValue, DbAgreement, DecisionInput, DevelopmentDecision, DevelopmentRecord } from '../../lib/family-development/records';
@@ -53,16 +59,20 @@ export interface CoachProps {
 
 const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
-/** Saving state for one card: one request at a time, and focus moves to the result for screen readers. */
+/**
+ * Saving state for one card: one request at a time (repeated taps do nothing), the tapped action shows "Saving…",
+ * and focus moves to the result so screen readers hear it.
+ */
 function useSave(onAccessLost?: () => void) {
-  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [done, setDone] = useState<string | null>(null);
   const result = useRef<HTMLParagraphElement>(null);
   useEffect(() => { if (done || error) result.current?.focus(); }, [done, error]);
-  const run = async (f: () => Promise<DecideResult>, ok: (r: Extract<DecideResult, { ok: true }>) => string) => {
+  const busy = pending !== null;
+  const run = async (key: string, f: () => Promise<DecideResult>, ok: (r: Extract<DecideResult, { ok: true }>) => string) => {
     if (busy) return;
-    setBusy(true); setError('');
+    setPending(key); setError('');
     try {
       const r = await f();
       if (r.ok) setDone(ok(r));
@@ -70,16 +80,28 @@ function useSave(onAccessLost?: () => void) {
         setError(ERROR_TEXT[r.error]);
         if (r.error === 'club_required') onAccessLost?.();
       }
-    } finally { setBusy(false); }
+    } finally { setPending(null); }
   };
-  return { busy, error, done, result, run };
+  return { busy, pending, error, done, result, run };
 }
 
 function Result({ s }: { s: ReturnType<typeof useSave> }) {
-  if (s.done) return <p ref={s.result} tabIndex={-1} role="status" className="mt-3 text-sm text-[var(--of-sage-ink)] outline-none" data-development-saved>{s.done}</p>;
-  if (s.error) return <p ref={s.result} tabIndex={-1} role="alert" className="mt-2 text-sm outline-none" data-development-error>{s.error}</p>;
+  if (s.done) return <p ref={s.result} tabIndex={-1} role="status" className="mt-2 text-[0.92rem] text-[var(--of-sage-ink)] outline-none" data-development-saved>{s.done}</p>;
+  if (s.error) return <p ref={s.result} tabIndex={-1} role="alert" className="mt-2 text-[0.92rem] outline-none" data-development-error>{s.error}</p>;
   return null;
 }
+
+/** The small, consistent stage indicator. */
+function StagePill({ stage }: { stage: MawlStage }) {
+  return <span className="inline-flex items-center rounded-full bg-[var(--of-surface)] px-2 py-0.5 text-[0.75rem] font-semibold text-[var(--of-sage-ink)]" title={MAWL_LABEL[stage]} data-development-stage-pill={stage}>{STAGE_SHORT[stage]}</span>;
+}
+
+/** Sentence-case buttons, in the app's colors: one primary per card; everything else quieter. */
+const PRIMARY = 'of-btn !min-h-[44px] !px-4 !text-[0.92rem] !normal-case !tracking-normal';
+const SECONDARY = 'of-btn of-btn--soft !min-h-[44px] !px-4 !text-[0.92rem] !normal-case !tracking-normal';
+const TEXT_ACTION = 'inline-flex min-h-[44px] items-center px-1 text-[0.88rem] text-warm-soft underline underline-offset-4 hover:text-warm-ink disabled:opacity-60';
+const DISCLOSURE = 'flex min-h-[44px] cursor-pointer list-none items-center gap-1.5 text-[0.92rem] font-semibold text-warm-ink [&::-webkit-details-marker]:hidden';
+const Chevron = () => <span aria-hidden="true" className="inline-flex size-4 items-center justify-center leading-none text-warm-soft transition-transform group-open:rotate-90">›</span>;
 
 // ------------------------------------------------------------------ Let's Talk
 
@@ -87,26 +109,27 @@ function CheckInCard({ step, firstName, color, live, decide, onAccessLost }: { s
   const id = step.record.id;
   const [variation, setVariation] = useState(false);
   const s = useSave(onAccessLost);
-  const answer = (value: CheckValue) => s.run(
+  const answer = (value: CheckValue) => s.run(value,
     () => decide(live.get(id) ?? step.record, { decision: 'check-in', check: { signal: step.question.signal, value, variation } }),
     () => 'Noted. More on this in Everyone’s Part.',
   );
   return (
-    <div className="rounded-[9px] border border-[var(--of-rule)] px-3 py-3" data-development-check-in={step.record.skillId}>
-      <div className="flex items-center gap-2.5">
+    <div className="border-t border-[var(--of-rule)] pt-3" data-development-check-in={step.record.skillId}>
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
         <Avatar name={firstName} color={color} size="sm" />
-        <p className="min-w-0 text-[0.92rem]"><strong>{firstName}</strong> · {step.record.title} <span className="text-warm-soft">· {STAGE_LABEL[step.record.stage!]}</span></p>
+        <p className="min-w-0 text-[0.95rem]"><strong>{firstName}</strong> · {step.record.title}</p>
+        <StagePill stage={step.record.stage!} />
       </div>
       <p className="mt-2 text-[0.95rem]" id={`dq-${id}`}>{step.question.text}</p>
       {!s.done && (
         <>
-          <div className="mt-3 grid grid-cols-3 gap-2" role="group" aria-labelledby={`dq-${id}`} aria-busy={s.busy}>
+          <div className="mt-2.5 grid grid-cols-3 gap-2" role="group" aria-labelledby={`dq-${id}`} aria-busy={s.busy}>
             {step.question.answers.map((a) => (
-              <button key={a.value} type="button" disabled={s.busy} className="min-h-[44px] rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.82rem] font-semibold disabled:opacity-60" onClick={() => void answer(a.value)} data-development-answer={a.value}>{a.label}</button>
+              <button key={a.value} type="button" disabled={s.busy} className="min-h-[44px] rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.88rem] font-semibold disabled:opacity-60" onClick={() => void answer(a.value)} data-development-answer={a.value}>{s.pending === a.value ? 'Saving…' : a.label}</button>
             ))}
           </div>
           {step.record.stage === 'watch' && (
-            <label className="mt-2 flex min-h-[44px] items-center gap-2 text-[0.85rem] text-warm-soft">
+            <label className="mt-1 flex min-h-[44px] items-center gap-2 text-[0.88rem] text-warm-soft">
               <input type="checkbox" className="size-5" checked={variation} onChange={(e) => setVariation(e.target.checked)} data-development-variation />
               We tried it on a different kind of day
             </label>
@@ -131,6 +154,10 @@ export function DevelopmentCheckIns({ plan, live, decide, colors, onAccessLost }
 
 // ------------------------------------------------------------------ Everyone's Part
 
+/**
+ * An active responsibility: what they're learning, how to help, one obvious next action (keep practicing), the stage
+ * changes behind "Change how we're practicing" (only the moves valid for this stage), and two quiet text actions.
+ */
 function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost }: { step: CheckInStep; firstName: string } & Pick<CoachProps, 'live' | 'decide' | 'onAgreement' | 'onAccessLost'>) {
   const rec = live.get(step.record.id) ?? step.record;
   const s = useSave(onAccessLost);
@@ -139,7 +166,7 @@ function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost 
   const [finish, setFinish] = useState(rec.finishLine ?? step.skill?.finishLine ?? '');
   // Kept for retries: tapping "Put it back" again after a failure never makes a second agreement.
   const [agreementId] = useState(newRecordId);
-  const act = (decision: DevelopmentDecision, extra: Partial<DecisionInput> = {}) => s.run(
+  const act = (decision: DevelopmentDecision, extra: Partial<DecisionInput> = {}) => s.run(decision,
     () => decide(live.get(rec.id) ?? rec, { decision, ...extra }),
     (r) => {
       if (r.agreement) onAgreement?.(r.agreement);
@@ -153,62 +180,91 @@ function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost 
         case 'dismiss': return 'Set aside. It’s off the list, and we won’t suggest it again.';
         case 'modify': return 'Saved your words, here and on the list.';
         case 'restore': return 'Back on the list.';
-        default: return 'Staying here this week.';
+        default: return rec.stage === 'launch' ? 'Noted. It stays theirs.' : 'Noted. Keep practicing this week.';
       }
     },
   );
   const stage = rec.stage!;
+  const label = (key: string, text: string) => (s.pending === key ? 'Saving…' : text);
   if (step.agreementRemoved && rec.agreementLive === false) {
     return (
       <div data-development-next={rec.skillId} data-development-removed>
-        <p className="text-[0.95rem]"><strong>{rec.title}</strong></p>
-        <p className="mt-1 text-[0.9rem]">{step.why[0]}</p>
+        <p className="font-semibold">{rec.title}</p>
+        <p className="mt-1 text-[0.92rem] text-warm-soft">{step.why[0]}</p>
         {!s.done && (
-          <div className="mt-3 flex flex-wrap gap-2" aria-busy={s.busy}>
-            <button type="button" disabled={s.busy} className="of-btn !min-h-[44px]" onClick={() => void act('restore', { agreementId, category: rec.category })} data-development-decision="restore">Put it back on the list</button>
-            <button type="button" disabled={s.busy} className="of-btn of-btn--soft !min-h-[44px]" onClick={() => void act('pause')} data-development-decision="pause">Pause it here too</button>
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" aria-busy={s.busy}>
+            <button type="button" disabled={s.busy} className={PRIMARY} onClick={() => void act('restore', { agreementId, category: rec.category })} data-development-decision="restore">{label('restore', 'Put it back on the list')}</button>
+            <button type="button" disabled={s.busy} className={TEXT_ACTION} onClick={() => void act('pause')} data-development-decision="pause">{label('pause', 'Pause it here too')}</button>
           </div>
         )}
         <Result s={s} />
       </div>
     );
   }
-  const offers = step.decisions.filter((d) => d === 'stay' || d === 'step-back' || d === 'pause' || (d === 'advance' && rec.status === 'active'));
+  const canAdvance = step.decisions.includes('advance') && rec.status === 'active';
+  const canBack = step.decisions.includes('step-back');
+  const back = practiceBackLabel(stage);
+  const prev = MAWL_STAGES[MAWL_STAGES.indexOf(stage) - 1];
   return (
     <div data-development-next={rec.skillId}>
-      <p className="text-[0.95rem]"><strong>{rec.title}</strong> <span className="text-warm-soft">· {STAGE_LABEL[stage]}</span></p>
-      <p className="mt-1 text-[0.9rem] leading-relaxed">{step.coaching}</p>
-      {step.watchVariation && <p className="mt-2 rounded-[9px] bg-[var(--of-surface)] px-3 py-2 text-[0.9rem]" data-development-variation-suggestion>Try a different kind of day: {step.watchVariation}</p>}
-      {stage === 'watch' && <p className="mt-2 text-[0.85rem] text-warm-soft" data-development-watch-distinction>{WATCH_DISTINCTION}</p>}
-      {step.hint && <p className="mt-2 text-[0.85rem] text-warm-soft" data-development-hint>{step.hint}</p>}
-      {step.safety && <p className="mt-2 text-[0.8rem] text-warm-soft">{step.safety}</p>}
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <p className="font-semibold">{rec.title}</p>
+        <StagePill stage={stage} />
+      </div>
+      <p className="mt-1.5 text-[0.95rem] leading-relaxed">{coachLine(stage, firstName)}</p>
+      {step.watchVariation && <p className="mt-1.5 text-[0.9rem] text-warm-soft" data-development-variation-suggestion>This week, try a different kind of day: {lower(step.watchVariation)}</p>}
+      {step.safety && <p className="mt-1.5 text-[0.85rem] text-warm-soft">{step.safety}</p>}
       {!s.done && (
-        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label={`What's next for ${firstName}: ${rec.title}`} aria-busy={s.busy}>
-          {offers.map((d) => (
-            <button key={d} type="button" disabled={s.busy} className={`of-btn ${d === 'stay' ? '' : 'of-btn--soft'} !min-h-[44px]`} onClick={() => void act(d)} data-development-decision={d}
-              {...(d === 'advance' && stage === 'watch' ? { 'aria-label': `${HAND_OVER_LABEL} to ${firstName}: ${rec.title}` } : {})}>
-              {d === 'stay' ? 'Stay here' : d === 'advance' ? advanceLabel(stage) : d === 'step-back' ? stepBackLabel(stage) : 'Pause for now'}
-            </button>
-          ))}
-          <button type="button" className="min-h-[44px] px-1 text-left text-[0.88rem] font-semibold text-warm-ink underline underline-offset-4" onClick={() => setEditing((e) => !e)} aria-expanded={editing} data-development-edit>Change the cue or finish line</button>
-        </div>
-      )}
-      {editing && !s.done && (
-        <form className="mt-3 space-y-2" onSubmit={(e) => { e.preventDefault(); void act('modify', { cue, finish }); }}>
-          <label className="block text-[0.8rem] text-warm-soft">When it happens
-            <input value={cue} maxLength={80} onChange={(e) => setCue(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem] text-warm-ink" />
-          </label>
-          <label className="block text-[0.8rem] text-warm-soft">What finished looks like
-            <input value={finish} maxLength={160} onChange={(e) => setFinish(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem] text-warm-ink" />
-          </label>
-          <button type="submit" disabled={s.busy} className="of-btn of-btn--soft">Save our words</button>
-        </form>
+        <>
+          <div className="mt-3" aria-busy={s.busy}>
+            <button type="button" disabled={s.busy} className={PRIMARY} onClick={() => void act('stay')} data-development-decision="stay">{label('stay', keepLabel(stage))}</button>
+          </div>
+          {(canAdvance || canBack) && (
+            <details className="group mt-1" data-development-change>
+              <summary className={DISCLOSURE}><Chevron />Change how we’re practicing</summary>
+              <div className="space-y-3 pb-1 pt-1">
+                {canBack && back && prev && (
+                  <div>
+                    <button type="button" disabled={s.busy} className={SECONDARY} onClick={() => void act('step-back')} data-development-decision="step-back" aria-describedby={`back-${rec.id}`}>{label('step-back', back)}</button>
+                    <p id={`back-${rec.id}`} className="mt-1 text-[0.85rem] text-warm-soft">Back to “{MAWL_LABEL[prev]}”.</p>
+                  </div>
+                )}
+                {canAdvance && (
+                  <div>
+                    {stage === 'watch' && <p className="mb-1.5 text-[0.85rem] text-warm-soft" data-development-watch-distinction>{WATCH_DISTINCTION}</p>}
+                    <button type="button" disabled={s.busy} className={SECONDARY} onClick={() => void act('advance')} data-development-decision="advance"
+                      {...(stage === 'watch' ? { 'aria-label': `${HAND_OVER_LABEL} to ${firstName}: ${rec.title}` } : {})}>{label('advance', advanceLabel(stage)!)}</button>
+                  </div>
+                )}
+              </div>
+            </details>
+          )}
+          <div className="flex flex-wrap gap-x-4" aria-busy={s.busy}>
+            <button type="button" className={TEXT_ACTION} onClick={() => setEditing((e) => !e)} aria-expanded={editing} data-development-edit>Edit routine</button>
+            <button type="button" disabled={s.busy} className={TEXT_ACTION} onClick={() => void act('pause')} data-development-decision="pause">{label('pause', 'Pause this responsibility')}</button>
+          </div>
+          {editing && (
+            <form className="mt-1 space-y-2" onSubmit={(e) => { e.preventDefault(); void act('modify', { cue, finish }); }} data-development-edit-form>
+              <label className="block text-[0.85rem] text-warm-soft">When it happens
+                <input value={cue} maxLength={80} onChange={(e) => setCue(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[1rem] text-warm-ink" />
+              </label>
+              <label className="block text-[0.85rem] text-warm-soft">What finished looks like
+                <input value={finish} maxLength={160} onChange={(e) => setFinish(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[1rem] text-warm-ink" />
+              </label>
+              <button type="submit" disabled={s.busy} className={SECONDARY}>{label('modify', 'Save routine')}</button>
+            </form>
+          )}
+        </>
       )}
       <Result s={s} />
     </div>
   );
 }
 
+/**
+ * A suggested new skill: what it is, how to start, when it happens, one obvious action (Add to our plan, which saves
+ * the record and the family agreement together), Customize for the rest, Not now. "Don't suggest again" is inside.
+ */
 function SuggestNext({ step, memberId, firstName, decide, onAgreement, onAccessLost }: { step: SuggestStep; memberId: string; firstName: string } & Pick<CoachProps, 'decide' | 'onAgreement' | 'onAccessLost'>) {
   const [cue, setCue] = useState(step.cueOptions[0] ?? '');
   const [finish, setFinish] = useState(step.finishLine);
@@ -217,53 +273,64 @@ function SuggestNext({ step, memberId, firstName, decide, onAgreement, onAccessL
   const [ids] = useState(() => ({ record: newRecordId(), agreement: newRecordId() }));
   const s = useSave(onAccessLost);
   const target = { id: ids.record, memberId, skillId: step.skill.id, title: step.skill.title };
-  const choose = (decision: 'start' | 'pause' | 'dismiss') => s.run(
+  const choose = (decision: 'start' | 'pause' | 'dismiss') => s.run(decision,
     () => decide(target, decision === 'start'
       ? { decision, stage, cue, finish, category: responsibilityCategoryOf(step.skill), agreementId: ids.agreement }
       : { decision, category: responsibilityCategoryOf(step.skill) }),
     (r) => {
       if (r.agreement) onAgreement?.(r.agreement);
-      if (decision !== 'start') return decision === 'pause' ? 'Not now. We won’t bring it up again until you do.' : 'Not for us. We won’t suggest it again.';
+      if (decision !== 'start') return decision === 'pause' ? 'Not now. We won’t bring it up again until you do.' : 'Got it. We won’t suggest it again.';
       const live = r.agreement && !r.agreement.deleted;
-      if (r.adopted) return `Already agreed: the other grown-up saved “${r.record.title}” for ${firstName}. It’s on the list.`;
-      return live ? `Saved: agreed by our family. It’s on ${firstName}’s list. Starting with “${STAGE_LABEL[r.record.stage!]}”.` : 'Saved here. It isn’t on the list yet: check Who does what.';
+      if (r.adopted) return `Already in your plan: the other grown-up added “${r.record.title}” for ${firstName}.`;
+      if (!live) return 'Saved here. It isn’t on the list yet: check Who does what.';
+      return r.record.status === 'launched'
+        ? `Added to our plan: agreed by our family. It’s on ${firstName}’s list as their responsibility.`
+        : `Added to our plan: agreed by our family. It’s on ${firstName}’s list.`;
     },
   );
+  const label = (key: string, text: string) => (s.pending === key ? 'Saving…' : text);
   return (
     <div data-development-suggest={step.skill.id}>
-      <p className="of-eyebrow">One idea{step.generic ? ' to start with' : ''}</p>
-      <p className="mt-1 font-semibold">{step.skill.title}</p>
-      <ul className="mt-1 space-y-0.5 text-[0.85rem] text-warm-soft" data-development-why>{step.why.slice(0, 2).map((w) => <li key={w}>{w}</li>)}</ul>
-      {step.safety && <p className="mt-2 text-[0.8rem] text-warm-soft">{step.safety}</p>}
+      <p className="text-[0.8rem] font-semibold text-[var(--of-sage-ink)]">Suggested next skill</p>
+      <p className="mt-0.5 font-semibold">{step.skill.title}</p>
+      <p className="mt-1.5 text-[0.95rem] leading-relaxed">{stage === 'model' ? suggestCoachLine(firstName) : coachLine(stage, firstName)}</p>
+      <p className="mt-1.5 text-[0.92rem]" data-development-summary><span className="text-warm-soft">When:</span> {cue.trim() || 'you choose'}</p>
       {!s.done && (
         <>
-          <p className="mt-2 text-[0.9rem]" data-development-summary><span className="text-warm-soft">When:</span> {cue.trim() || 'you choose'} · <span className="text-warm-soft">Finished:</span> {finish.trim() || 'you choose'} · <span className="text-warm-soft">{START_STAGES.find((x) => x.stage === stage)!.label}</span></p>
-          <details className="mt-1" data-development-adjust>
-            <summary className="min-h-[44px] cursor-pointer py-2.5 text-[0.88rem] font-semibold underline underline-offset-4">Adjust before agreeing</summary>
-            <p className="mt-1 text-[0.8rem] text-warm-soft" id={`cue-${ids.record}`}>When it happens (tie it to something that already happens)</p>
-            <div className="mt-1 flex flex-wrap gap-2" role="group" aria-labelledby={`cue-${ids.record}`}>
-              {step.cueOptions.map((c) => (
-                <button key={c} type="button" aria-pressed={cue === c} onClick={() => setCue(c)} className={`min-h-[44px] rounded-[8px] border px-3 text-left text-[0.85rem] ${cue === c ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white'}`} data-development-cue>{c}</button>
-              ))}
-            </div>
-            <label className="mt-2 block text-[0.8rem] text-warm-soft">Or in your words
-              <input value={cue} maxLength={80} onChange={(e) => setCue(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem] text-warm-ink" data-development-cue-input />
-            </label>
-            <label className="mt-3 block text-[0.8rem] text-warm-soft">What finished looks like
-              <input value={finish} maxLength={160} onChange={(e) => setFinish(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem] text-warm-ink" data-development-finish />
-            </label>
-            <p className="mt-3 text-[0.8rem] text-warm-soft">Where is {firstName} with this?</p>
-            <div className="mt-1 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={`Where is ${firstName} with this?`}>
-              {START_STAGES.map((x) => (
-                <button key={x.stage} type="button" role="radio" aria-checked={stage === x.stage} onClick={() => setStage(x.stage)} className={`min-h-[44px] rounded-[8px] border px-3 text-left text-[0.85rem] ${stage === x.stage ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white'}`} data-development-stage={x.stage}>{x.label}</button>
-              ))}
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" aria-busy={s.busy}>
+            <button type="button" className={PRIMARY} disabled={!finish.trim() || s.busy} onClick={() => void choose('start')} aria-label={`Add to our plan: ${firstName}, ${step.skill.title}`} data-development-agree>{label('start', s.error ? 'Try again: add to our plan' : 'Add to our plan')}</button>
+            <button type="button" disabled={s.busy} className={TEXT_ACTION} onClick={() => void choose('pause')} data-development-not-now>{label('pause', 'Not now')}</button>
+          </div>
+          <details className="group mt-1" data-development-adjust>
+            <summary className={DISCLOSURE}><Chevron />Customize</summary>
+            <div className="space-y-3 pb-1 pt-1">
+              {step.why[0] && <p className="text-[0.85rem] text-warm-soft" data-development-why>{step.why[0]}</p>}
+              <fieldset>
+                <legend className="text-[0.85rem] text-warm-soft">Where is {firstName} with this?</legend>
+                <div className="mt-1 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={`Where is ${firstName} with this?`}>
+                  {START_STAGES.map((x) => (
+                    <button key={x.stage} type="button" role="radio" aria-checked={stage === x.stage} onClick={() => setStage(x.stage)} className={`min-h-[44px] rounded-[8px] border px-3 text-left text-[0.9rem] ${stage === x.stage ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white'}`} data-development-stage={x.stage}>{x.label}</button>
+                  ))}
+                </div>
+              </fieldset>
+              <div>
+                <p className="text-[0.85rem] text-warm-soft" id={`cue-${ids.record}`}>When it happens: tie it to something that already happens</p>
+                <div className="mt-1 flex flex-wrap gap-2" role="group" aria-labelledby={`cue-${ids.record}`}>
+                  {step.cueOptions.map((c) => (
+                    <button key={c} type="button" aria-pressed={cue === c} onClick={() => setCue(c)} className={`min-h-[44px] rounded-[8px] border px-3 text-left text-[0.9rem] ${cue === c ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white'}`} data-development-cue>{c}</button>
+                  ))}
+                </div>
+                <label className="mt-2 block text-[0.85rem] text-warm-soft">Or in your words
+                  <input value={cue} maxLength={80} onChange={(e) => setCue(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[1rem] text-warm-ink" data-development-cue-input />
+                </label>
+              </div>
+              <label className="block text-[0.85rem] text-warm-soft">What finished looks like
+                <input value={finish} maxLength={160} onChange={(e) => setFinish(e.target.value)} className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[1rem] text-warm-ink" data-development-finish />
+              </label>
+              {step.safety && <p className="text-[0.85rem] text-warm-soft" data-development-safety>{step.safety}</p>}
+              <button type="button" disabled={s.busy} className={TEXT_ACTION} onClick={() => void choose('dismiss')} data-development-dismiss>{label('dismiss', 'Don’t suggest again')}</button>
             </div>
           </details>
-          <div className="mt-3 flex flex-wrap gap-2" aria-busy={s.busy}>
-            <button type="button" className="of-btn !min-h-[44px]" disabled={!finish.trim() || s.busy} onClick={() => void choose('start')} aria-label={`We agreed: ${firstName}, ${step.skill.title}`} data-development-agree>{s.busy ? 'Saving…' : s.error ? 'Try again: we agreed' : 'We agreed'}</button>
-            <button type="button" disabled={s.busy} className="of-btn of-btn--soft !min-h-[44px]" onClick={() => void choose('pause')} data-development-not-now>Not now</button>
-            <button type="button" disabled={s.busy} className="of-btn of-btn--soft !min-h-[44px]" onClick={() => void choose('dismiss')} data-development-dismiss>Not for us</button>
-          </div>
         </>
       )}
       <Result s={s} />
@@ -275,20 +342,22 @@ export function DevelopmentNextSteps({ plan, live, decide, colors, onAgreement, 
   const people = plan.people.filter((p) => p.step);
   if (!people.length) return null;
   return (
-    <div className="mb-5 space-y-3" data-development-next-steps>
+    <div className="mb-5" data-development-next-steps>
       <p className="of-eyebrow">One next step each</p>
-      {people.map((p) => (
-        <div key={p.memberId} className="rounded-[9px] border border-[var(--of-rule)] px-3 py-3" data-development-person={p.firstName}>
-          <div className="mb-2 flex items-center gap-2.5">
-            <Avatar name={p.firstName} color={colors[p.memberId]} size="sm" />
-            <span className="font-semibold">{p.firstName}{p.age !== null ? <span className="font-normal text-warm-soft"> · {p.age}</span> : null}</span>
-          </div>
-          {p.step!.kind === 'check-in'
-            ? <CheckInNext step={p.step as CheckInStep} firstName={p.firstName} live={live} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} />
-            : <SuggestNext step={p.step as SuggestStep} memberId={p.memberId} firstName={p.firstName} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} />}
-        </div>
-      ))}
-      <p className="text-[0.8rem] text-warm-soft">You decide every step. Nothing moves forward on its own.</p>
+      <ul className="mt-1">
+        {people.map((p) => (
+          <li key={p.memberId} className="border-b border-[var(--of-rule)] py-4 last:border-b-0" data-development-person={p.firstName}>
+            <div className="mb-1.5 flex items-center gap-2.5">
+              <Avatar name={p.firstName} color={colors[p.memberId]} size="sm" />
+              <span className="font-semibold">{p.firstName}{p.age !== null ? <span className="font-normal text-warm-soft"> · {p.age}</span> : null}</span>
+            </div>
+            {p.step!.kind === 'check-in'
+              ? <CheckInNext step={p.step as CheckInStep} firstName={p.firstName} live={live} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} />
+              : <SuggestNext step={p.step as SuggestStep} memberId={p.memberId} firstName={p.firstName} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} />}
+          </li>
+        ))}
+      </ul>
+      <p className="text-[0.85rem] text-warm-soft">You decide every step. Nothing moves forward on its own.</p>
     </div>
   );
 }
@@ -299,17 +368,17 @@ export function DevelopmentPractice({ plan, live }: Pick<CoachProps, 'plan' | 'l
   const now = plan.people.flatMap((p) => {
     const s = p.step;
     if (!s) return [];
-    if (s.kind === 'suggest') return [{ who: p.firstName, title: s.skill.title, text: s.coaching }];
+    if (s.kind === 'suggest') return [{ who: p.firstName, title: s.skill.title, text: suggestCoachLine(p.firstName) }];
     const r = live.get(s.record.id) ?? s.record;
     if (r.status !== 'active' || r.agreementLive === false || (r.stage !== 'model' && r.stage !== 'assist')) return [];
-    return [{ who: p.firstName, title: r.title, text: s.coaching }];
+    return [{ who: p.firstName, title: r.title, text: coachLine(r.stage, p.firstName) }];
   }).slice(0, 2);
   if (!now.length) return null;
   return (
     <div className="mt-4 rounded-[9px] bg-[var(--of-surface)] p-3" data-development-practice>
       <p className="of-eyebrow">Practice it now</p>
       <ul className="mt-2 space-y-2 text-[0.92rem]">
-        {now.map((x) => <li key={x.who + x.title}><strong>{x.who}</strong> · {lower(x.title)}: {x.text}</li>)}
+        {now.map((x) => <li key={x.who + x.title}><strong>{x.who}</strong> · {x.title}. {x.text}</li>)}
       </ul>
     </div>
   );

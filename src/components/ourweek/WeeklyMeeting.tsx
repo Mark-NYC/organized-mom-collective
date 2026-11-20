@@ -70,6 +70,7 @@ export default function WeeklyMeeting() {
   const week = weekAhead([...Object.values(cal.state.events), ...shared.events], localToday(today), today);
   const people = (cal.household?.members ?? []).filter((m) => !m.archived && m.firstName.trim());
   const agreed = agreementsByPerson(cal.household, fam.profile);
+  const agreedCount = new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size; // a shared agreement counts once
   // The Club's month, prepared from this family: the same call the month's meeting page makes.
   const meeting: FamilyMeeting | null = useMemo(
     () => (club && cal.household ? buildFamilyMeeting({ household: cal.household, profile: fam.profile, month }) : null),
@@ -91,6 +92,8 @@ export default function WeeklyMeeting() {
   const devPlan = slot && slot.key === key ? slot.plan : null;
   const devLive = useMemo(() => new Map((dev.records ?? []).map((r) => [r.id, r] as const)), [dev.records]);
   const devStepFor = new Set(devPlan?.people.filter((p) => p.step).map((p) => p.memberId) ?? []);
+  /** Whether Everyone's Part leads with personalized next steps (then agreements and the manual form start closed). */
+  const hasNextSteps = devStepFor.size > 0;
   const [who, setWho] = useState<string[]>([]);
   const [text, setText] = useState('');
   const [category, setCategory] = useState<ResponsibilityCategory>('other');
@@ -137,20 +140,17 @@ export default function WeeklyMeeting() {
         <p className="mt-3 text-[1rem] leading-relaxed text-warm-soft">{MEETING_GUIDE.subtitle}</p>
       </header>
 
-      <nav className="of-tile !p-4 sm:!p-5" aria-label="Family Meeting steps" data-meeting-navigation>
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <span className="of-eyebrow">Step {activeStep + 1} of {MEETING_GUIDE.parts.length}</span>
-          <span className="text-sm text-warm-soft">10 minutes together</span>
-        </div>
-        <div className="grid grid-cols-4 gap-2">
+      {/* The four parts as one compact segmented row: the current one filled, the others quiet. */}
+      <nav aria-label="Family Meeting steps" data-meeting-navigation>
+        <p className="mb-1.5 text-[0.85rem] text-warm-soft">Step {activeStep + 1} of {MEETING_GUIDE.parts.length} · 10 minutes together</p>
+        <div className="grid grid-cols-4 gap-1 rounded-[10px] border border-[var(--of-rule)] bg-white p-1">
           {MEETING_GUIDE.parts.map((part, i) => (
             <button key={part.title} type="button" onClick={() => goStep(i)}
               aria-current={activeStep === i ? 'step' : undefined}
               aria-label={`Step ${i + 1}: ${part.title}, ${part.minutes} minutes`}
-              className={`min-h-[52px] rounded-[8px] border px-1.5 py-2 text-center text-[0.72rem] sm:text-[0.82rem] ${activeStep === i ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white text-warm-soft'}`}
+              className={`flex min-h-[44px] items-center justify-center rounded-[7px] px-1 py-1 text-center text-[0.78rem] leading-tight sm:text-[0.88rem] ${activeStep === i ? 'bg-[var(--of-sage)] font-semibold text-warm-ink' : i < activeStep ? 'text-warm-ink' : 'text-warm-soft'}`}
               data-meeting-step={i}>
-              <span className="block font-serif text-[1.05rem]">{i + 1}</span>
-              <span className="block leading-tight">{part.title}</span>
+              {part.title}
             </button>
           ))}
         </div>
@@ -269,9 +269,25 @@ export default function WeeklyMeeting() {
                   <p className="mt-2 text-[0.8rem] text-warm-soft">Suggestions only. Change the words, pick someone else, or skip them.</p>
                 </div>
               )}
-              {agreed.length ? <AgreedParts people={agreed} colors={cal.colors} compact /> : <p className="text-sm text-warm-soft">Nothing written down yet.</p>}
+              {/* Secondary, so the first view is the one next step for each child. Open by default when there's no
+                  personalized step to show (a free family, or nothing suggested), so that meeting is unchanged. */}
+              <details className="group border-t border-[var(--of-rule)]" open={!hasNextSteps} data-agreed-section>
+                <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-1.5 text-[0.95rem] font-semibold [&::-webkit-details-marker]:hidden">
+                  <span aria-hidden="true" className="inline-flex size-4 items-center justify-center leading-none text-warm-soft transition-transform group-open:rotate-90">›</span>
+                  What we’ve already agreed{agreedCount > 0 && <span className="font-normal text-warm-soft"> ({agreedCount})</span>}
+                </summary>
+                <div className="pb-3">
+                  {agreed.length ? <AgreedParts people={agreed} colors={cal.colors} compact /> : <p className="text-sm text-warm-soft">Nothing written down yet.</p>}
+                  {agreed.length > 0 && cal.household && <a href="/app/family/responsibilities" className="mt-2 inline-flex min-h-[44px] items-center text-[0.88rem] text-warm-soft underline underline-offset-4" data-agreed-edit>Change or remove one in Who does what</a>}
+                </div>
+              </details>
               {cal.household ? (
-                <form className="mt-5 border-t border-[var(--of-rule)] pt-4" onSubmit={(e) => { e.preventDefault(); void add(); }} data-add-agreement>
+                <details className="group border-t border-[var(--of-rule)]" open={!hasNextSteps} data-add-agreement-section>
+                <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-1.5 text-[0.95rem] font-semibold [&::-webkit-details-marker]:hidden">
+                  <span aria-hidden="true" className="inline-flex size-4 items-center justify-center leading-none text-warm-soft transition-transform group-open:rotate-90">›</span>
+                  Add another responsibility
+                </summary>
+                <form className="pb-2" onSubmit={(e) => { e.preventDefault(); void add(); }} data-add-agreement>
                   <label className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">What we agreed
                     <input value={text} maxLength={160} onChange={(e) => setText(e.target.value)} placeholder="Feed the dog before school" className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem] normal-case tracking-normal text-warm-ink" data-agreement-new />
                   </label>
@@ -289,12 +305,14 @@ export default function WeeklyMeeting() {
                     </select>
                   </label>
                   <button type="submit" className="of-btn mt-4" disabled={!text.trim() || !who.length} data-save-new-agreement>We agreed</button>
-                  {fam.pending > 0 && fam.status === 'offline' && <p className="text-sm text-warm-soft">Saved on this phone. It will sync when you’re back online.</p>}
-                  {fam.conflicts.map((c) => <p key={c.id + c.at} role="alert" className="text-sm">{conflictText(c)}</p>)}
                 </form>
+                </details>
               ) : (
                 <a href="/app/sign-in?next=/app/family/meeting" className="of-tile-action mt-4">Sign in to write down your family’s parts →</a>
               )}
+              {/* Outside the collapsed sections, so sync news and conflicts are never hidden. */}
+              {fam.pending > 0 && fam.status === 'offline' && <p className="text-sm text-warm-soft">Saved on this phone. It will sync when you’re back online.</p>}
+              {fam.conflicts.map((c) => <p key={c.id + c.at} role="alert" className="text-sm">{conflictText(c)}</p>)}
               <p role="status" className="mt-2 text-sm text-[var(--of-sage-ink)]">{msg}</p>
             </div>
           )}
@@ -313,12 +331,14 @@ export default function WeeklyMeeting() {
         </section>
       ))}
 
-      <div className="flex items-center justify-between gap-3 pb-6" data-meeting-step-actions>
-        <button type="button" className="of-btn of-btn--soft" disabled={activeStep === 0} onClick={() => goStep(activeStep - 1)}>Back</button>
+      {/* Back and Next stay within reach: on phones and tablets they sit just above the tab bar (64px + its border +
+          the home-indicator safe area); with the keyboard open they return to the page flow so they never cover a field. */}
+      <div className="sticky bottom-[calc(65px+env(safe-area-inset-bottom))] z-30 -mx-5 flex items-center justify-between gap-3 border-t border-[var(--of-rule)] bg-ivory px-5 py-2.5 sm:-mx-8 sm:px-8 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:pb-6" data-meeting-step-actions>
+        <button type="button" className="of-btn of-btn--soft !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" disabled={activeStep === 0} onClick={() => goStep(activeStep - 1)}>Back</button>
         {activeStep < MEETING_GUIDE.parts.length - 1 ? (
-          <button type="button" className="of-btn" onClick={() => goStep(activeStep + 1)}>Next: {MEETING_GUIDE.parts[activeStep + 1].title} →</button>
+          <button type="button" className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" onClick={() => goStep(activeStep + 1)}>Next: {MEETING_GUIDE.parts[activeStep + 1].title} →</button>
         ) : (
-          <a className="of-btn" href="/app/family">Finish meeting ✓</a>
+          <a className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" href="/app/family">Finish meeting ✓</a>
         )}
       </div>
       {/* One question at a time for a free family, only once it pays off in the next meeting (§8). */}

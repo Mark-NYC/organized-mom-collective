@@ -82,13 +82,13 @@ describe('existing products are untouched', () => {
   it('coaching copy never defaults to rewards or payment for chores', () => {
     for (const f of DEV_FILES) expect(src(f)).not.toMatch(/reward|allowance|treat|screen time|sticker|prize/i);
   });
-  it('says "We agreed" only for the family\'s explicit choice and offers Not now / Not for us', () => {
-    expect(COACH).toMatch(/data-development-agree>\{s\.busy \? 'Saving…' : s\.error \? 'Try again: we agreed' : 'We agreed'\}</);
+  it('agrees only on the family\'s explicit choice (Add to our plan) and offers Not now and Don’t suggest again', () => {
+    expect(COACH).toMatch(/data-development-agree>\{label\('start', s\.error \? 'Try again: add to our plan' : 'Add to our plan'\)\}</);
     // Success is reported only from the database's answer, never after a fire-and-forget agreement save.
     expect(COACH).not.toMatch(/\.catch\(\(\) => undefined\)/);
     expect(COACH).not.toMatch(/saveAgreement/);
-    expect(COACH).toMatch(/data-development-not-now>Not now</);
-    expect(COACH).toMatch(/data-development-dismiss>Not for us</);
+    expect(COACH).toMatch(/data-development-not-now>\{label\('pause', 'Not now'\)\}</);
+    expect(COACH).toMatch(/data-development-dismiss>\{label\('dismiss', 'Don’t suggest again'\)\}</);
     expect(COACH).toMatch(/Nothing moves forward on its own/);
   });
 });
@@ -120,7 +120,8 @@ describe('the meeting UI renders the plan (server render)', async () => {
     expect(html).toMatch(/data-development-next="school-bag"/);
     expect(html).toMatch(/Hand over responsibility/); // offered as the family's choice, never applied
     expect(html).toMatch(/Doing it on their own is progress\. Handing over responsibility is a separate choice/);
-    expect(html).toMatch(/Step back: We’ll do it together/);
+    expect(html).toMatch(/Practice together again/);
+    expect(html).toMatch(/Back to “We’ll do it together”/);
     expect(html).not.toMatch(/Great! This is now their responsibility/); // never before a save
     expect(html).toMatch(/data-development-suggest=/);
     expect(html).toMatch(/I’ll show them how/);
