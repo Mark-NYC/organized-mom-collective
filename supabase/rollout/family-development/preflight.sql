@@ -8,11 +8,17 @@ select 'household_billing_user (20261128) exists', exists (select 1 from pg_proc
 union all
 select 'club_has_access (20261023) exists', exists (select 1 from pg_proc where pronamespace = 'public'::regnamespace and proname = 'club_has_access')
 union all
+select 'agreements (20261127) in place: columns and household_agreement_json',
+       exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'club_responsibilities' and column_name = 'agreed_source')
+   and exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'club_responsibilities' and column_name = 'deleted_at')
+   and exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'club_responsibilities' and column_name = 'revision')
+   and exists (select 1 from pg_proc where pronamespace = 'public'::regnamespace and proname = 'household_agreement_json')
+union all
 select 'club_family_members.archived_at exists', exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'club_family_members' and column_name = 'archived_at')
 union all
 select 'new tables not there yet', to_regclass('public.household_development') is null and to_regclass('public.household_development_events') is null
 union all
-select 'new functions not there yet', not exists (select 1 from pg_proc where pronamespace = 'public'::regnamespace and proname in ('household_development', 'household_development_decide', 'household_development_json'))
+select 'new functions not there yet', not exists (select 1 from pg_proc where pronamespace = 'public'::regnamespace and proname in ('household_development', 'household_development_decide', 'household_development_json', 'household_development_ensure_agreement'))
 union all
 select 'migration not recorded yet', case when to_regclass('supabase_migrations.schema_migrations') is null then true
   else ((xpath('/row/n/text()', query_to_xml('select count(*) as n from supabase_migrations.schema_migrations where name like ''%family_development%''', false, true, '')))[1])::text::int = 0 end
@@ -25,5 +31,6 @@ union all select 'rows: club_responsibilities', count(*)::text from public.club_
 union all
 select p.oid::regprocedure::text, md5(pg_get_functiondef(p.oid)) from pg_proc p
  where p.pronamespace = 'public'::regnamespace
-   and p.proname in ('household_id_for', 'household_billing_user', 'club_has_access', 'club_me', 'household_agreement_save', 'club_family_profile')
+   and p.proname in ('household_id_for', 'household_billing_user', 'club_has_access', 'club_me', 'club_family_profile',
+                     'household_agreement_save', 'household_agreement_remove', 'household_agreement_json', 'household_agreements')
 order by 1;

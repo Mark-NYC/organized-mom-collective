@@ -13,6 +13,7 @@ union all
 select 'functions callable by signed-in adults', has_function_privilege('authenticated', 'public.household_development()', 'execute')
    and has_function_privilege('authenticated', 'public.household_development_decide(jsonb, integer)', 'execute')
    and not has_function_privilege('authenticated', 'public.household_development_json(public.household_development)', 'execute')
+   and not has_function_privilege('authenticated', 'public.household_development_ensure_agreement(public.household_development, uuid, uuid)', 'execute')
 union all
 select 'starts empty', (select count(*) from public.household_development) = 0 and (select count(*) from public.household_development_events) = 0
 order by 1;
