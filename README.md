@@ -1,5 +1,7 @@
 # Organized Mom
 
+> **Family personalization product contract:** [Responsibility Development Framework](docs/product/RESPONSIBILITY_DEVELOPMENT_FRAMEWORK.md). MAWL (Model, Assist, Watch, Launch), habit stacking, age and seasonal context, and family-controlled progression govern future recommendation, onboarding and meeting changes. See [AGENTS.md](AGENTS.md) for required guardrails. Foundation only; monthly resources and production data remain unchanged.
+
 Companion web app for the Organized Mom Collective family wall calendar. People scan the QR code on the calendar (`/start`) and land in the cleaning companion at `/app/calendar`: a small daily reset plus one area to focus on. `/app` itself is **Organized Family**: Today, Calendar, Cleaning and Family tabs with Account behind the profile icon, free for everyone, the same experience as the **iPhone app** that bundles these pages ([docs/ios/WEB_APP_PARITY.md](docs/ios/WEB_APP_PARITY.md)). The iPhone app (Capacitor; in progress, not released): [docs/ios/OMC_APP_ROADMAP.md](docs/ios/OMC_APP_ROADMAP.md).
 
 Astro + TypeScript + Tailwind CSS v4, with React islands only where there's state. The cleaning companion's progress is saved in the browser's `localStorage` (not synced to accounts yet). The exceptions use Supabase: the customer survey (`/survey`, see `supabase/README.md`), the support form (`/support`, see `supabase/SUPPORT.md`) and the direct website shop (`/checkout`, `/admin/orders`, built but switched off; see `supabase/SHOP.md`) and the admin (`/admin`, email + password; see `supabase/ADMIN.md`).
