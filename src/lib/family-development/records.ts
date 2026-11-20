@@ -13,11 +13,17 @@
  *   - A paused or dismissed suggestion that was never started has no stage: nothing is inferred.
  *   - Skill performance, habit consistency and ownership are different answers (`CheckSignal`), never collapsed into
  *     a stage.
+ *
+ * Agreement lifecycle (the database does this in the same transaction as the decision; `agreementEffect` below):
+ *   start, resume, restore → the child's agreement is on the family's lists (created, or an existing one linked)
+ *   advance, step-back, stay, check-in → unchanged (practicing, or theirs: still an agreement)
+ *   modify → its words follow · pause, dismiss → removed from the lists (a tombstone, never a hard delete)
  */
 import { MAWL_STAGES, type DevelopmentStatus, type MawlStage } from './framework';
+import type { AgreementRow } from '../agreements/store';
 
 export const DEVELOPMENT_DECISIONS = [
-  'start', 'modify', 'advance', 'step-back', 'stay', 'check-in', 'pause', 'resume', 'dismiss',
+  'start', 'modify', 'advance', 'step-back', 'stay', 'check-in', 'pause', 'resume', 'dismiss', 'restore',
 ] as const;
 export type DevelopmentDecision = (typeof DEVELOPMENT_DECISIONS)[number];
 
@@ -42,8 +48,11 @@ export interface DevelopmentEvent {
   value?: CheckValue;
   variationPracticed: boolean;
   note?: string;
+  agreementChange?: AgreementChange;
   decidedAt: string;
 }
+
+export type AgreementChange = 'created' | 'linked' | 'updated' | 'removed';
 
 export interface DevelopmentRecord {
   id: string;
@@ -62,6 +71,12 @@ export interface DevelopmentRecord {
   /** 'YYYY-MM-DD'. */
   lastCheckInOn?: string;
   variationsPracticed: number;
+  /** club_responsibilities.category its agreement is filed under. */
+  category: string;
+  /** The family agreement that goes with it. */
+  agreementId?: string;
+  /** Whether that agreement is on the family's lists right now (someone may have removed it elsewhere). */
+  agreementLive: boolean;
   libraryVersion: number;
   revision: number;
   createdAt?: string;
@@ -78,6 +93,10 @@ export interface DecisionInput {
   finish?: string;
   note?: string;
   check?: DevelopmentCheck;
+  /** club_responsibilities.category for the agreement (start, resume, restore). */
+  category?: string;
+  /** Made on the phone for start, resume and restore, and kept for retries, so a repeat never makes a second one. */
+  agreementId?: string;
 }
 
 export class DecisionError extends Error {}
@@ -130,15 +149,31 @@ export function applyDecision(
       if (!stage) throw new DecisionError('the family chooses the stage when reopening');
       return { stage, status: statusFor(stage) };
     }
+    case 'restore':
+      if (!['active', 'launched'].includes(current.status)) throw new DecisionError('not active');
+      return { ...current };
     case 'modify':
       return { ...current };
   }
 }
 
+/** What a decision does to the family agreement (household_development_decide does the same, atomically). */
+export function agreementEffect(decision: DevelopmentDecision, next: Pick<DevelopmentRecord, 'status'>): 'ensure' | 'keep' | 'update-words' | 'remove' {
+  if (decision === 'pause' || decision === 'dismiss') return 'remove';
+  if (decision === 'modify') return 'update-words';
+  if (decision === 'start') return next.status === 'active' || next.status === 'launched' ? 'ensure' : 'keep';
+  if (decision === 'resume' || decision === 'restore') return 'ensure';
+  return 'keep';
+}
+
+/** Decisions that send a phone-made agreement id. */
+export const NEEDS_AGREEMENT_ID: readonly DevelopmentDecision[] = ['start', 'resume', 'restore'];
+
 /** The decisions the meeting may offer for a record, given its state. */
-export function availableDecisions(r: Pick<DevelopmentRecord, 'stage' | 'status'>): DevelopmentDecision[] {
+export function availableDecisions(r: Pick<DevelopmentRecord, 'stage' | 'status'> & { agreementLive?: boolean }): DevelopmentDecision[] {
   const i = stageIndex(r.stage);
   if (r.status === 'paused' || r.status === 'dismissed') return ['resume', 'modify'];
+  if (r.agreementLive === false) return ['restore', 'pause'];
   const out: DevelopmentDecision[] = ['stay'];
   if (r.status === 'active' && i >= 0 && i < MAWL_STAGES.length - 1) out.push('advance');
   if (i > 0) out.push('step-back');
@@ -153,25 +188,39 @@ export interface DbDevelopmentRecord {
   id: string; member_id: string; skill_id: string; title: string; stage: MawlStage | null; status: DevelopmentStatus;
   cue: string | null; finish_line: string | null; note: string | null; last_signal: CheckSignal | null;
   last_value: CheckValue | null; last_check_in_on: string | null; variations_practiced: number;
+  category?: string | null; agreement_id?: string | null; agreement_live?: boolean;
   library_version: number; revision: number; created_at?: string; updated_at?: string;
+  /** Returned by a decision: the agreement as phones sync it, when the decision changed it. */
+  agreement?: DbAgreement;
+  /** Another adult's record was returned instead of creating a second one. */
+  adopted?: boolean;
   history?: {
     decision: DevelopmentDecision; from_stage: MawlStage | null; to_stage: MawlStage | null;
     from_status: DevelopmentStatus | null; to_status: DevelopmentStatus; signal: CheckSignal | null;
     value: CheckValue | null; variation_practiced: boolean; note: string | null; decided_at: string;
+    agreement_change?: AgreementChange | null;
   }[];
 }
+
+/** household_agreement_json: the same row the agreements sync uses. */
+export type DbAgreement = AgreementRow;
 
 export const recordFromDb = (r: DbDevelopmentRecord): DevelopmentRecord => ({
   id: r.id, memberId: r.member_id, skillId: r.skill_id, title: r.title, stage: r.stage, status: r.status,
   ...(r.cue ? { cue: r.cue } : {}), ...(r.finish_line ? { finishLine: r.finish_line } : {}), ...(r.note ? { note: r.note } : {}),
   ...(r.last_signal && r.last_value ? { lastSignal: r.last_signal, lastValue: r.last_value } : {}),
   ...(r.last_check_in_on ? { lastCheckInOn: r.last_check_in_on.slice(0, 10) } : {}),
-  variationsPracticed: r.variations_practiced ?? 0, libraryVersion: r.library_version, revision: r.revision,
+  variationsPracticed: r.variations_practiced ?? 0, category: r.category ?? 'other',
+  ...(r.agreement_id ? { agreementId: r.agreement_id } : {}),
+  // Older payloads (no flag) are read as live, so nothing is shown as removed without the server saying so.
+  agreementLive: r.agreement_live ?? Boolean(r.agreement_id),
+  libraryVersion: r.library_version, revision: r.revision,
   ...(r.created_at ? { createdAt: r.created_at } : {}),
   history: (r.history ?? []).map((e) => ({
     decision: e.decision, fromStage: e.from_stage, toStage: e.to_stage, fromStatus: e.from_status, toStatus: e.to_status,
     ...(e.signal ? { signal: e.signal } : {}), ...(e.value ? { value: e.value } : {}),
-    variationPracticed: Boolean(e.variation_practiced), ...(e.note ? { note: e.note } : {}), decidedAt: e.decided_at,
+    variationPracticed: Boolean(e.variation_practiced), ...(e.note ? { note: e.note } : {}),
+    ...(e.agreement_change ? { agreementChange: e.agreement_change } : {}), decidedAt: e.decided_at,
   })),
 });
 
@@ -190,5 +239,7 @@ export function decisionToDb(
   if ((isNew || input.decision === 'modify' || input.decision === 'resume') && input.finish !== undefined) p.finish = input.finish.trim();
   if (input.note !== undefined) p.note = input.note.trim();
   if (input.check) p.check = { signal: input.check.signal, value: input.check.value, variation: Boolean(input.check.variation) };
+  if (input.category && (isNew || ['resume', 'restore', 'modify'].includes(input.decision))) p.category = input.category;
+  if (input.agreementId && NEEDS_AGREEMENT_ID.includes(input.decision)) p.agreement_id = input.agreementId;
   return p;
 }

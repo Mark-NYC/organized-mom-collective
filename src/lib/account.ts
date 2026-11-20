@@ -20,6 +20,8 @@ const KEY = SUPABASE_ANON_KEY;
 export const accountsEnabled = () => import.meta.env.PUBLIC_ACCOUNTS_ENABLED === 'true' && Boolean(URL_ && KEY);
 
 const SESSION_KEY = 'omc:account:session';
+/** The localStorage key of the signed-in session (other tabs' sign-ins and sign-outs arrive as `storage` events). */
+export const SESSION_STORAGE_KEY = SESSION_KEY;
 const SYNC_KEY = 'omc:account:sync';
 const NUDGE_KEY = 'omc:account:nudge';
 export const CHANGED_EVENT = 'omc:account:changed';

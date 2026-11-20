@@ -9,8 +9,9 @@
  * Order of preference for each child (at most ONE step per child):
  *   1. An active record that needs attention (last answer "not yet" or "partly").
  *   2. An active record due for its weekly check-in (a launched one every four weeks).
- *   3. Nothing, when the child already has a record in Model or Assist, or two active records: adult time is the
- *      limit, and a new skill on top would be administration, not coaching.
+ *   3. Nothing, when the child already has a record in Model or Assist, two responsibilities in progress (active
+ *      records plus other current agreements), or an agreement made this past week: adult time is the limit, and a
+ *      new skill on top would be administration, not coaching. Existing agreements come first.
  *   4. A new skill from the curated library, at most two per meeting for the whole household.
  *
  * Never: a stage change, a skill the family paused or dismissed (until they reopen it), a skill the child already
@@ -144,6 +145,8 @@ export interface CheckInQuestion {
 
 export interface CheckInStep {
   kind: 'check-in';
+  /** Its agreement was removed elsewhere (Who does what): the family chooses to put it back or pause it. */
+  agreementRemoved?: boolean;
   record: DevelopmentRecord;
   /** Null if the library no longer has the id (the family's own words still show). */
   skill: CuratedSkill | null;
@@ -223,12 +226,11 @@ const STAGE_COACH_FALLBACK: Record<MawlStage, string> = {
 };
 
 export function checkInQuestion(record: Pick<DevelopmentRecord, 'stage' | 'title' | 'cue'>, firstName: string): CheckInQuestion {
-  const what = record.title.charAt(0).toLowerCase() + record.title.slice(1);
   switch (record.stage) {
     case 'watch':
       return {
         signal: 'consistency',
-        text: `Did ${firstName} ${what} ${record.cue ? `at the usual time (${record.cue.charAt(0).toLowerCase() + record.cue.slice(1)})` : 'at the usual time'} without a reminder?`,
+        text: `Did ${firstName} do “${record.title}” ${record.cue ? `at the usual time (${record.cue.charAt(0).toLowerCase() + record.cue.slice(1)})` : 'at the usual time'} without a reminder?`,
         answers: [{ value: 'strong', label: 'Usually' }, { value: 'partial', label: 'Sometimes' }, { value: 'not-yet', label: 'Rarely' }],
       };
     case 'launch':
@@ -254,6 +256,16 @@ function checkInFor(r: DevelopmentRecord, firstName: string, today: string): Che
   if (r.status !== 'active' && r.status !== 'launched') return null;
   if (!r.stage) return null;
   const skill = skillById(r.skillId);
+  // The record says active but its agreement is gone from the lists: never leave the two contradicting each other.
+  if (r.agreementLive === false) {
+    return {
+      kind: 'check-in', agreementRemoved: true, record: r, skill, question: checkInQuestion(r, firstName),
+      coaching: skill?.[r.stage] ?? STAGE_COACH_FALLBACK[r.stage],
+      decisions: availableDecisions(r), attention: true,
+      why: [`“${r.title}” was taken off ${firstName}’s list. Put it back, or pause it here too?`],
+      ...(skill?.safety ? { safety: skill.safety } : {}),
+    };
+  }
   const attention = r.status === 'active' && (r.lastValue === 'not-yet' || r.lastValue === 'partial');
   const since = r.lastCheckInOn ?? r.createdAt?.slice(0, 10);
   const days = since ? daysBetween(since, today) : Infinity;
@@ -266,7 +278,10 @@ function checkInFor(r: DevelopmentRecord, firstName: string, today: string): Che
   if (attention) why.push(r.lastValue === 'not-yet' ? 'Last time you said it wasn’t happening yet.' : 'Last time you said it was happening some of the time.');
   else why.push(r.status === 'launched' ? `${firstName} owns this. A quick check that it’s still working.` : 'Something your family is already working on comes first.');
 
-  const coaching = skill?.[r.stage] ?? STAGE_COACH_FALLBACK[r.stage];
+  // The library's generated Watch line repeats its variation ("…practice a variation: X"); the variation gets its own
+  // line below, so the coaching says what Watch is for instead of saying the same thing twice.
+  const authored = skill?.[r.stage];
+  const coaching = authored && !(r.stage === 'watch' && /practice a variation:/.test(authored)) ? authored : STAGE_COACH_FALLBACK[r.stage];
   let watchVariation: string | undefined;
   let hint: string | undefined;
   if (r.stage === 'watch' && skill) {
@@ -342,9 +357,10 @@ function candidatesFor(
     if (NEEDS_FACT[skill.id] === 'pets' && !hasPets) return;
     if (NEEDS_FACT[skill.id] === 'home' && !desired.has(skill.id)) return;
     if (homeschool && SCHOOL_SKILLS.has(skill.id)) return;
-    // A next step waits until its foundation is launched; never stacked on top of one still in progress.
+    // A next step waits until its foundation is launched, unless the family asked for it for this child: their
+    // judgment of what the child can take on wins over the default sequence.
     const foundations = FOUNDATIONS.get(skill.id) ?? [];
-    if (foundations.some((f) => inProgress.has(f))) return;
+    if (!desired.has(skill.id) && foundations.some((f) => inProgress.has(f))) return;
 
     const why: string[] = [];
     let score = 0;
@@ -352,7 +368,7 @@ function candidatesFor(
     if (desired.has(skill.id)) { score += 100; specific = true; why.push(`You said you’d like ${name} to take on ${desired.get(skill.id)!.toLowerCase()}.`); }
     const built = foundations.find((f) => launched.has(f));
     if (built) { score += 25; specific = true; why.push(`Builds on “${skillById(built)?.title ?? built}”, which ${name} now owns.`); }
-    if (priority && PRIORITY_SKILLS[priority]?.includes(skill.id)) { score += 30; specific = true; why.push(`Fits what your family is working on: ${labelOf(PRIORITIES, priority).toLowerCase()}.`); }
+    if (priority && PRIORITY_SKILLS[priority]?.includes(skill.id)) { score += 40; specific = true; why.push(`Fits what your family is working on: ${labelOf(PRIORITIES, priority).toLowerCase()}.`); }
     const ch = challenges.find((c) => CHALLENGE_SKILLS[c]?.includes(skill.id));
     if (ch) { score += 10; specific = true; why.push(`Could help with “${labelOf(CHALLENGES, ch).toLowerCase()}”.`); }
     if (season !== 'everyday' && skill.seasons.includes(season)) { score += 20; why.push(`${SEASON_LABEL[season]} is a natural time to start.`); }
@@ -387,6 +403,11 @@ export function buildDevelopmentPlan(input: EngineInput): DevelopmentPlan {
   const children = input.household.members.filter((m) => !m.archived && m.kind === 'child' && m.firstName.trim());
   const records = input.records ?? [];
   const activeIds = new Set(children.map((c) => c.id));
+  // Current agreements not tied to a development record (made in a meeting, the month's plan, or Who does what).
+  const linked = new Set(records.map((r) => r.agreementId).filter(Boolean));
+  const otherAgreements = (memberId: string) => (input.profile?.responsibilities ?? []).filter((r) =>
+    r.status === 'confirmed' && r.agreement && r.ownerIds.includes(memberId) && !(r.id && linked.has(r.id))
+    && !skillFromAgreementSource(r.agreement.source));
   const people: PersonDevelopment[] = children.map((m) => {
     const age = childAge(m, input.today);
     const mine = records.filter((r) => r.memberId === m.id);
@@ -401,7 +422,12 @@ export function buildDevelopmentPlan(input: EngineInput): DevelopmentPlan {
 
   // New skills: children with the fewest active records first, then in the family's own order. Two per meeting.
   const order = people
-    .map((p, i) => ({ p, i, active: p.current.filter((r) => r.status === 'active').length }))
+    .map((p, i) => {
+      const others = otherAgreements(p.memberId);
+      const fresh = others.some((r) => r.agreement!.agreedAt && daysBetween(r.agreement!.agreedAt, input.today) < 7);
+      return { p, i, active: p.current.filter((r) => r.status === 'active').length + others.length, fresh };
+    })
+    .filter(({ fresh }) => !fresh)
     .filter(({ p }) => activeIds.has(p.memberId) && !p.step)
     .filter(({ p }) => !p.current.some((r) => r.status === 'active' && (r.stage === 'model' || r.stage === 'assist')))
     .filter(({ active }) => active < MAX_ACTIVE_PER_CHILD)

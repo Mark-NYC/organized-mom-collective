@@ -25,7 +25,7 @@ function rec(p: Partial<DevelopmentRecord> & Pick<DevelopmentRecord, 'memberId' 
   seq += 1;
   return {
     id: `r${String(seq).padStart(3, '0')}`, title: skillById(p.skillId)?.title ?? p.skillId, stage: 'model', status: 'active',
-    variationsPracticed: 0, libraryVersion: 1, revision: 1, history: [], createdAt: '2026-10-01T10:00:00Z', ...p,
+    variationsPracticed: 0, category: 'other', agreementLive: true, agreementId: `a-${seq}`, libraryVersion: 1, revision: 1, history: [], createdAt: '2026-10-01T10:00:00Z', ...p,
   };
 }
 const ev = (e: Partial<DevelopmentEvent>): DevelopmentEvent => ({ decision: 'check-in', fromStage: 'watch', toStage: 'watch', fromStatus: 'active', toStatus: 'active', variationPracticed: false, decidedAt: '2026-11-01T10:00:00Z', ...e });
