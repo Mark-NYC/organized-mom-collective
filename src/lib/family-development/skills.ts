@@ -587,7 +587,8 @@ export const CHORE_CHOICE_TO_SKILL: Readonly<Record<string, string>> = Object.fr
   "yard": "yard",
 });
 
-const byId = new Map<string, CuratedSkill>(skills.map(s => [s.id, s]));
+const library: readonly CuratedSkill[] = skills;
+const byId = new Map<string, CuratedSkill>(library.map(s => [s.id, s] as const));
 export function skillById(id: string): CuratedSkill | null { return byId.get(id) ?? null; }
 export function skillForChoreChoice(choiceId: string): CuratedSkill | null {
   const id = CHORE_CHOICE_TO_SKILL[choiceId];
@@ -602,10 +603,10 @@ export function skillsForContext(input: {
   categories?: readonly SkillCategory[];
   limit?: number;
 }): CuratedSkill[] {
-  const limit = Math.max(0, Math.min(input.limit ?? 8, skills.length));
+  const limit = Math.max(0, Math.min(input.limit ?? 8, library.length));
   const age = input.age ?? null;
   const categories = input.categories ? new Set(input.categories) : null;
-  return skills
+  return library
     .filter(s => !categories || categories.has(s.category))
     .map((s, index) => ({
       s, index,
