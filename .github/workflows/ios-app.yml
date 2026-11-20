@@ -11,10 +11,10 @@
 name: iPhone app
 on:
   pull_request:
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'scripts/rehearse-calendar-google-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   push:
     branches: ['claude/**']
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'scripts/rehearse-calendar-google-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
     tags: ['release-*']
   workflow_dispatch:
     inputs:
@@ -102,6 +102,12 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/rehearse-calendar-rollout.sh
+      - name: Rehearse the Connect Google Calendar rollout (20261206 on 20261205; rollback leaves no tokens)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+        run: bash scripts/rehearse-calendar-google-rollout.sh
 
   ios-simulator:
     # Both simulator tests: the launch test, then the family flow against the isolated backend.
@@ -183,6 +189,7 @@ jobs:
           PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
           psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
           psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/calendar-seed.sql
+          psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/google-seed.sql
       - name: Start the isolated test backend
         run: |
           PGHOST=localhost PGUSER=$(whoami) nohup node scripts/e2e/test-backend.mjs > backend.log 2>&1 &
@@ -208,6 +215,7 @@ jobs:
               PGHOST=localhost PGUSER=$(whoami) bash scripts/e2e/family-db.sh
               psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
               psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/calendar-seed.sql
+              psql -h localhost -U $(whoami) -X -q -d omc_family_e2e -f scripts/e2e/google-seed.sql
             fi
             TEST_RUNNER_E2E=1 xcodebuild test -project ios/App/App.xcodeproj -scheme App -configuration Debug \
               -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
@@ -307,6 +315,19 @@ jobs:
         run: |
           bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
           node scripts/e2e/calendar-e2e.mjs app-www e2e-calendar
+      - name: Build the website against the test backend (Google's redirect pages live on the site, also for the app)
+        run: npx astro build
+        env:
+          PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          PUBLIC_SUPABASE_ANON_KEY: e2e-anon
+          PUBLIC_CLUB_ENABLED: 'true'
+          PUBLIC_ACCOUNTS_ENABLED: 'true'
+      - name: Connect Google Calendar (mock Google, OAuth + PKCE, picker, two accounts, privacy, revoke), app bundle and website
+        run: |
+          bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+          node scripts/e2e/calendar-google-e2e.mjs app-www e2e-google
+          bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+          node scripts/e2e/calendar-google-e2e.mjs dist e2e-google-web
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -314,6 +335,8 @@ jobs:
           path: |
             e2e-family/
             e2e-calendar/
+            e2e-google/
+            e2e-google-web/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:

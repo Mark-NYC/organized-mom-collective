@@ -56,11 +56,11 @@ describe('pinned HTTP client', () => {
         },
       };
     };
-    expect(await (await httpGet(eofConn(`HTTP/1.1 200 OK\\r\\nContent-Length: ${ICS.length}\\r\\n\\r\\n${ICS}`), url, {}, 1e6)).text()).toBe(ICS);
-    const encoded = `HTTP/1.1 200 OK\\r\\nTransfer-Encoding: chunked\\r\\n\\r\\n${ICS.length.toString(16)}\\r\\n${ICS}\\r\\n0\\r\\n\\r\\n`;
+    expect(await (await httpGet(eofConn(`HTTP/1.1 200 OK\r\nContent-Length: ${ICS.length}\r\n\r\n${ICS}`), url, {}, 1e6)).text()).toBe(ICS);
+    const encoded = `HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n${ICS.length.toString(16)}\r\n${ICS}\r\n0\r\n\r\n`;
     expect(await (await httpGet(eofConn(encoded), url, {}, 1e6)).text()).toBe(ICS);
-    await expect(httpGet(eofConn('HTTP/1.1 200 OK\\r\\nContent-Length: 100\\r\\n\\r\\nBEGIN'), url, {}, 1e6)).rejects.toThrow('incomplete');
-    await expect(httpGet(eofConn(`HTTP/1.1 200 OK\\r\\n\\r\\n${ICS}`), url, {}, 1e6)).rejects.toThrow('incomplete');
+    await expect(httpGet(eofConn('HTTP/1.1 200 OK\r\nContent-Length: 100\r\n\r\nBEGIN'), url, {}, 1e6)).rejects.toThrow('incomplete');
+    await expect(httpGet(eofConn(`HTTP/1.1 200 OK\r\n\r\n${ICS}`), url, {}, 1e6)).rejects.toThrow('incomplete');
   });
 
   it('refuses what is too big, cut off, or not HTTP', async () => {

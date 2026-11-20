@@ -118,6 +118,17 @@ const send = (res, status, body) => {
 };
 
 let calendarFeeds = null;
+let calendarGoogle = null;
+// Connect Google Calendar against the MOCK Google (scripts/e2e/google-mock.mjs, E2E_GOOGLE_MOCK, default :54323). Never
+// real Google, never real credentials: the client id and secret below exist only in the mock.
+const GOOGLE_MOCK = process.env.E2E_GOOGLE_MOCK ?? 'http://127.0.0.1:54323';
+const e2eGoogle = {
+  clientId: 'e2e-google-client.apps.googleusercontent.test', clientSecret: 'e2e-google-secret',
+  // Like production: Google returns to the relay page on the site (/app/google-callback), which hands over to the function.
+  redirectUri: process.env.E2E_GOOGLE_REDIRECT ?? 'http://localhost:4330/app/google-callback/',
+  authorizeUrl: `${GOOGLE_MOCK}/o/oauth2/v2/auth`, tokenUrl: `${GOOGLE_MOCK}/token`, revokeUrl: `${GOOGLE_MOCK}/revoke`, apiBase: `${GOOGLE_MOCK}/calendar/v3`,
+};
+const e2eReturnOrigins = (process.env.E2E_RETURN_ORIGINS ?? 'http://localhost:4330,http://127.0.0.1:4330').split(',');
 const server = createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*');
   res.setHeader('Access-Control-Allow-Headers', 'apikey, authorization, content-type, prefer, x-client-info');
@@ -173,10 +184,22 @@ const server = createServer(async (req, res) => {
         getUser: async (t) => { const s = tokens.get(t); return s && s.exp > Date.now() ? { id: s.sub } : null; },
         // Calendar links at *.calendar.e2e.test are the e2e fixtures on this machine (E2E_CAL_FIXTURES, default :54322).
         fetch: (u, init) => fetch(String(u).replace(/^https?:\/\/[a-z0-9-]+\.calendar\.e2e\.test(:\d+)?/i, process.env.E2E_CAL_FIXTURES ?? 'http://127.0.0.1:54322'), init),
-        now: () => Date.now(), cronSecret: 'e2e-cron', allowPrivateHosts: true,
+        now: () => Date.now(), cronSecret: 'e2e-cron', allowPrivateHosts: true, google: e2eGoogle,
       });
       const r = await calendarFeeds(new Request(`http://127.0.0.1${url.pathname}`, { method: req.method, headers: Object.fromEntries(Object.entries(req.headers).filter(([, v]) => typeof v === 'string')), body: req.method === 'POST' ? raw : undefined }));
       res.writeHead(r.status, { 'Content-Type': 'application/json' });
+      return res.end(await r.text());
+    }
+    // ---- the calendar-google Edge Function: the real handler (supabase/functions/_shared/handlers/calendar-google.ts).
+    if (url.pathname === '/functions/v1/calendar-google' || url.pathname === '/functions/v1/calendar-google/callback') {
+      calendarGoogle ??= (await import('../../supabase/functions/_shared/handlers/calendar-google.ts')).createCalendarGoogleHandler({
+        db: { rpc: async (name, args = {}) => JSON.parse(psql(callSql(name, args)) || 'null') },
+        getUser: async (t) => { const s = tokens.get(t); return s && s.exp > Date.now() ? { id: s.sub } : null; },
+        fetch, google: e2eGoogle, returnOrigins: e2eReturnOrigins,
+      });
+      const r = await calendarGoogle(new Request(`http://127.0.0.1:${PORT}${url.pathname}${url.search}`, { method: req.method, headers: Object.fromEntries(Object.entries(req.headers).filter(([, v]) => typeof v === 'string')), body: req.method === 'POST' ? raw : undefined }));
+      const headers = Object.fromEntries([...r.headers.entries()]);
+      res.writeHead(r.status, { ...headers, 'Access-Control-Allow-Origin': '*' });
       return res.end(await r.text());
     }
     return send(res, 404, { message: `not served by the e2e backend: ${req.method} ${url.pathname}` });

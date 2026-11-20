@@ -464,6 +464,17 @@ export function shouldNudge(now = Date.now()): boolean {
 export const dismissNudge = (now = Date.now()) => write(NUDGE_KEY, now);
 
 /** Call one of our Edge Functions as the signed-in adult (e.g. calendar-feeds). Throws with the function's error code. */
+/** An Edge Function call that needs no sign-in (the anon key only): Google's redirect relay, which may load in a
+ *  browser where she isn't signed in (the iPhone app's Safari sheet). */
+export async function publicFunction<T>(name: string, body: unknown): Promise<T> {
+  const res = await fetch(`${URL_}/functions/v1/${name}`, {
+    method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body), referrerPolicy: 'no-referrer',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(typeof data?.error === 'string' ? data.error : `function_${res.status}`);
+  return data as T;
+}
+
 export async function accountFunction<T>(name: string, body: unknown): Promise<T> {
   const s = await getSession();
   if (!s) throw new Error('not_signed_in');

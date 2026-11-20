@@ -1,0 +1,26 @@
+---
+/** /app/google-callback: Google's OAuth redirect lands here, on our own domain (Google's verification needs the redirect
+ * URI on a verified domain). The page removes the one-time code from the address bar at once, hands code + state to the
+ * calendar-google function (which checks the state and exchanges the code with the server-held PKCE verifier and
+ * client secret), then continues to the calendar (website) or the "tap Done" page (iPhone app). The code is single-use
+ * and useless without those server-side secrets. docs/calendar/GOOGLE_CALENDAR.md */
+import Layout from '../../layouts/AppLayout.astro';
+import '../../styles/family-app-brand.css';
+---
+<Layout title="Google Calendar" description="Connecting Google Calendar to your family calendar.">
+  <meta name="referrer" content="no-referrer" />
+  <div class="family-brand of-page max-w-xl" data-google-callback>
+    <p class="of-eyebrow">Google Calendar</p>
+    <h1 class="of-page-title mt-2">Connecting…</h1>
+    <p class="mt-3 text-[1rem]" data-google-callback-text>One moment while we finish connecting your calendar.</p>
+  </div>
+  <script>
+    import { publicFunction } from '../../lib/account';
+    const q = new URLSearchParams(location.search);
+    const body = { action: 'callback', code: q.get('code') ?? undefined, state: q.get('state') ?? undefined, error: q.get('error') ?? undefined };
+    history.replaceState(null, '', location.pathname); // the code never stays in the address bar or history
+    publicFunction<{ location: string }>('calendar-google', body)
+      .then((r) => location.replace(r.location))
+      .catch(() => { document.querySelector('[data-google-callback-text]')!.textContent = 'Google Calendar couldn’t be connected. Go back to the family calendar and try again.'; });
+  </script>
+</Layout>
