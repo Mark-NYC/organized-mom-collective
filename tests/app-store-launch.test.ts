@@ -122,3 +122,44 @@ describe('Complimentary access, admin side', () => {
     expect(src('src/components/admin/ClubAdmin.tsx')).toMatch(/\{ id: 'access', label: 'Club access', note: 'Complimentary, by invitation' \}/);
   });
 });
+
+describe('In the app, the Club opens only for an explicit live grant (owner decision on PR 516)', () => {
+  afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.resetModules(); });
+  const paid = { access: true, grant: null, member: true, plan: 'monthly', status: 'active', renews: '2027-01-01', months: [{ month: '2026-11-01' }], kits: [{ slug: '2026-11-family-ownership', can: 'open' }], onboarded: true };
+  const stubClubMe = (me: object) => vi.stubGlobal('fetch', async () => new Response(JSON.stringify(me), { status: 200 }));
+  const signedIn = () => {
+    const data = new Map([['omc:account:session', JSON.stringify({ access_token: 'a', refresh_token: 'r', expires_at: Date.now() + 3600e3, user_id: 'u1', email: 'a@b.co' })]]);
+    vi.stubGlobal('localStorage', { getItem: (k: string) => data.get(k) ?? null, setItem: (k: string, v: string) => void data.set(k, v), removeItem: (k: string) => void data.delete(k), key: () => null, length: 0 });
+  };
+
+  it('a paying website member with no grant sees the free app: no access, no months, no billing details', async () => {
+    const { membershipForAppStore } = await import('../src/lib/club/membership');
+    const me = membershipForAppStore(paid as never, true);
+    expect(me).toMatchObject({ access: false, member: false, grant: null, plan: null, status: null, renews: null, months: [] });
+  });
+  it('a complimentary or beta grant opens it, with or without a paid subscription', async () => {
+    const { membershipForAppStore } = await import('../src/lib/club/membership');
+    for (const grant of ['complimentary', 'beta']) {
+      expect(membershipForAppStore({ ...paid, grant } as never, true).access).toBe(true);
+      expect(membershipForAppStore({ ...paid, grant, plan: null, status: null, member: false } as never, true).access).toBe(true);
+    }
+  });
+  it('the website is unchanged: paid members keep the Club', async () => {
+    const { membershipForAppStore } = await import('../src/lib/club/membership');
+    expect(membershipForAppStore(paid as never, false)).toEqual(paid);
+  });
+  it('the Club meeting and the MAWL layer (accountStore.me) follow the same rule in the app build', async () => {
+    vi.stubEnv('PUBLIC_APP_SHELL', 'ios'); signedIn();
+    stubClubMe(paid);
+    let { accountStore } = await import('../src/lib/club/store');
+    expect(await accountStore.me()).toMatchObject({ access: false, kits: [] });
+    vi.resetModules(); stubClubMe({ ...paid, grant: 'complimentary' });
+    ({ accountStore } = await import('../src/lib/club/store'));
+    expect((await accountStore.me())?.access).toBe(true);
+  });
+  it('and on the website a paid member still gets the Club meeting', async () => {
+    vi.stubEnv('PUBLIC_APP_SHELL', ''); signedIn(); stubClubMe(paid);
+    const { accountStore } = await import('../src/lib/club/store');
+    expect((await accountStore.me())?.access).toBe(true);
+  });
+});

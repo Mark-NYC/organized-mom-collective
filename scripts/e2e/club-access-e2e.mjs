@@ -9,7 +9,7 @@
  *   E2E_DB=omc_family_e2e node scripts/e2e/test-backend.mjs &
  *   PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 PUBLIC_SUPABASE_ANON_KEY=e2e-anon PUBLIC_ACCOUNTS_ENABLED=true \
  *     PUBLIC_CLUB_ENABLED=true npx astro build --outDir dist-qa
- *   node scripts/e2e/club-access-e2e.mjs dist-qa [out=e2e-club-access]   (CI: family-e2e job, on dist)
+ *   node scripts/e2e/club-access-e2e.mjs dist-qa [out=e2e-club-access] [app-www]   (CI: family-e2e job, on dist)
  *
  * Scenarios: a new free account; free features; no Club for a free family (pages and server); the owner grants
  * complimentary access in the dashboard; both adults get the Club, including the MAWL layer; access survives sign-out;
@@ -30,15 +30,23 @@ const PASSWORD = 'e2e-test-password'; // the test backend's only password (never
 mkdirSync(OUT, { recursive: true });
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' };
-const server = createServer((req, res) => {
-  const p = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^(\.\.[/\\])+/, '');
-  const file = [join(ROOT, p), join(ROOT, p, 'index.html'), join(ROOT, `${p}.html`)].find((f) => existsSync(f) && statSync(f).isFile());
-  if (!file) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream' });
-  res.end(readFileSync(file));
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
+const serve = async (root) => {
+  const srv = createServer((req, res) => {
+    const p = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^(\.\.[/\\])+/, '');
+    const file = [join(root, p), join(root, p, 'index.html'), join(root, `${p}.html`)].find((f) => existsSync(f) && statSync(f).isFile());
+    if (!file) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { 'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream' });
+    res.end(readFileSync(file));
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  return srv;
+};
+const server = await serve(ROOT);
 const base = `http://localhost:${server.address().port}`;
+// Optional: the iPhone app bundle (npm run build:app → app-www), where the Club opens only for an explicit grant.
+const APP_ROOT = process.argv[4];
+const appServer = APP_ROOT ? await serve(APP_ROOT) : null;
+const appBase = appServer ? `http://localhost:${appServer.address().port}` : null;
 
 let failures = 0;
 const results = [];
@@ -58,8 +66,8 @@ const rpc = async (token, fn, body = {}) => {
 const browser = await chromium.launch();
 const phone = { ...devices['iPhone 15 Pro'] };
 const newPhone = () => browser.newContext(phone);
-async function signInCode(page, email) {
-  await page.goto(`${base}/app/sign-in`, { waitUntil: 'networkidle' });
+async function signInCode(page, email, at = base) {
+  await page.goto(`${at}/app/sign-in`, { waitUntil: 'networkidle' });
   await page.fill('#ow-email', email);
   await page.click('button:has-text("Email me a code")');
   await page.fill('#ow-code', '123456');
@@ -68,12 +76,12 @@ async function signInCode(page, email) {
   await settle(page, 1500);
   return page.evaluate(() => JSON.parse(localStorage.getItem('omc:account:session')).access_token);
 }
-const meetingKind = async (page) => {
-  await page.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(page, 2000);
+const meetingKind = async (page, at = base) => {
+  await page.goto(`${at}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(page, 2000);
   return page.getAttribute('[data-weekly-meeting]', 'data-meeting-kind');
 };
-const clubHome = async (page) => {
-  await page.goto(`${base}/app/club`, { waitUntil: 'networkidle' }); await settle(page, 2000);
+const clubHome = async (page, at = base) => {
+  await page.goto(`${at}/app/club`, { waitUntil: 'networkidle' }); await settle(page, 2000);
   return page.evaluate(() => (document.getElementById('club-preview-intro')?.hidden ? 'member' : 'preview'));
 };
 
@@ -219,8 +227,24 @@ const payerCtx = await newPhone(); const payer = await payerCtx.newPage();
 await signInCode(payer, 'payer@e2e.test');
 check('12. the paying family keeps the Club', (await meetingKind(payer)) === 'club');
 check('12. the subscription row is untouched', (await sql(`select status || ',' || cancel_at_period_end || ',' || (access_revoked_at is null) from public.club_subscriptions where stripe_subscription_id = 'sub_E2EPay'`)) === 'active,false,true');
+let payerApp = null;
+if (appBase) {
+  // The iPhone app (owner decision on PR 516): a paid website subscription alone doesn't open the Club in the app.
+  const ctx = await newPhone(); payerApp = await ctx.newPage();
+  await signInCode(payerApp, 'payer@e2e.test', appBase);
+  check('app: a paying website member with no grant gets the free meeting in the app', (await meetingKind(payerApp, appBase)) === 'free');
+  check('app: and Club Home is the preview, with the invitation line', (await clubHome(payerApp, appBase)) === 'preview'
+    && /available by invitation/.test(await payerApp.locator('[data-club-invitation]').innerText()));
+  const text = await payerApp.locator('main').innerText();
+  check('app: no price, checkout or subscription wording on Club Home', !/\$\d|checkout|subscribe|upgrade|join the club/i.test(text));
+  await shot(payerApp, '06-app-paid-only-free');
+}
 admin.once('dialog', (d) => d.accept());
 await admin.click('[data-access-grant]'); await settle(admin, 1500);
+if (payerApp) {
+  check('app: once the owner grants complimentary access, the Club meeting opens in the app', (await meetingKind(payerApp, appBase)) === 'club');
+  check('app: and Club Home shows the membership', (await clubHome(payerApp, appBase)) === 'member');
+}
 await sql(`update public.club_subscriptions set status = 'canceled', ended_at = now() where stripe_subscription_id = 'sub_E2EPay'`); // the subscription ends (test only)
 check('13. the subscription ends while complimentary is live: access stays', (await meetingKind(payer)) === 'club');
 
@@ -244,5 +268,6 @@ check('13. the subscription ends while complimentary is live: access stays', (aw
 writeFileSync(join(OUT, 'results.json'), JSON.stringify({ at: new Date().toISOString(), failures, results }, null, 2));
 await browser.close();
 server.close();
+appServer?.close();
 console.log(failures ? `\n${failures} check(s) failed` : '\nall club access checks passed');
 process.exit(failures ? 1 : 0);

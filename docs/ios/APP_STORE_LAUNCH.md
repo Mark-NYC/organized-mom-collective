@@ -19,9 +19,12 @@ Related: [TESTFLIGHT.md](TESTFLIGHT.md) (signing and upload), [RELEASE_READINESS
   Account. The Club gates in the app point to Club Home, never to a sales page.
 - **Non-members see one plain line:** "Family Meeting Club is currently available by invitation." plus what stays free
   (`src/data/club/invitation.ts`). There's no price, trial, "join" or upgrade wording (unit-tested).
-- **Members are recognized** whether they pay on the website (Stripe, unchanged) or hold complimentary access. Both go
-  through the one entitlement that already exists, `club_has_access()`: a paid subscription OR a live
-  `club_access_grants` row.
+- **In the app, the Club opens only for an explicit live grant** (owner decision, 2026-11-20). A paid website
+  subscription alone shows the free app. A household with both a subscription and a grant gets the Club.
+  `membershipForAppStore` (`src/lib/club/membership.ts`) and `accountStore.me` (`src/lib/club/store.ts`) apply this
+  in the app build only, reading the live grant that `club_me` returns to both adults (20261208). This decides what the
+  app shows, not what the server allows. The server entitlement is still `club_has_access()`: a paid subscription OR a
+  live grant. On the website, paid members keep the Club exactly as before.
 - **Website billing is unchanged.** Checkout, the Stripe webhooks, invoices, monthly kits, PDFs, fulfillment and the
   Responsibility Card artwork are untouched.
 
@@ -51,7 +54,7 @@ Apple's App Review Guidelines were read on 2026-11-20 (page dated October 16, 20
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| **3.1.1 / 3.1.3(b) digital unlocks** | **Risk: owner decision** | See 3.1 below |
+| **3.1.1 / 3.1.3(b) digital unlocks** | Mitigated, owner decided; residual risk | See 3.1 below |
 | 3.1.3(e) physical goods | OK | The wall calendar and Club mailings are sold on the website, never in the app |
 | 4.8 Sign in with Apple | Not required | Sign-in uses the app's own email-code accounts. No third-party or social login (Google is only a calendar connection, not a sign-in) |
 | 5.1.1(v) account deletion | OK | Account → "Delete my account", inside the app (`FamilySummary.tsx`) |
@@ -71,22 +74,20 @@ Apple's App Review Guidelines were read on 2026-11-20 (page dated October 16, 20
 ### 3.1 The real risk: unlocking the Club without In-App Purchase
 
 Guideline 3.1.1 says apps "may not use their own mechanisms to unlock content or functionality". 3.1.3(b), multiplatform
-services, allows content bought elsewhere to be accessed in the app only if it is also offered through IAP. Club
-features in the app are unlocked for paying website members and for complimentary grants. Neither path uses IAP.
+services, allows content bought elsewhere to be accessed in the app only if it is also offered through IAP. **Decided
+(2026-11-20): in the app, Club features open only for complimentary (or beta) grants, never because of a website
+payment.** Nothing bought anywhere unlocks anything in the app.
 
 What works in our favor:
 - The app never mentions a price, never links out to buy, and says the Club is by invitation.
 - Complimentary access is free. Nobody pays to unlock anything in the app.
 - The Club's core is physical (monthly mailed kits, the calendar). That falls under 3.1.3(e), physical goods.
 
-What could still draw a rejection: a reviewer may see a paid tier (the website Club) unlocking digital features in the
-app without IAP. **This is uncertain. I can't verify how Apple will rule.** Options, cheapest first:
-
-1. **Submit as is, with clear review notes** (below): the app is free, sells nothing, Club access is invitation-only and
-   complimentary in the app, and the paid Club is a physical mail subscription on the website.
-2. If rejected under 3.1.1: hide Club content in the app for paid website members, so the app shows only complimentary
-   grants. Small change, but it removes a member benefit.
-3. Add IAP for the Club's digital layer. That's a pricing, tax and fulfillment decision and out of scope here.
+Residual risk, **uncertain, and I can't verify how Apple will rule**: a reviewer could still question invitation-only
+content for which no in-app purchase is offered. The review notes answer that directly: access is free and granted
+by us, and there's nothing to buy. The trade-off: paying website members see the free app until they're also granted
+access. Grant them from Admin → Club access if you want them to have the Club in the app. If Apple still objects, the
+remaining option is IAP for the Club's digital layer. That's a pricing, tax and fulfillment decision, out of scope here.
 
 ## 4. Reviewer accounts (owner only, never in Git)
 
@@ -118,7 +119,8 @@ No passwords are generated or stored by code. The only password in the repositor
 > Account 2 (Club by invitation): has complimentary Family Meeting Club access, granted by us at no charge. It shows the
 > Club version of the weekly Family Meeting and the monthly Club content.
 >
-> The app contains no purchases, prices or links to buy. Family Meeting Club access in the app is by invitation only.
+> The app contains no purchases, prices or links to buy. Family Meeting Club access in the app is by invitation only
+> and free: a payment made anywhere else does not unlock anything in the app.
 > Separately, we sell a physical wall calendar and a mailed monthly family kit on our website. Those are physical goods
 > delivered by mail and are not sold or promoted in the app.
 >
@@ -183,5 +185,5 @@ columns, and turns `complimentary` grants into `beta` grants, so families keep a
 | --- | --- |
 | `supabase/tests/club-complimentary-access.sql` | 56 checks: owner only, grant goes to the household owner, both adults, expiry, revoke all, paid untouched, paid + complimentary, audit, no self-grant, MAWL with 20261207. Runs in `scripts/test-household-sql.sh` |
 | `tests/app-store-launch.test.ts` | Invitation copy, no purchase wording, app build flags, policy links, deletion, password sign-in, admin labels, owner checks |
-| `scripts/e2e/club-access-e2e.mjs` | The real admin dashboard and family pages in Chromium (iPhone size): 15 scenarios. CI: `family-e2e` job |
+| `scripts/e2e/club-access-e2e.mjs` | The real admin dashboard and family pages in Chromium (iPhone size): 15 scenarios, plus the app bundle (`app-www`): a paid-only member sees the free app, and the Club opens after a grant. CI: `family-e2e` job |
 | `supabase/rollout/club-complimentary/*` | Preflight, verify and rollback, rehearsed locally: apply → verify → rollback → re-apply |

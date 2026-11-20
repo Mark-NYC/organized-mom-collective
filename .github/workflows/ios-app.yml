@@ -331,7 +331,7 @@ jobs:
       - name: Free accounts and complimentary Club (admin grant, both adults, MAWL, expiry, revoke, paid), on a fresh test database
         run: |
           bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
-          node scripts/e2e/club-access-e2e.mjs dist e2e-club-access
+          node scripts/e2e/club-access-e2e.mjs dist e2e-club-access app-www
       - uses: actions/upload-artifact@v4
         if: always()
         with:
