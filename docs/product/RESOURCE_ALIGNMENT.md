@@ -54,6 +54,16 @@ Every mapped record needs a skill category, outcome, *typical* age guidance, saf
 
 **Avoid forced one-to-one mappings:** "Own my laundry start to finish" may be a composite skill built from separate sort/fold/wash skills. Shared family rhythms are not always a child's solo skill; model their component contributions explicitly.
 
+## Curated skill registry v1 (implemented in the branch)
+
+- **Source:** `src/lib/family-development/skills.ts`, with `SKILLS_LIBRARY_VERSION = 1`. Contains **43 authored skills**, grouped across self-care, personal spaces, school preparation, home care, meals, laundry, food independence, initiative, routines, care of others and family teamwork.
+- **Available lookups:** `skillById`, `skillForChoreChoice`, `skillForCardIllustration`, and `skillsForContext`. Seasonal and age relevance **rank authored suggestions only**; they do not select MAWL stage or write progress.
+- **Existing chart crosswalk:** every one of the 30 `choreChoices.id` values is mapped to a stable skill ID, currently identically named. This is a mapping layer, not a rewrite of existing charts.
+- **Illustration crosswalk:** every illustration ID used in the existing 4–5, 6–7 and 10–12 age-guide card previews maps to a skill. These IDs are image references from `scripts/lib/age-chore-card-config.mjs`, **not verified printed physical-card identifiers**. No card text or print-ready artwork is recreated.
+- **Authoring rules:** each skill includes an observable finish line, suggested cue, natural benefit, Model/Assist/Watch/Launch guidance, a Watch variation and seasonal relevance; hazardous tasks explicitly retain adult-supervision guidance.
+- **Coverage tests:** `tests/family-skill-library.test.ts`; MAWL invariants remain in `tests/family-development-framework.test.ts`.
+- **Not connected:** current recommendations in public tools, family stages/progress persistence, and the live paid weekly meeting. Follow-on integration requires explicit review so existing customer data and fulfillment aren't disturbed.
+
 ## Proposed QA crosswalk to curate
 
 | Skill family | Guide examples | Existing chart IDs | Card / artwork validation | Watch variation |
@@ -80,8 +90,8 @@ These are mapping *candidates*, not a claim that every corresponding physical ca
 
 ## Next implementation, after owner review
 
-1. Verify actual responsibility-card source files and define the card-ID crosswalk.
-2. Make a small curated shared skill registry, seeded from guides, `choreChoices`, and card artwork, with tests for aliases and safety.
+1. Verify actual Responsibility Card print artwork and instructions; confirm or correct the provisional illustration-to-skill crosswalk.
+2. Curate printable guide language and aliases against the implemented v1 library, including the 8–9 guide and routine tools.
 3. Replace recommendation *lookups* across public tools only after parity tests; do not simultaneously redesign their layouts.
 4. Align educational copy and default motivation patterns through a separately reviewed copy change.
 5. Integrate persisted family-controlled MAWL decisions into the paid weekly meeting; keep monthly resources unchanged.
