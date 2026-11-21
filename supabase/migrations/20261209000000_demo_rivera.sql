@@ -14,7 +14,8 @@
 -- fulfillment, entitlements, emails, calendar feeds or Google tables, and no kit, resource or release is changed.
 --
 -- The one thing a phone can't do: make history weeks old. After each real decision the seed moves THAT household's
--- display dates back (development events' decided_at, records' and agreements' created_at, cleaning marks' dates).
+-- display dates back (development events' decided_at, records' created_at and last check-in date, agreements'
+-- created_at, cleaning marks' dates).
 -- Sync cursors (updated_at, synced_at, revision) are never back-dated, so phones pick up a reset normally.
 --
 -- Safety, enforced here (supabase/tests/demo-rivera.sql):
@@ -73,7 +74,11 @@ create function public.demo_age_decision(p_record uuid, p_days numeric) returns 
 language sql security definer set search_path = '' as $$
   update public.household_development_events set decided_at = now() - make_interval(secs => p_days * 86400)
    where id = (select max(id) from public.household_development_events where record_id = p_record);
-  update public.household_development set created_at = least(created_at, now() - make_interval(secs => p_days * 86400))
+  update public.household_development
+     set created_at = least(created_at, now() - make_interval(secs => p_days * 86400)),
+         -- A stage decision is also the family's last check-in (household_development_decide sets it to today).
+         last_check_in_on = case when last_check_in_on = current_date then (now() - make_interval(secs => p_days * 86400))::date
+                                 else last_check_in_on end
    where id = p_record;
 $$;
 
@@ -240,7 +245,7 @@ begin
   perform public.demo_decide(p_owner, jsonb_build_object('id', public.demo_id('dev:sofia-dishes'), 'decision', 'modify',
     'cue', 'After dinner'), 10);
   perform public.demo_decide(p_owner, jsonb_build_object('id', public.demo_id('dev:sofia-dishes'), 'decision', 'advance',
-    'note', 'Much easier after dinner.'), 4);
+    'note', 'Much easier after dinner.'), 6);
   -- Mateo: Unpack backpack and lunchbox, Model → Assist, finish line edited.
   perform public.demo_decide(p_partner, jsonb_build_object('id', public.demo_id('dev:mateo-unpack'), 'decision', 'start',
     'member_id', mateo, 'skill_id', 'after-school', 'title', 'Unpack my backpack and lunchbox', 'stage', 'model',
@@ -254,12 +259,15 @@ begin
     'member_id', mateo, 'skill_id', 'dishes', 'title', 'Clear my dishes', 'stage', 'model', 'cue', 'After dinner',
     'finish', 'Plate and cup are in the sink', 'category', 'meals',
     'agreement_id', public.demo_id('agreement:dev-mateo-dishes')), 3);
-  -- Elena: Put toys away, Model → Assist.
+  -- Elena: Put toys away, Model → Assist → Watch → Launch (so this week's meeting can suggest her next skill).
   perform public.demo_decide(p_owner, jsonb_build_object('id', public.demo_id('dev:elena-toys'), 'decision', 'start',
     'member_id', elena, 'skill_id', 'toys', 'title', 'Put toys away', 'stage', 'model', 'cue', 'Before bedtime',
     'finish', 'Toys are back in the bins', 'category', 'cleaning',
     'agreement_id', public.demo_id('agreement:dev-elena-toys')), 26);
+  perform public.demo_decide(p_owner, jsonb_build_object('id', public.demo_id('dev:elena-toys'), 'decision', 'advance'), 19);
   perform public.demo_decide(p_partner, jsonb_build_object('id', public.demo_id('dev:elena-toys'), 'decision', 'advance'), 12);
+  perform public.demo_decide(p_owner, jsonb_build_object('id', public.demo_id('dev:elena-toys'), 'decision', 'advance',
+    'note', 'She does it before bath without being asked.'), 5);
   -- Elena: Put dirty clothes in the hamper, started, then paused ("Not now").
   perform public.demo_decide(p_owner, jsonb_build_object('id', public.demo_id('dev:elena-hamper'), 'decision', 'start',
     'member_id', elena, 'skill_id', 'hamper', 'title', 'Put dirty clothes in the hamper', 'stage', 'model',

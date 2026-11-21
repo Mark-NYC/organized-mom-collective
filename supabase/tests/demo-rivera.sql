@@ -127,7 +127,7 @@ select pg_temp.expect((select count(*) from public.household_cleaning_marks wher
 select pg_temp.expect((select count(distinct period) from public.household_cleaning_marks where household_id = (select hid from seeded) and list = 'daily') = 14, 'two weeks of cleaning history');
 -- Development (MAWL)
 select pg_temp.expect((select string_agg(distinct stage, ',' order by stage) from public.household_development where household_id = (select hid from seeded) and status in ('active', 'launched')) = 'assist,launch,model,watch', 'all four stages: Model, Assist, Watch, Launch');
-select pg_temp.expect((select status = 'launched' from public.household_development where id = public.demo_id('dev:sofia-bag')), 'Sofia''s backpack was handed over (Launch)');
+select pg_temp.expect((select status = 'launched' from public.household_development where id = public.demo_id('dev:sofia-bag')) and (select status = 'launched' from public.household_development where id = public.demo_id('dev:elena-toys')), 'Sofia''s backpack and Elena''s toys were handed over (Launch)');
 select pg_temp.expect((select string_agg(decision, ',' order by id) from public.household_development_events where record_id = public.demo_id('dev:sofia-dishes')) = 'start,advance,step-back,modify,advance', 'a step back when more help was needed, then a new cue');
 select pg_temp.expect((select cue from public.household_development where id = public.demo_id('dev:sofia-dishes')) = 'After dinner', 'the different cue the family chose');
 select pg_temp.expect((select status = 'paused' and agreement_id is not null from public.household_development where id = public.demo_id('dev:elena-hamper'))
@@ -136,6 +136,7 @@ select pg_temp.expect((select finish_line like '%backpack on its hook' from publ
 select pg_temp.expect((select bool_and(r.deleted_at is null and r.owner_ids = array[h.member_id]) from public.household_development h join public.club_responsibilities r on r.id = h.agreement_id where h.household_id = (select hid from seeded) and h.status in ('active', 'launched')), 'every live skill has its agreement, owned by the child');
 select pg_temp.expect((select min(decided_at) < now() - interval '30 days' and max(decided_at) < now() - interval '2 days' from public.household_development_events where household_id = (select hid from seeded)), 'five weeks of decisions');
 select pg_temp.expect((select count(*) from public.household_development_events where household_id = (select hid from seeded) and decided_by = :LUIS) >= 3, 'both adults made decisions');
+select pg_temp.expect((select count(*) from public.household_development where household_id = (select hid from seeded) and status = 'active' and last_check_in_on <= current_date - 6) >= 2, 'check-ins are due this week (the meeting has something to ask)');
 select pg_temp.expect((select bool_and(updated_at > now() - interval '1 minute') from public.club_responsibilities where household_id = (select hid from seeded)), 'sync cursors are not back-dated (phones pick up the seed)');
 
 -- Both adults, through the app's own functions

@@ -14,6 +14,7 @@ import { clubResourceBySlug } from '../../data/club/resources';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/supabase-config';
 import { specLine, WELCOME_PRINT_SPECS } from '../../data/club/print-specs';
 import ClubAccessAdmin from './ClubAccessAdmin';
+import RiveraDemoAdmin from './RiveraDemoAdmin';
 
 const SUPABASE = SUPABASE_URL;
 const ANON = SUPABASE_ANON_KEY;
@@ -163,7 +164,7 @@ function Club(ctx: AdminContext) {
       </nav>
       <div className="mt-6">
         {tab === 'members' && <Members {...ctx} />}
-        {tab === 'access' && <ClubAccessAdmin {...ctx} />}
+        {tab === 'access' && <><ClubAccessAdmin {...ctx} /><RiveraDemoAdmin {...ctx} /></>}
         {tab === 'fulfillment' && <Fulfillment {...ctx} />}
         {tab === 'kits' && <Kits {...ctx} />}
         {tab === 'setup' && <Setup {...ctx} />}
