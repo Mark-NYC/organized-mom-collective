@@ -233,14 +233,15 @@ Results from CI runs and local runs. "Passed" means the job or script ran and pa
 
 | Check | Commit | Result |
 | --- | --- | --- |
-| Verify Astro build (website build + checks) | 425f3a2 | passed |
-| web-shell: unit tests, app bundle build, iPhone-size smoke test | 425f3a2 | passed |
-| household-db: all household SQL suites, production-schema step, household / calendar / Google rollback rehearsals, **launch migrations rehearsal** | 425f3a2 | passed |
-| family-e2e: family flow (two phones, offline, isolation), calendar subscriptions, Google Calendar, **free + complimentary Club e2e (website and app bundle)** | 425f3a2 | passed |
-| ios-simulator: unsigned simulator build, launch and interaction test (XCUITest), family flow in the real app (XCUITest) | f94cc3e (last commit that changes app code) | passed |
-| ios-simulator | 425f3a2 (doc, SQL test, CI script changes only) | see the PR for the final run |
+| Verify Astro build (website build + checks) | 425f3a2, e6988b0 | passed |
+| web-shell: unit tests, app bundle build, iPhone-size smoke test | 425f3a2, e6988b0 | passed |
+| household-db: all household SQL suites, production-schema step, household / calendar / Google rollback rehearsals, **launch migrations rehearsal** | 425f3a2, e6988b0 | passed |
+| family-e2e: family flow (two phones, offline, isolation), calendar subscriptions, Google Calendar, **free + complimentary Club e2e (website and app bundle)** | 425f3a2, e6988b0 | passed |
+| ios-simulator: unsigned simulator build, launch and interaction test (XCUITest), family flow in the real app (XCUITest) | f94cc3e | passed |
+| ios-simulator | 425f3a2 | failed: the launch test's tap on the Cleaning tab didn't register, so Today stayed on screen ("Not found: first Daily Reset task"). App code is the same as f94cc3e. Fixed in the test (e6988b0): it confirms the tab opened, and taps again if not |
+| **ios-simulator: build, launch test, family flow** | **e6988b0** (current app code) | **passed** |
 | ios-simulator | ae3e5bb | failed: test-timing artifact, not a regression. The test checked off a cleaning task at 23:58 UTC and relaunched after midnight, so the new day correctly showed 0 of 5. Passed again on f94cc3e |
-| iPhone app: TestFlight (Release archive) | — | **not run on this PR.** It triggers only on `ios/**` changes. A manual "Check only" run was refused to this session (403), so the owner has to start it |
+| iPhone app: TestFlight, check only (unit tests, app bundle leak check, `cap sync`, **Release archive**, unsigned) | e6988b0 | **passed**. Key and upload steps skipped (no secrets) |
 | Signed TestFlight upload | — | **never run.** Needs `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` |
 
 PR builds skip the simulator job by design. It runs on push builds.
