@@ -24,6 +24,7 @@
  * onto this phone's lists (fam.adoptAgreement), so there is no second agreement save that could fail on its own.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { track } from '../../lib/app/events';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
 import { CHALLENGES, PRIORITIES, RESPONSIBILITY_CATEGORIES } from '../../data/club/family-profile';
 import { useCalendar } from '../../lib/calendar/client';
@@ -101,6 +102,7 @@ export default function WeeklyMeeting() {
   const [activeStep, setActiveStep] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const goStep = (index: number) => {
+    if (index > 0) track('meeting_started');
     setActiveStep(Math.max(0, Math.min(MEETING_GUIDE.parts.length - 1, index)));
     document.querySelector('[data-weekly-meeting]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -338,7 +340,7 @@ export default function WeeklyMeeting() {
         {activeStep < MEETING_GUIDE.parts.length - 1 ? (
           <button type="button" className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" onClick={() => goStep(activeStep + 1)}>Next: {MEETING_GUIDE.parts[activeStep + 1].title} →</button>
         ) : (
-          <a className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" href="/app/family">Finish meeting ✓</a>
+          <a className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" href="/app/family" onClick={() => track('meeting_completed')}>Finish meeting ✓</a>
         )}
       </div>
       {/* One question at a time for a free family, only once it pays off in the next meeting (§8). */}

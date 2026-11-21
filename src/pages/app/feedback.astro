@@ -1,0 +1,17 @@
+---
+/**
+ * Feedback (/app/feedback): pilot feedback from inside the app (src/components/app/AppFeedback.tsx). Linked quietly
+ * from Today and Account with ?from=<the screen>. Website and iPhone app.
+ */
+import Layout from '../../layouts/AppLayout.astro';
+import AppFeedback from '../../components/app/AppFeedback';
+---
+<Layout title="Feedback" description="Tell us what's confusing, what isn't working, or what you wish it did.">
+  <div class="family-brand of-page max-w-2xl">
+    <header class="mb-6">
+      <p class="of-eyebrow">Help us make it simpler</p>
+      <h1 class="of-page-title mt-3">Tell us how it’s going.</h1>
+    </header>
+    <AppFeedback client:only="react" />
+  </div>
+</Layout>

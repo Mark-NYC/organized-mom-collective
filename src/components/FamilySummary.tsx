@@ -206,6 +206,7 @@ function OurWeekSignedIn({ email, role, shared }: { email: string; role: 'owner'
       <a href={routes.privacy} className="inline-flex min-h-[44px] items-center underline underline-offset-4">Privacy Policy</a>
       <a href={routes.terms} className="inline-flex min-h-[44px] items-center underline underline-offset-4">Terms of Service</a>
       <a href="/support" className="inline-flex min-h-[44px] items-center underline underline-offset-4">Help &amp; support</a>
+      <a href="/app/feedback?from=/app/account" className="inline-flex min-h-[44px] items-center underline underline-offset-4" data-feedback-link>Send feedback</a>
     </nav>
     </>
   );

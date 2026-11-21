@@ -88,12 +88,19 @@ interface Props {
   suggestedName?: string;
   /** `colorsChanged`: she picked a color herself (the page warns only then if the database can't keep colors yet). */
   onSave: (input: HouseholdInput, meta: { colorsChanged: boolean }) => Promise<void>;
+  /**
+   * 'app': Organized Family's free family setup (/app/family/setup). The page has its own title, and nothing here is
+   * about Club prints: no welcome-gift intro, no illustration style, colors and family name described for the app.
+   * Default 'club' keeps the Club's onboarding and family page exactly as they were.
+   */
+  variant?: 'club' | 'app';
 }
 
 const input = 'block min-h-12 w-full rounded-[4px] border border-warm-rule bg-white px-3 text-[1rem] text-warm-ink focus:border-warm-ink focus:outline-none';
 const select = `${input} pr-8`;
 
-export default function FamilyForm({ household, mode, readOnly, submitLabel, suggestedName, onSave }: Props) {
+export default function FamilyForm({ household, mode, readOnly, submitLabel, suggestedName, onSave, variant = 'club' }: Props) {
+  const app = variant === 'app';
   const today = useMemo(() => monthOf(new Date()), []);
   const initial = useMemo(() => draftsFrom(household, today), [household, today]);
   const [me, setMe] = useState<Draft>(initial.me);
@@ -148,7 +155,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
 
   return (
     <form onSubmit={submit} noValidate className="max-w-2xl">
-      {mode === 'start' ? (
+      {app ? null : mode === 'start' ? (
         <>
           <h1 className="font-serif text-[2.1rem] leading-[1.1] text-warm-ink sm:text-[2.6rem]">Tell us about your family</h1>
           <p className="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-warm-soft">
@@ -164,7 +171,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
         </>
       )}
 
-      <fieldset disabled={readOnly} className="mt-8 space-y-9">
+      <fieldset disabled={readOnly} className={`${app ? '' : 'mt-8 '}space-y-9`}>
         {mode === 'start' && (
           <section>
             <label className="block">
@@ -244,7 +251,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
           </button>
         </section>
 
-        <section aria-labelledby="club-art-style-heading" className="space-y-3">
+        {!app && <section aria-labelledby="club-art-style-heading" className="space-y-3">
           <div>
             <h2 id="club-art-style-heading" className="font-serif text-[1.3rem] text-warm-ink">Your family's illustration style</h2>
             <p className="mt-1 text-[0.9rem] text-warm-soft">Choose the look you'd like for illustrated monthly resources. You can change this in your family settings later.</p>
@@ -271,7 +278,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
             ))}
           </div>
           <p className="text-[0.82rem] text-warm-soft">This preference is saved to your family profile. Monthly illustrations will use it when that feature is introduced.</p>
-        </section>
+        </section>}
 
         <Optional collapsed={mode === 'start'}>
           <h2 className="label text-warm-soft">Your household <span className="normal-case tracking-normal">(optional)</span></h2>
@@ -282,7 +289,7 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
           {mode === 'edit' && household && household.members.some((m) => !m.archived) && (
             <div className="mt-5" data-family-colors>
               <span className="text-[0.95rem] font-semibold text-warm-ink">Family colors</span>
-              <span className="block text-[0.88rem] text-warm-soft">One marker color each, for your wall calendar and monthly Family Focus. Change any you like.</span>
+              <span className="block text-[0.88rem] text-warm-soft">{app ? 'One color each, on the calendar, cleaning and your Family Meeting. Change any you like.' : 'One marker color each, for your wall calendar and monthly Family Focus. Change any you like.'}</span>
               <ul className="mt-2 grid gap-2 sm:grid-cols-2">
                 {household.members.filter((m) => !m.archived).map((m) => (
                   <li key={m.id} className="flex items-center gap-3">
@@ -300,8 +307,8 @@ export default function FamilyForm({ household, mode, readOnly, submitLabel, sug
           )}
           {mode === 'edit' && (
             <label className="mt-5 block">
-              <span className="text-[0.95rem] font-semibold text-warm-ink">A name for your team</span>
-              <span className="block text-[0.88rem] text-warm-soft">It goes at the top of your printed chart. “The Rivera Family”, “Team Rivera”.</span>
+              <span className="text-[0.95rem] font-semibold text-warm-ink">{app ? 'What you call your family' : 'A name for your team'}</span>
+              <span className="block text-[0.88rem] text-warm-soft">{app ? 'It’s the name on your family’s calendar and plans.' : 'It goes at the top of your printed chart.'} “The Rivera Family”, “Team Rivera”.</span>
               <input className={`${input} mt-1.5`} value={displayName} maxLength={60} onChange={(e) => setDisplayName(e.target.value)} />
             </label>
           )}

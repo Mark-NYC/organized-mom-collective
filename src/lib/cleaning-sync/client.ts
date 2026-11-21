@@ -5,6 +5,7 @@
  * Near real time: a tap is sent at once; the other phone picks it up when it comes to the front, when the connection
  * returns, and every 15 seconds while a cleaning screen is open.
  */
+import { track } from '../app/events';
 import { accountRpc, accountsEnabled, getSession } from '../account';
 import { householdAccess } from '../household/api';
 import { APP_RESUME_EVENT } from '../native/platform';
@@ -75,6 +76,7 @@ export async function startCleaningSync() {
   // offers them all (adoptCleaning). With one, every tap is queued at once, before the first sync finishes.
   onListChange((key, added, removed) => {
     if (state.scope === 'none') return;
+    if (added.length) track('cleaning_checked');
     state = queue(state, marksFor(key, added, removed, new Date().toISOString()));
     save(state);
     status = 'waiting';

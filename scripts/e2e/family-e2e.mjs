@@ -335,8 +335,9 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await nora.click('button:has-text("Add a child")');
   await kidNames.nth(1).fill('Ben');
   await nora.locator('label:has-text("Age") select').nth(1).selectOption('5');
-  await nora.click('button[type="submit"]:has-text("Save and continue")');
-  await nora.waitForSelector('[data-setup-saved]', { timeout: 15000 }).catch(() => {});
+  await nora.click('button[type="submit"]:has-text("Save our family")');
+  await nora.waitForSelector('[data-setup-done]', { timeout: 15000 }).catch(() => {});
+  check('free setup: right after saving, one clear next step (Today) and the invitation for Owen', (await nora.locator('[data-setup-next]').count()) === 1 && /BRING IN OWEN/.test(await nora.locator('[data-setup-step="partner"]').innerText().catch(() => '')));
   const colors = await sql(`select coalesce((select count(distinct v) || '/' || count(*) from jsonb_each_text(h.preferences -> 'colors') e(k, v)), '0/0') from public.club_households h join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test'`);
   check('free setup: family saved (2 adults, 2 children), each with a permanent, distinct color', colors === '4/4', colors);
   check('free setup: no Club membership was needed or created', (await sql(`select count(*) from public.club_subscriptions s join auth.users u on u.id = s.user_id where u.email = 'nora@e2e.test'`)) === '0');

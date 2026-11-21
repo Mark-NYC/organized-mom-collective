@@ -13,3 +13,6 @@ export const CLUB_INVITATION_GATE = (what: string): [string, string] => [
   `${what} is part of Family Meeting Club`,
   `${CLUB_INVITATION} ${FREE_FOR_EVERYONE}`,
 ];
+
+/** The website's Club preview: what stays free and what the Club adds, plainly, with no price or push (the offer page has those). */
+export const CLUB_ADDS = 'The Club adds one personalized resource for your family each month, printed and mailed to you, with ideas for using it in your Family Meeting.';
