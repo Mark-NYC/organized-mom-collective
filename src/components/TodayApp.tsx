@@ -16,7 +16,7 @@ import { currentPlatform, isStandalone, restoreHandoff, saveHandoff, shouldOffer
 import { cleaningRoutes } from '../lib/companion';
 import { TimeMark, ZoneTag, shortTime } from './marks';
 import Onboarding from './Onboarding';
-import { Tally, TaskList } from './TaskList';
+import { CleaningIconStyle, Tally, TaskList } from './TaskList';
 import { monthColor } from '../theme';
 
 /**
@@ -51,6 +51,15 @@ export default function TodayApp({ variant }: { variant?: 'app' } = {}) {
   }, [ready]);
   // True only right after finishing the welcome screen, to point at the first task.
   const [justStarted, setJustStarted] = useState(false);
+  const [illustrationStyle, setIllustrationStyle] = useState<'simple' | 'color'>(() => {
+    try { return localStorage.getItem('omc:cleaning:illustration-style') === 'color' ? 'color' : 'simple'; }
+    catch { return 'simple'; }
+  });
+  const changeIllustrations = (value: 'simple' | 'color') => {
+    setIllustrationStyle(value);
+    try { localStorage.setItem('omc:cleaning:illustration-style', value); } catch {}
+  };
+
 
   // Note how this visit arrived (e.g. ?source=calendar from /start), then tidy the URL.
   useEffect(() => {
@@ -73,7 +82,25 @@ export default function TodayApp({ variant }: { variant?: 'app' } = {}) {
 
   if (!ready) return null;
   if (!onboarded) return <Onboarding onDone={finish} />;
-  return <AppVariant.Provider value={variant === 'app'}><Today justStarted={justStarted} /></AppVariant.Provider>;
+  return (
+    <AppVariant.Provider value={variant === 'app'}>
+      <CleaningIconStyle.Provider value={variant === 'app' ? illustrationStyle : 'simple'}>
+        {variant === 'app' && (
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-ink" role="group" aria-label="Cleaning task illustration style">
+            <span className="mr-1 font-semibold">Illustrations</span>
+            {(['simple','color'] as const).map(value => (
+              <button key={value} type="button" onClick={() => changeIllustrations(value)}
+                aria-pressed={illustrationStyle === value}
+                className={`rounded border px-3 py-2 ${illustrationStyle === value ? 'border-ink bg-band font-semibold' : 'border-rule bg-white'}`}>
+                {value === 'simple' ? 'Simple' : 'Soft color'}
+              </button>
+            ))}
+          </div>
+        )}
+        <Today justStarted={justStarted} />
+      </CleaningIconStyle.Provider>
+    </AppVariant.Provider>
+  );
 }
 
 function Today({ justStarted }: { justStarted: boolean }) {
