@@ -1,4 +1,5 @@
 ---
+import FounderSignature from '../components/FounderSignature.astro';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import { BRAND_NAME } from '../config';
 import { monthColors } from '../theme';
@@ -247,7 +248,7 @@ const closeUp = (month: string) => {
 <section class="ofc-founder" aria-labelledby="founder-heading">
  <div class="container founder-layout">
   <img class="founder-photo" src="/images/site/mark-megan-family-story-1200.webp" alt="Megan and her family" width="460" height="460" loading="lazy"/>
-  <div class="founder-copy"><h2 id="founder-heading">Hi, I'm Megan.</h2><p>We created Family Meeting Club because we want our kids to grow into capable people, without Mom having to manage every little thing along the way.</p><p>You don't need another parenting project. You need an easy way to get everyone involved.</p><p class="signature">Megan <span>Co-creator, Organized Mom Collective</span></p></div>
+  <div class="founder-copy"><h2 id="founder-heading">Hi, I'm Megan.</h2><p>We created Family Meeting Club because we want our kids to grow into capable people, without Mom having to manage every little thing along the way.</p><p>You don't need another parenting project. You need an easy way to get everyone involved.</p><FounderSignature class="mt-5" /></div>
  </div>
 </section>
 
