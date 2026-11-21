@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { createContext, useContext, useState } from 'react';
+import { colorIconFor } from '../lib/illustration-choice';
+
+export const CleaningIconStyle = createContext<'simple' | 'color'>('simple');
 import type { Task } from '../data/cleaning';
 
 interface TaskCheckboxProps {
@@ -19,6 +22,8 @@ interface TaskCheckboxProps {
 export function TaskCheckbox({ task, checked, onToggle, scope, next }: TaskCheckboxProps) {
   const inputId = `${scope}-${task.id}`;
   const [pop, setPop] = useState(false);
+  const iconStyle = useContext(CleaningIconStyle);
+  const icon = iconStyle === 'color' ? colorIconFor(task.label) : null;
 
   const change = () => {
     if (!checked) {
@@ -61,6 +66,7 @@ export function TaskCheckbox({ task, checked, onToggle, scope, next }: TaskCheck
             <path d="M4 15.5c2 1.6 3.7 3.6 5.3 6.2C13 13.6 18 7.4 25 2.5" pathLength={1} className={`tick-path ${checked ? 'tick-on' : ''}`} />
           </svg>
         </span>
+        {icon && <img src={icon} alt="" aria-hidden="true" width={38} height={38} className="size-10 shrink-0 object-contain" />}
         <span
           className={`min-w-0 flex-1 text-[1.0625rem] leading-snug transition-colors sm:text-[1rem] ${
             checked ? 'text-muted line-through decoration-muted/70 decoration-1' : 'text-ink'

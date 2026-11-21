@@ -589,10 +589,21 @@ const a = screenStarters.school;
 </style>
 
 <script>
+  import { initIllustrationChoice } from '../../lib/illustration-choice';
   import { initScreenTime } from './screen-time-contract';
   import { readToolHandoff } from '../../lib/tool-handoff';
 
   for (const host of document.querySelectorAll<HTMLElement>('.st-container')) {
     initScreenTime(host, host.hasAttribute('data-st-handoff') ? readToolHandoff('screen-time') : null);
+
+    initIllustrationChoice({
+      host, controls: host.querySelector<HTMLElement>('.st-actions')!,
+      key: host.dataset.stKey! + ':illustration-style',
+      originalLabel: 'Simple',
+      entries: () => Array.from(host.querySelectorAll<HTMLElement>('.st-sheet .st-row'))
+        .filter(element => !element.classList.contains('st-row-head'))
+        .map(element => ({ element, title: element.querySelector<HTMLInputElement>('input[type="text"]')?.value || '' })),
+    });
+
   }
 </script>

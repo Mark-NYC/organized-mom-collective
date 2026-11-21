@@ -592,11 +592,21 @@ const jsonLd = [
 </style>
 
 <script>
+  import { initIllustrationChoice } from '../lib/illustration-choice';
   import { autosave, downloadPng, fieldsIn } from '../lib/printable';
   import { toolEvent } from '../lib/tool-engagement';
 
   const sheet = document.getElementById('meal-planner')!;
   const host = sheet.closest<HTMLElement>('.mp-container')!;
+
+  initIllustrationChoice({
+    host, controls: host.querySelector<HTMLElement>('.mp-actions')!,
+    key: 'omc:meal-planner:illustration-style',
+    originalLabel: 'Simple',
+    entries: () => Array.from(sheet.querySelectorAll<HTMLElement>('.mp-title, .mp-label'))
+      .map(element => ({ element, title: element.textContent || '' })),
+  });
+
   const weekField = sheet.querySelector<HTMLInputElement>('[data-mp-week]')!;
   const dayRows = Array.from(sheet.querySelectorAll<HTMLElement>('[data-mp-row]'));
   const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];

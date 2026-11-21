@@ -198,10 +198,27 @@ const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astr
 </style>
 
 <script>
+  import { initIllustrationChoice } from '../../lib/illustration-choice';
   import { initMealTeamPlanner } from './meal-team-planner';
   import { readToolHandoff } from '../../lib/tool-handoff';
 
   for (const host of document.querySelectorAll<HTMLElement>('.mlt')) {
     initMealTeamPlanner(host, host.hasAttribute('data-mlt-handoff') ? readToolHandoff('meal-team') : null);
+
+    const refresh = initIllustrationChoice({
+      host, controls: host.querySelector<HTMLElement>('.mlt-plan-tools')!,
+      key: host.dataset.mltKey! + ':illustration-style',
+      originalLabel: 'Simple',
+      entries: () => Array.from(host.querySelectorAll<HTMLElement>('.mlt-sheets li'))
+        .map(element => ({ element, title: element.textContent || '' })),
+    });
+    const sheets = host.querySelector<HTMLElement>('.mlt-sheets');
+    let pending = false;
+    if (sheets) new MutationObserver(() => {
+      if (pending) return;
+      pending = true;
+      queueMicrotask(() => { pending = false; refresh(); });
+    }).observe(sheets, { childList: true, subtree: true });
+
   }
 </script>

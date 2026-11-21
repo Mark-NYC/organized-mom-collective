@@ -436,10 +436,20 @@ const { title, pages, storageKey, filename } = Astro.props;
 
 <script>
   import { autosave, downloadPng, fieldsIn } from '../../lib/printable';
+  import { initIllustrationChoice } from '../../lib/illustration-choice';
 
   const root = document.getElementById('checklist-pages')!;
   const host = root.closest<HTMLElement>('.ck-container')!;
   const pages = Array.from(root.querySelectorAll<HTMLElement>('[data-ck-page]'));
+  // The artwork sits inside the print page, so exports match the selected preview.
+  initIllustrationChoice({
+    host, controls: host.querySelector<HTMLElement>('.ck-actions')!,
+    key: root.dataset.ckKey! + ':illustration-style',
+    originalLabel: 'Simple',
+    entries: () => Array.from(root.querySelectorAll<HTMLElement>('.ck-item'))
+      .map(element => ({ element, title: element.querySelector<HTMLInputElement>('input[type="text"]')?.value || '' })),
+  });
+
   // Groups with a `due` (days before a date field, e.g. the first day of school) show that date.
   const start = root.querySelector<HTMLInputElement>('[data-ck-start]');
   const showDue = () => {
