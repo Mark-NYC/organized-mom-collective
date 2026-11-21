@@ -36,17 +36,17 @@ export default function FamilyHub() {
   }, [cal.signedIn]);
   const shared = (access?.adults.length ?? 1) > 1;
   const Month = month[0].toUpperCase() + month.slice(1);
-  // Getting started, in the owner's order: household, week, the other grown-up, the meeting, then the Club.
+  // Start with one real shared responsibility before optional calendar and sharing setup.
   const steps = [
     { id: 'household', done: Boolean(household), label: 'Set up your household', href: cal.signedIn ? '/app/family/setup' : '/app/sign-in?next=/app/family' },
-    { id: 'week', done: Object.keys(cal.state.events).length > 0, label: 'Put this week on the family calendar', href: '/app/family-calendar' },
-    { id: 'adult', done: shared, label: 'Invite the other grown-up (if there is one)', href: '/app/account#sharing-h' },
-    { id: 'meeting', done: agreed.length > 0, label: 'Hold your first ten-minute Family Meeting', href: '/app/family/meeting' },
+    { id: 'agreement', done: agreed.length > 0, label: 'Choose one responsibility together', href: '/app/family/meeting?start=responsibility' },
+    { id: 'week', done: Object.keys(cal.state.events).length > 0, label: 'Add a plan to your family calendar (optional)', href: '/app/family-calendar' },
+    { id: 'adult', done: shared, label: 'Invite another adult (optional)', href: '/app/account#sharing-h' },
     // Website only, and only while a new family is getting started: the one place a free family hears about the Club.
     // Never in the iPhone app (nothing is sold there), never as a card (owner decision 2026-11-17).
     ...(appShellBuild() || showsClub ? [] : [{ id: 'club', done: false, label: 'Discover Family Meeting Club', href: '/club' }]),
   ];
-  const showSteps = !isDemo() && steps.slice(0, 3).some((x) => !x.done);
+  const showSteps = !isDemo() && (!household || agreed.length === 0);
 
   return (
     <div className="of-grid of-grid--2 mt-6">
@@ -124,7 +124,8 @@ export default function FamilyHub() {
 
       {showSteps && (
         <section className="of-tile of-span-2" aria-labelledby="getting-started-h" data-getting-started>
-          <TileHead eyebrow="Getting started" title={<span id="getting-started-h">Your family, one step at a time</span>} />
+          <TileHead eyebrow="Getting started" title={<span id="getting-started-h">Start with one small win</span>} />
+          <p className="mt-2 text-[0.92rem] text-warm-soft">Pick one thing someone else can own tomorrow. You don't need a perfect calendar or a completed family profile to begin.</p>
           <ol className="mt-3 grid gap-2 md:grid-cols-2">
             {steps.map((x, i) => (
               <li key={x.id}>
@@ -135,6 +136,14 @@ export default function FamilyHub() {
               </li>
             ))}
           </ol>
+        </section>
+      )}
+
+      {!appShellBuild() && !showsClub && agreed.length > 0 && (
+        <section className="of-tile of-span-2" data-family-club-intro>
+          <TileHead eyebrow="An optional next step" title="Make the plan easier to use at home" />
+          <p className="of-tile-sub">Your free app keeps the calendar, cleaning and family agreements together. Family Meeting Club adds a personalized printed resource mailed to your home and monthly guidance. First month free, then $5.90/month. No need to join to keep using your family agreements.</p>
+          <a href="/club-2" className="of-tile-action mt-3">See an example of a personalized plan <Chevron /></a>
         </section>
       )}
 
