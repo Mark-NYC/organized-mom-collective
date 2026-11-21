@@ -1,5 +1,6 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
+import FounderSignature from '../components/FounderSignature.astro';
 import { routes } from '../routes';
 import { existsSync } from 'node:fs';
 const founderPhoto = existsSync('public/images/site/mark-megan-family-story-1200.webp');
@@ -54,6 +55,7 @@ const founderPhoto = existsSync('public/images/site/mark-megan-family-story-1200
     </div>
     <blockquote class="mt-10 border-l-4 border-[#bbcbb4] pl-6 font-serif text-[1.65rem] leading-snug text-warm-ink italic sm:text-[2rem]">A better organized home isn’t one where Mom does everything. It’s one where everyone plays a part.</blockquote>
     <p class="mt-8 text-[1.075rem] leading-relaxed text-warm-ink">Organized moms raise organized families. And organized families share the load.</p>
+    <FounderSignature class="mt-6" />
     <div class="mt-10 flex flex-wrap gap-4">
       <a href={routes.calendar} data-cta="story-calendar" class="btn-primary min-h-12 px-6">See the Family Calendar</a>
       <a href={routes.resources} data-cta="story-resources" class="btn-secondary min-h-12 px-6">Explore free resources</a>
