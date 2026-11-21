@@ -73,6 +73,7 @@ const library = [
 </style>
 
 <script>
+import { initIllustrationChoice } from '../../lib/illustration-choice';
 import { downloadPng } from '../../lib/printable';
 type Person = {id:string;name:string;age:number|null};
 type Task = {id:string;title:string;owner:string;when:string;icon:string};
@@ -152,5 +153,27 @@ for(const host of document.querySelectorAll<HTMLElement>('[data-frb]')){
   const resize=()=>{const width=Math.min(816,viewport.clientWidth);const scale=width/816;paper.style.transform=scale<1?`scale(${scale})`:'';viewport.style.height=`${1056*scale}px`;};
   if(typeof ResizeObserver!=='undefined') new ResizeObserver(resize).observe(viewport);else window.addEventListener('resize',resize);
   render();resize();
+
+  const refreshIllustrations = initIllustrationChoice({
+    host, controls: host.querySelector<HTMLElement>('.frb-preview-wrap')!,
+    key: 'omc:family-responsibility-builder:illustration-style',
+    originalLabel: 'Hand-drawn',
+    entries: () => [
+      ...Array.from(host.querySelectorAll<HTMLElement>('.frb-library-item')).map(element => ({
+        element, title: element.dataset.frbTitle || '', slug: element.dataset.frbLibraryItem,
+        image: element.querySelector<HTMLImageElement>('img'),
+      })),
+      ...Array.from(host.querySelectorAll<HTMLElement>('.frb-print-task')).map(element => ({
+        element, title: element.textContent || '', image: element.querySelector<HTMLImageElement>('img'),
+      })),
+    ],
+  });
+  let pending = false;
+  new MutationObserver(() => {
+    if (pending) return;
+    pending = true;
+    queueMicrotask(() => { pending = false; refreshIllustrations(); });
+  }).observe(host.querySelector<HTMLElement>('[data-frb-print-rows]')!, { childList: true, subtree: true });
+
 }
 </script>
