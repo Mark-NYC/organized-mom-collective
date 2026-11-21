@@ -82,12 +82,12 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/test-household-sql.sh
-      - name: 20261124-27 on production's current schema (without 20261121-23, and 28, 29 and 20261203, which need them)
+      - name: 20261124-27 on production's current schema (without 20261121-23, and 28, 29, 20261203 and 20261208, which need them)
         env:
           PGHOST: localhost
           PGUSER: postgres
           PGPASSWORD: ci-only
-          SKIP_MIGRATIONS: '^2026112[1238]|^20261129|^20261203'
+          SKIP_MIGRATIONS: '^2026112[1238]|^20261129|^20261203|^20261208'
           ONLY_TESTS: accounts-access club-access club-membership club-profile household-partners family-calendar household-colors family-agreements household-ownership household-join-from-own household-cleaning-progress
         run: bash scripts/test-household-sql.sh
       - name: Rollback rehearsal (preflight, apply, verify, roll back, schema identical to before)
@@ -108,6 +108,12 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/rehearse-calendar-google-rollout.sh
+      - name: Rehearse the App Store launch migrations (production's set, then 20261207 and 20261208 each alone; rollback; re-apply)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+        run: bash scripts/rehearse-launch-migrations.sh
 
   ios-simulator:
     # Both simulator tests: the launch test, then the family flow against the isolated backend.
@@ -328,6 +334,10 @@ jobs:
           node scripts/e2e/calendar-google-e2e.mjs app-www e2e-google
           bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
           node scripts/e2e/calendar-google-e2e.mjs dist e2e-google-web
+      - name: Free accounts and complimentary Club (admin grant, both adults, MAWL, expiry, revoke, paid), on a fresh test database
+        run: |
+          bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
+          node scripts/e2e/club-access-e2e.mjs dist e2e-club-access app-www
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -337,6 +347,7 @@ jobs:
             e2e-calendar/
             e2e-google/
             e2e-google-web/
+            e2e-club-access/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:

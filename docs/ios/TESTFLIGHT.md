@@ -2,6 +2,9 @@
 
 What's done in code, what only the owner can do, in order. Nothing here publishes to the App Store.
 
+For the public App Store launch (free app, Club by invitation, review accounts, submission checklist) see
+[APP_STORE_LAUNCH.md](APP_STORE_LAUNCH.md).
+
 ## Done in the repository
 
 | Item | Where |

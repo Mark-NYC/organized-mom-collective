@@ -17,6 +17,8 @@ import { adminRpc, loadSession as loadAdminSession } from '../../admin/session';
 import { MEMBER_STORAGE_PREFIX } from '../../../data/club/resources';
 import { connectPlanAccount, PLAN_SAVE } from './account';
 import { planKey } from './storage';
+import { appShellBuild } from '../../native/platform';
+import { CLUB_INVITATION_GATE } from '../../../data/club/invitation';
 import { PLAN_APPROVAL, isWelcomeResource } from './resource';
 import { setApprovalStore, type Approval } from './status';
 
@@ -26,11 +28,10 @@ export const welcomeApprovalSettled = () => lastApproval;
 
 /** The Welcome Family Rhythm's approval key: on her account (setApprovalStore), never this tab, for a member. */
 export const WELCOME_APPROVAL_KEY = 'omc:club:welcome-family-rhythm:approval';
-const WELCOME_DENIED: [string, string, string, string] = [
-  'Your Family Rhythm comes with the Club',
-  'It’s prepared from your family profile when you join, and it’s yours to keep.',
-  'See the Club', routes.clubJoin,
-];
+// In the iPhone app nothing links to the Club's sales or checkout pages: Family Meeting Club is by invitation there.
+const WELCOME_DENIED: [string, string, string, string] = appShellBuild()
+  ? [...CLUB_INVITATION_GATE('Your Family Rhythm'), 'Go to Club Home', routes.appClub]
+  : ['Your Family Rhythm comes with the Club', 'It’s prepared from your family profile when you join, and it’s yours to keep.', 'See the Club', routes.clubJoin];
 
 export type ReadyFamily = Extract<KitHousehold, { status: 'ready' }>;
 export const PLAN_FAMILY_READY = 'club:plan-family-ready';
@@ -56,6 +57,12 @@ export function deniedCopy(month: string, slug: string, me: Pick<Membership, 'ne
   if (!me) return base;
   if (me.next?.slug === slug && me.next.payment_on) {
     return [`${month} opens ${shortDate(me.next.payment_on)}`, `${month} comes with your ${shortDate(me.next.payment_on)} payment. It opens here that day, prepared with your family’s names.`, 'Go to Club Home', routes.appClub];
+  }
+  // Never a member (nothing received): the Club is by invitation, not "ended".
+  if (!me.access && !me.months?.length) {
+    return appShellBuild()
+      ? [...CLUB_INVITATION_GATE(month), 'Go to Club Home', routes.appClub]
+      : [`${month} is part of Family Meeting Club`, 'Each month’s plan is prepared for your family when you join.', 'See the Club', routes.clubJoin];
   }
   if (!me.access) return [`${month} isn’t open for your account`, 'Your membership has ended. The months you received stay in your Club to view and print.', 'Go to Club Home', routes.appClub];
   return base;

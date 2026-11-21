@@ -37,10 +37,29 @@ final class AppLaunchTests: XCTestCase {
         web.links.matching(NSPredicate(format: "label == %@", name)).firstMatch
     }
 
+    /// Go to a bottom tab. `arrived`: elements only the destination shows. If none appears within 8 s the tap didn't
+    /// take (run 44841715743: the Cleaning tap left Today on screen for the whole 45 s first-run wait), so tap again.
+    private func goTo(_ name: String, arrived: [XCUIElement] = []) {
+        tapTab(name)
+        guard !arrived.isEmpty else { return }
+        let deadline = Date().addingTimeInterval(8)
+        while Date() < deadline {
+            if arrived.contains(where: { $0.exists }) { return }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.25))
+        }
+        print("OMC: \(name) tab tap didn't navigate; tapping again")
+        tapTab(name)
+    }
+
+    /// What only the Cleaning page shows: its first-run screen, its checklist, or its storage note.
+    private var cleaningPage: [XCUIElement] {
+        [web.buttons.matching(NSPredicate(format: "label BEGINSWITH[c] 'Next:'")).firstMatch, text("Make beds"), text("saved progress stays")]
+    }
+
     /// Tap a bottom tab. Over a long page iOS can report the tab link's activation point as invalid, and asking
     /// `isHittable` then fails the test (runs 43682700419, 43718058363), though the bar is on screen. So tap by
     /// position: the link's frame center when its frame is usable, otherwise its slot in the four-tab bar.
-    private func goTo(_ name: String) {
+    private func tapTab(_ name: String) {
         let t = waitFor(tab(name), "\(name) tab")
         let window = app.windows.firstMatch.frame
         let f = t.frame
@@ -168,7 +187,7 @@ final class AppLaunchTests: XCTestCase {
 
         // A calendar owner opens the cleaning companion, finishes first-run, checks one task.
         XCTAssertFalse(control("I have the wall calendar").exists, "Our Week asks for the wall calendar before Cleaning")
-        goTo("Cleaning")
+        goTo("Cleaning", arrived: cleaningPage)
         finishCleaningOnboarding()
         let firstTask = waitFor(text("Make beds"), "first Daily Reset task")
         firstTask.tap()
@@ -330,7 +349,7 @@ final class AppLaunchTests: XCTestCase {
         // Cleaning (a calendar owner): Maya's cleaning part.
         goTo("Today")
         XCTAssertFalse(control("I have the wall calendar").exists, "Our Week asks for the wall calendar before Cleaning")
-        goTo("Cleaning")
+        goTo("Cleaning", arrived: cleaningPage)
         finishCleaningOnboarding()
         waitFor(text("part in cleaning"), "Cleaning: the agreement")
         shot("e2e-06-cleaning-agreed")

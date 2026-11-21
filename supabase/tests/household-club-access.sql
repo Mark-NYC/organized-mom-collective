@@ -58,9 +58,14 @@ select pg_temp.expect((select (m ->> 'access')::boolean from pme), 'partner: Clu
 select pg_temp.expect((select m ->> 'household_role' from pme) = 'partner', 'partner: told they''re the partner');
 select pg_temp.expect((select jsonb_path_exists(m, '$.kits[*] ? (@.slug == "2027-02-better-together" && @.can == "edit")') from pme), 'partner: the household''s month, editable');
 select pg_temp.expect((select jsonb_path_exists(m, '$.months[*] ? (@.month == "2027-02-01")') from pme), 'partner: the household''s months');
-select pg_temp.expect((select m -> 'plan' = 'null'::jsonb and m -> 'status' = 'null'::jsonb and m -> 'renews' = 'null'::jsonb and m -> 'grant' = 'null'::jsonb
+select pg_temp.expect((select m -> 'plan' = 'null'::jsonb and m -> 'status' = 'null'::jsonb and m -> 'renews' = 'null'::jsonb
                          and m -> 'intro' = 'null'::jsonb and m -> 'has_address' = 'null'::jsonb and m -> 'welcome' = 'null'::jsonb and m -> 'next' = 'null'::jsonb from pme),
-  'partner: no plan, status, renewal, grant, intro, address, welcome items or next charge');
+  'partner: no plan, status, renewal, intro, address, welcome items or next charge');
+-- The household's grant: hidden by 20261128; shown since 20261208 (complimentary access), so the app opens the member
+-- Club Home for the second adult of a complimentary household. Not billing information.
+select pg_temp.expect((select m -> 'grant' from pme) = case when to_regprocedure('public.club_admin_access_grant(uuid,timestamptz,text)') is null
+                                                           then 'null'::jsonb else '"beta"'::jsonb end,
+  'partner: the household''s grant (from 20261208 on)');
 select pg_temp.expect((select not jsonb_path_exists(m, '$.months[*].mailing') and not jsonb_path_exists(m, '$.months[*].plan') from pme), 'partner: no mailing or plan details per month');
 select pg_temp.expect((public.club_resource_get(:SLUG) ->> 'can') = 'edit', 'partner opens the month');
 select pg_temp.expect(public.club_resource_save(:SLUG, '{"omc:club:feb":"{\"by\":\"partner\"}"}', 0) = 1, 'partner edits the household''s copy');
