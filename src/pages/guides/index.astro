@@ -4,6 +4,7 @@
  * Content is visible without JavaScript; filters enhance browsing in place.
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
+import FounderSignature from '../../components/FounderSignature.astro';
 import GuideDirectoryCard from '../../components/guides/GuideDirectoryCard.astro';
 import { guides, guideUrl } from '../../data/guides/guide-directory';
 import { routes } from '../../routes';
@@ -112,6 +113,10 @@ const jsonLd = [{
           </a>
         </div>
       </div>
+    </section>
+    <section aria-label="From our family" class="mx-auto max-w-5xl px-5 pb-14 sm:px-8">
+      <p class="max-w-xl text-[0.95rem] leading-relaxed text-warm-ink">These are the simple home systems we're learning to use with our own family. We hope they make your week a little easier, too.</p>
+      <FounderSignature class="mt-5" />
     </section>
   </div>
 </PublicLayout>
