@@ -98,7 +98,9 @@ export default function WeeklyMeeting() {
   const [text, setText] = useState('');
   const [category, setCategory] = useState<ResponsibilityCategory>('other');
   const [msg, setMsg] = useState('');
-  const [activeStep, setActiveStep] = useState(0);
+  // The first-win link opens directly to Everyone's Part without skipping the normal free meeting for other families.
+  const [firstWin] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('start') === 'responsibility');
+  const [activeStep, setActiveStep] = useState(() => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('start') === 'responsibility' ? 2 : 0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const goStep = (index: number) => {
     setActiveStep(Math.max(0, Math.min(MEETING_GUIDE.parts.length - 1, index)));
@@ -133,6 +135,7 @@ export default function WeeklyMeeting() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5" data-weekly-meeting data-meeting-kind={meeting ? 'club' : 'free'}>
+      {firstWin && agreedCount === 0 && <div className="of-tile" data-first-family-win><p className="of-eyebrow">Start small</p><p className="mt-2 text-[0.95rem]">Choose one family member and one job they can own tomorrow. Talk about when it happens and what finished looks like. You can come back for the rest of the meeting another day.</p></div>}
       <header className="pb-2">
         <a href="/app/family" className="of-tile-action !mt-0">← Family</a>
         <p className="of-eyebrow mt-5">Our Family Meeting · {Month}</p>
@@ -282,10 +285,10 @@ export default function WeeklyMeeting() {
                 </div>
               </details>
               {cal.household ? (
-                <details className="group border-t border-[var(--of-rule)]" open={!hasNextSteps} data-add-agreement-section>
+                <details className="group border-t border-[var(--of-rule)]" open={firstWin || !hasNextSteps} data-add-agreement-section>
                 <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-1.5 text-[0.95rem] font-semibold [&::-webkit-details-marker]:hidden">
                   <span aria-hidden="true" className="inline-flex size-4 items-center justify-center leading-none text-warm-soft transition-transform group-open:rotate-90">›</span>
-                  Add another responsibility
+                  {firstWin && agreedCount === 0 ? 'Choose your first responsibility' : 'Add another responsibility'}
                 </summary>
                 <form className="pb-2" onSubmit={(e) => { e.preventDefault(); void add(); }} data-add-agreement>
                   <label className="block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">What we agreed
