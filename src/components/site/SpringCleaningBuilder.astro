@@ -194,10 +194,28 @@ const { storageKey, handoff = false, brand = 'Organized Mom Collective' } = Astr
 </style>
 
 <script>
+  import { initIllustrationChoice } from '../../lib/illustration-choice';
   import { initSpringCleaningBuilder } from './spring-cleaning-builder';
   import { readToolHandoff } from '../../lib/tool-handoff';
 
   for (const host of document.querySelectorAll<HTMLElement>('.sb')) {
     initSpringCleaningBuilder(host, host.hasAttribute('data-sb-handoff') ? readToolHandoff('spring-cleaning') : null);
+    const refresh = initIllustrationChoice({
+      host, controls: host.querySelector<HTMLElement>('.sb-buttons')!,
+      key: host.dataset.sbKey! + ':illustration-style',
+      originalLabel: 'Simple',
+      entries: () => Array.from(host.querySelectorAll<HTMLElement>('.sb-sheet-jobs li')).map(element => ({
+        element, title: element.textContent || '',
+      })),
+    });
+    // The builder regenerates session sheets as helpers and rooms change.
+    let pending = false;
+    const sheets = host.querySelector<HTMLElement>('.sb-sheets');
+    if (sheets) new MutationObserver(() => {
+      if (pending) return;
+      pending = true;
+      queueMicrotask(() => { pending = false; refresh(); });
+    }).observe(sheets, { childList: true, subtree: true });
+
   }
 </script>
