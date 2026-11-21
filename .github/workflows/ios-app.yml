@@ -108,6 +108,12 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/rehearse-calendar-google-rollout.sh
+      - name: Rehearse the App Store launch migrations (production's set, then 20261207 and 20261208 each alone; rollback; re-apply)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+        run: bash scripts/rehearse-launch-migrations.sh
 
   ios-simulator:
     # Both simulator tests: the launch test, then the family flow against the isolated backend.
