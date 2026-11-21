@@ -602,10 +602,22 @@ const jsonLd = [
 
 <script>
   import { autosave, downloadPng, fieldsIn } from '../lib/printable';
+  import { initIllustrationChoice } from '../lib/illustration-choice';
 
   const root = document.getElementById('lunch-posters')!;
   const host = root.closest<HTMLElement>('.lp-container')!;
   const sheets = Array.from(root.querySelectorAll<HTMLElement>('[data-lp-sheet]'));
+  initIllustrationChoice({
+    host, controls: host.querySelector<HTMLElement>('.lp-actions')!,
+    key: 'omc:lunch-posters:illustration-style',
+    originalLabel: 'Hand-drawn',
+    entries: () => Array.from(root.querySelectorAll<HTMLElement>('.lp-item')).map(element => ({
+      element,
+      title: element.querySelector<HTMLInputElement>('.lp-text')?.value || '',
+      image: element.querySelector<HTMLImageElement>('.lp-icon'),
+    })),
+  });
+
   const save = autosave(root, 'omc:lunch-posters:v1');
 
   document.querySelector('[data-lp-reset]')!.addEventListener('click', () => {
