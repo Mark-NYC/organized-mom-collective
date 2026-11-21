@@ -1,4 +1,4 @@
--- Rolls back 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261209, 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,18 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261209 Rivera demo (alone: supabase/rollout/demo-rivera/rollback.sql). Drops the demo functions and registry;
+-- a demo household that was installed stays an ordinary household (the household sections below remove what they own).
+drop function if exists public.demo_rivera_reset(text, text);
+drop function if exists public.demo_rivera_status();
+drop function if exists public.demo_rivera_seed(uuid, uuid);
+drop function if exists public.demo_decide(uuid, jsonb, numeric);
+drop function if exists public.demo_age_decision(uuid, numeric);
+drop function if exists public.demo_account_ok(uuid, uuid);
+drop function if exists public.demo_act_as(uuid);
+drop function if exists public.demo_id(text);
+drop table if exists public.demo_households;
 
 -- ---- 20261208 Complimentary Club access (alone: supabase/rollout/club-complimentary/rollback.sql). Grants stay;
 -- complimentary ones become beta (same access). First: its functions use household_id_for (20261124).

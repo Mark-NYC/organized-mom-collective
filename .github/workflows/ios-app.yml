@@ -114,6 +114,14 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/rehearse-launch-migrations.sh
+      - name: Rivera demo on production's migration set (without 20261130 and 20261202-04)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+          SKIP_MIGRATIONS: '^20261130|^2026120[234]'
+          ONLY_TESTS: demo-rivera
+        run: bash scripts/test-household-sql.sh
 
   ios-simulator:
     # Both simulator tests: the launch test, then the family flow against the isolated backend.
@@ -338,6 +346,10 @@ jobs:
         run: |
           bash scripts/e2e/family-db.sh && psql -X -q -d omc_family_e2e -f scripts/e2e/seed.sql
           node scripts/e2e/club-access-e2e.mjs dist e2e-club-access app-www
+      - name: Rivera demo (owner installs it, Ana and Luis on every screen at 393/430/desktop, reset), on a fresh test database
+        run: |
+          bash scripts/e2e/family-db.sh
+          node scripts/e2e/rivera-demo-e2e.mjs dist e2e-rivera app-www
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -348,6 +360,7 @@ jobs:
             e2e-google/
             e2e-google-web/
             e2e-club-access/
+            e2e-rivera/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
