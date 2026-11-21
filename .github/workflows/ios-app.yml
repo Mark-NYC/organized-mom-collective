@@ -114,6 +114,14 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/rehearse-launch-migrations.sh
+      - name: Rivera demo on production's migration set (without 20261130 and 20261202-04)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+          SKIP_MIGRATIONS: '^20261130|^2026120[234]'
+          ONLY_TESTS: demo-rivera
+        run: bash scripts/test-household-sql.sh
 
   ios-simulator:
     # Both simulator tests: the launch test, then the family flow against the isolated backend.
