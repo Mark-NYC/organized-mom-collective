@@ -42,6 +42,14 @@ export default function TodayDashboard() {
   // Phones: one column in this order. Wide screens: plans and the week on the left, the reset and the month on the right.
   return (
     <div className="of-dash">
+      {!isDemo() && cal.signedIn && cal.household && !agreed?.people.length && (
+        <section className="of-tile of-span-all" aria-labelledby="today-first-win-h" data-today-first-win>
+          <p className="of-eyebrow">One small win</p>
+          <h2 id="today-first-win-h" className="of-tile-title mt-2">Let someone else own one thing tomorrow.</h2>
+          <p className="of-tile-sub">Choose one family member and one responsibility. No need to organize the whole week first. Start small, and come back whenever it works for your family.</p>
+          <a href="/app/family/meeting?start=responsibility" className="of-btn mt-4">Choose our first responsibility</a>
+        </section>
+      )}
       {isDemo() && (
         <div className="family-note of-span-all" data-today-demo><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm">A made-up family, to show how Today looks. Nothing here is shared or synced. <a href="/app" className="underline">Leave the demo</a>.</p></div>
       )}
