@@ -224,3 +224,59 @@ columns, and turns `complimentary` grants into `beta` grants, so families keep a
 | `scripts/e2e/club-access-e2e.mjs` | The real admin dashboard and family pages in Chromium (iPhone size): 15 scenarios, plus the app bundle (`app-www`): a paid-only member sees the free app, and the Club opens after a grant. CI: `family-e2e` job |
 | `scripts/rehearse-launch-migrations.sh` | Production's migration set → 1207 alone → 1208 alone → use → rollback → re-apply, with data checks (section 5). CI: `household-db` job |
 | `tests/app-store-launch.test.ts` (loaders) | In the app build, months, welcome plan, Family Vision and kit documents never reach the server without a grant; with a grant they open; on the website nothing changes |
+
+## 9. Release verification (2026-11-21, PR #516)
+
+Results from CI runs and local runs. "Passed" means the job or script ran and passed. Anything that wasn't run says so.
+
+### CI (GitHub Actions)
+
+| Check | Commit | Result |
+| --- | --- | --- |
+| Verify Astro build (website build + checks) | 425f3a2 | passed |
+| web-shell: unit tests, app bundle build, iPhone-size smoke test | 425f3a2 | passed |
+| household-db: all household SQL suites, production-schema step, household / calendar / Google rollback rehearsals, **launch migrations rehearsal** | 425f3a2 | passed |
+| family-e2e: family flow (two phones, offline, isolation), calendar subscriptions, Google Calendar, **free + complimentary Club e2e (website and app bundle)** | 425f3a2 | passed |
+| ios-simulator: unsigned simulator build, launch and interaction test (XCUITest), family flow in the real app (XCUITest) | f94cc3e (last commit that changes app code) | passed |
+| ios-simulator | 425f3a2 (doc, SQL test, CI script changes only) | see the PR for the final run |
+| ios-simulator | ae3e5bb | failed: test-timing artifact, not a regression. The test checked off a cleaning task at 23:58 UTC and relaunched after midnight, so the new day correctly showed 0 of 5. Passed again on f94cc3e |
+| iPhone app: TestFlight (Release archive) | — | **not run on this PR.** It triggers only on `ios/**` changes. A manual "Check only" run was refused to this session (403), so the owner has to start it |
+| Signed TestFlight upload | — | **never run.** Needs `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` |
+
+PR builds skip the simulator job by design. It runs on push builds.
+
+### What the simulator tests cover, and what they don't
+
+- **Covered in the iOS Simulator:**
+  - Launch, the four tabs, safe areas (status bar, home indicator) and the Account panel when signed out.
+  - The sign-in screen, and progress surviving a relaunch and a wiped web view.
+  - Signing in against the test backend, the shared calendar, the weekly Family Meeting with the Club layer and a MAWL next step added to the plan, cleaning, close and reopen.
+- **Covered in Chromium against the real app bundle (`app-www`), not in the simulator:**
+  - Account deletion (free and paid-account rules), sign-out and signing in as someone else.
+  - A free household, and a paid-only household seeing the free app and the invitation.
+  - The Club opening after a grant, and a Club month opened directly staying closed.
+- **Unit tests only:** the Privacy Policy, Terms and Help links and where they open.
+- **Not tested on a real iPhone.** That happens with TestFlight (section 7).
+
+### Club access rules (the app's firm rule: only a live complimentary/beta grant opens the Club)
+
+| Scenario | Result | Where |
+| --- | --- | --- |
+| Free household: no Club in the app, and the server refuses Club content | passed | e2e (website + app), SQL |
+| Paid website member without a grant: free meeting, Club Home preview, invitation, month opened directly stays closed | passed | e2e on `app-www`; unit (loaders never reach the server) |
+| Complimentary household: Club meeting, MAWL, months | passed | e2e, SQL |
+| Both adults get it (grant found from either adult's email) | passed | e2e, SQL, rehearsal |
+| Expired or revoked grant: Club closes for both adults; family data kept | passed | e2e, SQL |
+| Paid + complimentary: Club in the app while the grant is live; subscription ending keeps access | passed | e2e, SQL |
+| Revoking complimentary never touches Stripe (subscription row unchanged) | passed | e2e, SQL, rehearsal; the migration has no write to `club_subscriptions` / `club_invoices` (unit) |
+| Paid website membership unchanged on the website | passed | e2e (paying member opens their month on the website), unit |
+| Nobody grants themself; admins who aren't owners are refused; anonymous callers refused | passed | SQL, e2e, rehearsal |
+| Admin: search, household, status, grant, expiry set/clear, revoke, re-grant, history | passed | e2e (real `/admin/club` page), SQL |
+
+### Purchase audit of the app bundle (`app-www`, 2026-11-21)
+
+- No `checkout.stripe.com`, `buy.stripe.com`, `js.stripe.com` or billing-portal URLs anywhere in the bundle.
+- `/club/join`, `/club` and `/club/dashboard` are excluded from the build. Nothing in the app links to `/club/join`. In the app, `/club` maps to Club Home and `/club/dashboard` to Account.
+- The `club-billing` client code is bundled with the shared membership module, but its only callers (the dashboard, the join page) aren't in the app.
+- No visible price, "subscribe", "upgrade", "join the Club" or "free trial" wording. The only "$" text is the free tools' "Under $25" budget filter. "Subscribe" appears only in the calendar's iCal help text.
+- Every Club gate in the app shows "Family Meeting Club is currently available by invitation." plus what stays free.
