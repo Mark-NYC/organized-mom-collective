@@ -579,9 +579,20 @@ const checks = (prefix: string, n: number) => Array.from({ length: n }, (_, i) =
 </style>
 
 <script>
+  import { initIllustrationChoice } from '../../lib/illustration-choice';
   import { autosave, clearFields, downloadPng, fieldsIn } from '../../lib/printable';
 
   const planner = document.getElementById('planner')!;
+
+  initIllustrationChoice({
+    host: planner.closest<HTMLElement>('.weekly-planner-container')!,
+    controls: planner.closest<HTMLElement>('.weekly-planner-container')!.querySelector<HTMLElement>('.wp-actions')!,
+    key: 'omc:planner:illustration-style',
+    originalLabel: 'Simple',
+    entries: () => Array.from(planner.querySelectorAll<HTMLElement>('.wp-title, .wp-week-of label'))
+      .map(element => ({ element, title: element.textContent || '' })),
+  });
+
   const save = autosave(planner, 'omc:planner:v1');
 
   document.querySelector('[data-planner-clear]')!.addEventListener('click', () => {
