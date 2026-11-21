@@ -27,14 +27,16 @@ insert into auth.users (id, email, email_confirmed_at) values
   ('00000000-0000-0000-0000-0000000c0a03', 'comp-sam@example.com', now()),
   ('00000000-0000-0000-0000-0000000c0a04', 'comp-pat@example.com', now()),
   ('00000000-0000-0000-0000-0000000c0a05', 'comp-new@example.com', now()),
-  ('00000000-0000-0000-0000-0000000c0a06', 'comp-free@example.com', now());
+  ('00000000-0000-0000-0000-0000000c0a06', 'comp-free@example.com', now()),
+  ('00000000-0000-0000-0000-0000000c0a07', 'comp-helper@example.com', now());
 \set ADMIN '''00000000-0000-0000-0000-0000000c0a01'''
 \set JEN '''00000000-0000-0000-0000-0000000c0a02'''
 \set SAM '''00000000-0000-0000-0000-0000000c0a03'''
 \set PAT '''00000000-0000-0000-0000-0000000c0a04'''
 \set NEWBIE '''00000000-0000-0000-0000-0000000c0a05'''
 \set FREE '''00000000-0000-0000-0000-0000000c0a06'''
-insert into public.admin_users (user_id, role) values (:ADMIN, 'owner');
+\set HELPER '''00000000-0000-0000-0000-0000000c0a07'''
+insert into public.admin_users (user_id, role) values (:ADMIN, 'owner'), (:HELPER, 'helper');
 
 -- Jen's household, with Sam as the second adult; Pat pays; Free has a family and nothing else; Newbie has no family yet.
 select pg_temp.as_user('authenticated', :JEN);
@@ -79,11 +81,18 @@ reset role;
 select pg_temp.as_user('anon', null);
 select pg_temp.expect(pg_temp.fails(format('select public.club_admin_access_detail(%L)', :JEN)), 'anonymous callers are refused');
 reset role;
+-- An admin who isn't an owner (role 'helper') can't see or change Club access either.
+select pg_temp.as_user('authenticated', :HELPER);
+select pg_temp.expect(pg_temp.fails(format('select public.club_admin_access_search(%L)', 'comp-')), 'a helper admin cannot search');
+select pg_temp.expect(pg_temp.fails(format('select public.club_admin_access_grant(%L)', :JEN)), 'a helper admin cannot grant');
+select pg_temp.expect(pg_temp.fails(format('select public.club_admin_access_revoke(%L)', :JEN)), 'a helper admin cannot revoke');
+select pg_temp.expect(pg_temp.fails(format('select public.club_admin_access_expiry(%L, null)', :JEN)), 'a helper admin cannot change an expiry');
+reset role;
 
 -- ---------------------------------------------------------------- find, see, grant
 select pg_temp.as_user('authenticated', :ADMIN);
 select pg_temp.expect(pg_temp.fails(format('select public.club_admin_access_search(%L)', 'co'), 'invalid'), 'search needs at least 3 characters');
-select pg_temp.expect(jsonb_array_length(public.club_admin_access_search('COMP-')) = 6, 'search by part of an email, any case');
+select pg_temp.expect(jsonb_array_length(public.club_admin_access_search('COMP-')) = 7, 'search by part of an email, any case');
 select pg_temp.expect((public.club_admin_access_search('comp-sam@example.com') -> 0 ->> 'email') = 'comp-sam@example.com', 'an exact email comes first');
 select pg_temp.expect(pg_temp.fails(format('select public.club_admin_access_search(%L)', '%%%')) is false and jsonb_array_length(public.club_admin_access_search('%%%')) = 0, 'wildcards are taken literally');
 create temp table s0 as select public.club_admin_access_detail(:SAM) as d;

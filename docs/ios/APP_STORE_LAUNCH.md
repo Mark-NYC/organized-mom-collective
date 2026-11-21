@@ -1,7 +1,7 @@
 # Organized Family: public App Store launch
 
 The plan for launching **Organized Family** as a free iPhone app, with Family Meeting Club available by invitation
-through complimentary access the owner grants. Status as of 2026-11-20. Nothing in this document has been applied to
+through complimentary access the owner grants. Status as of 2026-11-21. Nothing in this document has been applied to
 production, uploaded to App Store Connect or submitted to Apple. Each of those steps needs the owner's approval.
 
 Related: [TESTFLIGHT.md](TESTFLIGHT.md) (signing and upload), [RELEASE_READINESS.md](RELEASE_READINESS.md),
@@ -25,6 +25,26 @@ Related: [TESTFLIGHT.md](TESTFLIGHT.md) (signing and upload), [RELEASE_READINESS
   Supabase can authenticate which physical platform calls a shared RPC.
 - **Complimentary grants include the second adult.** `20261208` makes the partner's `club_me().grant` reflect
   the owner's live grant. Web subscribers can also be individually invited to iOS Club without changing their billing.
+- **Where the iOS rule is applied** (app build only; `appShellBuild()`):
+
+  | Club surface in the app | Reads | Without a live grant |
+  | --- | --- | --- |
+  | Club Home, months list, Club gates, `/app/club/<month>` | `loadMembership` → `membershipForAppStore` | preview + invitation line |
+  | Weekly Family Meeting (Club kind) and the MAWL layer | `accountStore.me` (via `useMeetingAccess`) | free meeting, no development layer |
+  | A month opened directly (`/club/resources/<slug>`; `/app/club/november` links to it) | `loadResource` / `saveResource` / `approveResource` | closed, invitation text |
+  | Welcome Family Rhythm | `loadWelcomePlan` and its save/approve | closed |
+  | Family Vision print (`/club/family-vision`) | `loadWelcome` (returns nothing) and its save/approve | nothing to show |
+  | Kit documents (chart editor, kit pages) | `accountStore.documents` / `saveDocument` | closed |
+
+  The last four were added on 2026-11-21 after the app-bundle e2e showed a paid-only member could open the November
+  month from a link inside the app ("Saved to your account"). That's fixed and covered by tests now.
+- **Server permissions are shared and platform-blind.** The same Supabase RPCs serve the website and the app, and the
+  server can't tell which one is calling. A paid subscription still passes `club_has_access` / `club_can_open` on the
+  server, so a paid member calling the RPCs directly (outside the app's screens) gets their paid content. That's the
+  same content they can open on the website anyway. **Nothing unpaid becomes reachable this way.** Free accounts are
+  refused by the server (`not_found` / `club_required`, tested), and only an owner admin can create a grant (server-side,
+  tested). The iOS rule controls what the app shows; it is not a server-side platform check, and we don't describe it
+  as one.
 - **Website billing is unchanged.** Checkout, the Stripe webhooks, invoices, monthly kits, PDFs, fulfillment and the
   Responsibility Card artwork are untouched.
 
@@ -131,12 +151,24 @@ No passwords are generated or stored by code. The only password in the repositor
 
 ## 5. Migrations: order, dependencies, rollout
 
-Production (read-only check, 2026-11-20) has every migration through **20261129**, plus 20261201, 20261205 and
-20261206. **Pending in the repo and not on production:** 20261130, 20261202, 20261203, 20261204, 20261207, 20261208.
+Production, re-checked read-only on **2026-11-21** (migration ledger plus the objects themselves): every migration through
+**20261129**, plus 20261201, 20261205 and 20261206 (production records them under the timestamps it applied them, by
+name). **Pending in the repo and not on production:** 20261130, 20261202, 20261203, 20261204, 20261207, 20261208. Object
+check: no `household_development` table; no `club_admin_access_*` functions; the grant reason check is still
+`('preview','beta')`; every dependency of 1207/1208 is present; `club_me` still has the exact `'grant', null,` text
+20261208 patches. Rows at check time: 11 households, 11 subscriptions (10 active), **0 Club grants**, 27 agreements.
+
+**The 10 active paying households will see the free app** until each one is granted complimentary access (Admin → Club
+access). Their website membership is unaffected.
 
 This launch needs **20261207** (the development records the Club meeting's MAWL layer writes) and **20261208**
-(complimentary access). Both were verified on the production migration set **without** 20261130 or 20261202–04: CI step
-"production schema" and the local rehearsals. The other pending migrations are not part of this release. Don't apply them
+(complimentary access). Both were verified on the production migration set **without** 20261130 or 20261202–04, by
+`scripts/rehearse-launch-migrations.sh` (CI: household-db job). It builds production's set with realistic rows, then
+applies 1207 and then 1208 each by itself (preflight, apply, verify), and checks that every existing household, adult,
+person, agreement, subscription, paid month and grant is unchanged. It exercises both migrations (grant from the second
+adult, revoke, re-grant, paid + complimentary, no self-grant, subscription row untouched), rolls back 1208 then 1207
+(schema fingerprint identical; every earlier row intact; the one agreement made through a development step kept by
+design), and re-applies both. The other pending migrations are not part of this release. Don't apply them
 alongside it.
 
 | Order | Migration | Depends on | Rollout files |
@@ -150,7 +182,8 @@ is made.
 ## 6. Production deployment checklist (for the owner's approval; nothing done yet)
 
 1. Merge the PR after review, and wait for CI to pass on `main`.
-2. **Backup:** run the `db-backup` workflow (or Supabase → Database → Backups → confirm today's backup), and note the backup id.
+2. **Fresh, verified backup:** run the `db-backup` workflow right before step 3, and confirm it finished and restored
+   in its self-test. Note the backup id. Don't continue on an older backup.
 3. **20261207:** run `supabase/rollout/family-development/preflight.sql` (all checks pass), then apply
    `20261207000000_family_development_records.sql` **by itself** (SQL editor, or `psql -f`). **Do not use
    `supabase db push`.** It would also apply 20261130 and 20261202–04, which aren't part of this release. Then run
@@ -186,7 +219,8 @@ columns, and turns `complimentary` grants into `beta` grants, so families keep a
 
 | Test | What |
 | --- | --- |
-| `supabase/tests/club-complimentary-access.sql` | 56 checks: owner only, grant goes to the household owner, both adults, expiry, revoke all, paid untouched, paid + complimentary, audit, no self-grant, MAWL with 20261207. Runs in `scripts/test-household-sql.sh` |
+| `supabase/tests/club-complimentary-access.sql` | 60 checks: owner only (families, anonymous callers and non-owner `helper` admins refused), grant goes to the household owner, both adults, expiry, revoke all, paid untouched, paid + complimentary, audit, no self-grant, MAWL with 20261207. Runs in `scripts/test-household-sql.sh` |
 | `tests/app-store-launch.test.ts` | Invitation copy, no purchase wording, app build flags, policy links, deletion, password sign-in, admin labels, owner checks |
 | `scripts/e2e/club-access-e2e.mjs` | The real admin dashboard and family pages in Chromium (iPhone size): 15 scenarios, plus the app bundle (`app-www`): a paid-only member sees the free app, and the Club opens after a grant. CI: `family-e2e` job |
-| `supabase/rollout/club-complimentary/*` | Preflight, verify and rollback, rehearsed locally: apply → verify → rollback → re-apply |
+| `scripts/rehearse-launch-migrations.sh` | Production's migration set → 1207 alone → 1208 alone → use → rollback → re-apply, with data checks (section 5). CI: `household-db` job |
+| `tests/app-store-launch.test.ts` (loaders) | In the app build, months, welcome plan, Family Vision and kit documents never reach the server without a grant; with a grant they open; on the website nothing changes |
