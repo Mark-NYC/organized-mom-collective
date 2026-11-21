@@ -60,7 +60,8 @@ describe('first-session fixes', () => {
     expect(setup).toMatch(/<details className="family-note" data-setup-edit>/);
   });
   it('Cleaning in the app goes straight to the checklist (the paper-calendar walkthrough stays on the QR pages)', () => {
-    expect(src('src/components/TodayApp.tsx')).toMatch(/forceSetup \? false : variant === 'app' \|\| isOnboarded\(\)/);
+    expect(src('src/components/TodayApp.tsx')).toMatch(/forceSetup \? false : skipsWalkthrough \|\| isOnboarded\(\)/);
+    expect(src('src/components/TodayApp.tsx')).toMatch(/skipsWalkthrough = variant === 'app' && !\/\^\\\/app\\\/calendar/);
     expect(src('src/layouts/AppLayout.astro')).toMatch(/\/\^\\\/app\\\/calendar\\\/\?\$\/\.test\(location\.pathname\)/);
   });
 });
