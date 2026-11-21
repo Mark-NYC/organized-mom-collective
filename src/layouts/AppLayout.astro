@@ -51,9 +51,10 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
       } catch (e) {}
     </script>
     <script is:inline define:vars={{ ONBOARDED_KEY }}>
-      // First visit to Today: hide app chrome until the onboarding screen renders.
+      // First visit to the printed calendar's companion page: hide app chrome until its walkthrough renders.
+      // (Organized Family's Cleaning tab, /app/cleaning, has no walkthrough.)
       try {
-        if (/^\/app\/(?:cleaning|calendar)\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
+        if (/^\/app\/calendar\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
           document.documentElement.classList.add('needs-onboarding');
         }
       } catch (e) {}
@@ -67,7 +68,9 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
   <Nav />
   <script>
     import { initCompanionAccess } from '../lib/companion-access';
+    import { track } from '../lib/app/events';
     void initCompanionAccess();
+    track('app_open'); // once a day, signed in only (docs/pilot/ANALYTICS.md)
   </script>
   <script>
     // Shared cleaning progress for a signed-in household (does nothing while accounts are off or she has no family).

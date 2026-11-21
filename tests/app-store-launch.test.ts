@@ -36,7 +36,8 @@ describe('Family Meeting Club by invitation, in the app', () => {
 
   it('the app Club page shows the invitation line only in the app build', () => {
     const page = src('src/pages/app/club.astro');
-    expect(page).toMatch(/\{appShell && <p[^>]*data-club-invitation>\{CLUB_INVITATION\} \{FREE_FOR_EVERYONE\}<\/p>\}/);
+    // App: the invitation and what's free. Website: what's free and what the Club adds (no price here).
+    expect(page).toMatch(/\{appShell\s*\? <p[^>]*data-club-invitation>\{CLUB_INVITATION\} \{FREE_FOR_EVERYONE\}<\/p>\s*: <p[^>]*data-club-adds>\{FREE_FOR_EVERYONE\} \{CLUB_ADDS\}<\/p>\}/);
   });
 
   it('the app build turns checkout and the shop off', () => {

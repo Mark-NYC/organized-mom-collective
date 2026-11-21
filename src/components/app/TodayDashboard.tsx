@@ -21,6 +21,9 @@ import { routes } from '../../routes';
 import { monthPageName } from '../../data/club/month-pages';
 import { useShowsClub } from './TodayOverview';
 import { Avatar, Chevron, Progress, TileHead } from './ui';
+import { householdAccess } from '../../lib/household/api';
+import { appShellBuild } from '../../lib/native/platform';
+import { firstSteps, gettingStarted, nextStep, type FirstStep } from '../../lib/app/first-steps';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
@@ -38,6 +41,14 @@ export default function TodayDashboard() {
   const agreed = monthAgreements(cal.household, profile, monthOf(today));
   const showsClub = useShowsClub() && visibleFeatures().some((f) => f.id === 'club');
   const month = MONTHS[today.getMonth()];
+  const [shared, setShared] = useState(false);
+  useEffect(() => {
+    if (!cal.signedIn || isDemo()) return;
+    void householdAccess().then((a) => setShared((a?.adults.length ?? 1) > 1), () => setShared(false));
+  }, [cal.signedIn]);
+  const steps = firstSteps({ household: cal.household, signedIn: cal.signedIn, hasPlans: Object.keys(cal.state.events).length > 0, shared,
+    agreedCount: agreed?.people.length ?? 0, offerClub: !appShellBuild() && !showsClub });
+  const starting = !isDemo() && !(cal.signedIn && !cal.household && cal.status === 'syncing') && gettingStarted(steps);
 
   // Phones: one column in this order. Wide screens: plans and the week on the left, the reset and the month on the right.
   return (
@@ -45,6 +56,7 @@ export default function TodayDashboard() {
       {isDemo() && (
         <div className="family-note of-span-all" data-today-demo><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm">A made-up family, to show how Today looks. Nothing here is shared or synced. <a href="/app" className="underline">Leave the demo</a>.</p></div>
       )}
+      {starting && <StartHere steps={steps} household={Boolean(cal.household)} />}
       <div className="of-dash-col">
         <TodayPlans date={date} cal={cal} events={events} week={week} style={{ order: 1 }} />
         <MeetingWeek week={week} agreedRoute={agreed?.route} style={{ order: 3 }} />
@@ -54,6 +66,11 @@ export default function TodayDashboard() {
         {showsClub && <ClubMonth month={month} title={monthPageName(monthOf(today))} style={{ order: 4 }} />}
         {agreed && <EveryonesPart agreed={agreed} colors={cal.colors} month={month} style={{ order: 5 }} />}
       </div>
+      {cal.signedIn && !isDemo() && (
+        <p className="of-span-all text-center text-[0.85rem] text-warm-soft" style={{ order: 99 }} data-feedback-quiet>
+          Something confusing or not working? <a href="/app/feedback?from=/app" className="underline underline-offset-4">Tell us</a>
+        </p>
+      )}
     </div>
   );
 }
@@ -228,5 +245,35 @@ function ClubMonth({ month, title, style }: { month: string; title?: string; sty
       </div>
       <span className="of-tile-action mt-3">Open {cap(month)} <Chevron /></span>
     </a>
+  );
+}
+
+/**
+ * A new family's first screen: what the app is for in one line, and ONE next step (docs/pilot/PILOT_TESTING.md).
+ * Gone once the family has started (src/lib/app/first-steps.ts); the same steps stay listed on Family until then.
+ */
+function StartHere({ steps, household }: { steps: FirstStep[]; household: boolean }) {
+  const next = nextStep(steps);
+  if (!next) return null;
+  const own = steps.filter((s) => s.id !== 'club');
+  const done = own.filter((s) => s.done).length;
+  if (!household) {
+    return (
+      <section className="of-tile of-tile--month of-span-all" style={{ order: -1 }} aria-labelledby="start-here-h" data-start-here="household">
+        <p className="of-eyebrow">Start here · Free</p>
+        <h2 id="start-here-h" className="of-tile-title of-tile-title--lg">One shared plan for your family’s week.</h2>
+        <p className="of-tile-sub">A calendar everyone can see, a ten-minute daily cleaning reset, and a weekly Family Meeting where everyone takes a part, so it isn’t all on you.</p>
+        <a href={next.href} className="of-btn mt-5" data-start-next={next.id}>Set up your family</a>
+        <p className="mt-3 text-[0.85rem] text-warm-soft">About a minute: first names and ages. Kids don’t need accounts.</p>
+      </section>
+    );
+  }
+  return (
+    <section className="of-tile of-span-all" style={{ order: -1 }} aria-labelledby="start-here-h" data-start-here={next.id}>
+      <p className="of-eyebrow">Getting started · {done} of {own.length} done</p>
+      <h2 id="start-here-h" className="of-tile-title">{next.label}</h2>
+      <a href={next.href} className="of-btn mt-4" data-start-next={next.id}>{next.id === 'meeting' ? 'Open the Family Meeting' : next.id === 'week' ? 'Add a plan' : 'Invite them'}</a>
+      {next.id === 'adult' && <a href="/app/family-calendar" className="ml-4 text-[0.9rem] underline underline-offset-4" data-start-skip>Skip for now</a>}
+    </section>
   );
 }

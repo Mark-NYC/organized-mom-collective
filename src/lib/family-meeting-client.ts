@@ -6,6 +6,7 @@
  * agreements laid over it (src/lib/agreements/client.ts: offline-first, synced with the household).
  * Demo (?demo=1): the labeled sample family, in this tab only. Otherwise none.
  */
+import { track } from './app/events';
 import { useEffect, useState } from 'react';
 import { accountsEnabled, getSession } from './account';
 import { accountStore } from './club/store';
@@ -83,10 +84,11 @@ export function useFamily(scope: string | null) {
       if (sample) return setServer(await sample.saveAgreement({ ...d }));
       if (!scope) throw new Error('not_signed_in');
       ag.save(toRow(d));
+      if (!demo) track('agreement_made');
     },
     /** An agreement the household database already saved (a development decision): onto this phone's lists now. */
     adoptAgreement(row: AgreementRow) {
-      if (!demo) ag.adopt(row);
+      if (!demo) { ag.adopt(row); track('agreement_made'); }
     },
     async removeAgreement(id: string) {
       if (sample) return setServer(await sample.removeAgreement(id));

@@ -5,6 +5,7 @@
  * Stored under omc:calendar:v1 (mirrored to native storage in the app; never synced into account_saves, see
  * syncableKey in src/lib/account.ts: the calendar has its own table).
  */
+import { track } from '../app/events';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { accountRpc, accountsEnabled, getSession } from '../account';
 import { accountStore } from '../club/store';
@@ -196,7 +197,7 @@ export function useCalendar(): CalendarHook {
     colors: household ? memberColors(household) : {},
     // Stamped here so the week before the Family Meeting can say "new" or "changed" before it syncs (the server's
     // own time replaces it once saved).
-    save: (e) => change((s) => saveLocal(s, { ...e, updated_at: new Date().toISOString() })),
+    save: (e) => { if (!isDemo()) track('plan_added'); change((s) => saveLocal(s, { ...e, updated_at: new Date().toISOString() })); },
     remove: (id) => change((s) => deleteLocal(s, id)),
     skip: (id, date) => change((s) => skipOccurrence(s, id, date)),
     dismissConflicts: () => commit({ ...ref.current, conflicts: [] }),

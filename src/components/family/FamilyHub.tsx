@@ -16,6 +16,7 @@ import { useKeptClubMonths, useShowsClub } from '../app/TodayOverview';
 import { Avatar, Chevron, Icon, TileHead } from '../app/ui';
 import { appShellBuild } from '../../lib/native/platform';
 import { monthPage } from '../../data/club/month-pages';
+import { firstSteps, gettingStarted } from '../../lib/app/first-steps';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -37,16 +38,11 @@ export default function FamilyHub() {
   const shared = (access?.adults.length ?? 1) > 1;
   const Month = month[0].toUpperCase() + month.slice(1);
   // Getting started, in the owner's order: household, week, the other grown-up, the meeting, then the Club.
-  const steps = [
-    { id: 'household', done: Boolean(household), label: 'Set up your household', href: cal.signedIn ? '/app/family/setup' : '/app/sign-in?next=/app/family' },
-    { id: 'week', done: Object.keys(cal.state.events).length > 0, label: 'Put this week on the family calendar', href: '/app/family-calendar' },
-    { id: 'adult', done: shared, label: 'Invite the other grown-up (if there is one)', href: '/app/account#sharing-h' },
-    { id: 'meeting', done: agreed.length > 0, label: 'Hold your first ten-minute Family Meeting', href: '/app/family/meeting' },
+  const steps = firstSteps({ household, signedIn: cal.signedIn, hasPlans: Object.keys(cal.state.events).length > 0, shared, agreedCount: agreed.length,
     // Website only, and only while a new family is getting started: the one place a free family hears about the Club.
     // Never in the iPhone app (nothing is sold there), never as a card (owner decision 2026-11-17).
-    ...(appShellBuild() || showsClub ? [] : [{ id: 'club', done: false, label: 'Discover Family Meeting Club', href: '/club' }]),
-  ];
-  const showSteps = !isDemo() && steps.slice(0, 3).some((x) => !x.done);
+    offerClub: !appShellBuild() && !showsClub });
+  const showSteps = !isDemo() && gettingStarted(steps);
 
   return (
     <div className="of-grid of-grid--2 mt-6">
