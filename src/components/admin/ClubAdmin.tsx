@@ -15,6 +15,7 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/supabase-config';
 import { specLine, WELCOME_PRINT_SPECS } from '../../data/club/print-specs';
 import ClubAccessAdmin from './ClubAccessAdmin';
 import RiveraDemoAdmin from './RiveraDemoAdmin';
+import PilotAdmin from './PilotAdmin';
 
 const SUPABASE = SUPABASE_URL;
 const ANON = SUPABASE_ANON_KEY;
@@ -125,13 +126,14 @@ export default function ClubAdmin() {
   return <AdminGate>{(ctx) => <Club {...ctx} />}</AdminGate>;
 }
 
-type ClubTab = 'members' | 'access' | 'fulfillment' | 'kits' | 'setup';
+type ClubTab = 'members' | 'access' | 'fulfillment' | 'kits' | 'setup' | 'pilot';
 const clubTabs: { id: ClubTab; label: string; note: string }[] = [
   { id: 'fulfillment', label: 'Fulfillment', note: 'Print and mail' },
   { id: 'members', label: 'Members', note: 'Households and billing' },
   { id: 'access', label: 'Club access', note: 'Complimentary, by invitation' },
   { id: 'kits', label: 'Monthly resources', note: 'Kit publishing' },
   { id: 'setup', label: 'Setup & emails', note: 'Configuration' },
+  { id: 'pilot', label: 'Pilot', note: 'Funnel and feedback' },
 ];
 const clubTabFromUrl = (): ClubTab => {
   const value = new URLSearchParams(window.location.search).get('tab');
@@ -153,7 +155,7 @@ function Club(ctx: AdminContext) {
   };
   return (
     <div>
-      <nav className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-5" aria-label="Club admin">
+      <nav className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-6" aria-label="Club admin">
         {clubTabs.map((item) => (
           <button key={item.id} type="button" onClick={() => choose(item.id)} aria-current={tab === item.id ? 'page' : undefined}
             className={`min-h-16 rounded-[8px] border px-4 py-3 text-left transition-colors ${tab === item.id ? 'border-[#8ea58a] bg-[#f1f4ec] shadow-[inset_0_3px_0_#718d70]' : 'border-rule bg-white hover:bg-band'}`}>
@@ -165,6 +167,7 @@ function Club(ctx: AdminContext) {
       <div className="mt-6">
         {tab === 'members' && <Members {...ctx} />}
         {tab === 'access' && <><ClubAccessAdmin {...ctx} /><RiveraDemoAdmin {...ctx} /></>}
+        {tab === 'pilot' && <PilotAdmin {...ctx} />}
         {tab === 'fulfillment' && <Fulfillment {...ctx} />}
         {tab === 'kits' && <Kits {...ctx} />}
         {tab === 'setup' && <Setup {...ctx} />}

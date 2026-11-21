@@ -32,7 +32,12 @@ export default function TodayApp({ variant }: { variant?: 'app' } = {}) {
   const [forceSetup] = useState(() =>
     typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('setup') === '1'
   );
-  const [onboarded, setOnboardedState] = useState(() => forceSetup ? false : isOnboarded());
+  // The paper-calendar walkthrough is for the printed calendar's QR pages. In Organized Family's Cleaning tab a new mom
+  // goes straight to today's checklist (her family is already set up in the app); ?setup=1 can still replay it.
+  // The walkthrough is for the printed calendar: its QR page (/app/calendar) keeps it, Organized Family's Cleaning tab
+  // opens straight on today's checklist (docs/pilot/PILOT_TESTING.md).
+  const skipsWalkthrough = variant === 'app' && !/^\/app\/calendar\/?$/.test(location.pathname);
+  const [onboarded, setOnboardedState] = useState(() => forceSetup ? false : skipsWalkthrough || isOnboarded());
   // iPhone Home Screen app, first launch: it has its own empty storage, so first pick up
   // the progress Safari left behind (see lib/install.ts) before deciding to show onboarding.
   const [ready, setReady] = useState(() => forceSetup || onboarded || !isStandalone());

@@ -1,3 +1,4 @@
+import { track } from '../lib/app/events';
 import { useEffect, useState } from 'react';
 import { monthColors } from '../theme';
 import { clubAccountsEnabled } from '../data/club/config';
@@ -116,6 +117,7 @@ export default function AppKitLibrary({ view = 'home' }: { view?: 'home' | 'mont
   useEffect(() => {
     const intro = document.getElementById('club-preview-intro');
     if (intro && view === 'home') intro.hidden = Boolean(me);
+    if (view === 'home' && !me) track('club_preview_viewed');
   }, [me]);
 
   if (view === 'home' && me && home) return <ClubHome me={me} {...home} />;
