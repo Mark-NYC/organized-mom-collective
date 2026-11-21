@@ -32,6 +32,9 @@ const matches: [RegExp, string][] = [
   [/\b(clean|vacuum|sweep|mop)\b.*\bfloor\b/i,'clean-floor'],
   [/\b(feed)\b.*\b(pet|dog|cat)\b/i,'feed-pets'],
   [/\b(snack)\b/i,'eat-a-snack'],
+  [/\b(groceries|grocery list)\b/i,'grocery-shopping'],
+  [/\b(family menu|dinner team|meal team)\b/i,'set-table'],
+  [/\b(week of|weekly planning)\b/i,'plan-the-week'],
 ];
 export function colorIconFor(text: string, slug = ''): string | null {
   const exact = approved.has(slug) ? slug : '';
@@ -93,6 +96,9 @@ export function initIllustrationChoice({ host, controls, key, entries, originalL
     try { localStorage.setItem(key, choice); } catch {}
     refresh();
   }));
+  host.addEventListener('input', (event) => {
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) refresh();
+  });
   refresh();
   return refresh;
 }
