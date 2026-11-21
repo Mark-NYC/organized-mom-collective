@@ -1,0 +1,20 @@
+---
+interface Props {
+  class?: string;
+  caption?: string;
+}
+const { class: className = '', caption = 'Mark & Meg · Founders, Organized Mom Collective' } = Astro.props;
+---
+
+<figure class:list={['inline-flex flex-col items-start gap-1.5', className]}>
+  <img
+    src="/images/site/mark-and-meg-signature.png"
+    alt="Mark and Meg"
+    width="180"
+    height="72"
+    loading="lazy"
+    decoding="async"
+    class="block h-auto w-[150px] max-w-full object-contain sm:w-[180px]"
+  />
+  {caption && <figcaption class="text-[0.75rem] leading-relaxed text-warm-soft">{caption}</figcaption>}
+</figure>
