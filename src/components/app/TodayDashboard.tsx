@@ -9,7 +9,7 @@ import { useToday } from '../../lib/hooks';
 import { isDemo, useCalendar } from '../../lib/calendar/client';
 import { localToday, occurrences, timeLabel, type CalendarEvent } from '../../lib/calendar/recurrence';
 import { useExternalCalendars } from '../../lib/calendar/feeds';
-import { monthAgreements, monthOf, weekAhead } from '../../lib/family-meeting-support';
+import { agreementsByPerson, monthAgreements, monthOf, weekAhead } from '../../lib/family-meeting-support';
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import { planFor } from '../../lib/schedule';
 import { dailyEssentials, weekend } from '../../data/cleaning';
@@ -36,13 +36,14 @@ export default function TodayDashboard() {
   const events = [...Object.values(cal.state.events), ...ext.events];
   const week = weekAhead(events, date, today);
   const agreed = monthAgreements(cal.household, profile, monthOf(today));
+  const hasAnyAgreement = agreementsByPerson(cal.household, profile).some((p) => p.parts.length > 0);
   const showsClub = useShowsClub() && visibleFeatures().some((f) => f.id === 'club');
   const month = MONTHS[today.getMonth()];
 
   // Phones: one column in this order. Wide screens: plans and the week on the left, the reset and the month on the right.
   return (
     <div className="of-dash">
-      {!isDemo() && cal.signedIn && cal.household && !agreed?.people.length && (
+      {!isDemo() && cal.signedIn && cal.household && !hasAnyAgreement && (
         <section className="of-tile of-span-all" aria-labelledby="today-first-win-h" data-today-first-win>
           <p className="of-eyebrow">One small win</p>
           <h2 id="today-first-win-h" className="of-tile-title mt-2">Let someone else own one thing tomorrow.</h2>
