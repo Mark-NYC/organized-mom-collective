@@ -1,12 +1,26 @@
 -- Rolls back 20261205_calendar_feeds in one transaction (docs/calendar/ROLLOUT.md → Rollback). Rehearsed as part of
 -- scripts/rehearse-household-rollback.sh (the same statements head supabase/rollout/household/rollback.sql).
 --
--- NEVER run without the owner's go. It REMOVES every calendar subscription, its encrypted link (Vault) and its imported events (the source calendars
+-- NEVER run without the owner's go. It REMOVES every calendar subscription (and, if 20261211 is applied, every
+-- responsibility on imported events), its encrypted link (Vault) and its imported events (the source calendars
 -- are untouched; families would have to add their links again). It touches nothing else: the family calendar,
 -- households, members, Club and billing rows stay exactly as they are.
 -- Unschedule the refresh first (step 1), or the job keeps calling a function that then fails harmlessly every run.
 begin;
 do $$ begin if exists (select 1 from pg_extension where extname = 'pg_cron') then perform cron.unschedule('omc-calendar-feeds-refresh'); end if; exception when others then null; end $$;
+-- What depends on it first: responsibilities on imported events (20261211, if applied; alone:
+-- supabase/rollout/event-tasks/rollback.sql). They go too.
+drop function if exists public.calendar_event_task_delete(uuid);
+drop function if exists public.calendar_event_task_done(uuid, boolean);
+drop function if exists public.calendar_event_task_save(jsonb);
+drop function if exists public.calendar_event_tasks(date, date);
+drop function if exists public.calendar_event_tasks_guard(uuid);
+drop function if exists public.calendar_event_task_for(uuid, uuid);
+drop function if exists public.calendar_event_tasks_events(uuid);
+do $$ begin if to_regclass('public.calendar_event_tasks') is not null then drop function if exists public.calendar_event_task_json(public.calendar_event_tasks); end if; end $$;
+drop table if exists public.calendar_event_tasks;
+drop function if exists public.calendar_event_tasks_enabled(uuid);
+do $$ begin if to_regclass('supabase_migrations.schema_migrations') is not null then delete from supabase_migrations.schema_migrations where version = '20261211000000'; end if; end $$;
 -- The encrypted links first (Vault), then everything the migration created.
 do $$ begin if to_regclass('vault.secrets') is not null then delete from vault.secrets where name like 'calendar\_feed:%'; end if; end $$;
 drop trigger if exists calendar_feed_forget_link on public.calendar_feeds;

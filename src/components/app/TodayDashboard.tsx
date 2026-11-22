@@ -9,6 +9,7 @@ import { useToday } from '../../lib/hooks';
 import { isDemo, useCalendar } from '../../lib/calendar/client';
 import { localToday, occurrences, timeLabel, type CalendarEvent } from '../../lib/calendar/recurrence';
 import { useExternalCalendars } from '../../lib/calendar/feeds';
+import { upcomingTasks, useEventTasks, type EventTasks, type TodayTask } from '../../lib/calendar/event-tasks';
 import { monthAgreements, monthOf, weekAhead } from '../../lib/family-meeting-support';
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import { planFor } from '../../lib/schedule';
@@ -37,6 +38,9 @@ export default function TodayDashboard() {
   // Her subscribed calendars too (private ones are hers to see); read-only.
   const ext = useExternalCalendars(cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null, 'mine');
   const events = [...Object.values(cal.state.events), ...ext.events];
+  // Who does what for imported events, the next 7 days (staged rollout: hidden until it's on for the household).
+  const eventTasks = useEventTasks(cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null);
+  const doing = eventTasks.available ? upcomingTasks(eventTasks.tasks, ext.events, date) : [];
   const week = weekAhead(events, date, today);
   const agreed = monthAgreements(cal.household, profile, monthOf(today));
   const showsClub = useShowsClub() && visibleFeatures().some((f) => f.id === 'club');
@@ -59,6 +63,7 @@ export default function TodayDashboard() {
       {starting && <StartHere steps={steps} household={Boolean(cal.household)} />}
       <div className="of-dash-col">
         <TodayPlans date={date} cal={cal} events={events} week={week} style={{ order: 1 }} />
+        {doing.length > 0 && <WhoDoesWhat items={doing} today={date} cal={cal} tasks={eventTasks} style={{ order: 1 }} />}
         <MeetingWeek week={week} agreedRoute={agreed?.route} style={{ order: 3 }} />
       </div>
       <div className="of-dash-col">
@@ -119,6 +124,49 @@ function TodayPlans({ date, cal, events, week, style }: { date: string; cal: Cal
           <a href={routes.familyCalendar} className="of-btn of-btn--soft mt-4">Add a plan</a>
         </div>
       )}
+    </section>
+  );
+}
+
+/**
+ * Responsibilities on imported events for the next 7 days (docs/calendar/EVENT_RESPONSIBILITIES.md): each with its
+ * person's color, the event and its day; checked off here or in the event, the same everywhere. One whose event left
+ * the calendar says so and can be removed.
+ */
+function WhoDoesWhat({ items, today, cal, tasks, style }: { items: TodayTask[]; today: string; cal: Cal; tasks: EventTasks; style: Style }) {
+  const [error, setError] = useState<string | null>(null);
+  const name = (id: string | null) => (id ? cal.household?.members.find((m) => m.id === id && !m.archived)?.firstName : undefined);
+  const open = items.filter((x) => !x.task.done).length;
+  const when = (x: TodayTask) => (x.date === today ? 'Today' : dayName(x.date)) + (x.event && x.event.start_time ? ` ${timeLabel(x.event)}` : '');
+  return (
+    <section className="of-tile" style={{ ['--of-order' as string]: style.order }} aria-labelledby="who-does-what-h" data-who-does-what>
+      <TileHead
+        eyebrow={<span id="who-does-what-h">Who’s doing what</span>}
+        title={open ? `${open === 1 ? 'One thing' : `${open} things`} to do this week` : 'All done this week'}
+        action={<a href={routes.familyCalendar} className="of-tile-action">Calendar <Chevron /></a>}
+      />
+      <ul className="of-rows">
+        {items.map((x) => {
+          const who = name(x.task.member_id);
+          return (
+            <li key={x.task.id} className="of-row !gap-2" data-today-task={x.task.title} data-done={x.task.done ? '' : undefined}>
+              <button type="button" role="checkbox" aria-checked={x.task.done} aria-label={`${x.task.title}${who ? `, ${who}` : ''}`}
+                onClick={async () => setError(await tasks.toggle(x.task.id))} className="grid size-11 shrink-0 place-items-center" data-task-done>
+                <span aria-hidden="true" className={`grid size-6 place-items-center rounded-[6px] border-2 text-[0.85rem] font-bold ${x.task.done ? 'border-warm-ink bg-warm-ink text-white' : 'border-[var(--of-rule-strong)] bg-white'}`}>{x.task.done ? '✓' : ''}</span>
+              </button>
+              <span aria-hidden="true" className="of-swatch" style={{ background: who ? cal.colors[x.task.member_id!]?.hex ?? '#8fa686' : '#d8d2c8' }} />
+              <span className="min-w-0 flex-1">
+                <span className={`of-row-title block ${x.task.done ? 'text-warm-soft line-through' : ''}`}>{x.task.title}</span>
+                <span className="of-row-meta">
+                  {[who ?? 'Anyone', x.event ? x.event.title : x.task.event_title, when(x)].join(' · ')}
+                  {!x.event && <span className="block text-[#a33]" data-task-orphan>No longer on the calendar · <button type="button" className="underline underline-offset-2" onClick={async () => setError(await tasks.remove(x.task.id))} data-task-orphan-remove>Remove</button></span>}
+                </span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      {error && <p role="alert" className="mt-2 text-[0.88rem] text-[#a33]">{error}</p>}
     </section>
   );
 }

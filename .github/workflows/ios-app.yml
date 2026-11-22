@@ -130,6 +130,14 @@ jobs:
           SKIP_MIGRATIONS: '^20261130|^2026120[234]|^20261209'
           ONLY_TESTS: app-events
         run: bash scripts/test-household-sql.sh
+      - name: Responsibilities on imported calendar events, on production's migration set (without 20261130, 20261202-04 and 20261210)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+          SKIP_MIGRATIONS: '^20261130|^2026120[234]|^20261210'
+          ONLY_TESTS: calendar-event-tasks
+        run: bash scripts/test-household-sql.sh
 
   ios-simulator:
     # Both simulator tests: the launch test, then the family flow against the isolated backend.
@@ -362,6 +370,10 @@ jobs:
         run: |
           bash scripts/e2e/family-db.sh
           node scripts/e2e/first-session-e2e.mjs dist app-www e2e-first-session
+      - name: Responsibilities on imported calendar events (Rivera demo, soccer/field trip/game night, refresh, reschedule, cancel, reconnect, two phones), on a fresh test database
+        run: |
+          bash scripts/e2e/family-db.sh
+          node scripts/e2e/event-tasks-e2e.mjs app-www e2e-event-tasks
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -374,6 +386,7 @@ jobs:
             e2e-club-access/
             e2e-rivera/
             e2e-first-session/
+            e2e-event-tasks/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:

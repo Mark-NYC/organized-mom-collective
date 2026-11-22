@@ -39,7 +39,9 @@ export interface CalendarEvent {
   deleted?: boolean;
   updated_at?: string;
   /** Imported from a calendar subscription (src/lib/calendar/feeds.ts): read-only, never synced back. */
-  external?: { feed_id: string; name: string; visibility: 'private' | 'household'; mine: boolean; tentative: boolean };
+  external?: { feed_id: string; name: string; visibility: 'private' | 'household'; mine: boolean; tentative: boolean;
+    /** The occurrence's identity in its source calendar (UID + original start): responsibilities attach to it. */
+    uid?: string; instance_key?: string };
 }
 
 export interface Occurrence {

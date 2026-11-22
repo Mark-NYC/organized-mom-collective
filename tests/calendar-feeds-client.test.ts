@@ -11,7 +11,7 @@ describe('imported calendar events', () => {
   it('timed events land in the device zone, in the chosen person’s color, read-only', () => {
     const [e] = toCalendarEvents([ev({ starts_at: '2026-11-18T21:00:00Z', ends_at: '2026-11-18T22:00:00Z' })], [feed], 'America/New_York');
     expect(e).toMatchObject({ starts_on: '2026-11-18', start_time: '16:00', end_time: '17:00', member_ids: ['maya'], recurrence: null });
-    expect(e.external).toEqual({ feed_id: 'f1', name: 'Lincoln Elementary', visibility: 'household', mine: true, tentative: false });
+    expect(e.external).toEqual({ feed_id: 'f1', name: 'Lincoln Elementary', visibility: 'household', mine: true, tentative: false, uid: 'u', instance_key: 'k' });
     // Late evening UTC is the next day in Tokyo.
     expect(toCalendarEvents([ev({ starts_at: '2026-11-18T21:00:00Z', ends_at: '2026-11-18T22:00:00Z' })], [feed], 'Asia/Tokyo')[0].starts_on).toBe('2026-11-19');
   });
