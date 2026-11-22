@@ -11,6 +11,7 @@ import type { MarkerColor } from '../../data/club/family-colors';
 import { GOOGLE_RESULT, feedsApi, type Feed, type FeedVisibility } from '../../lib/calendar/feeds';
 import { GooglePicker, GoogleSection, useGoogleAccounts, useGoogleReturn } from './GoogleCalendars';
 import { timeLabel, type CalendarEvent } from '../../lib/calendar/recurrence';
+import { MAX_TASK_TITLE, MAX_TASKS_PER_EVENT, occurrenceOf, tasksFor, type EventTasks } from '../../lib/calendar/event-tasks';
 
 const zone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York'; } catch { return 'America/New_York'; } };
 const ago = (iso: string | null) => {
@@ -26,6 +27,12 @@ const ERRORS: Record<string, string> = {
 };
 
 function Sheet({ title, onClose, children, data }: { title: string; onClose: () => void; children: React.ReactNode; data: string }) {
+  // Escape closes it (keyboards, iPad); the Done button stays the visible way out.
+  useEffect(() => {
+    const key = (ev: KeyboardEvent) => { if (ev.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', key);
+    return () => document.removeEventListener('keydown', key);
+  }, [onClose]);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 sm:items-center" role="dialog" aria-modal="true" aria-labelledby={`${data}-h`} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="family-brand max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-[16px] bg-[var(--of-bg)] px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-xl sm:rounded-[14px]" {...{ [`data-${data}`]: '' }}>
@@ -182,18 +189,98 @@ export function CalendarSources({ feeds, people, colors, onClose, onChanged, goo
 }
 
 /** An imported event: read-only, with where it came from. */
-export function ExternalEventSheet({ e, date, household, onClose }: { e: CalendarEvent; date: string; household: Household | null; onClose: () => void }) {
+export function ExternalEventSheet({ e, date, household, colors = {}, tasks, onClose }: {
+  e: CalendarEvent; date: string; household: Household | null; colors?: Record<string, MarkerColor>; tasks?: EventTasks; onClose: () => void;
+}) {
   const ext = e.external!;
   const whose = e.member_ids[0] ? household?.members.find((m) => m.id === e.member_ids[0])?.firstName : null;
   const day = new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
   return (
     <Sheet title={e.title} onClose={onClose} data="external-event">
-      <p className="mt-2 text-[0.95rem]">{day} · {timeLabel(e)}{ext.tentative ? ' · tentative' : ''}</p>
-      {e.location && <p className="mt-1 text-[0.95rem] text-warm-soft">{e.location}</p>}
-      <p className="of-tile mt-4 !p-4 text-[0.9rem]">
-        From <strong>{ext.name}</strong>{whose ? ` (${whose}’s calendar)` : ''} · {ext.visibility === 'household' ? 'shared with your household' : 'only you see it'}.
-        It’s read-only here: change it in the original calendar and it updates on its own.
+      <p className="mt-2 text-[0.95rem]" data-event-when>{day} · {timeLabel(e)}{ext.tentative ? ' · tentative' : ''}</p>
+      {e.location && <p className="mt-1 text-[0.95rem] text-warm-soft" data-event-location>{e.location}</p>}
+      <p className="mt-1 text-[0.85rem] text-warm-soft" data-event-from>
+        From <strong className="font-semibold text-warm-ink">{ext.name}</strong>{whose ? ` · ${whose}’s calendar` : ''} · {ext.visibility === 'household' ? 'shared with your household' : 'only you see it'}
       </p>
+      {tasks?.available && occurrenceOf(e)
+        ? <EventResponsibilities e={e} tasks={tasks} people={(household?.members ?? []).filter((m) => !m.archived)} colors={colors} />
+        : null}
+      <p className="mt-5 text-[0.8rem] text-warm-soft">It’s read-only here: change it in {ext.name} and it updates on its own.</p>
     </Sheet>
+  );
+}
+
+/** Who does what for one imported occurrence: check off, add, edit, reassign, remove. The event itself never changes. */
+function EventResponsibilities({ e, tasks, people, colors }: { e: CalendarEvent; tasks: EventTasks; people: Household['members']; colors: Record<string, MarkerColor> }) {
+  const list = tasksFor(tasks.tasks, e);
+  const [form, setForm] = useState<{ id?: string; title: string; member: string | null } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const name = (id: string | null) => (id ? people.find((m) => m.id === id)?.firstName : undefined);
+  const run = async (p: Promise<string | null>) => { setSaving(true); const err = await p; setSaving(false); setError(err); return err; };
+  const submit = async (ev: React.FormEvent) => {
+    ev.preventDefault();
+    if (!form || saving) return;
+    if (!(await run(tasks.save({ id: form.id, event: e, title: form.title, member_id: form.member })))) setForm(null);
+  };
+  const done = list.filter((t) => t.done).length;
+  return (
+    <section className="mt-5 border-t border-[var(--of-rule)] pt-4" aria-labelledby="event-tasks-h" data-event-tasks>
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 id="event-tasks-h" className="label">Who’s doing what</h3>
+        {list.length > 0 && <span className="text-[0.8rem] text-warm-soft" data-event-tasks-count>{done} of {list.length} done</span>}
+      </div>
+      {list.length > 0 && (
+        <ul className="mt-2 divide-y divide-[var(--of-rule)]">
+          {list.map((t) => {
+            const who = name(t.member_id);
+            return (
+              <li key={t.id} className="flex items-center gap-2 py-1" data-event-task={t.title} data-done={t.done ? '' : undefined}>
+                <button type="button" role="checkbox" aria-checked={t.done} aria-label={`${t.title}${who ? `, ${who}` : ''}`} onClick={() => void run(tasks.toggle(t.id))}
+                  className="grid size-11 shrink-0 place-items-center" data-task-done>
+                  <span aria-hidden="true" className={`grid size-6 place-items-center rounded-[6px] border-2 text-[0.85rem] font-bold ${t.done ? 'border-warm-ink bg-warm-ink text-white' : 'border-[var(--of-rule-strong)] bg-white'}`}>{t.done ? '✓' : ''}</span>
+                </button>
+                <button type="button" className="min-h-11 min-w-0 flex-1 text-left" onClick={() => { setError(null); setForm({ id: t.id, title: t.title, member: t.member_id }); }} aria-label={`Edit ${t.title}`} data-task-edit>
+                  <span className={`block text-[0.98rem] ${t.done ? 'text-warm-soft line-through' : 'text-warm-ink'}`}>{t.title}</span>
+                  <span className="flex items-center gap-1.5 text-[0.82rem] text-warm-soft" data-task-who>
+                    <span aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ background: who ? colors[t.member_id!]?.hex ?? '#8fa686' : 'transparent', border: who ? undefined : '1px solid #b9b2a8' }} />
+                    {who ?? 'Anyone'}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {error && <p role="alert" className="mt-2 text-[0.88rem] text-[#a33]" data-task-error>{error}</p>}
+      {form ? (
+        <form onSubmit={submit} className="mt-3" data-task-form>
+          <label className="block"><span className="label">{form.id ? 'Responsibility' : 'New responsibility'}</span>
+            <input autoFocus className="cal-input" value={form.title} maxLength={MAX_TASK_TITLE} placeholder="Pack soccer bag" enterKeyHint="done"
+              onChange={(ev) => setForm({ ...form, title: ev.target.value })} data-task-title />
+          </label>
+          <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Who’s doing it">
+            {[...people.map((m) => ({ id: m.id as string | null, label: m.firstName })), { id: null, label: 'Anyone' }].map((p) => (
+              <button key={p.id ?? 'anyone'} type="button" role="radio" aria-checked={form.member === p.id} onClick={() => setForm({ ...form, member: p.id })} data-task-member={p.label}
+                className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-sm ${form.member === p.id ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white'}`}>
+                {p.id && <span aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ background: colors[p.id]?.hex }} />}{p.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <button type="submit" className="of-btn" disabled={saving} data-task-save>{saving ? 'Saving…' : 'Save'}</button>
+            <button type="button" className="min-h-11 px-2 text-sm text-warm-soft underline underline-offset-4" onClick={() => { setForm(null); setError(null); }}>Cancel</button>
+            {form.id && (
+              <button type="button" className="ml-auto min-h-11 px-2 text-sm text-[#a33] underline underline-offset-4" data-task-remove
+                onClick={async () => { if (!(await run(tasks.remove(form.id!)))) setForm(null); }}>Remove</button>
+            )}
+          </div>
+        </form>
+      ) : list.length < MAX_TASKS_PER_EVENT && (
+        <button type="button" className="of-btn of-btn--soft mt-3" onClick={() => { setError(null); setForm({ title: '', member: null }); }} data-task-add>
+          {list.length ? 'Add another' : 'Add a responsibility'}
+        </button>
+      )}
+    </section>
   );
 }

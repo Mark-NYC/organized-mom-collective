@@ -102,7 +102,7 @@ export function toCalendarEvents(events: FeedEvent[], feeds: Feed[], tz = zone()
     const base = {
       id: `ext:${e.feed_id}:${e.uid}:${e.instance_key}`, title: e.title, location: e.location, notes: null, timezone: tz,
       recurrence: null, skip_dates: [], member_ids: f.member_id ? [f.member_id] : [], owner_member_id: null, revision: 0,
-      external: { feed_id: f.id, name: f.name, visibility: f.visibility, mine: f.mine, tentative: e.status === 'tentative' },
+      external: { feed_id: f.id, name: f.name, visibility: f.visibility, mine: f.mine, tentative: e.status === 'tentative', uid: e.uid, instance_key: e.instance_key },
     };
     if (e.all_day && e.start_date) return [{ ...base, starts_on: e.start_date, ends_on: e.end_date && e.end_date !== e.start_date ? e.end_date : null, start_time: null, end_time: null }];
     if (!e.starts_at || !e.ends_at) return [];

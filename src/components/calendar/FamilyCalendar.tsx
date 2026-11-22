@@ -18,6 +18,7 @@ import { agreementsByPerson, changeOf, type Change } from '../../lib/family-meet
 import { useFamilyProfile } from '../../lib/family-meeting-client';
 import AgreedParts from '../family/AgreedParts';
 import { useExternalCalendars } from '../../lib/calendar/feeds';
+import { doneLabel, tasksFor, useEventTasks } from '../../lib/calendar/event-tasks';
 import { CalendarSources, ExternalEventSheet } from './CalendarSources';
 import { tint } from '../app/ui';
 
@@ -65,6 +66,8 @@ export default function FamilyCalendar() {
   }, []);
   // Subscribed calendars (school, sports, work): read-only, beside the family's own plans. Hidden until set up.
   const ext = useExternalCalendars(cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null, 'mine');
+  // Who does what for imported events (staged rollout; nothing shows until it's on for the household).
+  const tasks = useEventTasks(cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null);
   const own = useMemo(() => Object.values(cal.state.events), [cal.state.events]);
   const events = useMemo(() => [...own, ...ext.events], [own, ext.events]);
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i));
@@ -84,7 +87,8 @@ export default function FamilyCalendar() {
   });
   const add = (date: string) => setEditing({ event: blank(date), date, isNew: true });
   const open = (o: Occurrence) => (o.event.external ? setViewing(o) : setEditing({ event: cal.state.events[o.event.id], date: o.date, isNew: false }));
-  const row = (o: Occurrence) => <EventRow key={`${o.event.id}-${o.date}`} o={o} change={o.event.external ? undefined : changeOf(o.event, now)} colors={cal.colors} household={cal.household} onOpen={() => open(o)} />;
+  const row = (o: Occurrence) => <EventRow key={`${o.event.id}-${o.date}`} o={o} change={o.event.external ? undefined : changeOf(o.event, now)} colors={cal.colors} household={cal.household}
+    tasksLabel={o.event.external && tasks.available ? doneLabel(tasksFor(tasks.tasks, o.event)) : null} onOpen={() => open(o)} />;
 
   const title = view === 'week'
     ? `${fmt(days[0], { month: 'short', day: 'numeric' })} – ${fmt(days[6], { month: days[0].slice(5, 7) === days[6].slice(5, 7) ? undefined : 'short', day: 'numeric' })}`
@@ -219,7 +223,7 @@ export default function FamilyCalendar() {
           }}
         />
       )}
-      {viewing && <ExternalEventSheet e={viewing.event} date={viewing.date} household={cal.household} onClose={() => setViewing(null)} />}
+      {viewing && <ExternalEventSheet e={viewing.event} date={viewing.date} household={cal.household} colors={cal.colors} tasks={tasks} onClose={() => setViewing(null)} />}
       {sources && <CalendarSources feeds={ext.feeds} people={people} colors={cal.colors} onClose={() => { setSources(false); setGoogleReturn(null); }} onChanged={ext.reload} googleReturn={googleReturn} />}
       <style>{`
         .cal-nav{display:inline-flex;min-width:44px;min-height:44px;align-items:center;justify-content:center;border:1px solid var(--of-rule);border-radius:9px;background:var(--of-surface);font-size:1.3rem;color:var(--of-ink)}
@@ -316,7 +320,7 @@ function StatusLine({ status, signedIn, unsaved, waiting }: { status: SyncStatus
   );
 }
 
-function EventRow({ o, change, colors, household, onOpen }: { o: Occurrence; change?: Change; colors: Record<string, MarkerColor>; household: Household | null; onOpen: () => void }) {
+function EventRow({ o, change, colors, household, tasksLabel, onOpen }: { o: Occurrence; change?: Change; colors: Record<string, MarkerColor>; household: Household | null; tasksLabel?: string | null; onOpen: () => void }) {
   const e = o.event;
   const name = (id: string) => household?.members.find((m) => m.id === id)?.firstName;
   const who = e.member_ids.map((id) => ({ id, name: name(id), color: colors[id] })).filter((p) => p.name);
@@ -336,6 +340,7 @@ function EventRow({ o, change, colors, household, onOpen }: { o: Occurrence; cha
               {owner && <span data-event-owner>· {owner} handles it</span>}
             </span>
           )}
+          {tasksLabel && <span className="mt-1 block text-[0.8rem] text-warm-soft" data-event-tasks-label>{tasksLabel}</span>}
         </span>
       </button>
     </li>

@@ -9,6 +9,9 @@ OAuth is not built yet; it needs the owner's Google Cloud credentials first (see
 Until the migration and function are live, the app checks for the feed functions, doesn't find them, and hides the
 whole feature. The production calendar behaves exactly as before.
 
+**Next layer:** who does what for an imported event (pack the bag, drive, sign the slip), kept apart from the imported
+events and never written back: [EVENT_RESPONSIBILITIES.md](EVENT_RESPONSIBILITIES.md) (migration 20261211, own rollout flag).
+
 ## 1. Audit: the calendar as it was (main @ 609d582)
 
 | Area | What exists |
