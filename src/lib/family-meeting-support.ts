@@ -32,7 +32,11 @@ export interface WeekItem {
   change?: Change;
   /** From a subscribed calendar (its name): read-only. */
   source?: string;
+  /** Where the event lives, so the family can highlight it as a priority (a link, never a copy). */
+  ref: EventRef;
 }
+/** A family event on a date, or an imported occurrence (UID + occurrence key). */
+export type EventRef = { source: 'family'; event_uid: string; instance_key: string } | { source: 'imported'; event_uid: string; instance_key: string };
 export interface WeekDay { date: string; label: string; items: WeekItem[] }
 export interface WeekAhead {
   from: string;
@@ -94,6 +98,9 @@ export function weekAhead(events: CalendarEvent[], today: string, now = new Date
       title: e.title, memberIds: e.member_ids, ownerId: e.owner_member_id ?? null,
       ...(change ? { change } : {}),
       ...(e.external ? { source: e.external.name } : {}),
+      ref: e.external?.uid && e.external.instance_key
+        ? { source: 'imported', event_uid: e.external.uid, instance_key: e.external.instance_key }
+        : { source: 'family', event_uid: e.id, instance_key: o.date },
     });
   }
   return { from, to, days, count: occ.length, changes: [...changes.values()], unhandled: unhandled.size };

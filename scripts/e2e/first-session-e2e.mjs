@@ -169,7 +169,7 @@ for (const p of PERSONAS) {
   await visit('/app/family/meeting', 'meeting');
   for (let i = 1; i < 4; i++) { await page.click(`[data-meeting-step="${i}"]`); await settle(page, 400); }
   check(`${p.id} meeting: all four parts open`, (await page.getAttribute('[data-meeting-part]', 'data-meeting-part')) === 'Let’s Practice');
-  await page.click('a:has-text("Finish meeting")'); await settle(page, 1500);
+  await page.click('[data-meeting-finish]'); await settle(page, 1500);
 
   // 9. Club: what it adds, no pressure
   l = await visit('/app/club', 'club');

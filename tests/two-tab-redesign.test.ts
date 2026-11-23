@@ -101,7 +101,9 @@ describe('Family Meeting landing', () => {
   it('one prominent Start; Continue only from recorded progress; Finish records it and returns to Today', () => {
     expect(m).toMatch(/>Start Our Family Meeting<\/button>/);
     expect(m).toMatch(/\{state === 'in-progress' \? \(/);
-    expect(m).toMatch(/href="\/app" onClick=\{\(\) => \{ track\('meeting_completed'\); setProgress\(recordFinished\(scope\)\); \}\}/);
+    // Finish records it, then shows "We have a plan." (the family plan), with a way to Today.
+    expect(m).toMatch(/onClick=\{\(\) => \{ track\('meeting_completed'\); setProgress\(recordFinished\(scope\)\); setPlanDone\(true\);/);
+    expect(src('src/components/ourweek/MeetingPlan.tsx')).toMatch(/href="\/app" className="of-btn" data-plan-today/);
   });
   it('the family\'s own focus is called theirs; a Club month is labeled as the month\'s, never as agreed', () => {
     expect(m).toMatch(/data-meeting-landing-focus="family"/);
@@ -122,7 +124,7 @@ describe('Family Meeting landing', () => {
 describe('Today: real data, and MAWL invisible', () => {
   const t = src('src/components/app/TodayDashboard.tsx');
   it('agreements have no invented completion: checkboxes only on trackable event responsibilities', () => {
-    const agreedList = t.slice(t.indexOf('data-agreed-parts'), t.indexOf('Agreed together in your Family Meeting.'));
+    const agreedList = t.slice(t.indexOf('data-agreed-parts'), t.indexOf('data-all-parts'));
     expect(agreedList).not.toMatch(/role="checkbox"|data-task-done/);
     const trackable = t.slice(t.indexOf('data-today-trackable'), t.indexOf('data-agreed-parts'));
     expect(trackable).toMatch(/role="checkbox" aria-checked=\{x\.task\.done\}/);

@@ -34,7 +34,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { track } from '../../lib/app/events';
 import { MEETING_GUIDE } from '../../data/club/meeting-guide';
 import { CHALLENGES, PRIORITIES, RESPONSIBILITY_CATEGORIES } from '../../data/club/family-profile';
-import { useCalendar } from '../../lib/calendar/client';
+import { isDemo, useCalendar } from '../../lib/calendar/client';
 import { useExternalCalendars } from '../../lib/calendar/feeds';
 import { localToday } from '../../lib/calendar/recurrence';
 import { useToday } from '../../lib/hooks';
@@ -52,6 +52,9 @@ import { useDevelopment, useMeetingAccess } from '../../lib/family-development/c
 import { buildDevelopmentPlan } from '../../lib/family-development/engine';
 import { planKey, reconcilePlan, recordScope, type PlanSlot } from '../../lib/family-development/meeting-plan';
 import { DevelopmentConversation, DevelopmentNextSteps, DevelopmentPractice, leadPerson } from '../family/DevelopmentCoach';
+import { GettingReady, PlanSummary, WeekReview } from './MeetingPlan';
+import { currentPriorities, usePriorities, weekOf } from '../../lib/app/priorities';
+import { useEventTasks } from '../../lib/calendar/event-tasks';
 import { dayWord, meetingState, nextScheduledMeeting, readProgress, recordFinished, recordStep, startOver, type MeetingProgress } from '../../lib/app/meeting-progress';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
@@ -157,13 +160,29 @@ export default function WeeklyMeeting() {
     }
   };
   const suggestions = meeting?.parts.people.filter((p) => p.suggested.length && !devStepFor.has(p.memberId)) ?? [];
-  const weekHighlights = week.days.flatMap((d) => d.items.map((item) => ({ day: d.label, item }))).slice(0, 5);
+  // The family plan (docs/ios/FAMILY_PLAN.md): this week's chosen priorities, shared by both adults, and the existing
+  // event responsibilities for getting ready. Hidden until the database has them; never in the demo.
+  const live = scope && cal.signedIn && !isDemo() ? scope : null;
+  const prio = usePriorities(live, localToday(today));
+  const eventTasks = useEventTasks(live);
+  const weekStart = weekOf(localToday(today));
+  const own = Object.values(cal.state.events);
+  const plan = currentPriorities(prio.items.filter((x) => x.week_of === weekStart), [...own, ...shared.events], localToday(today)).list;
+  const [planDone, setPlanDone] = useState(false);
 
   const state = meetingState(progress, agreedCount > 0);
   // The family's own focus (chosen in a meeting); a Club month's topic is labeled as the month's, never as agreed.
   const ownFocus = fam.profile?.priority ? (fam.profile.priority === 'other' ? fam.profile.priorityNote?.trim() || null : label(PRIORITIES, fam.profile.priority)) : null;
   const scheduled = nextScheduledMeeting(Object.values(cal.state.events), localToday(today), today);
   const lead = devPlan ? leadPerson(devPlan) : null;
+
+  if (planDone) {
+    return (
+      <div className="mx-auto max-w-3xl" data-weekly-meeting data-meeting-done>
+        <PlanSummary current={plan} agreed={agreed} external={shared.events} tasks={eventTasks} household={cal.household} colors={cal.colors} onAgain={() => { setPlanDone(false); }} />
+      </div>
+    );
+  }
 
   if (!inMeeting) {
     return (
@@ -294,42 +313,8 @@ export default function WeeklyMeeting() {
           ))}
           {p.title !== 'Our Focus' && !(meeting && p.title === 'Let’s Practice') && <p className="mt-2 text-[0.95rem] leading-relaxed">{!meeting && FREE_TEXT[p.title] ? FREE_TEXT[p.title] : meeting && p.title === 'Let’s Talk' ? CLUB_TALK : p.text}</p>}
 
-          {p.title === 'Our Focus' && week.count > 0 && (
-            <div className="mt-5 rounded-[9px] border border-[var(--of-rule)] bg-white/70 p-3 sm:p-4" data-meeting-week>
-              <div className="flex items-center justify-between gap-3">
-                <p className="of-eyebrow">This week on our calendar</p>
-                <span className="text-xs text-warm-soft">{week.count} events</span>
-              </div>
-              <p className="mt-1 text-sm text-warm-soft">What needs our family's attention this week?</p>
-              <ul className="mt-3 space-y-2 text-[0.9rem]" data-meeting-week-highlights>
-                {weekHighlights.map(({ day, item }, i) => (
-                  <li key={item.id + item.date + i} className="flex items-start gap-2">
-                    <span aria-hidden="true" className="mt-1.5 inline-block size-2 shrink-0 rounded-full" style={{ background: cal.colors[item.memberIds[0] ?? item.ownerId ?? '']?.hex ?? '#9aab8f' }} />
-                    <span className="min-w-0"><strong>{day}</strong> · {item.time === 'All day' ? '' : `${item.time} · `}{item.title}</span>
-                  </li>
-                ))}
-              </ul>
-              {week.count > 5 && (
-                <details className="mt-3 border-t border-[var(--of-rule)] pt-3" data-meeting-week-all>
-                  <summary className="cursor-pointer text-sm font-semibold">See the full week ({week.count} events)</summary>
-                  <ul className="mt-3 space-y-3 text-[0.88rem]">
-                    {week.days.filter((d) => d.items.length).map((d) => (
-                      <li key={d.date}><strong className="block">{d.label}</strong>
-                        <ul className="mt-1 space-y-1">
-                          {d.items.map((x) => (
-                            <li key={x.id + x.date} className="flex items-start gap-2 text-warm-soft">
-                              <span aria-hidden="true" className="mt-1.5 inline-block size-2 shrink-0 rounded-full" style={{ background: cal.colors[x.memberIds[0] ?? x.ownerId ?? '']?.hex ?? '#9aab8f' }} />
-                              <span>{x.time === 'All day' ? '' : `${x.time} · `}{x.title}{x.source ? ` · ${x.source}` : !x.ownerId ? ' · nobody handling it yet' : ''}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              )}
-            </div>
-          )}
+          {/* Look ahead and choose what matters: the family plan's priorities (MeetingPlan.tsx). */}
+          {p.title === 'Our Focus' && <WeekReview week={week} priorities={prio.available ? prio : null} current={plan} weekStart={weekStart} colors={cal.colors} />}
 
           {p.title === 'Let’s Talk' && (
             <div className="mt-4 space-y-4">
@@ -356,6 +341,7 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Everyone’s Part' && (
             <div className="mt-4" data-meeting-parts-agreed>
+              <GettingReady current={plan} external={shared.events} own={own} tasks={eventTasks} household={cal.household} colors={cal.colors} />
               {devPlan && <DevelopmentConversation plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgreement={fam.adoptAgreement} onAccessLost={access.revoke} />}
               {devPlan && <DevelopmentNextSteps plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgreement={fam.adoptAgreement} onAccessLost={access.revoke} exclude={lead?.memberId ?? ''} />}
               {suggestions.length > 0 && (
@@ -454,7 +440,7 @@ export default function WeeklyMeeting() {
         {activeStep < MEETING_GUIDE.parts.length - 1 ? (
           <button type="button" className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" onClick={() => goStep(activeStep + 1)}>Next: {MEETING_GUIDE.parts[activeStep + 1].title} →</button>
         ) : (
-          <a className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" href="/app" onClick={() => { track('meeting_completed'); setProgress(recordFinished(scope)); }} data-meeting-finish>Finish meeting ✓</a>
+          <button type="button" className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" onClick={() => { track('meeting_completed'); setProgress(recordFinished(scope)); setPlanDone(true); window.scrollTo(0, 0); }} data-meeting-finish>Finish meeting ✓</button>
         )}
       </div>
       {/* One question at a time for a free family, only once it pays off in the next meeting (§8). */}

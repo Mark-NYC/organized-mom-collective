@@ -211,7 +211,7 @@ export function ExternalEventSheet({ e, date, household, colors = {}, tasks, onC
 }
 
 /** Who does what for one imported occurrence: check off, add, edit, reassign, remove. The event itself never changes. */
-function EventResponsibilities({ e, tasks, people, colors }: { e: CalendarEvent; tasks: EventTasks; people: Household['members']; colors: Record<string, MarkerColor> }) {
+export function EventResponsibilities({ e, tasks, people, colors }: { e: CalendarEvent; tasks: EventTasks; people: Household['members']; colors: Record<string, MarkerColor> }) {
   const list = tasksFor(tasks.tasks, e);
   const [form, setForm] = useState<{ id?: string; title: string; member: string | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
