@@ -54,6 +54,10 @@ const sql = async (q) => (await (await fetch(`${API}/__test/sql`, { method: 'POS
 const settle = (page, ms = 1200) => page.waitForTimeout(ms);
 const shot = (page, name) => page.screenshot({ path: join(OUT, `${name}.png`), fullPage: true, timeout: 20000 }).catch((e) => console.log(`  (screenshot ${name} skipped: ${e.message.split('\n')[0]})`));
 const HID = `(select household_id from public.demo_households where key = 'rivera')`;
+// The seed checks two Daily Reset tasks today and, Monday to Thursday (the days with a zone), the zone's first task;
+// the page's first progress bar is today's whole routine (daily + zone). Expected "done" counts follow the weekday.
+const zoneToday = ['Mon', 'Tue', 'Wed', 'Thu'].includes(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short' }).format(new Date())) ? 1 : 0;
+const doneToday = (daily) => `${daily + zoneToday} of`;
 
 const browser = await chromium.launch();
 const errors = [];
@@ -121,7 +125,10 @@ for (const device of ['iPhone 15 Pro', 'iPhone 15 Pro Max', 'desktop']) {
     const l = await layout(page);
     check(`${tag} ${name}: opens with content, nothing clipped, no sideways scroll`, l.text.trim().length > 80 && l.overflow <= 1 && l.clipped.length === 0, `${l.text.trim().length} chars, overflow ${l.overflow}${l.clipped.length ? `, clipped: ${l.clipped.join(' / ')}` : ''}`);
     if (name === 'today') {
-      check(`${tag} today: the family's plans for today`, today.split('|').some((t) => l.text.includes(t)), today);
+      // Two-tab redesign: Today counts today's plans in its Plans shortcut (the plans themselves are on the calendar).
+      const n = today ? today.split('|').length : 0;
+      const plans = await page.locator('[data-today-shortcut="plans"]').innerText().catch(() => '');
+      check(`${tag} today: the family's plans for today (Plans: ${n})`, n ? new RegExp(`\\b${n} events? today`).test(plans) : /Nothing today/.test(plans), plans.replace(/\s+/g, ' '));
       check(`${tag} today: everyone's part names the kids`, ['Sofia', 'Mateo', 'Elena'].every((n) => l.text.includes(n)));
     }
     if (name === 'calendar') {
@@ -129,7 +136,11 @@ for (const device of ['iPhone 15 Pro', 'iPhone 15 Pro Max', 'desktop']) {
       await settle(page, 1000);
       check(`${tag} calendar: upcoming plans in the agenda`, /Dentist: Mateo|Birthday party|School picture day|Field trip/.test(await page.locator('main').innerText()));
     }
-    if (name === 'cleaning') check(`${tag} cleaning: today's progress is the family's (2 of 5)`, (await page.locator('[aria-label*="tasks done today"]').first().getAttribute('aria-label').catch(() => '')).startsWith('2 of'));
+    if (name === 'cleaning') {
+      // The household's shared progress arrives from the server after the page draws: give it a moment to settle.
+      await page.waitForFunction((want) => (document.querySelector('[aria-label*="tasks done today"]')?.getAttribute('aria-label') ?? '').startsWith(want), doneToday(2), { timeout: 8000 }).catch(() => {});
+      check(`${tag} cleaning: today's progress is the family's (2 of 5)`, (await page.locator('[aria-label*="tasks done today"]').first().getAttribute('aria-label').catch(() => '')).startsWith(doneToday(2)));
+    }
     if (name === 'meeting') {
       check(`${tag} meeting: the Club meeting for a complimentary family`, (await page.getAttribute('[data-weekly-meeting]', 'data-meeting-kind')) === 'club');
     }
@@ -146,7 +157,9 @@ await signIn(ana, ANA);
 await open(ana, '/app/family/meeting');
 check('meeting: four parts', (await ana.locator('[data-meeting-step]').count()) === 4);
 await ana.click('[data-meeting-step="2"]'); await settle(ana, 800);
-const steps = await ana.locator('[data-development-person]').evaluateAll((els) => els.map((e) => e.getAttribute('data-development-person')));
+// Two-tab redesign: one conversation first (the lead child), everyone else's next step behind one tap.
+if (await ana.locator('[data-development-others]:not([open])').count()) await ana.click('[data-development-others] summary');
+const steps = [await ana.getAttribute('[data-development-conversation]', 'data-development-conversation'), ...await ana.locator('[data-development-person]').evaluateAll((els) => els.map((e) => e.getAttribute('data-development-person')))];
 check('meeting: "One next step each": check-ins (Sofia, Mateo) and a new personalized suggestion (Elena)', ['Sofia', 'Mateo', 'Elena'].every((n) => steps.includes(n)), steps.join(','));
 check('meeting: the suggestion for Elena is a real one from the library, waiting for the family to decide', (await ana.locator('[data-development-person="Elena"]').innerText()).length > 40);
 await shot(ana, 'meeting-everyones-part');
@@ -166,7 +179,7 @@ check('cleaning: Ana checks a task; it is saved for the household', (await sql(`
 const luisCtx = await ctxFor('iPhone 15 Pro Max'); const luis = await luisCtx.newPage();
 await signIn(luis, LUIS);
 await open(luis, '/app/cleaning');
-check('Luis: sees Ana\'s checkmark (3 of 5)', (await luis.locator('[aria-label*="tasks done today"]').first().getAttribute('aria-label').catch(() => '')).startsWith('3 of'));
+check('Luis: sees Ana\'s checkmark (3 of 5)', (await luis.locator('[aria-label*="tasks done today"]').first().getAttribute('aria-label').catch(() => '')).startsWith(doneToday(3)));
 check('Luis: the cleaning is shared', (await luis.locator('[data-cleaning-share]').getAttribute('data-cleaning-share').catch(() => null)) === 'shared');
 await open(luis, '/app/family/meeting');
 check('Luis: the Club meeting too (second adult, same grant)', (await luis.getAttribute('[data-weekly-meeting]', 'data-meeting-kind')) === 'club');
@@ -205,7 +218,7 @@ await anaCtx.close();
 const ana2Ctx = await ctxFor('iPhone 15 Pro'); const ana2 = await ana2Ctx.newPage();
 await signIn(ana2, ANA);
 await open(ana2, '/app/cleaning');
-check('reset: Ana signs in again and sees the starting point (2 of 5)', (await ana2.locator('[aria-label*="tasks done today"]').first().getAttribute('aria-label').catch(() => '')).startsWith('2 of'));
+check('reset: Ana signs in again and sees the starting point (2 of 5)', (await ana2.locator('[aria-label*="tasks done today"]').first().getAttribute('aria-label').catch(() => '')).startsWith(doneToday(2)));
 check('nothing billed or sent: no subscription, invoice, entitlement, fulfillment, email, feed or Google rows', (await sql(`select (select count(*) from public.club_subscriptions) + (select count(*) from public.club_invoices) + (select count(*) from public.club_entitlements) + (select count(*) from public.club_fulfillment_orders) + (select count(*) from public.club_email_log) + (select count(*) from public.calendar_feeds) + (select count(*) from public.calendar_google_accounts)`)) === '0');
 await ana2Ctx.close(); await luisCtx.close();
 

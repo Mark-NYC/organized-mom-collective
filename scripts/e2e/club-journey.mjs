@@ -78,7 +78,8 @@ const chrome = (page) => page.evaluate(() => {
     h1: [...document.querySelectorAll('h1')].filter(vis).map((e) => e.textContent.replace(/\s+/g, ' ').trim()),
   };
 });
-const inApp = (c) => c.header && ['Today', 'Calendar', 'Cleaning', 'Family'].every((t) => c.tabs.includes(t)) && !c.oldClubHeader;
+// Two-tab redesign: Today · Family Meeting (the family and the Club are under Today's Resources).
+const inApp = (c) => c.header && ['Today', 'Family Meeting'].every((t) => c.tabs.includes(t)) && !c.oldClubHeader;
 const shot = (page, name) => page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true });
 
 const PEOPLE = [
@@ -97,7 +98,7 @@ for (const person of PEOPLE) {
 
   await page.goto(`${base}/app`, { waitUntil: 'load' }); await settle(page);
   check(who, 'Today is the app', inApp(await chrome(page)));
-  await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family/); await settle(page);
+  await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page);
   const fam = await chrome(page);
   check(who, 'Family tab: the app', inApp(fam));
   const clubTile = await page.locator('[data-family-club-card]').count();
@@ -200,7 +201,7 @@ for (const person of PEOPLE) {
       await shot(page, `${tag}-06-membership`);
     }
     // Back to Family from anywhere in the Club, with one tap.
-    await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family$/); await settle(page);
+    await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page);
     check(who, 'back to Family in one tap', inApp(await chrome(page)) && (await page.locator('[data-family-club-card]').count()) === 1);
   }
   await ctx.close();
@@ -213,12 +214,12 @@ for (const person of PEOPLE) {
   const { ctx, page } = await session('active@e2e.test');
   const step = async (name, ok, detail) => { check(who, name, ok, detail); await shot(page, `journey-${String(results.filter((r) => r.who === who).length).padStart(2, '0')}`); };
   await page.goto(`${base}/app`, { waitUntil: 'load' }); await settle(page, 3000);
-  await step('Today: the app, with this month’s Club tile named as its page names it', inApp(await chrome(page)) && (await page.locator('[data-club-month]').count()) === 1);
-  await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family$/); await settle(page, 2500);
+  await step('Today: the app, with this month’s Club tile named as its page names it', inApp(await chrome(page)) && /Guides & Club/.test(await page.locator('[data-today-shortcut="resources"]').innerText().catch(() => '')));
+  await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page, 2500);
   await step('Family: one way into the meeting, then the month’s Club tile (no duplicate meeting buttons)', inApp(await chrome(page)) && (await page.locator('a[href="/app/family/meeting"]:not([data-getting-started] a)').count()) === 1 && (await page.locator('[data-family-club-card]').count()) === 1);
   await page.click('[data-app-tabbar] a[href="/app"]'); await page.waitForURL(/\/app$/); await settle(page, 2500);
   await step('Today’s meeting link opens the same weekly meeting', (await page.locator('a[href*="view=meeting"]').count()) === 0);
-  await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family$/); await settle(page, 2500);
+  await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page, 2500);
   await page.click('[data-open-meeting]'); await page.waitForURL(/\/app\/family\/meeting/); await settle(page, 3500);
   await step('Weekly meeting: this month’s prepared plan inside the four parts', inApp(await chrome(page)) && (await page.locator('[data-weekly-meeting][data-meeting-kind="club"]').count()) === 1);
   const res = page.locator('[data-meeting-resource]').first();
@@ -244,7 +245,7 @@ for (const person of PEOPLE) {
     await due.first().locator('[data-check-in-answer="on-own"]').click(); await settle(page, 2000);
     await step('On my own: celebrated, nothing new added', (await page.locator('[data-check-in-result="celebrate"]').count()) === 1);
   }
-  await page.click('[data-app-tabbar] a[href="/app/family"]'); await page.waitForURL(/\/app\/family$/); await settle(page, 2500);
+  await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page, 2500);
   await step('Family’s “Who does what” shows the agreement', (await page.locator('[data-family-responsibilities-card]').innerText()).length > 20);
   // January's earlier work (production shape): reachable from the January page, viewed without changing anything saved.
   const savedBefore = await sql(`select v.state -> 'omc:club:january-weekly-meeting:v1' ->> 'v' from public.club_resource_versions v join public.club_kits k on k.id = v.kit_id where k.slug = '2027-01-fresh-start-together' and v.household_id = public.household_id_for('00000000-0000-0000-0000-0000000c1b03')`);
@@ -361,7 +362,7 @@ for (const person of PEOPLE) {
   for (const path of ['/app/family', `/app/club/${MONTH}`, '/app/club', '/app/club/months', ...(WEB ? ['/club/family'] : [])]) {
     await page.goto(base + path, { waitUntil: 'load' }); await settle(page, 3500);
     const c = await chrome(page);
-    check('active, desktop', `${path}: header tabs and Club bar`, c.header && c.tabs.length === 4 && !c.oldClubHeader && (path === '/app/family' || c.clubBar), JSON.stringify(c).slice(0, 140));
+    check('active, desktop', `${path}: header tabs and Club bar`, c.header && c.tabs.length === 2 && !c.oldClubHeader && (path === '/app/family' || c.clubBar), JSON.stringify(c).slice(0, 140));
     await shot(page, `desktop-${path.replace(/\W+/g, '-').replace(/^-|-$/g, '')}`);
   }
   await ctx.close();

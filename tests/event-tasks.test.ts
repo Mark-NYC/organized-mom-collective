@@ -74,9 +74,10 @@ describe('rollout and boundaries', () => {
     expect(sql).not.toMatch(/club_subscriptions|club_entitlements|club_invoices|stripe/i);
   });
   it('the app shows them only when available, never in the demo', () => {
-    for (const f of ['src/components/calendar/FamilyCalendar.tsx', 'src/components/app/TodayDashboard.tsx']) {
-      expect(src(f)).toMatch(/useEventTasks\(cal\.state\.scope !== 'local' && cal\.signedIn && !isDemo\(\) \? cal\.state\.scope : null\)/);
-    }
+    expect(src('src/components/calendar/FamilyCalendar.tsx')).toMatch(/useEventTasks\(cal\.state\.scope !== 'local' && cal\.signedIn && !isDemo\(\) \? cal\.state\.scope : null\)/);
+    const today = src('src/components/app/TodayDashboard.tsx');
+    expect(today).toMatch(/const live = cal\.state\.scope !== 'local' && cal\.signedIn && !isDemo\(\) \? cal\.state\.scope : null;/);
+    expect(today).toMatch(/useEventTasks\(live\)/);
     expect(src('src/components/calendar/CalendarSources.tsx')).toMatch(/tasks\?\.available && occurrenceOf\(e\)/);
   });
   it('the calendar grid gets words, not controls', () => {

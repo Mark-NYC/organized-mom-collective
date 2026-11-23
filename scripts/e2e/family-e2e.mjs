@@ -425,7 +425,8 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   await page.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(page, 1500);
   const clubCard = await page.locator('[data-family-club-card]').count();
   await page.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(page, 1500);
-  check('Club subscriber: her Club cards are on Family and Today', clubCard === 1 && (await page.locator('[data-club-month]').count()) === 1);
+  // Two-tab redesign: the Club lives under Resources (Family & resources); Today points there ("Guides & Club").
+  check('Club subscriber: her Club card is on Family & resources, and Today points to it', clubCard === 1 && /Guides & Club/.test(await page.locator('[data-today-shortcut="resources"]').innerText().catch(() => '')));
   // Account: Our Week, with the household's Club content and no billing; deleting is refused while the membership lasts.
   await page.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(page, 1200);
   const panel = await page.locator('[data-account-signin]').innerText().catch(() => '');

@@ -1,8 +1,8 @@
 /**
- * Family (/app/family): the family's shared headquarters, the same on the website and in the iPhone app
- * (docs/ios/APP_DESIGN_SYSTEM.md). This month's Family Meeting first, then the family's own data: members in their
- * permanent colors, who does what (agreements only), who shares the family, and the Family Meeting Club for households
- * that have it. Nothing here is a new feature: every tile opens a page that already exists.
+ * Family & resources (/app/family): Today's Resources shortcut since the two-tab redesign (docs/ios/TWO_TAB_REDESIGN.md).
+ * The same on the website and in the iPhone app: the way back to the Family Meeting, the family's own data (members in
+ * their permanent colors, who does what, who shares the family), getting started, and the Family Meeting Club with its
+ * monthly resources for households that have it. Nothing here is a new feature: every tile opens a page that exists.
  */
 import { useEffect, useState } from 'react';
 import { useToday } from '../../lib/hooks';
@@ -16,7 +16,8 @@ import { useKeptClubMonths, useShowsClub } from '../app/TodayOverview';
 import { Avatar, Chevron, Icon, TileHead } from '../app/ui';
 import { appShellBuild } from '../../lib/native/platform';
 import { monthPage } from '../../data/club/month-pages';
-import { firstSteps, gettingStarted } from '../../lib/app/first-steps';
+import { firstSteps, gettingStarted, inviteSkipped } from '../../lib/app/first-steps';
+import { readProgress } from '../../lib/app/meeting-progress';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -37,8 +38,9 @@ export default function FamilyHub() {
   }, [cal.signedIn]);
   const shared = (access?.adults.length ?? 1) > 1;
   const Month = month[0].toUpperCase() + month.slice(1);
-  // Getting started, in the owner's order: household, week, the other grown-up, the meeting, then the Club.
-  const steps = firstSteps({ household, signedIn: cal.signedIn, hasPlans: Object.keys(cal.state.events).length > 0, shared, agreedCount: agreed.length,
+  // Getting started (src/lib/app/first-steps.ts): household, one shared part, the first meeting, the other grown-up.
+  const steps = firstSteps({ household, signedIn: cal.signedIn, shared, agreedParts: new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size,
+    met: Boolean(readProgress(cal.state.scope !== 'local' ? cal.state.scope : null)?.completedAt), inviteSkipped: inviteSkipped(),
     // Website only, and only while a new family is getting started: the one place a free family hears about the Club.
     // Never in the iPhone app (nothing is sold there), never as a card (owner decision 2026-11-17).
     offerClub: !appShellBuild() && !showsClub });
@@ -46,24 +48,18 @@ export default function FamilyHub() {
 
   return (
     <div className="of-grid of-grid--2 mt-6">
-      <section className="of-tile of-tile--month of-span-2" aria-labelledby="our-meeting-h" data-our-meeting>
-        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-end">
-          <div>
-            <p className="of-eyebrow">Our Family Meeting · {month[0].toUpperCase() + month.slice(1)}</p>
-            <h2 id="our-meeting-h" className="of-tile-title of-tile-title--lg">{MEETING_GUIDE.subtitle}</h2>
-            <a href="/app/family/meeting" className="of-btn mt-5" data-open-meeting>Start our Family Meeting</a>
-          </div>
-          <ol className="grid grid-cols-2 gap-2" data-meeting-parts>
-            {MEETING_GUIDE.parts.map((p, i) => (
-              <li key={p.title} className="rounded-[9px] bg-white/80 px-3 py-2.5">
-                <span className="font-serif text-[1.1rem] text-[var(--of-month-accent)]">{i + 1}</span>
-                <span className="block text-[0.88rem] font-semibold leading-tight">{p.title}</span>
-                <span className="text-[0.75rem] text-warm-soft">{p.minutes} min</span>
-              </li>
-            ))}
-          </ol>
+      {/* The Family Meeting is its own tab now (two-tab redesign); this is just the way back to it from here. */}
+      <a href="/app/family/meeting" className="of-tile of-span-2" data-our-meeting data-open-meeting>
+        <div className="flex items-center gap-4">
+        <span className="of-icon-box of-icon-box--sage shrink-0"><Icon name="meeting" /></span>
+        <span className="min-w-0 flex-1">
+          <span className="of-eyebrow block">Our Family Meeting · {Month}</span>
+          <span className="mt-1 block font-serif text-[1.2rem] leading-snug">{MEETING_GUIDE.parts.map((p) => p.title).join(' · ')}</span>
+          <span className="of-tile-sub block">About ten minutes, once a week.</span>
+        </span>
+        <Chevron />
         </div>
-      </section>
+      </a>
 
       <section className="of-tile" aria-labelledby="our-family-h" data-family-members>
         <TileHead eyebrow="Our family" title={<span id="our-family-h">{household?.displayName ?? 'Everyone in it'}</span>}

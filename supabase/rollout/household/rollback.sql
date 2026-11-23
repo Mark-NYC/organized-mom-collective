@@ -1,4 +1,4 @@
--- Rolls back 20261211, 20261210, 20261209, 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261212, 20261211, 20261210, 20261209, 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,16 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261212 This week's family priorities (alone: supabase/rollout/priorities/rollback.sql). Removes the priorities
+-- families chose; calendars, agreements and responsibilities stay.
+drop function if exists public.household_priority_remove(uuid);
+drop function if exists public.household_priority_save(jsonb);
+drop function if exists public.household_priorities(date, date);
+drop function if exists public.household_priorities_guard(uuid);
+drop function if exists public.household_shared_occurrence(uuid, text, text);
+do $$ begin if to_regclass('public.household_priorities') is not null then drop function if exists public.household_priority_json(public.household_priorities, uuid); end if; end $$;
+drop table if exists public.household_priorities;
 
 -- ---- 20261211 Responsibilities on imported calendar events (alone: supabase/rollout/event-tasks/rollback.sql). Removes
 -- the responsibilities families added; imported events and subscriptions stay.

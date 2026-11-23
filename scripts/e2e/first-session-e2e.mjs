@@ -123,8 +123,16 @@ for (const p of PERSONAS) {
   await page.click('[data-setup-next]');
   await page.waitForURL(/\/app$/, { timeout: 15000 }); await settle(page, 1800);
   const next = await page.getAttribute('[data-start-here]', 'data-start-here').catch(() => null);
-  check(`${p.id} Today: "Getting started" points to this week's plans next`, next === 'week', String(next));
-  check(`${p.id} Today: the Family Meeting is right there, no instructions needed`, (await page.locator('a:has-text("Start our Family Meeting")').count()) >= 1);
+  check(`${p.id} Today: "Getting started" is one thing the family can share (not the calendar)`, next === 'share' && /Start with one thing your family can share/.test(await page.locator('[data-start-here]').innerText()), String(next));
+  // The first shared win, in about a minute: who, what (an idea or their own words), "We agreed".
+  await page.click(`[data-first-win-who="${p.kids[0][0]}"]`);
+  await page.fill('[data-first-win-text]', 'Feed the dog before school');
+  await page.click('[data-first-win-save]');
+  await page.waitForSelector('[data-start-here="meeting"]', { timeout: 15000 }).catch(() => {});
+  check(`${p.id} Today: the first shared part is saved for the family, and shows on Today`, (await sql(`select count(*) from public.club_responsibilities r join public.household_adults a on a.household_id = r.household_id join auth.users u on u.id = a.user_id where u.email = '${email}' and r.status = 'confirmed' and r.deleted_at is null and r.agreed_text = 'Feed the dog before school'`)) === '1'
+    && (await page.locator('[data-today-responsibilities] [data-part-person]').count()) === 1);
+  // Two-tab redesign: the Family Meeting is a tab, and Today's Next Family Meeting card opens it.
+  check(`${p.id} Today: the Family Meeting is right there, no instructions needed`, (await page.locator('[data-app-tabbar] a[href="/app/family/meeting"], [data-app-topnav] a[href="/app/family/meeting"]').count()) >= 1 && (await page.locator('[data-next-meeting]').count()) === 1);
   await shot('04-today');
 
   // 5. A first useful action: today's cleaning (straight to the checklist, no walkthrough)
@@ -159,16 +167,20 @@ for (const p of PERSONAS) {
   // 7. Tomorrow: coming back
   l = await visit('/app', 'today again');
   const nextAfter = await page.getAttribute('[data-start-here]', 'data-start-here').catch(() => null);
-  check(`${p.id} coming back: Today picks up where she left off (${p.adults.length ? 'invite' : 'first meeting'} next)`, nextAfter === (p.adults.length ? 'adult' : 'meeting'), String(nextAfter));
-  if (p.adults.length) {
-    check(`${p.id} coming back: inviting can be skipped`, (await page.locator('[data-start-skip]').count()) === 1);
-  }
+  check(`${p.id} coming back: Today picks up where she left off (the first meeting next)`, nextAfter === 'meeting', String(nextAfter));
 
   // 8. The Family Meeting
   await visit('/app/family/meeting', 'meeting');
   for (let i = 1; i < 4; i++) { await page.click(`[data-meeting-step="${i}"]`); await settle(page, 400); }
   check(`${p.id} meeting: all four parts open`, (await page.getAttribute('[data-meeting-part]', 'data-meeting-part')) === 'Let’s Practice');
-  await page.click('a:has-text("Finish meeting")'); await settle(page, 1500);
+  await page.click('[data-meeting-finish]'); await settle(page, 1500);
+  l = await visit('/app', 'after the first meeting');
+  const afterMeeting = await page.getAttribute('[data-start-here]', 'data-start-here').catch(() => null);
+  check(`${p.id} after the first meeting: ${p.adults.length ? 'the invitation, which can be skipped' : 'getting started is done'}`, afterMeeting === (p.adults.length ? 'adult' : null), String(afterMeeting));
+  if (p.adults.length) {
+    await page.click('[data-start-skip]'); await settle(page, 600);
+    check(`${p.id} skipping the invitation finishes getting started`, (await page.locator('[data-start-here]').count()) === 0);
+  }
 
   // 9. Club: what it adds, no pressure
   l = await visit('/app/club', 'club');

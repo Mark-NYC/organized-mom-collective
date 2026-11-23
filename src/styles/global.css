@@ -741,6 +741,27 @@
     display: none !important;
   }
 }
+/*
+ * The guided Family Meeting (WeeklyMeeting.tsx sets html[data-meeting-active]): the app's tabs step aside so the
+ * family has one conversation on screen; Back/Next sit at the bottom above the home indicator, and "Exit meeting" is
+ * at the top. The meeting's landing and "We have a plan." keep the tabs.
+ */
+html[data-meeting-active] :is(nav[data-app-tabbar], nav[data-app-topnav]) {
+  display: none !important;
+}
+@media (max-width: 1023.98px) {
+  html[data-meeting-active] [data-meeting-step-actions] {
+    bottom: 0;
+    padding-bottom: calc(0.625rem + env(safe-area-inset-bottom));
+  }
+  html[data-meeting-active] main#main {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  }
+  /* A field is focused (the keyboard is up): the bar goes back into the page so it never covers the field. */
+  [data-weekly-meeting]:has(:is(input, textarea, select):focus) [data-meeting-step-actions] {
+    position: static;
+  }
+}
 html.omc-bare :is(body > header[data-chrome], nav[data-app-tabbar], [data-club-chrome]) {
   display: none !important;
 }

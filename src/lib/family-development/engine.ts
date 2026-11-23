@@ -19,7 +19,7 @@
  * (pets, a yard, a dishwasher, school attendance for a homeschool family).
  */
 import type { MawlStage } from './framework';
-import { HAND_OVER_LABEL, MAWL_LABEL } from './language';
+import { HAND_OVER_LABEL } from './language';
 import { SKILLS_LIBRARY_VERSION, skillById, skills, type CuratedSkill, type SkillCategory } from './skills';
 import { availableDecisions, type CheckSignal, type CheckValue, type DevelopmentDecision, type DevelopmentRecord } from './records';
 import { CHALLENGES, GROWTH_ITEMS, PRIORITIES, labelOf, type ResponsibilityCategory } from '../../data/club/family-profile';
@@ -303,7 +303,7 @@ function checkInFor(r: DevelopmentRecord, firstName: string, today: string): Che
       ? 'Two weeks of “not yet.” Pausing for now is fine, or try a different time of day.'
       : 'Two weeks of “not yet.” Stepping back a stage, or tying it to a different moment in the day, often helps.';
   } else if (!hint && (r.stage === 'model' || r.stage === 'assist') && r.lastValue === 'strong') {
-    hint = r.stage === 'model' ? `When you’re ready, move on to “${MAWL_LABEL.assist}”.` : `When you’re ready, move on to “${MAWL_LABEL.watch}”.`;
+    hint = r.stage === 'model' ? 'When you’re ready, try doing it together.' : 'When you’re ready, let them try it while you coach.';
   }
   return {
     kind: 'check-in', record: r, skill, question: checkInQuestion(r, firstName), coaching,

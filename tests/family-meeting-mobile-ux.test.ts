@@ -11,7 +11,7 @@ import { DevelopmentNextSteps } from '../src/components/family/DevelopmentCoach'
 import { buildDevelopmentPlan } from '../src/lib/family-development/engine';
 import type { DevelopmentRecord } from '../src/lib/family-development/records';
 import type { MawlStage } from '../src/lib/family-development/framework';
-import { coachLine, keepLabel, practiceBackLabel, STAGE_SHORT, suggestCoachLine } from '../src/lib/family-development/language';
+import { coachLine, keepLabel, MAWL_LABEL, practiceBackLabel, STAGE_SHORT, suggestCoachLine } from '../src/lib/family-development/language';
 
 const household = { id: 'h', preferences: {}, profileVersion: 1, members: [
   { id: 'a', firstName: 'Ana', kind: 'adult' as const, role: 'parent' as const, isAccountHolder: true },
@@ -36,15 +36,18 @@ const decisions = (html: string) => [...html.matchAll(/data-development-decision
 
 describe('active responsibility card, every stage', () => {
   const cases: [MawlStage, string[], string | null, string | null][] = [
-    ['model', ['stay', 'advance', 'pause'], 'Next: We’ll do it together', null],
-    ['assist', ['stay', 'step-back', 'advance', 'pause'], 'Next: They’ll do it, I’ll coach', 'Show them again'],
+    ['model', ['stay', 'advance', 'pause'], 'Ready to do it together', null],
+    ['assist', ['stay', 'step-back', 'advance', 'pause'], 'Ready to try it while you coach', 'Show them again'],
     ['watch', ['stay', 'step-back', 'advance', 'pause'], 'Hand over responsibility', 'Practice together again'],
     ['launch', ['stay', 'step-back', 'pause'], null, 'Coach them again'],
   ];
   for (const [stage, expected, forward, back] of cases) {
     it(`${stage}: one primary action, only valid stage moves, quiet text actions`, () => {
       const c = card(render([rec(stage)]), 'data-development-next="room"');
-      expect(c).toMatch(new RegExp(`data-development-stage-pill="${stage}"[^>]*>${STAGE_SHORT[stage]}<`));
+      // Two-tab redesign: the stage is invisible (no pill, no stage name), the valid moves are unchanged.
+      expect(c).not.toContain('data-development-stage-pill');
+      expect(c).not.toContain(`>${STAGE_SHORT[stage]}<`);
+      for (const name of Object.values(MAWL_LABEL)) expect(c).not.toContain(`“${name}”`);
       expect(c).toContain(coachLine(stage, 'Maya').replace(/’/g, '’'));
       expect(c).toContain(`data-development-decision="stay">${keepLabel(stage)}<`);
       expect(decisions(c)).toEqual(expected);

@@ -26,7 +26,7 @@ describe('free and Club boundary', () => {
     expect(MEETING).toMatch(/const access = useMeetingAccess\(\);\n  const club = access\.club;/);
     expect(MEETING).not.toMatch(/getSession\(\)\.then/); // the one-shot Club check is gone
     // Every development element is behind the plan.
-    for (const c of ['DevelopmentCheckIns', 'DevelopmentNextSteps', 'DevelopmentPractice']) {
+    for (const c of ['DevelopmentConversation', 'DevelopmentNextSteps', 'DevelopmentPractice']) {
       expect(MEETING).toMatch(new RegExp(`\\{devPlan && <${c} `));
     }
   });
@@ -96,7 +96,8 @@ describe('existing products are untouched', () => {
 describe('the meeting UI renders the plan (server render)', async () => {
   const { createElement } = await import('react');
   const { renderToStaticMarkup } = await import('react-dom/server');
-  const { DevelopmentCheckIns, DevelopmentNextSteps, DevelopmentPractice } = await import('../src/components/family/DevelopmentCoach');
+  const DEV = await import('../src/components/family/DevelopmentCoach');
+  const { DevelopmentCheckIns, DevelopmentNextSteps, DevelopmentPractice } = DEV;
   const { buildDevelopmentPlan } = await import('../src/lib/family-development/engine');
   const household = { id: 'h', preferences: {}, profileVersion: 1, members: [
     { id: 'a', firstName: 'Ana', kind: 'adult' as const, role: 'parent' as const, isAccountHolder: true },
@@ -121,10 +122,30 @@ describe('the meeting UI renders the plan (server render)', async () => {
     expect(html).toMatch(/Hand over responsibility/); // offered as the family's choice, never applied
     expect(html).toMatch(/Doing it on their own is progress\. Handing over responsibility is a separate choice/);
     expect(html).toMatch(/Practice together again/);
-    expect(html).toMatch(/Back to “We’ll do it together”/);
+    // Two-tab redesign: no stage names anywhere (the stages stay invisible).
+    for (const name of ['I’ll show them how', 'They’ll do it, I’ll coach', 'Ready to take full responsibility', 'Back to “']) expect(html).not.toContain(name);
+    expect(html).not.toMatch(/data-development-stage-pill/);
     expect(html).not.toMatch(/Great! This is now their responsibility/); // never before a save
     expect(html).toMatch(/data-development-suggest=/);
-    expect(html).toMatch(/I’ll show them how/);
+    expect(html).toMatch(/How much help will Mia need at first\?/);
+    expect(html).toMatch(/Show Mia how first/);
+  });
+  it('Everyone\'s Part leads with ONE conversation: the child, "What went well?", the engine\'s own question and answers, our next step', () => {
+    const { DevelopmentConversation } = DEV;
+    const html = renderToStaticMarkup(createElement(DevelopmentConversation, props));
+    expect(html).toMatch(/data-development-conversation="Noah"/);
+    expect(html).toMatch(/What went well\?/);
+    expect(html).toMatch(/data-development-check-in="school-bag"/);
+    // The engine's own answers for this stage, not a made-up yes/no.
+    const answers = [...html.matchAll(/data-development-answer="([a-z-]+)"/g)].map((m) => m[1]);
+    expect(answers).toEqual(plan.people.find((p) => p.memberId === 'n')!.step!.kind === 'check-in' ? (plan.people.find((p) => p.memberId === 'n')!.step as { question: { answers: { value: string }[] } }).question.answers.map((a) => a.value) : []);
+    expect(html).toMatch(/data-development-our-next-step/);
+    expect(html).not.toMatch(/data-development-stage-pill|They’ll do it, I’ll coach/);
+    // Everyone else waits behind one tap, and Noah isn't repeated there.
+    const others = renderToStaticMarkup(createElement(DEV.DevelopmentNextSteps, { ...props, exclude: 'n' }));
+    expect(others).toMatch(/<details[^>]*data-development-others/);
+    expect(others).toMatch(/Next steps for Mia/);
+    expect(others).not.toMatch(/data-development-person="Noah"/);
   });
   it('Let\'s Practice offers the new idea\'s Model step', () => {
     expect(renderToStaticMarkup(createElement(DevelopmentPractice, props))).toMatch(/Practice it now/);

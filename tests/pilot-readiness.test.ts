@@ -18,30 +18,48 @@ const fam = (adults: number): Household => ({
     { id: 'k', firstName: 'Kid', kind: 'child' as const, role: 'child' as const, birthYear: 2017 },
   ],
 });
-const base = { signedIn: true, hasPlans: false, shared: false, agreedCount: 0, offerClub: false };
+const base = { signedIn: true, shared: false, agreedParts: 0, met: false, offerClub: false };
 
 describe('a new family\'s first steps (Today and Family)', () => {
   it('starts with setting up the family, signed out or in', () => {
     expect(nextStep(firstSteps({ ...base, household: null, signedIn: false }))).toMatchObject({ id: 'household', href: '/app/sign-in?next=/app/family/setup' });
     expect(nextStep(firstSteps({ ...base, household: null }))).toMatchObject({ id: 'household', href: '/app/family/setup' });
   });
-  it('then this week, then the other grown-up, then the first meeting; done when all are', () => {
-    expect(nextStep(firstSteps({ ...base, household: fam(2) }))?.id).toBe('week');
-    expect(nextStep(firstSteps({ ...base, household: fam(2), hasPlans: true }))?.id).toBe('adult');
-    expect(nextStep(firstSteps({ ...base, household: fam(2), hasPlans: true, shared: true }))?.id).toBe('meeting');
-    expect(gettingStarted(firstSteps({ ...base, household: fam(2), hasPlans: true, shared: true, agreedCount: 1 }))).toBe(false);
+  it('then a first shared win (not the calendar), then the first meeting, then the other grown-up; done when all are', () => {
+    expect(nextStep(firstSteps({ ...base, household: fam(2) }))?.id).toBe('share');
+    expect(firstSteps({ ...base, household: fam(2) }).map((s) => s.id)).not.toContain('week');
+    expect(nextStep(firstSteps({ ...base, household: fam(2), agreedParts: 1 }))?.id).toBe('meeting');
+    expect(nextStep(firstSteps({ ...base, household: fam(2), agreedParts: 1, met: true }))?.id).toBe('adult');
+    expect(gettingStarted(firstSteps({ ...base, household: fam(2), agreedParts: 1, met: true, shared: true }))).toBe(false);
+  });
+  it('the invitation is never required: skipping it finishes the list', () => {
+    expect(gettingStarted(firstSteps({ ...base, household: fam(2), agreedParts: 1, met: true, inviteSkipped: true }))).toBe(false);
+  });
+  it('a family that already agreed several parts (on any phone) is past its first meeting', () => {
+    expect(firstSteps({ ...base, household: fam(2), agreedParts: 3 }).find((s) => s.id === 'meeting')?.done).toBe(true);
   });
   it('a single parent has nobody to invite: that step is done, so the list can finish', () => {
-    const steps = firstSteps({ ...base, household: fam(1), hasPlans: true, agreedCount: 1 });
+    const steps = firstSteps({ ...base, household: fam(1), agreedParts: 1, met: true });
     expect(steps.find((s) => s.id === 'adult')?.done).toBe(true);
     expect(gettingStarted(steps)).toBe(false);
   });
   it('the Club is only a website step, never what "next" points to', () => {
-    const steps = firstSteps({ ...base, household: fam(2), hasPlans: true, shared: true, agreedCount: 1, offerClub: true });
+    const steps = firstSteps({ ...base, household: fam(2), agreedParts: 1, met: true, shared: true, offerClub: true });
     expect(steps.at(-1)?.id).toBe('club');
     expect(gettingStarted(steps)).toBe(false);
     expect(nextStep(steps)).toBeNull();
     expect(src('src/components/app/TodayDashboard.tsx')).toMatch(/offerClub: !appShellBuild\(\) && !showsClub/);
+  });
+  it('the first shared win is an ordinary agreement saved on Today, with age-fit ideas from the existing chore list', async () => {
+    const t = src('src/components/app/TodayDashboard.tsx');
+    expect(t).toMatch(/Start with one thing your family can share\./);
+    expect(t).toMatch(/await save\(\{ category: 'other', text, ownerIds: \[who\], month \}\)/);
+    expect(t).not.toMatch(/Put this week on the family calendar/);
+    const { starterIdeas } = await import('../src/lib/app/first-steps');
+    const { choreChoices } = await import('../src/data/chore-recommendations');
+    expect(starterIdeas(4, choreChoices)).toEqual(expect.arrayContaining(['Set the table', 'Clear my dishes']));
+    expect(starterIdeas(4, choreChoices)).not.toContain('Wipe kitchen counters');
+    expect(starterIdeas(4, choreChoices).length).toBeLessThanOrEqual(4);
   });
 });
 

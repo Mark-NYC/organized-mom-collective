@@ -37,18 +37,31 @@ final class AppLaunchTests: XCTestCase {
         web.links.matching(NSPredicate(format: "label == %@", name)).firstMatch
     }
 
-    /// Go to a bottom tab. `arrived`: elements only the destination shows. If none appears within 8 s the tap didn't
-    /// take (run 44841715743: the Cleaning tap left Today on screen for the whole 45 s first-run wait), so tap again.
+    /// Two-tab redesign (docs/ios/TWO_TAB_REDESIGN.md): Today and Family Meeting are tabs; Calendar, Cleaning and
+    /// Family are Today's Plans, Cleaning and Resources shortcuts.
+    private let shortcuts = ["Calendar": "Plans", "Cleaning": "Cleaning", "Family": "Resources"]
+    private func shortcut(_ name: String) -> XCUIElement {
+        web.links.matching(NSPredicate(format: "label BEGINSWITH %@", shortcuts[name] ?? name)).firstMatch
+    }
+
+    /// Go to a tab, or to a screen through Today's shortcut. `arrived`: elements only the destination shows. If none
+    /// appears within 8 s the tap didn't take (run 44841715743: the Cleaning tap left Today on screen for the whole
+    /// 45 s first-run wait), so tap again.
     private func goTo(_ name: String, arrived: [XCUIElement] = []) {
-        tapTab(name)
+        let open = {
+            if self.shortcuts[name] == nil { return self.tapTab(name) }
+            self.tapTab("Today")
+            self.tapClear(self.waitFor(self.shortcut(name), "\(name) shortcut on Today"))
+        }
+        open()
         guard !arrived.isEmpty else { return }
         let deadline = Date().addingTimeInterval(8)
         while Date() < deadline {
             if arrived.contains(where: { $0.exists }) { return }
             RunLoop.current.run(until: Date().addingTimeInterval(0.25))
         }
-        print("OMC: \(name) tab tap didn't navigate; tapping again")
-        tapTab(name)
+        print("OMC: \(name) tap didn't navigate; tapping again")
+        open()
     }
 
     /// What only the Cleaning page shows: its first-run screen, its checklist, or its storage note.
@@ -68,10 +81,10 @@ final class AppLaunchTests: XCTestCase {
             origin.withOffset(CGVector(dx: f.midX, dy: f.midY)).tap()
             return
         }
-        let order = ["Today", "Calendar", "Cleaning", "Family"]
+        let order = ["Today", "Family Meeting"]
         guard let i = order.firstIndex(of: name) else { return XCTFail("Unknown tab \(name)") }
         // The bar sits above the 34 pt home indicator; its labels are about 25 pt above that.
-        origin.withOffset(CGVector(dx: window.width * (CGFloat(i) + 0.5) / 4, dy: window.maxY - 34 - 25)).tap()
+        origin.withOffset(CGVector(dx: window.width * (CGFloat(i) + 0.5) / CGFloat(order.count), dy: window.maxY - 34 - 25)).tap()
     }
 
     /// Tap something on the page that may sit under the fixed tab bar (or above the screen): first drag the page in
@@ -181,7 +194,7 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(web.waitForExistence(timeout: 30), "The web view never appeared")
 
         // Today.
-        let title = waitFor(text("little more calm"), "Today title", timeout: launchTimeout)
+        let title = waitFor(text("Living out what we agreed"), "Today title", timeout: launchTimeout)
         assertInsideSafeArea("Today", topElement: title)
         shot("01-today")
 
@@ -199,8 +212,9 @@ final class AppLaunchTests: XCTestCase {
         // (covered with a member in testFamilyFlowWithTestBackend and scripts/e2e/family-e2e.mjs).
         XCTAssertFalse(tab("Club").exists, "the old Club tab is still there")
         XCTAssertFalse(tab("Account").exists, "Account should be the profile icon, not a tab")
-        tab("Family").tap()
-        let family = waitFor(text("plays a part"), "Family tab")
+        XCTAssertTrue(tab("Family Meeting").exists, "the Family Meeting tab is missing")
+        goTo("Family")
+        let family = waitFor(text("plays a part"), "Family & resources (Today's Resources)")
         waitFor(text("Who does what"), "Family Responsibilities card")
         // A free family (nobody signed in here) sees no Club membership card it couldn't open, and nothing to buy.
         XCTAssertFalse(text("Open the Club").exists, "a free family is shown a Family Meeting Club membership card")
@@ -209,7 +223,7 @@ final class AppLaunchTests: XCTestCase {
 
         // Account, from the profile icon: signed out, no made-up family.
         tab("Today").tap()
-        waitFor(text("little more calm"), "Today")
+        waitFor(text("Living out what we agreed"), "Today")
         waitFor(web.links.matching(NSPredicate(format: "label == 'Account and settings'")).firstMatch, "profile icon").tap()
         let account = waitFor(text("Sign in to see your family"), "Account sign-in panel")
         XCTAssertFalse(text("Rivera").exists, "Account shows a made-up family outside the demo")
@@ -223,15 +237,15 @@ final class AppLaunchTests: XCTestCase {
         assertInsideSafeArea("Our Week sign-in", topElement: text("Sign in to share your week"))
         shot("05-our-week-sign-in")
         tab("Today").tap()
-        waitFor(text("little more calm"), "Today after sign-in page")
+        waitFor(text("Living out what we agreed"), "Today after sign-in page")
         _ = account
 
         // Restart 1: a normal relaunch keeps the checkmark.
         app.terminate()
         app.launchArguments = []
         app.launch()
-        waitFor(text("little more calm"), "Today after relaunch", timeout: launchTimeout)
-        tab("Cleaning").tap()
+        waitFor(text("Living out what we agreed"), "Today after relaunch", timeout: launchTimeout)
+        goTo("Cleaning", arrived: cleaningPage)
         finishCleaningOnboarding()
         waitFor(oneTaskDone, "checkmark after relaunch")
         shot("06-cleaning-after-relaunch")
@@ -241,10 +255,9 @@ final class AppLaunchTests: XCTestCase {
         app.launchArguments = ["-OMCResetWebStorageForTesting"]
         app.launch()
         XCTAssertTrue(web.waitForExistence(timeout: 30))
-        waitFor(text("little more calm"), "Today after storage wipe", timeout: launchTimeout)
-        let cleaningTab = tab("Cleaning")
-        XCTAssertTrue(cleaningTab.waitForExistence(timeout: 20), "Cleaning tab gone after a storage wipe")
-        cleaningTab.tap()
+        waitFor(text("Living out what we agreed"), "Today after storage wipe", timeout: launchTimeout)
+        XCTAssertTrue(shortcut("Cleaning").waitForExistence(timeout: 20), "Cleaning shortcut gone after a storage wipe")
+        goTo("Cleaning", arrived: cleaningPage)
         waitFor(oneTaskDone, "checkmark restored after a storage wipe")
         shot("07-cleaning-after-storage-wipe")
     }
@@ -273,7 +286,7 @@ final class AppLaunchTests: XCTestCase {
         app.launchArguments = ["-OMCResetWebStorageForTesting"]
         app.launch()
         XCTAssertTrue(web.waitForExistence(timeout: 30))
-        waitFor(text("little more calm"), "Today", timeout: launchTimeout)
+        waitFor(text("Living out what we agreed"), "Today", timeout: launchTimeout)
 
         // Sign in as Jen (the test backend's code is 123456).
         waitFor(web.links.matching(NSPredicate(format: "label == 'Account and settings'")).firstMatch, "profile icon").tap()
@@ -321,13 +334,12 @@ final class AppLaunchTests: XCTestCase {
         waitFor(control("Done"), "close the Calendars panel").tap()
 
         // "We agreed" in this month's Family Meeting.
-        goTo("Family")
-        waitFor(text("plays a part"), "Family tab")
+        goTo("Family Meeting") // its own tab (two-tab redesign): the landing, then Start
         // One Family Meeting (docs/product/UNIFIED_FAMILY_ARCHITECTURE.md §2): the weekly page, with this month's Club
         // plan inside its four parts for a member household (Jen's is). One part at a time (PR 513). In Everyone's Part,
         // Maya's one next step is the skill the family asked for (seed: put-away-laundry → "Fold and put away my
         // clothes"); "Add to our plan" saves it with its agreement (docs/product/FAMILY_DEVELOPMENT_ENGINE.md).
-        waitFor(control("Start our Family Meeting"), "the weekly Family Meeting").tap()
+        waitFor(control("Start our Family Meeting"), "the Family Meeting landing's Start").tap()
         waitFor(text("Let’s Practice"), "the four parts")
         waitFor(text("Prepared for your family"), "this month's plan inside the meeting (member)", timeout: 30)
         shot("e2e-03a-weekly-meeting-with-month")

@@ -247,6 +247,7 @@ check('back online: same calendar', (await titles(jen)).filter((x) => x === 'Cho
 
 // ------------------------------------------------------------------ 7. Weekly Family Meeting: shared calendars only
 await jen.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' });
+await jen.click('[data-meeting-start]').catch(() => {}); // the landing first (two-tab redesign), then Our Focus
 await jen.waitForSelector('[data-meeting-week]', { timeout: 15000 }).catch(() => {});
 await settle(jen, 1200);
 const week = await jen.locator('[data-meeting-week]').textContent().catch(() => '') ?? '';
@@ -258,7 +259,9 @@ await shot(jen, '06-meeting-week', true);
 // ------------------------------------------------------------------ 8. Today shows them too
 await jen.goto(`${base}/app`, { waitUntil: 'networkidle' });
 await settle(jen, 1200);
-check('Today lists today’s imported events beside family ones', await jen.locator('[data-today-event="Choir"]').count() && await jen.locator('[data-today-event="Dentist"]').count());
+// Two-tab redesign: Today counts today's plans (imported and the family's own) in its Plans shortcut.
+const plans = await jen.locator('[data-today-shortcut="plans"]').innerText().catch(() => '');
+check('Today counts today’s imported events beside family ones (Plans)', /([2-9]|[1-9][0-9]) events today/.test(plans), plans.replace(/\s+/g, ' '));
 await shot(jen, '07-today');
 
 // ------------------------------------------------------------------ 9. Privacy switch, disconnection, removal

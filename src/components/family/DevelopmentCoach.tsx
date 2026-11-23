@@ -1,10 +1,18 @@
 /**
  * Club personalization inside the weekly Family Meeting: what each child is learning, one next step each
- * (docs/product/FAMILY_DEVELOPMENT_ENGINE.md). Three small pieces, one per meeting part, all reading one plan that
- * WeeklyMeeting keeps for the whole meeting (src/lib/family-development/meeting-plan.ts), so answering a question
- * never reshuffles the rest of the meeting:
+ * (docs/product/FAMILY_DEVELOPMENT_ENGINE.md). Small pieces, all reading one plan that WeeklyMeeting keeps for the
+ * whole meeting (src/lib/family-development/meeting-plan.ts), so answering a question never reshuffles the meeting.
  *
- *   Let's Talk       DevelopmentCheckIns   "How's it going?" for a skill the family is already working on.
+ * Two-tab redesign (docs/ios/TWO_TAB_REDESIGN.md): the development stages are invisible. No stage names, indicators
+ * or progressions; parents see a conversation and plain next steps. The engine, its valid decisions and its records
+ * are unchanged.
+ *
+ *   Everyone's Part  DevelopmentConversation  ONE conversation first: the child and what they're practicing, "What
+ *                                             went well?", the engine's own question with its own answers, then our
+ *                                             next step. Everyone else's next steps stay one tap away
+ *                                             (DevelopmentNextSteps with `exclude`), each with its question too.
+ *   Let's Talk       DevelopmentCheckIns   the older placement of the question (still exported, no longer used by
+ *                                         WeeklyMeeting).
  *   Everyone's Part  DevelopmentNextSteps  per child: who is learning what, how to help, and ONE obvious action.
  *                                          Active: Keep practicing; stage changes behind "Change how we're
  *                                          practicing" (only valid moves); Edit routine and Pause as text actions.
@@ -20,8 +28,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { MAWL_STAGES, type MawlStage } from '../../lib/family-development/framework';
 import {
-  HAND_OVER_LABEL, LAUNCH_CONFIRMATION, MAWL_LABEL, STAGE_SHORT, WATCH_DISTINCTION, advanceLabel, coachLine, keepLabel, practiceBackLabel,
-  suggestCoachLine,
+  HAND_OVER_LABEL, LAUNCH_CONFIRMATION, MAWL_LABEL, WATCH_DISTINCTION, advanceLabel, coachLine, keepLabel, practiceBackLabel,
+  startChoices, suggestCoachLine,
 } from '../../lib/family-development/language';
 import type { CheckInStep, DevelopmentPlan, SuggestStep } from '../../lib/family-development/engine';
 import { responsibilityCategoryOf } from '../../lib/family-development/engine';
@@ -31,10 +39,8 @@ import { newRecordId } from '../../lib/family-development/client';
 import type { MarkerColor } from '../../data/club/family-colors';
 import { Avatar } from '../app/ui';
 
-/** MAWL in a parent's words: the approved terms, one source (src/lib/family-development/language.ts). */
+/** Internal wording only (never rendered as a label; see the header). */
 export const STAGE_LABEL = MAWL_LABEL;
-/** Where a child starts with a new skill: the same four terms, Model first. */
-const START_STAGES: { stage: MawlStage; label: string }[] = MAWL_STAGES.map((stage) => ({ stage, label: MAWL_LABEL[stage] }));
 export const ERROR_TEXT: Record<DecideError, string> = {
   conflict: 'The other grown-up just changed this. Here’s the latest.',
   club_required: 'This part of the meeting is for Family Meeting Club members.',
@@ -91,11 +97,6 @@ function Result({ s }: { s: ReturnType<typeof useSave> }) {
   return null;
 }
 
-/** The small, consistent stage indicator. */
-function StagePill({ stage }: { stage: MawlStage }) {
-  return <span className="inline-flex items-center rounded-full bg-[var(--of-surface)] px-2 py-0.5 text-[0.75rem] font-semibold text-[var(--of-sage-ink)]" title={MAWL_LABEL[stage]} data-development-stage-pill={stage}>{STAGE_SHORT[stage]}</span>;
-}
-
 /** Sentence-case buttons, in the app's colors: one primary per card; everything else quieter. */
 const PRIMARY = 'of-btn !min-h-[44px] !px-4 !text-[0.92rem] !normal-case !tracking-normal';
 const SECONDARY = 'of-btn of-btn--soft !min-h-[44px] !px-4 !text-[0.92rem] !normal-case !tracking-normal';
@@ -105,20 +106,46 @@ const Chevron = () => <span aria-hidden="true" className="inline-flex size-4 ite
 
 // ------------------------------------------------------------------ Let's Talk
 
-function CheckInCard({ step, firstName, color, live, decide, onAccessLost }: { step: CheckInStep; firstName: string; color?: MarkerColor } & Pick<CoachProps, 'live' | 'decide' | 'onAccessLost'>) {
+function CheckInCard({ step, firstName, color, live, decide, onAccessLost, conversation = false }: { step: CheckInStep; firstName: string; color?: MarkerColor; conversation?: boolean } & Pick<CoachProps, 'live' | 'decide' | 'onAccessLost'>) {
   const id = step.record.id;
   const [variation, setVariation] = useState(false);
   const s = useSave(onAccessLost);
   const answer = (value: CheckValue) => s.run(value,
     () => decide(live.get(id) ?? step.record, { decision: 'check-in', check: { signal: step.question.signal, value, variation } }),
-    () => 'Noted. More on this in Everyone’s Part.',
+    () => (conversation ? 'Noted. Now choose your next step together.' : 'Noted. More on this in Everyone’s Part.'),
   );
+  if (conversation) {
+    // The question, then the engine's own answers as full-width choices (never assuming success).
+    return (
+      <fieldset className="mt-4" data-development-check-in={step.record.skillId} aria-busy={s.busy}>
+        <legend className="font-serif text-[1.2rem] leading-snug text-warm-ink" id={`dq-${id}`}>{step.question.text}</legend>
+        {!s.done && (
+          <div className="mt-2.5 space-y-2" role="group" aria-labelledby={`dq-${id}`}>
+            {step.question.answers.map((a) => (
+              <button key={a.value} type="button" disabled={s.busy}
+                className="flex min-h-[48px] w-full items-center gap-3 rounded-[9px] border border-[var(--of-rule)] bg-white px-3 text-left text-[0.95rem] disabled:opacity-60"
+                onClick={() => void answer(a.value)} data-development-answer={a.value}>
+                <span aria-hidden="true" className="inline-block size-5 shrink-0 rounded-full border-2 border-[var(--of-rule-strong)]" />
+                {s.pending === a.value ? 'Saving…' : a.label}
+              </button>
+            ))}
+            {step.record.stage === 'watch' && (
+              <label className="flex min-h-[44px] items-center gap-2 text-[0.88rem] text-warm-soft">
+                <input type="checkbox" className="size-5" checked={variation} onChange={(e) => setVariation(e.target.checked)} data-development-variation />
+                We tried it on a different kind of day
+              </label>
+            )}
+          </div>
+        )}
+        <Result s={s} />
+      </fieldset>
+    );
+  }
   return (
     <div className="border-t border-[var(--of-rule)] pt-3" data-development-check-in={step.record.skillId}>
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
         <Avatar name={firstName} color={color} size="sm" />
         <p className="min-w-0 text-[0.95rem]"><strong>{firstName}</strong> · {step.record.title}</p>
-        <StagePill stage={step.record.stage!} />
       </div>
       <p className="mt-2 text-[0.95rem]" id={`dq-${id}`}>{step.question.text}</p>
       {!s.done && (
@@ -158,7 +185,7 @@ export function DevelopmentCheckIns({ plan, live, decide, colors, onAccessLost }
  * An active responsibility: what they're learning, how to help, one obvious next action (keep practicing), the stage
  * changes behind "Change how we're practicing" (only the moves valid for this stage), and two quiet text actions.
  */
-function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost }: { step: CheckInStep; firstName: string } & Pick<CoachProps, 'live' | 'decide' | 'onAgreement' | 'onAccessLost'>) {
+function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost, hideTitle = false }: { step: CheckInStep; firstName: string; hideTitle?: boolean } & Pick<CoachProps, 'live' | 'decide' | 'onAgreement' | 'onAccessLost'>) {
   const rec = live.get(step.record.id) ?? step.record;
   const s = useSave(onAccessLost);
   const [editing, setEditing] = useState(false);
@@ -171,11 +198,12 @@ function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost 
     (r) => {
       if (r.agreement) onAgreement?.(r.agreement);
       setEditing(false);
-      const stage = r.record.stage ? `“${STAGE_LABEL[r.record.stage]}”` : '';
+      // What to do now, never which stage it is (stages stay invisible).
+      const now = r.record.stage ? coachLine(r.record.stage, firstName) : '';
       switch (decision) {
         // Only after the database confirmed it: the confirmation is the family's Launch decision, saved.
-        case 'advance': return r.record.status === 'launched' ? LAUNCH_CONFIRMATION : `Saved. Now: ${stage}.`;
-        case 'step-back': return `Saved. Back to ${stage}.`;
+        case 'advance': return r.record.status === 'launched' ? LAUNCH_CONFIRMATION : `Saved. This week: ${now}`;
+        case 'step-back': return `Saved. This week: ${now}`;
         case 'pause': return 'Paused. It’s off everyone’s list until you bring it back.';
         case 'dismiss': return 'Set aside. It’s off the list, and we won’t suggest it again.';
         case 'modify': return 'Saved your words, here and on the list.';
@@ -207,10 +235,7 @@ function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost 
   const prev = MAWL_STAGES[MAWL_STAGES.indexOf(stage) - 1];
   return (
     <div data-development-next={rec.skillId}>
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <p className="font-semibold">{rec.title}</p>
-        <StagePill stage={stage} />
-      </div>
+      {!hideTitle && <p className="font-semibold">{rec.title}</p>}
       <p className="mt-1.5 text-[0.95rem] leading-relaxed">{coachLine(stage, firstName)}</p>
       {step.watchVariation && <p className="mt-1.5 text-[0.9rem] text-warm-soft" data-development-variation-suggestion>This week, try a different kind of day: {lower(step.watchVariation)}</p>}
       {step.safety && <p className="mt-1.5 text-[0.85rem] text-warm-soft">{step.safety}</p>}
@@ -225,8 +250,7 @@ function CheckInNext({ step, firstName, live, decide, onAgreement, onAccessLost 
               <div className="space-y-3 pb-1 pt-1">
                 {canBack && back && prev && (
                   <div>
-                    <button type="button" disabled={s.busy} className={SECONDARY} onClick={() => void act('step-back')} data-development-decision="step-back" aria-describedby={`back-${rec.id}`}>{label('step-back', back)}</button>
-                    <p id={`back-${rec.id}`} className="mt-1 text-[0.85rem] text-warm-soft">Back to “{MAWL_LABEL[prev]}”.</p>
+                    <button type="button" disabled={s.busy} className={SECONDARY} onClick={() => void act('step-back')} data-development-decision="step-back">{label('step-back', back)}</button>
                   </div>
                 )}
                 {canAdvance && (
@@ -306,9 +330,9 @@ function SuggestNext({ step, memberId, firstName, decide, onAgreement, onAccessL
             <div className="space-y-3 pb-1 pt-1">
               {step.why[0] && <p className="text-[0.85rem] text-warm-soft" data-development-why>{step.why[0]}</p>}
               <fieldset>
-                <legend className="text-[0.85rem] text-warm-soft">Where is {firstName} with this?</legend>
-                <div className="mt-1 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={`Where is ${firstName} with this?`}>
-                  {START_STAGES.map((x) => (
+                <legend className="text-[0.85rem] text-warm-soft">How much help will {firstName} need at first?</legend>
+                <div className="mt-1 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label={`How much help will ${firstName} need at first?`}>
+                  {startChoices(firstName).map((x) => (
                     <button key={x.stage} type="button" role="radio" aria-checked={stage === x.stage} onClick={() => setStage(x.stage)} className={`min-h-[44px] rounded-[8px] border px-3 text-left text-[0.9rem] ${stage === x.stage ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white'}`} data-development-stage={x.stage}>{x.label}</button>
                   ))}
                 </div>
@@ -338,12 +362,54 @@ function SuggestNext({ step, memberId, firstName, decide, onAgreement, onAccessL
   );
 }
 
-export function DevelopmentNextSteps({ plan, live, decide, colors, onAgreement, onAccessLost }: CoachProps) {
-  const people = plan.people.filter((p) => p.step);
-  if (!people.length) return null;
+/** The person Everyone's Part talks about first: a check-in on something already being practiced, else a new idea. */
+export function leadPerson(plan: DevelopmentPlan) {
+  return plan.people.find((p) => p.step?.kind === 'check-in' && !(p.step as CheckInStep).agreementRemoved)
+    ?? plan.people.find((p) => p.step) ?? null;
+}
+
+/**
+ * Everyone's Part, the one conversation (direction: the approved mockup's right screen). A child already practicing
+ * something: their name and what it is, "What went well?" (said out loud, the child first; nothing to type), the
+ * engine's own question with its own answers, then our next step. Nobody practicing anything yet: the one new idea.
+ */
+export function DevelopmentConversation({ plan, live, decide, colors, onAgreement, onAccessLost }: CoachProps) {
+  const lead = leadPerson(plan);
+  if (!lead?.step) return null;
+  const check = lead.step.kind === 'check-in' ? (lead.step as CheckInStep) : null;
   return (
-    <div className="mb-5" data-development-next-steps>
-      <p className="of-eyebrow">One next step each</p>
+    <section className="mb-5 rounded-[12px] border border-[var(--of-rule)] bg-white p-4 sm:p-5" aria-labelledby="dev-talk-h" data-development-conversation={lead.firstName}>
+      <div className="flex items-center gap-3">
+        <Avatar name={lead.firstName} color={colors[lead.memberId]} />
+        <span className="min-w-0">
+          <span id="dev-talk-h" className="block font-serif text-[1.45rem] leading-tight text-warm-ink">{lead.firstName}</span>
+          <span className="block text-[0.95rem] text-warm-soft">{check ? check.record.title : 'Something new to learn'}</span>
+        </span>
+      </div>
+      {check ? (
+        <>
+          <div className="mt-4 rounded-[9px] bg-[var(--of-surface)] px-4 py-3" data-development-went-well>
+            <p className="font-serif text-[1.2rem] leading-snug">What went well?</p>
+            <p className="mt-1 text-[0.92rem] text-warm-soft">{lead.firstName} answers first. Then add one thing you noticed.</p>
+          </div>
+          <CheckInCard step={check} firstName={lead.firstName} color={colors[lead.memberId]} live={live} decide={decide} onAccessLost={onAccessLost} conversation />
+          <div className="mt-5 border-t border-[var(--of-rule)] pt-4" data-development-our-next-step>
+            <p className="of-eyebrow">Our next step</p>
+            <div className="mt-2"><CheckInNext step={check} firstName={lead.firstName} live={live} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} hideTitle /></div>
+          </div>
+        </>
+      ) : (
+        <div className="mt-4"><SuggestNext step={lead.step as SuggestStep} memberId={lead.memberId} firstName={lead.firstName} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} /></div>
+      )}
+      <p className="mt-4 text-[0.85rem] text-warm-soft">Everyone gets a say. You decide when they’re ready; nothing moves forward on its own.</p>
+    </section>
+  );
+}
+
+export function DevelopmentNextSteps({ plan, live, decide, colors, onAgreement, onAccessLost, exclude }: CoachProps & { exclude?: string }) {
+  const people = plan.people.filter((p) => p.step && p.memberId !== exclude);
+  if (!people.length) return null;
+  const list = (
       <ul className="mt-1">
         {people.map((p) => (
           <li key={p.memberId} className="border-b border-[var(--of-rule)] py-4 last:border-b-0" data-development-person={p.firstName}>
@@ -352,11 +418,28 @@ export function DevelopmentNextSteps({ plan, live, decide, colors, onAgreement, 
               <span className="font-semibold">{p.firstName}{p.age !== null ? <span className="font-normal text-warm-soft"> · {p.age}</span> : null}</span>
             </div>
             {p.step!.kind === 'check-in'
-              ? <CheckInNext step={p.step as CheckInStep} firstName={p.firstName} live={live} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} />
+              ? <>
+                  {exclude !== undefined && !(p.step as CheckInStep).agreementRemoved && <CheckInCard step={p.step as CheckInStep} firstName={p.firstName} live={live} decide={decide} onAccessLost={onAccessLost} conversation />}
+                  <div className={exclude !== undefined ? 'mt-3' : ''}><CheckInNext step={p.step as CheckInStep} firstName={p.firstName} live={live} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} /></div>
+                </>
               : <SuggestNext step={p.step as SuggestStep} memberId={p.memberId} firstName={p.firstName} decide={decide} onAgreement={onAgreement} onAccessLost={onAccessLost} />}
           </li>
         ))}
       </ul>
+  );
+  // Beside the one conversation, everyone else's next steps wait behind one tap (never a survey of everyone).
+  if (exclude !== undefined) {
+    return (
+      <details className="group mb-5 border-t border-[var(--of-rule)]" data-development-next-steps data-development-others>
+        <summary className={`${DISCLOSURE} min-h-[48px]`}><Chevron />Next steps for {people.map((p) => p.firstName).join(', ')}</summary>
+        {list}
+      </details>
+    );
+  }
+  return (
+    <div className="mb-5" data-development-next-steps>
+      <p className="of-eyebrow">One next step each</p>
+      {list}
       <p className="text-[0.85rem] text-warm-soft">You decide every step. Nothing moves forward on its own.</p>
     </div>
   );

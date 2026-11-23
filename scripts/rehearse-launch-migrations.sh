@@ -17,7 +17,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 DB=launch_migrations_rehearsal
 export PGHOST=${PGHOST:-localhost} PGPORT=${PGPORT:-5432} PGUSER=${PGUSER:-postgres}
-PENDING='^20261130|^2026120[234]|^20261207|^20261208|^20261209|^20261210|^20261211'
+PENDING='^20261130|^2026120[234]|^20261207|^20261208|^20261209|^20261210|^20261211|^20261212'
 M1207=supabase/migrations/20261207000000_family_development_records.sql
 M1208=supabase/migrations/20261208000000_club_complimentary_access.sql
 FD=supabase/rollout/family-development
