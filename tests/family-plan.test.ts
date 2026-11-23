@@ -107,10 +107,34 @@ describe('the meeting fits the plan into its four parts', () => {
   it('the four approved parts are unchanged', () => {
     expect(src('src/data/club/meeting-guide.ts')).toMatch(/Our Focus[\s\S]*Let’s Talk[\s\S]*Everyone’s Part[\s\S]*Let’s Practice/);
   });
-  it('"We have a plan.": getting-ready parts sit under their priority; then what was agreed in THIS meeting (nothing repeated)', () => {
+  it('"We have a plan.": what THIS meeting decided: three priorities with prep under them, new agreements only, one link to the rest', () => {
     expect(plan).toMatch(/data-plan-prep/);
-    expect(plan).toMatch(/const fresh = newIds && newIds\.size/);
+    expect(plan).toMatch(/const fresh = byKids\(newIds && newIds\.size/);
+    expect(plan).toMatch(/const top = current\.slice\(0, SHOWN\);/);
+    expect(plan).toMatch(/Nothing new this week\. Everyone keeps the parts they already have\./);
+    expect(plan).toMatch(/data-plan-all-parts>All of everyone’s parts \(\{total\}\)/);
+    // The standing list is never on screen (only the printout carries it, compactly).
+    expect(plan).toMatch(/className="hidden print:block" data-plan-print-parts/);
+    expect(plan).not.toMatch(/parts\.slice\(-1\)/);
     expect(m).toMatch(/<PlanSummary current=\{plan\} agreed=\{agreed\} newIds=\{newIds\}/);
+  });
+  it('Our Focus asks what matters, and keeps the usual week one tap away (grouped, never ranked or chosen for them)', () => {
+    expect(plan).toMatch(/What matters most this week\?/);
+    expect(plan).toMatch(/Look ahead together\. Is there anything we need to prepare for, decide about, or handle as a family\?/);
+    expect(plan).toMatch(/const special = items\.filter\(\(x\) => x\.more === 0\);/);
+    expect(plan).toMatch(/data-meeting-week-usual/);
+    const review = plan.slice(plan.indexOf('export function WeekReview'), plan.indexOf('export function GettingReady'));
+    expect(review).not.toMatch(/\.sort\(/); // no ranking
+  });
+  it('the guided meeting is focused: the tabs step aside, Exit stays, progress is saved at each step', () => {
+    expect(m).toMatch(/document\.documentElement\.toggleAttribute\('data-meeting-active', guided\)/);
+    expect(m).toMatch(/const guided = inMeeting && !planDone;/);
+    expect(m).toMatch(/data-meeting-exit/);
+    expect(m).toMatch(/setProgress\(recordStep\(scope, i\)\)/);
+    const css = src('src/styles/global.css');
+    expect(css).toMatch(/html\[data-meeting-active\] :is\(nav\[data-app-tabbar\], nav\[data-app-topnav\]\) \{\s*display: none !important;/);
+    expect(css).toMatch(/padding-bottom: calc\(0\.625rem \+ env\(safe-area-inset-bottom\)\)/);
+    expect(css).toMatch(/\[data-weekly-meeting\]:has\(:is\(input, textarea, select\):focus\) \[data-meeting-step-actions\] \{\s*position: static;/);
   });
   it('"We have a plan.": priorities and who owns what, printable; no badges, scores, streaks or confetti', () => {
     expect(plan).toMatch(/We have a plan\./);
@@ -125,9 +149,17 @@ describe('Today: a curated plan, not a household list', () => {
     const order = ['<FocusPanel', '<OurPriorities', '<Responsibilities', 'data-today-shortcuts', '<NextMeeting'].map((x) => t.indexOf(x));
     expect(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1]))).toBe(true);
   });
-  it('one standing part per person, about six rows; the full list one tap away', () => {
-    expect(t).toMatch(/const standing = kidsFirst\.slice\(0, Math\.max\(3, 6 - todays\.length\)\);/);
-    expect(t).toMatch(/const x = p\.parts\[p\.parts\.length - 1\];/);
+  it('one standing part per person, the same part on one row, about six rows; the full list one tap away', async () => {
+    expect(t).toMatch(/const standing = standingRows\(kidsFirst\)\.slice\(0, Math\.max\(3, 6 - todays\.length\)\);/);
+    const { standingRows, names } = await import('../src/components/app/TodayDashboard');
+    const part = (id: string, text: string, when?: string) => ({ id, text, category: 'school-prep' as const, ownerIds: [], ...(when ? { when } : {}) });
+    const kids = ['Amara', 'Ben', 'Cleo', 'Dami', 'Eli', 'Femi'].map((n, i) => ({ memberId: n, name: n, parts: [part(`old${i}`, 'Clear my dishes'), part(`p${i}`, i % 2 ? 'Pack my bag' : 'Pack my bag (weekdays)', 'After school')] }));
+    const rows = standingRows(kids);
+    expect(rows.map((r) => [r.part.text, r.people.length])).toEqual([['Pack my bag (weekdays)', 3], ['Pack my bag', 3]]);
+    expect(names(['Amara', 'Cleo', 'Eli'])).toBe('Amara, Cleo and Eli');
+    expect(names(['A', 'B', 'C', 'D', 'E'])).toBe('A, B and 3 more');
+    // Different "when" stays apart: never merges what isn't the same agreement.
+    expect(standingRows([{ memberId: 'a', name: 'A', parts: [part('1', 'Feed the dog', 'Morning')] }, { memberId: 'b', name: 'B', parts: [part('2', 'Feed the dog', 'Evening')] }])).toHaveLength(2);
     expect(t).toMatch(/href="\/app\/family\/responsibilities" className="of-tile-action mt-3" data-all-parts/);
   });
   it('priorities show only once the database has them; before a first meeting or after a missed one, a plain line', () => {

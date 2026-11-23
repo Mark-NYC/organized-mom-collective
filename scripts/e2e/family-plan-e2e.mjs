@@ -81,21 +81,44 @@ await shot(ana, '01-today-before-meeting');
 
 // ------------------------------------------------------------------ 2. Our Focus: look ahead, choose what matters
 await ana.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' });
+check('Family Meeting landing: the app\'s tabs are there', await ana.locator('[data-app-tabbar]').isVisible());
 await ana.click('[data-meeting-start]');
 await ana.waitForSelector('[data-meeting-priorities]', { timeout: 15000 });
+check('Our Focus asks what matters most, in the family\'s words', /What matters most this week\?/.test(await ana.locator('[data-meeting-what-matters]').innerText())
+  && /prepare for, decide about, or handle as a family/.test(await ana.locator('[data-meeting-week-prompt]').innerText()));
+check('the routine week (repeating events like Preschool) is grouped one tap away, not listed as equals', (await ana.locator('[data-meeting-week-usual]:not([open])').count()) === 1
+  && (await ana.locator('[data-meeting-week-highlights] [data-meeting-week-item="Preschool"]').count()) === 0);
+// The guided meeting is focused: no tabs, Back/Next at the bottom, Exit at the top.
+const focus = await ana.evaluate(() => {
+  const bar = document.querySelector('[data-meeting-step-actions]').getBoundingClientRect();
+  return { tabs: getComputedStyle(document.querySelector('[data-app-tabbar]')).display, barBottom: Math.round(bar.bottom), h: innerHeight };
+});
+check('guided meeting: the tabs step aside; Back/Next at the bottom of the screen; Exit meeting at the top', focus.tabs === 'none' && Math.abs(focus.barBottom - focus.h) <= 1
+  && (await ana.locator('[data-meeting-exit]').isVisible()), JSON.stringify(focus));
+// Typing (the keyboard up): Back/Next go back into the page, so they never cover the field.
+await ana.focus('[data-priority-note]');
+check('typing a priority: Back/Next return to the page flow (never over the field)', (await ana.locator('[data-meeting-step-actions]').evaluate((el) => getComputedStyle(el).position)) === 'static');
+await ana.locator('[data-priority-note]').blur();
 const weekCount = await ana.locator('[data-highlight]').count();
 check('Our Focus: the coming week, each with Highlight (nothing pre-chosen)', weekCount >= 3 && (await ana.locator('[data-highlight][aria-pressed="true"]').count()) === 0, `${weekCount} events`);
 // What a family would pick: a one-off they need to get ready for (the field trip slip), else the first thing.
 const trip = ana.locator('[data-highlight*="Field trip"]').first();
 const first = (await trip.count()) ? trip : ana.locator('[data-highlight]').first();
 const chosenTitle = await first.getAttribute('data-highlight');
-await first.click();
+await tap(ana, `[data-highlight="${chosenTitle}"]`);
 await ana.waitForSelector(`[data-meeting-priority="${chosenTitle}"]`, { timeout: 10000 });
 await ana.fill('[data-priority-note]', 'Calmer mornings, together');
 await ana.click('[data-priority-add]');
 await ana.waitForSelector('[data-meeting-priority="Calmer mornings, together"]', { timeout: 10000 });
 check('Ana highlights an event and adds a few words: saved for the household', (await priorities()) === `event:${chosenTitle}|note:Calmer mornings, together`, await priorities());
-await shot(ana, '02-our-focus-priorities');
+await ana.evaluate(() => window.scrollTo(0, 0));
+await shot(ana, '02-our-focus-priorities', false);
+// Exit mid-meeting: the tabs come back and nothing is lost (Continue opens the same part).
+await ana.click('[data-meeting-step="1"]'); await settle(ana, 500);
+await ana.click('[data-meeting-exit]'); await settle(ana, 500);
+check('Exit meeting: back on the landing with the tabs, and Continue keeps the family\'s place', (await ana.locator('[data-app-tabbar]').isVisible()) && /Continue: Let’s Talk/.test(await ana.locator('[data-meeting-continue]').innerText().catch(() => '')));
+await ana.click('[data-meeting-continue]'); await settle(ana, 500);
+check('…and Continue opens Let’s Talk again, tabs hidden', (await ana.getAttribute('[data-meeting-part]', 'data-meeting-part')) === 'Let’s Talk' && (await ana.locator('[data-app-tabbar]').evaluate((el) => getComputedStyle(el).display)) === 'none');
 // Everyone's Part: getting ready is there for the highlighted event (optional).
 await ana.click('[data-meeting-step="2"]'); await settle(ana, 800);
 check('Everyone\'s Part: "Getting ready for our priorities" lists the highlighted event', /Getting ready for our priorities/i.test(await ana.locator('[data-getting-ready]').innerText().catch(() => '')) && (await ana.locator(`[data-getting-ready-item="${chosenTitle}"]`).count()) === 1);
@@ -104,7 +127,10 @@ await ana.click('[data-meeting-step="3"]'); await settle(ana, 500);
 await ana.click('[data-meeting-finish]');
 await ana.waitForSelector('[data-plan-summary]', { timeout: 10000 });
 const summary = await ana.locator('[data-plan-summary]').innerText();
-check('Finish: "We have a plan." with this week\'s priorities and who owns what', /We have a plan\./.test(summary) && summary.includes(chosenTitle) && summary.includes('Calmer mornings, together') && ['Sofia', 'Mateo', 'Elena'].every((n) => summary.includes(n)));
+check('Finish: "We have a plan." with this week\'s priorities; nothing new agreed, so none invented, and the rest one tap away', /We have a plan\./.test(summary) && summary.includes(chosenTitle) && summary.includes('Calmer mornings, together')
+  && (await ana.getAttribute('[data-plan-parts]', 'data-plan-parts-kind')) === 'none' && /Nothing new this week/.test(summary) && (await ana.locator('[data-plan-all-parts]').count()) === 1
+  && !/Clear my dishes|Drive Sofia to soccer/.test(summary));
+check('"We have a plan.": the tabs are back (the meeting is over)', await ana.locator('[data-app-tabbar]').isVisible());
 check('…restrained: no badges, scores, streaks or confetti; printable', !/badge|score|streak|points|confetti/i.test(summary) && (await ana.locator('[data-plan-print]').count()) === 1);
 await shot(ana, '04-we-have-a-plan');
 
@@ -213,10 +239,24 @@ for (const [what, who] of [['Get the car ready', 'Luis'], ['Pack my clothes', 'M
 check('Everyone\'s Part: the family agrees who gets ready for the trip (Luis, Mateo, Sofia)', (await sql(`select count(*) from public.calendar_event_tasks where event_uid = 'lake@rivera'`)) === '3');
 await ana.locator('[data-getting-ready-item="Family trip to the lake"]').evaluate((el) => el.scrollIntoView({ block: 'start' }));
 await shot(ana, '03b-getting-ready-trip', false);
+// A new standing part agreed in this meeting (the ordinary agreement form).
+await ana.locator('[data-add-agreement-section]').evaluate((d) => { d.open = true; });
+await ana.fill('[data-add-agreement] input', 'Feed the cat before school');
+await tap(ana, '[data-add-agreement] [data-owner-chip="Elena"]');
+await tap(ana, '[data-save-new-agreement]'); await settle(ana, 1200);
 await ana.click('[data-meeting-step="3"]'); await settle(ana, 500);
 await tap(ana, '[data-meeting-finish]'); await ana.waitForSelector('[data-plan-summary]');
 const plan2 = await ana.locator('[data-plan-priorities]').innerText();
+const whole2 = await ana.locator('[data-plan-summary]').innerText();
 check('"We have a plan.": the trip once, with who gets ready for it under it', (plan2.match(/Family trip to the lake/g) ?? []).length === 1 && /Luis · Get the car ready/.test(plan2) && /Mateo · Pack my clothes/.test(plan2));
+check('"We have a plan.": only what was agreed today (Elena\'s new part), prep not repeated, no standing list', (await ana.getAttribute('[data-plan-parts]', 'data-plan-parts-kind')) === 'new'
+  && /What we agreed today/i.test(whole2) && /Feed the cat before school/.test(whole2) && (whole2.match(/Get the car ready/g) ?? []).length === 1 && !/Clear my dishes|Drive Sofia to soccer/.test(whole2), `${await ana.getAttribute('[data-plan-parts]', 'data-plan-parts-kind')} :: ${whole2.replace(/\s+/g, ' ').slice(0, 400)}`);
+const planHeight = await ana.evaluate(() => document.documentElement.scrollHeight);
+check('"We have a plan." fits about one phone screen and a bit', planHeight < 1700, String(planHeight));
+await ana.emulateMedia({ media: 'print' });
+const printed = await ana.locator('[data-plan-summary]').innerText();
+check('the printed plan adds everyone\'s standing parts, compactly (one page)', /Clear my dishes/.test(printed) && (await ana.evaluate(() => document.documentElement.scrollHeight)) < 1600);
+await ana.emulateMedia({ media: 'screen' });
 await shot(ana, '04b-we-have-a-plan-with-trip');
 await ana.goto(`${base}/app`, { waitUntil: 'networkidle' }); await ana.waitForSelector('[data-today-priority="Family trip to the lake"]');
 check('Today: the trip as a priority, "0 of 3 ready"', /0 of 3 ready/.test(await ana.locator('[data-today-priority="Family trip to the lake"]').innerText()));
@@ -304,11 +344,36 @@ for (const who of [...kids, 'Ada', 'Obi']) for (const j of jobs.slice(0, 3)) {
 await bigPage.goto(`${base}/app`, { waitUntil: 'networkidle' }); await bigPage.waitForSelector('[data-today-responsibilities]'); await settle(bigPage, 2000);
 const bigRows = await bigPage.locator('[data-today-responsibilities] .of-row').count();
 const allLink = await bigPage.locator('[data-all-parts]').innerText().catch(() => '');
-check('a family of eight with 24 agreements: Today shows six rows, children first, and the rest one tap away', bigRows === 6 && /\(24\)/.test(allLink)
-  && (await bigPage.locator('[data-part-person]').first().getAttribute('data-part-person')) === 'Amara', `${bigRows} rows · ${allLink}`);
+const firstGroup = await bigPage.locator('[data-part-person]').first().getAttribute('data-part-person');
+check('a family of eight with 24 agreements: the same part on one row (six bag-packers are two lines), children first, the rest one tap away', bigRows >= 2 && bigRows <= 6 && /\(24\)/.test(allLink)
+  && /^Amara, Cleo, Eli/.test(firstGroup ?? '') && (await bigPage.locator('[data-part-people="1"]').count()) === 0, `${bigRows} rows · ${firstGroup} · ${allLink}`);
 check('long list: no sideways scroll', (await layout(bigPage)).overflow <= 0);
 await shot(bigPage, '08-long-list-today');
 await bigCtx.close();
+
+// ------------------------------------------------------------------ 3f. A new household: one shared thing first, no calendar needed
+const fresh = `fresh-${Date.now()}@e2e.test`;
+const freshCtx = await browser.newContext({ ...devices['iPhone 15 Pro'], timezoneId: 'America/Chicago' });
+freshCtx.on('page', (p) => p.on('pageerror', (e) => errors.push(`fresh: ${e.message}`)));
+const fp = await freshCtx.newPage();
+await fp.goto(`${base}/app/sign-in`, { waitUntil: 'networkidle' });
+await fp.fill('#ow-email', fresh); await fp.click('button:has-text("Email me a code")'); await fp.fill('#ow-code', '123456');
+await fp.click('button[type="submit"]:has-text("Sign in")');
+await fp.waitForFunction(() => Boolean(localStorage.getItem('omc:account:session')), null, { timeout: 15000 });
+await rpc(await tokenOf(fp), 'club_household_save', { p_display_name: 'The Parkers', p_preferences: {}, p_members: [{ first_name: 'Jess', kind: 'adult', role: 'parent', is_account_holder: true }, { first_name: 'Sam', kind: 'adult', role: 'partner' }, { first_name: 'Max', kind: 'child', role: 'child', birth_year: 2018, birth_month: 5 }, { first_name: 'Lily', kind: 'child', role: 'child', birth_year: 2021, birth_month: 9 }] });
+await fp.goto(`${base}/app`, { waitUntil: 'networkidle' }); await fp.waitForSelector('[data-start-here="share"]', { timeout: 15000 }); await settle(fp, 1000);
+const freshText = await fp.locator('main').innerText();
+check('new household: Today starts with one thing the family can share, not the calendar', /Start with one thing your family can share\./.test(freshText) && !/Put this week on the family calendar/.test(freshText)
+  && (await fp.locator('[data-today-priorities], [data-today-responsibilities]').count()) === 0);
+await tap(fp, '[data-first-win-who="Max"]');
+await shot(fp, '11-new-family-today');
+const idea = await fp.locator('[data-first-win-idea]').first().getAttribute('data-first-win-idea');
+await tap(fp, `[data-first-win-idea="${idea}"]`);
+await tap(fp, '[data-first-win-save]'); await fp.waitForSelector('[data-start-here="meeting"]', { timeout: 15000 }); await settle(fp, 1500);
+check('…one tap for who, one for what, "We agreed": a real agreement, on Today for everyone; next, the first meeting', (await sql(`select count(*) from public.club_responsibilities r join public.household_adults a on a.household_id = r.household_id join auth.users u on u.id = a.user_id where u.email = '${fresh}' and r.status = 'confirmed' and r.deleted_at is null`)) === '1'
+  && (await fp.locator(`[data-today-responsibilities] [data-agreement]`).innerText()) === idea, idea);
+await shot(fp, '12-new-family-after-first-win');
+await freshCtx.close();
 
 // ------------------------------------------------------------------ 4. Layout and boundaries
 for (const [page, name] of [[ana, '393'], [luis, '430']]) {

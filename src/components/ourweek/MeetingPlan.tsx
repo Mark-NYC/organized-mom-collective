@@ -73,8 +73,16 @@ export function WeekReview({ week, priorities, current, weekStart, colors }: {
       </li>
     );
   };
+  // What happens every day stays one tap away, so a routine school run never looks as weighty as a trip. Grouped by
+  // whether it repeats this week, never ranked: the family decides what matters.
+  const special = items.filter((x) => x.more === 0);
+  const usual = items.filter((x) => x.more > 0);
   return (
-    <div className="mt-5 space-y-4">
+    <div className="mt-5 space-y-4" data-meeting-what-matters>
+      <div>
+        <p className="font-serif text-[1.3rem] leading-snug text-warm-ink" data-meeting-what-matters-title>What matters most this week?</p>
+        <p className="mt-1 text-[0.95rem] leading-relaxed" data-meeting-week-prompt>Look ahead together. Is there anything we need to prepare for, decide about, or handle as a family?</p>
+      </div>
       {priorities?.available && (
         <div className="rounded-[9px] border border-[var(--of-month-accent)]/40 bg-white p-3 sm:p-4" data-meeting-priorities data-chosen={chosen.length}>
           <div className="flex items-baseline justify-between gap-3">
@@ -91,13 +99,13 @@ export function WeekReview({ week, priorities, current, weekStart, colors }: {
               ))}
             </ul>
           ) : (
-            <p className="mt-1.5 text-[0.9rem] text-warm-soft">Pick the two or three things the whole family needs to know about or get ready for.</p>
+            <p className="mt-1.5 text-[0.9rem] text-warm-soft" data-priorities-empty>Nothing chosen yet. Choose what needs the whole family this week, from the calendar below or in a few words.</p>
           )}
           {rule.note && <p className="mt-1.5 text-[0.85rem] text-warm-soft" data-priority-rule>{rule.note}</p>}
           {rule.canAdd && (
             <form className="mt-3 flex gap-2" onSubmit={(e) => { e.preventDefault(); void run('note', async () => { const err = await priorities.addNote(note, weekStart); if (!err) setNote(''); return err; }); }} data-priority-note-form>
-              <label className="sr-only" htmlFor="priority-note">Something else that matters this week</label>
-              <input id="priority-note" value={note} maxLength={MAX_NOTE} onChange={(e) => setNote(e.target.value)} placeholder="Something else that matters this week" className="min-h-[44px] min-w-0 flex-1 rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem]" data-priority-note />
+              <label className="sr-only" htmlFor="priority-note">Something that matters this week, in a few words</label>
+              <input id="priority-note" value={note} maxLength={MAX_NOTE} onChange={(e) => setNote(e.target.value)} placeholder="In a few words: Decide on Sofia’s camp" className="min-h-[44px] min-w-0 flex-1 rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem]" data-priority-note />
               <button type="submit" disabled={!note.trim() || busy !== null} className="of-btn of-btn--soft !min-h-[44px] !px-3 !normal-case !tracking-normal" data-priority-add>Add</button>
             </form>
           )}
@@ -106,16 +114,26 @@ export function WeekReview({ week, priorities, current, weekStart, colors }: {
       )}
       {week.count > 0 && (
         <div className="rounded-[9px] border border-[var(--of-rule)] bg-white/70 p-3 sm:p-4" data-meeting-week>
-          <p className="of-eyebrow">Coming up this week</p>
-          <p className="mt-1 text-[0.9rem] text-warm-soft" data-meeting-week-prompt>Read it out loud. Ask everyone: what’s coming up that we need to know about or get ready for?</p>
-          <ul className="mt-2 text-[0.9rem]" data-meeting-week-highlights>{items.slice(0, 6).map(row)}</ul>
-          {items.length > 6 && (
+          <p className="of-eyebrow">On the calendar this week</p>
+          {special.length > 0
+            ? <ul className="mt-2 text-[0.9rem]" data-meeting-week-highlights>{special.slice(0, 6).map(row)}</ul>
+            : <p className="mt-1 text-[0.9rem] text-warm-soft">Just the usual week.</p>}
+          {special.length > 6 && (
             <details className="mt-2 border-t border-[var(--of-rule)] pt-2" data-meeting-week-all>
-              <summary className="flex min-h-[44px] cursor-pointer items-center text-sm font-semibold">The rest of the week ({items.length - 6} more)</summary>
-              <ul className="text-[0.88rem]">{items.slice(6).map(row)}</ul>
+              <summary className="flex min-h-[44px] cursor-pointer items-center text-sm font-semibold">More this week ({special.length - 6})</summary>
+              <ul className="text-[0.88rem]">{special.slice(6).map(row)}</ul>
+            </details>
+          )}
+          {usual.length > 0 && (
+            <details className="mt-2 border-t border-[var(--of-rule)] pt-2" data-meeting-week-usual>
+              <summary className="flex min-h-[44px] cursor-pointer items-center text-sm font-semibold">Our usual week ({usual.length}: {usual.slice(0, 2).map((x) => x.item.title).join(', ')}{usual.length > 2 ? '…' : ''})</summary>
+              <ul className="text-[0.88rem]">{usual.map(row)}</ul>
             </details>
           )}
         </div>
+      )}
+      {week.count === 0 && (
+        <p className="text-[0.9rem] text-warm-soft" data-meeting-week-empty>Nothing on the family calendar this week. Talk it through, and add what matters in a few words. If it helps to look ahead together next time, <a href="/app/family-calendar" className="underline underline-offset-4">put a few plans on the calendar</a>.</p>
       )}
     </div>
   );
@@ -165,8 +183,10 @@ export function GettingReady({ current, external, own, tasks, household, colors 
 }
 
 /**
- * "We have a plan.": each priority once, with its getting-ready parts under it; then what each person agreed in THIS
- * meeting (or, if nothing new, each person's most recent part). Nothing repeated, nothing gamified; printable.
+ * "We have a plan.": what THIS meeting decided, not the household's whole list. This week's priorities (three
+ * prominently, a busy week's fourth and fifth on one line) with their getting-ready parts under them; then the
+ * responsibilities agreed in this meeting; then one compact link to everyone's standing parts. Nothing invented,
+ * nothing repeated, nothing gamified. The printout adds everyone's standing parts in a compact list (one page).
  */
 export function PlanSummary({ current, agreed, newIds, external, tasks, household, colors, onAgain }: {
   current: Resolved[]; agreed: PersonAgreements[]; newIds: Set<string> | null; external: CalendarEvent[]; tasks: EventTasks; household: Household | null; colors: Record<string, MarkerColor>; onAgain: () => void;
@@ -177,12 +197,14 @@ export function PlanSummary({ current, agreed, newIds, external, tasks, househol
     const ext = r.priority.source === 'imported' ? external.find((e) => e.external?.uid === r.priority.event_uid && e.external?.instance_key === r.priority.instance_key) : undefined;
     return ext && tasks.available ? tasksFor(tasks.tasks, ext) : [];
   };
-  const fresh = newIds && newIds.size ? agreed.map((p) => ({ ...p, parts: p.parts.filter((x) => newIds.has(x.id)) })).filter((p) => p.parts.length) : [];
   // Children first, as on Today: their parts are the ones the family is handing over.
   const kid = (id: string) => people.find((m) => m.id === id)?.kind === 'child';
-  const parts = (fresh.length ? fresh : agreed.map((p) => ({ ...p, parts: p.parts.slice(-1) })))
-    .sort((a, b) => Number(kid(b.memberId)) - Number(kid(a.memberId)));
+  const byKids = <T extends { memberId: string }>(xs: T[]) => [...xs].sort((a, b) => Number(kid(b.memberId)) - Number(kid(a.memberId)));
+  const fresh = byKids(newIds && newIds.size ? agreed.map((p) => ({ ...p, parts: p.parts.filter((x) => newIds.has(x.id)) })).filter((p) => p.parts.length) : []);
   const total = new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size;
+  const top = current.slice(0, SHOWN);
+  const also = current.slice(SHOWN);
+  const when = (r: Resolved) => (r.date ? ` · ${dayLabel(r.date)}${r.time ? ` · ${r.time}` : ''}` : '');
   return (
     <section className="space-y-5" aria-labelledby="plan-h" data-plan-summary>
       <header>
@@ -193,11 +215,11 @@ export function PlanSummary({ current, agreed, newIds, external, tasks, househol
         <div className="of-tile" data-plan-priorities>
           <p className="of-eyebrow">This week’s priorities</p>
           <ol className="mt-1">
-            {current.map((r, i) => {
+            {top.map((r, i) => {
               const prep = prepFor(r);
               return (
                 <li key={r.priority.id} className="border-b border-[var(--of-rule)] py-2.5 last:border-b-0" data-plan-priority={r.title}>
-                  <p className="text-[1rem]"><span className="mr-2 font-serif text-[var(--of-month-accent)]">{i + 1}</span><strong className="font-semibold">{r.title}</strong>{r.date ? <span className="text-warm-soft"> · {dayLabel(r.date)}{r.time ? ` · ${r.time}` : ''}</span> : null}</p>
+                  <p className="text-[1.05rem]"><span className="mr-2 font-serif text-[var(--of-month-accent)]">{i + 1}</span><strong className="font-semibold">{r.title}</strong><span className="text-warm-soft">{when(r)}</span></p>
                   {prep.length > 0 && (
                     <ul className="mt-1.5 space-y-1 pl-6" data-plan-prep>
                       {prep.map((t) => (
@@ -212,23 +234,34 @@ export function PlanSummary({ current, agreed, newIds, external, tasks, househol
               );
             })}
           </ol>
+          {also.length > 0 && <p className="mt-1 text-[0.88rem] text-warm-soft" data-plan-also>Also this week: {also.map((r) => r.title).join(', ')}</p>}
         </div>
       )}
-      {parts.length > 0 && (
-        <div className="of-tile" data-plan-parts data-plan-parts-kind={fresh.length ? 'new' : 'recent'}>
-          <p className="of-eyebrow">{fresh.length ? 'What we agreed today' : 'Everyone’s part'}</p>
+      <div className="of-tile" data-plan-parts data-plan-parts-kind={fresh.length ? 'new' : 'none'}>
+        <p className="of-eyebrow">{fresh.length ? 'What we agreed today' : 'Everyone’s parts'}</p>
+        {fresh.length ? (
           <ul className="of-rows mt-1">
-            {parts.map((p) => (
+            {fresh.map((p) => (
               <li key={p.memberId} className="of-row !items-start !gap-3" data-plan-person={p.name}>
                 <Avatar name={p.name} color={colors[p.memberId]} size="sm" />
                 <span className="min-w-0"><span className="of-row-title block">{p.name}</span>{p.parts.map((x) => <span key={x.id} className="block text-[0.92rem]">{x.text}{x.when ? <span className="text-warm-soft"> · {x.when}</span> : null}</span>)}</span>
               </li>
             ))}
           </ul>
-          {total > parts.reduce((n, p) => n + p.parts.length, 0) && <p className="mt-2 text-[0.85rem] text-warm-soft print:hidden">Everyone’s other parts are on <a href="/app/family/responsibilities" className="underline underline-offset-4">Who does what</a>.</p>}
-        </div>
-      )}
-      {!current.length && !parts.length && <p className="text-warm-soft">You talked it through together. That counts. Next time, pick one priority and one part each.</p>}
+        ) : (
+          <p className="mt-1.5 text-[0.95rem]" data-plan-no-new>{total ? 'Nothing new this week. Everyone keeps the parts they already have.' : current.length ? 'No standing parts yet. When you’re ready, each person can take one.' : 'You talked it through together. That counts. Next time, pick one priority and one part each.'}</p>
+        )}
+        {total > 0 && <a href="/app/family/responsibilities" className="of-tile-action mt-3 print:hidden" data-plan-all-parts>All of everyone’s parts ({total})</a>}
+        {/* On paper only: everyone's standing parts, compact, so the fridge copy is the whole plan on one page. */}
+        {total > 0 && (
+          <div className="hidden print:block" data-plan-print-parts>
+            <p className="of-eyebrow mt-4">Everyone’s parts</p>
+            <ul className="mt-1 text-[0.85rem] leading-snug">
+              {byKids(agreed).map((p) => <li key={p.memberId}><strong>{p.name}</strong>: {p.parts.map((x) => x.text).join('; ')}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
       <div className="flex flex-wrap items-center gap-3 print:hidden">
         <a href="/app" className="of-btn" data-plan-today>See it on Today</a>
         <button type="button" className="of-btn of-btn--soft" onClick={() => window.print()} data-plan-print>Print our plan</button>

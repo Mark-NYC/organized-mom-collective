@@ -62,7 +62,6 @@ const label = (list: { id: string; label: string }[], id: string) => list.find((
 
 /** Basic guidance for a family without the Club's month: the approved parts, with what to do when there's no monthly focus. */
 const FREE_TEXT: Record<string, string> = {
-  'Our Focus': 'Look at the week ahead together: what’s coming, and what does it need from us?',
   'Let’s Talk': 'Start with what went well since last time. Then each person names one thing that was hard. Everyone answers, the youngest first. No wrong answers, no fixing anyone.',
 };
 /** The guide's Let's Talk, where this month's questions are on this page rather than a separate sheet. */
@@ -179,6 +178,14 @@ export default function WeeklyMeeting() {
   const ownFocus = fam.profile?.priority ? (fam.profile.priority === 'other' ? fam.profile.priorityNote?.trim() || null : label(PRIORITIES, fam.profile.priority)) : null;
   const scheduled = nextScheduledMeeting(Object.values(cal.state.events), localToday(today), today);
   const lead = devPlan ? leadPerson(devPlan) : null;
+  // A focused conversation: while the guided meeting is open the app's tabs step aside (global.css,
+  // html[data-meeting-active]); Back/Next and "Exit meeting" stay. The landing, "We have a plan." and every other
+  // screen keep the tabs. Progress is saved at each step (recordStep), so leaving never loses the family's place.
+  const guided = inMeeting && !planDone;
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-meeting-active', guided);
+    return () => document.documentElement.removeAttribute('data-meeting-active');
+  }, [guided]);
 
   if (planDone) {
     return (
@@ -273,8 +280,8 @@ export default function WeeklyMeeting() {
     <div className="mx-auto max-w-3xl space-y-5" data-weekly-meeting data-meeting-kind={meeting ? 'club' : 'free'}>
       {/* Compact while the family is meeting: the way back to the landing, and where they are. */}
       <header className="flex items-center justify-between gap-3">
-        <button type="button" className="inline-flex min-h-11 items-center gap-1.5 text-[0.95rem] font-semibold text-warm-ink" onClick={() => { setInMeeting(false); window.scrollTo(0, 0); }} data-meeting-back-to-landing>
-          <span aria-hidden="true">‹</span><span>Family Meeting</span>
+        <button type="button" className="inline-flex min-h-11 items-center gap-1.5 text-[0.95rem] font-semibold text-warm-ink" onClick={() => { setInMeeting(false); window.scrollTo(0, 0); }} aria-label="Exit the meeting. Your place is saved." data-meeting-back-to-landing data-meeting-exit>
+          <span aria-hidden="true">‹</span><span>Exit meeting</span>
         </button>
         <span className="rounded-full bg-[var(--of-sage)] px-3 py-1 text-[0.85rem] font-semibold" data-meeting-step-count>Step {activeStep + 1} of {MEETING_GUIDE.parts.length}</span>
         <h1 className="sr-only">{MEETING_GUIDE.title} · {Month}</h1>
@@ -311,7 +318,7 @@ export default function WeeklyMeeting() {
             </div>
           ) : (
             <>
-              <p className="mt-2 text-[0.95rem] leading-relaxed">{FREE_TEXT[p.title]}</p>
+              {/* The part's question ("What matters most this week?") is WeekReview's own heading, just below. */}
               {fam.profile?.priority && fam.profile.priority !== 'other' && <p className="mt-3 rounded-[9px] bg-[var(--of-surface)] px-3 py-2.5 text-[0.95rem]" data-meeting-priority>Our family is working on: <strong>{label(PRIORITIES, fam.profile.priority)}</strong>. What would help with it this week?</p>}
             </>
           ))}
@@ -437,8 +444,9 @@ export default function WeeklyMeeting() {
         </section>
       ))}
 
-      {/* Back and Next stay within reach: on phones and tablets they sit just above the tab bar (64px + its border +
-          the home-indicator safe area); with the keyboard open they return to the page flow so they never cover a field. */}
+      {/* Back and Next stay within reach at the bottom of phones and tablets, above the home indicator (the tabs are
+          hidden during the guided meeting; global.css). With a field focused (the keyboard open) they return to the
+          page flow, so they never cover what's being typed. The 65px offset is the fallback if the tabs ever show. */}
       <div className="sticky bottom-[calc(65px+env(safe-area-inset-bottom))] z-30 -mx-5 flex items-center justify-between gap-3 border-t border-[var(--of-rule)] bg-ivory px-5 py-2.5 sm:-mx-8 sm:px-8 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:pb-6" data-meeting-step-actions>
         <button type="button" className="of-btn of-btn--soft !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" disabled={activeStep === 0} onClick={() => goStep(activeStep - 1)}>Back</button>
         {activeStep < MEETING_GUIDE.parts.length - 1 ? (

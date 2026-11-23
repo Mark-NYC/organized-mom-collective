@@ -16,7 +16,8 @@ import { useKeptClubMonths, useShowsClub } from '../app/TodayOverview';
 import { Avatar, Chevron, Icon, TileHead } from '../app/ui';
 import { appShellBuild } from '../../lib/native/platform';
 import { monthPage } from '../../data/club/month-pages';
-import { firstSteps, gettingStarted } from '../../lib/app/first-steps';
+import { firstSteps, gettingStarted, inviteSkipped } from '../../lib/app/first-steps';
+import { readProgress } from '../../lib/app/meeting-progress';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -37,8 +38,9 @@ export default function FamilyHub() {
   }, [cal.signedIn]);
   const shared = (access?.adults.length ?? 1) > 1;
   const Month = month[0].toUpperCase() + month.slice(1);
-  // Getting started, in the owner's order: household, week, the other grown-up, the meeting, then the Club.
-  const steps = firstSteps({ household, signedIn: cal.signedIn, hasPlans: Object.keys(cal.state.events).length > 0, shared, agreedCount: agreed.length,
+  // Getting started (src/lib/app/first-steps.ts): household, one shared part, the first meeting, the other grown-up.
+  const steps = firstSteps({ household, signedIn: cal.signedIn, shared, agreedParts: new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size,
+    met: Boolean(readProgress(cal.state.scope !== 'local' ? cal.state.scope : null)?.completedAt), inviteSkipped: inviteSkipped(),
     // Website only, and only while a new family is getting started: the one place a free family hears about the Club.
     // Never in the iPhone app (nothing is sold there), never as a card (owner decision 2026-11-17).
     offerClub: !appShellBuild() && !showsClub });

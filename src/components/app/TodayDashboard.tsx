@@ -20,7 +20,8 @@ import { localToday, occurrences, timeLabel } from '../../lib/calendar/recurrenc
 import { useExternalCalendars } from '../../lib/calendar/feeds';
 import { upcomingTasks, useEventTasks, type EventTasks, type TodayTask } from '../../lib/calendar/event-tasks';
 import { agreementsByPerson, monthOf, type PersonAgreements } from '../../lib/family-meeting-support';
-import { useFamilyProfile } from '../../lib/family-meeting-client';
+import { useFamily } from '../../lib/family-meeting-client';
+import { choreChoices } from '../../data/chore-recommendations';
 import { planFor } from '../../lib/schedule';
 import { dailyEssentials } from '../../data/cleaning';
 import { dateKey } from '../../lib/dates';
@@ -34,7 +35,7 @@ import { useKeptClubMonths, useShowsClub } from './TodayOverview';
 import { Avatar, Chevron, Icon } from './ui';
 import { householdAccess } from '../../lib/household/api';
 import { appShellBuild } from '../../lib/native/platform';
-import { firstSteps, gettingStarted, nextStep, type FirstStep } from '../../lib/app/first-steps';
+import { firstSteps, gettingStarted, inviteSkipped, nextStep, skipInvite, starterIdeas, type FirstStep } from '../../lib/app/first-steps';
 import { dayWord, meetingState, nextScheduledMeeting, readProgress } from '../../lib/app/meeting-progress';
 import { SHOWN, currentPriorities, usePriorities, type Resolved } from '../../lib/app/priorities';
 import { doneLabel, tasksFor } from '../../lib/calendar/event-tasks';
@@ -65,7 +66,8 @@ export default function TodayDashboard() {
   const today = useToday();
   const cal = useCalendar();
   const scope = cal.state.scope !== 'local' ? cal.state.scope : null;
-  const profile = useFamilyProfile(scope);
+  const fam = useFamily(scope);
+  const profile = fam.profile;
   const date = localToday(today);
   const live = cal.state.scope !== 'local' && cal.signedIn && !isDemo() ? cal.state.scope : null;
   // Her subscribed calendars too (private ones are hers to see); read-only.
@@ -87,29 +89,36 @@ export default function TodayDashboard() {
     if (!cal.signedIn || isDemo()) return;
     void householdAccess().then((a) => setShared((a?.adults.length ?? 1) > 1), () => setShared(false));
   }, [cal.signedIn]);
-  const steps = firstSteps({ household: cal.household, signedIn: cal.signedIn, hasPlans: own.length > 0, shared,
-    agreedCount: agreed.length, offerClub: !appShellBuild() && !showsClub });
-  const starting = !isDemo() && !(cal.signedIn && !cal.household && cal.status === 'syncing') && gettingStarted(steps);
   const progress = readProgress(scope);
+  const agreedParts = new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size;
+  const [skipped, setSkipped] = useState(false);
+  useEffect(() => setSkipped(inviteSkipped()), []);
+  const steps = firstSteps({ household: cal.household, signedIn: cal.signedIn, shared, agreedParts, met: Boolean(progress?.completedAt),
+    inviteSkipped: skipped, offerClub: !appShellBuild() && !showsClub });
+  const starting = !isDemo() && !(cal.signedIn && !cal.household && cal.status === 'syncing') && gettingStarted(steps);
+
   const state = meetingState(progress, agreed.length > 0, today);
   const ownFocus = profile?.priority ? (profile.priority === 'other' ? profile.priorityNote?.trim() || null : PRIORITIES.find((p) => p.id === profile.priority)?.label ?? null) : null;
   const plansToday = occurrences(events, date, date).length;
   // This week's priorities, chosen in the Family Meeting (both adults; docs/ios/FAMILY_PLAN.md).
   const prio = usePriorities(live, date);
   const { list: current, from } = currentPriorities(prio.items, events, date);
+  // A brand-new family (nothing shared yet, nothing chosen yet) sees one thing: its first shared win.
+  const firstWin = starting && nextStep(steps)?.id === 'share' && !current.length;
 
   return (
     <div className="space-y-4" data-today>
       {isDemo() && (
         <div className="family-note" data-today-demo><strong className="text-sm">Demo · Not a real family</strong><p className="mt-1 text-sm">A made-up family, to show how Today looks. Nothing here is shared or synced. <a href="/app" className="underline">Leave the demo</a>.</p></div>
       )}
-      {starting && <StartHere steps={steps} household={Boolean(cal.household)} />}
+      {starting && <StartHere steps={steps} cal={cal} save={fam.saveAgreement} month={monthOf(today)} onSkip={() => { skipInvite(); setSkipped(true); }} />}
 
-      {cal.household && <FocusPanel ownFocus={ownFocus} clubMonth={showsClub ? monthPage(today.getMonth() + 1).name : null} first={state === 'first'} />}
+      {/* A brand-new family sees one thing: its first shared win. The rest of Today fills in from there. */}
+      {cal.household && !firstWin && <FocusPanel ownFocus={ownFocus} clubMonth={showsClub ? monthPage(today.getMonth() + 1).name : null} first={state === 'first'} />}
 
-      {cal.household && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} />}
+      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} />}
 
-      {cal.household && <Responsibilities todays={todays} later={laterThisWeek} agreed={agreed} cal={cal} tasks={eventTasks} today={date} />}
+      {cal.household && !firstWin && <Responsibilities todays={todays} later={laterThisWeek} agreed={agreed} cal={cal} tasks={eventTasks} today={date} />}
 
       <nav aria-label="More for today" className="grid grid-cols-3 gap-2.5" data-today-shortcuts>
         <Shortcut href={routes.familyCalendar} icon="calendar" title="Plans" sub={plansToday ? `${plansToday} ${plansToday === 1 ? 'event' : 'events'} today` : 'Nothing today'} id="plans" />
@@ -194,6 +203,25 @@ function OurPriorities({ current, from, first, tasks, external }: { current: Res
   );
 }
 
+/** "Amara", "Amara and Ben", "Amara, Ben and Cleo", "Amara, Ben and 4 more". */
+export const names = (xs: string[]) => xs.length <= 1 ? (xs[0] ?? '') : xs.length <= 3 ? `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}` : `${xs.slice(0, 2).join(', ')} and ${xs.length - 2} more`;
+
+/**
+ * Each person's most recent standing part, once, with people who agreed the very same part (same words, same "when")
+ * on one row: six children who each pack their bag are one line, not six. Order kept (children first).
+ */
+export function standingRows(people: PersonAgreements[]): { part: PersonAgreements['parts'][number]; people: PersonAgreements[] }[] {
+  const rows = new Map<string, { part: PersonAgreements['parts'][number]; people: PersonAgreements[] }>();
+  for (const p of people) {
+    const x = p.parts[p.parts.length - 1];
+    if (!x) continue;
+    const key = `${x.text.trim().toLowerCase()}|${(x.when ?? '').trim().toLowerCase()}`;
+    const row = rows.get(key);
+    if (row) row.people.push(p); else rows.set(key, { part: x, people: [p] });
+  }
+  return [...rows.values()];
+}
+
 /**
  * Today's responsibilities: what can be checked off today (responsibilities on today's calendar events), then each
  * person's standing agreements, once each. A family with none is invited to agree them in the Family Meeting.
@@ -205,7 +233,7 @@ function Responsibilities({ todays, later, agreed, cal, tasks, today }: { todays
   // A manageable list: today's trackable responsibilities, then one standing part per person, about six rows in all.
   // Children first: their parts are the ones the family is handing over. Adults' are in the full list too.
   const kidsFirst = [...agreed].sort((a, b) => Number(member(b.memberId)?.kind === 'child') - Number(member(a.memberId)?.kind === 'child'));
-  const standing = kidsFirst.slice(0, Math.max(3, 6 - todays.length));
+  const standing = standingRows(kidsFirst).slice(0, Math.max(3, 6 - todays.length));
   const total = new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size;
   return (
     <section className="of-tile" aria-labelledby="today-resp-h" data-today-responsibilities data-everyones-part>
@@ -248,21 +276,20 @@ function Responsibilities({ todays, later, agreed, cal, tasks, today }: { todays
               {todays.length > 0 && <p className="of-eyebrow mt-4" data-agreed-heading>Our standing parts</p>}
               {/* One per person (the most recently agreed), never the whole household list: that's one tap away. */}
               <ul className="of-rows mt-1" aria-label="What we agreed" data-agreed-parts>
-                {standing.map((p) => {
-                  const x = p.parts[p.parts.length - 1];
-                  return (
-                    <li key={p.memberId} data-part-person={p.name}>
-                      <a href="/app/family/responsibilities" className="of-row !gap-3">
-                        <Avatar name={p.name} color={cal.colors[p.memberId]} />
-                        <span className="min-w-0 flex-1">
-                          <span className="of-row-title block">{p.name}</span>
-                          <span className="block text-[0.92rem] text-warm-ink" data-agreement={x.id}>{x.text}</span>
-                          {x.when && <span className="of-row-meta">{x.when}</span>}
-                        </span>
-                      </a>
-                    </li>
-                  );
-                })}
+                {standing.map((row) => (
+                  <li key={row.people.map((p) => p.memberId).join('|')} data-part-person={row.people.map((p) => p.name).join(', ')} data-part-people={row.people.length}>
+                    <a href="/app/family/responsibilities" className="of-row !gap-3">
+                      <span className="flex shrink-0 -space-x-3" aria-hidden="true">
+                        {row.people.slice(0, 3).map((p) => <Avatar key={p.memberId} name={p.name} color={cal.colors[p.memberId]} />)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="of-row-title block">{names(row.people.map((p) => p.name))}</span>
+                        <span className="block text-[0.92rem] text-warm-ink" data-agreement={row.part.id}>{row.part.text}</span>
+                        {row.part.when && <span className="of-row-meta">{row.part.when}</span>}
+                      </span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </>
           )}
@@ -310,31 +337,87 @@ function NextMeeting({ events, today, state, completedAt, step }: { events: Para
 }
 
 /**
- * A new family's first screen: what the app is for in one line, and ONE next step (docs/pilot/PILOT_TESTING.md).
- * Gone once the family has started (src/lib/app/first-steps.ts); the same steps stay listed on Family until then.
+ * A new family's first screen: what the app is for in one line, and ONE next step (src/lib/app/first-steps.ts). After
+ * the household, the first shared win right here: one person, one responsibility, "We agreed" (about a minute; an
+ * ordinary agreement, the same the Family Meeting saves). No calendar, invitation, Club or meeting needed first.
  */
-function StartHere({ steps, household }: { steps: FirstStep[]; household: boolean }) {
+function StartHere({ steps, cal, save, month, onSkip }: { steps: FirstStep[]; cal: Cal; save: ReturnType<typeof useFamily>['saveAgreement']; month: string; onSkip: () => void }) {
   const next = nextStep(steps);
   if (!next) return null;
   const own = steps.filter((s) => s.id !== 'club');
   const done = own.filter((s) => s.done).length;
-  if (!household) {
+  if (!cal.household) {
     return (
       <section className="of-tile of-tile--month of-span-all" style={{ order: -1 }} aria-labelledby="start-here-h" data-start-here="household">
         <p className="of-eyebrow">Start here · Free</p>
         <h2 id="start-here-h" className="of-tile-title of-tile-title--lg">One shared plan for your family’s week.</h2>
-        <p className="of-tile-sub">A calendar everyone can see, a ten-minute daily cleaning reset, and a weekly Family Meeting where everyone takes a part, so it isn’t all on you.</p>
+        <p className="of-tile-sub">A ten-minute weekly Family Meeting where everyone takes a part, and the plan on Today for the whole family, so it isn’t all on you.</p>
         <a href={next.href} className="of-btn mt-5" data-start-next={next.id}>Set up your family</a>
         <p className="mt-3 text-[0.85rem] text-warm-soft">About a minute: first names and ages. Kids don’t need accounts.</p>
       </section>
     );
   }
+  if (next.id === 'share') return <FirstWin cal={cal} save={save} month={month} done={done} total={own.length} />;
   return (
     <section className="of-tile of-span-all" style={{ order: -1 }} aria-labelledby="start-here-h" data-start-here={next.id}>
       <p className="of-eyebrow">Getting started · {done} of {own.length} done</p>
       <h2 id="start-here-h" className="of-tile-title">{next.label}</h2>
-      <a href={next.href} className="of-btn mt-4" data-start-next={next.id}>{next.id === 'meeting' ? 'Open the Family Meeting' : next.id === 'week' ? 'Add a plan' : 'Invite them'}</a>
-      {next.id === 'adult' && <a href="/app/family-calendar" className="ml-4 text-[0.9rem] underline underline-offset-4" data-start-skip>Skip for now</a>}
+      {next.id === 'meeting' && <p className="of-tile-sub">Everyone at the table: what matters this week, and who takes which part.</p>}
+      <a href={next.href} className="of-btn mt-4" data-start-next={next.id}>{next.id === 'meeting' ? 'Open the Family Meeting' : 'Invite them'}</a>
+      {next.id === 'adult' && <button type="button" className="ml-4 min-h-11 text-[0.9rem] underline underline-offset-4" onClick={onSkip} data-start-skip>Skip for now</button>}
+    </section>
+  );
+}
+
+/** The first shared win: who takes it, what it is (a few age-fit ideas, or their own words), "We agreed". */
+function FirstWin({ cal, save, month, done, total }: { cal: Cal; save: ReturnType<typeof useFamily>['saveAgreement']; month: string; done: number; total: number }) {
+  const people = (cal.household?.members ?? []).filter((m) => !m.archived && m.firstName.trim())
+    .sort((a, b) => Number(b.kind === 'child') - Number(a.kind === 'child'));
+  const [who, setWho] = useState<string | null>(null);
+  const [text, setText] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const person = people.find((m) => m.id === who);
+  const age = person?.kind === 'child' && person.birthYear ? new Date().getFullYear() - person.birthYear : null;
+  const ideas = person ? starterIdeas(age, choreChoices) : [];
+  const submit = async () => {
+    if (!who || !text.trim()) return;
+    setBusy(true); setError(null);
+    try { await save({ category: 'other', text, ownerIds: [who], month }); }
+    catch { setError('Couldn’t save that. Try again in a moment.'); }
+    setBusy(false);
+  };
+  return (
+    <section className="of-tile of-tile--month of-span-all" style={{ order: -1 }} aria-labelledby="start-here-h" data-start-here="share">
+      <p className="of-eyebrow">Getting started · {done} of {total} done · About a minute</p>
+      <h2 id="start-here-h" className="of-tile-title of-tile-title--lg">Start with one thing your family can share.</h2>
+      <p className="of-tile-sub">One job that’s on your mind right now. Ask who will own it, start to finish.</p>
+      <form className="mt-4" onSubmit={(e) => { e.preventDefault(); void submit(); }} data-first-win>
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft" id="first-win-who">Who will own it?</p>
+        <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-labelledby="first-win-who">
+          {people.map((m) => (
+            <button key={m.id} type="button" role="radio" aria-checked={who === m.id} onClick={() => setWho(m.id)} data-first-win-who={m.firstName}
+              className={`inline-flex min-h-[44px] items-center gap-2 rounded-[8px] border px-3 text-sm ${who === m.id ? 'border-warm-ink bg-[var(--of-sage)] font-semibold' : 'border-[var(--of-rule)] bg-white'}`}>
+              <Avatar name={m.firstName} color={cal.colors[m.id]} size="sm" />{m.firstName}
+            </button>
+          ))}
+        </div>
+        {person && (
+          <>
+            <label className="mt-4 block text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-warm-soft">What will {person.firstName} own?
+              <input value={text} maxLength={160} onChange={(e) => setText(e.target.value)} placeholder="Feed the dog before school" className="mt-1 block min-h-[44px] w-full rounded-[8px] border border-[var(--of-rule)] bg-white px-2 text-[0.95rem] normal-case tracking-normal text-warm-ink" data-first-win-text />
+            </label>
+            {ideas.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2" aria-label="Ideas">
+                {ideas.map((x) => <button key={x} type="button" onClick={() => setText(x)} className="min-h-[40px] rounded-full border border-[var(--of-rule)] bg-white px-3 text-[0.85rem] text-warm-soft" data-first-win-idea={x}>{x}</button>)}
+              </div>
+            )}
+            <button type="submit" className="of-btn mt-4" disabled={busy || !text.trim()} data-first-win-save>We agreed</button>
+          </>
+        )}
+        {error && <p role="alert" className="mt-2 text-[0.88rem] text-[#a33]">{error}</p>}
+      </form>
+      <p className="mt-4 text-[0.85rem] text-warm-soft">It shows on Today for the whole family. Your first Family Meeting can come next.</p>
     </section>
   );
 }

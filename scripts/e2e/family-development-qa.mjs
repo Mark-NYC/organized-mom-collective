@@ -142,10 +142,10 @@ check('Club with next steps: "Add another responsibility" starts closed', await 
 check('buttons use sentence case, not uppercase', await jen.locator('[data-development-next-steps] button, [data-meeting-step-actions] .of-btn').evaluateAll((els) => els.every((e) => getComputedStyle(e).textTransform === 'none')));
 const bars = await jen.evaluate(() => {
   const a = document.querySelector('[data-meeting-step-actions]')?.getBoundingClientRect();
-  const t = document.querySelector('[data-app-tabbar]')?.getBoundingClientRect();
-  return a && t ? { actionsBottom: a.bottom, tabTop: t.top, visible: a.top < window.innerHeight } : null;
+  const t = document.querySelector('[data-app-tabbar]');
+  return a ? { actionsBottom: a.bottom, height: window.innerHeight, tabsHidden: !t || getComputedStyle(t).display === 'none', visible: a.top < window.innerHeight } : null;
 });
-check('Back and Next sit just above the tab bar, never under it', !!bars && bars.visible && bars.actionsBottom <= bars.tabTop + 1, JSON.stringify(bars));
+check('guided meeting: the tabs step aside; Back and Next sit at the bottom of the screen', !!bars && bars.visible && bars.tabsHidden && Math.abs(bars.actionsBottom - bars.height) <= 1, JSON.stringify(bars));
 await jen.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
 await settle(jen, 300);
 const lastVisible = await jen.evaluate(() => {

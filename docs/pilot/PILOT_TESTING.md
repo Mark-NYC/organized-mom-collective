@@ -34,6 +34,7 @@ after screenshots in the PR).
 - **Today**
   - *Before:* three equal buttons and no sense of where to start. The "Getting started" list was at the bottom of Family.
   - *Now:* a new family sees "Start here" at the top: what the app is for, and one next step. After setup, "Getting started · 1 of 4 done" with the next step until they've started, then it goes away.
+  - *Refined (2026-11-23):* the step after setup is no longer "Put this week on the family calendar". It's **"Start with one thing your family can share."**: pick who, pick or type one job, "We agreed", right on Today, in about a minute. Then the first Family Meeting, then (optional, skippable) the other grown-up. The calendar comes in when it helps the family look ahead together.
   - The steps are one shared list (`src/lib/app/first-steps.ts`), so Today and Family always agree.
 - **Single parents**
   - *Before:* "Invite the other grown-up" could never be done, so the getting-started list never finished.

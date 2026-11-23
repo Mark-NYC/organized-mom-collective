@@ -62,7 +62,7 @@ builds on the two-tab redesign ([TWO_TAB_REDESIGN.md](TWO_TAB_REDESIGN.md)) and 
 | **Let's Talk** | Unchanged: celebrate what went well, this month's questions |
 | **Everyone's Part** | **Getting ready for our priorities** (optional, collapsed). For an imported event, the existing event responsibilities (Dad prepares the car, Andrew packs his clothes). For the family's own event, who handles it. Then the development conversation and agreements as before |
 | **Let's Practice** | Unchanged |
-| **Finish** | **"We have a plan."**: this week's priorities, the getting-ready parts, and each person's parts (two each, the rest one tap away). **Print our plan** and **See it on Today**. No badges, scores, streaks or confetti |
+| **Finish** | **"We have a plan."**: this week's priorities with their getting-ready parts, what was agreed in this meeting, and a link to everyone's parts. **Print our plan** and **See it on Today**. No badges, scores, streaks or confetti |
 
 ## Privacy and links
 
@@ -107,7 +107,43 @@ builds on the two-tab redesign ([TWO_TAB_REDESIGN.md](TWO_TAB_REDESIGN.md)) and 
 - Everyone's part today shows today's checkable items, then one standing part per person, **children first**, about six rows. "All of everyone's parts (N)" opens the full list.
 - A family of eight with 24 agreements still gets six rows.
 
-**"We have a plan."** Each priority once, with its getting-ready parts under it (who, what). Then **What we agreed today**, or each person's latest part if nothing new was agreed, children first. Print our plan.
+**"We have a plan."** Each priority once, with its getting-ready parts under it (who, what). Then **What we agreed today** (children first), or one honest line if nothing new was agreed. Print our plan. (Refined below.)
+
+## Pre-pilot refinements (2026-11-23)
+
+**Choosing what matters, on purpose.**
+- Our Focus asks **"What matters most this week?"** and then: "Look ahead together. Is there anything we need to prepare for, decide about, or handle as a family?"
+- The calendar list shows **one-off** events first.
+- Events that repeat during the week (school, preschool, practice) sit under **"Our usual week (N)"**, one tap away. They are grouped, never ranked, and still highlightable. Nothing is chosen for the family.
+- A priority can still be written in a few words. Three is normal; up to five.
+
+**"We have a plan." is a summary of this meeting.**
+- This week's priorities, three prominently (a busy week's fourth and fifth go on one "Also this week" line). Getting-ready parts sit under their event.
+- **What we agreed today:** only responsibilities agreed in this meeting.
+- If nothing new was agreed, one line: "Nothing new this week. Everyone keeps the parts they already have." Nothing is invented.
+- Then **All of everyone's parts (N)**, a link; the standing list is not repeated on screen.
+- **Print our plan** adds everyone's standing parts as a compact list, so the paper copy is the whole plan on about one page. **See it on Today** is kept.
+
+**A first shared win, not a calendar.**
+- After household setup, Today shows only **"Start with one thing your family can share."**
+  - Who will own it: person chips, children first.
+  - What: their words, or up to four age-fit ideas from the existing chore list.
+  - **We agreed** saves an ordinary agreement (the same as the meeting's).
+- Getting started is now: household → one shared thing → first Family Meeting → the other grown-up (optional, "Skip for now").
+- The calendar is no longer a step. It's offered in the meeting when the week is empty, and from the Plans shortcut.
+- No calendar, invitation, Club or full meeting is required first.
+
+**Large households.**
+- Everyone's part today puts people with the same latest part (same words, same "when") on one row: overlapping initials and "Amara, Cleo and 2 more".
+- Six children who each pack their bag are two lines, not six. Still about six rows, with "All of everyone's parts (N)". No completion is invented.
+
+**A focused meeting.**
+- While the guided four-step meeting is open, the app's tabs (bottom bar on phones, header tabs on wide screens) are hidden.
+- **Exit meeting** stays at the top. Back/Next sit at the bottom, above the home indicator (`env(safe-area-inset-bottom)`).
+- With a field focused (keyboard up), Back/Next return to the page flow so they never cover the field.
+- Progress is saved at every step, so Exit and Continue pick up the same part.
+- The landing, "We have a plan." and every other screen keep the tabs.
+- Same CSS on the website, the installed PWA and the iPhone app's web view (`html[data-meeting-active]` in `global.css`).
 
 ## Stress tests (simulated households, not research)
 
