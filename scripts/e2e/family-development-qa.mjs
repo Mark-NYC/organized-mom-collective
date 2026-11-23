@@ -149,7 +149,9 @@ check('guided meeting: the tabs step aside; Back and Next sit at the bottom of t
 await jen.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
 await settle(jen, 300);
 const lastVisible = await jen.evaluate(() => {
-  const t = document.querySelector('[data-app-tabbar]')?.getBoundingClientRect().top ?? window.innerHeight;
+  // The tabs are hidden during the guided meeting (display: none reports top 0): then only Back/Next can cover.
+  const bar = document.querySelector('[data-app-tabbar]');
+  const t = bar && getComputedStyle(bar).display !== 'none' ? bar.getBoundingClientRect().top : window.innerHeight;
   const a = document.querySelector('[data-meeting-step-actions]')?.getBoundingClientRect().top ?? t;
   const last = [...document.querySelectorAll('[data-meeting-part] summary')].pop()?.getBoundingClientRect();
   return last ? last.bottom <= Math.min(t, a) + 1 : true;
