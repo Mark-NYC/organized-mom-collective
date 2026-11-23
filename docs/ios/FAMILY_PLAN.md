@@ -70,6 +70,45 @@ builds on the two-tab redesign ([TWO_TAB_REDESIGN.md](TWO_TAB_REDESIGN.md)) and 
 - If its calendar is later made private, the priority leaves the other adult's plan; the adult who chose it still sees it.
 - A priority is a link to its event. Today and the meeting show the event as it is now: moved, renamed, or "no longer on the calendar". The stored title is only a fallback.
 
+## Final rules (QA pass, 2026-11-23)
+
+**How many priorities.**
+- **Three is the normal number. A busy week can hold up to five, never more.**
+- The meeting shows nothing extra up to two, then "Three is usually plenty. A busy week can hold up to five." at three or four.
+- At five it says "That's 5, the most for one week. Remove one to choose another."
+  - Highlight then appears only on the chosen ones (to remove), and Add goes away. No greyed-out buttons.
+- If a stale screen tries a sixth, it's refused in words. The database enforces five, under a per-household lock.
+- Today shows the top three, then **Show 2 more** in place. "We have a plan." shows them all.
+- `priorityRule()` in `MeetingPlan.tsx`; tested in `tests/family-plan.test.ts` and the two-adult e2e.
+
+**Looking ahead without scrolling dozens.**
+- Our Focus lists each event **once**: a daily school run is one line, "and 4 more days".
+- It shows the first six, with the rest one tap away. It starts with a prompt to read it out loud and ask everyone.
+
+**Collaboration** (confirmed in `scripts/e2e/family-plan-e2e.mjs`, two phones):
+- Both adults highlight the same event at the same moment: one priority.
+- Both add at the same moment: both kept.
+- One removes the other's: gone for both. The other's stale screen removing it too: no error.
+- A stale screen adding past five: refused in words.
+- A single adult, and a household whose second adult was invited and never joined, get the full experience.
+- A partner who was offline sees the current plan when back.
+- There's no approval step and no partner permissions: any adult of the household can do anything.
+
+**Privacy and the device** (confirmed in the same e2e and in `tests/family-plan.test.ts`):
+- **Moved or renamed at the source:** Today shows the new day; a priority is a link.
+- **Cancelled or deleted at the source:** the adult who chose it sees "No longer on the calendar". The other adult sees nothing, never a stale title.
+- **Calendar made private, or sharing revoked:** it leaves the other adult's Today, meeting and "We have a plan." (what they would print). That includes an adult who was offline when it changed: back online, it's gone from the screen **and from the device's storage**.
+- **Sign-out:** the household's priorities, event responsibilities and imported calendar events are removed from the device (`HOUSEHOLD_CACHES` in `src/lib/account.ts`). Another family signing in on the same device sees nothing of them. Every cache is also keyed to its household.
+- **An adult who leaves or changes households:** the database answers for their current household only, so they see nothing of the old one.
+- **Remaining, by design:** a device that is **offline** keeps showing what it last loaded, legitimately, until it reconnects. This is the same as the calendar's existing offline copy.
+
+**Today.**
+- Order: Focus → Our priorities this week → Everyone's part today → Plans · Cleaning · Resources → Next Family Meeting.
+- Everyone's part today shows today's checkable items, then one standing part per person, **children first**, about six rows. "All of everyone's parts (N)" opens the full list.
+- A family of eight with 24 agreements still gets six rows.
+
+**"We have a plan."** Each priority once, with its getting-ready parts under it (who, what). Then **What we agreed today**, or each person's latest part if nothing new was agreed, children first. Print our plan.
+
 ## Stress tests (simulated households, not research)
 
 These come from the earlier synthetic household simulation. They were used as design stress tests, not as evidence.

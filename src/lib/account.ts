@@ -281,10 +281,16 @@ export async function signOut(scope: 'local' | 'global' = 'local') {
   saveSession(null);
   try {
     rawRemove(SYNC_KEY);
+    // The household's server-backed copies (docs/ios/FAMILY_PLAN.md → Privacy): priorities, event responsibilities and
+    // imported calendar events go with the sign-in, so nobody who uses this device next can read them from storage.
+    for (const k of HOUSEHOLD_CACHES) rawRemove(k);
   } catch {
     /* fine */
   }
 }
+
+/** Copies of household data fetched from the server, removed at sign-out (each is re-fetched on the next sign-in). */
+export const HOUSEHOLD_CACHES = ['omc:priorities:v1', 'omc:calendar:event-tasks:v1', 'omc:calendar:feeds:v1:mine', 'omc:calendar:feeds:v1:household'];
 
 /**
  * A lost or shared phone: ends this sign-in on every device (scope=global). Other devices stop within the hour, when

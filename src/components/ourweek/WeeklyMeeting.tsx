@@ -127,6 +127,7 @@ export default function WeeklyMeeting() {
     const i = Math.max(0, Math.min(MEETING_GUIDE.parts.length - 1, index));
     setActiveStep(i);
     setProgress(recordStep(scope, i));
+    setStartIds((ids) => ids ?? new Set(agreed.flatMap((x) => x.parts.map((y) => y.id))));
     document.querySelector('[data-weekly-meeting]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   const begin = (fresh: boolean) => {
@@ -169,6 +170,9 @@ export default function WeeklyMeeting() {
   const own = Object.values(cal.state.events);
   const plan = currentPriorities(prio.items.filter((x) => x.week_of === weekStart), [...own, ...shared.events], localToday(today)).list;
   const [planDone, setPlanDone] = useState(false);
+  // What the family agreed DURING this meeting (for "We have a plan."): the agreements there when it started.
+  const [startIds, setStartIds] = useState<Set<string> | null>(null);
+  const newIds = startIds ? new Set(agreed.flatMap((p) => p.parts.map((x) => x.id)).filter((id) => !startIds.has(id))) : null;
 
   const state = meetingState(progress, agreedCount > 0);
   // The family's own focus (chosen in a meeting); a Club month's topic is labeled as the month's, never as agreed.
@@ -179,7 +183,7 @@ export default function WeeklyMeeting() {
   if (planDone) {
     return (
       <div className="mx-auto max-w-3xl" data-weekly-meeting data-meeting-done>
-        <PlanSummary current={plan} agreed={agreed} external={shared.events} tasks={eventTasks} household={cal.household} colors={cal.colors} onAgain={() => { setPlanDone(false); }} />
+        <PlanSummary current={plan} agreed={agreed} newIds={newIds} external={shared.events} tasks={eventTasks} household={cal.household} colors={cal.colors} onAgain={() => { setPlanDone(false); }} />
       </div>
     );
   }

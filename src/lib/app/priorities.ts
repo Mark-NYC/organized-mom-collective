@@ -80,7 +80,10 @@ export function currentPriorities(items: Priority[], events: CalendarEvent[], to
   for (const w of weeks) {
     const list = items.filter((p) => p.week_of === w).sort((a, b) => a.sort - b.sort)
       .map((p) => resolve(p, events))
-      .filter((r) => r.priority.kind === 'note' || (r.date ?? '') >= today);
+      .filter((r) => r.priority.kind === 'note' || (r.date ?? '') >= today)
+      // Privacy: an imported event this adult can no longer see (its calendar made private or unshared, or cancelled)
+      // shows only to the adult who chose it, never as a stale title to anyone else, cached copy or not.
+      .filter((r) => !(r.gone && r.priority.source === 'imported' && !r.priority.mine));
     if (list.length) return { list, from: w === week ? 'this-week' : 'last-meeting' };
   }
   return { list: [], from: null };

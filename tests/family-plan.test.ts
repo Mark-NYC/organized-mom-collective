@@ -45,6 +45,47 @@ describe('priorities are deliberate, linked and honest', () => {
     expect(currentPriorities([], [], '2026-12-08')).toEqual({ list: [], from: null });
   });
   it('about three: the app shows three', () => expect(SHOWN).toBe(3));
+  it('privacy: an imported event the other adult can no longer see is hidden from them (never a stale title); the chooser still sees it', () => {
+    const theirs = { ...tripP, mine: false };
+    expect(currentPriorities([theirs], [], '2026-12-01').list).toEqual([]);
+    expect(currentPriorities([tripP], [], '2026-12-01').list.map((r) => [r.title, r.gone])).toEqual([['Family trip to the lake', true]]);
+    // A family event that was deleted is the household's own: both adults see that it's gone.
+    expect(currentPriorities([{ ...presP, mine: false }], [], '2026-12-01').list.map((r) => r.gone)).toEqual([true]);
+  });
+});
+
+describe('the priority rule: three is normal, five is the most, in words', async () => {
+  const { priorityRule, reviewItems } = await import('../src/components/ourweek/MeetingPlan');
+  it('0–2: room, nothing to say; 3–4: room, a gentle note; 5: no room, how to make some', () => {
+    expect(priorityRule(0)).toEqual({ canAdd: true, note: null });
+    expect(priorityRule(2)).toEqual({ canAdd: true, note: null });
+    expect(priorityRule(3)).toEqual({ canAdd: true, note: 'Three is usually plenty. A busy week can hold up to five.' });
+    expect(priorityRule(4).canAdd).toBe(true);
+    expect(priorityRule(5)).toEqual({ canAdd: false, note: 'That’s 5, the most for one week. Remove one to choose another.' });
+  });
+  it('no disabled Highlight buttons: a chosen one can always be removed, a new one appears only while there is room', () => {
+    const plan = src('src/components/ourweek/MeetingPlan.tsx');
+    expect(plan).toMatch(/\{priorities\?\.available && \(picked \|\| rule\.canAdd\) && \(/);
+    expect(plan).not.toMatch(/disabled=\{busy !== null \|\| \(!picked/);
+  });
+  it('the week review shows each event once (a daily event is one line), so a family isn\'t scrolling dozens', () => {
+    const days = ['2026-11-30', '2026-12-01', '2026-12-02', '2026-12-03', '2026-12-04'];
+    const school = ev({ id: 'school', title: 'School', starts_on: '2026-11-30', recurrence: { freq: 'daily' } as CalendarEvent['recurrence'] });
+    const w = weekAhead([school, ev({})], '2026-11-30', new Date('2026-11-30T06:00:00'));
+    const items = reviewItems(w);
+    expect(items.map((x) => [x.item.title, x.more])).toEqual([['School', 6], ['School presentation', 0]]);
+    void days;
+  });
+});
+
+describe('sign-out: the household\'s fetched copies leave the device', () => {
+  it('priorities, event responsibilities and imported calendar events are cleared at sign-out', () => {
+    const acc = src('src/lib/account.ts');
+    expect(acc).toMatch(/for \(const k of HOUSEHOLD_CACHES\) rawRemove\(k\);/);
+    for (const k of ['omc:priorities:v1', 'omc:calendar:event-tasks:v1', 'omc:calendar:feeds:v1:mine', 'omc:calendar:feeds:v1:household']) expect(acc).toContain(`'${k}'`);
+    // …and each cache is tied to its household, so a different household on the same device never reads it.
+    expect(src('src/lib/app/priorities.ts')).toMatch(/return c && c\.scope === scope \? c\.items : null;/);
+  });
 });
 
 describe('the meeting fits the plan into its four parts', () => {
@@ -66,6 +107,11 @@ describe('the meeting fits the plan into its four parts', () => {
   it('the four approved parts are unchanged', () => {
     expect(src('src/data/club/meeting-guide.ts')).toMatch(/Our Focus[\s\S]*Let’s Talk[\s\S]*Everyone’s Part[\s\S]*Let’s Practice/);
   });
+  it('"We have a plan.": getting-ready parts sit under their priority; then what was agreed in THIS meeting (nothing repeated)', () => {
+    expect(plan).toMatch(/data-plan-prep/);
+    expect(plan).toMatch(/const fresh = newIds && newIds\.size/);
+    expect(m).toMatch(/<PlanSummary current=\{plan\} agreed=\{agreed\} newIds=\{newIds\}/);
+  });
   it('"We have a plan.": priorities and who owns what, printable; no badges, scores, streaks or confetti', () => {
     expect(plan).toMatch(/We have a plan\./);
     expect(plan).toMatch(/window\.print\(\)/);
@@ -80,7 +126,7 @@ describe('Today: a curated plan, not a household list', () => {
     expect(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1]))).toBe(true);
   });
   it('one standing part per person, about six rows; the full list one tap away', () => {
-    expect(t).toMatch(/const standing = agreed\.slice\(0, Math\.max\(3, 6 - todays\.length\)\);/);
+    expect(t).toMatch(/const standing = kidsFirst\.slice\(0, Math\.max\(3, 6 - todays\.length\)\);/);
     expect(t).toMatch(/const x = p\.parts\[p\.parts\.length - 1\];/);
     expect(t).toMatch(/href="\/app\/family\/responsibilities" className="of-tile-action mt-3" data-all-parts/);
   });

@@ -155,7 +155,9 @@ function FocusPanel({ ownFocus, clubMonth, first }: { ownFocus: string | null; c
  * event as it is now. Before a first meeting, or when a week goes by without one, it says so plainly, without guilt.
  */
 function OurPriorities({ current, from, first, tasks, external }: { current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean; tasks: EventTasks; external: CalendarEvent[] }) {
-  const shown = current.slice(0, SHOWN);
+  // Three is the normal view; a busy week's fourth and fifth are one tap away, in place (never hidden elsewhere).
+  const [all, setAll] = useState(false);
+  const shown = all ? current : current.slice(0, SHOWN);
   const when = (r: Resolved) => (r.date ? `${dayName(r.date)}${r.time ? ` · ${r.time}` : ''}` : 'This week');
   return (
     <section className="of-tile" aria-labelledby="priorities-h" data-today-priorities={from ?? 'none'}>
@@ -182,7 +184,11 @@ function OurPriorities({ current, from, first, tasks, external }: { current: Res
       ) : (
         <p className="mt-2 text-[0.92rem] text-warm-soft" data-no-priorities>{first ? 'In your first Family Meeting, choose up to three things the whole family needs to know about or get ready for.' : 'Choose this week’s few in your next Family Meeting, whenever it suits you.'}</p>
       )}
-      {current.length > SHOWN && <p className="mt-2 text-[0.8rem] text-warm-soft">+{current.length - SHOWN} more in the Family Meeting</p>}
+      {current.length > SHOWN && (
+        <button type="button" className="mt-1 min-h-11 text-[0.85rem] text-warm-soft underline underline-offset-4" aria-expanded={all} onClick={() => setAll(!all)} data-priorities-more>
+          {all ? 'Show the top three' : `Show ${current.length - SHOWN} more`}
+        </button>
+      )}
       <a href={MEETING} className="of-tile-action mt-3" data-priorities-meeting>{shown.length ? 'Change in the Family Meeting' : 'Open the Family Meeting'} <Chevron /></a>
     </section>
   );
@@ -197,7 +203,9 @@ function Responsibilities({ todays, later, agreed, cal, tasks, today }: { todays
   const member = (id: string | null) => (id ? cal.household?.members.find((m) => m.id === id && !m.archived) : undefined);
   const empty = !todays.length && !agreed.length;
   // A manageable list: today's trackable responsibilities, then one standing part per person, about six rows in all.
-  const standing = agreed.slice(0, Math.max(3, 6 - todays.length));
+  // Children first: their parts are the ones the family is handing over. Adults' are in the full list too.
+  const kidsFirst = [...agreed].sort((a, b) => Number(member(b.memberId)?.kind === 'child') - Number(member(a.memberId)?.kind === 'child'));
+  const standing = kidsFirst.slice(0, Math.max(3, 6 - todays.length));
   const total = new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size;
   return (
     <section className="of-tile" aria-labelledby="today-resp-h" data-today-responsibilities data-everyones-part>
