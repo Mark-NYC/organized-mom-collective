@@ -22,6 +22,13 @@
  * The plan is tied to who is signed in, the household, Club access and the day (meeting-plan.ts), never kept across
  * them. "We agreed" for a skill is saved by the database with its agreement in one step; the returned agreement goes
  * onto this phone's lists (fam.adoptAgreement), so there is no second agreement save that could fail on its own.
+ *
+ * Two-tab redesign (docs/ios/TWO_TAB_REDESIGN.md): this page is the Family Meeting TAB. It opens on a short landing
+ * (the family's focus, the four parts, one Start button, what they agreed last time) and the guided meeting begins on
+ * Start. Continue appears only when this phone recorded an unfinished meeting (src/lib/app/meeting-progress.ts), and
+ * "you met on Sunday" only after Finish meeting was tapped. Missing weeks are never counted. The development
+ * conversation (one child, "What went well?", the engine's own question, our next step) is in Everyone's Part; the
+ * stages themselves never show.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { track } from '../../lib/app/events';
@@ -44,7 +51,8 @@ import type { ResponsibilityCategory } from '../../data/club/family-profile';
 import { useDevelopment, useMeetingAccess } from '../../lib/family-development/client';
 import { buildDevelopmentPlan } from '../../lib/family-development/engine';
 import { planKey, reconcilePlan, recordScope, type PlanSlot } from '../../lib/family-development/meeting-plan';
-import { DevelopmentCheckIns, DevelopmentNextSteps, DevelopmentPractice } from '../family/DevelopmentCoach';
+import { DevelopmentConversation, DevelopmentNextSteps, DevelopmentPractice, leadPerson } from '../family/DevelopmentCoach';
+import { dayWord, meetingState, nextScheduledMeeting, readProgress, recordFinished, recordStep, startOver, type MeetingProgress } from '../../lib/app/meeting-progress';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 const label = (list: { id: string; label: string }[], id: string) => list.find((c) => c.id === id)?.label ?? id;
@@ -101,10 +109,28 @@ export default function WeeklyMeeting() {
   const [msg, setMsg] = useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
+  // The landing first; the guided meeting once the family taps Start (or Continue). ?step=N opens a part directly.
+  const [inMeeting, setInMeeting] = useState(() => { try { return new URLSearchParams(location.search).has('step'); } catch { return false; } });
+  const [progress, setProgress] = useState<MeetingProgress | null>(null);
+  useEffect(() => { setProgress(readProgress(scope)); }, [scope]);
+  useEffect(() => {
+    try {
+      const n = Number(new URLSearchParams(location.search).get('step'));
+      if (n >= 1 && n <= MEETING_GUIDE.parts.length) setActiveStep(n - 1);
+    } catch { /* the first part */ }
+  }, []);
   const goStep = (index: number) => {
     if (index > 0) track('meeting_started');
-    setActiveStep(Math.max(0, Math.min(MEETING_GUIDE.parts.length - 1, index)));
+    const i = Math.max(0, Math.min(MEETING_GUIDE.parts.length - 1, index));
+    setActiveStep(i);
+    setProgress(recordStep(scope, i));
     document.querySelector('[data-weekly-meeting]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const begin = (fresh: boolean) => {
+    if (fresh) startOver(scope);
+    const resume = !fresh && progress && !progress.completedAt ? progress.step : 0;
+    setInMeeting(true);
+    goStep(resume);
   };
   const Month = MONTHS[today.getMonth()][0].toUpperCase() + MONTHS[today.getMonth()].slice(1);
   const challenges = fam.profile?.challenges ?? [];
@@ -133,18 +159,106 @@ export default function WeeklyMeeting() {
   const suggestions = meeting?.parts.people.filter((p) => p.suggested.length && !devStepFor.has(p.memberId)) ?? [];
   const weekHighlights = week.days.flatMap((d) => d.items.map((item) => ({ day: d.label, item }))).slice(0, 5);
 
+  const state = meetingState(progress, agreedCount > 0);
+  // The family's own focus (chosen in a meeting); a Club month's topic is labeled as the month's, never as agreed.
+  const ownFocus = fam.profile?.priority ? (fam.profile.priority === 'other' ? fam.profile.priorityNote?.trim() || null : label(PRIORITIES, fam.profile.priority)) : null;
+  const scheduled = nextScheduledMeeting(Object.values(cal.state.events), localToday(today), today);
+  const lead = devPlan ? leadPerson(devPlan) : null;
+
+  if (!inMeeting) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-5" data-weekly-meeting data-meeting-landing data-meeting-state={state} data-meeting-kind={meeting ? 'club' : 'free'}>
+        <header>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="of-page-title">Family Meeting</h1>
+            <span className="rounded-full bg-[var(--of-sage)] px-3 py-1 text-[0.85rem] font-semibold text-warm-ink" data-meeting-minutes>About 10 min</span>
+          </div>
+          <p className="mt-3 text-[1rem] leading-relaxed text-warm-soft">{MEETING_GUIDE.subtitle}</p>
+        </header>
+
+        {ownFocus ? (
+          <section className="of-tile of-tile--month" aria-labelledby="focus-h" data-meeting-landing-focus="family">
+            <p className="of-eyebrow">Our family focus</p>
+            <h2 id="focus-h" className="mt-2 font-serif text-[1.6rem] leading-tight">{ownFocus}</h2>
+            <p className="mt-2 text-[0.95rem] text-warm-soft">What would help with it this week?</p>
+          </section>
+        ) : meeting ? (
+          <section className="of-tile of-tile--month" aria-labelledby="focus-h" data-meeting-landing-focus="club-month">
+            <p className="of-eyebrow">This month · prepared for your family</p>
+            <h2 id="focus-h" className="mt-2 font-serif text-[1.6rem] leading-tight">{monthPage(today.getMonth() + 1).name}</h2>
+            <p className="mt-2 text-[0.95rem] text-warm-soft">{meeting.focus.challenge}</p>
+          </section>
+        ) : state === 'first' ? (
+          <section className="of-tile of-tile--month" aria-labelledby="focus-h" data-meeting-landing-focus="first">
+            <p className="of-eyebrow">Your first Family Meeting</p>
+            <h2 id="focus-h" className="mt-2 font-serif text-[1.45rem] leading-snug">Everyone at the table, about ten minutes.</h2>
+            <p className="mt-2 text-[0.95rem] text-warm-soft">We’ll walk you through it: look at the week together, talk, and agree one part each.</p>
+          </section>
+        ) : null}
+
+        <ol className="grid grid-cols-4 gap-1" aria-label="The four parts" data-meeting-parts-preview>
+          {MEETING_GUIDE.parts.map((part, i) => {
+            const current = state === 'in-progress' ? progress!.step === i : i === 0;
+            // Tapping a part opens the meeting there (e.g. straight to Everyone's Part).
+            return (
+              <li key={part.title}>
+                <button type="button" className="flex min-h-[44px] w-full flex-col items-center text-center" aria-current={current ? 'step' : undefined}
+                  aria-label={`Step ${i + 1}: ${part.title}, ${part.minutes} minutes`} onClick={() => { setInMeeting(true); goStep(i); }} data-meeting-step={i}>
+                  <span className={`grid size-10 place-items-center rounded-full border-2 font-serif text-[1.1rem] ${current ? 'border-[var(--of-sage-bar)] bg-[var(--of-sage-bar)] text-white' : 'border-[var(--of-rule-strong)] bg-white text-warm-ink'}`}>{i + 1}</span>
+                  <span className={`mt-1.5 text-[0.8rem] leading-tight ${current ? 'font-semibold text-warm-ink' : 'text-warm-soft'}`}>{part.title}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div>
+          {state === 'in-progress' ? (
+            <>
+              <button type="button" className="of-btn of-btn--block !min-h-[52px] !normal-case !tracking-normal !text-[1.05rem]" onClick={() => begin(false)} data-meeting-start data-meeting-continue>
+                Continue: {MEETING_GUIDE.parts[progress!.step]?.title ?? MEETING_GUIDE.parts[0].title}
+              </button>
+              <button type="button" className="mt-2 min-h-11 w-full text-[0.9rem] text-warm-soft underline underline-offset-4" onClick={() => begin(true)} data-meeting-start-over>Start over</button>
+            </>
+          ) : (
+            <button type="button" className="of-btn of-btn--block !min-h-[52px] !normal-case !tracking-normal !text-[1.05rem]" onClick={() => begin(true)} data-meeting-start>Start Our Family Meeting</button>
+          )}
+          {state === 'recent' && progress?.completedAt && (
+            <p className="mt-3 text-center text-[0.92rem] text-warm-soft" data-meeting-recent>You met {dayWord(progress.completedAt, today) === 'today' || dayWord(progress.completedAt, today) === 'yesterday' ? dayWord(progress.completedAt, today) : `on ${dayWord(progress.completedAt, today)}`}. Everyone’s parts are on <a href="/app" className="underline underline-offset-4">Today</a>.</p>
+          )}
+          {state === 'ready' && <p className="mt-3 text-center text-[0.92rem] text-warm-soft" data-meeting-ready>Ready when you are. Pick up right where your family is.</p>}
+          {scheduled && <p className="mt-2 text-center text-[0.92rem] text-warm-soft" data-meeting-scheduled>On your calendar: {new Date(`${scheduled.date}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' })}{scheduled.time ? ` · ${scheduled.time}` : ''}</p>}
+        </div>
+
+        {agreedCount > 0 && (
+          <a href="/app/family/responsibilities" className="of-tile" data-meeting-last-time>
+            <div className="flex items-center gap-4">
+            <span className="of-icon-box of-icon-box--sage shrink-0"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="m8.5 12.2 2.4 2.4 4.6-4.8" /></svg></span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-semibold">Last time together</span>
+              <span className="block text-[0.9rem] text-warm-soft">{agreedCount === 1 ? 'One part agreed' : `${agreedCount} parts agreed`}{lead ? `, and how ${lead.firstName}’s is going` : ''}.</span>
+            </span>
+            <span aria-hidden="true" className="text-warm-soft">›</span>
+            </div>
+          </a>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-5" data-weekly-meeting data-meeting-kind={meeting ? 'club' : 'free'}>
-      <header className="pb-2">
-        <a href="/app/family" className="of-tile-action !mt-0">← Family</a>
-        <p className="of-eyebrow mt-5">Our Family Meeting · {Month}</p>
-        <h1 className="of-page-title mt-2">{MEETING_GUIDE.title}</h1>
-        <p className="mt-3 text-[1rem] leading-relaxed text-warm-soft">{MEETING_GUIDE.subtitle}</p>
+      {/* Compact while the family is meeting: the way back to the landing, and where they are. */}
+      <header className="flex items-center justify-between gap-3">
+        <button type="button" className="inline-flex min-h-11 items-center gap-1.5 text-[0.95rem] font-semibold text-warm-ink" onClick={() => { setInMeeting(false); window.scrollTo(0, 0); }} data-meeting-back-to-landing>
+          <span aria-hidden="true">‹</span><span>Family Meeting</span>
+        </button>
+        <span className="rounded-full bg-[var(--of-sage)] px-3 py-1 text-[0.85rem] font-semibold" data-meeting-step-count>Step {activeStep + 1} of {MEETING_GUIDE.parts.length}</span>
+        <h1 className="sr-only">{MEETING_GUIDE.title} · {Month}</h1>
       </header>
 
       {/* The four parts as one compact segmented row: the current one filled, the others quiet. */}
       <nav aria-label="Family Meeting steps" data-meeting-navigation>
-        <p className="mb-1.5 text-[0.85rem] text-warm-soft">Step {activeStep + 1} of {MEETING_GUIDE.parts.length} · 10 minutes together</p>
         <div className="grid grid-cols-4 gap-1 rounded-[10px] border border-[var(--of-rule)] bg-white p-1">
           {MEETING_GUIDE.parts.map((part, i) => (
             <button key={part.title} type="button" onClick={() => goStep(i)}
@@ -219,7 +333,6 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Let’s Talk' && (
             <div className="mt-4 space-y-4">
-              {devPlan && <DevelopmentCheckIns plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAccessLost={access.revoke} />}
               <FollowThrough household={cal.household} profile={fam.profile} colors={cal.colors} {...(devPlan ? { skipSkillAgreements: true } : {})} />
               {meeting ? (
                 <div className="rounded-[9px] bg-[var(--of-surface)] p-4" data-meeting-questions>
@@ -243,7 +356,8 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Everyone’s Part' && (
             <div className="mt-4" data-meeting-parts-agreed>
-              {devPlan && <DevelopmentNextSteps plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgreement={fam.adoptAgreement} onAccessLost={access.revoke} />}
+              {devPlan && <DevelopmentConversation plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgreement={fam.adoptAgreement} onAccessLost={access.revoke} />}
+              {devPlan && <DevelopmentNextSteps plan={devPlan} live={devLive} decide={dev.decide} colors={cal.colors} onAgreement={fam.adoptAgreement} onAccessLost={access.revoke} exclude={lead?.memberId ?? ''} />}
               {suggestions.length > 0 && (
                 <div className="mb-5" data-meeting-suggestions>
                   <p className="of-eyebrow">Ideas for this month, by age</p>
@@ -340,7 +454,7 @@ export default function WeeklyMeeting() {
         {activeStep < MEETING_GUIDE.parts.length - 1 ? (
           <button type="button" className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" onClick={() => goStep(activeStep + 1)}>Next: {MEETING_GUIDE.parts[activeStep + 1].title} →</button>
         ) : (
-          <a className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" href="/app/family" onClick={() => track('meeting_completed')}>Finish meeting ✓</a>
+          <a className="of-btn !min-h-[44px] !normal-case !tracking-normal !text-[0.92rem]" href="/app" onClick={() => { track('meeting_completed'); setProgress(recordFinished(scope)); }} data-meeting-finish>Finish meeting ✓</a>
         )}
       </div>
       {/* One question at a time for a free family, only once it pays off in the next meeting (§8). */}

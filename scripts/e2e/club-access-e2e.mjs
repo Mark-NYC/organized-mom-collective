@@ -179,7 +179,8 @@ const anaCtx = await newPhone(); const ana = await anaCtx.newPage();
 await signInCode(ana, 'ana@e2e.test');
 check('5. the household has the Club right away: the meeting is the Club kind', (await meetingKind(ana)) === 'club');
 await ana.click('[data-meeting-step="2"]'); await settle(ana, 600);
-check('7. Club personalization and MAWL: one next step for her child', (await ana.locator('[data-development-next-steps] [data-development-person]').count()) >= 1);
+// Two-tab redesign: Everyone's Part leads with one conversation; any other child's next step is one tap away.
+check('7. Club personalization and MAWL: one next step for her child', (await ana.locator('[data-development-conversation], [data-development-next-steps] [data-development-person]').count()) >= 1);
 check('5. Club Home shows her membership, not the preview', (await clubHome(ana)) === 'member');
 const tomCtx = await newPhone(); const tom = await tomCtx.newPage();
 await signInCode(tom, 'tom@e2e.test');

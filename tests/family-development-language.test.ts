@@ -27,15 +27,16 @@ describe('approved MAWL language', () => {
   it('names the Watch → Launch move "Hand over responsibility", a parent action', () => {
     expect(HAND_OVER_LABEL).toBe('Hand over responsibility');
     expect(advanceLabel('watch')).toBe('Hand over responsibility');
-    expect(advanceLabel('model')).toBe('Next: We’ll do it together');
-    expect(advanceLabel('assist')).toBe('Next: They’ll do it, I’ll coach');
+    // Two-tab redesign: actions in plain words, never a stage name.
+    expect(advanceLabel('model')).toBe('Ready to do it together');
+    expect(advanceLabel('assist')).toBe('Ready to try it while you coach');
     expect(advanceLabel('launch')).toBeNull();
   });
 
   it('keeps moving backward possible from every stage after Model, including after Launch', () => {
-    expect(stepBackLabel('launch')).toBe('Step back: They’ll do it, I’ll coach');
-    expect(stepBackLabel('watch')).toBe('Step back: We’ll do it together');
-    expect(stepBackLabel('assist')).toBe('Step back: I’ll show them how');
+    expect(stepBackLabel('launch')).toBe('Coach them again');
+    expect(stepBackLabel('watch')).toBe('Practice together again');
+    expect(stepBackLabel('assist')).toBe('Show them again');
     expect(stepBackLabel('model')).toBeNull();
     expect(applyDecision({ stage: 'launch', status: 'launched' }, { decision: 'step-back' })).toEqual({ stage: 'watch', status: 'active' });
   });

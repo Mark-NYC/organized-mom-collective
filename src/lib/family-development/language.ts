@@ -1,7 +1,10 @@
 /**
- * Parent-facing MAWL language (owner decision 2026-11-20, PR 515). One source for every screen that names a stage:
- * the weekly Family Meeting, development coaching, check-ins, buttons and confirmations. The stored values stay
- * 'model' · 'assist' · 'watch' · 'launch'.
+ * Parent-facing language for the development engine. One source for the weekly Family Meeting, check-ins, buttons
+ * and confirmations. The stored values stay 'model' · 'assist' · 'watch' · 'launch'.
+ *
+ * Two-tab redesign (docs/ios/TWO_TAB_REDESIGN.md): the stages are INVISIBLE. No screen shows a stage's name, a stage
+ * indicator or a progression; parents see what to do next ("Do it together…") and choose actions ("Ready to do it
+ * together"). MAWL_LABEL stays for the engine's internal wording and records, never rendered as a label.
  *
  * Doing something on their own is progress (a check-in answer). Taking full responsibility is Launch: a separate,
  * explicit family decision ("Hand over responsibility"), never inferred from a check-in.
@@ -24,27 +27,32 @@ export const LAUNCH_CONFIRMATION = 'Great! This is now their responsibility. You
 /** In Watch: doing it independently is not the same as taking full responsibility. */
 export const WATCH_DISTINCTION = 'Doing it on their own is progress. Handing over responsibility is a separate choice you make, when you’re ready.';
 
-/** The button that moves one stage forward, by the current stage. Launch has none. */
+/** The action that moves one stage forward, by the current stage, in plain words (no stage names). Launch has none. */
 export function advanceLabel(stage: MawlStage): string | null {
   switch (stage) {
-    case 'model': return `Next: ${MAWL_LABEL.assist}`;
-    case 'assist': return `Next: ${MAWL_LABEL.watch}`;
+    case 'model': return 'Ready to do it together';
+    case 'assist': return 'Ready to try it while you coach';
     case 'watch': return HAND_OVER_LABEL;
     case 'launch': return null;
   }
 }
 
-/** The button that moves one stage back, by the current stage. Model has none. */
+/** The action that moves one stage back, by the current stage, in plain words. Model has none. */
 export function stepBackLabel(stage: MawlStage): string | null {
-  switch (stage) {
-    case 'model': return null;
-    case 'assist': return `Step back: ${MAWL_LABEL.model}`;
-    case 'watch': return `Step back: ${MAWL_LABEL.assist}`;
-    case 'launch': return `Step back: ${MAWL_LABEL.watch}`;
-  }
+  return practiceBackLabel(stage);
 }
 
-/** The small stage indicator on a card. The approved MAWL_LABEL stays the stage's full name. */
+/** Where a new responsibility starts, asked as how much help the child needs at first (never as a stage). */
+export function startChoices(firstName: string): { stage: MawlStage; label: string }[] {
+  return [
+    { stage: 'model', label: `Show ${firstName} how first` },
+    { stage: 'assist', label: 'We’ll do it together' },
+    { stage: 'watch', label: `${firstName} can mostly do it; I’ll coach` },
+    { stage: 'launch', label: `${firstName} already owns it` },
+  ];
+}
+
+/** Internal short names (logs, tests). Never rendered: the redesign shows no stage indicator. */
 export const STAGE_SHORT: Record<MawlStage, string> = {
   model: 'Learning',
   assist: 'Together',

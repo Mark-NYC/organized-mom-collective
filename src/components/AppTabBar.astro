@@ -1,8 +1,8 @@
 ---
 /**
- * Organized Family's bottom tab bar: Today · Calendar · Cleaning · Family, with Account behind the profile icon in the
- * header (Nav.astro). The same on the website's /app and in the iPhone app (owner decision 2026-11-17), at every
- * width. Shared by Nav.astro (every /app page) and, in the iPhone app bundle, ClubLayout (/club/login, /club/family…),
+ * Organized Family's bottom tab bar: Today · Family Meeting (two-tab redesign, src/data/app/tabs.ts), with Account
+ * behind the profile icon in the header (Nav.astro). The same on the website's /app and in the iPhone app, at every
+ * width. Every other screen (calendar, cleaning, the family, the Club) belongs to Today, which links to it. Shared by Nav.astro (every /app page) and, in the iPhone app bundle, ClubLayout (/club/login, /club/family…),
  * so no screen in the app is a dead end: the app has no back button (docs/ios/OMC_APP_ROADMAP.md).
  *
  * One exception, website only: the printed calendar's QR copy (/app/calendar…) keeps its own four phone tabs (its
@@ -10,7 +10,7 @@
  */
 import { calendarPath } from '../lib/companion';
 import { Icon } from './app/ui';
-import { PRIMARY_TABS } from '../data/app/tabs';
+import { PRIMARY_TABS, tabFor } from '../data/app/tabs';
 
 interface Props {
   /** Render in ClubLayout: Club pages count as the Club tab, and the bar needs room reserved below the page. */
@@ -27,12 +27,8 @@ const items = calendar ? [
   { href: '/app/calendar/settings', label: 'Settings', glyph: '◯' },
 ] : PRIMARY_TABS;
 const active = (href: string) => {
-  if (href === '/app') return path === '/app';
-  if (href === '/app/club' && (club || path.startsWith('/club/'))) return true;
-  // The Club, its meeting pages and the family pages all live under the app's Family tab.
-  if (href === '/app/family') return club || path === '/app/family' || /^\/(app\/family|app\/club|club)(\/|$)/.test(path);
-  if (!calendar && href === '/app/cleaning') return path === '/app/cleaning' || /^\/app\/(week|settings|calendar)(\/|$)/.test(path);
-  return path === href || (href !== '/app/calendar' && path.startsWith(href + '/'));
+  if (calendar) return path === href || (href !== '/app/calendar' && path.startsWith(href + '/'));
+  return tabFor(club ? '/app/club' : path) === href;
 };
 ---
 <nav

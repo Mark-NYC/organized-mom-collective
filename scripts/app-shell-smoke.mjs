@@ -214,14 +214,18 @@ await ipad.close();
   const row = page.locator('[data-calendar-event="Team photo"]');
   if (!(await row.locator('[data-change="new"]').isVisible())) fail('calendar: a plan added this week isn\'t marked New');
   else console.log('  ✓ calendar: a plan added this week is marked New for the meeting');
+  // Two-tab redesign: the week ahead is part of the meeting's Our Focus; Today counts today's plans (Plans shortcut).
   await page.goto(base + '/app', { waitUntil: 'networkidle' });
-  const week = page.locator('[data-meeting-week]');
-  if (!(await week.isVisible())) fail('Today: no "next 7 days" for the Family Meeting');
-  else if (!/Team photo/.test(await week.locator('[data-meeting-changes]').innerText())) fail('Today: the new plan isn\'t listed as new or changed');
-  else console.log('  ✓ Today: the next 7 days for the Family Meeting, with what\'s new');
+  if (!/[1-9][0-9]* events? today/.test(await page.locator('[data-today-shortcut="plans"]').innerText().catch(() => ''))) fail('Today: the Plans shortcut doesn\'t count today\'s plan');
   if (await page.locator('[data-sunday-card]').count()) fail('Today: still shows Sunday Setup');
+  await page.goto(base + '/app/family/meeting', { waitUntil: 'networkidle' });
+  await page.click('[data-meeting-start]');
+  const week = page.locator('[data-meeting-week]');
+  if (!(await week.isVisible())) fail('meeting: no "this week on our calendar" in Our Focus');
+  else if (!/Team photo/.test(await week.innerText())) fail('meeting: the new plan isn\'t in the week');
+  else console.log('  ✓ Today counts today\'s plans; the Family Meeting looks at the week together');
   await week.scrollIntoViewIfNeeded();
-  await page.screenshot({ path: join(OUT, '12-today-meeting-week.png'), fullPage: true });
+  await page.screenshot({ path: join(OUT, '12-meeting-week.png'), fullPage: true });
   // After the meeting, in the labeled demo family: everyone's part as the month's meeting lists it, in their colors.
   await page.goto(base + '/app?demo=1', { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
@@ -235,23 +239,24 @@ await ipad.close();
   await page.close();
 }
 
-// Navigation: Today · Calendar · Cleaning · Family, Account behind the profile icon. The Family tab leads with Our
-// Family Meeting (the standard guide's four parts), then Family Responsibilities, then the Family Meeting Club.
+// Navigation (two-tab redesign): Today · Family Meeting, Account behind the profile icon. Family & resources (Today's
+// Resources shortcut) leads back to the meeting (its four parts), then Family Responsibilities, then the Club.
 {
   const page = await web.newPage();
   await page.goto(base + '/app', { waitUntil: 'networkidle' });
   const tabs = await page.locator('[data-app-tabbar] a').evaluateAll((as) => as.map((a) => a.lastElementChild.textContent.trim()));
-  if (tabs.join() !== 'Today,Calendar,Cleaning,Family') fail(`tabs: expected Today,Calendar,Cleaning,Family, got ${tabs.join()}`);
-  else console.log('  ✓ tabs: Today · Calendar · Cleaning · Family');
+  if (tabs.join() !== 'Today,Family Meeting') fail(`tabs: expected Today,Family Meeting, got ${tabs.join()}`);
+  else console.log('  ✓ tabs: Today · Family Meeting');
+  for (const id of ['plans', 'cleaning', 'resources']) if (!(await page.locator(`[data-today-shortcut="${id}"]`).isVisible())) fail(`Today: no ${id} shortcut`);
   if (!(await page.locator('[data-profile-link][href="/app/account"]').isVisible())) fail('no profile icon for Account');
   await page.goto(base + '/app/family', { waitUntil: 'networkidle' });
-  const parts = await page.locator('[data-meeting-parts] li').allInnerTexts();
-  if (parts.length !== 4 || !/Our Focus/.test(parts[0]) || !/Let’s Practice/.test(parts[3])) fail(`Family: the four parts aren't shown in order: ${parts.join(' | ')}`);
+  const parts = await page.locator('[data-our-meeting]').innerText().catch(() => '');
+  if (!parts.includes('Our Focus · Let’s Talk · Everyone’s Part · Let’s Practice')) fail(`Family: the four parts aren't shown in order: ${parts}`);
   else if (!(await page.locator('[data-family-responsibilities-card]').isVisible())) fail('Family: responsibilities card missing');
   // Nobody is signed in here: a free family sees no Club membership card (it's for households that have the Club).
   else if (await page.locator('[data-family-club-card]').count()) fail('Family: a free family is shown the Family Meeting Club membership card');
-  else if (!(await page.locator('[data-app-tabbar] a[href="/app/family"][aria-current="page"]').count())) fail('Family tab not marked current');
-  else console.log('  ✓ Family: Our Family Meeting (four parts), Family Responsibilities; no Club card for a free family');
+  else if (!(await page.locator('[data-app-tabbar] a[href="/app"][aria-current="page"]').count())) fail('Family & resources: Today tab not marked current');
+  else console.log('  ✓ Family & resources: the way to the meeting (four parts), Family Responsibilities; no Club card for a free family');
   await page.screenshot({ path: join(OUT, '14-family.png'), fullPage: true });
 
   // "We agreed" in the meeting (labeled sample family, saved in this tab only), then everywhere else.
@@ -350,7 +355,7 @@ await ipad.close();
 {
   const page = await visit(native, '/app', '02-today-native');
   if (await page.locator('[data-calendar-unlock-button]').isVisible()) fail('the app still asks for the wall calendar before Cleaning');
-  if (!(await page.locator('[data-app-tabbar] a[href="/app/cleaning"]').isVisible())) fail('no Cleaning tab without a wall calendar');
+  if (!(await page.locator('[data-today-shortcut="cleaning"]').isVisible())) fail('no Cleaning shortcut without a wall calendar');
   {
     await page.goto(base + '/app/cleaning', { waitUntil: 'networkidle' });
     // A new device sees the companion's short onboarding first: step through it, as she would.

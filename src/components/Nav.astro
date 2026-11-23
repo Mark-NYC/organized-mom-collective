@@ -3,7 +3,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 import { calendarPath } from '../lib/companion';
 import AppTabBar from './AppTabBar.astro';
 import { Icon } from './app/ui';
-import { PRIMARY_TABS } from '../data/app/tabs';
+import { PRIMARY_TABS, tabFor } from '../data/app/tabs';
 // Organized Family is one unified app on the website and on the iPhone (AppTabBar.astro). Only the printed calendar's
 // QR copy (/app/calendar…, website only) keeps its own tabs, with its links in the header on wider screens.
 const appShell = import.meta.env.PUBLIC_APP_SHELL === 'ios';
@@ -18,10 +18,8 @@ const items = calendar ? [
 ] : [];
 const active = (href: string) => href === '/app' ? path === href : path === href || (href !== '/app/calendar' && path.startsWith(href + '/'));
 // Wide screens (desktop, iPad): the four tabs live in the header instead of the bottom bar (AppTabBar.astro).
-const tabActive = (href: string) => club ? href === '/app/family' : href === '/app' ? path === '/app'
-  : href === '/app/family' ? /^\/app\/(family|club)(\/|$)/.test(path)
-  : href === '/app/cleaning' ? /^\/app\/(cleaning|week|settings)(\/|$)/.test(path)
-  : path === href || path.startsWith(href + '/');
+// Two tabs (src/data/app/tabs.ts): the meeting is its own tab; every other app screen belongs to Today.
+const tabActive = (href: string) => tabFor(club ? '/app/club' : path) === href;
 ---
 <header data-chrome class="border-b border-warm-rule bg-ivory">
   <div class="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-5 sm:px-8">

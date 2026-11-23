@@ -241,10 +241,13 @@ check('each game night has its own responsibilities', (await sql(`select count(d
 const luis = await phone('iPhone 15 Pro Max');
 const luisToken = await signIn(luis, LUIS);
 await luis.goto(`${base}/app`, { waitUntil: 'networkidle' });
-await luis.waitForSelector('[data-who-does-what]', { timeout: 15000 });
-const tile = await luis.locator('[data-who-does-what]').innerText();
-check('Luis’s Today: "Who’s doing what" for the week, each with person, event and day',
-  /Drive to practice/.test(tile) && /Luis · Soccer practice · Today/.test(tile) && /Sign permission slip/.test(tile) && /Pick the game/.test(tile), tile.replace(/\n/g, ' | ').slice(0, 240));
+await luis.waitForSelector('[data-today-trackable]', { timeout: 15000 });
+const tile = await luis.locator('[data-today-responsibilities]').innerText();
+// Two-tab redesign: Today's Responsibilities lists today's (with a checkbox), and says how many more this week.
+check('Luis’s Today: today’s responsibilities with person, task and event; the rest of the week counted',
+  /Drive to practice/.test(tile) && /Luis\s+Drive to practice\s+Soccer practice/.test(tile) && /Pack soccer bag/.test(tile) && !/Sign permission slip/.test(tile)
+  && /more this week/i.test(await luis.locator('[data-today-later]').innerText().catch(() => '')),
+  JSON.stringify({ luisRow: /Luis\s+Drive to practice\s+Soccer practice/.test(tile), bag: /Pack soccer bag/.test(tile), noSlip: !/Sign permission slip/.test(tile), later: await luis.locator('[data-today-later]').innerText().catch(() => 'none') }));
 await shot(luis, '04-luis-today');
 await luis.click('[data-today-task="Drive to practice"] [data-task-done]');
 await settle(luis, 800);
@@ -257,7 +260,7 @@ await ana.click('[data-event-task="Drive to practice"] [data-task-done]');
 await settle(ana, 800);
 await closeSheet(ana);
 await luis.reload({ waitUntil: 'networkidle' });
-await luis.waitForSelector('[data-who-does-what]');
+await luis.waitForSelector('[data-today-trackable]');
 check('and back: Ana unchecks it, Luis’s Today shows it open again', (await luis.locator('[data-today-task="Drive to practice"] [data-task-done]').getAttribute('aria-checked')) === 'false');
 
 // ------------------------------------------------------------------ 6. The calendar changes underneath
@@ -293,7 +296,7 @@ await refreshAll(anaToken);
 check('a cancelled game night: its responsibility is kept, never moved to another night',
   (await sql(`select event_on from public.calendar_event_tasks where title = 'Make popcorn'`)) === day(3) && (await sql(`select count(*) from public.calendar_feed_events where uid = 'gamenight@rivera'`)) === '2');
 await ana.goto(`${base}/app`, { waitUntil: 'networkidle' });
-await ana.waitForSelector('[data-who-does-what]');
+await ana.waitForSelector('[data-today-trackable]');
 const orphan = ana.locator('[data-today-task="Make popcorn"]');
 check('Today says it’s no longer on the calendar, with Remove', /No longer on the calendar/.test(await orphan.innerText()));
 await shot(ana, '05-ana-today-cancelled');
@@ -348,8 +351,8 @@ await ana.goto(`${base}/app/family`, { waitUntil: 'networkidle' });
 await settle(ana);
 check('Family: opens with the family', /Mateo/.test(await ana.locator('main').innerText()));
 await ana.goto(`${base}/app`, { waitUntil: 'networkidle' });
-await ana.waitForSelector('[data-today-plans]');
-check('Today: plans, cleaning reset and the Family Meeting week still there', (await ana.locator('[data-today-plans]').count()) === 1 && (await ana.locator('[data-today-reset]').count()) === 1 && (await ana.locator('[data-meeting-week]').count()) === 1);
+await ana.waitForSelector('[data-today-responsibilities]');
+check('Today: responsibilities, Plans · Cleaning · Resources and the next Family Meeting still there', (await ana.locator('[data-today-responsibilities]').count()) === 1 && (await ana.locator('[data-today-shortcut]').count()) === 3 && (await ana.locator('[data-next-meeting]').count()) === 1);
 const own = await rpc(anaToken, 'calendar_event_save', { p_event: { id: crypto.randomUUID(), title: 'Dentist', starts_on: day(5), start_time: '09:00', timezone: TZ, member_ids: [await member('Elena')] }, p_base_revision: null });
 check('the family calendar still saves its own events', own.status === 200);
 check('no page errors', errors.length === 0, errors.slice(0, 3).join(' | '));

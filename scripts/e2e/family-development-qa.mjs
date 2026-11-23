@@ -130,7 +130,8 @@ check('Club family: meeting is the Club kind', (await jen.getAttribute('[data-we
 await step(jen, 1);
 check('no records: Let\'s Talk has no development check-in yet', await jen.locator('[data-development-check-ins]').count() === 0);
 await step(jen, 2);
-const people = await jen.locator('[data-development-person]').evaluateAll((els) => els.map((e) => e.getAttribute('data-development-person')));
+// Two-tab redesign: one conversation first, everyone else's next step behind one tap.
+const people = [await jen.getAttribute('[data-development-conversation]', 'data-development-conversation'), ...await jen.locator('[data-development-person]').evaluateAll((els) => els.map((e) => e.getAttribute('data-development-person')))].filter(Boolean);
 check('no records: one next step each, for the two children only', JSON.stringify(people.sort()) === JSON.stringify(['Leo', 'Maya']), people.join(','));
 const monthDup = await jen.locator('[data-meeting-suggestion="Maya"], [data-meeting-suggestion="Leo"]').count();
 check('no duplicate: a child with a development step gets no month suggestion too', monthDup === 0, `${monthDup}`);
@@ -155,9 +156,11 @@ const lastVisible = await jen.evaluate(() => {
 });
 check('scrolled to the end, the last control is not covered by Back/Next or the tab bar', lastVisible);
 await jen.evaluate(() => window.scrollTo(0, 0));
-await jen.click('[data-development-person="Leo"] [data-development-adjust] summary');
-const stages = await jen.locator('[data-development-person="Leo"] [data-development-stage]').allTextContents();
-check('all four MAWL stages in the approved words', JSON.stringify(stages) === JSON.stringify(['I’ll show them how', 'We’ll do it together', 'They’ll do it, I’ll coach', 'Ready to take full responsibility']), stages.join(' · '));
+const leo = (await jen.locator('[data-development-conversation="Leo"]').count()) ? jen.locator('[data-development-conversation="Leo"]') : jen.locator('[data-development-person="Leo"]');
+if (!(await leo.isVisible())) await jen.click('[data-development-others] summary');
+await leo.locator('[data-development-adjust] summary').click();
+const stages = await leo.locator('[data-development-stage]').allTextContents();
+check('where to start, asked as how much help (no stage names)', JSON.stringify(stages) === JSON.stringify(['Show Leo how first', 'We’ll do it together', 'Leo can mostly do it; I’ll coach', 'Leo already owns it']), stages.join(' · '));
 await layout(jen, 'phone 393 · idea adjust panel open');
 await shot(jen, '03b-idea-adjust-open');
 await jen.click('[data-development-person="Leo"] [data-development-adjust] summary');
@@ -224,13 +227,13 @@ await shot(jen, '05-club-lets-practice');
 // ------------------------------------------------------------------ 3. a week later: check-in, Watch, pause
 await sql(`update household_development set stage = 'watch', last_check_in_on = current_date - 8, cue = 'After dinner' where member_id = '${kids.leo}'`);
 await openMeeting(jen);
-await step(jen, 1);
-check('a week later: Let\'s Talk asks how Leo\'s skill is going', await jen.locator(`[data-development-check-in="${leoSkill}"]`).count() === 1);
+await step(jen, 2);
+check('a week later: Everyone\'s Part asks how Leo\'s skill is going', await jen.locator(`[data-development-check-in="${leoSkill}"]`).count() === 1);
 check('Watch: the question is about the usual time without reminders', /without a reminder/.test(await jen.textContent(`[data-development-check-in="${leoSkill}"]`)));
 check('Watch: offers "a different kind of day"', await jen.locator('[data-development-variation]').count() === 1);
 check('no duplicate: the old follow-through doesn\'t ask about the same agreement', await jen.locator('[data-check-in]').count() === 0);
-await layout(jen, 'phone 393 · Let\'s Talk (check-in)');
-await axe(jen, 'phone 393 · Let\'s Talk');
+await layout(jen, 'phone 393 · Everyone\'s Part (check-in)');
+await axe(jen, 'phone 393 · Everyone\'s Part');
 await shot(jen, '06-watch-check-in');
 await jen.check('[data-development-variation]');
 await jen.click(`[data-development-check-in="${leoSkill}"] [data-development-answer="strong"]`);
@@ -240,7 +243,7 @@ check('check-in "Usually": recorded, stage stays Watch (no automatic Launch)', a
 await step(jen, 2);
 const next = jen.locator(`[data-development-next="${leoSkill}"]`);
 check('Everyone\'s Part: Launch is offered only as the family\'s own decision', /Hand over responsibility/.test(await next.textContent()) && /Doing it on their own is progress/.test(await next.textContent()));
-check('Everyone\'s Part: a small stage indicator in plain words', (await next.locator('[data-development-stage-pill]').textContent()) === 'Practicing');
+check('Everyone\'s Part: no stage indicator or stage name (stages stay invisible)', (await next.locator('[data-development-stage-pill]').count()) === 0 && !/They’ll do it, I’ll coach|Practicing</.test(await next.innerHTML()));
 await shot(jen, '07-watch-next-step');
 await next.locator('[data-development-decision="pause"]').click();
 await jen.waitForSelector(`[data-development-next="${leoSkill}"] [data-development-saved]`);
@@ -293,9 +296,9 @@ check('Launch saved: launched, and the agreement stays on the list', launched ==
 await shot(jen, '07c-launch-confirmed', false);
 await sql(`update household_development set last_check_in_on = current_date - 30 where member_id = '${kids.maya}'`);
 await openMeeting(jen);
-await step(jen, 1);
+await step(jen, 2);
 check('after Launch: the check-in asks whether it is still theirs (ownership)', /still Maya’s/.test(await jen.textContent(`[data-development-check-in="${mayaSkill}"]`) ?? ''));
-check('after Launch: the stage reads "Their responsibility"', (await jen.textContent(`[data-development-check-in="${mayaSkill}"] [data-development-stage-pill]`)) === 'Their responsibility');
+check('after Launch: no stage label shown', (await jen.locator(`[data-development-check-in="${mayaSkill}"] [data-development-stage-pill]`).count()) === 0);
 await step(jen, 2);
 check('after Launch: moving back is still possible', /Coach them again/.test(await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="step-back"]`).textContent() ?? ''));
 check('after Launch: the primary action keeps it theirs', (await jen.locator(`[data-development-next="${mayaSkill}"] [data-development-decision="stay"]`).textContent())?.trim() === 'Keep it as theirs');

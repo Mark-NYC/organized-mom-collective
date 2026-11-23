@@ -124,7 +124,8 @@ for (const p of PERSONAS) {
   await page.waitForURL(/\/app$/, { timeout: 15000 }); await settle(page, 1800);
   const next = await page.getAttribute('[data-start-here]', 'data-start-here').catch(() => null);
   check(`${p.id} Today: "Getting started" points to this week's plans next`, next === 'week', String(next));
-  check(`${p.id} Today: the Family Meeting is right there, no instructions needed`, (await page.locator('a:has-text("Start our Family Meeting")').count()) >= 1);
+  // Two-tab redesign: the Family Meeting is a tab, and Today's Next Family Meeting card opens it.
+  check(`${p.id} Today: the Family Meeting is right there, no instructions needed`, (await page.locator('[data-app-tabbar] a[href="/app/family/meeting"], [data-app-topnav] a[href="/app/family/meeting"]').count()) >= 1 && (await page.locator('[data-next-meeting]').count()) === 1);
   await shot('04-today');
 
   // 5. A first useful action: today's cleaning (straight to the checklist, no walkthrough)
