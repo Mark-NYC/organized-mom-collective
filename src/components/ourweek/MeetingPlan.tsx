@@ -44,8 +44,8 @@ export function reviewItems(week: WeekAhead): { day: string; item: WeekItem; mor
 }
 
 /** Look ahead together, and choose what matters. */
-export function WeekReview({ week, priorities, current, weekStart, colors }: {
-  week: WeekAhead; priorities: Priorities | null; current: Resolved[]; weekStart: string; colors: Record<string, MarkerColor>;
+export function WeekReview({ week, priorities, current, weekStart, colors, intakeActivities = [] }: {
+  week: WeekAhead; priorities: Priorities | null; current: Resolved[]; weekStart: string; colors: Record<string, MarkerColor>; intakeActivities?: string[];
 }) {
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +111,13 @@ export function WeekReview({ week, priorities, current, weekStart, colors }: {
           )}
           {error && <p role="alert" className="mt-2 text-[0.85rem] text-[#a33]" data-priority-error>{error}</p>}
         </div>
+      )}
+      {intakeActivities.length > 0 && (
+        <details className="border-t border-[var(--of-rule)] pt-2 text-[0.9rem]" data-onboarding-week-cues>
+          <summary className="min-h-11 cursor-pointer text-warm-soft">From your family setup: regular activities</summary>
+          <p className="mt-1 text-warm-soft">{intakeActivities.join(' · ')}</p>
+          <p className="mt-1 text-[0.82rem] text-warm-soft">These are reminders of what you shared, not calendar events or selected priorities.</p>
+        </details>
       )}
       {week.count > 0 && (
         <div className="rounded-[9px] border border-[var(--of-rule)] bg-white/70 p-3 sm:p-4" data-meeting-week>
