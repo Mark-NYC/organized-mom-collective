@@ -41,7 +41,7 @@ import { appShellBuild } from '../../lib/native/platform';
 import { firstSteps, gettingStarted, inviteSkipped, nextStep, skipInvite, starterIdeas, type FirstStep } from '../../lib/app/first-steps';
 import { dayWord, meetingState, nextScheduledMeeting, readProgress } from '../../lib/app/meeting-progress';
 import { SHOWN, currentPriorities, usePriorities, type Resolved } from '../../lib/app/priorities';
-import { doneLabel, tasksFor } from '../../lib/calendar/event-tasks';
+import { tasksFor } from '../../lib/calendar/event-tasks';
 import type { CalendarEvent } from '../../lib/calendar/recurrence';
 
 const dayName = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
@@ -106,9 +106,11 @@ export default function TodayDashboard() {
   // This week's priorities, chosen in the Family Meeting (both adults; docs/ios/FAMILY_PLAN.md).
   const prio = usePriorities(live, date);
   const { list: current, from } = currentPriorities(prio.items, events, date);
+  const [showAllPriorities, setShowAllPriorities] = useState(false);
+  const visiblePriorities = showAllPriorities ? current : current.slice(0, SHOWN);
   // A task shown under its highlighted priority should not appear a second time
   // in Everyone's part today. Tasks on unhighlighted events still appear there.
-  const nestedTaskIds = new Set(current.flatMap((r) => {
+  const nestedTaskIds = new Set(visiblePriorities.flatMap((r) => {
     if (r.gone || r.priority.source !== 'imported' || !eventTasks.available) return [];
     const event = ext.events.find((e) => e.external?.uid === r.priority.event_uid && e.external?.instance_key === r.priority.instance_key);
     return event ? tasksFor(eventTasks.tasks, event).map((t) => t.id) : [];
@@ -127,7 +129,7 @@ export default function TodayDashboard() {
       {/* A brand-new family sees one thing: its first shared win. The rest of Today fills in from there. */}
       {cal.household && !firstWin && <FocusPanel ownFocus={ownFocus} clubMonth={showsClub ? monthPage(today.getMonth() + 1).name : null} first={state === 'first'} />}
 
-      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} household={cal.household} colors={cal.colors} />}
+      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} household={cal.household} all={showAllPriorities} setAll={setShowAllPriorities} />}
 
       {cal.household && !firstWin && <Responsibilities todays={otherTasks} later={laterThisWeek} agreed={agreed} profile={profile} cal={cal} tasks={eventTasks} today={date} />}
 
@@ -174,9 +176,8 @@ function FocusPanel({ ownFocus, clubMonth, first }: { ownFocus: string | null; c
  * Our priorities this week: the few things the family chose in its meeting (never automatic), each linked to its
  * event as it is now. Before a first meeting, or when a week goes by without one, it says so plainly, without guilt.
  */
-function OurPriorities({ current, from, first, tasks, external, household, colors }: { current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean; tasks: EventTasks; external: CalendarEvent[]; household: Cal['household']; colors: Cal['colors'] }) {
+function OurPriorities({ current, from, first, tasks, external, household, all, setAll }: { current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean; tasks: EventTasks; external: CalendarEvent[]; household: Cal['household']; all: boolean; setAll: (value: boolean) => void }) {
   // Three is the normal view; a busy week's fourth and fifth are one tap away, in place (never hidden elsewhere).
-  const [all, setAll] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const shown = all ? current : current.slice(0, SHOWN);
   const when = (r: Resolved) => (r.date ? `${dayName(r.date)}${r.time ? ` · ${r.time}` : ''}` : 'This week');
@@ -205,7 +206,7 @@ function OurPriorities({ current, from, first, tasks, external, household, color
                           <li key={t.id} className="flex items-start gap-2 text-[0.88rem] leading-snug">
                             <button type="button" role="checkbox" aria-checked={t.done} aria-label={`${t.title}, ${person(t.member_id)}`}
                               onClick={async () => setError(await tasks.toggle(t.id))}
-                              className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-[var(--of-rule-strong)] text-[0.8rem] text-warm-ink"
+                              className="grid size-10 shrink-0 place-items-center rounded-full border border-[var(--of-rule-strong)] text-[0.8rem] text-warm-ink"
                               data-priority-part-toggle={t.id}>{t.done ? '✓' : '·'}</button>
                             <span className={t.done ? 'text-warm-soft line-through' : 'text-warm-ink'}>
                               <span className="font-medium">{person(t.member_id)}</span> · {t.title}
