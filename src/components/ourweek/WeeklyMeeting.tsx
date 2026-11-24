@@ -312,10 +312,13 @@ export default function WeeklyMeeting() {
 
           {p.title === 'Our Focus' && (meeting ? (
             <div className="mt-3" data-club-month-meeting data-meeting-focus>
-              <p className="of-eyebrow">This month · prepared for your family</p>
-              <p className="mt-2 font-serif text-[1.25rem] leading-snug">{meeting.focus.challenge}</p>
-              <p className="mt-2 text-[0.95rem] leading-relaxed">{meeting.focus.principle} {meeting.focus.why}</p>
-              {meeting.focus.forWhom && <p className="mt-2 text-[0.85rem] text-warm-soft">{meeting.focus.forWhom}</p>}
+              <p className="of-eyebrow">This month's focus</p>
+              <p className="mt-2 font-serif text-[1.15rem] leading-snug">{meeting.focus.challenge}</p>
+              <details className="mt-2 text-[0.88rem] leading-relaxed text-warm-soft" data-meeting-focus-details>
+                <summary className="min-h-10 cursor-pointer underline underline-offset-4">Why this matters</summary>
+                <p className="mt-1">{meeting.focus.principle} {meeting.focus.why}</p>
+                {meeting.focus.forWhom && <p className="mt-1 text-[0.82rem]">{meeting.focus.forWhom}</p>}
+              </details>
             </div>
           ) : (
             <>

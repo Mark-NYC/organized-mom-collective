@@ -107,15 +107,17 @@ describe('the meeting fits the plan into its four parts', () => {
   it('the four approved parts are unchanged', () => {
     expect(src('src/data/club/meeting-guide.ts')).toMatch(/Our Focus[\s\S]*Let’s Talk[\s\S]*Everyone’s Part[\s\S]*Let’s Practice/);
   });
-  it('"We have a plan.": what THIS meeting decided: three priorities with prep under them, new agreements only, one link to the rest', () => {
-    expect(plan).toMatch(/data-plan-prep/);
-    expect(plan).toMatch(/const fresh = byKids\(newIds && newIds\.size/);
-    expect(plan).toMatch(/const top = current\.slice\(0, SHOWN\);/);
-    expect(plan).toMatch(/Nothing new this week\. Everyone keeps the parts they already have\./);
-    expect(plan).toMatch(/data-plan-all-parts>All of everyone’s parts \(\{total\}\)/);
-    // The standing list is never on screen (only the printout carries it, compactly).
+  it('"We have a plan.": one compact, shared plan with prep under each priority and home responsibilities once', () => {
+    const shared = src('src/components/app/FamilyWeekPlan.tsx');
+    expect(plan).toMatch(/<FamilyWeekPlan current=\{current\}/);
+    expect(src('src/components/app/TodayDashboard.tsx')).toMatch(/<FamilyWeekPlan current=\{visible\}/);
+    expect(shared).toMatch(/data-plan-prep/);
+    expect(shared).toMatch(/data-plan-home/);
+    expect(shared).toMatch(/data-plan-priority/);
+    expect(plan).toMatch(/const fresh = newIds\?\.size/);
+    expect(plan).toMatch(/const home = fresh\.length \? fresh : agreed/);
+    expect(plan).toMatch(/data-plan-all-parts/);
     expect(plan).toMatch(/className="hidden print:block" data-plan-print-parts/);
-    expect(plan).not.toMatch(/parts\.slice\(-1\)/);
     expect(m).toMatch(/<PlanSummary current=\{plan\} agreed=\{agreed\} newIds=\{newIds\}/);
   });
   it('Our Focus asks what matters, and keeps the usual week one tap away (grouped, never ranked or chosen for them)', () => {
@@ -162,9 +164,19 @@ describe('Today: a curated plan, not a household list', () => {
     expect(standingRows([{ memberId: 'a', name: 'A', parts: [part('1', 'Feed the dog', 'Morning')] }, { memberId: 'b', name: 'B', parts: [part('2', 'Feed the dog', 'Evening')] }])).toHaveLength(2);
     expect(t).toMatch(/href="\/app\/family\/responsibilities" className="of-tile-action mt-3" data-all-parts/);
   });
+  it('nested event parts are checkable under priorities, never repeated in Everyone’s part today', () => {
+    const shared = src('src/components/app/FamilyWeekPlan.tsx');
+    expect(shared).toMatch(/data-priority-part-toggle/);
+    expect(shared).toMatch(/await tasks\.toggle\(t\.id\)/);
+    expect(t).toMatch(/const nestedTaskIds = new Set\(visiblePriorities\.flatMap/);
+    expect(t).toMatch(/const otherTasks = todays\.filter\(\(x\) => !nestedTaskIds\.has\(x\.task\.id\)\)/);
+    expect(t).toMatch(/!prio\.available && <Responsibilities/);
+    expect(t).toMatch(/otherTasks=\{otherTasks\}/);
+    expect(shared).toMatch(/data-plan-other-today/);
+  });
   it('priorities show only once the database has them; before a first meeting or after a missed one, a plain line', () => {
     expect(t).toMatch(/prio\.available && <OurPriorities/);
-    expect(t).toMatch(/In your first Family Meeting, choose up to three/);
+    expect(t).toMatch(/In your first Family Meeting, choose what matters and who will handle it/);
     expect(t).not.toMatch(/you missed|overdue|streak/i);
   });
 });

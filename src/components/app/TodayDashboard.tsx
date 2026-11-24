@@ -41,7 +41,8 @@ import { appShellBuild } from '../../lib/native/platform';
 import { firstSteps, gettingStarted, inviteSkipped, nextStep, skipInvite, starterIdeas, type FirstStep } from '../../lib/app/first-steps';
 import { dayWord, meetingState, nextScheduledMeeting, readProgress } from '../../lib/app/meeting-progress';
 import { SHOWN, currentPriorities, usePriorities, type Resolved } from '../../lib/app/priorities';
-import { doneLabel, tasksFor } from '../../lib/calendar/event-tasks';
+import { tasksFor } from '../../lib/calendar/event-tasks';
+import FamilyWeekPlan from './FamilyWeekPlan';
 import type { CalendarEvent } from '../../lib/calendar/recurrence';
 
 const dayName = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
@@ -106,6 +107,16 @@ export default function TodayDashboard() {
   // This week's priorities, chosen in the Family Meeting (both adults; docs/ios/FAMILY_PLAN.md).
   const prio = usePriorities(live, date);
   const { list: current, from } = currentPriorities(prio.items, events, date);
+  const [showAllPriorities, setShowAllPriorities] = useState(false);
+  const visiblePriorities = showAllPriorities ? current : current.slice(0, SHOWN);
+  // A task shown under its highlighted priority should not appear a second time
+  // in Everyone's part today. Tasks on unhighlighted events still appear there.
+  const nestedTaskIds = new Set(visiblePriorities.flatMap((r) => {
+    if (r.gone || r.priority.source !== 'imported' || !eventTasks.available) return [];
+    const event = ext.events.find((e) => e.external?.uid === r.priority.event_uid && e.external?.instance_key === r.priority.instance_key);
+    return event ? tasksFor(eventTasks.tasks, event).map((t) => t.id) : [];
+  }));
+  const otherTasks = todays.filter((x) => !nestedTaskIds.has(x.task.id));
   // A brand-new family (nothing shared yet, nothing chosen yet) sees one thing: its first shared win.
   const firstWin = starting && nextStep(steps)?.id === 'share' && !current.length;
 
@@ -119,9 +130,10 @@ export default function TodayDashboard() {
       {/* A brand-new family sees one thing: its first shared win. The rest of Today fills in from there. */}
       {cal.household && !firstWin && <FocusPanel ownFocus={ownFocus} clubMonth={showsClub ? monthPage(today.getMonth() + 1).name : null} first={state === 'first'} />}
 
-      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} />}
+      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} own={own} agreed={agreed} otherTasks={otherTasks} household={cal.household} colors={cal.colors} all={showAllPriorities} setAll={setShowAllPriorities} />}
 
-      {cal.household && !firstWin && <Responsibilities todays={todays} later={laterThisWeek} agreed={agreed} profile={profile} cal={cal} tasks={eventTasks} today={date} />}
+      {/* Unhighlighted event tasks still need a home; highlighted tasks and standing roles already live in Our week together. */}
+      {cal.household && !firstWin && !prio.available && <Responsibilities todays={otherTasks} later={laterThisWeek} agreed={prio.available ? [] : agreed} profile={profile} cal={cal} tasks={eventTasks} today={date} />}
 
       <nav aria-label="More for today" className="grid grid-cols-3 gap-2.5" data-today-shortcuts>
         <Shortcut href={routes.familyCalendar} icon="calendar" title="Plans" sub={plansToday ? `${plansToday} ${plansToday === 1 ? 'event' : 'events'} today` : 'Nothing today'} id="plans" />
@@ -166,42 +178,38 @@ function FocusPanel({ ownFocus, clubMonth, first }: { ownFocus: string | null; c
  * Our priorities this week: the few things the family chose in its meeting (never automatic), each linked to its
  * event as it is now. Before a first meeting, or when a week goes by without one, it says so plainly, without guilt.
  */
-function OurPriorities({ current, from, first, tasks, external }: { current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean; tasks: EventTasks; external: CalendarEvent[] }) {
-  // Three is the normal view; a busy week's fourth and fifth are one tap away, in place (never hidden elsewhere).
-  const [all, setAll] = useState(false);
-  const shown = all ? current : current.slice(0, SHOWN);
-  const when = (r: Resolved) => (r.date ? `${dayName(r.date)}${r.time ? ` · ${r.time}` : ''}` : 'This week');
+function OurPriorities({ current, from, first, tasks, external, own, agreed, otherTasks, household, colors, all, setAll }: {
+  current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean;
+  tasks: EventTasks; external: CalendarEvent[]; own: CalendarEvent[];
+  agreed: PersonAgreements[]; otherTasks: TodayTask[]; household: Cal['household']; colors: Cal['colors'];
+  all: boolean; setAll: (value: boolean) => void;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const visible = all ? current : current.slice(0, SHOWN);
   return (
     <section className="of-tile" aria-labelledby="priorities-h" data-today-priorities={from ?? 'none'}>
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 id="priorities-h" className="font-serif text-[1.35rem] leading-tight">Our priorities this week</h2>
-        {from === 'last-meeting' && <span className="text-[0.8rem] text-warm-soft">From your last meeting</span>}
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 id="priorities-h" className="font-serif text-[1.35rem] leading-tight">Our week together</h2>
+        {from === 'last-meeting' && <span className="text-[0.75rem] text-warm-soft">From our last meeting</span>}
       </div>
-      {shown.length ? (
-        <ol className="of-rows mt-1">
-          {shown.map((r, i) => {
-            const ext = r.priority.source === 'imported' ? external.find((e) => e.external?.uid === r.priority.event_uid && e.external?.instance_key === r.priority.instance_key) : undefined;
-            const ready = ext && tasks.available ? doneLabel(tasksFor(tasks.tasks, ext)) : null;
-            return (
-              <li key={r.priority.id} className="of-row !gap-3" data-today-priority={r.title}>
-                <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--of-month-wash)] font-serif text-[1rem] text-warm-ink">{i + 1}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="of-row-title block">{r.title}</span>
-                  <span className="of-row-meta">{r.gone ? <span className="text-[#a33]">No longer on the calendar</span> : when(r)}{ready ? ` · ${ready === 'All done' ? 'ready' : ready.replace(' done', ' ready')}` : ''}</span>
-                </span>
-              </li>
-            );
-          })}
-        </ol>
+      {current.length || agreed.length || otherTasks.length ? (
+        <FamilyWeekPlan current={visible} external={external} own={own} tasks={tasks} agreed={agreed}
+          household={household} colors={colors} interactive onError={setError} otherTasks={otherTasks} />
       ) : (
-        <p className="mt-2 text-[0.92rem] text-warm-soft" data-no-priorities>{first ? 'In your first Family Meeting, choose up to three things the whole family needs to know about or get ready for.' : 'Choose this week’s few in your next Family Meeting, whenever it suits you.'}</p>
+        <p className="mt-2 text-[0.9rem] text-warm-soft" data-no-priorities>
+          {first ? 'In your first Family Meeting, choose what matters and who will handle it.' : 'Choose what matters together at your next Family Meeting.'}
+        </p>
       )}
+      {error && <p className="mt-2 text-[0.85rem] text-[#a33]" role="alert">{error}</p>}
       {current.length > SHOWN && (
-        <button type="button" className="mt-1 min-h-11 text-[0.85rem] text-warm-soft underline underline-offset-4" aria-expanded={all} onClick={() => setAll(!all)} data-priorities-more>
+        <button type="button" className="mt-1 min-h-11 text-[0.85rem] text-warm-soft underline underline-offset-4"
+          aria-expanded={all} onClick={() => setAll(!all)} data-priorities-more>
           {all ? 'Show the top three' : `Show ${current.length - SHOWN} more`}
         </button>
       )}
-      <a href={MEETING} className="of-tile-action mt-3" data-priorities-meeting>{shown.length ? 'Change in the Family Meeting' : 'Open the Family Meeting'} <Chevron /></a>
+      <a href={MEETING} className="of-tile-action mt-2" data-priorities-meeting>
+        {current.length ? 'Change our plan' : 'Plan together'} <Chevron />
+      </a>
     </section>
   );
 }
