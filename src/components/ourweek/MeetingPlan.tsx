@@ -21,7 +21,6 @@ import { doneLabel, tasksFor, type EventTasks } from '../../lib/calendar/event-t
 import type { MarkerColor } from '../../data/club/family-colors';
 import type { Household } from '../../lib/club/profile';
 import { EventResponsibilities } from '../calendar/CalendarSources';
-import { Avatar } from '../app/ui';
 import FamilyWeekPlan from '../app/FamilyWeekPlan';
 
 const dayLabel = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
