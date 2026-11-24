@@ -2,9 +2,9 @@
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const zones = ['Living Room', 'Bedrooms', 'Entry/Bathroom', 'Kitchen Reset', 'Deep Cleaning', 'Home Project', 'Catch-Up / Reset'];
 const examples = [
-  { id:'soccer', title:'Soccer practice', event:3, time:'4 PM', day:2, person:'Philip', job:'Pack the soccer bag', done:'Cleats, water and shin guards are by the door.' },
+  { id:'soccer', title:'Soccer practice', attendee:'Philip', event:3, time:'4 PM', day:2, person:'Philip', job:'Pack the soccer bag', done:'Cleats, water and shin guards are by the door.' },
   { id:'entry', title:'Entry/Bathroom', day:2, person:'Andrew', job:'Put shoes and bags away', done:'All shoes on the rack and bags hung by dinner.' },
-  { id:'trip', title:'Class field trip', event:4, time:'9 AM', day:3, person:'Andrew', job:'Pack a field trip lunch', done:'Lunch and a filled bottle are in the fridge.' },
+  { id:'trip', title:'Class field trip', attendee:'Andrew', event:4, time:'9 AM', day:3, person:'Andrew', job:'Pack a field trip lunch', done:'Lunch and a filled bottle are in the fridge.' },
 ];
 const key = 'omc.experimental.family-week.v1';
 const fresh = () => ({ week:1, agreements:[], moved:false, checked:false, calendar:'weekly', reviewed:false, draft:null, skipped:[] });
@@ -25,6 +25,7 @@ const heading = (over,title) => '<p class="kicker">'+esc(over)+'</p><h1>'+esc(ti
 const feature = html => '<section class="feature">'+html+'</section>';
 const weekLabel = () => state.week === 1 ? 'November 23–29' : 'December 14–20';
 const events = () => [examples[0], ...(state.week === 4 ? [examples[2]] : []), {id:'library', title:'Library visit',event:5,time:'11 AM'}];
+const libraryVisit = { id:'library', title:'Library visit', attendee:'Family', event:5, time:'11 AM', day:4, person:'', job:'Gather library books', done:'Books to return are in the tote by the door.' };
 const dayFor = item => item.id === 'entry' && state.moved ? 5 : item.day;
 const detail = item => '<li><strong>'+esc(item.person)+'</strong> · '+esc(item.job)+'<br><small>'+days[dayFor(item)]+' · '+esc(item.done)+'</small></li>';
 const row = (title,html) => '<div class="row"><h3>'+esc(title)+'</h3>'+html+'</div>';
@@ -37,7 +38,7 @@ function today() {
   const priorities = state.agreements.filter(a=>a.id!=='entry');
   const cleaning = state.agreements.find(a=>a.id==='entry');
   return heading(weekLabel()+' · Sample week','Today') + feature('<h2>Our family focus</h2>'+
-    (priorities.length ? priorities.map(item=>row(item.title,'<ul>'+detail(item)+'</ul>')).join('') : '<p>Choose what deserves a little preparation this week.</p>')+
+    (priorities.length ? priorities.map(item=>row(item.title,(item.event!=null?'<small>'+days[item.event]+' · '+esc(item.time)+'</small>':'')+'<ul>'+detail(item)+'</ul>')).join('') : '<p>Choose what deserves a little preparation this week.</p>')+
     button(state.draft||state.agreements.length?'meeting':'start', state.draft?'Resume family meeting':state.agreements.length?'Review our plan':'Start family meeting','primary'))+
     '<section><h2>Our week together</h2>'+events().map(e=>row(e.title,'<small>'+days[e.event]+' · '+e.time+'</small>')).join('')+
     (cleaning?row(cleaning.title,'<ul>'+detail(cleaning)+'</ul><small>'+ (state.checked?'Finished':'Planned')+'</small>'):'')+'</section>'+
@@ -54,8 +55,8 @@ function landing() {
     '<div class="links">'+link('/app/club/','Family Meeting Club')+'</div>';
 }
 function start() {
-  const available = [...state.agreements, ...examples.filter(x=>(x.id!=='trip'||state.week===4)&&!state.skipped.includes(x.id)&&!state.agreements.some(a=>a.id===x.id))];
-  state.draft={step:0,items:structuredClone(available),selected:available.map(a=>a.id),index:0,
+  const available = [...state.agreements, ...[...examples,libraryVisit].filter(x=>(x.id!=='trip'||state.week===4)&&!state.skipped.includes(x.id)&&!state.agreements.some(a=>a.id===x.id))];
+  state.draft={step:0,items:structuredClone(available),selected:available.filter(a=>a.id!=='library'||state.agreements.some(old=>old.id==='library')).map(a=>a.id),index:0,
     agreed:state.agreements.map(a=>a.id),changed:[],review:[],custom:false};
 }
 function discussion(d) {
@@ -107,7 +108,7 @@ function wall() {
   const monthly=state.calendar==='monthly';
   const notes=days.map(()=>[]);
   for(const a of entries) {
-    if(a.event!=null) notes[a.event].push((monthly?a.person+' · ':'')+a.title+' · '+a.time);
+    if(a.event!=null) notes[a.event].push((monthly?(a.attendee||'Family')+' · ':'')+a.title+' · '+a.time);
     notes[dayFor(a)].push(a.person+' · '+a.job);
   }
   return heading(weekLabel(),'Wall calendar')+select('calendar','Your calendar',[['weekly','Family Life Planner'],['monthly','Family Schedule Calendar'],['other','Our own calendar']],state.calendar)+
@@ -188,7 +189,7 @@ root.addEventListener('click',e=>{
   else if(action==='quick'||action==='finish'){
     if(action==='finish'){
       state.agreements=d.items.filter(a=>d.selected.includes(a.id)&&d.agreed.includes(a.id));
-      state.skipped=[...new Set([...state.skipped,...d.items.filter(a=>!state.agreements.some(x=>x.id===a.id)).map(a=>a.id)])];
+      state.skipped=[...new Set([...state.skipped,...d.items.filter(a=>a.id!=='library'&&!state.agreements.some(x=>x.id===a.id)).map(a=>a.id)])];
     }
     state.draft=null;state.reviewed=true;go('today');status.textContent='Meeting finished.';
   } else if(action==='advance'){state.week=4;state.reviewed=false;state.moved=false;state.checked=false;state.draft=null;go('meeting');}
