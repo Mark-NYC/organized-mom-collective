@@ -53,7 +53,9 @@ describe('a new family\'s first steps (Today and Family)', () => {
   it('the first shared win is an ordinary agreement saved on Today, with age-fit ideas from the existing chore list', async () => {
     const t = src('src/components/app/TodayDashboard.tsx');
     expect(t).toMatch(/Start with one thing your family can share\./);
-    expect(t).toMatch(/await save\(\{ category: 'other', text, ownerIds: \[who\], month \}\)/);
+    expect(t).toMatch(/await save\(\{ category, text, ownerIds: \[who\], month \}\)/);
+    expect(t).toContain('growthIdeas(profile, person.id)');
+    expect(t).toContain('setCategory(x.category)');
     expect(t).not.toMatch(/Put this week on the family calendar/);
     const { starterIdeas } = await import('../src/lib/app/first-steps');
     const { choreChoices } = await import('../src/data/chore-recommendations');
