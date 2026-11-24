@@ -318,7 +318,7 @@ export default function WeeklyMeeting() {
                 <summary className="min-h-10 cursor-pointer underline underline-offset-4">Why this matters</summary>
                 <p className="mt-1">{meeting.focus.principle} {meeting.focus.why}</p>
                 {meeting.focus.forWhom && <p className="mt-1 text-[0.82rem]">{meeting.focus.forWhom}</p>}
-              </details>}
+              </details>
             </div>
           ) : (
             <>
