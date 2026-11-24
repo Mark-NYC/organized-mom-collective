@@ -12,7 +12,7 @@ const fresh = () => ({ week:1, agreements:[], moved:false, checked:false, calend
 let state = fresh();
 try {
   const saved = JSON.parse(sessionStorage.getItem(key));
-  if (saved && [1,4].includes(saved.week) && Array.isArray(saved.agreements) && Array.isArray(saved.skipped)) state = saved;
+  if (saved && [1,2,4].includes(saved.week) && Array.isArray(saved.agreements) && Array.isArray(saved.skipped)) state = saved;
 } catch { /* This rehearsal also works in memory. */ }
 const root = document.querySelector('.of-preview');
 const main = root.querySelector('main');
@@ -24,7 +24,7 @@ const button = (action, label, style='secondary') => '<button type="button" clas
 const link = (url,label) => '<a class="link" href="'+url+'">'+label+'</a>';
 const heading = (over,title) => '<p class="kicker">'+esc(over)+'</p><h1>'+esc(title)+'</h1>';
 const feature = html => '<section class="feature">'+html+'</section>';
-const weekLabel = () => state.week === 1 ? 'November 23–29' : 'December 14–20';
+const weekLabel = () => state.week === 1 ? 'November 23–29' : state.week===2?'November 30–December 6':'December 14–20';
 const events = () => state.week===1 ? sampleWeek.days.flatMap((d,event)=>d.items.map(item=>({id:item.id,title:item.title,event,time:item.time}))) : [examples[0], ...(state.week === 4 ? [examples[2]] : []), {id:'library', title:'Library visit',event:5,time:'11 AM'}];
 const libraryVisit = { id:'library', title:'Library visit', attendee:'Family', event:5, time:'11 AM', day:4, person:'', job:'Gather library books', done:'Books to return are in the tote by the door.' };
 const dayFor = item => item.id === 'entry' && state.moved ? 5 : item.day;
@@ -47,16 +47,16 @@ function today() {
     (state.reviewed && state.week===1 ? button('advance','Try Week Four','text'):'');
 }
 function landing() {
-  return heading('Week '+state.week+' · '+weekLabel(),'Family Meeting')+
+  return heading((state.week!==1?'Next week':'First meeting')+' · '+weekLabel(),'Family Meeting')+(state.exampleHistory?'<p class="detail">Example from last meeting: Philip chose soccer prep and Andrew chose the entryway.</p>':'')+
     feature('<h2>'+(state.reviewed?'Your family plan':state.agreements.length?'How is the plan working?':'What matters this week?')+'</h2>'+
     (state.agreements.length?'<ul>'+state.agreements.map(detail).join('')+'</ul>':'<p>Look ahead together and choose one thing that would make the week easier.</p>')+
     '<div class="actions">'+(state.draft?button('resume','Resume meeting','primary'):state.agreements.length?
       button('quick','Everything still works','primary')+button('start','Something changed'):button('start','Start meeting','primary'))+'</div>')+
     (state.reviewed&&state.week===1?button('advance','Try Week Four','text'):'')+
-    '<div class="links">'+link('/app/club/','Family Meeting Club')+'</div>';
+    '<div class="links">'+link('/experimental/organized-family/','First meeting')+link('/app/club/','Family Meeting Club')+'</div>';
 }
 function start() {
-  const available = [...state.agreements, ...[...examples,libraryVisit].filter(x=>(x.id!=='trip'||state.week===4)&&!state.skipped.includes(x.id)&&!state.agreements.some(a=>a.id===x.id))];
+  const available = [...state.agreements, ...[...examples,libraryVisit].filter(x=>(x.id!=='trip'||state.week!==1)&&!state.skipped.includes(x.id)&&!state.agreements.some(a=>a.id===x.id))];
   state.draft={step:0,items:structuredClone(available),selected:available.filter(a=>a.id!=='library'||state.agreements.some(old=>old.id==='library')).map(a=>a.id),index:0,
     agreed:state.agreements.map(a=>a.id),changed:[],review:[],custom:false};
 }
@@ -81,7 +81,7 @@ function meeting() {
       '<div>'+button('next','Let’s talk','primary')+'</div>';
   } else if(d.step===1) {
     body='<h2>What would help this week?</h2><p>Give everyone a turn. What could you do yourself? Where would you like a hand?</p>'+
-    (items.length?'<ul>'+items.map(a=>'<li>'+esc(a.title)+'</li>').join('')+'</ul>':'')+
+    (items.length?'<ul>'+items.map(a=>'<li><strong>'+esc(a.title)+'</strong>'+(a.question?'<p>'+esc(a.question)+'</p>':'')+'</li>').join('')+'</ul>':'')+
     '<details><summary>Bring in this month’s Club conversation</summary>'+link('/app/club/','Open Family Meeting Club')+'</details>'+button('next','Choose our parts','primary');
   } else if(d.step===2 && items[d.index]) {
     const a=items[d.index];
@@ -94,7 +94,7 @@ function meeting() {
       '<p><strong>'+esc(active.person)+'</strong> · '+esc(active.job)+'</p><p>Show each other what finished looks like. '+esc(active.done)+'</p><p class="detail">Would it help to watch once, try together, or have someone nearby?</p>':'<h2>Anything to practice together?</h2><p>You can finish here if the familiar parts still feel right.</p>';
     body+=button('handoff','See our calendar','secondary')+' '+button('finish','Finish meeting','primary');
   }
-  return heading('Family Meeting · '+(d.step+1)+' of 4',titles[d.step])+feature(body)+(d.step>0?button('back','Back','text'):'')+button('pause','Pause meeting','text');
+  return heading('Family Meeting · '+(d.step+1)+' of 4',titles[d.step])+feature(body)+(d.step>0?button('back','Back','text'):'')+button('pause','Pause meeting','text')+(d.step===2 && d.changed.some(id=>d.agreed.includes(id))?button('finish','Finish with what we agreed','secondary'):'');
 }
 function cleaning() {
   const a=state.agreements.find(x=>x.id==='entry');
@@ -114,7 +114,7 @@ function wall() {
   }
   return heading(weekLabel(),'Wall calendar')+select('calendar','Your calendar',[['weekly','Family Life Planner'],['monthly','Family Schedule Calendar'],['other','Our own calendar']],state.calendar)+
     '<p class="detail">'+(monthly?'Placement guide · Use the person’s row and the date.':state.calendar==='weekly'?'The cleaning prompts are already printed. Add only what helps.':'Choose the entries your family wants to see.')+'</p>'+
-    '<div class="days">'+days.map((d,i)=>'<div class="day"><strong>'+d+' '+((state.week===1?23:14)+i)+'</strong>'+
+    '<div class="days">'+days.map((d,i)=>'<div class="day"><strong>'+d+' '+((state.week===1?23:state.week===2?(i===0?30:0):14)+i)+'</strong>'+
     (state.calendar==='weekly'?'<p><small>Printed · '+zones[i]+'</small></p>':'')+notes[i].map(n=>'<p>'+esc(n)+'</p>').join('')+'</div>').join('')+'</div>'+
     '<p>Who wants to write, draw, or point to where their part goes?</p>'+button(calendarOpen?'finish':'today',calendarOpen?'Finish meeting':'Back to Today','primary');
 }
@@ -209,7 +209,7 @@ if (incoming) {
       const agenda = entries.map(e => ({
         person:'', job:'', done:'', day:e.event ?? 0,
         ...([...examples,libraryVisit].find(sample => sample.id === e.id) || {}),
-        id:e.id, title:e.title, ...(e.event == null ? {} : {event:e.event,time:e.time}),
+        id:e.id, title:e.title, question:typeof e.question==='string'?e.question:'', ...(e.event == null ? {} : {event:e.event,time:e.time}),
       }));
       state.draft.items = agenda;
       state.draft.selected = agenda.map(item => item.id);
@@ -219,5 +219,11 @@ if (incoming) {
     }
   } catch { /* An invalid link opens the regular sample. */ }
   history.replaceState(null,'',location.pathname + location.search);
+}
+if (new URLSearchParams(location.search).get('scenario')==='next') {
+  const hasHistory=state.reviewed||state.agreements.length>0;
+  if(!hasHistory){state=fresh();state.agreements=structuredClone([examples[0],examples[1]]);state.exampleHistory=true;}
+  state.week=2;state.moved=false;state.checked=false;state.draft=null;go('meeting');save();
+  history.replaceState(null,'',location.pathname);
 }
 render(false);

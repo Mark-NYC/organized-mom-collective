@@ -68,7 +68,7 @@ const FREE_TEXT: Record<string, string> = {
 /** The guide's Let's Talk, where this month's questions are on this page rather than a separate sheet. */
 const CLUB_TALK = 'Ask this month’s questions below. Everyone answers, the youngest first. No wrong answers, no fixing anyone.';
 
-export default function WeeklyMeeting() {
+export default function WeeklyMeeting({ discussionQuestions }: { discussionQuestions?: string[] } = {}) {
   const today = useToday();
   const month = monthOf(today);
   const cal = useCalendar();
@@ -110,10 +110,10 @@ export default function WeeklyMeeting() {
   const [text, setText] = useState('');
   const [category, setCategory] = useState<ResponsibilityCategory>('other');
   const [msg, setMsg] = useState('');
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(discussionQuestions ? 1 : 0);
   const [questionIndex, setQuestionIndex] = useState(0);
   // The landing first; the guided meeting once the family taps Start (or Continue). ?step=N opens a part directly.
-  const [inMeeting, setInMeeting] = useState(() => { try { return new URLSearchParams(location.search).has('step'); } catch { return false; } });
+  const [inMeeting, setInMeeting] = useState(() => { try { return Boolean(discussionQuestions) || new URLSearchParams(location.search).has('step'); } catch { return false; } });
   const [progress, setProgress] = useState<MeetingProgress | null>(null);
   useEffect(() => { setProgress(readProgress(scope)); }, [scope]);
   useEffect(() => {
@@ -328,6 +328,7 @@ export default function WeeklyMeeting() {
           {/* Look ahead and choose what matters: the family plan's priorities (MeetingPlan.tsx). */}
           {p.title === 'Our Focus' && <WeekReview week={week} priorities={prio.available ? prio : null} current={plan} weekStart={weekStart} colors={cal.colors} intakeActivities={activityCues(fam.profile)} />}
 
+          {p.title === 'Let’s Talk' && discussionQuestions?.map(q => <p key={q} className="of-tile p-4">{q}</p>)}
           {p.title === 'Let’s Talk' && (
             <div className="mt-4 space-y-4">
               <FollowThrough household={cal.household} profile={fam.profile} colors={cal.colors} {...(devPlan ? { skipSkillAgreements: true } : {})} />

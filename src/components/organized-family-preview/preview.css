@@ -47,3 +47,12 @@
 .agenda .agenda-options {margin-top:12px}
 .agenda footer {margin-top:24px;color:var(--soft);font-size:.88rem}
 .agenda button:disabled {opacity:.55;cursor:default}
+.agenda .scenario{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:24px;padding:4px;margin:0 0 22px;font-size:.85rem}
+.scenario>*{padding:8px 16px}.scenario strong{background:var(--sage);border-radius:20px}
+.of-preview .conversation{background:#e8eee4;border-radius:14px;padding:clamp(20px,4vw,36px);border-top:4px solid #899d80}
+.conversation .meeting-rule{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #bdcab8;padding-bottom:12px;margin-bottom:22px}
+.meeting-rule span{font:italic 1.35rem Georgia,serif}
+.of-preview .conversation h2{font-size:clamp(2rem,5vw,3.1rem);margin:5px 0 10px;letter-spacing:-.035em}
+.conversation article>p{font-size:1.1rem;max-width:34rem}
+.conversation .prep{display:flex;flex-wrap:wrap;gap:4px 12px;border-left:3px solid #879e7e;padding:8px 14px;margin:18px 0}
+.conversation .actions{margin-top:20px}.meeting-options{border-top:1px solid var(--line);padding-top:15px}
