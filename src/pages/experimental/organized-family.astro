@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalendarAgenda from '../../components/organized-family-preview/CalendarAgenda';
+import '../../components/organized-family-preview/preview.css';
+---
+<BaseLayout title="Our week together · Organized Family" description="Choose what to talk through at your family meeting." robots="noindex" tracking={false}>
+  <CalendarAgenda client:only="react"><p slot="fallback">Opening your week…</p></CalendarAgenda>
+</BaseLayout>
