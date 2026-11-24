@@ -40,6 +40,7 @@ import { localToday } from '../../lib/calendar/recurrence';
 import { useToday } from '../../lib/hooks';
 import { agreementsByPerson, monthOf, weekAhead } from '../../lib/family-meeting-support';
 import { useFamily } from '../../lib/family-meeting-client';
+import { activityCues } from '../../lib/app/onboarding-bridge';
 import { conflictText } from '../../lib/agreements/client';
 import { buildFamilyMeeting, suggestionKey, type FamilyMeeting, type PartRecommendation } from '../../lib/club/family-meeting';
 import AgreedParts from '../family/AgreedParts';
@@ -325,7 +326,7 @@ export default function WeeklyMeeting() {
           {p.title !== 'Our Focus' && !(meeting && p.title === 'Let’s Practice') && <p className="mt-2 text-[0.95rem] leading-relaxed">{!meeting && FREE_TEXT[p.title] ? FREE_TEXT[p.title] : meeting && p.title === 'Let’s Talk' ? CLUB_TALK : p.text}</p>}
 
           {/* Look ahead and choose what matters: the family plan's priorities (MeetingPlan.tsx). */}
-          {p.title === 'Our Focus' && <WeekReview week={week} priorities={prio.available ? prio : null} current={plan} weekStart={weekStart} colors={cal.colors} />}
+          {p.title === 'Our Focus' && <WeekReview week={week} priorities={prio.available ? prio : null} current={plan} weekStart={weekStart} colors={cal.colors} intakeActivities={activityCues(fam.profile)} />}
 
           {p.title === 'Let’s Talk' && (
             <div className="mt-4 space-y-4">
