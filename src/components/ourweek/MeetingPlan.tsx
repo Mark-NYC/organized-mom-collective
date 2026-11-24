@@ -22,6 +22,7 @@ import type { MarkerColor } from '../../data/club/family-colors';
 import type { Household } from '../../lib/club/profile';
 import { EventResponsibilities } from '../calendar/CalendarSources';
 import { Avatar } from '../app/ui';
+import FamilyWeekPlan from '../app/FamilyWeekPlan';
 
 const dayLabel = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
 
@@ -196,84 +197,57 @@ export function GettingReady({ current, external, own, tasks, household, colors 
  * nothing repeated, nothing gamified. The printout adds everyone's standing parts in a compact list (one page).
  */
 export function PlanSummary({ current, agreed, newIds, external, tasks, household, colors, onAgain }: {
-  current: Resolved[]; agreed: PersonAgreements[]; newIds: Set<string> | null; external: CalendarEvent[]; tasks: EventTasks; household: Household | null; colors: Record<string, MarkerColor>; onAgain: () => void;
+  current: Resolved[]; agreed: PersonAgreements[]; newIds: Set<string> | null;
+  external: CalendarEvent[]; tasks: EventTasks; household: Household | null;
+  colors: Record<string, MarkerColor>; onAgain: () => void;
 }) {
-  const people = (household?.members ?? []).filter((m) => !m.archived);
-  const name = (id: string | null) => people.find((m) => m.id === id)?.firstName;
-  const prepFor = (r: Resolved) => {
-    const ext = r.priority.source === 'imported' ? external.find((e) => e.external?.uid === r.priority.event_uid && e.external?.instance_key === r.priority.instance_key) : undefined;
-    return ext && tasks.available ? tasksFor(tasks.tasks, ext) : [];
-  };
-  // Children first, as on Today: their parts are the ones the family is handing over.
-  const kid = (id: string) => people.find((m) => m.id === id)?.kind === 'child';
-  const byKids = <T extends { memberId: string }>(xs: T[]) => [...xs].sort((a, b) => Number(kid(b.memberId)) - Number(kid(a.memberId)));
-  const fresh = byKids(newIds && newIds.size ? agreed.map((p) => ({ ...p, parts: p.parts.filter((x) => newIds.has(x.id)) })).filter((p) => p.parts.length) : []);
+  // Show new meeting agreements first, while keeping standing agreements available
+  // even when nothing new was added. This is not a second list or task system.
+  const fresh = newIds?.size
+    ? agreed.map((p) => ({ ...p, parts: p.parts.filter((x) => newIds.has(x.id)) })).filter((p) => p.parts.length)
+    : [];
+  const home = fresh.length ? fresh : agreed;
   const total = new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size;
-  const top = current.slice(0, SHOWN);
-  const also = current.slice(SHOWN);
-  const when = (r: Resolved) => (r.date ? ` · ${dayLabel(r.date)}${r.time ? ` · ${r.time}` : ''}` : '');
   return (
     <section className="space-y-5" aria-labelledby="plan-h" data-plan-summary>
       <header>
         <p className="of-eyebrow">Our Family Meeting</p>
         <h1 id="plan-h" className="of-page-title mt-2">We have a plan.</h1>
+        <p className="mt-1 text-[0.9rem] text-warm-soft">What matters, and who's handling it.</p>
       </header>
-      {current.length > 0 && (
-        <div className="of-tile" data-plan-priorities>
-          <p className="of-eyebrow">This week’s priorities</p>
-          <ol className="mt-1">
-            {top.map((r, i) => {
-              const prep = prepFor(r);
-              return (
-                <li key={r.priority.id} className="border-b border-[var(--of-rule)] py-2.5 last:border-b-0" data-plan-priority={r.title}>
-                  <p className="text-[1.05rem]"><span className="mr-2 font-serif text-[var(--of-month-accent)]">{i + 1}</span><strong className="font-semibold">{r.title}</strong><span className="text-warm-soft">{when(r)}</span></p>
-                  {prep.length > 0 && (
-                    <ul className="mt-1.5 space-y-1 pl-6" data-plan-prep>
-                      {prep.map((t) => (
-                        <li key={t.id} className="flex items-center gap-2 text-[0.92rem]">
-                          <Avatar name={name(t.member_id) ?? '·'} color={t.member_id ? colors[t.member_id] : undefined} size="sm" />
-                          <span><strong className="font-semibold">{name(t.member_id) ?? 'Anyone'}</strong> · {t.title}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-          {also.length > 0 && <p className="mt-1 text-[0.88rem] text-warm-soft" data-plan-also>Also this week: {also.map((r) => r.title).join(', ')}</p>}
-        </div>
-      )}
-      <div className="of-tile" data-plan-parts data-plan-parts-kind={fresh.length ? 'new' : 'none'}>
-        <p className="of-eyebrow">{fresh.length ? 'What we agreed today' : 'Everyone’s parts'}</p>
-        {fresh.length ? (
-          <ul className="of-rows mt-1">
-            {fresh.map((p) => (
-              <li key={p.memberId} className="of-row !items-start !gap-3" data-plan-person={p.name}>
-                <Avatar name={p.name} color={colors[p.memberId]} size="sm" />
-                <span className="min-w-0"><span className="of-row-title block">{p.name}</span>{p.parts.map((x) => <span key={x.id} className="block text-[0.92rem]">{x.text}{x.when ? <span className="text-warm-soft"> · {x.when}</span> : null}</span>)}</span>
-              </li>
-            ))}
-          </ul>
+      <div className="of-tile" data-plan-priorities>
+        <h2 className="font-serif text-[1.35rem] leading-tight">Our week together</h2>
+        {current.length || home.length ? (
+          <div data-plan-parts data-plan-parts-kind={fresh.length ? 'new' : 'standing'}>
+            <FamilyWeekPlan current={current} external={external} tasks={tasks} household={household}
+              colors={colors} agreed={home} interactive={false} max={3} />
+          </div>
         ) : (
-          <p className="mt-1.5 text-[0.95rem]" data-plan-no-new>{total ? 'Nothing new this week. Everyone keeps the parts they already have.' : current.length ? 'No standing parts yet. When you’re ready, each person can take one.' : 'You talked it through together. That counts. Next time, pick one priority and one part each.'}</p>
+          <p className="mt-2 text-[0.9rem] text-warm-soft" data-plan-no-new>
+            Choose one thing that matters and one part someone can own.
+          </p>
         )}
-        {total > 0 && <a href="/app/family/responsibilities" className="of-tile-action mt-3 print:hidden" data-plan-all-parts>All of everyone’s parts ({total})</a>}
-        {/* On paper only: everyone's standing parts, compact, so the fridge copy is the whole plan on one page. */}
+        {current.length > SHOWN && <p className="mt-2 text-[0.85rem] text-warm-soft" data-plan-also>Also this week: {current.slice(SHOWN).map((r) => r.title).join(', ')}</p>}
+        {total > 0 && (
+          <a href="/app/family/responsibilities" className="of-tile-action mt-2 print:hidden"
+            data-plan-all-parts>All of everyone’s parts ({total})</a>
+        )}
+        {/* The printed plan includes the full standing list without duplicating it on screen. */}
         {total > 0 && (
           <div className="hidden print:block" data-plan-print-parts>
-            <p className="of-eyebrow mt-4">Everyone’s parts</p>
+            <p className="of-eyebrow mt-4">Everyone’s standing parts</p>
             <ul className="mt-1 text-[0.85rem] leading-snug">
-              {byKids(agreed).map((p) => <li key={p.memberId}><strong>{p.name}</strong>: {p.parts.map((x) => x.text).join('; ')}</li>)}
+              {agreed.map((p) => <li key={p.memberId}><strong>{p.name}</strong>: {p.parts.map((x) => x.text).join('; ')}</li>)}
             </ul>
           </div>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-3 print:hidden">
-        <a href="/app" className="of-btn" data-plan-today>See it on Today</a>
+      <div className="grid gap-2.5 print:hidden sm:grid-cols-2">
+        <a href="/app" className="of-btn justify-center text-center" data-plan-today>See it on Today</a>
         <button type="button" className="of-btn of-btn--soft" onClick={() => window.print()} data-plan-print>Print our plan</button>
-        <button type="button" className="min-h-11 px-2 text-sm text-warm-soft underline underline-offset-4" onClick={onAgain} data-plan-back>Back to the meeting</button>
       </div>
+      <button type="button" className="min-h-11 text-[0.85rem] text-warm-soft underline underline-offset-4 print:hidden"
+        onClick={onAgain} data-plan-back>Back to the meeting</button>
     </section>
   );
 }
