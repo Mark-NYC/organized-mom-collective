@@ -1,3 +1,4 @@
+import { sampleWeek } from './sample-calendar';
 // Only sample data belongs in this route. Each tab keeps its own meeting rehearsal.
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const zones = ['Living Room', 'Bedrooms', 'Entry/Bathroom', 'Kitchen Reset', 'Deep Cleaning', 'Home Project', 'Catch-Up / Reset'];
@@ -24,7 +25,7 @@ const link = (url,label) => '<a class="link" href="'+url+'">'+label+'</a>';
 const heading = (over,title) => '<p class="kicker">'+esc(over)+'</p><h1>'+esc(title)+'</h1>';
 const feature = html => '<section class="feature">'+html+'</section>';
 const weekLabel = () => state.week === 1 ? 'November 23–29' : 'December 14–20';
-const events = () => [examples[0], ...(state.week === 4 ? [examples[2]] : []), {id:'library', title:'Library visit',event:5,time:'11 AM'}];
+const events = () => state.week===1 ? sampleWeek.days.flatMap((d,event)=>d.items.map(item=>({id:item.id,title:item.title,event,time:item.time}))) : [examples[0], ...(state.week === 4 ? [examples[2]] : []), {id:'library', title:'Library visit',event:5,time:'11 AM'}];
 const libraryVisit = { id:'library', title:'Library visit', attendee:'Family', event:5, time:'11 AM', day:4, person:'', job:'Gather library books', done:'Books to return are in the tote by the door.' };
 const dayFor = item => item.id === 'entry' && state.moved ? 5 : item.day;
 const detail = item => '<li><strong>'+esc(item.person)+'</strong> · '+esc(item.job)+'<br><small>'+days[dayFor(item)]+' · '+esc(item.done)+'</small></li>';
@@ -195,4 +196,28 @@ root.addEventListener('click',e=>{
   } else if(action==='advance'){state.week=4;state.reviewed=false;state.moved=false;state.checked=false;state.draft=null;go('meeting');}
   save();render();
 });
+// A new rehearsal starts only when the family explicitly continues from the sample agenda.
+const incoming = new URLSearchParams(location.hash.slice(1)).get('agenda');
+if (incoming) {
+  try {
+    const entries = JSON.parse(incoming);
+    if (Array.isArray(entries) && entries.length <= 5 && entries.every(e =>
+      e && typeof e.id === 'string' && typeof e.title === 'string' && e.title.trim() &&
+      (e.event == null || (Number.isInteger(e.event) && e.event >= 0 && e.event < 7 && typeof e.time === 'string')))) {
+      state = fresh();
+      start();
+      const agenda = entries.map(e => ({
+        person:'', job:'', done:'', day:e.event ?? 0,
+        ...([...examples,libraryVisit].find(sample => sample.id === e.id) || {}),
+        id:e.id, title:e.title, ...(e.event == null ? {} : {event:e.event,time:e.time}),
+      }));
+      state.draft.items = agenda;
+      state.draft.selected = agenda.map(item => item.id);
+      state.draft.step = 1;
+      go('meeting');
+      save();
+    }
+  } catch { /* An invalid link opens the regular sample. */ }
+  history.replaceState(null,'',location.pathname + location.search);
+}
 render(false);

@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../components/organized-family-preview/preview.css';
+---
+<BaseLayout title="Organized Family · Design preview" description="Try a week and a Family Meeting with a sample household." robots="noindex" tracking={false}>
+  <div class="of-preview">
+    <header class="mast"><span>Organized Family</span><small>Sample household</small></header>
+    <main id="week-view" tabindex="-1" aria-label="Family planner"></main>
+    <nav aria-label="Family planner"><button data-view="today">Today</button><button data-view="meeting">Family Meeting</button></nav>
+    <p class="sr-only" role="status" id="week-status"></p>
+    <noscript>Enable JavaScript to try the family meeting.</noscript>
+  </div>
+  <script>import '../../components/organized-family-preview/preview.js';</script>
+</BaseLayout>

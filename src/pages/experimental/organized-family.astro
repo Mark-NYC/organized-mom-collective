@@ -1,14 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CalendarAgenda from '../../components/organized-family-preview/CalendarAgenda';
 import '../../components/organized-family-preview/preview.css';
 ---
-<BaseLayout title="Organized Family · Design preview" description="Try a week and a Family Meeting with a sample household." robots="noindex" tracking={false}>
-  <div class="of-preview">
-    <header class="mast"><span>Organized Family</span><small>Sample household</small></header>
-    <main id="week-view" tabindex="-1" aria-label="Family planner"></main>
-    <nav aria-label="Family planner"><button data-view="today">Today</button><button data-view="meeting">Family Meeting</button></nav>
-    <p class="sr-only" role="status" id="week-status"></p>
-    <noscript>Enable JavaScript to try the family meeting.</noscript>
-  </div>
-  <script>import '../../components/organized-family-preview/preview.js';</script>
+<BaseLayout title="Our week together · Organized Family" description="Choose what to talk through at your family meeting." robots="noindex" tracking={false}>
+  <CalendarAgenda client:only="react"><p slot="fallback">Opening your week…</p></CalendarAgenda>
 </BaseLayout>
