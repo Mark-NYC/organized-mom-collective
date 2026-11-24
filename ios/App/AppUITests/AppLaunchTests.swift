@@ -348,6 +348,12 @@ final class AppLaunchTests: XCTestCase {
         tapClear(agree, bottom: 200)
         waitFor(text("Added to our plan: agreed by our family."), "agreed for Maya")
         shot("e2e-03b-meeting-we-agreed")
+        // The guided meeting is focused (docs/ios/FAMILY_PLAN.md → A focused meeting): the tabs step aside, and
+        // "Exit meeting" (top) is the way out; the landing brings the tabs back with the family's place kept.
+        XCTAssertFalse(tab("Today").exists, "the tabs are hidden during the guided meeting")
+        tapClear(waitFor(control("Exit the meeting. Your place is saved."), "Exit meeting"))
+        waitFor(tab("Today"), "the tabs are back after Exit meeting")
+        XCTAssertTrue(button("Continue").waitForExistence(timeout: 10), "Continue keeps the family's place")
 
         // Today and the calendar show it.
         goTo("Today")
