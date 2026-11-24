@@ -174,7 +174,7 @@ describe('Today: a curated plan, not a household list', () => {
   });
   it('priorities show only once the database has them; before a first meeting or after a missed one, a plain line', () => {
     expect(t).toMatch(/prio\.available && <OurPriorities/);
-    expect(t).toMatch(/In your first Family Meeting, choose up to three/);
+    expect(t).toMatch(/In your first Family Meeting, choose what matters and who will handle it/);
     expect(t).not.toMatch(/you missed|overdue|streak/i);
   });
 });
