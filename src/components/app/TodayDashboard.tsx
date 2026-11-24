@@ -130,10 +130,10 @@ export default function TodayDashboard() {
       {/* A brand-new family sees one thing: its first shared win. The rest of Today fills in from there. */}
       {cal.household && !firstWin && <FocusPanel ownFocus={ownFocus} clubMonth={showsClub ? monthPage(today.getMonth() + 1).name : null} first={state === 'first'} />}
 
-      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} own={own} agreed={agreed} household={cal.household} colors={cal.colors} all={showAllPriorities} setAll={setShowAllPriorities} />}
+      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} own={own} agreed={agreed} otherTasks={otherTasks} household={cal.household} colors={cal.colors} all={showAllPriorities} setAll={setShowAllPriorities} />}
 
       {/* Unhighlighted event tasks still need a home; highlighted tasks and standing roles already live in Our week together. */}
-      {cal.household && !firstWin && (!prio.available || otherTasks.length > 0) && <Responsibilities todays={otherTasks} later={laterThisWeek} agreed={prio.available ? [] : agreed} profile={profile} cal={cal} tasks={eventTasks} today={date} />}
+      {cal.household && !firstWin && !prio.available && <Responsibilities todays={otherTasks} later={laterThisWeek} agreed={prio.available ? [] : agreed} profile={profile} cal={cal} tasks={eventTasks} today={date} />}
 
       <nav aria-label="More for today" className="grid grid-cols-3 gap-2.5" data-today-shortcuts>
         <Shortcut href={routes.familyCalendar} icon="calendar" title="Plans" sub={plansToday ? `${plansToday} ${plansToday === 1 ? 'event' : 'events'} today` : 'Nothing today'} id="plans" />
@@ -178,10 +178,10 @@ function FocusPanel({ ownFocus, clubMonth, first }: { ownFocus: string | null; c
  * Our priorities this week: the few things the family chose in its meeting (never automatic), each linked to its
  * event as it is now. Before a first meeting, or when a week goes by without one, it says so plainly, without guilt.
  */
-function OurPriorities({ current, from, first, tasks, external, own, agreed, household, colors, all, setAll }: {
+function OurPriorities({ current, from, first, tasks, external, own, agreed, otherTasks, household, colors, all, setAll }: {
   current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean;
   tasks: EventTasks; external: CalendarEvent[]; own: CalendarEvent[];
-  agreed: PersonAgreements[]; household: Cal['household']; colors: Cal['colors'];
+  agreed: PersonAgreements[]; otherTasks: TodayTask[]; household: Cal['household']; colors: Cal['colors'];
   all: boolean; setAll: (value: boolean) => void;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -192,9 +192,9 @@ function OurPriorities({ current, from, first, tasks, external, own, agreed, hou
         <h2 id="priorities-h" className="font-serif text-[1.35rem] leading-tight">Our week together</h2>
         {from === 'last-meeting' && <span className="text-[0.75rem] text-warm-soft">From our last meeting</span>}
       </div>
-      {current.length || agreed.length ? (
+      {current.length || agreed.length || otherTasks.length ? (
         <FamilyWeekPlan current={visible} external={external} own={own} tasks={tasks} agreed={agreed}
-          household={household} colors={colors} interactive onError={setError} />
+          household={household} colors={colors} interactive onError={setError} otherTasks={otherTasks} />
       ) : (
         <p className="mt-2 text-[0.9rem] text-warm-soft" data-no-priorities>
           {first ? 'In your first Family Meeting, choose what matters and who will handle it.' : 'Choose what matters together at your next Family Meeting.'}
