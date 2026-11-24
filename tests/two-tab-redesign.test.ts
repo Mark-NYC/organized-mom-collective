@@ -103,7 +103,7 @@ describe('Family Meeting landing', () => {
     expect(m).toMatch(/\{state === 'in-progress' \? \(/);
     // Finish records it, then shows "We have a plan." (the family plan), with a way to Today.
     expect(m).toMatch(/onClick=\{\(\) => \{ track\('meeting_completed'\); setProgress\(recordFinished\(scope\)\); setPlanDone\(true\);/);
-    expect(src('src/components/ourweek/MeetingPlan.tsx')).toMatch(/href="\/app" className="of-btn" data-plan-today/);
+    expect(src('src/components/ourweek/MeetingPlan.tsx')).toMatch(/href="\/app" className="of-btn[^"]*" data-plan-today/);
   });
   it('the family\'s own focus is called theirs; a Club month is labeled as the month\'s, never as agreed', () => {
     expect(m).toMatch(/data-meeting-landing-focus="family"/);
