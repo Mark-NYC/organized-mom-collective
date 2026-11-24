@@ -106,6 +106,14 @@ export default function TodayDashboard() {
   // This week's priorities, chosen in the Family Meeting (both adults; docs/ios/FAMILY_PLAN.md).
   const prio = usePriorities(live, date);
   const { list: current, from } = currentPriorities(prio.items, events, date);
+  // A task shown under its highlighted priority should not appear a second time
+  // in Everyone's part today. Tasks on unhighlighted events still appear there.
+  const nestedTaskIds = new Set(current.flatMap((r) => {
+    if (r.gone || r.priority.source !== 'imported' || !eventTasks.available) return [];
+    const event = ext.events.find((e) => e.external?.uid === r.priority.event_uid && e.external?.instance_key === r.priority.instance_key);
+    return event ? tasksFor(eventTasks.tasks, event).map((t) => t.id) : [];
+  }));
+  const otherTasks = todays.filter((x) => !nestedTaskIds.has(x.task.id));
   // A brand-new family (nothing shared yet, nothing chosen yet) sees one thing: its first shared win.
   const firstWin = starting && nextStep(steps)?.id === 'share' && !current.length;
 
@@ -119,9 +127,9 @@ export default function TodayDashboard() {
       {/* A brand-new family sees one thing: its first shared win. The rest of Today fills in from there. */}
       {cal.household && !firstWin && <FocusPanel ownFocus={ownFocus} clubMonth={showsClub ? monthPage(today.getMonth() + 1).name : null} first={state === 'first'} />}
 
-      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} />}
+      {cal.household && !firstWin && prio.available && <OurPriorities current={current} from={from} first={state === 'first'} tasks={eventTasks} external={ext.events} household={cal.household} colors={cal.colors} />}
 
-      {cal.household && !firstWin && <Responsibilities todays={todays} later={laterThisWeek} agreed={agreed} profile={profile} cal={cal} tasks={eventTasks} today={date} />}
+      {cal.household && !firstWin && <Responsibilities todays={otherTasks} later={laterThisWeek} agreed={agreed} profile={profile} cal={cal} tasks={eventTasks} today={date} />}
 
       <nav aria-label="More for today" className="grid grid-cols-3 gap-2.5" data-today-shortcuts>
         <Shortcut href={routes.familyCalendar} icon="calendar" title="Plans" sub={plansToday ? `${plansToday} ${plansToday === 1 ? 'event' : 'events'} today` : 'Nothing today'} id="plans" />
@@ -166,9 +174,10 @@ function FocusPanel({ ownFocus, clubMonth, first }: { ownFocus: string | null; c
  * Our priorities this week: the few things the family chose in its meeting (never automatic), each linked to its
  * event as it is now. Before a first meeting, or when a week goes by without one, it says so plainly, without guilt.
  */
-function OurPriorities({ current, from, first, tasks, external }: { current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean; tasks: EventTasks; external: CalendarEvent[] }) {
+function OurPriorities({ current, from, first, tasks, external, household, colors }: { current: Resolved[]; from: 'this-week' | 'last-meeting' | null; first: boolean; tasks: EventTasks; external: CalendarEvent[]; household: Cal['household']; colors: Cal['colors'] }) {
   // Three is the normal view; a busy week's fourth and fifth are one tap away, in place (never hidden elsewhere).
   const [all, setAll] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const shown = all ? current : current.slice(0, SHOWN);
   const when = (r: Resolved) => (r.date ? `${dayName(r.date)}${r.time ? ` · ${r.time}` : ''}` : 'This week');
   return (
@@ -181,14 +190,32 @@ function OurPriorities({ current, from, first, tasks, external }: { current: Res
         <ol className="of-rows mt-1">
           {shown.map((r, i) => {
             const ext = r.priority.source === 'imported' ? external.find((e) => e.external?.uid === r.priority.event_uid && e.external?.instance_key === r.priority.instance_key) : undefined;
-            const ready = ext && tasks.available ? doneLabel(tasksFor(tasks.tasks, ext)) : null;
+            const parts = ext && tasks.available ? tasksFor(tasks.tasks, ext) : [];
+            const person = (id: string | null) => household?.members.find((m) => m.id === id && !m.archived)?.firstName ?? 'Anyone';
             return (
-              <li key={r.priority.id} className="of-row !gap-3" data-today-priority={r.title}>
-                <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--of-month-wash)] font-serif text-[1rem] text-warm-ink">{i + 1}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="of-row-title block">{r.title}</span>
-                  <span className="of-row-meta">{r.gone ? <span className="text-[#a33]">No longer on the calendar</span> : when(r)}{ready ? ` · ${ready === 'All done' ? 'ready' : ready.replace(' done', ' ready')}` : ''}</span>
-                </span>
+              <li key={r.priority.id} className="border-b border-[var(--of-rule)] py-3 last:border-0" data-today-priority={r.title}>
+                <div className="flex items-start gap-3">
+                  <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--of-month-wash)] font-serif text-[1rem] text-warm-ink">{i + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold leading-snug text-warm-ink">{r.title}</p>
+                    <p className="mt-0.5 text-[0.82rem] text-warm-soft">{r.gone ? <span className="text-[#a33]">No longer on the calendar</span> : when(r)}</p>
+                    {parts.length > 0 && (
+                      <ul className="mt-2 space-y-1.5" aria-label={`Who is handling ${r.title}`} data-today-priority-parts>
+                        {parts.map((t) => (
+                          <li key={t.id} className="flex items-start gap-2 text-[0.88rem] leading-snug">
+                            <button type="button" role="checkbox" aria-checked={t.done} aria-label={`${t.title}, ${person(t.member_id)}`}
+                              onClick={async () => setError(await tasks.toggle(t.id))}
+                              className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-[var(--of-rule-strong)] text-[0.8rem] text-warm-ink"
+                              data-priority-part-toggle={t.id}>{t.done ? '✓' : '·'}</button>
+                            <span className={t.done ? 'text-warm-soft line-through' : 'text-warm-ink'}>
+                              <span className="font-medium">{person(t.member_id)}</span> · {t.title}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
               </li>
             );
           })}
@@ -196,6 +223,7 @@ function OurPriorities({ current, from, first, tasks, external }: { current: Res
       ) : (
         <p className="mt-2 text-[0.92rem] text-warm-soft" data-no-priorities>{first ? 'In your first Family Meeting, choose up to three things the whole family needs to know about or get ready for.' : 'Choose this week’s few in your next Family Meeting, whenever it suits you.'}</p>
       )}
+      {error && <p className="mt-2 text-[0.85rem] text-[#a33]" role="alert">{error}</p>}
       {current.length > SHOWN && (
         <button type="button" className="mt-1 min-h-11 text-[0.85rem] text-warm-soft underline underline-offset-4" aria-expanded={all} onClick={() => setAll(!all)} data-priorities-more>
           {all ? 'Show the top three' : `Show ${current.length - SHOWN} more`}
