@@ -170,7 +170,9 @@ describe('Today: a curated plan, not a household list', () => {
     expect(shared).toMatch(/await tasks\.toggle\(t\.id\)/);
     expect(t).toMatch(/const nestedTaskIds = new Set\(visiblePriorities\.flatMap/);
     expect(t).toMatch(/const otherTasks = todays\.filter\(\(x\) => !nestedTaskIds\.has\(x\.task\.id\)\)/);
-    expect(t).toMatch(/\(!prio\.available \|\| otherTasks\.length > 0\)/);
+    expect(t).toMatch(/!prio\.available && <Responsibilities/);
+    expect(t).toMatch(/otherTasks=\{otherTasks\}/);
+    expect(shared).toMatch(/data-plan-other-today/);
   });
   it('priorities show only once the database has them; before a first meeting or after a missed one, a plain line', () => {
     expect(t).toMatch(/prio\.available && <OurPriorities/);
