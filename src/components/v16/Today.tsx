@@ -12,7 +12,7 @@ import {
   SHOWN, currentPriorities, dailyKey, dayName, agreedParts, durable, missingReason, occurrenceOf, titleOf, partDate, sessionDay, sharedOccurrences, zoneKey, type Part, type Priority,
 } from '../../lib/v16/model';
 import { act } from './Parts';
-import { Check, Person, StatusPill, fmtDate, type Ctx } from './shared';
+import { Check, CleaningBox, Person, StatusPill, fmtDate, type Ctx } from './shared';
 import { useState } from 'react';
 
 function greeting() {
@@ -144,7 +144,7 @@ export default function Today({ ctx }: { ctx: Ctx }) {
                   <span className="v16-meta">{ct && sessionWd !== null ? `${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][sessionWd]} · Cleaning, ${zone?.zone}${sessionWd !== ct.zoneDay ? ' (moved this week)' : ''}` : date ? `Every ${dayName(date)}` : p.cue ?? ''}{p.pending ? ' · waiting to share' : ''}</span>
                 </button>
                 {/* The cleaning task's own checkbox: the same check the Cleaning screen shows (one canonical state). */}
-                {key ? <Check checked={Boolean(ctx.s.cleaning.checks[key])} label={`${zone?.zone}: ${p.title}, done this week`}
+                {key ? <CleaningBox checked={Boolean(ctx.s.cleaning.checks[key])} label={`${zone?.zone}: ${p.title}, done this week`}
                   onChange={() => ctx.set((s) => { const checks = { ...s.cleaning.checks }; if (checks[key]) delete checks[key]; else checks[key] = true; return { ...s, cleaning: { ...s.cleaning, checks } }; })} />
                   : <Chevron />}
               </div>

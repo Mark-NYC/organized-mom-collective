@@ -90,7 +90,8 @@ await p.selectOption('[data-view-day]', '3');
 await shot(p, '06-cleaning-wednesday');
 t = await text(p);
 check('Cleaning: Daily Reset has all five canonical tasks', ['Make beds', 'Load or unload the dishwasher', 'Clear kitchen counters and table', 'Quick pickup of main living areas', 'Wipe obvious spills and messes'].every((x) => t.includes(x)));
-check('Cleaning: Wednesday shows Entry/Bathroom with every task (8)', (await p.locator('[data-zone-session="Entry/Bathroom"] [role="checkbox"]').count()) === 8);
+check('Cleaning: Wednesday shows Entry/Bathroom with every task (8)', (await p.locator('[data-zone-session="Entry/Bathroom"] input[type="checkbox"]').count()) === 8);
+check('Cleaning: tasks use the cleaning companion’s own checkboxes (TaskList), not round toggles', (await p.locator('[data-screen="cleaning"] ul input[type="checkbox"]').count()) === 13 && (await p.locator('[data-screen="cleaning"] ul .v16-check').count()) === 0);
 await p.click('[data-rhythm]');
 await shot(p, '07-cleaning-rhythm');
 check('Cleaning: Rhythm offers printed calendar, one main day, not right now, Daily Reset', await p.locator('[data-rhythm-panel]').innerText().then((r) => ['Follow the printed calendar', 'One main cleaning day', 'Not right now', 'Include Daily Reset'].every((x) => r.includes(x))) && (await p.locator('[data-mode]').count()) === 3);
@@ -101,19 +102,20 @@ check('Cleaning: one main cleaning day gathers all four zones on Saturday', (awa
 await p.click('[data-mode="printed"]');
 await p.click('[data-rhythm]');
 await p.selectOption('[data-view-day]', '3');
-await p.click('[data-daily-reset] [aria-label="Make beds"]');
+await p.locator('[data-daily-reset]').getByText('Make beds').click();
 await p.click('[data-move-row] [role="checkbox"]');
 check('Cleaning: moved session leaves Wednesday', (await p.locator('[data-zone-session="Entry/Bathroom"]').count()) === 0);
 await p.selectOption('[data-view-day]', '6');
-await p.click('[data-zone-session="Entry/Bathroom"] [aria-label="Clear entry clutter"]');
+await p.locator('[data-zone-session="Entry/Bathroom"]').getByText('Clear entry clutter').click();
+await p.waitForTimeout(900);
 await shot(p, '08-cleaning-moved-to-saturday');
 check('Cleaning: Saturday has the same Entry/Bathroom session, marked this week only, plus Home Project', /moved from Wednesday, this week only/i.test(await text(p)) && (await p.locator('[data-weekend-zone="Home Project"]').count()) === 1);
 await p.click('[data-view-week="1"]');
 await p.selectOption('[data-view-day]', '3');
-check('Cleaning: next week is back on Wednesday, unchecked (no forked or reset state carried)', (await p.locator('[data-zone-session="Entry/Bathroom"]').count()) === 1 && (await p.locator('[data-zone-session="Entry/Bathroom"] [aria-label="Clear entry clutter"]').getAttribute('aria-checked')) === 'false');
+check('Cleaning: next week is back on Wednesday, unchecked (no forked or reset state carried)', (await p.locator('[data-zone-session="Entry/Bathroom"]').count()) === 1 && !(await p.locator('[data-zone-session="Entry/Bathroom"]').getByLabel('Clear entry clutter').isChecked()));
 await p.click('[data-view-week="0"]');
 await p.click('[data-move-row] [role="checkbox"]');
-check('Cleaning: moving back keeps the check made on Saturday (one session)', (await p.locator('[data-zone-session="Entry/Bathroom"] [aria-label="Clear entry clutter"]').getAttribute('aria-checked')) === 'true');
+check('Cleaning: moving back keeps the check made on Saturday (one session)', (await p.locator('[data-zone-session="Entry/Bathroom"]').getByLabel('Clear entry clutter').isChecked()));
 await p.click('text=Back to Today');
 check('Today reflects the same Daily Reset check (1 of 5)', /Daily Reset 1 of 5/.test(await p.locator('[data-shortcut="cleaning"]').innerText()));
 
@@ -212,11 +214,12 @@ check('Today: agreement shows beneath its activity, in the owner’s color, on t
 check('Today: agreed preparation has one real checkbox', (await p.locator('[data-today-prep="p-soccer-bag"] [role="checkbox"]').count()) === 1);
 check("Today: Everyone's part shows Mateo's agreement with the cleaning task's own check", /Mateo · Put shoes and bags away/.test(await p.locator('[data-everyone-part="p-entry"]').innerText()));
 check('Today: the conference stays visible even though its prep was skipped', /Parent-teacher conference/.test(t));
+check('Today: the linked cleaning task uses the companion’s square box, not a round toggle', (await p.locator('[data-everyone-part="p-entry"] [data-cleaning-box]').count()) === 1);
 await p.click('[data-everyone-part="p-entry"] [role="checkbox"]');
 await shot(p, '19-today-after-first-meeting');
 await p.click('[data-shortcut="cleaning"]');
 await p.selectOption('[data-view-day]', '3');
-check('One completion state: the check on Today is the Cleaning task’s check', (await p.locator('[data-zone-session="Entry/Bathroom"] [aria-label="Put shoes, coats and bags away"]').getAttribute('aria-checked')) === 'true' && /Mateo’s part/.test(await p.locator('[data-zone-session="Entry/Bathroom"]').innerText()));
+check('One completion state: the check on Today is the Cleaning task’s check', (await p.locator('[data-zone-session="Entry/Bathroom"]').getByLabel('Put shoes, coats and bags away').isChecked()) && /Mateo’s part/.test(await p.locator('[data-zone-session="Entry/Bathroom"]').innerText()));
 await p.click('text=Back to Today');
 
 // ---- Activity moved / cancelled in its source calendar

@@ -21,7 +21,7 @@ billing, RLS or Club-entitlement change.
 | `src/lib/v16/demo.ts` | The fictional household and its calendar |
 | `src/styles/v16.css` | Layout and rhythm only, on existing `--of-*` tokens |
 | `tests/v16-model.test.ts` | 28 unit tests |
-| `scripts/e2e/v16-preview.mjs` | 82-check click-through + screenshots → `docs/ios/screenshots/v16/` |
+| `scripts/e2e/v16-preview.mjs` | 84-check click-through + screenshots → `docs/ios/screenshots/v16/` |
 
 ## Reused (real code, not copies)
 
@@ -46,7 +46,7 @@ billing, RLS or Club-entitlement change.
 | Cleaning checks | **Separate demo keys** shaped like the real ones, so the preview can't overwrite a reviewer's real progress |
 | Wall calendars | **HTML schematics** of the two printed layouts (zones as printed), not the print files |
 
-## Scenario trace (all pass: 82/82 browser checks, 28 unit tests)
+## Scenario trace (all pass: 84/84 browser checks, 28 unit tests)
 
 1. **First meeting, start to finish:** Our Focus → Let's Talk → Everyone's Part → Let's Practice → "We have a plan" → Today.
 2. **Thursday soccer → Wednesday "Pack soccer bag"**, labeled Suggested on Today and in Plans, with "Why this?".

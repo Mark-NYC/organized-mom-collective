@@ -10,6 +10,7 @@ import { dailyEssentials, monthlyDeepClean, weekend, weeklySchedule } from '../.
 import { addDays, weekday } from '../../lib/calendar/recurrence';
 import { DAY_NAMES, agreedParts, dailyKey, moveSession, sessionDay, sessionsOn, zoneKey, type CleaningMode } from '../../lib/v16/model';
 import { Check, Person, fmtDate, type Ctx } from './shared';
+import { TaskList } from '../TaskList';
 
 const ORDER = [1, 2, 3, 4, 5, 6, 0];
 
@@ -31,6 +32,8 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
   const movedAway = usual && c.mode === 'printed' && sessionDay(ctx.s, monday, usual.day) !== wd ? sessionDay(ctx.s, monday, usual.day) : null;
   const end = weekend.days.find((d) => d.day === wd);
   const project = monthlyDeepClean.find((m) => m.month === Number(monday.slice(5, 7)) - 1);
+  // The cleaning companion's own checklist (src/components/TaskList.tsx): its box, its pen tick, its strike-through.
+  const doneIn = (tasks: { id: string }[], key: (id: string) => string) => new Set(tasks.filter((t) => c.checks[key(t.id)]).map((t) => t.id));
   const owners = (taskId: string) => agreedParts(ctx.s).filter((p) => p.cleaningTask?.taskId === taskId);
   return (
     <section data-screen="cleaning">
@@ -87,10 +90,8 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
       {c.dailyReset && c.mode !== 'off' && (
         <div className="v16-section !mt-5" data-daily-reset>
           <div className="flex items-center gap-2"><img src={dailyEssentials.icon} alt="" width="28" height="28" className="size-7" /><p className="v16-eyebrow">{dailyEssentials.title} · {dailyEssentials.minutes}</p></div>
-          <ul className="v16-rows">{dailyEssentials.tasks.map((t) => {
-            const key = dailyKey(date, t.id);
-            return <li key={t.id} className="v16-row !min-h-[48px] !py-1"><Check checked={Boolean(c.checks[key])} label={t.label} onChange={() => toggle(key)} /><span className="v16-row-main">{t.label}</span></li>;
-          })}</ul>
+          <TaskList tasks={dailyEssentials.tasks} label={dailyEssentials.title} scope={`v16-daily-${date}`}
+            checked={doneIn(dailyEssentials.tasks, (id) => dailyKey(date, id))} onToggle={(id) => toggle(dailyKey(date, id))} />
         </div>
       )}
 
@@ -100,12 +101,11 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
           <div key={z} className="v16-section !mt-6" data-zone-session={zone.zone}>
             <div className="flex items-center gap-2"><img src={zone.icon} alt="" width="28" height="28" className="size-7" />
               <p className="v16-eyebrow">{zone.zone} · {zone.minutes}{z !== wd ? ` · moved from ${DAY_NAMES[z]}, this week only` : ''}</p></div>
-            <ul className="v16-rows">{zone.tasks.map((t) => {
-              const key = zoneKey(monday, z, t.id);
-              const who = owners(t.id);
-              return <li key={t.id} className="v16-row !min-h-[48px] !py-1"><Check checked={Boolean(c.checks[key])} label={t.label} onChange={() => toggle(key)} />
-                <span className="v16-row-main">{t.label}</span>{who.map((p) => <span key={p.id} className="inline-flex items-center gap-1 text-[0.78rem]"><Person ctx={ctx} id={p.ownerId} />{ctx.names[p.ownerId!]}’s part</span>)}</li>;
-            })}</ul>
+            <TaskList tasks={zone.tasks} label={zone.zone} scope={`v16-zone-${monday}-${z}`}
+              checked={doneIn(zone.tasks, (id) => zoneKey(monday, z, id))} onToggle={(id) => toggle(zoneKey(monday, z, id))} />
+            {zone.tasks.flatMap((t) => owners(t.id).map((p) => (
+              <p key={p.id} className="v16-meta mt-2 flex items-center gap-2" data-task-owner={t.id}><Person ctx={ctx} id={p.ownerId} />{ctx.names[p.ownerId!]}’s part: {t.label}</p>
+            )))}
           </div>
         );
       })}
@@ -115,10 +115,8 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
           <div className="flex items-center gap-2"><img src={weekend.icon} alt="" width="28" height="28" className="size-7" /><p className="v16-eyebrow">{end.zone}</p></div>
           <p className="v16-meta mt-1">{weekend.description}</p>
           {project && <details className="v16-details"><summary>This month: {project.title}</summary>
-            <ul className="v16-rows">{project.tasks.map((t) => {
-              const key = `monthly:${monday.slice(0, 7)}:${t.id}`;
-              return <li key={t.id} className="v16-row !min-h-[48px] !py-1"><Check checked={Boolean(c.checks[key])} label={t.label} onChange={() => toggle(key)} /><span className="v16-row-main">{t.label}</span></li>;
-            })}</ul></details>}
+            <TaskList tasks={project.tasks} label={project.title} scope={`v16-monthly-${monday.slice(0, 7)}`}
+              checked={doneIn(project.tasks, (id) => `monthly:${monday.slice(0, 7)}:${id}`)} onToggle={(id) => toggle(`monthly:${monday.slice(0, 7)}:${id}`)} /></details>}
         </div>
       )}
       {c.mode === 'off' && <p className="v16-card v16-card--quiet">Cleaning is paused. Turn it back on in Rhythm any time; nothing was lost.</p>}

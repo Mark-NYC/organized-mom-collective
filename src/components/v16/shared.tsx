@@ -68,5 +68,19 @@ export function Check({ checked, label, onChange }: { checked: boolean; label: s
   );
 }
 
+/** A cleaning task's check outside the Cleaning screen: the cleaning companion's own box and pen tick (TaskList.tsx). */
+export function CleaningBox({ checked, label, onChange }: { checked: boolean; label: string; onChange: () => void }) {
+  return (
+    <button type="button" role="checkbox" aria-checked={checked} aria-label={label} className="group inline-flex size-11 shrink-0 items-center justify-center" onClick={onChange} data-cleaning-box>
+      <span aria-hidden="true" className={`relative size-8 rounded-[7px] border-[1.5px] transition-colors ${checked ? 'border-rule-strong/60' : 'border-ink'} group-hover:bg-band`}>
+        <svg viewBox="0 0 28 28" className={`absolute -top-[0.7rem] -right-[0.55rem] size-[2.3rem] overflow-visible text-ink transition-opacity ${checked ? 'opacity-100 duration-0' : 'opacity-0 duration-200'}`}
+          fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 15.5c2 1.6 3.7 3.6 5.3 6.2C13 13.6 18 7.4 25 2.5" pathLength={1} className={`tick-path ${checked ? 'tick-on' : ''}`} />
+        </svg>
+      </span>
+    </button>
+  );
+}
+
 export const fmtDate = (d: string, o: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'short', day: 'numeric' }) =>
   new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { ...o, timeZone: 'UTC' });
