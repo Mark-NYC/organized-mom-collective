@@ -155,7 +155,7 @@ function Talk({ ctx }: { ctx: Ctx }) {
     <section data-meeting-step="talk">
       <Head look={ctx.look} step={1} title="Let’s Talk" lede="Talk it through out loud. Nothing here needs typing." />
       <div className={`v16-card ${club ? 'v16-card--month' : 'v16-card--quiet'}`} data-talk-card data-club={club ? '' : undefined}>
-        {ctx.look === 'v17' && <Art name="conversation-bubbles" size="lg" />}
+        {ctx.look === 'v17' && <Art name="chat" size="lg" />}
         {club ? (
           <p className="v16-eyebrow !text-[color:var(--of-month-accent)]">This month · {club.theme}</p>
         ) : (

@@ -7,7 +7,7 @@
 - **Same demo family, separate state:** both pages run on the same fictional Rivera household, but each keeps its own state in the browser.
 
 **How it's built:** one codebase with a `look` flag (`V16App look="v17"`) and one scoped stylesheet (`src/styles/v17.css`). The only markup that differs between the looks:
-- illustrations on activities, shortcuts, empty states and the meeting invitation;
+- icon tiles on activities, shortcuts, empty states and the meeting invitation;
 - a step progress bar in place of the "FAMILY MEETING · n of 4" eyebrow;
 - bottom sheets for Rhythm and New event;
 - a few explanatory lines hidden.
@@ -22,7 +22,7 @@ Every data attribute, state rule and workflow is shared. The same 84-check click
 | Tiny uppercase tracked eyebrows over every block | Decorative labeling; reads as a template | Sentence-case secondary text, or nothing; a step bar in the meeting |
 | Uppercase, letter-spaced buttons | Fashion-catalog styling, not an app | Pill buttons in sentence case: one sage primary, neutral secondary |
 | Pills/badges for every status | Badge noise | A colored word with a small dot (Suggested = butter, Agreed = sage, Waiting = blush) |
-| Generic line icons for things | Interchangeable with any dashboard | The brand's **own soft-color hand-drawn illustrations**, painted in the calendar's pastels |
+| Generic line icons for things | Interchangeable with any dashboard | Meaningful icons for each kind of thing (ball, bus, lunchbox, coat hanger…), on soft tiles tinted from the calendar palette. The hand-drawn soft-color illustrations stay with the kid-friendly printables for the fridge (owner, 2026-11-25) |
 | Pastel-tinted rounded-square initials | Low contrast, weak identity | Solid discs in each person's **saved marker color**, with a white initial |
 | Settings panels pushed inline into the page | Scrolling forms | Native bottom sheets with a grabber, a title and Done |
 | Same weight everywhere | No hierarchy | Large title 32–36/760; section 22/720; row 16.5/560; meta 14 |
@@ -32,7 +32,7 @@ Every data attribute, state rule and workflow is shared. The same 84-check click
 **Color (audited from `src/theme.ts`, `global.css`, `family-colors.ts` and the printed calendar artwork):**
 - **Interactive color, one only:** sage `#4F7A4A`. That's the wordmark green, deepened so white text clears 4.5:1. It carries primary buttons, selection, links, progress and the tab highlight. Its tint is `#E3EEDF`.
 - **People:** the saved family marker colors (`MARKER_COLORS`), unchanged. They appear as avatars, as a person's done check (it fills with their color), and as their handwriting on the paper previews.
-- **Things:** the calendar pastels, via the illustrations (blue-gray, sage, blush, butter).
+- **Things:** icon tiles in the calendar pastels: sky, butter, sage, blush, lilac. Each tint has a darker ink of the same hue.
 - **Month:** the current month's calendar color, only on Club/monthly content (the Let's Talk card and the Resources month card).
 - **Neutrals:**
   - Page and surfaces: `#FFFFFF`.
@@ -64,10 +64,11 @@ Every data attribute, state rule and workflow is shared. The same 84-check click
 - Checks fill with the person's color.
 - Cleaning keeps the companion's own rounded-square box and pen tick (owner decision), with a soft sage fill when done.
 
-**Illustrations (`Art`, in `src/components/v16/shared.tsx`):**
-- Taken from `public/assets/icons/ofc/v2/routines` and matched by meaning only. For example: soccer gear for soccer, a bus for the field trip, a lunchbox for lunch, the coat hooks for the entryway, conversation bubbles for the conference.
-- Interface controls keep the simple line icons (`ui.tsx`).
-- Cleaning lists stay text-only, because only a few tasks have a matching illustration and a partial set looked inconsistent.
+**Icons (`Art`, in `src/components/v16/shared.tsx`):**
+- 16 line glyphs drawn on the same 24px grid, stroke and round caps as the app's interface icons (`ui.tsx`), so the set reads as one family.
+- Each sits on a soft tile from the calendar palette, matched to the kind of thing: activities and school on sky and butter, family and home on sage, food and care on blush, conversation and music on lilac.
+- The soft-color hand-drawn illustrations are **not** used in the app. They belong to the printables.
+- Cleaning lists stay text-only with the companion's own checkboxes.
 
 ## 3. Preserved
 
@@ -87,5 +88,5 @@ Every data attribute, state rule and workflow is shared. The same 84-check click
 
 1. **Wordmark in sans** (shown) vs keeping the serif logo only as the logo.
 2. **Sage as the single interactive color** vs a warmer accent from the calendar (for example, rose `#B88A8C`). Sage reads calmer and is already the wordmark color.
-3. **Illustrations next to activities.** They're matched by keyword in the preview; production would need a small, explicit mapping per activity type, or a family-chosen illustration.
+3. **Icons next to activities.** They're matched by keyword in the preview; production would need an explicit icon per activity type, or a family-chosen icon.
 4. **Dark mode** isn't explored yet.
