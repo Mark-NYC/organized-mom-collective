@@ -144,5 +144,10 @@ text('Missed a day? Skip, don\'t stack. Find monthly project tasks in the cleani
 text('organizedmomcollective.com', 32, 25, 8.3, bold);
 const destination = join(root, 'public/downloads/weekly-cleaning-reset-one-page-v2.pdf');
 await mkdir(dirname(destination), { recursive: true });
-await writeFile(destination, await pdf.save());
+if (pdf.getPageCount() !== 1) throw new Error('Weekly Cleaning Reset must be exactly one page.');
+const bytes = await pdf.save();
+await writeFile(destination, bytes);
+// Preserve old resource, Pinterest and email links with the exact same one-page PDF.
+await writeFile(join(root, 'public/downloads/weekly-cleaning-zones.pdf'), bytes);
+await writeFile(join(root, 'public/downloads/weekly-cleaning-reset-one-page.pdf'), bytes);
 console.log('Generated one-page Letter cleaning reset from live tasks and original zone icons.');
