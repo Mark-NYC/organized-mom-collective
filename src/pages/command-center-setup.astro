@@ -79,10 +79,178 @@ const jsonLd = [
     </div>
   </section>
 
+  <div class="ccs-club-design">
   <ChecklistPages title="Command Center Setup" pages={pages} storageKey="omc:command-center:v1" filename="command-center-setup">
     <p slot="footnote" class="ck-footnote">
       The why behind each step: <a href={routes.article('home-command-center')} class="text-link">How to Set Up a Home Command Center</a>.
       {' '}Want the calendar for it? See the <a href={routes.calendar} data-cta="command-center-setup" class="text-link">Family Wall Calendar</a>
     </p>
   </ChecklistPages>
+</div>
 </PublicLayout>
+
+<style is:global>
+  /* Command Center only. Keep the on-screen sheet and exported PNG identical. */
+  .ccs-club-design {
+    --ccs-ink: #3F3B39;
+    --ccs-muted: #6E6461;
+    --ccs-line: #E4DDD6;
+    --ccs-green: #3F6B5A;
+    --ccs-green-wash: #EEF4F1;
+    font-family: Montserrat, var(--font-sans), Arial, sans-serif;
+  }
+  .ccs-club-design .ck-container {
+    --ck-ink: var(--ccs-ink);
+    --ck-soft: var(--ccs-muted);
+    --ck-rule: var(--ccs-line);
+    --ck-rose: var(--ccs-green);
+    --ck-rose-deep: var(--ccs-green);
+    --ck-rose-wash: var(--ccs-green-wash);
+    --ck-sage: var(--ccs-line);
+    --ck-sage-wash: #fff;
+    background: #F7F6F3;
+    padding: 30px 20px 60px;
+  }
+  .ccs-club-design .ck-actions { margin-bottom: 26px; }
+  .ccs-club-design .ck-btn {
+    font-family: Montserrat, var(--font-sans), Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: .015em;
+    text-transform: none;
+    font-weight: 700;
+    border-radius: 7px;
+    border-color: #D2DAD4;
+    min-height: 44px;
+    padding: 0 20px;
+    color: var(--ccs-green);
+  }
+  .ccs-club-design .ck-btn:hover { background: var(--ccs-green-wash); }
+  .ccs-club-design .ck-btn-primary { background: var(--ccs-green); color: #fff; border-color: var(--ccs-green); }
+  .ccs-club-design .ck-btn-primary:hover { background: #315546; color: #fff; }
+  .ccs-club-design .ck-page {
+    background: #fff;
+    border: 1px solid #E7E5E0;
+    border-radius: 2px;
+    padding: 57px 62px 42px;
+    box-shadow: 0 10px 32px rgba(48, 43, 39, .09);
+    font-family: Montserrat, var(--font-sans), Arial, sans-serif;
+    color: var(--ccs-ink);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .ccs-club-design .ck-head {
+    text-align: left;
+    border-bottom: 0;
+    padding: 0 0 27px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .ccs-club-design .ck-head::before {
+    content: 'OUR FAMILY  /  HOME SETUP';
+    display: block;
+    margin-bottom: 15px;
+    color: var(--ccs-green);
+    font: 700 11px/1.3 Montserrat, Arial, sans-serif;
+    letter-spacing: .19em;
+  }
+  .ccs-club-design .ck-head::after {
+    content: 'One place for the plan. A part for everyone.';
+    display: block;
+    margin-top: 10px;
+    font: 400 14px/1.5 Montserrat, Arial, sans-serif;
+    color: var(--ccs-muted);
+  }
+  .ccs-club-design .ck-title {
+    font: 700 37px/1.13 Montserrat, Arial, sans-serif;
+    letter-spacing: -.045em;
+    color: var(--ccs-ink);
+  }
+  .ccs-club-design .ck-section { padding-top: 20px; }
+  .ccs-club-design .ck-section + .ck-section {
+    border-top: 1px solid var(--ccs-line);
+    padding-top: 25px;
+    margin-top: 12px;
+  }
+  .ccs-club-design .ck-section-title {
+    margin: 0 0 14px;
+    color: var(--ccs-ink);
+    font: 700 21px/1.25 Montserrat, Arial, sans-serif;
+    letter-spacing: -.03em;
+  }
+  .ccs-club-design .ck-groups { gap: 16px 27px; }
+  .ccs-club-design .ck-group,
+  .ccs-club-design .ck-step-box,
+  .ccs-club-design .ck-timeline,
+  .ccs-club-design .ck-priority {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+  .ccs-club-design .ck-group-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 25px;
+    padding: 0;
+    margin: 0 0 7px;
+    background: transparent;
+    color: var(--ccs-ink);
+    font: 700 12px/1.4 Montserrat, Arial, sans-serif;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .ccs-club-design .ck-step {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    border-radius: 50%;
+    background: var(--ccs-green-wash);
+    color: var(--ccs-green);
+    font: 700 11px/22px Montserrat, Arial, sans-serif;
+    text-align: center;
+  }
+  .ccs-club-design .ck-items { gap: 3px 15px; }
+  .ccs-club-design .ck-item { min-height: 31px; gap: 10px; }
+  .ccs-club-design .ck-item input[type='checkbox'] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--ccs-green);
+    border-radius: 3px;
+  }
+  .ccs-club-design .ck-item input[type='text'] {
+    height: 30px;
+    min-width: 0;
+    padding: 2px 0;
+    color: var(--ccs-ink);
+    background: transparent;
+    border-bottom: 1px solid #E5E1DC;
+    border-radius: 0;
+    font: 500 11.5px/1.35 Montserrat, Arial, sans-serif;
+    letter-spacing: -.018em;
+  }
+  .ccs-club-design .ck-item input[type='text']:focus {
+    background: var(--ccs-green-wash);
+    border-color: var(--ccs-green);
+    outline: 2px solid var(--ccs-green);
+    outline-offset: 1px;
+  }
+  .ccs-club-design .ck-item input[type='text']::placeholder { color: #9F9B95; }
+  .ccs-club-design .ck-footnote {
+    max-width: 650px;
+    padding-top: 12px;
+    font: 400 14px/1.85 Montserrat, Arial, sans-serif;
+    color: var(--ccs-muted);
+  }
+  @media (max-width: 768px) {
+    .ccs-club-design .ck-container:not(.ck-exporting) { padding: 18px 12px 40px; }
+    .ccs-club-design .ck-container:not(.ck-exporting) .ck-page { padding: 27px 21px 35px; }
+    .ccs-club-design .ck-container:not(.ck-exporting) .ck-title { font-size: 29px; }
+    .ccs-club-design .ck-container:not(.ck-exporting) .ck-head { padding-bottom: 20px; }
+    .ccs-club-design .ck-container:not(.ck-exporting) .ck-groups { gap: 19px; }
+    .ccs-club-design .ck-container:not(.ck-exporting) .ck-item input[type='text'] { font-size: 13px; }
+    .ccs-club-design .ck-container:not(.ck-exporting) .ck-section + .ck-section { margin-top: 17px; }
+  }
+</style>
