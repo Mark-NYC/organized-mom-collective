@@ -11,6 +11,7 @@ export interface DirectoryPresentation {
   onScreen?: boolean;
 }
 export const directoryTools: Record<string, DirectoryPresentation> = {
+  [routes.familyMeetingAgenda]: { title: '10-minute family meeting agenda', description: 'Give everyone a voice and a part to play with a customizable one-page meeting sheet.', action: 'Make your family meeting agenda', category: 'everyone', slug: 'family-meeting-agenda', icon: 'heart' },
   [routes.familyResponsibilityBuilder]: { title: 'Family responsibility chart', description: 'Give everyone in the household a real job to own, then print one family-wide chart.', action: 'Build your family chart', category: 'everyone', slug: 'family-responsibility-builder', icon: 'home' },
   [routes.choreChart]: { title: 'Chore chart by age', description: 'Choose a few jobs, add your child’s name, and make a chart they can follow.', action: 'Make your chore chart', category: 'everyone', slug: 'chore-chart', icon: 'home' },
   [routes.routineChart]: { title: 'Kids’ routine charts', description: 'Tap illustrated morning, after-school, or bedtime steps and hang them where your child can see them.', action: 'Make your routine chart', category: 'everyone', slug: 'routine-chart', icon: 'calendar' },
@@ -38,7 +39,7 @@ export const directoryTools: Record<string, DirectoryPresentation> = {
   [routes.pantry]: { title: 'Pantry inventory', description: 'See what’s already there, what needs using, and what to buy.', action: 'Make your pantry inventory', category: 'planning', slug: 'pantry', icon: 'meal' },
 };
 /** Editorially selected starter tools; 'Popular' is a navigation label, not a measured ranking. */
-export const popularPaths: string[] = [routes.choreChart, routes.mealPlanner, routes.tryCalendar, routes.mentalLoad, routes.lunchSnackStation, routes.laundrySystem];
+export const popularPaths: string[] = [routes.familyMeetingAgenda, routes.choreChart, routes.mealPlanner, routes.tryCalendar, routes.mentalLoad, routes.lunchSnackStation, routes.laundrySystem];
 export const seasonalSelections = [
   { months: [8, 9, 10], paths: [routes.fallCleaning, routes.thanksgivingPlan, routes.holidayGifts] },
   { months: [11], paths: [routes.decemberCountdown, routes.holidayGifts, routes.gratitudeTracker] },

@@ -1,77 +1,95 @@
 ---
-/**
- * Public printable that follows the same four-part, ten-minute family meeting
- * rhythm as the Club Welcome Kit. Shared source: data/club/meeting-guide.ts.
- * No member details or Club-only resources are exposed here.
- */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import { MEETING_GUIDE } from '../data/club/meeting-guide';
-const G = MEETING_GUIDE;
-// Match the exact hand-drawn illustrations used by the Club Family Meeting.
-const stepIcons = [
+import { MEETING_GUIDE as G } from '../data/club/meeting-guide';
+const icons = [
   '/images/club/onboarding/family-members.webp',
   '/images/club/onboarding/family-meeting.webp',
   '/images/club/onboarding/shared-responsibility.webp',
   '/images/club/onboarding/individual-ownership.webp',
-] as const;
+];
 const prompts = [
-  'Choose one thing to work on together this month. Say why it matters to your family.',
-  'Ask what is going well, what is hard, and what would help. Let everyone speak, youngest first.',
-  'Agree on one small part per person. Write down who owns the next step, not just who will help.',
-  'Try one of those parts together now, so everyone knows what finished looks like.',
+  'Choose one thing to work on together this month. Why does it matter to all of us?',
+  'What went well? What was hard? What would help? Hear everyone, youngest first.',
+  'Each person agrees to one small part they own this week. Say it out loud.',
+  'Try one part together now, so everyone knows what finished looks like.',
 ];
 ---
-<PublicLayout title="Free Family Meeting Agenda Printable" description="Print a one-page family meeting agenda with the same four-part, ten-minute rhythm: Our Focus, Let’s Talk, Everyone’s Part and Let’s Practice." width="wide">
-  <main class="fm-public">
-    <div class="fm-public-intro">
-      <p class="label">Free family meeting agenda</p>
+<PublicLayout title="Free 10-Minute Family Meeting Agenda Printable" description="Customize and download a beautiful one-page family meeting agenda with four illustrated parts and room for everyone’s responsibilities." width="wide">
+  <main class="fm-public" data-fm-tool>
+    <header class="fm-intro">
       <h1>One family meeting. Ten minutes.</h1>
-      <p>Use the same four parts every week. Hear each person, agree on one next step, and practice it together. This printable follows the Family Meeting format used in Organized Family Club.</p>
-      <div class="fm-public-actions">
-        <button type="button" data-meeting-print>Print this agenda</button>
-        <a href="/resources/family-meeting-agenda">Read the simple guide</a>
+      <p>Give everyone a voice and a part to play. Make this sheet yours, or print it blank and fill it in together.</p>
+    </header>
+    <div class="fm-layout">
+      <aside class="fm-editor" aria-label="Customize your meeting">
+        <h2>Make it yours</h2>
+        <p>Tap any writing line on the sheet to type your own words. Leave it blank for a reusable agenda.</p>
+        <div class="fm-actions">
+          <button type="button" data-meeting-download>Download PNG</button>
+          <button type="button" data-meeting-print>Print / Save PDF</button>
+          <button type="button" data-meeting-reset>Clear my entries</button>
+        </div>
+        <p class="fm-small">US Letter · One page. Your edits are saved in this browser.</p>
+        <a href="/resources/family-meeting-agenda/">Read the simple guide</a>
+      </aside>
+      <div class="fm-preview">
+        <article class="fm-public-paper" data-meeting-paper aria-label="Editable family meeting agenda">
+          <header class="fm-paper-head">
+            <p class="fm-kicker">OUR WEEKLY RHYTHM</p>
+            <h2>{G.title}</h2>
+            <p class="fm-sub">Ten minutes. Everyone has a part.</p>
+            <div class="fm-meta">
+              <label>Our family<input data-field="family" maxlength="45" aria-label="Family name" /></label>
+              <label>Week of<input data-field="week" maxlength="30" aria-label="Week of" /></label>
+            </div>
+          </header>
+          <div class="fm-steps">
+            {G.parts.map((part,i) => (
+              <section class="fm-step">
+                <img src={icons[i]} alt="" aria-hidden="true" width="66" height="66" decoding="async" />
+                <div class="fm-step-body">
+                  <div class="fm-step-head"><h3>{part.title}</h3><span>{part.minutes} min</span></div>
+                  <p class="fm-prompt">{prompts[i]}</p>
+                  {i === 0 && <label>Our focus this month<input data-field="focus" maxlength="85" /></label>}
+                  {i === 1 && <label>Something we heard<input data-field="heard" maxlength="85" /></label>}
+                  {i === 2 && <div class="fm-roles">
+                    <div class="fm-role-head"><span>Who</span><span>My part this week</span></div>
+                    {Array.from({length:4},(_,j)=><div class="fm-role"><input data-field={`who-${j}`} maxlength="25" aria-label={`Person ${j+1}`} /><input data-field={`part-${j}`} maxlength="65" aria-label={`Responsibility ${j+1}`} /></div>)}
+                  </div>}
+                  {i === 3 && <label>What we’ll try together now<input data-field="practice" maxlength="85" /></label>}
+                </div>
+              </section>
+            ))}
+          </div>
+          <footer class="fm-paper-foot"><p>Everyone has a voice. Everyone has a part.</p><span>ORGANIZED MOM COLLECTIVE · organizedmomcollective.com</span></footer>
+        </article>
       </div>
     </div>
-    <article class="fm-public-paper" aria-label="Printable family meeting agenda">
-      <p class="fm-public-brand">ORGANIZED MOM COLLECTIVE</p>
-      <h2>{G.title}</h2>
-      <p class="fm-public-sub">{G.subtitle}</p>
-      <div class="fm-public-meta"><span>Our family: <span class="fm-line"></span></span><span>Date: <span class="fm-line"></span></span></div>
-      <div class="fm-public-steps">
-        {G.parts.map((part, i) => (
-          <section class="fm-public-step">
-            <header class="fm-public-step-head"><img src={stepIcons[i]} alt="" aria-hidden="true" class="fm-public-icon" width="40" height="40" decoding="async" /><b class="fm-public-number">{i + 1}</b><h3>{part.title}</h3><span class="fm-public-time">{part.minutes} min</span></header>
-            <p>{prompts[i]}</p>
-            {i === 0 && <div class="fm-public-write"><span>Our focus this month</span><div class="fm-rule"></div></div>}
-            {i === 1 && <div class="fm-public-write"><span>Something we heard</span><div class="fm-rule"></div></div>}
-            {i === 2 && <div class="fm-public-write"><span>Our next step</span><div class="fm-rule"></div><div class="fm-public-two"><span>Who owns it? <span class="fm-line"></span></span><span>When? <span class="fm-line"></span></span></div></div>}
-            {i === 3 && <div class="fm-public-write"><span>What we'll try together now</span><div class="fm-rule"></div></div>}
-          </section>
-        ))}
-      </div>
-      <p class="fm-public-bottom">Everyone has a voice. Everyone can play a part. Stop at ten minutes.</p>
-      <p class="fm-public-footer">organizedmomcollective.com</p>
-    </article>
-    <p class="fm-public-note">Print at US Letter size, portrait, at 100% scale. The blank spaces are for notes, not additional homework. The Club adds a prepared meeting page and a personalized Family Focus each month; this page is the free reusable agenda.</p>
+    <aside class="fm-club-note"><p>Want the conversation prepared for you each month? The Family Meeting Club pairs this weekly rhythm with a fresh Family Focus and personalized questions.</p><a href="/club/">Explore the Family Meeting Club</a></aside>
   </main>
 </PublicLayout>
 <style is:global>
-.fm-public{max-width:960px;margin:auto;padding:36px 18px 70px;color:#545454;font-family:Montserrat,Arial,sans-serif}
-.fm-public-intro{max-width:720px;margin:0 auto 32px}.fm-public-intro h1{font:400 clamp(2rem,5vw,3.25rem)/1.13 Georgia,serif;margin:12px 0}.fm-public-intro p:not(.label){line-height:1.7;max-width:680px}
-.fm-public-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:22px}.fm-public-actions button{background:#545454;color:white;border:0;border-radius:4px;padding:14px 24px;font-weight:700;cursor:pointer;min-height:44px}.fm-public-actions a{text-decoration:underline;text-underline-offset:4px;font-weight:600}
-.fm-public-paper{box-sizing:border-box;max-width:816px;margin:0 auto;background:white;border:1px solid #d5c5b8;padding:44px 54px;box-shadow:0 8px 34px #54545412}
-.fm-public-brand{font-size:10px;letter-spacing:.19em;font-weight:700;color:#66755f}.fm-public-paper h2{font:400 40px/1.1 Georgia,serif;margin:10px 0 7px}.fm-public-sub{font:italic 16px/1.45 Georgia,serif;color:#727272;margin:0 0 20px}
-.fm-public-meta{display:flex;gap:22px;font-size:12px;margin-bottom:18px}.fm-public-meta>span{flex:1}.fm-line{display:inline-block;vertical-align:bottom;border-bottom:1px solid #bcbcbc;min-width:75px;flex:1}
-.fm-public-steps{border-top:2px solid #d4dfc4}.fm-public-step{padding:16px 0 14px;border-bottom:1px solid #d5c5b8;break-inside:avoid}.fm-public-step header{display:flex;gap:10px;align-items:center}.fm-public-icon{width:40px;height:40px;object-fit:contain;flex-shrink:0}.fm-public-number{background:#d4dfc4;border-radius:50%;width:28px;height:28px;flex-shrink:0;display:grid;place-items:center;font-size:13px}.fm-public-step h3{font:400 23px/1.3 Georgia,serif;margin:0;flex:1}.fm-public-time{font-size:11px;font-weight:700;background:#f1d8a8;padding:5px 10px;border-radius:99px}.fm-public-step p{font-size:12px;line-height:1.5;margin:7px 0 8px 40px}
-.fm-public-write{margin-left:40px;font-size:11px;color:#727272}.fm-rule{height:22px;border-bottom:1px solid #c8c8c8}.fm-public-two{display:flex;gap:22px;margin-top:8px}.fm-public-two span{display:flex;gap:7px;flex:1}.fm-public-bottom{font:italic 15px Georgia,serif;text-align:center;margin:20px 0 10px}.fm-public-footer{text-align:center;font-size:10px;letter-spacing:.09em;color:#727272}.fm-public-note{font-size:13px;line-height:1.7;color:#727272;max-width:700px;margin:20px auto}
-@media(max-width:650px){.fm-public-icon{width:32px;height:32px}.fm-public-paper{padding:23px 20px}.fm-public-meta{flex-wrap:wrap}.fm-public-step p,.fm-public-write{margin-left:0}.fm-public-two{flex-wrap:wrap}.fm-public-paper h2{font-size:32px}}
-@page{size:letter portrait;margin:.45in}
-@media print{body{background:white!important}.fm-public{padding:0;max-width:none}.fm-public-intro,.fm-public-note{display:none!important}.fm-public-paper{border:none;box-shadow:none;padding:0;margin:0;max-width:none;width:100%;break-inside:avoid}.fm-public-step{padding:14px 0 12px}.fm-public-icon{width:32px;height:32px;print-color-adjust:exact;-webkit-print-color-adjust:exact}.fm-public-step p{font-size:11px}.fm-public-write{font-size:10px}.fm-public-paper h2{font-size:36px}body > header,body > footer,body > nav, .site-header, .site-footer{display:none!important}}
+.fm-public{--fm-ink:#3F3B39;--fm-green:#3F6B5A;--fm-rule:#E4DDD6;--fm-muted:#6E6461;max-width:1200px;margin:auto;padding:38px 24px 64px;font-family:Montserrat,var(--font-sans),Arial,sans-serif;color:var(--fm-ink)}
+.fm-intro{max-width:760px;margin:0 auto 34px;text-align:center}.fm-intro h1{font:400 clamp(2rem,5vw,3.2rem)/1.15 Georgia,serif;margin:0 0 14px}.fm-intro p{font-size:15px;line-height:1.75;margin:0}
+.fm-layout{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:32px;align-items:start}.fm-editor{padding:20px 0;position:sticky;top:24px}.fm-editor h2{font-size:21px;font-weight:700;margin:0 0 10px}.fm-editor p{font-size:14px;line-height:1.7;margin:0 0 20px}.fm-actions{display:grid;gap:10px;margin:0 0 17px}.fm-actions button{border:1px solid var(--fm-green);background:white;color:var(--fm-green);min-height:45px;border-radius:5px;font:600 13px Montserrat,Arial,sans-serif;cursor:pointer}.fm-actions button:first-child{background:var(--fm-green);color:white}.fm-actions button:last-child{border-color:transparent;text-decoration:underline}.fm-actions button:disabled{opacity:.55}.fm-editor .fm-small{font-size:12px;color:var(--fm-muted)}.fm-editor a,.fm-club-note a{text-decoration:underline;text-underline-offset:4px;font-weight:600}
+.fm-preview{min-width:0;padding:14px;background:#F4F3F0}.fm-public-paper{box-sizing:border-box;width:100%;max-width:816px;min-height:1056px;margin:0 auto;padding:46px 54px 35px;background:white;box-shadow:0 10px 30px #3d38311f;display:flex;flex-direction:column;font-family:Montserrat,Arial,sans-serif;color:#3F3B39;print-color-adjust:exact;-webkit-print-color-adjust:exact}.fm-public-paper *{box-sizing:border-box}.fm-paper-head{text-align:center;margin-bottom:24px}.fm-kicker{font:700 11px/1.3 Montserrat,Arial,sans-serif;letter-spacing:.22em;color:#3F6B5A;margin:0 0 12px}.fm-paper-head h2{font:700 39px/1.12 Montserrat,Arial,sans-serif;letter-spacing:-.04em;margin:0 0 8px}.fm-sub{font:italic 17px/1.4 Georgia,serif;color:#6E6461;margin:0 0 22px}.fm-meta{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;text-align:left}.fm-public-paper label{display:block;font-size:11px;font-weight:600;color:#6E6461;line-height:1.4}.fm-public-paper input{display:block;width:100%;min-width:0;border:0;border-bottom:1px solid #CFC9C3;border-radius:0;background:transparent;color:#3F3B39;font:500 13px/1.35 Montserrat,Arial,sans-serif;padding:3px 0;height:27px}.fm-public-paper input:focus{outline:2px solid #3F6B5A;outline-offset:2px;background:#EEF4F1}.fm-steps{border-top:1px solid #E4DDD6}.fm-step{display:grid;grid-template-columns:66px minmax(0,1fr);gap:19px;padding:20px 0;border-bottom:1px solid #E4DDD6;break-inside:avoid}.fm-step img{width:66px;height:66px;object-fit:contain}.fm-step-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.fm-step-head h3{font:700 22px/1.2 Montserrat,Arial,sans-serif;letter-spacing:-.025em;margin:0}.fm-step-head span{font:700 11px Montserrat,Arial,sans-serif;white-space:nowrap;color:#3F6B5A}.fm-prompt{font:500 13px/1.5 Montserrat,Arial,sans-serif;margin:7px 0 12px}.fm-role-head,.fm-role{display:grid;grid-template-columns:1fr 2.5fr;gap:16px}.fm-role-head{font-size:11px;font-weight:600;color:#6E6461}.fm-role input{height:25px}.fm-paper-foot{text-align:center;margin-top:auto;padding-top:22px}.fm-paper-foot p{font:italic 16px Georgia,serif;margin:0 0 9px}.fm-paper-foot span{font-size:9px;font-weight:600;letter-spacing:.075em;color:#6E6461}.fm-club-note{max-width:680px;margin:30px auto 0;text-align:center;font-size:13px;line-height:1.7}.fm-club-note p{margin:0 0 8px}
+@media(max-width:1050px){.fm-layout{display:block}.fm-editor{position:static;max-width:816px;margin:0 auto;padding:0 0 20px}.fm-actions{display:flex;flex-wrap:wrap}.fm-actions button{padding:0 18px}}
+@media(max-width:650px){.fm-public{padding:26px 12px 45px}.fm-preview{padding:5px}.fm-public:not(.fm-exporting) .fm-public-paper{padding:25px 18px;min-height:0}.fm-public:not(.fm-exporting) .fm-paper-head h2{font-size:28px}.fm-public:not(.fm-exporting) .fm-meta{gap:12px}.fm-public:not(.fm-exporting) .fm-step{grid-template-columns:42px minmax(0,1fr);gap:10px;padding:17px 0}.fm-public:not(.fm-exporting) .fm-step img{width:42px;height:42px}.fm-public:not(.fm-exporting) .fm-step-head h3{font-size:18px}.fm-public:not(.fm-exporting) .fm-role{gap:8px}.fm-public:not(.fm-exporting) .fm-public-paper input{font-size:16px;height:32px}.fm-public:not(.fm-exporting) .fm-paper-foot{margin-top:12px}}
+@page{size:letter portrait;margin:0}
+@media print{body{background:white!important}body > header,body > footer,body > nav,.site-header,.site-footer,.fm-intro,.fm-editor,.fm-club-note{display:none!important}.fm-public{padding:0!important;margin:0!important;max-width:none!important}.fm-layout{display:block}.fm-preview{padding:0;background:white}.fm-public .fm-public-paper{width:8.5in!important;max-width:none!important;min-height:11in!important;height:11in!important;margin:0!important;padding:46px 54px 35px!important;box-shadow:none;break-inside:avoid}.fm-public .fm-step{grid-template-columns:66px minmax(0,1fr)!important;gap:19px!important;padding:20px 0!important}.fm-public .fm-step img{width:66px!important;height:66px!important}.fm-public .fm-paper-head h2{font-size:39px!important}.fm-public .fm-step-head h3{font-size:22px!important}.fm-public .fm-public-paper input{font-size:13px!important;height:27px!important}}
 </style>
-
 <script>
+  import { autosave, clearFields, downloadPng } from '../lib/printable';
   import { requireToolEmail } from '../lib/tool-email';
-  document.querySelector<HTMLButtonElement>('[data-meeting-print]')?.addEventListener('click', async () => {
-    if (await requireToolEmail('family-meeting-agenda')) window.print();
-  });
+  const host = document.querySelector<HTMLElement>('[data-fm-tool]');
+  const paper = host?.querySelector<HTMLElement>('[data-meeting-paper]');
+  const download = host?.querySelector<HTMLButtonElement>('[data-meeting-download]');
+  if (host && paper && download) {
+    const save = autosave(paper, 'omc:family-meeting-agenda:v1');
+    download.addEventListener('click', () => downloadPng(paper, { filename:'OMC-Family-Meeting-Agenda.png', width:816, height:1056, layoutHost:host, exportClass:'fm-exporting', button:download }));
+    host.querySelector('[data-meeting-print]')?.addEventListener('click', async () => {
+      if (await requireToolEmail('family-meeting-agenda')) { host.classList.add('fm-exporting'); try { window.print(); } finally { host.classList.remove('fm-exporting'); } }
+    });
+    host.querySelector('[data-meeting-reset]')?.addEventListener('click', () => { if (confirm('Clear your meeting entries?')) { clearFields(paper); save(); } });
+  }
 </script>

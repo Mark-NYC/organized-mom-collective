@@ -1,6 +1,7 @@
 import { routes } from '../routes';
 
 export const freeTools = [
+  { href: routes.familyMeetingAgenda, name: '10-Minute Family Meeting Agenda', summary: 'Four illustrated parts, ten minutes, and one shared plan. Customize and print your family meeting.' },
   { href: routes.familyResponsibilityBuilder, name: 'Family Responsibility Chart Builder', summary: 'Give parents and kids clear ownership of household jobs on one printable family chart.' },
   { href: routes.choreChart, name: 'Chore Chart by Age', summary: 'Daily and weekly chores matched to your child’s age, with illustrated jobs and rewards to work toward.' },
   { href: routes.backToSchool, name: 'Back to School Checklist', summary: 'Supplies, clothes, forms and routines, plus a countdown dated from the first day.' },
