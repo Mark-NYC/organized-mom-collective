@@ -163,9 +163,9 @@ export default function Today({ ctx }: { ctx: Ctx }) {
       {meetingOcc && <p className="v16-meta mt-5" data-next-meeting>Next Family Meeting: {fmtDate(meetingOcc.date, { weekday: 'long' })} at {timeLabel(meetingOcc.event)} (on your calendar).</p>}
 
       <nav aria-label="More" className="v16-shortcuts">
-        <button type="button" className="v16-shortcut" onClick={() => ctx.go('plans')} data-shortcut="plans">{ctx.look === 'v17' ? <Art name="calendar" /> : <Icon name="calendar" />} Plans <small>{sharedOccurrences(ctx.s, ctx.monday).filter((o) => o.date === ctx.today).length} today</small></button>
-        <button type="button" className="v16-shortcut" onClick={() => ctx.go('cleaning')} data-shortcut="cleaning">{ctx.look === 'v17' ? <Art name="sparkle" /> : <Icon name="check" />} Cleaning <small>{ctx.s.cleaning.dailyReset ? `Daily Reset ${dailyDone} of ${dailyEssentials.tasks.length}` : weeklySchedule.find((z) => z.day === todayWd)?.zone ?? 'This week'}</small></button>
-        <button type="button" className="v16-shortcut" onClick={() => ctx.go('resources')} data-shortcut="resources">{ctx.look === 'v17' ? <Art name="book" /> : <Icon name="list" />} Resources <small>{ctx.club ? ctx.club.resourceTitle : 'Family & guides'}</small></button>
+        <button type="button" className="v16-shortcut" onClick={() => ctx.go('plans')} data-shortcut="plans">{ctx.look === 'v17' ? <Art name="calendar" tile="blue" /> : <Icon name="calendar" />} Plans <small>{sharedOccurrences(ctx.s, ctx.monday).filter((o) => o.date === ctx.today).length} today</small></button>
+        <button type="button" className="v16-shortcut" onClick={() => ctx.go('cleaning')} data-shortcut="cleaning">{ctx.look === 'v17' ? <Art name="sparkle" tile="sage" /> : <Icon name="check" />} Cleaning <small>{ctx.s.cleaning.dailyReset ? `Daily Reset ${dailyDone} of ${dailyEssentials.tasks.length}` : weeklySchedule.find((z) => z.day === todayWd)?.zone ?? 'This week'}</small></button>
+        <button type="button" className="v16-shortcut" onClick={() => ctx.go('resources')} data-shortcut="resources">{ctx.look === 'v17' ? <Art name="book" tile="rose" /> : <Icon name="list" />} Resources <small>{ctx.club ? ctx.club.resourceTitle : 'Family & guides'}</small></button>
       </nav>
     </section>
   );

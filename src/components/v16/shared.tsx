@@ -90,36 +90,36 @@ export function CleaningBox({ checked, label, onChange }: { checked: boolean; la
 export const fmtDate = (d: string, o: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'short', day: 'numeric' }) =>
   new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { ...o, timeZone: 'UTC' });
 
-// ------------------------------------------------------------------ V17: interface icons, sheets
+// ------------------------------------------------------------------ V17: one bold icon family, sheets
 
 /**
- * V17's icons for things in the app (activities, jobs, shortcuts): one small line set drawn like the app's existing
- * interface icons (src/components/app/ui.tsx: 24px grid, round caps), each on a soft tile from the printed calendar's
- * palette. The soft-color hand-drawn illustrations stay where they belong: the kid-friendly printables for the fridge.
+ * V17's icon family: filled silhouettes and heavy rounded strokes on a 24px grid (SF Symbols in spirit), in near-black
+ * by default. One family everywhere: tabs, header, rows, shortcuts. No pastel tiles around them. The soft-color
+ * hand-drawn illustrations belong to editorial content, monthly kits, printables and celebrations, not the interface.
  */
-type Glyph = 'ball' | 'bus' | 'lunch' | 'chat' | 'car' | 'hanger' | 'trash' | 'music' | 'backpack' | 'people' | 'calendar' | 'sparkle' | 'book' | 'heart' | 'paw' | 'plate';
+export type Glyph = 'house' | 'people' | 'person' | 'ball' | 'bus' | 'lunch' | 'chat' | 'car' | 'hanger' | 'trash' | 'music' | 'backpack'
+  | 'calendar' | 'sparkle' | 'book' | 'heart' | 'paw' | 'plate' | 'check';
+const F = { fill: 'currentColor', stroke: 'none' } as const;
 const GLYPH: Record<Glyph, React.ReactNode> = {
-  ball: <><circle cx="12" cy="12" r="8.5" /><path d="m12 8.3 3 2.2-1.1 3.6h-3.8L9 10.5z" /><path d="M12 3.5v4.8M15 10.5l4.6-1.4M13.9 14.1l2.8 4M10.1 14.1l-2.8 4M9 10.5 4.4 9.1" /></>,
-  bus: <><rect x="4.5" y="4" width="15" height="13.5" rx="3" /><path d="M4.5 11h15M8 20v-2.5M16 20v-2.5" /><circle cx="8.3" cy="14.3" r=".6" /><circle cx="15.7" cy="14.3" r=".6" /></>,
-  lunch: <><rect x="3.5" y="8.5" width="17" height="11" rx="2.5" /><path d="M9 8.5V6.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6.5v2M3.5 13h17" /></>,
-  chat: <><path d="M4 15.5V6.5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2V12a2 2 0 0 1-2 2H7.5z" /><path d="M17 8.5h1.5a1.5 1.5 0 0 1 1.5 1.5v9l-2.8-2.5H11a1.5 1.5 0 0 1-1.5-1.5V14" /></>,
-  car: <><path d="M4.5 16.5V12l1.8-4.6A2 2 0 0 1 8.2 6h7.6a2 2 0 0 1 1.9 1.4l1.8 4.6v4.5" /><path d="M3.5 16.5h17M4.5 12h15" /><circle cx="7.8" cy="18.3" r="1.7" /><circle cx="16.2" cy="18.3" r="1.7" /></>,
-  hanger: <><path d="M12 9.5V8.6a2 2 0 1 0-2-2" /><path d="M12 9.5 3.8 15.6a1.3 1.3 0 0 0 .8 2.4h14.8a1.3 1.3 0 0 0 .8-2.4z" /></>,
-  trash: <><path d="M4.5 7h15M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2M6.5 7l.9 12a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-12" /><path d="M10 11v5.5M14 11v5.5" /></>,
-  music: <><path d="M9 18V6l10-2v12" /><circle cx="6.8" cy="18" r="2.2" /><circle cx="16.8" cy="16" r="2.2" /></>,
-  backpack: <><path d="M6 10a6 6 0 0 1 12 0v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19z" /><path d="M9.5 4.6V3.5h5v1.1M9 14h6v3.5H9z" /></>,
-  people: <><circle cx="9" cy="8.5" r="3" /><circle cx="17" cy="9.5" r="2.3" /><path d="M3.5 19c.8-3.2 3-5 5.5-5s4.7 1.8 5.5 5" /><path d="M14.8 14.6c.7-.4 1.4-.6 2.2-.6 2 0 3.5 1.4 4 4" /></>,
-  calendar: <><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" /><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" /><circle cx="12" cy="15" r=".7" /></>,
-  sparkle: <><path d="M12 3.5 13.6 9l5.4 1.6-5.4 1.6L12 17.8l-1.6-5.6L5 10.6 10.4 9z" /><path d="M18.5 16.5v3M17 18h3" /></>,
-  book: <><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v13H6.5A1.5 1.5 0 0 0 5 18.5z" /><path d="M5 18.5A1.5 1.5 0 0 0 6.5 20H19M9 8h6" /></>,
-  heart: <><path d="M12 19s-7-4.3-7-9.5A3.8 3.8 0 0 1 12 7.3a3.8 3.8 0 0 1 7 2.2C19 14.7 12 19 12 19z" /></>,
-  paw: <><circle cx="7" cy="10" r="1.6" /><circle cx="10.5" cy="6.8" r="1.6" /><circle cx="14.5" cy="6.8" r="1.6" /><circle cx="18" cy="10" r="1.6" /><path d="M12.5 11.5c2.6 0 5 3.4 5 5.6 0 1.6-1.4 2.4-2.8 2-1.3-.4-1.6-.7-2.2-.7s-.9.3-2.2.7c-1.4.4-2.8-.4-2.8-2 0-2.2 2.4-5.6 5-5.6z" /></>,
-  plate: <><circle cx="12" cy="12.5" r="6.5" /><circle cx="12" cy="12.5" r="3.5" /><path d="M3.5 5v6M3.5 8h0M20.5 5v14" /></>,
-};
-/** Each icon's tile: a tint from the printed calendar's month palette, with a darker ink of the same hue. */
-const TILE: Record<Glyph, 'sky' | 'butter' | 'sage' | 'blush' | 'lilac'> = {
-  ball: 'sky', bus: 'butter', lunch: 'blush', chat: 'lilac', car: 'sky', hanger: 'sage', trash: 'sage', music: 'lilac', backpack: 'butter',
-  people: 'sage', calendar: 'sky', sparkle: 'sage', book: 'blush', heart: 'blush', paw: 'butter', plate: 'blush',
+  house: <path {...F} d="M3.2 10.4 11 4.1a1.6 1.6 0 0 1 2 0l7.8 6.3c.3.3.5.6.5 1V19a2 2 0 0 1-2 2h-3.8v-5.2a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1V21H4.7a2 2 0 0 1-2-2v-7.6c0-.4.2-.7.5-1z" />,
+  people: <><circle {...F} cx="8.8" cy="7.8" r="3.4" /><circle {...F} cx="17" cy="8.8" r="2.7" /><path {...F} d="M2.4 19.3c.5-3.8 3.1-6.1 6.4-6.1s5.9 2.3 6.4 6.1a1.3 1.3 0 0 1-1.3 1.5H3.7a1.3 1.3 0 0 1-1.3-1.5z" /><path {...F} d="M16.6 20.8h3.9a1.2 1.2 0 0 0 1.2-1.4c-.4-3-2.2-4.9-4.6-4.9-.9 0-1.7.2-2.4.7 1.1 1.2 1.8 2.8 2 4.6.1.4 0 .7-.1 1z" /></>,
+  person: <><circle {...F} cx="12" cy="7.6" r="4.1" /><path {...F} d="M4 19.6c.8-4 4-6.4 8-6.4s7.2 2.4 8 6.4a1.3 1.3 0 0 1-1.3 1.6H5.3A1.3 1.3 0 0 1 4 19.6z" /></>,
+  ball: <><circle cx="12" cy="12" r="8.6" strokeWidth="2.2" /><path {...F} d="m12 8 3.4 2.5-1.3 4h-4.2l-1.3-4z" /><path d="M12 3.6V8M15.4 10.5l4.3-1.3M14.1 14.5l2.7 3.6M9.9 14.5l-2.7 3.6M8.6 10.5 4.3 9.2" strokeWidth="2" /></>,
+  bus: <><path {...F} fillRule="evenodd" d="M7 2.8h10A3 3 0 0 1 20 5.8V17a1.2 1.2 0 0 1-1.2 1.2H5.2A1.2 1.2 0 0 1 4 17V5.8a3 3 0 0 1 3-3zM6.4 6.3v4.6h11.2V6.3zM7.6 13.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm8.8 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z" /><rect {...F} x="6" y="17.5" width="3" height="3.6" rx="1.2" /><rect {...F} x="15" y="17.5" width="3" height="3.6" rx="1.2" /></>,
+  lunch: <><rect {...F} x="2.8" y="8.4" width="18.4" height="12" rx="3" /><path d="M8.4 8.4V6.6A1.8 1.8 0 0 1 10.2 4.8h3.6a1.8 1.8 0 0 1 1.8 1.8v1.8" strokeWidth="2.3" /></>,
+  chat: <><path {...F} d="M5.2 3.6h9.6A2.8 2.8 0 0 1 17.6 6.4v6a2.8 2.8 0 0 1-2.8 2.8H9.4l-3.9 3.2c-.5.4-1.2 0-1.2-.6v-2.6a2.8 2.8 0 0 1-1.9-2.8v-6a2.8 2.8 0 0 1 2.8-2.8z" /><path d="M20 8.6a2 2 0 0 1 1.2 1.8v5.4a2.3 2.3 0 0 1-1.5 2.2v2.2l-3.3-2.6h-3.6" strokeWidth="2.1" /></>,
+  car: <path {...F} fillRule="evenodd" d="M7.7 5.2h8.6a2.6 2.6 0 0 1 2.4 1.7l1.5 4c.6.4 1 1 1 1.8v4.6a1.3 1.3 0 0 1-1.3 1.3h-.8v1.2a1.6 1.6 0 0 1-3.2 0v-1.2H8.1v1.2a1.6 1.6 0 0 1-3.2 0v-1.2h-.8a1.3 1.3 0 0 1-1.3-1.3v-4.6c0-.8.4-1.4 1-1.8l1.5-4a2.6 2.6 0 0 1 2.4-1.7zM6.6 10.4h10.8l-1-2.7a.8.8 0 0 0-.7-.5H8.3a.8.8 0 0 0-.7.5zM6.8 13.2a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm10.4 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z" />,
+  hanger: <><path d="M12 9.6V8.4a2.1 2.1 0 1 0-2.1-2.1" strokeWidth="2.3" /><path {...F} d="M12 8.6c.3 0 .6.1.8.3l7.8 6c1.2.9.6 2.8-.9 2.8H4.3c-1.5 0-2.1-1.9-.9-2.8l7.8-6c.2-.2.5-.3.8-.3z" /></>,
+  trash: <><path {...F} d="M5.5 8h13l-1 11.4a2 2 0 0 1-2 1.8H8.5a2 2 0 0 1-2-1.8z" /><path d="M3.8 5.8h16.4M9.4 5.6V4.2a1 1 0 0 1 1-1h3.2a1 1 0 0 1 1 1v1.4" strokeWidth="2.2" /></>,
+  music: <><path d="M9.2 17.6V6.3l10-2.3v11.3" strokeWidth="2.3" /><circle {...F} cx="6.6" cy="17.6" r="2.9" /><circle {...F} cx="16.6" cy="15.4" r="2.9" /></>,
+  backpack: <><path {...F} d="M5.6 10.6A6.4 6.4 0 0 1 12 4.2a6.4 6.4 0 0 1 6.4 6.4v8.6a2 2 0 0 1-2 2H7.6a2 2 0 0 1-2-2z" /><path d="M9.4 4.6V3.4a1 1 0 0 1 1-1h3.2a1 1 0 0 1 1 1v1.2" strokeWidth="2.1" /></>,
+  calendar: <><rect x="3.6" y="5" width="16.8" height="15.6" rx="3" strokeWidth="2.2" /><path {...F} d="M3.6 8A3 3 0 0 1 6.6 5h10.8a3 3 0 0 1 3 3v2.2H3.6z" /><path d="M8 2.8v3.4M16 2.8v3.4" strokeWidth="2.3" /><rect {...F} x="7" y="13.2" width="3.2" height="3.2" rx=".9" /></>,
+  sparkle: <><path {...F} d="M10.5 3.4c.2-.6 1-.6 1.2 0l1.4 4.3a2 2 0 0 0 1.3 1.3l4.3 1.4c.6.2.6 1 0 1.2l-4.3 1.4a2 2 0 0 0-1.3 1.3l-1.4 4.3c-.2.6-1 .6-1.2 0l-1.4-4.3a2 2 0 0 0-1.3-1.3l-4.3-1.4c-.6-.2-.6-1 0-1.2l4.3-1.4a2 2 0 0 0 1.3-1.3z" /><path {...F} d="M18.3 15.6c.1-.4.7-.4.8 0l.4 1.2c.1.3.3.5.6.6l1.2.4c.4.1.4.7 0 .8l-1.2.4a1 1 0 0 0-.6.6l-.4 1.2c-.1.4-.7.4-.8 0l-.4-1.2a1 1 0 0 0-.6-.6l-1.2-.4c-.4-.1-.4-.7 0-.8l1.2-.4a1 1 0 0 0 .6-.6z" /></>,
+  book: <><path {...F} d="M4.8 5a2.4 2.4 0 0 1 2.4-2.4h11a1 1 0 0 1 1 1v13.6H7.2a2.4 2.4 0 0 0-2.4 2.3z" /><path d="M4.8 19.4a2 2 0 0 0 2 2h12.4" strokeWidth="2.2" /></>,
+  heart: <path {...F} d="M12 20.6c-.3 0-.6-.1-.8-.3C8 17.9 3 14.2 3 9.4A4.7 4.7 0 0 1 12 7.2a4.7 4.7 0 0 1 9 2.2c0 4.8-5 8.5-8.2 10.9-.2.2-.5.3-.8.3z" />,
+  paw: <><ellipse {...F} cx="6.4" cy="10.4" rx="1.9" ry="2.3" /><ellipse {...F} cx="10.2" cy="6.6" rx="1.9" ry="2.4" /><ellipse {...F} cx="14.6" cy="6.6" rx="1.9" ry="2.4" /><ellipse {...F} cx="18.2" cy="10.4" rx="1.9" ry="2.3" /><path {...F} d="M12.4 11.4c2.7 0 5.3 3.6 5.3 6 0 1.7-1.5 2.6-3 2.1-1.2-.4-1.6-.7-2.3-.7s-1.1.3-2.3.7c-1.5.5-3-.4-3-2.1 0-2.4 2.6-6 5.3-6z" /></>,
+  plate: <><circle cx="12.5" cy="12.5" r="6.6" strokeWidth="2.2" /><circle {...F} cx="12.5" cy="12.5" r="3.2" /><path d="M3.4 4.4v5.4a1.4 1.4 0 0 0 1.4 1.4M3.4 11.2v8.6M21 4.4v15.4" strokeWidth="2.1" /></>,
+  check: <><circle {...F} cx="12" cy="12" r="9.4" /><path d="m7.8 12.3 2.8 2.8 5.6-5.8" stroke="#fff" strokeWidth="2.4" /></>,
 };
 const MATCH: [RegExp, Glyph][] = [
   [/soccer|practice|sport|game/i, 'ball'], [/field trip/i, 'bus'], [/lunch/i, 'lunch'], [/conference|teacher/i, 'chat'],
@@ -128,13 +128,13 @@ const MATCH: [RegExp, Glyph][] = [
 ];
 export const artFor = (text: string): Glyph => MATCH.find(([re]) => re.test(text))?.[1] ?? 'calendar';
 
-export function Art({ name, size = 'md' }: { name: Glyph; size?: 'sm' | 'md' | 'lg' }) {
+/** A bold icon. Bare by default (near-black, no container). `tile`: a solid calendar-color square with a white glyph. */
+export function Art({ name, size = 'md', tile }: { name: Glyph; size?: 'sm' | 'md' | 'lg'; tile?: 'blue' | 'sage' | 'rose' | 'butter' | 'plum' }) {
   const px = size === 'sm' ? 20 : size === 'lg' ? 28 : 24;
-  return (
-    <span aria-hidden="true" className={`v17-art v17-art--${size} v17-tone--${TILE[name]}`} data-glyph={name}>
-      <svg width={px} height={px} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{GLYPH[name]}</svg>
-    </span>
-  );
+  const svg = <svg width={px} height={px} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">{GLYPH[name]}</svg>;
+  return tile
+    ? <span aria-hidden="true" className={`v17-tile v17-tile--${tile}`} data-glyph={name}>{svg}</span>
+    : <span aria-hidden="true" className={`v17-icon v17-icon--${size}`} data-glyph={name}>{svg}</span>;
 }
 
 /** A native-feeling bottom sheet (dialog): grabber, title, Done. Esc, the backdrop and Done close it. */

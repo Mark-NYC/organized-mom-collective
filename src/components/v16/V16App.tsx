@@ -19,7 +19,7 @@ import Cleaning from './Cleaning';
 import Meeting, { CheckIn, PlanSummary } from './Meeting';
 import Plans from './Plans';
 import Today from './Today';
-import { Person, TAB_OF, type Ctx, type Look, type Route } from './shared';
+import { Art, Person, TAB_OF, type Ctx, type Look, type Route } from './shared';
 
 const ROUTES: Route[] = ['today', 'plans', 'cleaning', 'resources', 'account', 'meeting', 'check-in', 'plan'];
 const readRoute = (): Route => { const r = location.hash.replace(/^#\/?/, '') as Route; return ROUTES.includes(r) ? r : 'today'; };
@@ -102,9 +102,9 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
         <div className="v16-header-inner">
           <button type="button" className="v16-wordmark" onClick={() => go('today')} aria-label="Organized Family, Today">organized<em>family.</em></button>
           <nav className="v16-topnav" aria-label="Organized Family">
-            {tabs.map((t) => <button key={t.id} type="button" aria-current={tab === t.id ? 'page' : undefined} onClick={t.on}><Icon name={t.icon} size={19} />{t.label}</button>)}
+            {tabs.map((t) => <button key={t.id} type="button" aria-current={tab === t.id ? 'page' : undefined} onClick={t.on}>{look === 'v17' ? <Art name={t.id === 'today' ? 'house' : 'people'} size="sm" /> : <Icon name={t.icon} size={19} />}{t.label}</button>)}
           </nav>
-          <button type="button" className="v16-iconbtn" aria-label="Account and settings" onClick={() => go('account')} data-account><Icon name="person" /></button>
+          <button type="button" className="v16-iconbtn" aria-label="Account and settings" onClick={() => go('account')} data-account>{look === 'v17' ? <Art name="person" size="sm" /> : <Icon name="person" />}</button>
         </div>
       </header>
       <main className="v16-main" id="main">
@@ -118,7 +118,7 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
         {route === 'plan' && <PlanSummary ctx={ctx} />}
       </main>
       <nav className="v16-tabbar" aria-label="App navigation">
-        <ul>{tabs.map((t) => <li key={t.id}><button type="button" aria-current={tab === t.id ? 'page' : undefined} onClick={t.on} data-tab={t.id}><Icon name={t.icon} size={22} />{t.label}</button></li>)}</ul>
+        <ul>{tabs.map((t) => <li key={t.id}><button type="button" aria-current={tab === t.id ? 'page' : undefined} onClick={t.on} data-tab={t.id}>{look === 'v17' ? <Art name={t.id === 'today' ? 'house' : 'people'} /> : <Icon name={t.icon} size={22} />}{t.label}</button></li>)}</ul>
       </nav>
     </div>
   );

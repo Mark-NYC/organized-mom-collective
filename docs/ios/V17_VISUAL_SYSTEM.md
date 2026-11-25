@@ -27,48 +27,50 @@ Every data attribute, state rule and workflow is shared. The same 84-check click
 | Settings panels pushed inline into the page | Scrolling forms | Native bottom sheets with a grabber, a title and Done |
 | Same weight everywhere | No hierarchy | Large title 32–36/760; section 22/720; row 16.5/560; meta 14 |
 
-## 2. The system
+## 2. The system (refinement 2: confident, not washed out)
 
-**Color (audited from `src/theme.ts`, `global.css`, `family-colors.ts` and the printed calendar artwork):**
-- **Interactive color, one only:** sage `#4F7A4A`. That's the wordmark green, deepened so white text clears 4.5:1. It carries primary buttons, selection, links, progress and the tab highlight. Its tint is `#E3EEDF`.
-- **People:** the saved family marker colors (`MARKER_COLORS`), unchanged. They appear as avatars, as a person's done check (it fills with their color), and as their handwriting on the paper previews.
-- **Things:** icon tiles in the calendar pastels: sky, butter, sage, blush, lilac. Each tint has a darker ink of the same hue.
-- **Month:** the current month's calendar color, only on Club/monthly content (the Let's Talk card and the Resources month card).
-- **Neutrals:**
-  - Page and surfaces: `#FFFFFF`.
-  - Fills: `#F3F5F4` for grouping, empty states and fields; `#E9ECEA` for secondary buttons and segmented tracks.
-  - Text: `#1F2422`, secondary `#69716D`, hairline `#ECEEED`.
+Owner feedback on the first pass: it was "washed out", read like "a softly styled website", and its icons were too
+delicate. Refinement 2 keeps the same structure and raises contrast, color conviction and tactility.
 
-**Type:**
-- One family, Figtree Variable (bundled via `@fontsource-variable/figtree`, so it renders the same on every device).
-- No serif and no all-caps headings.
-- **Wordmark:** "organized family." in sans, with "family." in sage. This is a brand change for the owner to decide.
+**Color: the calendar palette at full strength where it means something**
+- **Interactive color, one only:** a deeper wordmark sage, `#3E7A43` (white text 5.3:1). It carries primary buttons, the main call-to-action card (solid), selection, progress, links and the active tab.
+- **The calendar's colors, strengthened:** January frost `#3A7895`, May leaf `#4B8746`, February blush `#BF5D69`, June apricot `#C98B0C`, April lilac `#7357AD`. They appear as solid icon squares in the grouped shortcuts and as strong status words.
+- **People:** the saved marker colors as solid discs, and as each person's done check.
+- **Month:** the month's own calendar color, at full strength, on the Club conversation card.
+- **Text:**
+  - near-black `#121614`;
+  - secondary `#56605A` (6.3:1 on white);
+  - control edges `#8D9792`, so empty checks and toggles are clearly visible.
+- **Surfaces:** white plus one neutral gray (`#F1F3F2` and `#E5E9E7`). Solid color only where it should stand out.
 
-**Shape and space:**
-- Radius 14 on fields, 20–24 on cards and shortcuts, 30 on sheets; pill buttons.
-- 22px side gutter. 36px between sections. Touch targets of at least 44px (buttons 46–52).
+**Icons: one bold family**
+- Filled silhouettes and heavy rounded strokes on a 24px grid, SF Symbols in spirit (`Art` / `GLYPH` in `src/components/v16/shared.tsx`): house, people, person, ball, bus, lunchbox, chat, car, hanger, trash, music, backpack, calendar, sparkle, book, heart, paw, plate and check.
+- Near-black and bare in rows and cards, with no pastel containers.
+- White on a solid calendar-color square only in the grouped shortcuts (iOS settings style).
+- The same family runs through the tab bar, the header and the account button.
+- The soft-color hand-drawn illustrations are **not** in the interface. They're kept for editorial content, monthly kits, printables, onboarding and celebrations (owner direction).
+- **Exception kept on purpose:** the Cleaning zone icons are the companion's existing zone artwork (V16 contract §2). Swapping them is an owner decision.
 
-**Surfaces:**
-- Few soft surfaces: the invitation card, the Let's Talk card, empty states and shortcuts.
-- Rows sit on white with hairline separators; no nested cards.
-- Shadow only on the primary button, the floating tab bar, sheets and paper previews.
+**Type and spacing:**
+- Figtree.
+- Large title 32–38/800, sections 23/780, row titles 16/600, meta 14.4/500.
+- 28px between sections; rows 56px.
+
+**Controls:**
+- 54px pill primary buttons, with an inner highlight and a soft colored shadow.
+- Neutral secondary buttons, with near-black text.
+- Fields have a visible edge and a green focus ring.
+- iOS segmented control.
+- Press feedback scales controls down slightly.
+- Checks and the highlight toggle fill with a small spring.
 
 **Navigation:**
-- **Phone:** a floating translucent tab bar with the two destinations (Today, Family Meeting).
-- **Desktop:** the same two tabs as a segmented control in the header, with content on a centered white canvas over the soft neutral.
+- A compact floating tab bar with bold icons. The active tab is green icon and label on a gray capsule; inactive tabs are near-black.
+- Desktop: the same tabs in the header, with content on a white canvas over gray.
 
-**States and motion:**
-- Selection and completion fill with a small spring (respecting reduced motion).
-- Press feedback scales controls down slightly.
-- Expanded rows fade in.
-- Checks fill with the person's color.
-- Cleaning keeps the companion's own rounded-square box and pen tick (owner decision), with a soft sage fill when done.
+**Shortcuts:** a grouped list (icon square, title, detail line, chevron) instead of three equal pale tiles.
 
-**Icons (`Art`, in `src/components/v16/shared.tsx`):**
-- 16 line glyphs drawn on the same 24px grid, stroke and round caps as the app's interface icons (`ui.tsx`), so the set reads as one family.
-- Each sits on a soft tile from the calendar palette, matched to the kind of thing: activities and school on sky and butter, family and home on sage, food and care on blush, conversation and music on lilac.
-- The soft-color hand-drawn illustrations are **not** used in the app. They belong to the printables.
-- Cleaning lists stay text-only with the companion's own checkboxes.
+**Status:** strong colored words with a dot, never badges.
 
 ## 3. Preserved
 
