@@ -10,6 +10,19 @@ import type { ChecklistPage } from '../lib/checklist-pages';
 import { routes } from '../routes';
 import { BRAND_NAME } from '../config';
 
+import art0 from '../../assets/icons/ofc/february/laundry-hamper.webp';
+import art1 from '../../assets/icons/ofc/february/washing-machine.webp';
+import art2 from '../../assets/icons/ofc/february/laundry-basket.webp';
+import art3 from '../../assets/icons/ofc/february/sorting-clothes.webp';
+import art4 from '../../assets/icons/ofc/february/loading-washer.webp';
+import art5 from '../../assets/icons/ofc/february/transfering-clothes.webp';
+import art6 from '../../assets/icons/ofc/february/folding-clothes.webp';
+import art7 from '../../assets/icons/ofc/february/putting-clothes-away.webp';
+import art8 from '../../assets/icons/ofc/february/folded-shirt.webp';
+import art9 from '../../assets/icons/ofc/february/dresser.webp';
+import art10 from '../../assets/icons/ofc/february/checking-care-label.webp';
+
+const art = [art0.src, art1.src, art2.src, art3.src, art4.src, art5.src, art6.src, art7.src, art8.src, art9.src, art10.src];
 const pages: ChecklistPage[] = [
   {
     sections: [
@@ -105,17 +118,18 @@ const jsonLd = [
   width="full"
   jsonLd={jsonLd}
 >
-  <section aria-labelledby="ls-h" class="bg-cream public-panel public-intro">
+  <section aria-labelledby="ls-h" class="ls-intro">
     <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-      <p class="label text-warm-soft">Free laundry system</p>
-      <h1 id="ls-h" class="serif-hero mt-3">Laundry That Moves, Not Piles Up.</h1>
-      <p class="lede mt-4 max-w-2xl text-warm-ink">
-        Set up three stations once, then follow five steps from basket to drawer, with a named owner for the whole cycle and everyone putting away their own pile. Tick it off,
-        change anything to fit your house, then download both pages to hang by the washer. What you change stays saved in this browser.
+      <p class="ls-eyebrow">FREE FAMILY PRINTABLE</p>
+      <h1 id="ls-h" class="ls-title">Laundry That Moves, Not Piles Up.</h1>
+      <p class="ls-description">
+        Five simple steps from basket to drawer. Give everyone a part, customize the checklist, and hang it by the washer.
       </p>
     </div>
   </section>
 
+  <div class="ls-design" data-ls-art={JSON.stringify(art)}>
+  <p class="ls-edit-note">Tap a checklist line to make it yours. Changes are saved in this browser.</p>
   <ChecklistPages title="Laundry System" pages={pages} storageKey="omc:laundry-system:v1" filename="laundry-system">
     <p slot="footnote" class="ck-footnote">
       More free tools: the <a href={routes.choreChart} class="text-link">Chore Chart by Age</a>, the
@@ -123,4 +137,42 @@ const jsonLd = [
       {' '}<a href={routes.calendar} data-cta="laundry-system" class="text-link">Family Wall Calendar</a>
     </p>
   </ChecklistPages>
+  </div>
 </PublicLayout>
+<style is:global>
+.ls-intro{background:#fff;text-align:center;color:#3F3B39}.ls-eyebrow{font:700 10px Montserrat,sans-serif;letter-spacing:.2em;color:#3F6B5A}.ls-title{font:400 clamp(2rem,4vw,3rem)/1.15 Georgia,serif;margin:12px 0}.ls-description{font:500 15px/1.75 Montserrat,sans-serif;max-width:660px;margin:0 auto}
+.ls-design{background:#F4F3F0;color:#3F3B39;font-family:Montserrat,Arial,sans-serif}.ls-edit-note{text-align:center;font-size:13px;padding:20px 12px 0;margin:0;color:#6E6461}
+.ls-design .ck-container{--ck-ink:#3F3B39;--ck-soft:#6E6461;--ck-rule:#E4DDD6;--ck-rose:#3F6B5A;--ck-rose-deep:#3F6B5A;--ck-rose-wash:#EEF4F1;--ck-sage:#E4DDD6;--ck-sage-wash:#EEF4F1;background:transparent;padding-top:18px}
+.ls-design .ck-btn{border-color:#3F6B5A;color:#3F6B5A;letter-spacing:0;text-transform:none;font-size:13px;border-radius:5px}.ls-design .ck-btn-primary{background:#3F6B5A;color:white}.ls-design .ck-btn-primary:hover{background:#315344}
+.ls-design .ck-page{box-sizing:border-box;background:white;border:0;border-radius:0;box-shadow:0 8px 30px #3F3B3918;padding:38px 48px 32px;font-family:Montserrat,Arial,sans-serif;display:flex;flex-direction:column;color:#3F3B39;height:1056px;min-height:1056px}
+.ls-design .ck-head{border:0;padding-bottom:15px;margin:0 0 10px;text-align:center}.ls-design .ck-kicker{font-size:10px;color:#3F6B5A;font-weight:700;letter-spacing:.2em}.ls-design .ck-kicker::before{content:'OUR FAMILY RHYTHM · '}.ls-design .ck-title{font:700 39px/1.15 Montserrat,Arial,sans-serif;letter-spacing:-.04em;margin:8px 0}.ls-design .ck-head::after{content:'From basket to drawer, everyone has a part.';font:italic 15px Georgia,serif;color:#6E6461}
+.ls-design .ck-section{padding-top:10px}.ls-design .ck-section+.ck-section{margin-top:10px;border-color:#E4DDD6}.ls-design .ck-section-title{font:700 20px/1.25 Montserrat,Arial,sans-serif;margin:0 0 8px;color:#3F3B39}
+.ls-design .ck-group{border:0;border-radius:0;background:transparent;padding:4px 0 8px;margin:0 0 5px;display:grid;grid-template-columns:51px minmax(0,1fr);column-gap:13px;align-items:start;border-bottom:1px solid #E4DDD6}.ls-design .ck-group:last-child{border-bottom:0}.ls-design .ck-group-title{grid-column:2;grid-row:1;display:flex;align-items:center;gap:6px;background:transparent;color:#3F3B39;padding:0;margin:0 0 4px;font:700 14px/1.3 Montserrat,Arial,sans-serif;letter-spacing:0;text-transform:none}.ls-design .ck-step{background:#EEF4F1;color:#3F6B5A;width:19px;height:19px;margin:0;font-size:10px}.ls-design .ls-art{grid-column:1;grid-row:1 / span 2;width:51px;height:51px;object-fit:contain;align-self:center}.ls-design .ck-items{grid-column:2;grid-row:2;gap:1px 14px}.ls-design .ck-item{min-height:24px;gap:7px}.ls-design .ck-item input[type=checkbox]{width:15px;height:15px;accent-color:#3F6B5A}.ls-design .ck-item input[type=text]{font:500 11.5px/1.3 Montserrat,Arial,sans-serif;height:24px;padding:0;border-bottom:1px solid #E4DDD6}.ls-design .ck-item input[type=text]:focus{background:#EEF4F1;border-color:#3F6B5A}.ls-design .ck-page::after{content:'ORGANIZED MOM COLLECTIVE  ·  organizedmomcollective.com';font:600 9px/1.5 Montserrat,Arial,sans-serif;letter-spacing:.09em;text-align:center;color:#6E6461;margin-top:auto;padding-top:12px}.ls-design .omc-illustration-choice{display:none}.ls-design .omc-color-task-icon{display:none!important}
+.ls-design .ck-container:not(.ck-exporting) .ls-stage{position:relative;width:calc(816px * var(--ls-scale,1));height:calc(1056px * var(--ls-scale,1));margin:auto}.ls-design .ck-container:not(.ck-exporting) .ls-stage .ck-page{position:absolute;inset:0;width:816px;max-width:none;height:1056px;min-height:1056px;transform:scale(var(--ls-scale,1));transform-origin:top left}
+.ls-design .ls-edit{flex:0 0 15px;width:15px;height:24px;padding:0;border:0;background:transparent;color:#3F6B5A;cursor:pointer;display:grid;place-items:center}.ls-design .ls-edit svg{width:12px;height:12px}.ls-design .ck-exporting .ls-edit{display:none!important}
+@media(max-width:768px){.ls-design .ck-container:not(.ck-exporting) .ck-page{padding:38px 48px 32px}.ls-design .ck-container:not(.ck-exporting) .ck-title{font-size:39px}.ls-design .ck-container:not(.ck-exporting) .ck-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.ls-design .ck-container:not(.ck-exporting) .ck-item{min-height:24px}.ls-design .ck-container:not(.ck-exporting) .ck-item input[type=checkbox]{width:15px;height:15px}.ls-design .ck-container:not(.ck-exporting) .ck-item input[type=text]{height:24px;font-size:11.5px}.ls-design .ck-container{padding-left:10px;padding-right:10px}}
+@media print{.ls-design .ls-edit{display:none!important}}
+</style>
+<script>
+  const host = document.querySelector<HTMLElement>('.ls-design');
+  if (host) {
+    const artwork: string[] = JSON.parse(host.dataset.lsArt || '[]');
+    host.querySelectorAll<HTMLElement>('.ck-group').forEach((group,i) => {
+      if (!artwork[i]) return;
+      const img = document.createElement('img');
+      img.className = 'ls-art'; img.src = artwork[i]; img.alt = ''; img.width = 51; img.height = 51;
+      group.prepend(img);
+    });
+    host.querySelectorAll<HTMLInputElement>('.ck-item input[type=text]').forEach(input => {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'ls-edit'; button.title = 'Click to edit'; button.setAttribute('aria-label','Edit '+(input.getAttribute('aria-label') || 'checklist item'));
+      button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="m14 5 5 5M4 20l4-1 12-12a2.8 2.8 0 0 0-4-4L4 15z"/></svg>';
+      button.addEventListener('click',()=>input.focus()); input.after(button);
+    });
+    host.querySelectorAll<HTMLElement>('.ck-page-wrap').forEach(wrap => {
+      const page = wrap.querySelector<HTMLElement>('.ck-page'); if(!page) return;
+      const stage = document.createElement('div'); stage.className='ls-stage'; page.before(stage); stage.append(page);
+      const fit = () => { if(!host.querySelector('.ck-exporting')) stage.style.setProperty('--ls-scale',String(Math.min(1,wrap.clientWidth/816))); };
+      fit(); if(typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(wrap); window.addEventListener('resize',fit);
+    });
+  }
+</script>
