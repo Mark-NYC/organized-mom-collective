@@ -60,6 +60,8 @@ export interface Part {
   agreedSignature?: string;
   /** It was agreed once and then changed: needs agreeing again. */
   changedSinceAgreed?: boolean;
+  /** The durable commitment as last agreed. Edits in a meeting never touch it until "We agree" again. */
+  agreedCopy?: Pick<Part, 'ownerId' | 'title' | 'finishLine' | 'offsetDays' | 'weekday'>;
   /** Saved here but not yet shared with the other adult's phone (offline). */
   pending?: boolean;
   /** Trackable prep only: done for this week's occurrence. */
@@ -142,7 +144,8 @@ export function partReducer(parts: Part[], a: PartAction, online: boolean): Part
         return p.status === 'agreed' ? p : { ...p, status: 'kept' };
       case 'agree':
         if (!p.ownerId || !p.title.trim()) return p; // an agreement needs someone and something
-        return { ...p, status: 'agreed', agreedOn: a.today, agreedSignature: signature(p), changedSinceAgreed: false, pending: !online };
+        return { ...p, status: 'agreed', agreedOn: a.today, agreedSignature: signature(p), changedSinceAgreed: false, pending: !online,
+          agreedCopy: { ownerId: p.ownerId, title: p.title, finishLine: p.finishLine, offsetDays: p.offsetDays, weekday: p.weekday } };
       case 'skip':
         return { ...p, status: 'skipped' };
       case 'unskip':
@@ -159,6 +162,29 @@ export function partReducer(parts: Part[], a: PartAction, online: boolean): Part
         // Only an agreed, trackable preparation has a done state.
         return p.status === 'agreed' && p.eventLink ? { ...p, done: !p.done } : p;
     }
+  });
+}
+
+/**
+ * The durable family commitment for a part, or null. Keep and edits are meeting discussion only: while an agreement is
+ * being changed, everything outside the meeting (Today, Plans, paper, practice) still shows what was last agreed.
+ */
+export function durable(p: Part): Part | null {
+  if (p.status === 'agreed') return p;
+  if (p.changedSinceAgreed && p.agreedCopy) return { ...p, ...p.agreedCopy, status: 'agreed', changedSinceAgreed: false };
+  return null;
+}
+export const agreedParts = (s: Pick<V16State, 'parts'>) => s.parts.map(durable).filter((p): p is Part => Boolean(p));
+
+/**
+ * The meeting (or check-in) ends: discussion state is dropped. "Kept" goes back to a plain suggestion, and an agreement
+ * that was changed but never re-agreed stays exactly as last agreed. Nothing here is a durable record.
+ */
+export function endDiscussion(parts: Part[]): Part[] {
+  return parts.map((p) => {
+    if (p.changedSinceAgreed) return durable(p)!;
+    if (p.status === 'kept') return { ...p, status: 'suggested' };
+    return p;
   });
 }
 
@@ -265,7 +291,7 @@ export interface PracticeQuestion {
   title: string;
   text: string;
   /** Each choice is one explicit family decision, validated by the real engine rule. */
-  choices: { label: string; decision: DevelopmentDecision; stage?: MawlStage; primary?: boolean }[];
+  choices: { label: string; decision: DevelopmentDecision; stage?: MawlStage; primary?: boolean; more?: boolean }[];
 }
 
 const recordFor = (s: V16State, memberId: string, skill: string) =>
@@ -274,18 +300,18 @@ const recordFor = (s: V16State, memberId: string, skill: string) =>
 /** One natural question per child, only about a responsibility the family has AGREED to. Owned skills are not asked. */
 export function practiceQuestions(s: V16State, names: Record<string, string>, kids: Set<string>): PracticeQuestion[] {
   const out: PracticeQuestion[] = [];
-  for (const p of s.parts) {
-    if (p.status !== 'agreed' || !p.skill || !p.ownerId || !kids.has(p.ownerId)) continue;
+  for (const p of agreedParts(s)) {
+    if (!p.skill || !p.ownerId || !kids.has(p.ownerId)) continue;
     if (out.some((q) => q.memberId === p.ownerId)) continue; // one per child
     const name = names[p.ownerId];
     const r = recordFor(s, p.ownerId, p.skill);
     const t = `“${p.title}”`;
     if (!r) {
       out.push({ memberId: p.ownerId, partId: p.id, skill: p.skill, title: p.title, text: `How much help will ${name} need with ${t} at first?`, choices: [
-        { label: `Show ${name} how first`, decision: 'start', stage: 'model' },
-        { label: 'We’ll do it together', decision: 'start', stage: 'assist', primary: true },
-        { label: `${name} can mostly do it`, decision: 'start', stage: 'watch' },
-        { label: `${name} already owns it`, decision: 'start', stage: 'launch' },
+        { label: 'Do it together', decision: 'start', stage: 'assist', primary: true },
+        { label: `${name} mostly can`, decision: 'start', stage: 'watch' },
+        { label: `Show ${name} how first`, decision: 'start', stage: 'model', more: true },
+        { label: `${name} already owns it`, decision: 'start', stage: 'launch', more: true },
       ] });
       continue;
     }
@@ -375,7 +401,8 @@ export function seed(scenario: Scenario, opts: { club: boolean; adults: Adults; 
 
   // Week four: three weeks ago the family agreed these. They stay in force; nobody re-confirms them.
   const agreedOn = W(monday, -20);
-  const agreed = (p: Part): Part => ({ ...p, status: 'agreed', agreedOn, agreedSignature: signature(p) });
+  const agreed = (p: Part): Part => ({ ...p, status: 'agreed', agreedOn, agreedSignature: signature(p),
+    agreedCopy: { ownerId: p.ownerId, title: p.title, finishLine: p.finishLine, offsetDays: p.offsetDays, weekday: p.weekday } });
   const trash: Part = {
     id: 'p-trash', origin: 'prepared', title: 'Take out trash and recycling', ownerId: adultOwner, finishLine: 'Bins at the curb and new bags in',
     weekday: 2, status: 'suggested',

@@ -20,8 +20,8 @@ billing, RLS or Club-entitlement change.
 | `src/lib/v16/model.ts` | Every rule as pure functions (state honesty, invalidation, prep follows event, privacy, cleaning moves) |
 | `src/lib/v16/demo.ts` | The fictional household and its calendar |
 | `src/styles/v16.css` | Layout and rhythm only, on existing `--of-*` tokens |
-| `tests/v16-model.test.ts` | 23 unit tests |
-| `scripts/e2e/v16-preview.mjs` | 76-check click-through + screenshots → `docs/ios/screenshots/v16/` |
+| `tests/v16-model.test.ts` | 28 unit tests |
+| `scripts/e2e/v16-preview.mjs` | 82-check click-through + screenshots → `docs/ios/screenshots/v16/` |
 
 ## Reused (real code, not copies)
 
@@ -46,13 +46,19 @@ billing, RLS or Club-entitlement change.
 | Cleaning checks | **Separate demo keys** shaped like the real ones, so the preview can't overwrite a reviewer's real progress |
 | Wall calendars | **HTML schematics** of the two printed layouts (zones as printed), not the print files |
 
-## Scenario trace (all pass: 76/76 browser checks, 23 unit tests)
+## Scenario trace (all pass: 82/82 browser checks, 28 unit tests)
 
 1. **First meeting, start to finish:** Our Focus → Let's Talk → Everyone's Part → Let's Practice → "We have a plan" → Today.
 2. **Thursday soccer → Wednesday "Pack soccer bag"**, labeled Suggested on Today and in Plans, with "Why this?".
 3. **In-place edit** of owner, task, finish line and day, on the same step. Done editing ≠ agreement.
 4. **Explicit agreement:** Keep → "Kept for discussion"; only *We agree* agrees. Editing an agreement → "Changed · agree again".
-5. **On Today:** the agreement sits under Soccer practice in Sofia's purple, on Wednesday, with one checkbox.
+   **Keep is meeting discussion only** (owner decision 2026-11-25): it is never a durable record. When the meeting or check-in
+   ends, kept proposals return to plain suggestions, and an agreement that was changed but not re-agreed stays exactly as
+   last agreed. While it is being discussed, Today, Plans, paper and practice keep showing the durable agreement
+   (`durable()` / `endDiscussion()` in model.ts). **No migration is needed.**
+5. **On Today:** a highlighted activity shows its agreed preparation nested beneath it (Sofia's purple, Wednesday, one checkbox).
+   **Agreeing to prepare never highlights the activity** (owner decision 2026-11-25): preparation for an activity that is
+   not a priority appears under Everyone's part, below a line naming its activity and day.
 6. **One cleaning state:** Mateo's agreed part on Today checks the same Entry/Bathroom task the Cleaning screen shows (and vice versa). Daily Reset count matches.
 7. **Wed → Sat move:** the same session (same checks) moves for this week; next week is back on Wednesday; moving back keeps the checks.
 8. **Week four:** three earlier agreements stay in force, no re-approval; last meeting's focus carries over, labeled.
@@ -68,14 +74,41 @@ Also covered: privacy (Luis's private calendar never shown; Ana's marked private
 1. **Fictional family, not the mockup's names.** The mockup used Mark/Meg/Philip/Andrew. The contract requires a fictional household, so this uses the Riveras. That also proves nothing is hardcoded to "Andrew".
 2. **The existing look wins over mockup pixels:** Georgia titles, uppercase `.of-btn`, rounded-square avatars. The mockup shows sans titles, pill buttons and round avatars.
 3. **Before the first meeting, Today says "Coming up"** under What matters. The mockup implies soccer was already a priority; the contract forbids automatic highlighting.
-4. **Agreeing to an event's preparation puts that event on Today**, so the field-trip lunch shows under its activity. The family's explicit decision triggers it, not curation.
+4. ~~Agreeing to prepare put the event in What matters.~~ Reversed by the owner: priorities need their own decision. The field-trip lunch now shows under Everyone's part, beneath its activity.
 5. **Our Focus lists one-off events first.** A repeating activity joins them only when it has preparation this week (soccer); the rest go under "Our usual week".
 6. **Resources is the third shortcut** next to Plans and Cleaning (the contract adds it; the mockup shows two).
 7. Older `TWO_TAB_REDESIGN.md` puts the development check-in in Everyone's Part. V16 puts it in Let's Practice, per the contract.
 
+## Visual audit against the 12 V16 screenshots (2026-11-25)
+
+Fixed in this pass:
+- Our Focus: text "Highlight" pills → a quiet round toggle (filled with the month accent), matching the reference's check circle. The meta line no longer wraps "every week" onto its own line.
+- Let's Practice: four stacked answers → one question with two equal answers, as in the reference ("Do it together" / "Sofia mostly can", or "Let's try" / "Keep helping"). The other two answers sit behind "Other answers".
+- Cleaning: the native square checkbox for moving the session → the app's round check. "View day" sits inline, label left and picker right, as in the reference. This/next week is a segmented control.
+- Disclosure chevrons point down and flip up, instead of rotating sideways.
+- Weekly paper: zone labels wrap inside their day box instead of colliding. Times read "4pm".
+- "Done means" is a two-line field, so long finish lines are never clipped.
+- Editing an agreement that's already in place no longer jumps it to another list and closes the editor.
+
+| Reference | Matches | Intentional difference (contract §1–2) |
+| --- | --- | --- |
+| Today, first week | Greeting, sage invitation, What matters with nested prep labeled Suggested, empty Everyone's part, shortcuts | Titles in Georgia (reference: sans). Avatars are the app's rounded squares, **in each person's color** (reference: the same sage for everyone). A third shortcut, Resources (contract §4.5). |
+| Our week | Day groups, prep on its own day, Done | Adds Week/Month/Agenda, Add event and connected calendars (contract §7). Source pills on imported events. |
+| Cleaning (default / Rhythm) | Sage session card with move control, View day, Daily Reset, the Rhythm panel's options | Shows the full zone task lists and weekend zones (the reference showed a subset; contract §8: never delete). No sliders icon: the app's icon set has none. |
+| Our Focus | Rows with day and time plus a right-hand toggle, "Choose a few", Back/Continue, Come back later | Member color dots and source pills; the "Our usual week" disclosure; a few-words priority. |
+| Let's Talk | Month card, one question, idea row (person + words), Add their idea | The real month's content (November: Owning a complete responsibility), not "Our Family, Our Team". |
+| Everyone's Part (collapsed / expanded / edit) | Context eyebrow, title, "Name · Day", chevron; Done means; Keep/Change/Skip; editor fields; Done editing; See other suggestions / Show fewer | A status pill on every row (Suggested / Kept / Agreed) and a member-color avatar. An explicit **We agree** button, which the reference lacked (contract §5.3). A When field. |
+| Let's Practice | Sage question card, two equal answers, "Put it on the wall" with a format picker, three radios, kids note, Finish meeting | Faithful layouts of **both** printed formats, not the reference's name list. The Club month's practice activity. "Nothing to practice this time". |
+| Week four Today | "A good week starts here", check-in card, What matters, Everyone's part | Adds Luis's trash agreement and the next meeting from the real calendar event. |
+| Anything new this week? | Still working card, New · Friday, field trip, Keep/Change/Skip, readiness question with two answers, Finish check-in, Full Family Meeting | Imported-event details, a member-color avatar on each row, and an explicit We agree. |
+
+Global: the UI buttons keep the app's uppercase tracked style (`.of-btn`), where the reference has sentence-case black pills.
+The bottom tab bar, the header wordmark and the profile button follow `AppTabBar.astro` and `Nav.astro`. A striped preview bar
+sits on top; it isn't part of the app.
+
 ## Gaps before connecting to production
 
-- Wire the mocked stores to the real ones (agreements + `agreedSignature` semantics, event-tasks for trackable prep, priorities, development `decide` RPC). **Keep → We agree as two states needs a field the agreement store doesn't have yet.** That's a migration decision for the owner.
+- Wire the mocked stores to the real ones (agreements, event-tasks for trackable prep, priorities, development `decide` RPC). Keep stays in the meeting's own state on the device, so no migration is needed for it.
 - Real Google/iCal: feed toggles → existing visibility RPCs; moved/cancelled from real refreshes.
 - Meeting progress is per-device today (`meeting-progress.ts`); V16's resume is the same.
 - Two-device sync and conflict UI weren't exercised (needs the e2e backend).

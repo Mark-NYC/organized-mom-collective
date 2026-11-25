@@ -8,7 +8,7 @@ import { STAGE_SHORT } from '../src/lib/family-development/language';
 import { buildFamilyMeeting } from '../src/lib/club/family-meeting';
 import { ANA, LUIS, MATEO, SOFIA, colorsFor, demoHousehold, demoProfile } from '../src/lib/v16/demo';
 import {
-  MAX_PER_WEEK, addNotePriority, currentPriorities, decide, eventsFor, missingReason, mondayOf, moveSession, partDate, partReducer, practiceQuestions,
+  MAX_PER_WEEK, addNotePriority, agreedParts, durable, endDiscussion, currentPriorities, decide, eventsFor, missingReason, mondayOf, moveSession, partDate, partReducer, practiceQuestions,
   seed, sessionDay, sessionsOn, sharedOccurrences, statusLabel, togglePriority, weekOccurrences, type V16State,
 } from '../src/lib/v16/model';
 
@@ -70,6 +70,36 @@ describe('first week: suggestions are not agreements', () => {
   it('offline agreements are marked as waiting to share, not silently synced', () => {
     const s = apply({ ...first(), online: false }, { type: 'agree', id: 'p-soccer-bag', today: TODAY });
     expect(statusLabel(part(s, 'p-soccer-bag'))).toBe('Agreed · waiting to share');
+  });
+});
+
+describe('Keep is meeting discussion only; We agree is the durable commitment', () => {
+  it('kept proposals go back to plain suggestions when the meeting ends (nothing persisted as Keep)', () => {
+    const s = apply(first(), { type: 'keep', id: 'p-soccer-bag' });
+    expect(durable(part(s, 'p-soccer-bag'))).toBeNull();
+    expect(endDiscussion(s.parts).find((p) => p.id === 'p-soccer-bag')!.status).toBe('suggested');
+  });
+  it('while an agreement is being changed, everything outside the meeting still shows what was agreed', () => {
+    let s = week4();
+    s = apply(s, { type: 'edit', id: 'p-entry', patch: { ownerId: SOFIA, title: 'Hang up coats' } });
+    expect(part(s, 'p-entry').status).toBe('kept');
+    const d = agreedParts(s).find((p) => p.id === 'p-entry')!;
+    expect([d.ownerId, d.title]).toEqual([MATEO, 'Put shoes and bags away']);
+  });
+  it('a changed agreement that is never re-agreed stays exactly as last agreed after the meeting', () => {
+    const s = apply(week4(), { type: 'edit', id: 'p-entry', patch: { ownerId: SOFIA } });
+    const after = endDiscussion(s.parts).find((p) => p.id === 'p-entry')!;
+    expect(after).toMatchObject({ status: 'agreed', ownerId: MATEO, changedSinceAgreed: false });
+  });
+  it('re-agreeing makes the change the new durable commitment', () => {
+    let s = apply(week4(), { type: 'edit', id: 'p-entry', patch: { ownerId: SOFIA } });
+    s = apply(s, { type: 'agree', id: 'p-entry', today: TODAY });
+    expect(endDiscussion(s.parts).find((p) => p.id === 'p-entry')!.ownerId).toBe(SOFIA);
+  });
+  it('agreeing to prepare for an event never adds a priority', () => {
+    const s = apply(apply(week4(), { type: 'keep', id: 'p-lunch' }), { type: 'agree', id: 'p-lunch', today: TODAY });
+    expect(currentPriorities(s).some((p) => p.eventLink === 'fieldtrip@lincoln')).toBe(false);
+    expect(s.priorities).toEqual(week4().priorities);
   });
 });
 

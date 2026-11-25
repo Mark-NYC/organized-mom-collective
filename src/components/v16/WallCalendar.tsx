@@ -7,10 +7,11 @@
  * The preview writes only agreed parts and chosen priorities, in each person's own marker color. Nothing to check off.
  */
 import { weekend, weeklySchedule } from '../../data/cleaning';
-import { addDays, timeLabel } from '../../lib/calendar/recurrence';
-import { currentPriorities, occurrenceOf, partDate, type Part } from '../../lib/v16/model';
+import { addDays } from '../../lib/calendar/recurrence';
+import { agreedParts, currentPriorities, occurrenceOf, partDate, type Part } from '../../lib/v16/model';
 import type { Ctx } from './shared';
 
+const startTime = (t?: string | null) => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}${m ? `:${String(m).padStart(2, '0')}` : ''}${h >= 12 ? 'pm' : 'am'}`; };
 const DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const zoneFor = (i: number) => (i < 4 ? weeklySchedule[i].zone : weekend.days[i - 4].zone);
 
@@ -20,12 +21,12 @@ function Hand({ ctx, who, text }: { ctx: Ctx; who: string | null; text: string }
 
 export default function WallCalendar({ ctx }: { ctx: Ctx }) {
   const { format, plan } = ctx.s.wall;
-  const agreed = ctx.s.parts.filter((p) => p.status === 'agreed');
+  const agreed = agreedParts(ctx.s);
   // Weekly page: what goes in ink is preparation for an activity and the chosen priorities; cleaning is pre-printed.
   const weeklyItems = (date: string) => [
     ...currentPriorities(ctx.s).flatMap((p) => {
       const o = p.eventLink ? occurrenceOf(ctx.s, ctx.monday, p.eventLink) : null;
-      return o && o.date === date ? [{ key: p.id, who: null, text: `${o.event.title} ${timeLabel(o.event).replace(/–.*/, '')}` }] : [];
+      return o && o.date === date ? [{ key: p.id, who: null, text: `${o.event.title} ${startTime(o.event.start_time)}`.trim() }] : [];
     }),
     ...agreed.filter((p) => p.eventLink && partDate(ctx.s, ctx.monday, p) === date).map((p) => ({ key: p.id, who: p.ownerId, text: p.title })),
   ];

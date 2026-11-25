@@ -7,12 +7,12 @@
 import { useMemo, useState } from 'react';
 import { coachLine } from '../../lib/family-development/language';
 import {
-  MAX_PER_WEEK, SHOWN, addNotePriority, currentPriorities, dayName, decide, isReadOnly, linkOf, occurrenceOf, priorityCount, practiceQuestions,
+  MAX_PER_WEEK, SHOWN, agreedParts, endDiscussion, addNotePriority, currentPriorities, dayName, decide, isReadOnly, linkOf, occurrenceOf, priorityCount, practiceQuestions,
   sharedOccurrences, togglePriority, type MeetingStep, type Part, type PracticeQuestion,
 } from '../../lib/v16/model';
 import { timeLabel, type Occurrence } from '../../lib/calendar/recurrence';
 import { PartRow } from './Parts';
-import { Arrow, Down, Person, fmtDate, type Ctx } from './shared';
+import { Arrow, CheckMark, Down, Person, fmtDate, type Ctx } from './shared';
 import WallCalendar from './WallCalendar';
 
 export const STEPS = ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'] as const;
@@ -75,13 +75,14 @@ function FocusRow({ ctx, o, full }: { ctx: Ctx; o: Occurrence; full: boolean }) 
     <div className="v16-row" data-focus-event={o.event.title}>
       <span className="v16-row-main">
         <span className="v16-row-title block">{o.event.title}</span>
-        <span className="v16-meta flex flex-wrap items-center gap-2">{dayName(o.date)} · {timeLabel(o.event)} <Members ctx={ctx} ids={o.event.member_ids} />
-          {o.event.recurrence && <span>· Every week</span>}
+        <span className="v16-meta flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span>{dayName(o.date)} · {timeLabel(o.event)}{o.event.recurrence ? ' · every week' : ''}</span>
+          <Members ctx={ctx} ids={o.event.member_ids} />
           {isReadOnly(o.event) && <span className="v16-pill v16-pill--ro">{o.event.external!.name}</span>}</span>
       </span>
       <button type="button" className="v16-toggle" aria-pressed={on} disabled={!on && full} onClick={() => ctx.set((s) => ({ ...s, priorities: togglePriority(s, link) }))}
         aria-label={`${on ? 'Remove' : 'Highlight'} ${o.event.title}`} data-highlight>
-        {on ? 'Highlighted' : 'Highlight'}
+        <span aria-hidden="true" className="v16-toggle-dot">{on && <CheckMark />}</span>
       </button>
     </div>
   );
@@ -205,7 +206,8 @@ export function EveryonesPartList({ ctx, parts, startOpen }: { ctx: Ctx; parts: 
 
 function EveryonesPart({ ctx }: { ctx: Ctx }) {
   const [more, setMore] = useState(false);
-  const inForce = ctx.s.parts.filter((p) => p.status === 'agreed' && p.agreedOn && p.agreedOn < ctx.monday);
+  // Agreed before this week: stays in this list while being discussed or changed, so an open editor never jumps away.
+  const inForce = ctx.s.parts.filter((p) => p.agreedCopy && p.agreedOn && p.agreedOn < ctx.monday && p.status !== 'skipped');
   const open = ctx.s.parts.filter((p) => !inForce.includes(p) && p.status !== 'skipped').sort((a, b) => ORDER(a) - ORDER(b));
   const skipped = ctx.s.parts.filter((p) => p.status === 'skipped');
   const ideas = open.filter((p) => p.origin === 'idea');
@@ -249,6 +251,7 @@ function EveryonesPart({ ctx }: { ctx: Ctx }) {
 export function Readiness({ ctx, compact = false }: { ctx: Ctx; compact?: boolean }) {
   const questions = useMemo(() => practiceQuestions(ctx.s, ctx.names, ctx.kids), [ctx.s, ctx.names, ctx.kids]);
   const [who, setWho] = useState<string | null>(null);
+  const [others, setOthers] = useState(false);
   const answered = ctx.s.practice.memberId && ctx.s.practice.outcome;
   const q: PracticeQuestion | undefined = questions.find((x) => x.memberId === who) ?? questions[0];
   if (ctx.s.practice.nothing) {
@@ -264,7 +267,7 @@ export function Readiness({ ctx, compact = false }: { ctx: Ctx; compact?: boolea
     );
   }
   if (!q) {
-    return <p className="v16-meta" data-practice-empty>{ctx.s.parts.some((p) => p.status === 'agreed') ? 'Everyone’s agreed parts are already theirs. Nothing to practice right now.' : 'Agree on a part in Everyone’s Part first; practice grows from what the family agreed.'}</p>;
+    return <p className="v16-meta" data-practice-empty>{agreedParts(ctx.s).length > 0 ? 'Everyone’s agreed parts are already theirs. Nothing to practice right now.' : 'Agree on a part in Everyone’s Part first; practice grows from what the family agreed.'}</p>;
   }
   const choose = (c: PracticeQuestion['choices'][number]) => ctx.set((s) => {
     const records = decide(s, q, c, ctx.today);
@@ -276,12 +279,13 @@ export function Readiness({ ctx, compact = false }: { ctx: Ctx; compact?: boolea
     <div className={compact ? '' : 'v16-card'} data-practice-question={q.memberId}>
       <div className="flex items-start gap-3">
         <Person ctx={ctx} id={q.memberId} size="md" />
-        <p className={compact ? 'text-[1.02rem] font-medium' : 'v16-card-title'}>{q.text}</p>
+        <p className={compact ? 'text-[1.02rem] font-medium' : 'text-[1.08rem] font-medium leading-snug'}>{q.text}</p>
       </div>
-      <div className="v16-choices">
-        {q.choices.map((c) => <button key={c.label} type="button" className={`v16-choice${c.primary ? ' v16-choice--primary' : ''}`} onClick={() => choose(c)} data-practice-choice={c.decision}>{c.label}</button>)}
+      <div className="v16-choices v16-choices--pair">
+        {q.choices.filter((c) => !c.more || others).map((c) => <button key={c.label} type="button" className={`v16-choice${c.primary ? ' v16-choice--primary' : ''}`} onClick={() => choose(c)} data-practice-choice={c.decision} data-practice-stage-choice={c.stage ? '' : undefined}>{c.label}</button>)}
       </div>
       <div className="mt-2 flex flex-wrap gap-x-4">
+        {q.choices.some((c) => c.more) && !others && <button type="button" className="v16-link" onClick={() => setOthers(true)} data-practice-more>Other answers</button>}
         {questions.length > 1 && <button type="button" className="v16-link" onClick={() => setWho(questions[(questions.indexOf(q) + 1) % questions.length].memberId)} data-practice-other>Someone else</button>}
         <button type="button" className="v16-link" onClick={() => ctx.set((s) => ({ ...s, practice: { nothing: true } }))} data-practice-nothing>Nothing to practice this time</button>
       </div>
@@ -291,7 +295,7 @@ export function Readiness({ ctx, compact = false }: { ctx: Ctx; compact?: boolea
 
 function Practice({ ctx }: { ctx: Ctx }) {
   const finish = () => {
-    ctx.set((s) => ({ ...s, meeting: { ...s.meeting, step: 0, started: false, finishedOn: ctx.today, talkIndex: 0 } }));
+    ctx.set((s) => ({ ...s, parts: endDiscussion(s.parts), meeting: { ...s.meeting, step: 0, started: false, finishedOn: ctx.today, talkIndex: 0 } }));
     ctx.go('plan');
   };
   return (
@@ -314,8 +318,9 @@ function Practice({ ctx }: { ctx: Ctx }) {
 // ------------------------------------------------------------------ Week Four check-in
 
 export function CheckIn({ ctx }: { ctx: Ctx }) {
-  const still = ctx.s.parts.filter((p) => p.status === 'agreed' && p.agreedOn && p.agreedOn < ctx.monday);
-  const fresh = ctx.s.parts.filter((p) => !still.includes(p) && p.eventLink && p.origin === 'prepared');
+  const still = agreedParts(ctx.s).filter((p) => p.agreedOn && p.agreedOn < ctx.monday);
+  const stillIds = new Set(still.map((p) => p.id));
+  const fresh = ctx.s.parts.filter((p) => !stillIds.has(p.id) && p.eventLink && p.origin === 'prepared');
   return (
     <section data-check-in>
       <p className="v16-eyebrow pt-2">Family check-in</p>
@@ -340,7 +345,7 @@ export function CheckIn({ ctx }: { ctx: Ctx }) {
         );
       })}
       <div className="v16-section border-t border-[color:var(--of-rule)] pt-5"><Readiness ctx={ctx} compact /></div>
-      <button type="button" className="of-btn of-btn--block mt-6" onClick={() => { ctx.set((s) => ({ ...s, meeting: { ...s.meeting, checkInDone: true } })); ctx.go('today'); }} data-finish-check-in>Finish check-in</button>
+      <button type="button" className="of-btn of-btn--block mt-6" onClick={() => { ctx.set((s) => ({ ...s, parts: endDiscussion(s.parts), meeting: { ...s.meeting, checkInDone: true } })); ctx.go('today'); }} data-finish-check-in>Finish check-in</button>
       <div className="v16-later"><button type="button" className="v16-link" onClick={() => ctx.go('meeting')} data-full-meeting>Full Family Meeting</button></div>
     </section>
   );
@@ -350,7 +355,7 @@ export function CheckIn({ ctx }: { ctx: Ctx }) {
 
 export function PlanSummary({ ctx }: { ctx: Ctx }) {
   const prios = currentPriorities(ctx.s);
-  const agreed = ctx.s.parts.filter((p) => p.status === 'agreed');
+  const agreed = agreedParts(ctx.s);
   return (
     <section data-plan-summary>
       <p className="v16-eyebrow pt-2">Family Meeting</p>

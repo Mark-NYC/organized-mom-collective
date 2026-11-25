@@ -14,7 +14,7 @@ import { localToday } from '../../lib/calendar/recurrence';
 import { monthTints } from '../../lib/club/month-tints';
 import { Icon } from '../app/ui';
 import { colorsFor, demoHousehold, demoProfile } from '../../lib/v16/demo';
-import { STORAGE_KEY, mondayOf, seed, type Part, type V16State } from '../../lib/v16/model';
+import { STORAGE_KEY, agreedParts, mondayOf, seed, type Part, type V16State } from '../../lib/v16/model';
 import Cleaning from './Cleaning';
 import Meeting, { CheckIn, PlanSummary } from './Meeting';
 import Plans from './Plans';
@@ -173,9 +173,9 @@ function Resources({ ctx }: { ctx: Ctx }) {
       </div>
       <div className="v16-section">
         <h2 className="v16-h3">Who does what</h2>
-        <ul className="v16-rows">{ctx.s.parts.filter((p) => p.status === 'agreed').map((p) => (
+        <ul className="v16-rows">{agreedParts(ctx.s).map((p) => (
           <li key={p.id} className="v16-row"><Person ctx={ctx} id={p.ownerId} /><span className="v16-row-main">{ctx.names[p.ownerId!]} · {p.title}</span></li>
-        ))}{!ctx.s.parts.some((p) => p.status === 'agreed') && <li className="v16-meta py-3">Nothing agreed yet.</li>}</ul>
+        ))}{!agreedParts(ctx.s).length && <li className="v16-meta py-3">Nothing agreed yet.</li>}</ul>
       </div>
       <p className="v16-meta mt-6">In the current app this is <a className="underline" href="/app/family">Family &amp; resources</a> (sharing, setup and the Club’s months).</p>
       <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')}>Back to Today</button>

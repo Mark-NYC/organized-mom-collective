@@ -9,7 +9,7 @@ import { dailyEssentials, weeklySchedule } from '../../data/cleaning';
 import { timeLabel } from '../../lib/calendar/recurrence';
 import { Chevron, Icon } from '../app/ui';
 import {
-  SHOWN, currentPriorities, dailyKey, dayName, missingReason, occurrenceOf, titleOf, partDate, sessionDay, sharedOccurrences, zoneKey, type Part, type Priority,
+  SHOWN, currentPriorities, dailyKey, dayName, agreedParts, durable, missingReason, occurrenceOf, titleOf, partDate, sessionDay, sharedOccurrences, zoneKey, type Part, type Priority,
 } from '../../lib/v16/model';
 import { act } from './Parts';
 import { Check, Person, StatusPill, fmtDate, type Ctx } from './shared';
@@ -22,7 +22,7 @@ function greeting() {
 
 function Invitation({ ctx }: { ctx: Ctx }) {
   const m = ctx.s.meeting;
-  const agreedBefore = ctx.s.parts.filter((p) => p.status === 'agreed' && p.agreedOn && p.agreedOn < ctx.monday).length;
+  const agreedBefore = agreedParts(ctx.s).filter((p) => p.agreedOn && p.agreedOn < ctx.monday).length;
   const newOnes = ctx.s.parts.filter((p) => p.status !== 'agreed' && p.status !== 'skipped' && p.eventLink && p.origin === 'prepared' && occurrenceOf(ctx.s, ctx.monday, p.eventLink)).length;
   if (m.started) {
     return <button type="button" className="v16-card" onClick={() => ctx.go('meeting')} data-invite="continue">
@@ -62,7 +62,8 @@ function PrepRow({ ctx, p }: { ctx: Ctx; p: Part }) {
 function Matter({ ctx, pr }: { ctx: Ctx; pr: Priority }) {
   if (pr.kind === 'note') return <div className="py-3"><p className="v16-meta">This week</p><p className="v16-h3">{pr.text}</p></div>;
   const o = occurrenceOf(ctx.s, ctx.monday, pr.eventLink!);
-  const preps = ctx.s.parts.filter((p) => p.eventLink === pr.eventLink && p.status !== 'skipped' && p.origin !== 'idea');
+  // The durable agreement where there is one (edits in a meeting don't show here until agreed); else the labeled proposal.
+  const preps = ctx.s.parts.filter((p) => p.eventLink === pr.eventLink && p.status !== 'skipped' && p.origin !== 'idea').map((p) => durable(p) ?? p);
   if (!o) {
     const why = missingReason(ctx.s, ctx.monday, pr.eventLink!);
     return <div className="py-3" data-matter-missing={why}><p className="v16-meta">{why === 'cancelled' ? 'Cancelled in its calendar' : why === 'private' ? 'Its calendar is now private' : 'Not on the calendar this week'}</p>
@@ -82,12 +83,16 @@ export default function Today({ ctx }: { ctx: Ctx }) {
   const [all, setAll] = useState(false);
   const prios = currentPriorities(ctx.s);
   const carried = prios.length > 0 && prios[0].from === 'last-meeting';
-  // Before anything is chosen: the week's one-off activities that have prepared preparation, labeled "coming up".
-  const comingUp = prios.length ? [] : sharedOccurrences(ctx.s, ctx.monday)
+  // Before the family's first meeting only: activities with prepared preparation, labeled "coming up", never as priorities.
+  const comingUp = prios.length || ctx.s.meeting.finishedOn || ctx.s.meeting.checkInDone ? [] : sharedOccurrences(ctx.s, ctx.monday)
     .filter((o) => ctx.s.parts.some((p) => p.eventLink === (o.event.external?.uid ?? o.event.id) && p.status !== 'skipped'))
     .filter((o, i, a) => a.findIndex((x) => x.event.id === o.event.id) === i);
-  const standing = ctx.s.parts.filter((p) => p.status === 'agreed' && !p.eventLink);
-  const eventAgreed = ctx.s.parts.filter((p) => p.status === 'agreed' && p.eventLink && !prios.some((pr) => pr.eventLink === p.eventLink));
+  const agreed = agreedParts(ctx.s);
+  const standing = agreed.filter((p) => !p.eventLink);
+  // Agreed preparation for an activity the family did NOT choose as a priority: it's someone's part, shown under its
+  // activity here. Agreeing to prepare never makes the activity a priority; that's a separate family decision.
+  const shownEvents = new Set([...prios.map((pr) => pr.eventLink), ...comingUp.map((o) => o.event.external?.uid ?? o.event.id)]);
+  const eventAgreed = agreed.filter((p) => p.eventLink && !shownEvents.has(p.eventLink) && occurrenceOf(ctx.s, ctx.monday, p.eventLink));
   const meetingOcc = sharedOccurrences(ctx.s, ctx.monday).find((o) => o.event.title === 'Family Meeting' && o.date >= ctx.today);
   const todayWd = new Date(`${ctx.today}T12:00:00Z`).getUTCDay();
   const dailyDone = dailyEssentials.tasks.filter((t) => ctx.s.cleaning.checks[dailyKey(ctx.today, t.id)]).length;
@@ -108,18 +113,23 @@ export default function Today({ ctx }: { ctx: Ctx }) {
         <div className="v16-rows">
           {shown.map((pr) => <Matter key={pr.id} ctx={ctx} pr={pr} />)}
           {comingUp.map((o) => <Matter key={o.event.id} ctx={ctx} pr={{ id: o.event.id, kind: 'event', eventLink: o.event.external?.uid ?? o.event.id, from: 'this-week' }} />)}
-          {eventAgreed.map((p) => {
-            const o = occurrenceOf(ctx.s, ctx.monday, p.eventLink!);
-            return o ? <Matter key={p.id} ctx={ctx} pr={{ id: p.id, kind: 'event', eventLink: p.eventLink, from: 'this-week' }} /> : null;
-          })}
         </div>
         {prios.length > SHOWN && <button type="button" className="v16-link" onClick={() => setAll(!all)} data-more-priorities>{all ? 'Show fewer' : `${prios.length - SHOWN} more`}</button>}
       </div>
 
       <div className="v16-section">
         <h2 className="v16-h2">Everyone’s part</h2>
-        {!standing.length && <p className="v16-meta mt-1">Agreed household responsibilities appear here.</p>}
+        {!standing.length && !eventAgreed.length && <p className="v16-meta mt-1">Agreed household responsibilities appear here.</p>}
         <div className="v16-rows">
+          {eventAgreed.map((p) => {
+            const o = occurrenceOf(ctx.s, ctx.monday, p.eventLink!)!;
+            return (
+              <div key={p.id} className="py-3" data-everyone-event={o.event.title}>
+                <p className="v16-meta">For {o.event.title} · {fmtDate(o.date, { weekday: 'long' })}, {timeLabel(o.event)}</p>
+                <div className="v16-nested mt-1"><PrepRow ctx={ctx} p={p} /></div>
+              </div>
+            );
+          })}
           {standing.map((p) => {
             const date = partDate(ctx.s, ctx.monday, p);
             const ct = p.cleaningTask;

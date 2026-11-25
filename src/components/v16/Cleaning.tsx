@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { dailyEssentials, monthlyDeepClean, weekend, weeklySchedule } from '../../data/cleaning';
 import { addDays, weekday } from '../../lib/calendar/recurrence';
-import { DAY_NAMES, dailyKey, moveSession, sessionDay, sessionsOn, zoneKey, type CleaningMode } from '../../lib/v16/model';
+import { DAY_NAMES, agreedParts, dailyKey, moveSession, sessionDay, sessionsOn, zoneKey, type CleaningMode } from '../../lib/v16/model';
 import { Check, Person, fmtDate, type Ctx } from './shared';
 
 const ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -31,7 +31,7 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
   const movedAway = usual && c.mode === 'printed' && sessionDay(ctx.s, monday, usual.day) !== wd ? sessionDay(ctx.s, monday, usual.day) : null;
   const end = weekend.days.find((d) => d.day === wd);
   const project = monthlyDeepClean.find((m) => m.month === Number(monday.slice(5, 7)) - 1);
-  const owners = (taskId: string) => ctx.s.parts.filter((p) => p.status === 'agreed' && p.cleaningTask?.taskId === taskId);
+  const owners = (taskId: string) => agreedParts(ctx.s).filter((p) => p.cleaningTask?.taskId === taskId);
   return (
     <section data-screen="cleaning">
       <div className="flex items-center justify-between gap-3 pt-2">
@@ -63,25 +63,26 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
             <img src={usual.icon} alt="" width="36" height="36" className="size-9" />
             <div><p className="v16-card-title">{usual.zone}</p><p className="text-[0.82rem]">{DAY_NAMES[usual.day]}, our usual day</p></div>
           </div>
-          <label className="v16-radio mt-2">
-            <input type="checkbox" checked={sessionDay(ctx.s, monday, usual.day) === 6} onChange={(e) => setC({ moved: moveSession(ctx.s, monday, usual.day, e.target.checked ? 6 : null) })} data-move-session />
-            Move {week === 0 ? 'this' : 'next'} week’s session to Saturday
-          </label>
+          <div className="mt-2 flex items-center gap-2" data-move-row>
+            <Check checked={sessionDay(ctx.s, monday, usual.day) === 6} label={`Move ${week === 0 ? 'this' : 'next'} week’s session to Saturday`}
+              onChange={() => setC({ moved: moveSession(ctx.s, monday, usual.day, sessionDay(ctx.s, monday, usual.day) === 6 ? null : 6) })} />
+            <span className="text-[0.95rem]" aria-hidden="true">Move {week === 0 ? 'this' : 'next'} week’s session to Saturday</span>
+          </div>
           {movedAway !== null && <p className="text-[0.84rem]" role="status">Moved to {DAY_NAMES[movedAway]} for {week === 0 ? 'this' : 'that'} week only. The checklist moves with it; the week after, it’s back on {DAY_NAMES[usual.day]}.</p>}
         </div>
       )}
 
-      <div className="mt-5 grid grid-cols-2 gap-2">
-        <label className="v16-field">View day
-          <select className="v16-input" value={wd} onChange={(e) => setWd(Number(e.target.value))} data-view-day>
-            {ORDER.map((d) => <option key={d} value={d}>{DAY_NAMES[d]}</option>)}
-          </select></label>
-        <label className="v16-field">Week
-          <select className="v16-input" value={week} onChange={(e) => setWeek(Number(e.target.value) as 0 | 1)} data-view-week>
-            <option value={0}>This week</option><option value={1}>Next week</option>
-          </select></label>
+      <label className="v16-inline-field mt-3">View day
+        <select className="v16-input" value={wd} onChange={(e) => setWd(Number(e.target.value))} data-view-day>
+          {ORDER.map((d) => <option key={d} value={d}>{DAY_NAMES[d]}</option>)}
+        </select></label>
+      <div className="flex items-center justify-between gap-3">
+        <p className="v16-meta">{fmtDate(date)}</p>
+        <div className="of-seg" role="group" aria-label="Which week">
+          <button type="button" aria-pressed={week === 0} onClick={() => setWeek(0)} data-view-week="0">This week</button>
+          <button type="button" aria-pressed={week === 1} onClick={() => setWeek(1)} data-view-week="1">Next week</button>
+        </div>
       </div>
-      <p className="v16-meta mt-2">{fmtDate(date)}</p>
 
       {c.dailyReset && c.mode !== 'off' && (
         <div className="v16-section !mt-5" data-daily-reset>
