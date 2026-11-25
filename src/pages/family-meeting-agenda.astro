@@ -33,7 +33,7 @@ const prompts = [
         <a href="/resources/family-meeting-agenda/">Read the simple guide</a>
       </aside>
       <div class="fm-preview">
-        <article class="fm-public-paper" data-meeting-paper aria-label="Editable family meeting agenda">
+        <div class="fm-stage"><article class="fm-public-paper" data-meeting-paper aria-label="Editable family meeting agenda">
           <header class="fm-paper-head">
             <p class="fm-kicker">OUR WEEKLY RHYTHM</p>
             <h2>{G.title}</h2>
@@ -62,7 +62,7 @@ const prompts = [
             ))}
           </div>
           <footer class="fm-paper-foot"><p>Everyone has a voice. Everyone has a part.</p><span>ORGANIZED MOM COLLECTIVE · organizedmomcollective.com</span></footer>
-        </article>
+        </article></div>
       </div>
     </div>
     <aside class="fm-club-note"><p>Want the conversation prepared for you each month? The Family Meeting Club pairs this weekly rhythm with a fresh Family Focus and personalized questions.</p><a href="/club/">Explore the Family Meeting Club</a></aside>
@@ -77,6 +77,26 @@ const prompts = [
 @media(max-width:650px){.fm-public{padding:26px 12px 45px}.fm-preview{padding:5px}.fm-public:not(.fm-exporting) .fm-public-paper{padding:25px 18px;min-height:0}.fm-public:not(.fm-exporting) .fm-paper-head h2{font-size:28px}.fm-public:not(.fm-exporting) .fm-meta{gap:12px}.fm-public:not(.fm-exporting) .fm-step{grid-template-columns:42px minmax(0,1fr);gap:10px;padding:17px 0}.fm-public:not(.fm-exporting) .fm-step img{width:42px;height:42px}.fm-public:not(.fm-exporting) .fm-step-head h3{font-size:18px}.fm-public:not(.fm-exporting) .fm-role{gap:8px}.fm-public:not(.fm-exporting) .fm-public-paper input{font-size:16px;height:32px}.fm-public:not(.fm-exporting) .fm-paper-foot{margin-top:12px}}
 @page{size:letter portrait;margin:0}
 @media print{body{background:white!important}body > header,body > footer,body > nav,.site-header,.site-footer,.fm-intro,.fm-editor,.fm-club-note{display:none!important}.fm-public{padding:0!important;margin:0!important;max-width:none!important}.fm-layout{display:block}.fm-preview{padding:0;background:white}.fm-public .fm-public-paper{width:8.5in!important;max-width:none!important;min-height:11in!important;height:11in!important;margin:0!important;padding:46px 54px 35px!important;box-shadow:none;break-inside:avoid}.fm-public .fm-step{grid-template-columns:66px minmax(0,1fr)!important;gap:19px!important;padding:20px 0!important}.fm-public .fm-step img{width:66px!important;height:66px!important}.fm-public .fm-paper-head h2{font-size:39px!important}.fm-public .fm-step-head h3{font-size:22px!important}.fm-public .fm-public-paper input{font-size:13px!important;height:27px!important}}
+
+.fm-public:not(.fm-exporting) .fm-stage{position:relative;margin:auto;width:calc(816px * var(--fm-scale,1));height:calc(1056px * var(--fm-scale,1))}
+.fm-public:not(.fm-exporting) .fm-public-paper{position:absolute;inset:0;width:816px;max-width:none;height:1056px;min-height:1056px;padding:42px 54px 35px;margin:0;transform:scale(var(--fm-scale,1));transform-origin:top left}
+.fm-public:not(.fm-exporting) .fm-paper-head h2{font-size:39px}
+.fm-public:not(.fm-exporting) .fm-meta{gap:22px}
+.fm-public:not(.fm-exporting) .fm-step{grid-template-columns:66px minmax(0,1fr);gap:19px;padding:17px 0}
+.fm-public:not(.fm-exporting) .fm-step img{width:66px;height:66px}
+.fm-public:not(.fm-exporting) .fm-step-head h3{font-size:22px}
+.fm-public:not(.fm-exporting) .fm-role{gap:16px}
+.fm-public:not(.fm-exporting) .fm-public-paper input{font-size:13px;height:27px}
+.fm-public:not(.fm-exporting) .fm-paper-foot{margin-top:auto}
+.fm-public .fm-step{padding:17px 0}
+.fm-exporting .fm-public-paper{height:1056px;min-height:1056px;padding:42px 54px 35px}
+.fm-edit-wrap{position:relative;display:block;min-width:0}
+.fm-edit-wrap input{padding-right:25px}
+.fm-edit-hint{position:absolute;right:0;bottom:2px;display:grid;place-items:center;width:25px;height:25px;border:0;background:transparent;color:#3F6B5A;cursor:pointer;padding:3px}
+.fm-edit-hint svg{width:15px;height:15px}
+.fm-exporting .fm-edit-hint{display:none!important}
+.fm-exporting .fm-edit-wrap input{padding-right:0}
+@media print{.fm-edit-hint{display:none!important}.fm-edit-wrap input{padding-right:0!important}.fm-public .fm-stage{position:static!important;width:8.5in!important;height:11in!important}.fm-public .fm-public-paper{position:static!important;transform:none!important;padding:42px 54px 35px!important}.fm-public .fm-step{padding:17px 0!important}}
 </style>
 <script>
   import { autosave, clearFields, downloadPng } from '../lib/printable';
@@ -86,6 +106,17 @@ const prompts = [
   const download = host?.querySelector<HTMLButtonElement>('[data-meeting-download]');
   if (host && paper && download) {
     const save = autosave(paper, 'omc:family-meeting-agenda:v1');
+    const preview = host.querySelector<HTMLElement>('.fm-preview');
+    const fit = () => { if (!preview || host.classList.contains('fm-exporting')) return; const css = getComputedStyle(preview); host.style.setProperty('--fm-scale', String(Math.min(1, Math.max(.1,(preview.clientWidth-parseFloat(css.paddingLeft)-parseFloat(css.paddingRight))/816)))); };
+    fit();
+    if (preview && typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(preview);
+    window.addEventListener('resize',fit);
+    for(const input of paper.querySelectorAll<HTMLInputElement>('input[data-field]')){
+      const wrap=document.createElement('span');wrap.className='fm-edit-wrap';input.before(wrap);wrap.append(input);
+      const hint=document.createElement('button');hint.type='button';hint.className='fm-edit-hint';hint.title='Click to edit';hint.setAttribute('aria-label','Edit '+(input.getAttribute('aria-label')||input.closest('label')?.textContent?.trim()||'this line'));
+      hint.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 5 5 5M4 20l4-1 12-12a2.8 2.8 0 0 0-4-4L4 15z"/></svg>';
+      hint.addEventListener('click',()=>input.focus());wrap.append(hint);
+    }
     download.addEventListener('click', () => downloadPng(paper, { filename:'OMC-Family-Meeting-Agenda.png', width:816, height:1056, layoutHost:host, exportClass:'fm-exporting', button:download }));
     host.querySelector('[data-meeting-print]')?.addEventListener('click', async () => {
       if (await requireToolEmail('family-meeting-agenda')) { host.classList.add('fm-exporting'); try { window.print(); } finally { host.classList.remove('fm-exporting'); } }
