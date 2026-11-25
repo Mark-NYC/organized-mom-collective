@@ -12,7 +12,7 @@ import {
   SHOWN, currentPriorities, dailyKey, dayName, agreedParts, durable, missingReason, occurrenceOf, titleOf, partDate, sessionDay, sharedOccurrences, zoneKey, type Part, type Priority,
 } from '../../lib/v16/model';
 import { act } from './Parts';
-import { Check, CleaningBox, Person, StatusPill, fmtDate, type Ctx } from './shared';
+import { Art, Check, CleaningBox, Person, artFor, StatusPill, fmtDate, type Ctx } from './shared';
 import { useState } from 'react';
 
 function greeting() {
@@ -26,19 +26,19 @@ function Invitation({ ctx }: { ctx: Ctx }) {
   const newOnes = ctx.s.parts.filter((p) => p.status !== 'agreed' && p.status !== 'skipped' && p.eventLink && p.origin === 'prepared' && occurrenceOf(ctx.s, ctx.monday, p.eventLink)).length;
   if (m.started) {
     return <button type="button" className="v16-card" onClick={() => ctx.go('meeting')} data-invite="continue">
-      <span className="v16-card-title flex items-center justify-between gap-3">Continue your Family Meeting <span aria-hidden="true">↗</span></span>
+      {ctx.look === 'v17' && <Art name="family-group" size="lg" />}<span className="v16-card-title flex items-center justify-between gap-3">Continue your Family Meeting <span aria-hidden="true">↗</span></span>
       <span className="mt-1 block text-[0.88rem]">You stopped at {['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'][m.step]}. Pick up whenever you’re ready.</span></button>;
   }
   if (ctx.s.scenario === 'week4' && !m.checkInDone && m.finishedOn !== ctx.today) {
     return <button type="button" className="v16-card" onClick={() => ctx.go('check-in')} data-invite="check-in">
-      <span className="v16-card-title flex items-center justify-between gap-3">A quick family check-in <span aria-hidden="true">↗</span></span>
+      {ctx.look === 'v17' && <Art name="family-group" size="lg" />}<span className="v16-card-title flex items-center justify-between gap-3">A quick family check-in <span aria-hidden="true">↗</span></span>
       <span className="mt-1 block text-[0.88rem]">{agreedBefore} agreement{agreedBefore === 1 ? '' : 's'} continue{agreedBefore === 1 ? 's' : ''}.{newOnes ? ` ${newOnes === 1 ? 'One new activity' : `${newOnes} new activities`} to decide.` : ''}</span></button>;
   }
   if (m.finishedOn === ctx.today || m.checkInDone) {
     return <p className="v16-meta mt-4 flex items-center gap-2" data-invite="done"><Icon name="check" size={18} /> You talked it through {m.finishedOn === ctx.today ? 'today' : 'this week'}. Everyone’s part is below.</p>;
   }
   return <button type="button" className="v16-card" onClick={() => ctx.go('meeting')} data-invite="start">
-    <span className="v16-card-title flex items-center justify-between gap-3">Make this week’s plan <span aria-hidden="true">↗</span></span>
+    {ctx.look === 'v17' && <Art name="family-group" size="lg" />}<span className="v16-card-title flex items-center justify-between gap-3">Make this week’s plan <span aria-hidden="true">↗</span></span>
     <span className="mt-1 block text-[0.88rem]">A few decisions together can make the week easier.</span></button>;
 }
 
@@ -53,7 +53,7 @@ function PrepRow({ ctx, p }: { ctx: Ctx; p: Part }) {
         <span className="v16-meta flex flex-wrap items-center gap-2">{date ? dayName(date) : ''}{!agreed && <StatusPill part={p} />}</span>
       </button>
       {agreed
-        ? <Check checked={Boolean(p.done)} label={`${p.title}, done`} onChange={() => act(ctx, { type: 'toggle-done', id: p.id })} />
+        ? <Check checked={Boolean(p.done)} label={`${p.title}, done`} tone={p.ownerId ? ctx.colors[p.ownerId]?.hex : undefined} onChange={() => act(ctx, { type: 'toggle-done', id: p.id })} />
         : <Chevron />}
     </div>
   );
@@ -72,8 +72,13 @@ function Matter({ ctx, pr }: { ctx: Ctx; pr: Priority }) {
   }
   return (
     <div className="py-3" data-matter={o.event.title}>
-      <p className="v16-meta">{fmtDate(o.date, { weekday: 'long' })} · {timeLabel(o.event)}{o.event.id === 'e-soccer-moved' ? ' · moved' : ''}</p>
-      <p className="v16-h3">{o.event.title}</p>
+      <div className="v17-lead">
+        {ctx.look === 'v17' && <Art name={artFor(o.event.title)} />}
+        <div className="min-w-0">
+          <p className="v16-meta">{fmtDate(o.date, { weekday: 'long' })} · {timeLabel(o.event)}{o.event.id === 'e-soccer-moved' ? ' · moved' : ''}</p>
+          <p className="v16-h3">{o.event.title}</p>
+        </div>
+      </div>
       {preps.length > 0 && <div className="v16-nested mt-2">{preps.map((p) => <PrepRow key={p.id} ctx={ctx} p={p} />)}</div>}
     </div>
   );
@@ -119,7 +124,9 @@ export default function Today({ ctx }: { ctx: Ctx }) {
 
       <div className="v16-section">
         <h2 className="v16-h2">Everyone’s part</h2>
-        {!standing.length && !eventAgreed.length && <p className="v16-meta mt-1">Agreed household responsibilities appear here.</p>}
+        {!standing.length && !eventAgreed.length && (ctx.look === 'v17'
+          ? <div className="v17-empty" data-empty-parts><Art name="helping-hands" size="lg" /><p>What everyone agrees to do shows up here.</p></div>
+          : <p className="v16-meta mt-1">Agreed household responsibilities appear here.</p>)}
         <div className="v16-rows">
           {eventAgreed.map((p) => {
             const o = occurrenceOf(ctx.s, ctx.monday, p.eventLink!)!;
@@ -156,9 +163,9 @@ export default function Today({ ctx }: { ctx: Ctx }) {
       {meetingOcc && <p className="v16-meta mt-5" data-next-meeting>Next Family Meeting: {fmtDate(meetingOcc.date, { weekday: 'long' })} at {timeLabel(meetingOcc.event)} (on your calendar).</p>}
 
       <nav aria-label="More" className="v16-shortcuts">
-        <button type="button" className="v16-shortcut" onClick={() => ctx.go('plans')} data-shortcut="plans"><Icon name="calendar" /> Plans <small>{sharedOccurrences(ctx.s, ctx.monday).filter((o) => o.date === ctx.today).length} today</small></button>
-        <button type="button" className="v16-shortcut" onClick={() => ctx.go('cleaning')} data-shortcut="cleaning"><Icon name="check" /> Cleaning <small>{ctx.s.cleaning.dailyReset ? `Daily Reset ${dailyDone} of ${dailyEssentials.tasks.length}` : weeklySchedule.find((z) => z.day === todayWd)?.zone ?? 'This week'}</small></button>
-        <button type="button" className="v16-shortcut" onClick={() => ctx.go('resources')} data-shortcut="resources"><Icon name="list" /> Resources <small>{ctx.club ? ctx.club.resourceTitle : 'Family & guides'}</small></button>
+        <button type="button" className="v16-shortcut" onClick={() => ctx.go('plans')} data-shortcut="plans">{ctx.look === 'v17' ? <Art name="calendar" /> : <Icon name="calendar" />} Plans <small>{sharedOccurrences(ctx.s, ctx.monday).filter((o) => o.date === ctx.today).length} today</small></button>
+        <button type="button" className="v16-shortcut" onClick={() => ctx.go('cleaning')} data-shortcut="cleaning">{ctx.look === 'v17' ? <Art name="spray-bottle-cloth" /> : <Icon name="check" />} Cleaning <small>{ctx.s.cleaning.dailyReset ? `Daily Reset ${dailyDone} of ${dailyEssentials.tasks.length}` : weeklySchedule.find((z) => z.day === todayWd)?.zone ?? 'This week'}</small></button>
+        <button type="button" className="v16-shortcut" onClick={() => ctx.go('resources')} data-shortcut="resources">{ctx.look === 'v17' ? <Art name="book-stack" /> : <Icon name="list" />} Resources <small>{ctx.club ? ctx.club.resourceTitle : 'Family & guides'}</small></button>
       </nav>
     </section>
   );

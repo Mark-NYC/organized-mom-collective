@@ -15,7 +15,7 @@ import {
 } from '../../lib/v16/model';
 import { demoEvents } from '../../lib/v16/demo';
 import { act } from './Parts';
-import { Check, Person, StatusPill, fmtDate, type Ctx } from './shared';
+import { Art, Check, Panel, Person, StatusPill, artFor, fmtDate, type Ctx } from './shared';
 
 type View = 'week' | 'month' | 'agenda';
 
@@ -26,7 +26,7 @@ function EventRow({ ctx, o }: { ctx: Ctx; o: Occurrence }) {
   return (
     <div data-plan-event={e.title}>
       <button type="button" className="v16-row !items-start" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <span className="mt-0.5 text-[color:var(--of-sage-ink)]"><Icon name="calendar" size={18} /></span>
+        {ctx.look === 'v17' ? <Art name={artFor(e.title)} size="sm" /> : <span className="mt-0.5 text-[color:var(--of-sage-ink)]"><Icon name="calendar" size={18} /></span>}
         <span className="v16-row-main">
           <span className="v16-row-title block">{e.title}</span>
           <span className="v16-meta flex flex-wrap items-center gap-2">{timeLabel(e)}
@@ -65,7 +65,7 @@ function PrepLine({ ctx, p }: { ctx: Ctx; p: Part }) {
         </span>
         {why && <span className="v16-meta mt-1 block">{p.why}</span>}
       </span>
-      {agreed && p.eventLink && <Check checked={Boolean(p.done)} label={`${p.title}, done`} onChange={() => act(ctx, { type: 'toggle-done', id: p.id })} />}
+      {agreed && p.eventLink && <Check checked={Boolean(p.done)} label={`${p.title}, done`} tone={p.ownerId ? ctx.colors[p.ownerId]?.hex : undefined} onChange={() => act(ctx, { type: 'toggle-done', id: p.id })} />}
     </div>
   );
 }
@@ -145,14 +145,14 @@ export default function Plans({ ctx }: { ctx: Ctx }) {
         <h1 className="v16-h1">Our week</h1>
         <button type="button" className="v16-link" onClick={() => ctx.go('today')} data-plans-done>Done</button>
       </div>
-      <p className="v16-lede">All activities stay visible. Preparation appears on the day it needs to happen.</p>
+      <p className="v16-lede v16-explain">All activities stay visible. Preparation appears on the day it needs to happen.</p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <div className="of-seg flex-1" role="group" aria-label="Calendar view">
           {(['week', 'month', 'agenda'] as View[]).map((v) => <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} data-view={v}>{v[0].toUpperCase() + v.slice(1)}</button>)}
         </div>
         <button type="button" className="of-btn !min-h-[46px]" onClick={() => setAdding(true)} data-add-event>Add event</button>
       </div>
-      {adding && <AddEvent ctx={ctx} onDone={() => setAdding(false)} />}
+      {adding && <Panel ctx={ctx} title="New event" onClose={() => setAdding(false)}><AddEvent ctx={ctx} onDone={() => setAdding(false)} /></Panel>}
 
       {hidden.length > 0 && (
         <div className="v16-card v16-card--quiet" role="status" data-hidden-prep>

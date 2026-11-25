@@ -66,7 +66,7 @@ export function PartRow({ ctx, part, open, onToggle, prominent = false }: { ctx:
                   {part.status === 'agreed' && (
                     <p className="v16-meta mt-3" role="status">Agreed{part.agreedOn ? ` on ${new Date(`${part.agreedOn}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' })}` : ''}. {part.pending ? 'Saved on this phone; it will reach the other adult’s phone when you’re back online.' : 'It stays in place week to week until you change it.'}</p>
                   )}
-                  {part.status === 'suggested' && !part.changedSinceAgreed && <p className="v16-meta mt-2">Keep it to talk it over. Nothing is agreed until you all say so.</p>}
+                  {part.status === 'suggested' && !part.changedSinceAgreed && <p className="v16-meta mt-2 v16-explain">Keep it to talk it over. Nothing is agreed until you all say so.</p>}
                 </>
               )}
             </>

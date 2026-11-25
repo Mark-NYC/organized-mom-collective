@@ -12,7 +12,7 @@ import {
 } from '../../lib/v16/model';
 import { timeLabel, type Occurrence } from '../../lib/calendar/recurrence';
 import { PartRow } from './Parts';
-import { Arrow, CheckMark, Down, Person, fmtDate, type Ctx } from './shared';
+import { Arrow, Art, CheckMark, Down, Person, artFor, fmtDate, type Ctx } from './shared';
 import WallCalendar from './WallCalendar';
 
 export const STEPS = ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'] as const;
@@ -39,13 +39,19 @@ function Nav({ ctx, step, next, nextLabel = 'Continue' }: { ctx: Ctx; step: Meet
   );
 }
 
-function Head({ step, title, lede }: { step: MeetingStep; title: string; lede: string }) {
+function Head({ step, title, lede, look = 'v16' }: { step: MeetingStep; title: string; lede: string; look?: Ctx['look'] }) {
   return (
     <header>
-      <div className="flex items-baseline justify-between gap-3 pt-2">
-        <p className="v16-eyebrow">Family Meeting</p>
-        <p className="v16-meta" aria-label={`Part ${step + 1} of 4`}>{step + 1} of 4</p>
-      </div>
+      {look === 'v17' ? (
+        <div className="v17-steps pt-2" aria-label={`Family Meeting, part ${step + 1} of 4`}>
+          {STEPS.map((name, i) => <span key={name} data-on={i <= step ? '' : undefined} title={name} />)}
+        </div>
+      ) : (
+        <div className="flex items-baseline justify-between gap-3 pt-2">
+          <p className="v16-eyebrow">Family Meeting</p>
+          <p className="v16-meta" aria-label={`Part ${step + 1} of 4`}>{step + 1} of 4</p>
+        </div>
+      )}
       <h1 className="v16-h1" data-step-title>{title}</h1>
       <p className="v16-lede">{lede}</p>
     </header>
@@ -73,6 +79,7 @@ function FocusRow({ ctx, o, full }: { ctx: Ctx; o: Occurrence; full: boolean }) 
   const on = ctx.s.priorities.some((p) => p.from === 'this-week' && p.eventLink === link);
   return (
     <div className="v16-row" data-focus-event={o.event.title}>
+      {ctx.look === 'v17' && <Art name={artFor(o.event.title)} />}
       <span className="v16-row-main">
         <span className="v16-row-title block">{o.event.title}</span>
         <span className="v16-meta flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -102,7 +109,7 @@ function Focus({ ctx }: { ctx: Ctx }) {
   const notes = ctx.s.priorities.filter((p) => p.from === 'this-week' && p.kind === 'note');
   return (
     <section aria-labelledby="focus-h" data-meeting-step="focus">
-      <Head step={0} title="Our Focus" lede="What needs our attention this week?" />
+      <Head look={ctx.look} step={0} title="Our Focus" lede="What needs our attention this week?" />
       <div className="v16-rows mt-3">
         {main.map((o) => <FocusRow key={`${o.event.id}-${o.date}`} ctx={ctx} o={o} full={full} />)}
         {!main.length && <p className="v16-meta py-4">Nothing new on the shared calendar this week.</p>}
@@ -146,8 +153,9 @@ function Talk({ ctx }: { ctx: Ctx }) {
   };
   return (
     <section data-meeting-step="talk">
-      <Head step={1} title="Let’s Talk" lede="Talk it through out loud. Nothing here needs typing." />
+      <Head look={ctx.look} step={1} title="Let’s Talk" lede="Talk it through out loud. Nothing here needs typing." />
       <div className={`v16-card ${club ? 'v16-card--month' : 'v16-card--quiet'}`} data-talk-card data-club={club ? '' : undefined}>
+        {ctx.look === 'v17' && <Art name="conversation-bubbles" size="lg" />}
         {club ? (
           <p className="v16-eyebrow !text-[color:var(--of-month-accent)]">This month · {club.theme}</p>
         ) : (
@@ -216,7 +224,7 @@ function EveryonesPart({ ctx }: { ctx: Ctx }) {
   const hidden = open.length - shown.length;
   return (
     <section data-meeting-step="parts">
-      <Head step={2} title="Everyone’s Part" lede="Decide together. You can edit right here without leaving the meeting." />
+      <Head look={ctx.look} step={2} title="Everyone’s Part" lede="Decide together. You can edit right here without leaving the meeting." />
       {inForce.length > 0 && (
         <details className="v16-details mt-3" data-in-force>
           <summary>Already agreed · still in place ({inForce.length}) <Down open={false} /></summary>
@@ -240,7 +248,7 @@ function EveryonesPart({ ctx }: { ctx: Ctx }) {
           <EveryonesPartList ctx={ctx} parts={skipped} />
         </details>
       )}
-      <p className="v16-meta mt-3">Only what you agree shows on Today as someone’s part. Suggestions you don’t decide on stay here for next time.</p>
+      <p className="v16-meta mt-3 v16-explain">Only what you agree shows on Today as someone’s part. Suggestions you don’t decide on stay here for next time.</p>
       <Nav ctx={ctx} step={2} next={() => setStep(ctx, 3)} />
     </section>
   );
@@ -300,7 +308,7 @@ function Practice({ ctx }: { ctx: Ctx }) {
   };
   return (
     <section data-meeting-step="practice">
-      <Head step={3} title="Let’s Practice" lede="One small step toward more responsibility. No extra tracking." />
+      <Head look={ctx.look} step={3} title="Let’s Practice" lede="One small step toward more responsibility. No extra tracking." />
       <div className="mt-4"><Readiness ctx={ctx} /></div>
       {ctx.club && (
         <details className="v16-details mt-3" data-club-practice>
@@ -337,9 +345,14 @@ export function CheckIn({ ctx }: { ctx: Ctx }) {
         const o = p.eventLink ? occurrenceOf(ctx.s, ctx.monday, p.eventLink) : null;
         return (
           <div key={p.id} className="v16-section" data-new-activity>
-            <p className="v16-eyebrow">New · {o ? dayName(o.date) : 'this week'}</p>
-            <h2 className="v16-h2 mt-1">{o?.event.title ?? 'Activity'}</h2>
-            {o && <p className="v16-meta">{fmtDate(o.date)} · {timeLabel(o.event)}{o.event.external ? ` · from ${o.event.external.name}, read-only` : ''}</p>}
+            <div className="v17-lead">
+              {ctx.look === 'v17' && <Art name={artFor(o?.event.title ?? '')} />}
+              <div className="min-w-0">
+                <p className="v16-eyebrow">New · {o ? dayName(o.date) : 'this week'}</p>
+                <h2 className="v16-h2 mt-1">{o?.event.title ?? 'Activity'}</h2>
+                {o && <p className="v16-meta">{fmtDate(o.date)} · {timeLabel(o.event)}{o.event.external ? ` · from ${o.event.external.name}, read-only` : ''}</p>}
+              </div>
+            </div>
             <EveryonesPartList ctx={ctx} parts={[p]} startOpen={p.id} />
           </div>
         );

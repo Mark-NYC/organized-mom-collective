@@ -1,5 +1,5 @@
 /**
- * V16 experiment click-through (docs/ios/V16_EXPERIMENT.md): drives the preview through every scenario the V16
+ * V16 experiment click-through. Also drives V17 (same product, new look): pass its URL (docs/ios/V16_EXPERIMENT.md): drives the preview through every scenario the V16
  * contract lists, asserts what each step must show, and saves screenshots (iPhone 390 × 844 @2x, 375, 430, desktop
  * 1280). Needs a running site: `npx astro dev`, then
  *   node scripts/e2e/v16-preview.mjs [base URL] [screenshot dir]
@@ -31,7 +31,7 @@ async function open(viewport, scale = 2) {
   await p.waitForSelector('[data-screen="today"]');
   return p;
 }
-const shot = (p, name, full = true) => p.screenshot({ path: `${OUT}/${name}.jpg`, type: 'jpeg', quality: 82, fullPage: full });
+const shot = async (p, name, full = true) => { await p.waitForTimeout(450); return p.screenshot({ path: `${OUT}/${name}.jpg`, type: 'jpeg', quality: 82, fullPage: full }); };
 const text = (p, sel = 'main') => p.locator(sel).innerText();
 const demo = async (p, sel, value) => {
   if (!(await p.locator('[data-demo-bar]').evaluate((d) => d.open))) await p.click('[data-demo-bar] > summary');
@@ -49,7 +49,7 @@ await shot(p, '01-today-first-week');
 let t = await text(p);
 check('Today: first-week greeting, gentle invitation to make the plan', /Good (morning|afternoon|evening)\./.test(t) && /Make this week’s plan/.test(t));
 check('Today: soccer bag shows under Soccer practice, labeled Suggested', await p.locator('[data-matter="Soccer practice"] [data-today-prep="p-soccer-bag"]').innerText().then((x) => /Sofia · Pack soccer bag/.test(x) && /Suggested/.test(x)));
-check('Today: no agreement shown before anyone agreed', /Agreed household responsibilities appear here/.test(t) && !(await p.locator('[data-everyone-part]').count()));
+check('Today: no agreement shown before anyone agreed', (/Agreed household responsibilities appear here/.test(t) || (await p.locator('[data-empty-parts]').count()) === 1) && !(await p.locator('[data-everyone-part]').count()));
 check('Today: suggested prep has no checkbox (no fake done state)', (await p.locator('[data-today-prep="p-soccer-bag"] [role="checkbox"]').count()) === 0);
 check("Colors: Sofia's avatar is her saved purple, Luis's his brown", (await color(p, '[data-today-prep="p-soccer-bag"] .of-avatar')) === rgb('#6B46C1') && (await color(p, '[data-today-prep="p-pickup"] .of-avatar')) === rgb('#8B5A2B'));
 
@@ -100,7 +100,7 @@ await p.selectOption('[data-main-day]', '6');
 await p.selectOption('[data-view-day]', '6');
 check('Cleaning: one main cleaning day gathers all four zones on Saturday', (await p.locator('[data-zone-session]').count()) === 4);
 await p.click('[data-mode="printed"]');
-await p.click('[data-rhythm]');
+if (await p.locator('[data-sheet]').count()) await p.keyboard.press('Escape'); else await p.click('[data-rhythm]'); // V17: a bottom sheet
 await p.selectOption('[data-view-day]', '3');
 await p.locator('[data-daily-reset]').getByText('Make beds').click();
 await p.click('[data-move-row] [role="checkbox"]');

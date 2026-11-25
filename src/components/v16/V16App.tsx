@@ -19,14 +19,14 @@ import Cleaning from './Cleaning';
 import Meeting, { CheckIn, PlanSummary } from './Meeting';
 import Plans from './Plans';
 import Today from './Today';
-import { Person, TAB_OF, type Ctx, type Route } from './shared';
+import { Person, TAB_OF, type Ctx, type Look, type Route } from './shared';
 
 const ROUTES: Route[] = ['today', 'plans', 'cleaning', 'resources', 'account', 'meeting', 'check-in', 'plan'];
 const readRoute = (): Route => { const r = location.hash.replace(/^#\/?/, '') as Route; return ROUTES.includes(r) ? r : 'today'; };
 
-function load(today: string): V16State {
+function load(today: string, key: string): V16State {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (raw) { const s = JSON.parse(raw) as V16State & { savedMonday?: string }; if (s.v === 1 && s.savedMonday === mondayOf(today)) return s; }
   } catch { /* fresh */ }
   return seed('first', { club: true, adults: 'two', today });
@@ -49,18 +49,20 @@ function withMonthParts(s: V16State, club: ReturnType<typeof buildFamilyMeeting>
   return [...kept, ...extra];
 }
 
-export default function V16App() {
+export default function V16App({ look = 'v16' }: { look?: Look }) {
+  // V16 and V17 keep separate demo state, so the two can be compared side by side.
+  const storageKey = look === 'v17' ? `${STORAGE_KEY}:v17` : STORAGE_KEY;
   const today = useMemo(() => localToday(), []);
   const monday = mondayOf(today);
   const [s, setS] = useState<V16State | null>(null);
   const [route, setRoute] = useState<Route>('today');
-  useEffect(() => { setS(load(today)); setRoute(readRoute()); }, [today]);
+  useEffect(() => { setS(load(today, storageKey)); setRoute(readRoute()); }, [today]);
   useEffect(() => {
     const on = () => setRoute(readRoute());
     addEventListener('hashchange', on);
     return () => removeEventListener('hashchange', on);
   }, []);
-  useEffect(() => { if (s) try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...s, savedMonday: monday })); } catch { /* private mode */ } }, [s, monday]);
+  useEffect(() => { if (s) try { localStorage.setItem(storageKey, JSON.stringify({ ...s, savedMonday: monday })); } catch { /* private mode */ } }, [s, monday]);
   // This month's approved calendar color, as AppLayout sets it for /app.
   useEffect(() => {
     const t = monthTints(new Date().getMonth()), r = document.documentElement.style;
@@ -79,7 +81,7 @@ export default function V16App() {
   if (!s) return <div className="v16" aria-busy="true" />;
   const people = household.members.filter((m) => !m.archived);
   const ctx: Ctx = {
-    s, set, today, monday, household, colors: colorsFor(household), names: Object.fromEntries(people.map((m) => [m.id, m.firstName])),
+    look, s, set, today, monday, household, colors: colorsFor(household), names: Object.fromEntries(people.map((m) => [m.id, m.firstName])),
     people, kids: new Set(people.filter((m) => m.kind === 'child').map((m) => m.id)), club, go,
   };
   const tab = TAB_OF[route];
@@ -94,7 +96,7 @@ export default function V16App() {
     { id: 'meeting' as const, label: 'Family Meeting', icon: 'meeting' as const, on: openMeetingTab },
   ];
   return (
-    <div className="v16 family-brand" data-v16 data-route={route} data-scenario={s.scenario}>
+    <div className={`v16 family-brand${look === 'v17' ? ' v17' : ''}`} data-look={look} data-v16 data-route={route} data-scenario={s.scenario}>
       <DemoBar ctx={ctx} />
       <header className="v16-header">
         <div className="v16-header-inner">

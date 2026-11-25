@@ -9,8 +9,8 @@ import { useState } from 'react';
 import { dailyEssentials, monthlyDeepClean, weekend, weeklySchedule } from '../../data/cleaning';
 import { addDays, weekday } from '../../lib/calendar/recurrence';
 import { DAY_NAMES, agreedParts, dailyKey, moveSession, sessionDay, sessionsOn, zoneKey, type CleaningMode } from '../../lib/v16/model';
-import { Check, Person, fmtDate, type Ctx } from './shared';
-import { TaskList } from '../TaskList';
+import { Check, Panel, Person, fmtDate, type Ctx } from './shared';
+import { CleaningIconStyle, TaskList } from '../TaskList';
 
 const ORDER = [1, 2, 3, 4, 5, 6, 0];
 
@@ -36,14 +36,15 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
   const doneIn = (tasks: { id: string }[], key: (id: string) => string) => new Set(tasks.filter((t) => c.checks[key(t.id)]).map((t) => t.id));
   const owners = (taskId: string) => agreedParts(ctx.s).filter((p) => p.cleaningTask?.taskId === taskId);
   return (
+    <CleaningIconStyle.Provider value="simple">
     <section data-screen="cleaning">
       <div className="flex items-center justify-between gap-3 pt-2">
         <h1 className="v16-h1">Cleaning</h1>
         <button type="button" className="v16-choice" aria-expanded={rhythm} onClick={() => setRhythm(!rhythm)} data-rhythm>Rhythm</button>
       </div>
-      {rhythm && (
+      {rhythm && (<Panel ctx={ctx} title="Our cleaning rhythm" onClose={() => setRhythm(false)}>
         <div className="v16-editor mt-3" data-rhythm-panel>
-          <p className="v16-h3">Our cleaning rhythm</p>
+          {ctx.look !== 'v17' && <p className="v16-h3">Our cleaning rhythm</p>}
           {([['printed', 'Follow the printed calendar'], ['one-day', 'One main cleaning day'], ['off', 'Not right now']] as [CleaningMode, string][]).map(([v, label]) => (
             <label key={v} className="v16-radio"><input type="radio" name="mode" checked={c.mode === v} onChange={() => setC({ mode: v })} data-mode={v} />{label}</label>
           ))}
@@ -54,11 +55,11 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
               </select></label>
           )}
           <label className="v16-radio"><input type="checkbox" checked={c.dailyReset} onChange={(e) => setC({ dailyReset: e.target.checked })} data-daily-toggle />Include Daily Reset</label>
-          <button type="button" className="v16-choice w-full" onClick={() => setRhythm(false)}>Done</button>
+          <button type="button" className="v16-choice w-full v16-inline-only" onClick={() => setRhythm(false)}>Done</button>
           <p className="v16-meta">The printed calendar never changes. These choices only change what the app shows each day.</p>
         </div>
-      )}
-      <p className="v16-lede">One checklist. A routine the whole family can share.</p>
+      </Panel>)}
+      <p className="v16-lede v16-explain">One checklist. A routine the whole family can share.</p>
 
       {usual && c.mode === 'printed' && (
         <div className="v16-card" data-session-card>
@@ -130,8 +131,9 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
           return <li key={d} className="v16-row !min-h-[44px]"><span className="w-24 font-semibold">{DAY_NAMES[d]}</span><span className="v16-meta">{[...zones, ...(we ? [we] : [])].join(' · ') || '—'}</span></li>;
         })}</ul>
       </details>
-      <p className="v16-meta mt-4">Completion shows on Today. It doesn’t change anyone’s independence by itself.</p>
+      <p className="v16-meta mt-4 v16-explain">Completion shows on Today. It doesn’t change anyone’s independence by itself.</p>
       <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')}>Back to Today</button>
     </section>
+    </CleaningIconStyle.Provider>
   );
 }
