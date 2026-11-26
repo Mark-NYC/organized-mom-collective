@@ -373,18 +373,18 @@ export const dailyKey = (date: string, id: string) => `daily:${date}:${id}`;
 export const zoneKey = (monday: string, zoneDay: number, id: string) => `zone:${monday}:${zoneDay}:${id}`;
 
 /** The weekday this week's session for a zone happens on. A move is for one week only. */
-export function sessionDay(s: V16State, monday: string, zoneDay: number): number {
+export function sessionDay(s: Pick<V16State, 'cleaning'>, monday: string, zoneDay: number): number {
   if (s.cleaning.mode === 'one-day') return s.cleaning.mainDay;
   return s.cleaning.moved[monday]?.[zoneDay] ?? zoneDay;
 }
 
 /** Mon–Thu zone sessions happening on a weekday this week (by their usual zone day). */
-export function sessionsOn(s: V16State, monday: string, wd: number): number[] {
+export function sessionsOn(s: Pick<V16State, 'cleaning'>, monday: string, wd: number): number[] {
   if (s.cleaning.mode === 'off') return [];
   return [1, 2, 3, 4].filter((z) => sessionDay(s, monday, z) === wd);
 }
 
-export function moveSession(s: V16State, monday: string, zoneDay: number, to: number | null): V16State['cleaning']['moved'] {
+export function moveSession(s: Pick<V16State, 'cleaning'>, monday: string, zoneDay: number, to: number | null): V16State['cleaning']['moved'] {
   const week = { ...(s.cleaning.moved[monday] ?? {}) };
   if (to === null || to === zoneDay) delete week[zoneDay]; else week[zoneDay] = to;
   return { ...s.cleaning.moved, [monday]: week };
