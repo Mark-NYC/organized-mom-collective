@@ -1,3 +1,4 @@
 # Push a change to this file with "[db-backup]" in the commit message to run a production backup from a branch
 # (for example right before a migration session). docs/operations/DATABASE_BACKUPS.md
 # last request: before enabling event responsibilities for the production test household (after 20261211), 2026-11-22
+# 2026-11-26: restore-verify backup before V20 production migrations
