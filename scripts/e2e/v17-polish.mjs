@@ -58,6 +58,11 @@ for (const theme of ['forest', 'brown']) {
     const tag = `${theme}-${vp.width}`;
     const p = await open(theme, vp);
     check(`${tag}: theme applied`, (await p.locator('[data-v16]').getAttribute('data-theme')) === theme);
+    if (theme === 'brown') {
+      const look = await p.evaluate(() => { const root = document.querySelector('[data-v16]'); const b = document.querySelector('button.v16-card'); return { page: getComputedStyle(root).backgroundColor, cta: getComputedStyle(b).backgroundImage }; });
+      check(`${tag}: brown theme uses the app's warm ivory page (#FAF7F1)`, look.page === 'rgb(250, 247, 241)', look.page);
+      check(`${tag}: brown call to action is a gradient of the established browns`, look.cta.includes('linear-gradient') && look.cta.includes('rgb(95, 75, 57)') && look.cta.includes('rgb(74, 63, 62)'), look.cta);
+    }
     const primary = await p.locator('[data-v16]').evaluate((el) => getComputedStyle(el).getPropertyValue('--v17-primary').trim());
     check(`${tag}: primary color token is ${theme === 'brown' ? 'the calendar brown #4a3f3e' : 'forest green #3e7a43'}`, primary === (theme === 'brown' ? '#4a3f3e' : '#3e7a43'), primary);
     check(`${tag}: no colored shadow under the primary button card`, (await rgb(p, 'button.v16-card', 'boxShadow')) === 'none');
@@ -74,12 +79,12 @@ for (const theme of ['forest', 'brown']) {
     await settle(p, 500);
     const cellBg = await rgb(p, '[data-month] button:not([aria-pressed="true"]) ', 'backgroundColor');
     check(`${tag} Month: no gray cell backgrounds`, cellBg === 'rgba(0, 0, 0, 0)', cellBg);
-    const sel = await p.locator('[data-month] button[aria-pressed="true"] .v16-mday').evaluate((el) => { const s = getComputedStyle(el); return { bg: s.backgroundColor, color: s.color, r: s.borderRadius }; });
+    const sel = await p.locator('[data-month] button[aria-pressed="true"] .v16-mday').evaluate((el) => { const s = getComputedStyle(el); return { bg: s.backgroundImage !== 'none' ? s.backgroundImage : s.backgroundColor, color: s.color, r: s.borderRadius }; });
     check(`${tag} Month: selected date is a solid circle in the primary color, white number`, sel.color === 'rgb(255, 255, 255)' && sel.r.startsWith('999') && sel.bg !== 'rgba(0, 0, 0, 0)', JSON.stringify(sel));
     const today = await p.locator('[data-month] button[data-today] .v16-mday').evaluate((el) => { const s = getComputedStyle(el); return { bg: s.backgroundColor, ring: s.boxShadow }; });
     check(`${tag} Month: today is a ring (distinct from the selected date)`, today.bg === 'rgba(0, 0, 0, 0)' && today.ring.includes('inset'), JSON.stringify(today));
     const num = await rgb(p, '[data-month] button:not([data-today]):not([aria-pressed="true"]):not([data-outside]) .v16-mday', 'color');
-    check(`${tag} Month: date numbers near-black`, num === 'rgb(18, 22, 20)', num);
+    check(`${tag} Month: date numbers in the theme's ink (near-black; warm charcoal #4B4544 in brown)`, num === (theme === 'brown' ? 'rgb(75, 69, 68)' : 'rgb(18, 22, 20)'), num);
     if (vp.width === 390) { await p.locator('[data-month]').scrollIntoViewIfNeeded(); await shot(p, `${tag}-03-plans-month`); }
     await clears(p, '[data-calendars]', `${tag} Plans`);
 

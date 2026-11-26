@@ -42,8 +42,13 @@
   --v17-rose:#bf5d69;
   --v17-butter:#c98b0c;
   --v17-plum:#7357ad;
+  --v17-page:#ffffff;
+  --v17-surface:#ffffff;
+  /* What a solid primary control is painted with: the flat color, or a gradient (brown theme). */
+  --v17-primary-fill:var(--v17-primary);
+  --v17-primary-fill-press:var(--v17-primary-press);
   --color-warm-button:var(--v17-primary);
-  background:#fff;
+  background:var(--v17-page);
   color:var(--of-ink);
   font-family:var(--font-sans);
   font-size:16px;
@@ -67,18 +72,18 @@
 .v17 .v16-main{padding-top:0}
 
 /* ---------------------------------------------------------------- header and navigation */
-.v17 .v16-header{position:sticky;top:0;z-index:30;background:#fff;backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px)}
+.v17 .v16-header{position:sticky;top:0;z-index:30;background:var(--v17-surface);backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px)}
 .v17 .v16-header-inner{min-height:54px}
 .v17 .v16-wordmark{font-family:var(--font-sans);font-weight:800;font-size:1.18rem;letter-spacing:-.035em;color:var(--of-ink)}
 .v17 .v16-wordmark em{font-style:normal;color:var(--v17-primary);margin-left:.18em}
 .v17 .v16-iconbtn{width:40px;height:40px;border:0;background:var(--v17-fill);color:var(--of-ink)}
 .v17 .v16-topnav{background:var(--v17-fill);padding:4px;border-radius:14px}
 .v17 .v16-topnav button{min-height:40px;border-radius:11px;font-weight:680;color:var(--of-ink)}
-.v17 .v16-topnav button[aria-current="page"]{background:#fff;color:var(--v17-primary);box-shadow:0 1px 3px rgba(18,22,20,.14)}
+.v17 .v16-topnav button[aria-current="page"]{background:var(--v17-surface);color:var(--v17-primary);box-shadow:0 1px 3px rgba(18,22,20,.14)}
 
 /* Tab bar: compact, bold icons, an unmistakable active state */
 .v17 .v16-tabbar{left:16px;right:16px;bottom:calc(6px + env(safe-area-inset-bottom));max-width:19.5rem;margin-inline:auto;border:0;border-radius:22px;padding:4px;
-  background:color-mix(in srgb,#fff 88%,transparent);backdrop-filter:saturate(1.8) blur(22px);-webkit-backdrop-filter:saturate(1.8) blur(22px);
+  background:color-mix(in srgb,var(--v17-surface) 90%,transparent);backdrop-filter:saturate(1.8) blur(22px);-webkit-backdrop-filter:saturate(1.8) blur(22px);
   box-shadow:0 8px 24px -10px rgba(18,22,20,.35),0 0 0 .5px rgba(18,22,20,.14)}
 .v17 .v16-tabbar ul{gap:4px}
 .v17 .v16-tabbar button{min-height:44px;gap:1px;border-radius:18px;font-size:.68rem;font-weight:700;color:var(--of-ink);transition:background-color .18s ease,color .18s ease}
@@ -103,8 +108,8 @@
 /* ---------------------------------------------------------------- cards: one that acts, a few that inform */
 .v17 .v16-card{margin-top:16px;border-radius:20px;padding:16px 18px;background:var(--v17-positive-tint);color:var(--v17-positive-ink)}
 /* A card you tap (the meeting invitation) is the screen's call to action: solid brand green */
-.v17 button.v16-card{background:var(--v17-primary);color:#fff;box-shadow:none;transition:transform .12s ease,background-color .15s ease}
-.v17 button.v16-card:hover{background:var(--v17-primary-press);filter:none}
+.v17 button.v16-card{background:var(--v17-primary-fill);color:#fff;box-shadow:none;transition:transform .12s ease,background-color .15s ease}
+.v17 button.v16-card:hover{background:var(--v17-primary-fill-press);filter:none}
 .v17 button.v16-card .v17-icon{color:#fff}
 .v17 .v16-card--month{background:var(--of-month);color:var(--of-ink)}
 .v17 .v16-card--month .v16-eyebrow{color:var(--of-ink)!important;opacity:.78}
@@ -123,7 +128,7 @@
 .v17 .v16-nested{border-left:0;padding-left:0;margin-left:42px;margin-top:4px}
 .v17 .v16-nested .v16-row{min-height:50px;padding-block:6px}
 .v17 [data-matter],.v17 [data-everyone-event]{padding-block:12px}
-.v17 .of-chevron{color:#8d9792}
+.v17 .of-chevron{color:var(--v17-control-edge)}
 
 /* People: solid discs in their own marker color, white initial (the name always shows too) */
 .v17 .of-avatar{border-radius:999px;background:currentColor!important;-webkit-text-fill-color:#fff;font-family:var(--font-sans);font-weight:760;font-size:1rem;width:38px;height:38px}
@@ -140,8 +145,8 @@
 
 /* ---------------------------------------------------------------- buttons and controls: tactile, unmistakably interactive */
 .v17 .of-btn{border:0;border-radius:999px;min-height:54px;padding:0 22px;font-family:var(--font-sans);font-size:1.04rem;font-weight:720;letter-spacing:-.008em;text-transform:none;
-  background:var(--v17-primary);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.14);transition:background-color .15s ease,transform .12s ease}
-.v17 .of-btn:hover{background:var(--v17-primary-press)}
+  background:var(--v17-primary-fill);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.14);transition:background-color .15s ease,transform .12s ease}
+.v17 .of-btn:hover{background:var(--v17-primary-fill-press)}
 .v17 .of-btn--soft{background:var(--v17-fill-2);color:var(--of-ink);box-shadow:none}
 .v17 .of-btn--soft:hover{background:#d9dedb}
 .v17 .of-btn:disabled{opacity:.35;box-shadow:none}
@@ -149,9 +154,9 @@
 .v17 .v16-later{margin-top:2px}
 .v17 .v16-choice{border:0;min-height:46px;padding:0 18px;border-radius:999px;background:var(--v17-fill-2);font-size:.96rem;font-weight:680;color:var(--of-ink);transition:background-color .15s ease,color .15s ease,transform .12s ease}
 .v17 .v16-choice:hover{background:#d9dedb}
-.v17 .v16-choice[aria-pressed="true"],.v17 .v16-choice--primary{background:var(--v17-primary);color:#fff}
+.v17 .v16-choice[aria-pressed="true"],.v17 .v16-choice--primary{background:var(--v17-primary-fill);color:#fff}
 .v17 .v16-choice--quiet{background:transparent;color:var(--of-ink)}
-.v17 .v16-card .v16-choice:not(.v16-choice--primary):not([aria-pressed="true"]){background:#fff}
+.v17 .v16-card .v16-choice:not(.v16-choice--primary):not([aria-pressed="true"]){background:var(--v17-surface)}
 .v17 .v16-choices--pair .v16-choice{padding:0 10px;font-size:.94rem;line-height:1.2}
 .v17 .v16-link{color:var(--v17-primary);font-size:.96rem;font-weight:700}
 .v17 .v16-card .v16-link{color:inherit}
@@ -160,22 +165,22 @@
 /* Segmented control */
 .v17 .of-seg{border:0;background:var(--v17-fill-2);border-radius:12px;padding:3px;gap:2px}
 .v17 .of-seg > button{min-height:38px;border-radius:9px;font-size:.9rem;font-weight:680;letter-spacing:0;color:var(--of-ink);transition:background-color .18s ease,box-shadow .18s ease}
-.v17 .of-seg > [aria-pressed="true"]{background:#fff;box-shadow:0 1px 4px rgba(18,22,20,.18),0 0 0 .5px rgba(18,22,20,.06)}
+.v17 .of-seg > [aria-pressed="true"]{background:var(--v17-surface);box-shadow:0 1px 4px rgba(18,22,20,.18),0 0 0 .5px rgba(18,22,20,.06)}
 
 /* Fields */
 .v17 .v16-input{border:1px solid var(--of-rule);background:var(--v17-fill);border-radius:13px;min-height:50px;font-size:1rem;color:var(--of-ink)}
-.v17 .v16-input::placeholder{color:#7d8681}
-.v17 .v16-input:focus{outline:0;background:#fff;border-color:var(--v17-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--v17-primary) 22%,transparent)}
+.v17 .v16-input::placeholder{color:color-mix(in srgb,var(--of-soft) 85%,var(--v17-page))}
+.v17 .v16-input:focus{outline:0;background:var(--v17-surface);border-color:var(--v17-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--v17-primary) 22%,transparent)}
 .v17 .v16-field{font-size:.92rem;font-weight:680}
 .v17 .v16-editor{background:var(--v17-fill);border-radius:20px;padding:16px;gap:12px}
-.v17 .v16-editor .v16-input{background:#fff}
+.v17 .v16-editor .v16-input{background:var(--v17-surface)}
 .v17 .v16-inline-field{font-weight:650}
 .v17 .v16-radio{min-height:48px;font-size:1rem;font-weight:550}
 .v17 .v16-radio input{accent-color:var(--v17-primary);width:22px;height:22px}
 
 /* Selection and completion */
 .v17 .v16-toggle-dot{width:28px;height:28px;border:2px solid var(--v17-control-edge);transition:background-color .18s ease,border-color .18s ease}
-.v17 .v16-toggle[aria-pressed="true"] .v16-toggle-dot{background:var(--v17-primary);border-color:var(--v17-primary);animation:v17-pop .3s cubic-bezier(.3,1.6,.5,1)}
+.v17 .v16-toggle[aria-pressed="true"] .v16-toggle-dot{background:var(--v17-primary-fill);border-color:var(--v17-primary);animation:v17-pop .3s cubic-bezier(.3,1.6,.5,1)}
 .v17 .v16-check > span{width:28px;height:28px;border:2px solid var(--v17-control-edge);transition:background-color .18s ease,border-color .18s ease}
 .v17 .v16-check[aria-checked="true"] > span{background:var(--tone,var(--v17-positive));border-color:var(--tone,var(--v17-positive));animation:v17-pop .3s cubic-bezier(.3,1.6,.5,1)}
 
@@ -195,7 +200,7 @@
 .v17 .v16-shortcut + .v16-shortcut{box-shadow:inset 0 1px 0 var(--of-rule)}
 .v17 .v16-shortcut:hover{background:var(--v17-fill-2)}
 .v17 .v16-shortcut small{grid-column:2;font-weight:550;font-size:.86rem;color:var(--of-soft);line-height:1.3}
-.v17 .v16-shortcut::after{content:'';grid-column:3;grid-row:1 / span 2;width:8px;height:8px;border-top:2.2px solid #8d9792;border-right:2.2px solid #8d9792;border-radius:1px;transform:rotate(45deg)}
+.v17 .v16-shortcut::after{content:'';grid-column:3;grid-row:1 / span 2;width:8px;height:8px;border-top:2.2px solid var(--v17-control-edge);border-right:2.2px solid var(--v17-control-edge);border-radius:1px;transform:rotate(45deg)}
 .v17 .v16-shortcut:active{transform:none;background:var(--v17-fill-2)}
 
 /* ---------------------------------------------------------------- empty states, steps, disclosure, paper */
@@ -210,7 +215,7 @@
 /* ---------------------------------------------------------------- bottom sheet */
 .v17-sheet-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
 .v17-sheet-backdrop{position:absolute;inset:0;border:0;background:rgba(12,16,14,.4);animation:v17-fade .2s ease}
-.v17-sheet{position:relative;width:100%;max-width:34rem;max-height:88dvh;overflow:auto;background:#fff;border-radius:28px 28px 0 0;padding:8px 20px calc(20px + env(safe-area-inset-bottom));
+.v17-sheet{position:relative;width:100%;max-width:34rem;max-height:88dvh;overflow:auto;background:var(--v17-surface);border-radius:28px 28px 0 0;padding:8px 20px calc(20px + env(safe-area-inset-bottom));
   box-shadow:0 -12px 40px rgba(12,16,14,.22);animation:v17-up .34s cubic-bezier(.2,.9,.25,1);color:var(--of-ink)}
 .v17-grabber{display:block;width:38px;height:5px;margin:2px auto 6px;border-radius:99px;background:#c2c9c5}
 .v17-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
@@ -233,7 +238,7 @@
   .v17{background:var(--v17-fill)}
   .v17 .v16-header{background:var(--v17-fill)}
   .v17 .v16-topnav{background:var(--v17-fill-2)}
-  .v17 .v16-main{max-width:46rem;margin:8px auto 48px;padding:36px 48px 52px;background:#fff;border-radius:30px;box-shadow:0 1px 2px rgba(18,22,20,.05)}
+  .v17 .v16-main{max-width:46rem;margin:8px auto 48px;padding:36px 48px 52px;background:var(--v17-surface);border-radius:30px;box-shadow:0 1px 2px rgba(18,22,20,.05)}
   .v17 .v16-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
   .v17 .v16-shortcut + .v16-shortcut{box-shadow:inset 1px 0 0 var(--of-rule-strong)}
 }
@@ -249,11 +254,27 @@
    The site's established CTA brown (--color-warm-button, src/styles/global.css) for interaction; its tint from the
    printed calendar's November color (#D5C5B8, src/theme.ts). Positive states stay forest green. */
 .v17[data-theme="brown"]{
+  /* Owner direction (2026-11-26): the brown theme uses the current app's own tones (sampled from /app, which match the
+     established tokens): warm ivory page, ivory surfaces, warm rules, mushroom fills, sage tint, warm charcoal ink. */
+  --v17-page:#faf7f1;
+  --v17-surface:#fefdfa;
+  --v17-fill:#f3eee8;
+  --v17-fill-2:#eae3db;
+  --of-rule:#e6e0d7;
+  --of-rule-strong:#d6ccc2;
+  --of-ink:#4b4544;
+  --of-soft:#6c6461;
+  --v17-control-edge:#a2958e;
+  /* Primary: a gradient between the two established browns, the November accent #5F4B39 and the CTA brown #4A3F3E */
   --v17-primary:#4a3f3e;
   --v17-primary-press:#3a302f;
-  --v17-primary-tint:color-mix(in srgb,#d5c5b8 48%,#fff);
+  --v17-primary-tint:#eae3db;
+  --v17-primary-fill:linear-gradient(135deg,#6a5442 0%,#5f4b39 38%,#4a3f3e 100%);
+  --v17-primary-fill-press:linear-gradient(135deg,#5f4b39 0%,#4a3f3e 55%,#3a302f 100%);
+  /* Positive keeps forest green, on the app's sage tint */
+  --v17-positive-tint:#e4e9df;
 }
-.v17[data-theme="brown"] button.v16-card{background:var(--v17-primary)}
+.v17[data-theme="brown"] .v16-wordmark em{color:#586a50}
 
 /* ---------------------------------------------------------------- tab bar: smaller, never covering anything */
 .v17 .v16-tabbar svg{width:22px;height:22px}
@@ -267,12 +288,12 @@
 .v17 .v16-month > *{background:none!important;min-height:52px;padding:4px 0;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;opacity:1}
 .v17 .v16-month .v16-mh{min-height:0;font-size:.78rem;font-weight:650;color:var(--of-soft)}
 .v17 .v16-month [data-outside]{opacity:1}
-.v17 .v16-month [data-outside] .v16-mday{color:#a2aaa6}
+.v17 .v16-month [data-outside] .v16-mday{color:color-mix(in srgb,var(--of-soft) 55%,var(--v17-page))}
 .v17 .v16-mday{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;font-size:.98rem;font-weight:600;color:var(--of-ink);font-variant-numeric:tabular-nums;transition:background-color .18s ease,color .18s ease}
 .v17 .v16-mdots{display:flex;gap:3px;min-height:6px}
 .v17 .v16-mdots .of-dot{width:6px!important;height:6px!important}
 .v17 .v16-month [data-today] .v16-mday{color:var(--v17-primary);font-weight:800;box-shadow:inset 0 0 0 2px var(--v17-primary)}
-.v17 .v16-month [aria-pressed="true"] .v16-mday{background:var(--v17-primary);color:#fff;box-shadow:none;animation:v17-pop .26s cubic-bezier(.3,1.6,.5,1)}
+.v17 .v16-month [aria-pressed="true"] .v16-mday{background:var(--v17-primary-fill);color:#fff;box-shadow:none;animation:v17-pop .26s cubic-bezier(.3,1.6,.5,1)}
 .v17 .v16-month [data-today]{outline:0!important}
 @media(hover:hover){.v17 .v16-month button:hover .v16-mday{background:var(--v17-fill-2)}.v17 .v16-month button[aria-pressed="true"]:hover .v16-mday{background:var(--v17-primary-press)}}
 
@@ -315,7 +336,7 @@
    viewport-fit=cover is on (BaseLayout), so the page draws under the status bar in a standalone PWA: pad the top, keep
    the sticky header below the status bar, and fill that strip so content never shows through it. */
 .v17{padding-top:env(safe-area-inset-top)}
-.v17::before{content:'';position:fixed;inset:0 0 auto 0;height:env(safe-area-inset-top);background:#fff;z-index:50;pointer-events:none}
+.v17::before{content:'';position:fixed;inset:0 0 auto 0;height:env(safe-area-inset-top);background:var(--v17-surface);z-index:50;pointer-events:none}
 .v17 .v16-header{top:env(safe-area-inset-top)}
 @media(max-width:1023px){.v17 .v16-main,.v17 .v16-header-inner{padding-left:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right))}}
 @media(min-width:1024px){.v17::before{background:var(--v17-fill)}}

@@ -79,7 +79,11 @@ Refinement 2 is the **visual baseline**. This pass changes no layout, flow or da
 **Theme: switchable primary color.**
 - Primary, the interaction color, is token-driven (`--v17-primary` / `-press` / `-tint`). Reviewers can switch it in the preview controls (stored on the device, `omc:v17-theme`).
 - **Forest green** `#3E7A43` is the default.
-- **Calendar brown** is the site's established CTA brown, `--color-warm-button` `#4A3F3E` (`src/styles/global.css`). Its tint comes from the printed calendar's November color, `#D5C5B8` (`src/theme.ts`).
+- **Calendar brown** uses the current app's own tones (owner direction, 2026-11-26), sampled from `/app` on an iPhone. They match the established tokens:
+  - page `#FAF7F1`, cards and bars `#FEFDFA`, warm rule `#E6E0D7`, mushroom fill `#EAE3DB`, sage tint `#E4E9DF`;
+  - ink `#4B4544`, secondary text `#6C6461`, wordmark green `#586A50`.
+  - Primary controls (buttons, the call-to-action card, the selected date, the highlight toggle) are a **gradient** of the two established browns: the November accent `#5F4B39` and the CTA brown `#4A3F3E` (`--color-warm-button`).
+  - Type stays Figtree, and icons stay bold and filled, in the warm ink.
 - **Positive** (`--v17-positive`) is always forest green, in both themes: completion and done checks, "Agreed", meeting progress, cleaning checks and the cleaning session card.
 
 **Shadows:** no colored shadows under buttons or cards. A faint inner highlight remains on primary buttons.
