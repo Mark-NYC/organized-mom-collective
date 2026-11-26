@@ -23,6 +23,9 @@ import TodayV18 from '../v18/TodayV18';
 import TodayV19 from '../v19/TodayV19';
 import { SCENARIOS_V19, seedV19, type ScenarioV19 } from '../../lib/v19/scenarios';
 import { undoFeedback } from '../../lib/v19/resolve';
+import { SCENARIOS_V20, seedV20, type ScenarioV20 } from '../../lib/v20/scenarios';
+import { prefsFor, type NotifyPrefs } from '../../lib/v20/notify';
+import Phones, { useOutbox } from '../v20/Phones';
 import { SCENARIOS, demoToday, seedScenario, type ScenarioId } from '../../lib/v18/scenarios';
 import { allMemory, forget } from '../../lib/v18/memory';
 import { memoryLine, snapshot } from '../../lib/v18/engine';
@@ -31,11 +34,12 @@ import { Art, Illo, Person, TAB_OF, type Ctx, type Look, type Route } from './sh
 const ROUTES: Route[] = ['today', 'plans', 'cleaning', 'resources', 'account', 'meeting', 'check-in', 'plan'];
 const readRoute = (): Route => { const r = location.hash.replace(/^#\/?/, '') as Route; return ROUTES.includes(r) ? r : 'today'; };
 
-function load(today: string, key: string, gen: 0 | 18 | 19): V16State {
+function load(today: string, key: string, gen: 0 | 18 | 19 | 20): V16State {
   try {
     const raw = localStorage.getItem(key);
     if (raw) { const s = JSON.parse(raw) as V16State & { savedMonday?: string }; if (s.v === 1 && s.savedMonday === mondayOf(today) && (!gen || s.intel)) return s; }
   } catch { /* fresh */ }
+  if (gen === 20) return seedV20('n-help', { club: true, monday: mondayOf(today) });
   if (gen === 19) return seedV19('change', { club: true, monday: mondayOf(today) });
   return gen === 18 ? seedScenario('field-trip', { club: true, monday: mondayOf(today) }) : seed('first', { club: true, adults: 'two', today });
 }
@@ -61,9 +65,9 @@ function withMonthParts(s: V16State, club: ReturnType<typeof buildFamilyMeeting>
  * `intelligent` = V18 (docs/ios/V18_TODAY_INTELLIGENCE.md): the V17 preview with the intelligent Today. Its own demo
  * state, and "today" pinned to Thursday of this week so the preview's scenarios always land on the same day.
  */
-export default function V16App({ look = 'v16', intelligent = false }: { look?: Look; intelligent?: boolean | 'v19' }) {
+export default function V16App({ look = 'v16', intelligent = false }: { look?: Look; intelligent?: boolean | 'v19' | 'v20' }) {
   // V16, V17, V18 and V19 keep separate demo state, so they can be compared side by side.
-  const gen: 0 | 18 | 19 = intelligent === 'v19' ? 19 : intelligent ? 18 : 0;
+  const gen: 0 | 18 | 19 | 20 = intelligent === 'v20' ? 20 : intelligent === 'v19' ? 19 : intelligent ? 18 : 0;
   const storageKey = gen ? `${STORAGE_KEY}:v${gen}` : look === 'v17' ? `${STORAGE_KEY}:v17` : STORAGE_KEY;
   const today = useMemo(() => (intelligent ? demoToday(mondayOf(localToday())) : localToday()), [intelligent]);
   const monday = mondayOf(today);
@@ -121,7 +125,7 @@ export default function V16App({ look = 'v16', intelligent = false }: { look?: L
   ];
   return (
     <div className={`v16 family-brand${look === 'v17' ? ' v17' : ''}${intelligent ? ' v18' : ''}`} data-look={gen ? `v${gen}` : look} data-theme={look === 'v17' ? theme : undefined} data-v16 data-route={route} data-scenario={s.scenario}>
-      {gen === 19 ? <DemoBarV19 ctx={ctx} theme={{ value: theme, set: chooseTheme }} /> : intelligent ? <DemoBarV18 ctx={ctx} theme={{ value: theme, set: chooseTheme }} /> : <DemoBar ctx={ctx} theme={look === 'v17' ? { value: theme, set: chooseTheme } : null} />}
+      {gen === 19 || gen === 20 ? <DemoBarV19 ctx={ctx} theme={{ value: theme, set: chooseTheme }} /> : intelligent ? <DemoBarV18 ctx={ctx} theme={{ value: theme, set: chooseTheme }} /> : <DemoBar ctx={ctx} theme={look === 'v17' ? { value: theme, set: chooseTheme } : null} />}
       <header className="v16-header">
         <div className="v16-header-inner">
           <button type="button" className="v16-wordmark" onClick={() => go('today')} aria-label="Organized Family, Today">organized<em>family.</em></button>
@@ -134,7 +138,7 @@ export default function V16App({ look = 'v16', intelligent = false }: { look?: L
       <main className="v16-main" id="main">
         {/* Keyed by screen (and meeting part) so each one enters with a short transition in V17. */}
         <div className="v16-route" key={route === 'meeting' ? `meeting-${s.meeting.step}` : route}>
-        {route === 'today' && (gen === 19 ? <TodayV19 ctx={ctx} /> : intelligent ? <TodayV18 ctx={ctx} /> : <Today ctx={ctx} />)}
+        {route === 'today' && (gen === 19 || gen === 20 ? <TodayV19 ctx={ctx} /> : intelligent ? <TodayV18 ctx={ctx} /> : <Today ctx={ctx} />)}
         {route === 'plans' && <Plans ctx={ctx} />}
         {route === 'cleaning' && <Cleaning ctx={ctx} />}
         {route === 'resources' && <Resources ctx={ctx} />}
@@ -188,17 +192,22 @@ function DemoBar({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: The
 function DemoBarV19({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: Theme) => void } }) {
   const s = ctx.s;
   const intel = s.intel!;
-  const scenario = (intel.scenario ?? 'change') as ScenarioV19;
-  const reseed = (id: ScenarioV19) => { ctx.set(() => seedV19(id, { club: s.club, monday: ctx.monday })); ctx.go('today'); };
+  const v20 = ctx.gen === 20;
+  const list = v20 ? SCENARIOS_V20 : SCENARIOS_V19;
+  const scenario = (intel.scenario ?? (v20 ? 'n-help' : 'change')) as ScenarioV19;
+  const reseed = (id: string) => { ctx.set(() => (v20 ? seedV20(id as ScenarioV20, { club: s.club, monday: ctx.monday }) : seedV19(id as ScenarioV19, { club: s.club, monday: ctx.monday }))); ctx.go('today'); };
+  const pushes = v20 ? <PushCount ctx={ctx} /> : null;
   const setIntel = (patch: Partial<typeof intel>) => ctx.set((x) => ({ ...x, intel: { ...x.intel!, ...patch } }));
   return (
     <details className="v16-demo" aria-label="Preview controls (not part of the app)" data-demo-bar>
       <summary className="v16-demo-inner cursor-pointer list-none"><span className="v16-demo-tag">Preview controls · simulated data</span>
-        <span className="text-[0.74rem]">{SCENARIOS_V19.find(([id]) => id === scenario)?.[1]} · viewing as {ctx.names[intel.viewer] ?? 'Ana'}{intel.aiAvailable ? '' : ' · interpreter down'} · demo day Thursday</span>
+        <span className="text-[0.74rem]">{list.find(([id]) => id === scenario)?.[1]}{pushes} · viewing as {ctx.names[intel.viewer] ?? 'Ana'}{intel.aiAvailable ? '' : ' · interpreter down'} · demo day Thursday</span>
         <span className="ml-auto text-[0.74rem] underline">Change</span></summary>
       <div className="v16-demo-inner">
-        <label>Scenario <select value={scenario} onChange={(e) => reseed(e.target.value as ScenarioV19)} data-demo-v19>
-          {SCENARIOS_V19.map(([id, label], n) => <option key={id} value={id}>{n + 1}. {label}</option>)}</select></label>
+        <label>Scenario <select value={scenario} onChange={(e) => reseed(e.target.value)} data-demo-v19>
+          {list.map(([id, label], n) => <option key={id} value={id}>{n + 1}. {label}</option>)}</select></label>
+        {v20 && <label>Time <select value={intel.clock ?? '14:30'} onChange={(e) => setIntel({ clock: e.target.value })} data-demo-clock>
+          {['07:30', '13:30', '14:30', '18:00', '21:45'].map((t) => <option key={t} value={t}>{t}</option>)}</select></label>}
         <label>Viewing as <select value={intel.viewer} onChange={(e) => setIntel({ viewer: e.target.value })} data-demo-viewer>
           {ctx.people.filter((m) => m.kind === 'adult').map((m) => <option key={m.id} value={m.id}>{m.firstName}</option>)}</select></label>
         <label><input type="checkbox" checked={intel.aiAvailable} onChange={(e) => setIntel({ aiAvailable: e.target.checked })} data-demo-ai /> Interpreter available (simulated)</label>
@@ -207,8 +216,15 @@ function DemoBarV19({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: 
         <label><input type="checkbox" checked={!s.online} onChange={(e) => ctx.set((x) => ({ ...x, online: !e.target.checked, parts: e.target.checked ? x.parts : x.parts.map((p) => ({ ...p, pending: false })) }))} data-demo-offline /> Offline</label>
         <button type="button" onClick={() => reseed(scenario)} data-demo-reset>Reset</button>
       </div>
+      {v20 && <div className="v16-demo-inner !block"><p className="v16-demo-tag mb-2">Simulated push · both phones share one household plan</p><Phones ctx={ctx} /></div>}
     </details>
   );
+}
+
+function PushCount({ ctx }: { ctx: Ctx }) {
+  const { notes } = useOutbox(ctx);
+  const n = notes.filter((x) => x.status === 'deliver' || x.status === 'sent' || x.status === 'quiet').length;
+  return <>{` · ${n} push${n === 1 ? '' : 'es'}`}</>;
 }
 
 /** V18 reviewer controls: SIMULATED demonstration states for Today. Not product UI, never in the app. */
@@ -284,7 +300,8 @@ function Account({ ctx }: { ctx: Ctx }) {
         <li className="v16-row">{ctx.look === 'v17' && <Art name="people" tile="blue" />}<span className="v16-row-main">Family plan</span><span className="v16-meta">{ctx.s.club ? 'Family Meeting Club' : 'Free'}</span></li>
         <li className="v16-row">{ctx.look === 'v17' && <Art name="sync" tile="sage" />}<span className="v16-row-main">Sync</span><span className="v16-meta">{ctx.s.online ? 'Up to date' : 'Offline · changes wait on this phone'}</span></li>
       </ul>
-      {ctx.gen === 19 && <Assistance ctx={ctx} />}
+      {ctx.gen === 20 && <Notifications ctx={ctx} />}
+      {(ctx.gen === 19 || ctx.gen === 20) && <Assistance ctx={ctx} />}
       {ctx.s.intel && <Noticed ctx={ctx} />}
       <p className="v16-meta mt-4">Preview only. The real account, sharing, billing and sign-in are at <a className="underline" href="/app/account">/app/account</a>; nothing here changes them.</p>
       <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')}>Back to Today</button>
@@ -329,6 +346,41 @@ function Assistance({ ctx }: { ctx: Ctx }) {
           <button type="button" className="v16-link" onClick={() => ctx.set((s) => undoFeedback(s, f))} data-undo>Undo</button>
         </li>
       ))}</ul>}
+    </div>
+  );
+}
+
+/**
+ * V20: notification settings, per adult, in Account (no new screen). Three purposes on by default, the Family Meeting
+ * reminder off by default, quiet hours. There is no setting for chore or cleaning reminders because there are none.
+ */
+function Notifications({ ctx }: { ctx: Ctx }) {
+  const viewer = ctx.s.intel!.viewer;
+  const p = prefsFor(ctx.s, viewer);
+  const set = (patch: Partial<NotifyPrefs>) => ctx.set((s) => ({ ...s, intel: { ...s.intel!, notifyPrefs: { ...(s.intel!.notifyPrefs ?? {}), [viewer]: { ...(s.intel!.notifyPrefs?.[viewer] ?? {}), ...patch } } } }));
+  const rows: [keyof NotifyPrefs, string, string][] = [
+    ['needsYou', 'Someone needs you', 'A request for a hand, or something that needs an owner.'],
+    ['changed', 'Something important changed', 'A conflict in your plan today, or a shared agreement someone updated.'],
+    ['handled', 'Something you were carrying is handled', 'When someone takes what you asked for.'],
+    ['meeting', 'Family Meeting reminder', 'An hour before your meeting.'],
+  ];
+  return (
+    <div className="v16-section" data-notifications>
+      <h2 className="v16-h3">Notifications</h2>
+      <p className="v16-meta mt-1">Only when it matters. Never chore or cleaning reminders.</p>
+      <ul className="v16-rows mt-2">{rows.map(([k, label, hint]) => (
+        <li key={k} className="v16-row">
+          <label className="v16-row-main flex items-center justify-between gap-3">
+            <span><span className="block">{label}</span><span className="v16-meta">{hint}</span></span>
+            <input type="checkbox" className="v20-switch" checked={Boolean(p[k])} onChange={(e) => set({ [k]: e.target.checked })} data-notify={k} />
+          </label>
+        </li>
+      ))}</ul>
+      <label className="v16-field mt-3">Quiet hours
+        <select className="v16-input" value={`${p.quietStart}-${p.quietEnd}`} onChange={(e) => { const [quietStart, quietEnd] = e.target.value.split('-'); set({ quietStart, quietEnd }); }} data-quiet>
+          <option value="21:00-07:00">9 PM – 7 AM</option><option value="22:00-06:30">10 PM – 6:30 AM</option><option value="20:00-07:30">8 PM – 7:30 AM</option>
+        </select>
+      </label>
     </div>
   );
 }

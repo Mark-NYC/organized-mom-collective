@@ -52,6 +52,7 @@ export function applyChoices(s: V16State, i: SmartInsight, choices: Record<strin
         if (!before) break;
         let parts = partReducer(next.parts, { type: 'edit', id: e.partId, patch: e.patch }, next.online);
         parts = partReducer(parts, { type: 'agree', id: e.partId, today: ctx.today }, next.online);
+        parts = parts.map((p) => (p.id === e.partId ? { ...p, lastChangedBy: ctx.viewer, lastChangedOn: ctx.today } : p));
         next = { ...next, parts };
         resolved = true;
         break;
@@ -64,7 +65,9 @@ export function applyChoices(s: V16State, i: SmartInsight, choices: Record<strin
         if (next.parts.some((p) => p.id === e.part.id)) break;
         // Volunteering yourself is your own agreement; anyone else still decides (a Suggested part on their Today).
         const mine = e.part.ownerId === ctx.viewer;
-        const part = mine ? partReducer([e.part], { type: 'agree', id: e.part.id, today: ctx.today }, next.online)[0] : e.part;
+        // Whoever offered it up is who it's handed back to ("handled" goes to them).
+        const offered = { ...e.part, askedBy: e.part.askedBy ?? (mine ? undefined : ctx.viewer) };
+        const part = mine ? partReducer([offered], { type: 'agree', id: offered.id, today: ctx.today }, next.online)[0] : offered;
         next = { ...next, parts: [...next.parts, part] };
         if (!mine) openParts.push(part.id);
         resolved = true;

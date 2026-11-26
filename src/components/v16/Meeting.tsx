@@ -177,8 +177,8 @@ function Talk({ ctx }: { ctx: Ctx }) {
         {club && <p className="v16-meta mt-1">From {club.resourceTitle}, this month’s Family Meeting Club kit.</p>}
       </div>
 
-      {ctx.gen === 19 && <AgendaV19 ctx={ctx} />}
-      {ctx.gen !== 19 && ctx.s.intel && ctx.s.intel.topics.length > 0 && (
+      {(ctx.gen === 19 || ctx.gen === 20) && <AgendaV19 ctx={ctx} />}
+      {ctx.gen !== 19 && ctx.gen !== 20 && ctx.s.intel && ctx.s.intel.topics.length > 0 && (
         <div className="v16-section" data-meeting-topics-list>
           <h2 className="v16-h3">Brought up from Today</h2>
           <ul className="v16-rows">{ctx.s.intel.topics.map((t) => (

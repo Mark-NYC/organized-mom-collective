@@ -75,3 +75,32 @@
 .v18 .v19-reassure{margin-top:14px;font-size:.92rem;color:var(--v17-positive-ink,#244a24);font-weight:600}
 .v18 .v19-reassure li+li{margin-top:4px}
 .v18 .v19-agenda{margin-top:20px}
+
+/* ====================================================================================================================
+   V20 (docs/ios/V20_BASELINE.md): the illustration treatment and the preview's simulated phones. Nothing else changes.
+   ==================================================================================================================== */
+/* Hand-drawn icon, white interior, charcoal line, on a solid calendar-color circle (color set inline, by meaning). */
+.v18 .v20-badge{flex:none;display:inline-grid;place-items:center;border-radius:50%;overflow:hidden}
+.v18 .v20-badge img{display:block;width:78%;height:78%;object-fit:contain}
+.v18 .v20-badge--sm{width:32px;height:32px}
+.v18 .v20-badge--md{width:40px;height:40px}
+.v18 .v20-badge--lg{width:52px;height:52px}
+.v18 .v19-affected .v17-lead .v19-question{margin:0}
+.v18 .v20-switch{appearance:none;flex:none;width:46px;height:28px;border-radius:999px;background:var(--v17-fill-2);position:relative;transition:background-color .2s ease;cursor:pointer}
+.v18 .v20-switch::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s ease}
+.v18 .v20-switch:checked{background:var(--v17-positive)}
+.v18 .v20-switch:checked::after{transform:translateX(18px)}
+/* Preview only: two lock screens. */
+.v18 .v20-phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.v18 .v20-phone{border-radius:22px;padding:12px;background:linear-gradient(160deg,#3b3634,#5a514c);min-height:140px}
+.v18 .v20-phone-head{display:flex;justify-content:space-between;color:#fff;font-weight:700;font-size:.8rem;margin-bottom:8px;letter-spacing:.01em}
+.v18 .v20-phone-empty{color:rgba(255,255,255,.7);font-size:.82rem;text-align:center;padding:24px 0}
+.v18 .v20-push{background:rgba(255,255,255,.92);border-radius:16px;padding:10px 12px;margin-top:8px;color:#151515;letter-spacing:0;text-transform:none}
+.v18 .v20-push[data-push-status="held"],.v18 .v20-push[data-push-status="scheduled"]{opacity:.7}
+.v18 .v20-push-app{display:flex;align-items:center;gap:6px;font-size:.68rem;font-weight:650;color:#514843;text-transform:uppercase;letter-spacing:.03em}
+.v18 .v20-push-icon{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:4px;background:#493F3C;color:#fff;font-size:.55rem;text-transform:none}
+.v18 .v20-push-title{margin-top:4px;font-weight:750;font-size:.9rem;line-height:1.25}
+.v18 .v20-push-body{font-size:.84rem;line-height:1.3;color:#514843}
+.v18 .v20-push-status{margin-top:4px;font-size:.68rem;color:#75695E}
+.v18 .v20-push-actions{display:flex;gap:6px;margin-top:8px}
+.v18 .v20-push-actions button{flex:1;min-height:36px;border-radius:10px;background:#EDE5DA;color:#493F3C;font-weight:700;font-size:.8rem}

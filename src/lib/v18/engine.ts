@@ -62,6 +62,15 @@ export interface IntelState {
   assistance?: 'fewer' | 'standard' | 'more';
   /** Meeting agenda items the family has talked about (key → date). */
   talked?: Record<string, string>;
+  // ---------------------------------------------------------------- V20 (src/lib/v20/notify.ts): optional
+  /** Each adult's notification choices (purposes, the meeting reminder, quiet hours). */
+  notifyPrefs?: Record<string, Partial<import('../v20/notify').NotifyPrefs>>;
+  /** Delivered notifications by dedupe key (shared, so the same facts never alert twice on any device). */
+  sent?: Record<string, { to: string; date: string; time: string; urgent: boolean }>;
+  /** "I've got it" on a change: who took it, and who else had been told. */
+  claims?: Record<string, { by: string; on: string; title: string; notified: string[] }>;
+  /** Preview only: the demo clock ('HH:MM'). */
+  clock?: string;
 }
 
 export const emptyIntel = (viewer: string): IntelState =>

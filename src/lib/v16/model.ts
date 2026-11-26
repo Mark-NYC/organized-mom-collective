@@ -60,6 +60,9 @@ export interface Part {
   onDate?: string;
   /** V19: who asked for this help (a handoff from "Share the load"); the owner still has to agree. */
   askedBy?: string;
+  /** V20: the adult who last changed this agreement, and when (for the "updated a shared plan" notification). */
+  lastChangedBy?: string;
+  lastChangedOn?: string;
   /** Canonical skill (src/lib/family-development/skills.ts) for Let's Practice. */
   skill?: string;
   status: PartStatus;

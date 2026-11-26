@@ -21,7 +21,9 @@ import { PartRow } from '../v16/Parts';
 import { Art, artFor, Person, Sheet, fmtDate, type Ctx, type Glyph } from '../v16/shared';
 import { Chevron } from '../app/ui';
 import { dailyEssentials, weeklySchedule } from '../../data/cleaning';
+import { Badge, badgeFor, type BadgeName } from '../v20/Badge';
 
+const AFFECTED_BADGE: Record<string, BadgeName> = { ride: 'car', dinner: 'cooking-pot', cleaning: 'spray-bottle-cloth', backup: 'helping-hands', intention: 'breakfast-bowl', simplify: 'home', part: 'calendar' };
 const STEP = ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'];
 const SHOWN_PARTS = 3;
 const ICON: Record<SmartInsight['category'], Glyph> = {
@@ -164,7 +166,7 @@ function Matter({ ctx, r, onOpen }: { ctx: Ctx; r: MatterRowV19; onOpen: (key: s
   return (
     <div className="py-3" data-matter={r.occ.event.title} data-group={r.group} data-priority={r.priority ? '' : undefined}>
       <div className="v17-lead">
-        <Art name={artFor(r.occ.event.title)} />
+        {ctx.gen === 20 ? <Badge name={badgeFor(r.occ.event.title)} /> : <Art name={artFor(r.occ.event.title)} />}
         <div className="min-w-0">
           <p className="v16-meta">{fmtDate(r.occ.date, { weekday: 'long' })} · {timeLabel(r.occ.event)}</p>
           <p className="v16-h3">{r.occ.event.title}</p>
@@ -183,7 +185,7 @@ function MeetingRow({ ctx, agenda, occ }: { ctx: Ctx; agenda: number; occ: Retur
   if (m.started) {
     return (
       <button type="button" className="v18-meeting v18-meeting--resume" onClick={() => ctx.go('meeting')} data-meeting-row="resume">
-        <Art name="people" />
+        {ctx.gen === 20 ? <Badge name="family-meeting-around-a-table" /> : <Art name="people" />}
         <span className="min-w-0 flex-1"><span className="v18-meeting-title">Continue your Family Meeting</span><span className="v16-meta block">You stopped at {STEP[m.step]}.</span></span>
         <span aria-hidden="true" className="v18-meeting-go">→</span>
       </button>
@@ -192,7 +194,7 @@ function MeetingRow({ ctx, agenda, occ }: { ctx: Ctx; agenda: number; occ: Retur
   const go = () => (ctx.s.scenario === 'week4' && !m.checkInDone ? ctx.go('check-in') : ctx.go('meeting'));
   return (
     <button type="button" className="v18-meeting" onClick={go} data-meeting-row={occ ? 'next' : 'plan'}>
-      <Art name="people" />
+      {ctx.gen === 20 ? <Badge name="family-meeting-around-a-table" /> : <Art name="people" />}
       <span className="min-w-0 flex-1">
         <span className="v18-meeting-title">{occ ? `Next Family Meeting · ${dayName(occ.date)}, ${timeLabel(occ.event).split('–')[0].trim()}` : 'Plan this week together'}</span>
         {agenda > 0 && <span className="v16-meta block" data-meeting-topics={agenda}>{agenda === 1 ? '1 thing to talk about' : `${agenda} things to talk about`}</span>}
@@ -240,7 +242,7 @@ function ResolveSheet({ ctx, i, meetingDay, onClose }: { ctx: Ctx; i: SmartInsig
         {!openParts && <>
           {i.affected.map((a) => (
             <div key={a.id} className="v19-affected" data-affected={a.kind}>
-              <h3 className="v19-question">{a.question}</h3>
+              {ctx.gen === 20 ? <div className="v17-lead"><Badge name={AFFECTED_BADGE[a.kind]} /><h3 className="v19-question">{a.question}</h3></div> : <h3 className="v19-question">{a.question}</h3>}
               {a.facts.map((f) => <p key={f} className="v16-meta mt-1">{f}</p>)}
               {a.current && (
                 <div className="v19-current" data-current>
