@@ -303,6 +303,8 @@ export function Readiness({ ctx, compact = false }: { ctx: Ctx; compact?: boolea
 
 function Practice({ ctx }: { ctx: Ctx }) {
   const finish = () => {
+    celebrateNext = true;
+    if (ctx.look === 'v17') try { navigator.vibrate?.(12); } catch { /* not supported */ }
     ctx.set((s) => ({ ...s, parts: endDiscussion(s.parts), meeting: { ...s.meeting, step: 0, started: false, finishedOn: ctx.today, talkIndex: 0 } }));
     ctx.go('plan');
   };
@@ -366,12 +368,30 @@ export function CheckIn({ ctx }: { ctx: Ctx }) {
 
 // ------------------------------------------------------------------ We have a plan
 
+/** Set by Finish meeting: the summary celebrates once, on arrival, not every time it's reopened. */
+let celebrateNext = false;
+// The calendar's own colors, at full strength, for the few sparks.
+const SPARKS = ['#3a7895', '#4b8746', '#bf5d69', '#c98b0c', '#7357ad', '#3a7895', '#c98b0c', '#bf5d69'];
+
+/** V17's Family Meeting completion: the family illustration (a celebratory moment), a check, a few sparks. Once. */
+function Celebrate() {
+  return (
+    <div className="v17-celebrate" aria-hidden="true" data-celebrate>
+      {SPARKS.map((c, i) => <span key={i} className="v17-spark" style={{ '--c': c, '--a': `${i * 45 + 20}deg` } as import('react').CSSProperties} />)}
+      <span className="v17-celebrate-art"><img src="/assets/icons/ofc/v2/routines/family-group.webp" alt="" /></span>
+      <span className="v17-celebrate-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12.5 4.6 4.6L19 7.5" /></svg></span>
+    </div>
+  );
+}
+
 export function PlanSummary({ ctx }: { ctx: Ctx }) {
   const prios = currentPriorities(ctx.s);
   const agreed = agreedParts(ctx.s);
+  const [celebrate] = useState(() => { const c = celebrateNext; celebrateNext = false; return c && ctx.look === 'v17'; });
   return (
-    <section data-plan-summary>
-      <p className="v16-eyebrow pt-2">Family Meeting</p>
+    <section data-plan-summary data-celebrating={celebrate ? '' : undefined}>
+      {celebrate && <Celebrate />}
+      {!celebrate && <p className="v16-eyebrow pt-2">Family Meeting</p>}
       <h1 className="v16-h1">We have a plan.</h1>
       <p className="v16-lede">Everyone’s part is on Today. Come back to the meeting any time.</p>
       <div className="v16-section">

@@ -116,6 +116,7 @@ function Calendars({ ctx }: { ctx: Ctx }) {
           const v = ctx.s.feedVisibility[f!.feed_id] ?? f!.visibility;
           return (
             <li key={f!.feed_id} className="v16-row">
+              {ctx.look === 'v17' && <Art name={f!.feed_id === 'feed-lincoln' ? 'backpack' : 'calendar'} tile={f!.feed_id === 'feed-lincoln' ? 'butter' : 'blue'} />}
               <span className="v16-row-main"><span className="v16-row-title block">{f!.name}</span><span className="v16-meta">{f!.feed_id === 'feed-lincoln' ? 'School calendar (iCal)' : 'Google Calendar'} · read-only · added by Ana</span></span>
               <div className="of-seg" role="group" aria-label={`${f!.name}: who sees it`}>
                 <button type="button" aria-pressed={v === 'private'} onClick={() => ctx.set((s) => ({ ...s, feedVisibility: { ...s.feedVisibility, [f!.feed_id]: 'private' } }))} data-feed-private={f!.feed_id}>Private</button>
@@ -210,10 +211,10 @@ function Month({ ctx, picked, setPicked }: { ctx: Ctx; picked: string; setPicked
         {cells.map((d) => {
           const people = [...new Set(all.filter((o) => o.date === d).flatMap((o) => o.event.member_ids))].filter((id) => ctx.names[id]);
           return (
-            <button key={d} type="button" onClick={() => setPicked(d)} data-today={d === ctx.today ? '' : undefined} aria-pressed={d === picked}
-              className={`text-left ${d.slice(0, 7) !== first.slice(0, 7) ? 'opacity-40' : ''} ${d === picked ? '!bg-[var(--of-month-wash)]' : ''}`} aria-label={`${fmtDate(d)}, ${all.filter((o) => o.date === d).length} events`}>
-              <span className="block font-semibold">{+d.slice(8)}</span>
-              <span className="mt-1 flex flex-wrap gap-0.5">{people.slice(0, 5).map((id) => <span key={id} className="of-dot !h-[7px] !w-[7px]" style={{ background: ctx.colors[id]?.hex }} />)}</span>
+            <button key={d} type="button" onClick={() => setPicked(d)} data-today={d === ctx.today ? '' : undefined} data-outside={d.slice(0, 7) !== first.slice(0, 7) ? '' : undefined} aria-pressed={d === picked}
+              className={`text-left ${d.slice(0, 7) !== first.slice(0, 7) && ctx.look !== 'v17' ? 'opacity-40' : ''} ${d === picked && ctx.look !== 'v17' ? '!bg-[var(--of-month-wash)]' : ''}`} aria-label={`${d === ctx.today ? 'Today, ' : ''}${fmtDate(d)}, ${all.filter((o) => o.date === d).length} events`}>
+              <span className="v16-mday block font-semibold">{+d.slice(8)}</span>
+              <span className="v16-mdots mt-1 flex flex-wrap gap-0.5">{people.slice(0, 5).map((id) => <span key={id} className="of-dot !h-[7px] !w-[7px]" style={{ background: ctx.colors[id]?.hex }} />)}</span>
             </button>
           );
         })}

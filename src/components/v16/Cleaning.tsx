@@ -132,7 +132,7 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
         })}</ul>
       </details>
       <p className="v16-meta mt-4 v16-explain">Completion shows on Today. It doesn’t change anyone’s independence by itself.</p>
-      <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')}>Back to Today</button>
+      <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')} data-cleaning-back>Back to Today</button>
     </section>
     </CleaningIconStyle.Provider>
   );

@@ -101,8 +101,10 @@ await p.selectOption('[data-view-day]', '6');
 check('Cleaning: one main cleaning day gathers all four zones on Saturday', (await p.locator('[data-zone-session]').count()) === 4);
 await p.click('[data-mode="printed"]');
 if (await p.locator('[data-sheet]').count()) await p.keyboard.press('Escape'); else await p.click('[data-rhythm]'); // V17: a bottom sheet
-await p.selectOption('[data-view-day]', '3');
+// Daily Reset is per date: tick it on TODAY's weekday, the one Today shows (the run may fall on any day).
+await p.selectOption('[data-view-day]', String(new Date().getDay()));
 await p.locator('[data-daily-reset]').getByText('Make beds').click();
+await p.selectOption('[data-view-day]', '3');
 await p.click('[data-move-row] [role="checkbox"]');
 check('Cleaning: moved session leaves Wednesday', (await p.locator('[data-zone-session="Entry/Bathroom"]').count()) === 0);
 await p.selectOption('[data-view-day]', '6');

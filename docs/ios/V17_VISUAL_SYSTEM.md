@@ -72,6 +72,56 @@ delicate. Refinement 2 keeps the same structure and raises contrast, color convi
 
 **Status:** strong colored words with a dot, never badges.
 
+## 2b. Polish pass (owner baseline, 2026-11-26)
+
+Refinement 2 is the **visual baseline**. This pass changes no layout, flow or data.
+
+**Theme: switchable primary color.**
+- Primary, the interaction color, is token-driven (`--v17-primary` / `-press` / `-tint`). Reviewers can switch it in the preview controls (stored on the device, `omc:v17-theme`).
+- **Forest green** `#3E7A43` is the default.
+- **Calendar brown** is the site's established CTA brown, `--color-warm-button` `#4A3F3E` (`src/styles/global.css`). Its tint comes from the printed calendar's November color, `#D5C5B8` (`src/theme.ts`).
+- **Positive** (`--v17-positive`) is always forest green, in both themes: completion and done checks, "Agreed", meeting progress, cleaning checks and the cleaning session card.
+
+**Shadows:** no colored shadows under buttons or cards. A faint inner highlight remains on primary buttons.
+
+**Headings:** page titles stay at 800. Secondary headings are softer: sections 700, subsections 640, card titles 660.
+
+**Month calendar:**
+- No backgrounds behind dates. Numbers are near-black; days outside the month are gray.
+- Family-member color dots sit under each date.
+- The **selected date** is a solid primary-color circle with a white number. **Today** is a primary-color ring with a bold number. Both stay distinct when they're different days.
+- Hover tint appears only on devices that actually hover.
+
+**Tab bar:**
+- About 15% smaller (max width 19.5rem, 44px buttons with 44px targets, 22px icons).
+- It slides away while a text field has focus, so it never covers an input or the keyboard area.
+- Content padding keeps every screen's last control clear of it. This is verified by `scripts/e2e/v17-polish.mjs` on every screen and every meeting part, at 390 and 430 px, in both themes.
+
+**Safe areas:**
+- `viewport-fit=cover` is on, so the page pads for the status bar. The sticky header stays below the status bar, and a white strip fills that area in a standalone PWA.
+- Side insets are respected in landscape. The tab bar and sheets respect the home indicator.
+- *Tested in Chromium at iPhone sizes only.* No WebKit/Safari engine is installed in this environment, so Safari and the installed PWA still need a check on a real iPhone.
+
+**Icons:** audited at 64px and 20px. The ball (it read as a steering wheel), lunch (it read as a briefcase; now an apple) and backpack (now with a pocket and handle) were redrawn. A sync glyph was added.
+
+**Selective color tiles:** the solid calendar-color squares, kept for grouped lists: shortcuts, Account (Family plan, Sync) and connected calendars (Google, school iCal).
+
+**Motion** (all off under reduced motion; verified):
+- Screens and meeting parts enter with a short fade-and-rise.
+- Checks fill with a spring, then the tick draws.
+- The highlight toggle and selected dates pop slightly.
+- A new "Agreed" settles in.
+- The active tab icon gives a small bounce.
+- Sheets slide up.
+
+**Family Meeting completion:** on Finish meeting, "We have a plan" opens once with a celebration:
+- The hand-drawn family illustration blooms in a soft green circle (a celebratory use of the illustrations), and a green check draws.
+- Eight sparks in the calendar colors drift out once.
+- The title and the agreed parts rise in.
+- A light haptic tap plays where the device supports it.
+
+Reopening the summary later doesn't replay it.
+
 ## 3. Preserved
 
 - Every screen, its order and its content: Today, Plans (Week/Month/Agenda, Add event, connected calendars, private/shared), Cleaning (Daily Reset, all zones, the rhythm options, the weekly move), the four meeting parts, the Week Four check-in, We have a plan, Resources and Account.

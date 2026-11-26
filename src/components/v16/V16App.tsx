@@ -56,6 +56,10 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
   const monday = mondayOf(today);
   const [s, setS] = useState<V16State | null>(null);
   const [route, setRoute] = useState<Route>('today');
+  // V17 primary color, switchable in the preview controls (forest green or the calendar brown). Device-only, a review aid.
+  const [theme, setTheme] = useState<Theme>('forest');
+  useEffect(() => { try { if (localStorage.getItem(THEME_KEY) === 'brown') setTheme('brown'); } catch { /* default */ } }, []);
+  const chooseTheme = (t: Theme) => { setTheme(t); try { localStorage.setItem(THEME_KEY, t); } catch { /* private mode */ } };
   useEffect(() => { setS(load(today, storageKey)); setRoute(readRoute()); }, [today]);
   useEffect(() => {
     const on = () => setRoute(readRoute());
@@ -96,8 +100,8 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
     { id: 'meeting' as const, label: 'Family Meeting', icon: 'meeting' as const, on: openMeetingTab },
   ];
   return (
-    <div className={`v16 family-brand${look === 'v17' ? ' v17' : ''}`} data-look={look} data-v16 data-route={route} data-scenario={s.scenario}>
-      <DemoBar ctx={ctx} />
+    <div className={`v16 family-brand${look === 'v17' ? ' v17' : ''}`} data-look={look} data-theme={look === 'v17' ? theme : undefined} data-v16 data-route={route} data-scenario={s.scenario}>
+      <DemoBar ctx={ctx} theme={look === 'v17' ? { value: theme, set: chooseTheme } : null} />
       <header className="v16-header">
         <div className="v16-header-inner">
           <button type="button" className="v16-wordmark" onClick={() => go('today')} aria-label="Organized Family, Today">organized<em>family.</em></button>
@@ -108,6 +112,8 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
         </div>
       </header>
       <main className="v16-main" id="main">
+        {/* Keyed by screen (and meeting part) so each one enters with a short transition in V17. */}
+        <div className="v16-route" key={route === 'meeting' ? `meeting-${s.meeting.step}` : route}>
         {route === 'today' && <Today ctx={ctx} />}
         {route === 'plans' && <Plans ctx={ctx} />}
         {route === 'cleaning' && <Cleaning ctx={ctx} />}
@@ -116,6 +122,7 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
         {route === 'meeting' && <Meeting ctx={ctx} />}
         {route === 'check-in' && <CheckIn ctx={ctx} />}
         {route === 'plan' && <PlanSummary ctx={ctx} />}
+        </div>
       </main>
       <nav className="v16-tabbar" aria-label="App navigation">
         <ul>{tabs.map((t) => <li key={t.id}><button type="button" aria-current={tab === t.id ? 'page' : undefined} onClick={t.on} data-tab={t.id}>{look === 'v17' ? <Art name={t.id === 'today' ? 'house' : 'people'} /> : <Icon name={t.icon} size={22} />}{t.label}</button></li>)}</ul>
@@ -124,7 +131,10 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
   );
 }
 
-function DemoBar({ ctx }: { ctx: Ctx }) {
+type Theme = 'forest' | 'brown';
+const THEME_KEY = 'omc:v17-theme';
+
+function DemoBar({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: Theme) => void } | null }) {
   const s = ctx.s;
   const reseed = (patch: Partial<Pick<V16State, 'scenario' | 'club' | 'adults'>>) => {
     const next = { scenario: s.scenario, club: s.club, adults: s.adults, ...patch };
@@ -134,9 +144,11 @@ function DemoBar({ ctx }: { ctx: Ctx }) {
   return (
     <details className="v16-demo" aria-label="Preview controls (not part of the app)" data-demo-bar>
       <summary className="v16-demo-inner cursor-pointer list-none"><span className="v16-demo-tag">Preview controls · not in the app</span>
-        <span className="text-[0.74rem]">{s.scenario === 'first' ? 'First week' : 'Week four'} · {s.club ? 'Club' : 'Free'} · {s.adults === 'two' ? 'Two adults' : 'One adult'}{s.soccer !== 'as-planned' ? ` · soccer ${s.soccer}` : ''}{s.online ? '' : ' · offline'}</span>
+        <span className="text-[0.74rem]">{s.scenario === 'first' ? 'First week' : 'Week four'} · {s.club ? 'Club' : 'Free'} · {s.adults === 'two' ? 'Two adults' : 'One adult'}{s.soccer !== 'as-planned' ? ` · soccer ${s.soccer}` : ''}{s.online ? '' : ' · offline'}{theme ? ` · ${theme.value === 'brown' ? 'Brown' : 'Forest green'}` : ''}</span>
         <span className="ml-auto text-[0.74rem] underline">Change</span></summary>
       <div className="v16-demo-inner">
+        {theme && <label>Primary color <select value={theme.value} onChange={(e) => theme.set(e.target.value as Theme)} data-demo-theme>
+          <option value="forest">Forest green</option><option value="brown">Calendar brown</option></select></label>}
         <label>Scenario <select value={s.scenario} onChange={(e) => reseed({ scenario: e.target.value as V16State['scenario'] })} data-demo-scenario>
           <option value="first">First week</option><option value="week4">Week four</option></select></label>
         <label>Plan <select value={s.club ? 'club' : 'free'} onChange={(e) => ctx.set((x) => ({ ...x, club: e.target.value === 'club' }))} data-demo-plan>
@@ -192,8 +204,8 @@ function Account({ ctx }: { ctx: Ctx }) {
       <h1 className="v16-h1 pt-2">Account</h1>
       <p className="v16-lede">Signed in as Ana (sample). {adults.length > 1 ? `${adults.map((a) => a.firstName).join(' and ')} share this family’s plan as equals.` : 'One adult runs this family’s plan; nothing waits on a second account.'}</p>
       <ul className="v16-rows mt-4">
-        <li className="v16-row"><span className="v16-row-main">Family plan</span><span className="v16-meta">{ctx.s.club ? 'Family Meeting Club' : 'Free'}</span></li>
-        <li className="v16-row"><span className="v16-row-main">Sync</span><span className="v16-meta">{ctx.s.online ? 'Up to date' : 'Offline · changes wait on this phone'}</span></li>
+        <li className="v16-row">{ctx.look === 'v17' && <Art name="people" tile="blue" />}<span className="v16-row-main">Family plan</span><span className="v16-meta">{ctx.s.club ? 'Family Meeting Club' : 'Free'}</span></li>
+        <li className="v16-row">{ctx.look === 'v17' && <Art name="sync" tile="sage" />}<span className="v16-row-main">Sync</span><span className="v16-meta">{ctx.s.online ? 'Up to date' : 'Offline · changes wait on this phone'}</span></li>
       </ul>
       <p className="v16-meta mt-4">Preview only. The real account, sharing, billing and sign-in are at <a className="underline" href="/app/account">/app/account</a>; nothing here changes them.</p>
       <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')}>Back to Today</button>
