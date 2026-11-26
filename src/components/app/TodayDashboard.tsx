@@ -39,6 +39,7 @@ import { Avatar, Chevron, Icon } from './ui';
 import { householdAccess } from '../../lib/household/api';
 import { appShellBuild } from '../../lib/native/platform';
 import { firstSteps, gettingStarted, inviteSkipped, nextStep, skipInvite, starterIdeas, type FirstStep } from '../../lib/app/first-steps';
+import { useSharedMeetingProgress } from "../../lib/app/shared-meeting-progress";
 import { dayWord, meetingState, nextScheduledMeeting, readProgress } from '../../lib/app/meeting-progress';
 import { SHOWN, currentPriorities, usePriorities, type Resolved } from '../../lib/app/priorities';
 import { doneLabel, tasksFor } from '../../lib/calendar/event-tasks';
@@ -92,7 +93,9 @@ export default function TodayDashboard() {
     if (!cal.signedIn || isDemo()) return;
     void householdAccess().then((a) => setShared((a?.adults.length ?? 1) > 1), () => setShared(false));
   }, [cal.signedIn]);
-  const progress = readProgress(scope);
+  const [progress, setProgress] = useState(() => readProgress(scope));
+  useEffect(() => setProgress(readProgress(scope)), [scope]);
+  useSharedMeetingProgress(live, setProgress);
   const agreedParts = new Set(agreed.flatMap((p) => p.parts.map((x) => x.id))).size;
   const [skipped, setSkipped] = useState(false);
   useEffect(() => setSkipped(inviteSkipped()), []);
