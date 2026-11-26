@@ -2,13 +2,18 @@
 /** Companion app pages (/app/…): noindex, installable, app navigation. */
 import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
+import FamilyNavigation from '../components/v20/FamilyNavigation.astro';
+import '../styles/family-app-brand.css';
+import '../styles/v16.css';
+import '../styles/v17.css';
+import '../styles/v18.css';
+import '@fontsource-variable/figtree';
 import { calendarPath } from '../lib/companion';
 const calendar = calendarPath(Astro.url.pathname);
 const cleaningOnly = !calendar && /^\/app\/(cleaning|week|reorder|settings)\/?$/.test(Astro.url.pathname);
 import { SITE_NAME } from '../config';
 import { ONBOARDED_KEY } from '../lib/storage';
 import { monthTints } from '../lib/club/month-tints';
-import '../styles/family-app-brand.css';
 // This month's approved calendar color (src/theme.ts) as the app's accent, chosen on the device (the page is static).
 // Tiles use the month's lightest step (the same steps its Club printables use); the accent carries labels and progress.
 const MONTH_THEME = Array.from({ length: 12 }, (_, i) => { const t = monthTints(i); return [t.base, t.weeks[0], t.accent]; });
@@ -65,7 +70,8 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:border focus:border-ink focus:bg-paper focus:px-4 focus:py-2"
     >Skip to content</a
   >
-  <Nav />
+  <div class={calendar ? undefined : "v16 v17 v18 family-brand"} data-look={calendar ? undefined : "v20"} data-theme={calendar ? undefined : "brown"}>
+  {calendar ? <Nav /> : <FamilyNavigation />}
   <script>
     import { initCompanionAccess } from '../lib/companion-access';
     import { track } from '../lib/app/events';
@@ -77,9 +83,10 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     import { startCleaningSync } from '../lib/cleaning-sync/client';
     void startCleaningSync();
   </script>
-  <main data-calendar-feature={cleaningOnly ? "" : undefined} hidden={cleaningOnly} id="main" class="mx-auto max-w-5xl px-5 pt-7 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-12 sm:pb-20">
+  <main data-calendar-feature={cleaningOnly ? "" : undefined} hidden={cleaningOnly} id="main" class={calendar ? "mx-auto max-w-5xl px-5 pt-7 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-12 sm:pb-20" : "v16-main"}>
     <slot />
   </main>
+  </div>
   {appShell && <script>import '../lib/native/init';</script>}
   {appShell && <style is:global>html.omc-native body { padding-top: env(safe-area-inset-top); } html.omc-native body::before { content: ''; position: fixed; inset: 0 0 auto 0; height: env(safe-area-inset-top); background-color: inherit; z-index: 1000; pointer-events: none; }</style>}
   <script is:inline>
