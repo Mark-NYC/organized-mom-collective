@@ -1,0 +1,21 @@
+---
+import { PRIMARY_TABS, tabFor } from '../../data/app/tabs';
+import { Art } from '../v16/shared';
+const current = tabFor(Astro.url.pathname.replace(/\/$/, ''));
+---
+<header data-chrome class="v16-header">
+  <div class="v16-header-inner">
+    <a class="v16-wordmark" href="/app" aria-label="Organized Family, Today">organized<em>family.</em></a>
+    <nav class="v16-topnav" aria-label="Organized Family" data-app-topnav>
+      {PRIMARY_TABS.map(t => <a href={t.href} aria-current={current === t.href ? 'page' : undefined}>
+        <Art name={t.href === '/app' ? 'house' : 'people'} size="sm" />{t.label}
+      </a>)}
+    </nav>
+    <a class="v16-iconbtn" href="/app/account" aria-label="Account and settings" data-profile-link><Art name="person" size="sm" /></a>
+  </div>
+</header>
+<nav class="v16-tabbar" aria-label="App navigation" data-chrome data-app-tabbar>
+  <ul>{PRIMARY_TABS.map(t => <li><a href={t.href} aria-current={current === t.href ? 'page' : undefined}>
+    <Art name={t.href === '/app' ? 'house' : 'people'} />{t.label}
+  </a></li>)}</ul>
+</nav>
