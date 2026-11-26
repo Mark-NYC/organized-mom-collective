@@ -12,7 +12,7 @@ import {
 } from '../../lib/v16/model';
 import { timeLabel, type Occurrence } from '../../lib/calendar/recurrence';
 import { PartRow } from './Parts';
-import { Arrow, Art, CheckMark, Down, Person, artFor, fmtDate, type Ctx } from './shared';
+import { Arrow, Art, CheckMark, Down, Illo, Person, artFor, fmtDate, type Ctx } from './shared';
 import WallCalendar from './WallCalendar';
 
 export const STEPS = ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'] as const;
@@ -155,7 +155,7 @@ function Talk({ ctx }: { ctx: Ctx }) {
     <section data-meeting-step="talk">
       <Head look={ctx.look} step={1} title="Let’s Talk" lede="Talk it through out loud. Nothing here needs typing." />
       <div className={`v16-card ${club ? 'v16-card--month' : 'v16-card--quiet'}`} data-talk-card data-club={club ? '' : undefined}>
-        {ctx.look === 'v17' && <Art name="chat" size="lg" />}
+        {ctx.look === 'v17' && <Illo name="conversation-bubbles" size="lg" />}
         {club ? (
           <p className="v16-eyebrow !text-[color:var(--of-month-accent)]">This month · {club.theme}</p>
         ) : (
@@ -337,6 +337,7 @@ export function CheckIn({ ctx }: { ctx: Ctx }) {
       <h1 className="v16-h1">Anything new this week?</h1>
       {still.length > 0 && (
         <div className="v16-card" data-still-working>
+          {ctx.look === 'v17' && <Illo name="helping-hands" size="lg" />}
           <p className="v16-card-title">Still working</p>
           <ul className="mt-2 grid gap-2">{still.map((p) => (
             <li key={p.id} className="flex items-center gap-2 text-[0.92rem]"><Person ctx={ctx} id={p.ownerId} /> {ctx.names[p.ownerId!]} · {p.title}</li>))}</ul>
@@ -390,10 +391,12 @@ export function PlanSummary({ ctx }: { ctx: Ctx }) {
   const [celebrate] = useState(() => { const c = celebrateNext; celebrateNext = false; return c && ctx.look === 'v17'; });
   return (
     <section data-plan-summary data-celebrating={celebrate ? '' : undefined}>
-      {celebrate && <Celebrate />}
-      {!celebrate && <p className="v16-eyebrow pt-2">Family Meeting</p>}
-      <h1 className="v16-h1">We have a plan.</h1>
-      <p className="v16-lede">Everyone’s part is on Today. Come back to the meeting any time.</p>
+      <div className={celebrate ? 'v17-moment' : undefined} data-moment={celebrate ? '' : undefined}>
+        {celebrate && <Celebrate />}
+        {!celebrate && <p className="v16-eyebrow pt-2">Family Meeting</p>}
+        <h1 className="v16-h1">We have a plan.</h1>
+        <p className="v16-lede">Everyone’s part is on Today. Come back to the meeting any time.</p>
+      </div>
       <div className="v16-section">
         <h2 className="v16-h3">What matters</h2>
         <ul className="v16-rows">{prios.map((p) => {

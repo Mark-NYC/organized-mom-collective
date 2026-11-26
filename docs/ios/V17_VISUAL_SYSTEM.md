@@ -126,6 +126,51 @@ Refinement 2 is the **visual baseline**. This pass changes no layout, flow or da
 
 Reopening the summary later doesn't replay it.
 
+## 2c. Refinement 3: native craftsmanship, two visual modes (owner, 2026-11-26)
+
+**Two modes, one system.**
+- **Everyday utility:** the default everywhere.
+  - Pure white surfaces, near-black type `#141414` and functional icons.
+  - Neutral gray secondary surfaces (`#F2F2F5`, `#E8E8ED`) and iOS-style separators.
+  - A **solid** primary color for interaction only.
+- **Meaningful moments:** reserved for the places that are moments.
+  - Gradients made **only of the printed calendar's month colors** (June apricot, July coral, February blush, April lilac, May leaf, March mint).
+  - The brand's hand-drawn illustrations.
+  - More generous space.
+- Where each moment appears:
+
+| Moment | Treatment |
+| --- | --- |
+| Invitation to meet / check in (Today) | Warm gradient (June, July, February), family illustration, brown arrow button |
+| Club conversation (Let's Talk) and Club month (Resources) | The month's own color as a gentle gradient, with an illustration |
+| Encouragement: "Still working", a saved practice decision | Fresh gradient (May, March), helping-hands illustration |
+| Empty "Everyone's part" | Helping-hands illustration, one kind line |
+| Family Meeting completion | Dawn gradient (four month colors), family illustration, check, sparks (once) |
+
+**Brown is the primary interaction color, and the default.**
+- Solid `#4A3F3E` (`--color-warm-button`), with a light tint `#F1EBE6` from November `#D5C5B8` for the active tab and selections.
+- No gradients on controls; the earlier "muddy" brown gradient is gone. No brown-tinted surfaces.
+- Forest green remains switchable as a primary, and it stays the positive color in both themes.
+
+**Type:** Figtree. Titles 740 at −0.026em; sections 680; subsections 620; card titles 650; rows 560; meta 450.
+
+**Native controls:**
+- **Functional icons:** a rounder, heavier stroke (2.3) on chevrons and arrows, matching the filled icon family.
+- **Buttons:** solid primary with a crisp pressed state; gray secondary buttons.
+- **Segmented control:** iOS-style, a gray track with a raised white thumb.
+- **Fields:** gray fill, with a primary-color focus ring.
+- **Rows:** a soft tap highlight.
+- **Tab bar:** real translucent material with a soft neutral shadow; the active tab is a brown tint.
+- **Sheets:** centered title, Done at the right, 32px corners.
+
+**Tab bar and content:** every screen's last control clears the floating bar. Verified by `scripts/e2e/v17-polish.mjs` (111 checks, both themes, 390 and 430 px). A scroll-edge fade was tried and removed, because it tinted buttons passing beneath it.
+
+**Design tokens:**
+- Semantic light tokens: `--v17-label`, `-label-2`, `-label-3`, `-separator`, `-page`, `-surface`, `-material`, `-fill`, `-fill-2`, `-primary*`, `-positive*` and the `-moment-*` gradients.
+- Matching **dark** values are defined under `[data-appearance="dark"]`. They're not switched on yet: the V16 base layer still has light-only colors that need an audit first.
+
+**Engineering note:** the icon table now builds each icon when it's drawn, not at module load, so a cold dev-server dependency rebuild can't break hydration.
+
 ## 3. Preserved
 
 - Every screen, its order and its content: Today, Plans (Week/Month/Agenda, Add event, connected calendars, private/shared), Cleaning (Daily Reset, all zones, the rhythm options, the weekly move), the four meeting parts, the Week Four check-in, We have a plan, Resources and Account.

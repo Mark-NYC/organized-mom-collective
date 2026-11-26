@@ -19,7 +19,7 @@ import Cleaning from './Cleaning';
 import Meeting, { CheckIn, PlanSummary } from './Meeting';
 import Plans from './Plans';
 import Today from './Today';
-import { Art, Person, TAB_OF, type Ctx, type Look, type Route } from './shared';
+import { Art, Illo, Person, TAB_OF, type Ctx, type Look, type Route } from './shared';
 
 const ROUTES: Route[] = ['today', 'plans', 'cleaning', 'resources', 'account', 'meeting', 'check-in', 'plan'];
 const readRoute = (): Route => { const r = location.hash.replace(/^#\/?/, '') as Route; return ROUTES.includes(r) ? r : 'today'; };
@@ -57,8 +57,8 @@ export default function V16App({ look = 'v16' }: { look?: Look }) {
   const [s, setS] = useState<V16State | null>(null);
   const [route, setRoute] = useState<Route>('today');
   // V17 primary color, switchable in the preview controls (forest green or the calendar brown). Device-only, a review aid.
-  const [theme, setTheme] = useState<Theme>('forest');
-  useEffect(() => { try { if (localStorage.getItem(THEME_KEY) === 'brown') setTheme('brown'); } catch { /* default */ } }, []);
+  const [theme, setTheme] = useState<Theme>('brown');
+  useEffect(() => { try { if (localStorage.getItem(THEME_KEY) === 'forest') setTheme('forest'); } catch { /* default */ } }, []);
   const chooseTheme = (t: Theme) => { setTheme(t); try { localStorage.setItem(THEME_KEY, t); } catch { /* private mode */ } };
   useEffect(() => { setS(load(today, storageKey)); setRoute(readRoute()); }, [today]);
   useEffect(() => {
@@ -148,7 +148,7 @@ function DemoBar({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: The
         <span className="ml-auto text-[0.74rem] underline">Change</span></summary>
       <div className="v16-demo-inner">
         {theme && <label>Primary color <select value={theme.value} onChange={(e) => theme.set(e.target.value as Theme)} data-demo-theme>
-          <option value="forest">Forest green</option><option value="brown">Calendar brown</option></select></label>}
+          <option value="brown">Calendar brown</option><option value="forest">Forest green</option></select></label>}
         <label>Scenario <select value={s.scenario} onChange={(e) => reseed({ scenario: e.target.value as V16State['scenario'] })} data-demo-scenario>
           <option value="first">First week</option><option value="week4">Week four</option></select></label>
         <label>Plan <select value={s.club ? 'club' : 'free'} onChange={(e) => ctx.set((x) => ({ ...x, club: e.target.value === 'club' }))} data-demo-plan>
@@ -172,6 +172,7 @@ function Resources({ ctx }: { ctx: Ctx }) {
       <p className="v16-lede">Your family, who does what, and {ctx.club ? 'this month’s Club kit' : 'guides'}.</p>
       {ctx.club && (
         <div className="v16-card v16-card--month" data-club-month>
+          {ctx.look === 'v17' && <Illo name="book-stack" size="lg" />}
           <p className="v16-eyebrow !text-[color:var(--of-month-accent)]">This month · Family Meeting Club</p>
           <p className="v16-card-title mt-1">{ctx.club.resourceTitle}</p>
           <p className="mt-1 text-[0.9rem]">{ctx.club.focus.challenge}</p>
