@@ -14,6 +14,9 @@ import { timeLabel, type Occurrence } from '../../lib/calendar/recurrence';
 import { PartRow } from './Parts';
 import { Arrow, Art, CheckMark, Down, Illo, Person, artFor, fmtDate, type Ctx } from './shared';
 import WallCalendar from './WallCalendar';
+import { enginePeople } from '../v18/TodayV18';
+import { buildTodayV19 } from '../../lib/v19/engine';
+import { talked } from '../../lib/v19/resolve';
 
 export const STEPS = ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'] as const;
 const FREE_QUESTIONS = [
@@ -174,7 +177,8 @@ function Talk({ ctx }: { ctx: Ctx }) {
         {club && <p className="v16-meta mt-1">From {club.resourceTitle}, this month’s Family Meeting Club kit.</p>}
       </div>
 
-      {ctx.s.intel && ctx.s.intel.topics.length > 0 && (
+      {ctx.gen === 19 && <AgendaV19 ctx={ctx} />}
+      {ctx.gen !== 19 && ctx.s.intel && ctx.s.intel.topics.length > 0 && (
         <div className="v16-section" data-meeting-topics-list>
           <h2 className="v16-h3">Brought up from Today</h2>
           <ul className="v16-rows">{ctx.s.intel.topics.map((t) => (
@@ -425,6 +429,29 @@ export function PlanSummary({ ctx }: { ctx: Ctx }) {
       {ctx.s.practice.outcome && <p className="v16-card">{ctx.s.practice.outcome}</p>}
       <button type="button" className="of-btn of-btn--block mt-7" onClick={() => ctx.go('today')} data-back-to-today>Back to Today</button>
       <div className="v16-later"><button type="button" className="v16-link" onClick={() => { ctx.set((s) => ({ ...s, meeting: { ...s.meeting, step: 0, started: true } })); ctx.go('meeting'); }}>Open the meeting again</button></div>
+    </section>
+  );
+}
+
+/**
+ * V19: what Today routed to the meeting (friction, ownership, seasons, intentions, early preparation), one at a time in
+ * the same light brown card, like the month's questions. Prepared, never decided: "Talked about it" just clears it.
+ */
+function AgendaV19({ ctx }: { ctx: Ctx }) {
+  const people = useMemo(() => enginePeople(ctx), [ctx.people, ctx.today]); // eslint-disable-line react-hooks/exhaustive-deps
+  const agenda = buildTodayV19({ s: ctx.s, monday: ctx.monday, today: ctx.today, people }).agenda;
+  const [i, setI] = useState(0);
+  if (!agenda.length) return null;
+  const item = agenda[Math.min(i, agenda.length - 1)];
+  return (
+    <section className="v18-heads v19-agenda" aria-label="Worth talking about" data-agenda={item.key}>
+      <p className="v18-heads-eyebrow">{item.eyebrow} · {Math.min(i, agenda.length - 1) + 1} of {agenda.length}</p>
+      <h2 className="v18-heads-title">{item.title}</h2>
+      {item.body && <p className="v18-heads-body">{item.body}</p>}
+      <div className="v18-heads-actions">
+        <button type="button" className="v18-heads-primary" onClick={() => ctx.set((s) => talked(s, item.key, ctx.today))} data-agenda-talked>Talked about it <span aria-hidden="true">✓</span></button>
+        {agenda.length > 1 && <button type="button" className="v18-heads-quiet" onClick={() => setI((i + 1) % agenda.length)} data-agenda-next>Next</button>}
+      </div>
     </section>
   );
 }

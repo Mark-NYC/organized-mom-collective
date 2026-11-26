@@ -56,6 +56,10 @@ export interface Part {
   need?: string;
   /** V18: the family talked about it (Keep) at some point. Not consent; it marks an open loop if never agreed. */
   discussed?: boolean;
+  /** V19: a one-time part for one date ("Lead dinner tonight"), instead of a weekly day or an event. */
+  onDate?: string;
+  /** V19: who asked for this help (a handoff from "Share the load"); the owner still has to agree. */
+  askedBy?: string;
   /** Canonical skill (src/lib/family-development/skills.ts) for Let's Practice. */
   skill?: string;
   status: PartStatus;
@@ -85,7 +89,7 @@ export interface V16State {
   adults: Adults;
   online: boolean;
   /** Demo: what happened to this week's soccer practice in its source calendar. */
-  soccer: 'as-planned' | 'moved' | 'cancelled' | 'earlier';
+  soccer: 'as-planned' | 'moved' | 'cancelled' | 'earlier' | 'later';
   /** Ana's choice per calendar she connected: shared with the household or private. */
   feedVisibility: Record<string, 'household' | 'private'>;
   extraEvents: CalendarEvent[];
@@ -140,7 +144,7 @@ export type PartAction =
   | { type: 'agree'; id: string; today: string }
   | { type: 'skip'; id: string }
   | { type: 'unskip'; id: string }
-  | { type: 'edit'; id: string; patch: Partial<Pick<Part, 'ownerId' | 'title' | 'finishLine' | 'offsetDays' | 'weekday'>> }
+  | { type: 'edit'; id: string; patch: Partial<Pick<Part, 'ownerId' | 'title' | 'finishLine' | 'offsetDays' | 'weekday' | 'cue'>> }
   | { type: 'toggle-done'; id: string };
 
 export function partReducer(parts: Part[], a: PartAction, online: boolean): Part[] {
@@ -167,7 +171,7 @@ export function partReducer(parts: Part[], a: PartAction, online: boolean): Part
       }
       case 'toggle-done':
         // Only an agreed, trackable preparation has a done state.
-        return p.status === 'agreed' && p.eventLink ? { ...p, done: !p.done } : p;
+        return p.status === 'agreed' && (p.eventLink || p.onDate) ? { ...p, done: !p.done } : p;
     }
   });
 }
@@ -212,10 +216,11 @@ export function eventsFor(s: V16State, monday: string): CalendarEvent[] {
     if (out.id === 'e-soccer' && s.soccer !== 'as-planned') out = { ...out, skip_dates: [...(out.skip_dates ?? []), thursday] };
     return out;
   });
-  if (s.soccer === 'earlier') {
-    // The source calendar moved this one occurrence earlier the same day (4 PM → 3 PM).
+  if (s.soccer === 'earlier' || s.soccer === 'later') {
+    // The source calendar moved this one occurrence the same day (4 PM → 3 PM, or → 5:30 PM).
     const soccer = list.find((e) => e.id === 'e-soccer')!;
-    list.push({ ...soccer, id: 'e-soccer-moved', starts_on: thursday, start_time: '15:00', end_time: '16:15', recurrence: null, skip_dates: [],
+    const [start, end] = s.soccer === 'earlier' ? ['15:00', '16:15'] : ['17:30', '18:45'];
+    list.push({ ...soccer, id: 'e-soccer-moved', starts_on: thursday, start_time: start, end_time: end, recurrence: null, skip_dates: [],
       external: { ...soccer.external!, instance_key: thursday } });
   }
   if (s.soccer === 'moved') {
@@ -255,6 +260,7 @@ export function partDate(s: V16State, monday: string, p: Part): string | null {
     return o ? addDays(o.date, p.offsetDays ?? 0) : null;
   }
   if (p.weekday !== undefined) return dateOfWeekday(monday, p.weekday);
+  if (p.onDate) return p.onDate >= monday && p.onDate <= addDays(monday, 6) ? p.onDate : null;
   return null;
 }
 

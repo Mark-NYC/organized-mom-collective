@@ -34,7 +34,7 @@ export function enginePeople(ctx: Ctx): EnginePerson[] {
   return ctx.people.map((m) => ({ id: m.id, firstName: m.firstName, kind: m.kind === 'adult' ? 'adult' : 'child', age: m.birthYear ? year - m.birthYear : undefined }));
 }
 
-function actionLabel(a: ActionId, meetingDay: string | null): string {
+export function actionLabel(a: ActionId, meetingDay: string | null): string {
   switch (a) {
     case 'make-plan': return 'Make a plan';
     case 'finish-plan': return 'Finish the plan';
@@ -163,7 +163,7 @@ export default function TodayV18({ ctx }: { ctx: Ctx }) {
 }
 
 /** Agreed preparation gets the owner's check; a proposal shows its status. Completing one teaches household memory. */
-function PrepLine({ ctx, p, date, doneYesterday }: { ctx: Ctx; p: Part; date: string | null; doneYesterday: boolean }) {
+export function PrepLine({ ctx, p, date, doneYesterday }: { ctx: Ctx; p: Part; date: string | null; doneYesterday: boolean }) {
   const agreed = p.status === 'agreed';
   const toggle = () => ctx.set((s) => {
     const next = { ...s, parts: s.parts.map((x) => (x.id === p.id && x.status === 'agreed' && x.eventLink ? { ...x, done: !x.done } : x)) };
@@ -185,7 +185,7 @@ function PrepLine({ ctx, p, date, doneYesterday }: { ctx: Ctx; p: Part; date: st
   );
 }
 
-function PartLine({ ctx, p }: { ctx: Ctx; p: Part }) {
+export function PartLine({ ctx, p }: { ctx: Ctx; p: Part }) {
   const date = partDate(ctx.s, ctx.monday, p);
   if (p.eventLink) {
     const o = sharedOccurrences(ctx.s, ctx.monday).find((x) => (x.event.external?.uid ?? x.event.id) === p.eventLink);
@@ -238,7 +238,7 @@ function MeetingRow({ ctx, topics, occ }: { ctx: Ctx; topics: number; occ: Retur
 }
 
 /** One lightweight sheet per action. Every choice goes through an existing workflow; nothing is decided for the family. */
-function InsightSheet({ ctx, i, meetingDay, onAction, onClose }: { ctx: Ctx; i: Insight; meetingDay: string | null; onAction: (a: ActionId) => void; onClose: () => void }) {
+export function InsightSheet({ ctx, i, meetingDay, onAction, onClose }: { ctx: Ctx; i: Insight; meetingDay: string | null; onAction: (a: ActionId) => void; onClose: () => void }) {
   const [open, setOpen] = useState<string | null>(null);
   const eventTitle = i.eventLink ? sharedOccurrences(ctx.s, ctx.monday).find((o) => (o.event.external?.uid ?? o.event.id) === i.eventLink)?.event.title ?? 'This activity' : '';
   const reviewParts = i.type === 'exception' ? ctx.s.parts.filter((p) => i.partIds.includes(p.id)) : [];

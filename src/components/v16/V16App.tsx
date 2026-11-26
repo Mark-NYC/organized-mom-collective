@@ -20,6 +20,9 @@ import Meeting, { CheckIn, PlanSummary } from './Meeting';
 import Plans from './Plans';
 import Today from './Today';
 import TodayV18 from '../v18/TodayV18';
+import TodayV19 from '../v19/TodayV19';
+import { SCENARIOS_V19, seedV19, type ScenarioV19 } from '../../lib/v19/scenarios';
+import { undoFeedback } from '../../lib/v19/resolve';
 import { SCENARIOS, demoToday, seedScenario, type ScenarioId } from '../../lib/v18/scenarios';
 import { allMemory, forget } from '../../lib/v18/memory';
 import { memoryLine, snapshot } from '../../lib/v18/engine';
@@ -28,12 +31,13 @@ import { Art, Illo, Person, TAB_OF, type Ctx, type Look, type Route } from './sh
 const ROUTES: Route[] = ['today', 'plans', 'cleaning', 'resources', 'account', 'meeting', 'check-in', 'plan'];
 const readRoute = (): Route => { const r = location.hash.replace(/^#\/?/, '') as Route; return ROUTES.includes(r) ? r : 'today'; };
 
-function load(today: string, key: string, intelligent: boolean): V16State {
+function load(today: string, key: string, gen: 0 | 18 | 19): V16State {
   try {
     const raw = localStorage.getItem(key);
-    if (raw) { const s = JSON.parse(raw) as V16State & { savedMonday?: string }; if (s.v === 1 && s.savedMonday === mondayOf(today) && (!intelligent || s.intel)) return s; }
+    if (raw) { const s = JSON.parse(raw) as V16State & { savedMonday?: string }; if (s.v === 1 && s.savedMonday === mondayOf(today) && (!gen || s.intel)) return s; }
   } catch { /* fresh */ }
-  return intelligent ? seedScenario('field-trip', { club: true, monday: mondayOf(today) }) : seed('first', { club: true, adults: 'two', today });
+  if (gen === 19) return seedV19('change', { club: true, monday: mondayOf(today) });
+  return gen === 18 ? seedScenario('field-trip', { club: true, monday: mondayOf(today) }) : seed('first', { club: true, adults: 'two', today });
 }
 
 /** The Club month's own suggestions, as proposals (never agreements), one per person who has nothing prepared. */
@@ -57,9 +61,10 @@ function withMonthParts(s: V16State, club: ReturnType<typeof buildFamilyMeeting>
  * `intelligent` = V18 (docs/ios/V18_TODAY_INTELLIGENCE.md): the V17 preview with the intelligent Today. Its own demo
  * state, and "today" pinned to Thursday of this week so the preview's scenarios always land on the same day.
  */
-export default function V16App({ look = 'v16', intelligent = false }: { look?: Look; intelligent?: boolean }) {
-  // V16, V17 and V18 keep separate demo state, so they can be compared side by side.
-  const storageKey = intelligent ? `${STORAGE_KEY}:v18` : look === 'v17' ? `${STORAGE_KEY}:v17` : STORAGE_KEY;
+export default function V16App({ look = 'v16', intelligent = false }: { look?: Look; intelligent?: boolean | 'v19' }) {
+  // V16, V17, V18 and V19 keep separate demo state, so they can be compared side by side.
+  const gen: 0 | 18 | 19 = intelligent === 'v19' ? 19 : intelligent ? 18 : 0;
+  const storageKey = gen ? `${STORAGE_KEY}:v${gen}` : look === 'v17' ? `${STORAGE_KEY}:v17` : STORAGE_KEY;
   const today = useMemo(() => (intelligent ? demoToday(mondayOf(localToday())) : localToday()), [intelligent]);
   const monday = mondayOf(today);
   const [s, setS] = useState<V16State | null>(null);
@@ -68,7 +73,7 @@ export default function V16App({ look = 'v16', intelligent = false }: { look?: L
   const [theme, setTheme] = useState<Theme>('brown');
   useEffect(() => { try { if (localStorage.getItem(THEME_KEY) === 'forest') setTheme('forest'); } catch { /* default */ } }, []);
   const chooseTheme = (t: Theme) => { setTheme(t); try { localStorage.setItem(THEME_KEY, t); } catch { /* private mode */ } };
-  useEffect(() => { setS(load(today, storageKey, intelligent)); setRoute(readRoute()); }, [today]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setS(load(today, storageKey, gen)); setRoute(readRoute()); }, [today]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const on = () => setRoute(readRoute());
     addEventListener('hashchange', on);
@@ -100,7 +105,7 @@ export default function V16App({ look = 'v16', intelligent = false }: { look?: L
   if (!s) return <div className="v16" aria-busy="true" />;
   const people = household.members.filter((m) => !m.archived);
   const ctx: Ctx = {
-    look, s, set, today, monday, household, colors: colorsFor(household), names: Object.fromEntries(people.map((m) => [m.id, m.firstName])),
+    look, gen: gen || undefined, s, set, today, monday, household, colors: colorsFor(household), names: Object.fromEntries(people.map((m) => [m.id, m.firstName])),
     people, kids: new Set(people.filter((m) => m.kind === 'child').map((m) => m.id)), club, go,
   };
   const tab = TAB_OF[route];
@@ -115,8 +120,8 @@ export default function V16App({ look = 'v16', intelligent = false }: { look?: L
     { id: 'meeting' as const, label: 'Family Meeting', icon: 'meeting' as const, on: openMeetingTab },
   ];
   return (
-    <div className={`v16 family-brand${look === 'v17' ? ' v17' : ''}${intelligent ? ' v18' : ''}`} data-look={intelligent ? 'v18' : look} data-theme={look === 'v17' ? theme : undefined} data-v16 data-route={route} data-scenario={s.scenario}>
-      {intelligent ? <DemoBarV18 ctx={ctx} theme={{ value: theme, set: chooseTheme }} /> : <DemoBar ctx={ctx} theme={look === 'v17' ? { value: theme, set: chooseTheme } : null} />}
+    <div className={`v16 family-brand${look === 'v17' ? ' v17' : ''}${intelligent ? ' v18' : ''}`} data-look={gen ? `v${gen}` : look} data-theme={look === 'v17' ? theme : undefined} data-v16 data-route={route} data-scenario={s.scenario}>
+      {gen === 19 ? <DemoBarV19 ctx={ctx} theme={{ value: theme, set: chooseTheme }} /> : intelligent ? <DemoBarV18 ctx={ctx} theme={{ value: theme, set: chooseTheme }} /> : <DemoBar ctx={ctx} theme={look === 'v17' ? { value: theme, set: chooseTheme } : null} />}
       <header className="v16-header">
         <div className="v16-header-inner">
           <button type="button" className="v16-wordmark" onClick={() => go('today')} aria-label="Organized Family, Today">organized<em>family.</em></button>
@@ -129,7 +134,7 @@ export default function V16App({ look = 'v16', intelligent = false }: { look?: L
       <main className="v16-main" id="main">
         {/* Keyed by screen (and meeting part) so each one enters with a short transition in V17. */}
         <div className="v16-route" key={route === 'meeting' ? `meeting-${s.meeting.step}` : route}>
-        {route === 'today' && (intelligent ? <TodayV18 ctx={ctx} /> : <Today ctx={ctx} />)}
+        {route === 'today' && (gen === 19 ? <TodayV19 ctx={ctx} /> : intelligent ? <TodayV18 ctx={ctx} /> : <Today ctx={ctx} />)}
         {route === 'plans' && <Plans ctx={ctx} />}
         {route === 'cleaning' && <Cleaning ctx={ctx} />}
         {route === 'resources' && <Resources ctx={ctx} />}
@@ -174,6 +179,33 @@ function DemoBar({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: The
           <option value="as-planned">As planned</option><option value="moved">Moved to Friday</option><option value="cancelled">Cancelled</option></select></label>
         <label><input type="checkbox" checked={!s.online} onChange={(e) => ctx.set((x) => ({ ...x, online: !e.target.checked, parts: e.target.checked ? x.parts : x.parts.map((p) => ({ ...p, pending: false })) }))} data-demo-offline /> Offline</label>
         <button type="button" onClick={() => reseed({})} data-demo-reset>Reset</button>
+      </div>
+    </details>
+  );
+}
+
+/** V19 reviewer controls: SIMULATED demonstration facts for Today. Not product UI, never in the app. */
+function DemoBarV19({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: Theme) => void } }) {
+  const s = ctx.s;
+  const intel = s.intel!;
+  const scenario = (intel.scenario ?? 'change') as ScenarioV19;
+  const reseed = (id: ScenarioV19) => { ctx.set(() => seedV19(id, { club: s.club, monday: ctx.monday })); ctx.go('today'); };
+  const setIntel = (patch: Partial<typeof intel>) => ctx.set((x) => ({ ...x, intel: { ...x.intel!, ...patch } }));
+  return (
+    <details className="v16-demo" aria-label="Preview controls (not part of the app)" data-demo-bar>
+      <summary className="v16-demo-inner cursor-pointer list-none"><span className="v16-demo-tag">Preview controls · simulated data</span>
+        <span className="text-[0.74rem]">{SCENARIOS_V19.find(([id]) => id === scenario)?.[1]} · viewing as {ctx.names[intel.viewer] ?? 'Ana'}{intel.aiAvailable ? '' : ' · interpreter down'} · demo day Thursday</span>
+        <span className="ml-auto text-[0.74rem] underline">Change</span></summary>
+      <div className="v16-demo-inner">
+        <label>Scenario <select value={scenario} onChange={(e) => reseed(e.target.value as ScenarioV19)} data-demo-v19>
+          {SCENARIOS_V19.map(([id, label], n) => <option key={id} value={id}>{n + 1}. {label}</option>)}</select></label>
+        <label>Viewing as <select value={intel.viewer} onChange={(e) => setIntel({ viewer: e.target.value })} data-demo-viewer>
+          {ctx.people.filter((m) => m.kind === 'adult').map((m) => <option key={m.id} value={m.id}>{m.firstName}</option>)}</select></label>
+        <label><input type="checkbox" checked={intel.aiAvailable} onChange={(e) => setIntel({ aiAvailable: e.target.checked })} data-demo-ai /> Interpreter available (simulated)</label>
+        <label>Primary color <select value={theme.value} onChange={(e) => theme.set(e.target.value as Theme)} data-demo-theme>
+          <option value="brown">Calendar brown</option><option value="forest">Forest green</option></select></label>
+        <label><input type="checkbox" checked={!s.online} onChange={(e) => ctx.set((x) => ({ ...x, online: !e.target.checked, parts: e.target.checked ? x.parts : x.parts.map((p) => ({ ...p, pending: false })) }))} data-demo-offline /> Offline</label>
+        <button type="button" onClick={() => reseed(scenario)} data-demo-reset>Reset</button>
       </div>
     </details>
   );
@@ -252,6 +284,7 @@ function Account({ ctx }: { ctx: Ctx }) {
         <li className="v16-row">{ctx.look === 'v17' && <Art name="people" tile="blue" />}<span className="v16-row-main">Family plan</span><span className="v16-meta">{ctx.s.club ? 'Family Meeting Club' : 'Free'}</span></li>
         <li className="v16-row">{ctx.look === 'v17' && <Art name="sync" tile="sage" />}<span className="v16-row-main">Sync</span><span className="v16-meta">{ctx.s.online ? 'Up to date' : 'Offline · changes wait on this phone'}</span></li>
       </ul>
+      {ctx.gen === 19 && <Assistance ctx={ctx} />}
       {ctx.s.intel && <Noticed ctx={ctx} />}
       <p className="v16-meta mt-4">Preview only. The real account, sharing, billing and sign-in are at <a className="underline" href="/app/account">/app/account</a>; nothing here changes them.</p>
       <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')}>Back to Today</button>
@@ -272,6 +305,30 @@ function Noticed({ ctx }: { ctx: Ctx }) {
           <button type="button" className="v16-link" onClick={() => ctx.set((s) => ({ ...s, intel: { ...s.intel!, memory: forget(s.intel!.memory, m.id, ctx.today) } }))} data-forget>Forget</button>
         </li>
       ))}</ul>
+    </div>
+  );
+}
+
+/** V19: how much Today brings up, in the family's own words. One simple choice; the rest is learned and correctable. */
+function Assistance({ ctx }: { ctx: Ctx }) {
+  const intel = ctx.s.intel!;
+  const never = (intel.feedback ?? []).filter((f) => f.kind === 'never' || f.kind === 'not-relevant');
+  return (
+    <div className="v16-section" data-assistance>
+      <h2 className="v16-h3">Heads-ups on Today</h2>
+      <label className="v16-field mt-2">How much should Today bring up?
+        <select className="v16-input" value={intel.assistance ?? 'standard'} onChange={(e) => ctx.set((s) => ({ ...s, intel: { ...s.intel!, assistance: e.target.value as 'fewer' | 'standard' | 'more' } }))} data-assistance-select>
+          <option value="fewer">Only when something changes</option>
+          <option value="standard">The usual</option>
+          <option value="more">Help us get ahead earlier</option>
+        </select>
+      </label>
+      {never.length > 0 && <ul className="v16-rows mt-2">{never.map((f) => (
+        <li key={`${f.key}${f.kind}`} className="v16-row" data-never={f.pattern}>
+          <span className="v16-row-main"><span className="block">{f.kind === 'never' ? 'Don’t suggest' : 'Not relevant'}: {f.pattern.split(':').slice(1).join(' ').replace(/-/g, ' ')}</span><span className="v16-meta">Since {f.on}</span></span>
+          <button type="button" className="v16-link" onClick={() => ctx.set((s) => undoFeedback(s, f))} data-undo>Undo</button>
+        </li>
+      ))}</ul>}
     </div>
   );
 }

@@ -15,10 +15,10 @@
  * Never: assign a responsibility, change an event, modify an agreement, or advance a development record. Every
  * action routes to an existing workflow (a proposal the family agrees to, the week view, a meeting topic).
  */
-import { addDays, daysBetween, timeLabel, type CalendarEvent, type Occurrence } from '../calendar/recurrence';
+import { addDays, daysBetween, occurrences, timeLabel, type CalendarEvent, type Occurrence } from '../calendar/recurrence';
 import type { DevelopmentRecord } from '../family-development/records';
 import {
-  agreedParts, currentPriorities, dayName, durable, linkOf, mondayOf, partDate, sessionsOn, sharedOccurrences, type Part, type V16State,
+  agreedParts, currentPriorities, dayName, durable, eventsFor, isShared, linkOf, mondayOf, partDate, sessionsOn, sharedOccurrences, type Part, type V16State,
 } from '../v16/model';
 import { weekday } from '../calendar/recurrence';
 import { allMemory, emptyMemory, memoryFor, type Memory, type MemoryState } from './memory';
@@ -49,6 +49,19 @@ export interface IntelState {
   viewer: string;
   /** Which demo scenario seeded this (preview only). */
   scenario?: string;
+  // ---------------------------------------------------------------- V19 (src/lib/v19): optional, absent in V18 state
+  /** What the family told us about an insight (richer than a resolution): see src/lib/v19/attention.ts. */
+  feedback?: import('../v19/attention').Feedback[];
+  /** Circumstances someone reported today ("Something changed?"). Household facts, shared with both adults. */
+  reports?: import('../v19/attention').Report[];
+  /** Completion history: when standing parts were actually done (late, moved), for recurring friction. */
+  history?: import('../v19/attention').HistoryEntry[];
+  /** insight key → the day it first appeared as the Today card (the attention budget). */
+  shown?: Record<string, import('../v19/attention').Shown>;
+  /** The family's own choice in Account: how much Today brings up. */
+  assistance?: 'fewer' | 'standard' | 'more';
+  /** Meeting agenda items the family has talked about (key → date). */
+  talked?: Record<string, string>;
 }
 
 export const emptyIntel = (viewer: string): IntelState =>
@@ -110,14 +123,14 @@ export interface TodayInput { s: V16State; monday: string; today: string; people
 
 // ------------------------------------------------------------------ helpers
 
-const clamp = (n: number) => Math.max(0, Math.min(1, n));
-const t12 = (t: string) => { const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`; };
-const hash = (s: string) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
-const list = (xs: string[]) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
-const article = (label: string) => (label === 'RSVP' ? 'an RSVP' : /^(A |An |Lunch|Gear|Pickup)/.test(label) ? label.toLowerCase() : /^[AEIOU]/i.test(label) ? `an ${label.toLowerCase()}` : `a ${label.toLowerCase()}`);
+export const clamp = (n: number) => Math.max(0, Math.min(1, n));
+export const t12 = (t: string) => { const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`; };
+export const hash = (s: string) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+export const list = (xs: string[]) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+export const article = (label: string) => (label === 'RSVP' ? 'an RSVP' : /^(A |An |Lunch|Gear|Pickup)/.test(label) ? label.toLowerCase() : /^[AEIOU]/i.test(label) ? `an ${label.toLowerCase()}` : `a ${label.toLowerCase()}`);
 /** '15:00' → '3 PM', '15:30' → '3:30 PM'. */
-const short = (t: string) => t12(t).replace(':00', '');
-const ROUTINE = /^(school|family meeting)$/i;
+export const short = (t: string) => t12(t).replace(':00', '');
+export const ROUTINE = /^(school|family meeting)$/i;
 
 export const occKey = (o: Occurrence) => `${linkOf(o.event)}@${o.event.external?.instance_key ?? o.date}`;
 
@@ -127,7 +140,7 @@ export function whenWord(date: string, today: string) {
   return d === 0 ? 'Today' : d === 1 ? 'Tomorrow' : dayName(date);
 }
 /** "Tomorrow’s school field trip", or "Zoe’s party on Saturday" when the title is already possessive. */
-const possessive = (date: string, today: string, title: string) => {
+export const possessive = (date: string, today: string, title: string) => {
   const w = whenWord(date, today);
   if (/[’']s\b/.test(title)) return `${title} ${w === 'Today' || w === 'Tomorrow' ? w.toLowerCase() : `on ${w}`}`;
   return `${w}’s ${title.charAt(0).toLowerCase()}${title.slice(1)}`;
@@ -140,7 +153,7 @@ export function snapshot(s: V16State, monday: string, taken: string): Baseline {
   return { taken, items };
 }
 
-const intelOf = (s: V16State) => s.intel ?? emptyIntel('m-ana');
+export const intelOf = (s: V16State) => s.intel ?? emptyIntel('m-ana');
 
 /** The family's kind for an event: a cached interpretation when it's more confident than the rules. */
 export function kindOf(s: V16State, o: Occurrence): { kind: EventKind; confidence: number; interp: Interpretation | null } {
@@ -166,17 +179,19 @@ export function pendingInterpretations({ s, monday, today, people }: TodayInput)
   return out;
 }
 
-function upcoming(s: V16State, monday: string, today: string, days: number) {
+export function upcoming(s: V16State, monday: string, today: string, days: number) {
   const last = addDays(today, days);
-  return sharedOccurrences(s, monday).filter((o) => o.date >= today && o.date <= last && !ROUTINE.test(o.event.title));
+  // Beyond this week (V19's longer preparation windows), read the same calendar over the longer range.
+  const occ = last > addDays(monday, 6) ? occurrences(eventsFor(s, monday), today, last).filter((o) => isShared(o.event)) : sharedOccurrences(s, monday);
+  return occ.filter((o) => o.date >= today && o.date <= last && !ROUTINE.test(o.event.title));
 }
 
-function relevanceFor(viewer: string, members: string[], adultTask: boolean): number {
+export function relevanceFor(viewer: string, members: string[], adultTask: boolean): number {
   if (members.includes(viewer)) return 1;
   return adultTask ? 0.8 : 0.5;
 }
 
-const NEED_VERB: Record<string, [string, string]> = {
+export const NEED_VERB: Record<string, [string, string]> = {
   ride: ['drives', 'drove'], lunch: ['packs lunch', 'packed lunch'], card: ['makes the card', 'made the card'], gift: ['picks the gift', 'picked the gift'],
   rsvp: ['RSVPs', 'RSVPed'], gear: ['packs the bag', 'packed the bag'], pickup: ['does pickup', 'did pickup'], outfit: ['lays out the outfit', 'laid out the outfit'],
 };
@@ -249,11 +264,11 @@ function exceptions(inp: TodayInput, names: Record<string, string>): Insight[] {
 }
 
 /** A + B. What an activity needs that nobody has (or that was talked about and never agreed), one insight per occurrence. */
-function needsWork(inp: TodayInput, names: Record<string, string>): Insight[] {
+export function needsWork(inp: TodayInput, names: Record<string, string>, opts: { days?: number; maxDue?: number } = {}): Insight[] {
   const { s, monday, today, people } = inp;
   const intel = intelOf(s);
   const out: Insight[] = [];
-  for (const o of upcoming(s, monday, today, 3)) {
+  for (const o of upcoming(s, monday, today, opts.days ?? 3)) {
     const link = linkOf(o.event);
     const { kind, confidence, interp } = kindOf(s, o);
     if (confidence < 0.5) continue;
@@ -280,7 +295,7 @@ function needsWork(inp: TodayInput, names: Record<string, string>): Insight[] {
         state: !part ? 'missing' : part.discussed ? 'discussed' : 'proposed',
       });
     }
-    if (!poss.length || earliestDue > 2) continue;
+    if (!poss.length || earliestDue > (opts.maxDue ?? 2)) continue;
     const loop = poss.some((p) => p.state === 'discussed');
     const sure = confidence >= 0.8;
     const what = possessive(o.date, today, o.event.title);
@@ -320,7 +335,7 @@ function needsWork(inp: TodayInput, names: Record<string, string>): Insight[] {
 }
 
 /** Who could own a need: what the family told us, a repeated pattern, or a child who already owns the same skill. */
-function possibleOwner(s: V16State, need: Need, mem: Memory | null, people: Person[], names: Record<string, string>, part?: Part): { id: string | null; why?: string } {
+export function possibleOwner(s: V16State, need: Need, mem: Memory | null, people: Person[], names: Record<string, string>, part?: Part): { id: string | null; why?: string } {
   // The reason is said only when it's grounded; a proposal that already names someone keeps its owner either way.
   const fixed = part?.ownerId ?? null;
   if (mem?.effect === 'owner' && mem.memberId && names[mem.memberId] && (!fixed || fixed === mem.memberId)) return { id: mem.memberId, why: memoryLine(mem, names) };
@@ -333,7 +348,7 @@ function possibleOwner(s: V16State, need: Need, mem: Memory | null, people: Pers
 }
 
 /** B. Something the family talked about (Keep) and never agreed, with no activity attached. */
-function looseLoops(inp: TodayInput, names: Record<string, string>): Insight[] {
+export function looseLoops(inp: TodayInput, names: Record<string, string>): Insight[] {
   const { s, monday } = inp;
   const intel = intelOf(s);
   return s.parts.filter((p) => !p.eventLink && p.discussed && p.status !== 'agreed' && p.status !== 'skipped').map((p) => base({
@@ -346,7 +361,7 @@ function looseLoops(inp: TodayInput, names: Record<string, string>): Insight[] {
 }
 
 /** E. Several full days in a row, especially when a cleaning session lands on the fullest one. */
-function capacity(inp: TodayInput): Insight[] {
+export function capacity(inp: TodayInput): Insight[] {
   const { s, monday, today } = inp;
   const intel = intelOf(s);
   const days = [0, 1, 2, 3].map((i) => addDays(today, i)).filter((d) => d <= addDays(monday, 6));
@@ -372,7 +387,7 @@ function capacity(inp: TodayInput): Insight[] {
 }
 
 /** D. Mental-ownership development, family-reported only: worth noticing together, never urgent, never a stage. */
-function development(inp: TodayInput, names: Record<string, string>): Insight[] {
+export function development(inp: TodayInput, names: Record<string, string>): Insight[] {
   const { s, monday } = inp;
   const intel = intelOf(s);
   return s.records.filter((r) => r.status === 'active').flatMap((r: DevelopmentRecord) => {
@@ -390,11 +405,11 @@ function development(inp: TodayInput, names: Record<string, string>): Insight[] 
   });
 }
 
-interface BaseArgs extends Omit<Insight, 'fingerprint' | 'relevance' | 'score' | 'venue' | 'possibilities' | 'memories'> {
+export interface BaseArgs extends Omit<Insight, 'fingerprint' | 'relevance' | 'score' | 'venue' | 'possibilities' | 'memories'> {
   adultTask: boolean; viewer: string; fp: string; venue?: 'today' | 'meeting'; possibilities?: Possibility[]; memories?: Memory[]; meta?: Record<string, unknown>;
 }
 const META = new WeakMap<Insight, Record<string, unknown>>();
-function base(a: BaseArgs): Insight {
+export function base(a: BaseArgs): Insight {
   const { adultTask, viewer, fp, meta, ...rest } = a;
   const relevance = relevanceFor(viewer, a.members, adultTask);
   const confidence = clamp(a.confidence);

@@ -16,6 +16,8 @@ export type Look = 'v16' | 'v17';
 
 export interface Ctx {
   look: Look;
+  /** Which intelligent Today the preview runs (V18 or V19); absent for V16/V17. */
+  gen?: 18 | 19;
   s: V16State;
   set: (f: (s: V16State) => V16State) => void;
   today: string;

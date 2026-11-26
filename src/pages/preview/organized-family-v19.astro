@@ -1,0 +1,19 @@
+---
+/**
+ * V19 Today (docs/ios/V19_ATTENTION.md): maximum intelligence, minimum interruption. Built on the V18 preview; Today
+ * and Let's Talk's agenda only. Unlinked, noindex, web-only; no analytics, no service worker. V16, V17 and V18 stay as
+ * they were for comparison. Scenario controls are reviewer tools, outside the product interface.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import V16App from '../../components/v16/V16App';
+import '../../styles/family-app-brand.css';
+import '../../styles/v16.css';
+import '../../styles/v17.css';
+import '../../styles/v18.css';
+import '@fontsource-variable/figtree';
+import '@fontsource/kalam/latin-400.css';
+---
+<BaseLayout title="Organized Family · V19 preview" description="Unlisted exploration of Organized Family's Today (V19)." robots="noindex" tracking={false}>
+  <meta slot="head" name="theme-color" content="#ffffff" />
+  <V16App client:only="react" look="v17" intelligent="v19" />
+</BaseLayout>
