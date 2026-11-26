@@ -1,0 +1,19 @@
+---
+/**
+ * V18 Intelligent Today (docs/ios/V18_TODAY_INTELLIGENCE.md): the V17 preview with an intelligent Today. Unlinked,
+ * noindex, web-only preview; not in the sitemap or the iPhone bundle, no analytics, no service worker. The V16 and V17
+ * previews stay as they were for comparison. Scenario controls are reviewer tools, outside the product interface.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import V16App from '../../components/v16/V16App';
+import '../../styles/family-app-brand.css';
+import '../../styles/v16.css';
+import '../../styles/v17.css';
+import '../../styles/v18.css';
+import '@fontsource-variable/figtree';
+import '@fontsource/kalam/latin-400.css';
+---
+<BaseLayout title="Organized Family · V18 preview" description="Unlisted exploration of an intelligent Today for Organized Family (V18)." robots="noindex" tracking={false}>
+  <meta slot="head" name="theme-color" content="#ffffff" />
+  <V16App client:only="react" look="v17" intelligent />
+</BaseLayout>

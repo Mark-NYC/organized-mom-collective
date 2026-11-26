@@ -1,0 +1,56 @@
+/* ====================================================================================================================
+   V18 Intelligent Today (docs/ios/V18_TODAY_INTELLIGENCE.md). Layered on the V17 system; only what's new for Today.
+   The heads-up card uses the approved palette exactly: solid, no shadow, no border.
+   ==================================================================================================================== */
+.v18{
+  --v18-heads-bg:#EDE5DA;
+  --v18-heads-eyebrow:#655548;
+  --v18-heads-heading:#151515;
+  --v18-heads-body:#514843;
+  --v18-heads-primary:#493F3C;
+  --v18-heads-secondary:#75695E;
+}
+.v18 .v18-sub{margin-top:8px;font-size:1.02rem;line-height:1.4;color:var(--v17-label-2,#4a514d);font-weight:520}
+
+/* ---------------------------------------------------------------- heads-up card */
+.v18 .v18-heads{margin-top:20px;background:var(--v18-heads-bg);border-radius:24px;padding:20px;border:0;box-shadow:none;
+  animation:v18-in .32s cubic-bezier(.2,.8,.2,1) both}
+.v18 .v18-heads-eyebrow{display:flex;align-items:center;gap:7px;color:var(--v18-heads-eyebrow);font-size:.8rem;font-weight:700;letter-spacing:.01em}
+.v18 .v18-heads-eyebrow .v17-icon{color:var(--v18-heads-eyebrow)}
+.v18 .v18-heads-eyebrow .v17-icon svg{width:16px;height:16px}
+.v18 .v18-heads-title{margin-top:8px;color:var(--v18-heads-heading);font-size:1.22rem;line-height:1.22;font-weight:750;letter-spacing:-.012em}
+.v18 .v18-heads-body{margin-top:6px;color:var(--v18-heads-body);font-size:.96rem;line-height:1.45}
+.v18 .v18-heads-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px 18px;margin-top:12px}
+.v18 .v18-heads-primary{min-height:44px;display:inline-flex;align-items:center;gap:6px;color:var(--v18-heads-primary);font-weight:750;font-size:1rem;background:none;border:0;padding:0;
+  -webkit-tap-highlight-color:transparent;transition:opacity .15s ease}
+.v18 .v18-heads-primary span{transition:transform .18s ease}
+.v18 .v18-heads-primary:hover span{transform:translateX(3px)}
+.v18 .v18-heads-quiet{min-height:44px;color:var(--v18-heads-secondary);font-weight:600;font-size:.95rem;background:none;border:0;padding:0;-webkit-tap-highlight-color:transparent}
+.v18 .v18-heads-dismiss{margin-left:auto}
+.v18 :is(.v18-heads-primary,.v18-heads-quiet):active{opacity:.6}
+@keyframes v18-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------------------------------------------------------------- What matters / Everyone's part */
+.v18 .v18-attention{display:flex;align-items:center;gap:7px;margin-top:4px;font-size:.88rem;font-weight:620;color:var(--v18-heads-eyebrow)}
+.v18 .v18-attention::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:var(--v18-heads-eyebrow)}
+.v18 .v18-done{color:var(--v17-positive-ink,#244a24);font-weight:650}
+.v18 .v18-caret{display:inline-block;transition:transform .2s ease;transform:translateY(-3px)}
+.v18 .v18-caret.is-open{transform:rotate(180deg) translateY(-2px)}
+
+/* ---------------------------------------------------------------- the meeting row */
+.v18 .v18-meeting{display:flex;align-items:center;gap:12px;width:100%;margin-top:24px;min-height:60px;padding:12px 16px;border-radius:18px;background:var(--v17-fill);text-align:left;color:var(--of-ink)}
+.v18 .v18-meeting-title{display:block;font-weight:700;font-size:.98rem}
+.v18 .v18-meeting--resume{background:var(--v17-primary-tint)}
+.v18 .v18-meeting-go{font-weight:700;color:var(--v17-primary)}
+.v18 .v18-meeting:active{transform:scale(.985)}
+
+/* ---------------------------------------------------------------- sheets */
+.v18 .v18-sheet-lede{font-size:1.08rem;font-weight:700;line-height:1.3}
+.v18 .v18-possibility{padding:14px 0;border-bottom:1px solid var(--v17-separator,#e4e8e6)}
+.v18 .v18-sheet-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.v18 .v18-why{margin:4px 0 6px;padding-left:18px;list-style:disc;font-size:.88rem;line-height:1.45;color:var(--v17-label-2,#4a514d)}
+.v18 .v18-why li{margin-top:4px}
+.v18 .v18-simulated{margin-top:6px;font-size:.8rem;font-weight:650;color:#8a4b14}
+
+@media (prefers-reduced-motion:reduce){.v18 .v18-heads{animation:none}.v18 .v18-caret,.v18 .v18-heads-primary span{transition:none}}
+.v18 .v18-heads-actions:has([data-heads-secondary]) .v18-heads-dismiss{margin-left:0}

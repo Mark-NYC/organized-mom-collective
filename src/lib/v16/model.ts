@@ -51,6 +51,11 @@ export interface Part {
   ideaBy?: string;
   /** A cue in words when there's no fixed day ("When I come in"), from the Club month. */
   cue?: string;
+  /** V18: which kind of preparation this covers for its event ('lunch', 'transport', 'gift'…), so the intelligence
+   *  layer knows a need is already handled (src/lib/v18/playbooks.ts). */
+  need?: string;
+  /** V18: the family talked about it (Keep) at some point. Not consent; it marks an open loop if never agreed. */
+  discussed?: boolean;
   /** Canonical skill (src/lib/family-development/skills.ts) for Let's Practice. */
   skill?: string;
   status: PartStatus;
@@ -80,7 +85,7 @@ export interface V16State {
   adults: Adults;
   online: boolean;
   /** Demo: what happened to this week's soccer practice in its source calendar. */
-  soccer: 'as-planned' | 'moved' | 'cancelled';
+  soccer: 'as-planned' | 'moved' | 'cancelled' | 'earlier';
   /** Ana's choice per calendar she connected: shared with the household or private. */
   feedVisibility: Record<string, 'household' | 'private'>;
   extraEvents: CalendarEvent[];
@@ -97,6 +102,8 @@ export interface V16State {
   };
   practice: { memberId?: string; skill?: string; outcome?: string; nothing?: boolean };
   wall: { format: 'weekly' | 'monthly'; plan: 'together' | 'later' | 'other' | null };
+  /** V18 only: the intelligence layer's household memory, resolutions and meeting topics (src/lib/v18). */
+  intel?: import('../v18/engine').IntelState;
   cleaning: {
     mode: CleaningMode;
     mainDay: number;
@@ -141,7 +148,7 @@ export function partReducer(parts: Part[], a: PartAction, online: boolean): Part
     if (p.id !== a.id) return p;
     switch (a.type) {
       case 'keep':
-        return p.status === 'agreed' ? p : { ...p, status: 'kept' };
+        return p.status === 'agreed' ? p : { ...p, status: 'kept', discussed: true };
       case 'agree':
         if (!p.ownerId || !p.title.trim()) return p; // an agreement needs someone and something
         return { ...p, status: 'agreed', agreedOn: a.today, agreedSignature: signature(p), changedSinceAgreed: false, pending: !online,
@@ -205,6 +212,12 @@ export function eventsFor(s: V16State, monday: string): CalendarEvent[] {
     if (out.id === 'e-soccer' && s.soccer !== 'as-planned') out = { ...out, skip_dates: [...(out.skip_dates ?? []), thursday] };
     return out;
   });
+  if (s.soccer === 'earlier') {
+    // The source calendar moved this one occurrence earlier the same day (4 PM → 3 PM).
+    const soccer = list.find((e) => e.id === 'e-soccer')!;
+    list.push({ ...soccer, id: 'e-soccer-moved', starts_on: thursday, start_time: '15:00', end_time: '16:15', recurrence: null, skip_dates: [],
+      external: { ...soccer.external!, instance_key: thursday } });
+  }
   if (s.soccer === 'moved') {
     const soccer = list.find((e) => e.id === 'e-soccer')!;
     // The source calendar moved this one occurrence: same UID and original instance, a new day.
@@ -379,7 +392,7 @@ export function seed(scenario: Scenario, opts: { club: boolean; adults: Adults; 
     id: 'p-soccer-bag', origin: 'prepared', title: 'Pack soccer bag', ownerId: SOFIA,
     finishLine: 'Cleats, shin guards, uniform and water bottle in the bag by the door', eventLink: 'practice@riverside-fc', offsetDays: -1,
     why: 'Soccer practice is Thursday at 4:00 PM, right after school. Packing the evening before keeps Thursday afternoon calm.',
-    skill: 'school-day-prep', status: 'suggested',
+    skill: 'school-day-prep', status: 'suggested', need: 'gear',
   };
   const entry: Part = {
     id: 'p-entry', origin: 'prepared', title: 'Put shoes and bags away', ownerId: MATEO,
@@ -388,7 +401,7 @@ export function seed(scenario: Scenario, opts: { club: boolean; adults: Adults; 
   };
   const pickup: Part = {
     id: 'p-pickup', origin: 'prepared', title: opts.adults === 'two' ? 'Pick up Mateo and Elena during the conference' : 'Arrange pickup for Mateo and Elena',
-    ownerId: adultOwner, finishLine: 'Pickup confirmed, with a time', eventLink: 'e-conf', offsetDays: 0,
+    ownerId: adultOwner, finishLine: 'Pickup confirmed, with a time', eventLink: 'e-conf', offsetDays: 0, need: 'pickup',
     why: 'The parent-teacher conference is Monday at 3:15 PM, the same time as school pickup.', status: 'suggested',
   };
   const base: V16State = {
@@ -411,7 +424,7 @@ export function seed(scenario: Scenario, opts: { club: boolean; adults: Adults; 
     id: 'p-lunch', origin: 'prepared', title: 'Pack lunch for the field trip', ownerId: SOFIA,
     finishLine: 'Lunch and water bottle packed in the backpack', eventLink: 'fieldtrip@lincoln', offsetDays: -1,
     why: 'The field trip on Friday runs from 8:30 AM to 2:00 PM, through lunch. Thursday evening is the last evening before.',
-    skill: 'school-day-prep', status: 'suggested',
+    skill: 'school-day-prep', status: 'suggested', need: 'lunch',
   };
   return {
     ...base,

@@ -174,6 +174,18 @@ function Talk({ ctx }: { ctx: Ctx }) {
         {club && <p className="v16-meta mt-1">From {club.resourceTitle}, this month’s Family Meeting Club kit.</p>}
       </div>
 
+      {ctx.s.intel && ctx.s.intel.topics.length > 0 && (
+        <div className="v16-section" data-meeting-topics-list>
+          <h2 className="v16-h3">Brought up from Today</h2>
+          <ul className="v16-rows">{ctx.s.intel.topics.map((t) => (
+            <li key={t.key} className="v16-row" data-topic={t.key}>
+              <span className="v16-row-main">{t.text}</span>
+              <button type="button" className="v16-link" onClick={() => ctx.set((s) => ({ ...s, intel: { ...s.intel!, topics: s.intel!.topics.filter((x) => x.key !== t.key) } }))} data-topic-done>Talked about it</button>
+            </li>
+          ))}</ul>
+        </div>
+      )}
+
       <h2 className="v16-h3 mt-7" id="idea-h">Someone have an idea?</h2>
       <p className="v16-meta mt-1">In their own words. It stays an idea until the family agrees.</p>
       <form className="mt-3 grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] gap-2" onSubmit={(e) => { e.preventDefault(); add(); }} aria-labelledby="idea-h">
