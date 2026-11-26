@@ -32,7 +32,7 @@ export interface Ctx {
   go: (r: Route) => void;
 }
 
-export function Person({ ctx, id, size = 'sm' }: { ctx: Ctx; id: string | null; size?: 'sm' | 'md' }) {
+export function Person({ ctx, id, size = 'sm' }: { ctx: Pick<Ctx, 'names' | 'colors'>; id: string | null; size?: 'sm' | 'md' }) {
   if (!id || !ctx.names[id]) return <span aria-hidden="true" className={`of-avatar${size === 'sm' ? ' of-avatar--sm' : ''}`} style={{ background: '#efe9e1', color: '#6e6461' }}>?</span>;
   return <Avatar name={ctx.names[id]} color={ctx.colors[id]} size={size} />;
 }
@@ -174,6 +174,6 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
 }
 
 /** Inline in V16 (as approved), a bottom sheet in V17. */
-export function Panel({ ctx, title, onClose, children }: { ctx: Ctx; title: string; onClose: () => void; children: React.ReactNode }) {
+export function Panel({ ctx, title, onClose, children }: { ctx: Pick<Ctx, 'look'>; title: string; onClose: () => void; children: React.ReactNode }) {
   return ctx.look === 'v17' ? <Sheet title={title} onClose={onClose}>{children}</Sheet> : <>{children}</>;
 }
