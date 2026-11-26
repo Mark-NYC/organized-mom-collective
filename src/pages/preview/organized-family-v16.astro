@@ -1,0 +1,14 @@
+---
+/**
+ * V16 experiment: unlinked, noindex, web-only preview (docs/ios/V16_EXPERIMENT.md). Not in the sitemap, not in the
+ * iPhone app bundle (src/data/app/shell-routes.json), no analytics, no service worker. Does not replace /app.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import V16App from '../../components/v16/V16App';
+import '../../styles/family-app-brand.css';
+import '../../styles/v16.css';
+import '@fontsource/kalam/latin-400.css';
+---
+<BaseLayout title="Organized Family · V16 preview" description="Unlisted experimental preview of the Organized Family V16 design." robots="noindex" tracking={false}>
+  <V16App client:only="react" />
+</BaseLayout>

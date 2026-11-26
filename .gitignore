@@ -34,3 +34,6 @@ dist-app/
 app-www/
 app-shell-smoke/
 e2e-family/
+
+# Generated at build by scripts/prepare-v2-routine-icons.mjs (npm run prepare:assets) from the v2 masters
+public/assets/icons/ofc/v2/routines/*.webp

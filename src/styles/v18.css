@@ -1,0 +1,106 @@
+/* ====================================================================================================================
+   V18 Intelligent Today (docs/ios/V18_TODAY_INTELLIGENCE.md). Layered on the V17 system; only what's new for Today.
+   The heads-up card uses the approved palette exactly: solid, no shadow, no border.
+   ==================================================================================================================== */
+.v18{
+  --v18-heads-bg:#EDE5DA;
+  --v18-heads-eyebrow:#655548;
+  --v18-heads-heading:#151515;
+  --v18-heads-body:#514843;
+  --v18-heads-primary:#493F3C;
+  --v18-heads-secondary:#75695E;
+}
+.v18 .v18-sub{margin-top:8px;font-size:1.02rem;line-height:1.4;color:var(--v17-label-2,#4a514d);font-weight:520}
+
+/* ---------------------------------------------------------------- heads-up card */
+.v18 .v18-heads{margin-top:20px;background:var(--v18-heads-bg);border-radius:24px;padding:20px;border:0;box-shadow:none;
+  animation:v18-in .32s cubic-bezier(.2,.8,.2,1) both}
+.v18 .v18-heads-eyebrow{display:flex;align-items:center;gap:7px;color:var(--v18-heads-eyebrow);font-size:.8rem;font-weight:700;letter-spacing:.01em}
+.v18 .v18-heads-eyebrow .v17-icon{color:var(--v18-heads-eyebrow)}
+.v18 .v18-heads-eyebrow .v17-icon svg{width:16px;height:16px}
+.v18 .v18-heads-title{margin-top:8px;color:var(--v18-heads-heading);font-size:1.22rem;line-height:1.22;font-weight:750;letter-spacing:-.012em}
+.v18 .v18-heads-body{margin-top:6px;color:var(--v18-heads-body);font-size:.96rem;line-height:1.45}
+.v18 .v18-heads-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px 18px;margin-top:12px}
+.v18 .v18-heads-primary{min-height:44px;display:inline-flex;align-items:center;gap:6px;color:var(--v18-heads-primary);font-weight:750;font-size:1rem;background:none;border:0;padding:0;
+  -webkit-tap-highlight-color:transparent;transition:opacity .15s ease}
+.v18 .v18-heads-primary span{transition:transform .18s ease}
+.v18 .v18-heads-primary:hover span{transform:translateX(3px)}
+.v18 .v18-heads-quiet{min-height:44px;color:var(--v18-heads-secondary);font-weight:600;font-size:.95rem;background:none;border:0;padding:0;-webkit-tap-highlight-color:transparent}
+.v18 .v18-heads-dismiss{margin-left:auto}
+.v18 :is(.v18-heads-primary,.v18-heads-quiet):active{opacity:.6}
+@keyframes v18-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------------------------------------------------------------- What matters / Everyone's part */
+.v18 .v18-attention{display:flex;align-items:center;gap:7px;margin-top:4px;font-size:.88rem;font-weight:620;color:var(--v18-heads-eyebrow)}
+.v18 .v18-attention::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:var(--v18-heads-eyebrow)}
+.v18 .v18-done{color:var(--v17-positive-ink,#244a24);font-weight:650}
+.v18 .v18-caret{display:inline-block;transition:transform .2s ease;transform:translateY(-3px)}
+.v18 .v18-caret.is-open{transform:rotate(180deg) translateY(-2px)}
+
+/* ---------------------------------------------------------------- the meeting row */
+.v18 .v18-meeting{display:flex;align-items:center;gap:12px;width:100%;margin-top:24px;min-height:60px;padding:12px 16px;border-radius:18px;background:var(--v17-fill);text-align:left;color:var(--of-ink)}
+.v18 .v18-meeting-title{display:block;font-weight:700;font-size:.98rem}
+.v18 .v18-meeting--resume{background:var(--v17-primary-tint)}
+.v18 .v18-meeting-go{font-weight:700;color:var(--v17-primary)}
+.v18 .v18-meeting:active{transform:scale(.985)}
+
+/* ---------------------------------------------------------------- sheets */
+.v18 .v18-sheet-lede{font-size:1.08rem;font-weight:700;line-height:1.3}
+.v18 .v18-possibility{padding:14px 0;border-bottom:1px solid var(--v17-separator,#e4e8e6)}
+.v18 .v18-sheet-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.v18 .v18-why{margin:4px 0 6px;padding-left:18px;list-style:disc;font-size:.88rem;line-height:1.45;color:var(--v17-label-2,#4a514d)}
+.v18 .v18-why li{margin-top:4px}
+.v18 .v18-simulated{margin-top:6px;font-size:.8rem;font-weight:650;color:#8a4b14}
+
+@media (prefers-reduced-motion:reduce){.v18 .v18-heads{animation:none}.v18 .v18-caret,.v18 .v18-heads-primary span{transition:none}}
+.v18 .v18-heads-actions:has([data-heads-secondary]) .v18-heads-dismiss{margin-left:0}
+
+/* ====================================================================================================================
+   V19 (docs/ios/V19_ATTENTION.md): only what's new. Same card, same palette; quieter everything else.
+   ==================================================================================================================== */
+.v18 .v19-changed{display:inline-flex;align-items:center;min-height:36px;margin-top:4px;padding:0;background:none;border:0;color:var(--v18-heads-secondary);font-size:.9rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent)}
+.v18 .v19-attention-btn{background:none;border:0;padding:0;min-height:32px;text-align:left;cursor:pointer}
+.v18 .v19-done-prep{opacity:.62}
+.v18 .v19-earlier{opacity:.8}
+.v18 .v19-dismissed{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:16px;padding:12px 16px;border-radius:18px;background:var(--v17-fill);color:var(--v18-heads-secondary);font-size:.92rem}
+.v18 .v19-affected{padding:16px 0;border-bottom:1px solid var(--v17-separator,#e4e8e6)}
+.v18 .v19-affected:first-child{padding-top:4px}
+.v18 .v19-question{font-size:1.08rem;font-weight:750;line-height:1.3;color:var(--of-ink)}
+.v18 .v19-current{margin-top:12px;padding:12px 14px;border-radius:16px;background:var(--v17-fill)}
+.v18 .v19-options{display:grid;gap:6px;margin-top:6px}
+.v18 .v19-option{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:48px;padding:11px 14px;border-radius:14px;background:var(--v17-fill);border:0;text-align:left;color:var(--of-ink);font-size:.96rem;-webkit-tap-highlight-color:transparent}
+.v18 .v19-option[aria-checked="true"]{background:var(--v17-primary-tint);box-shadow:inset 0 0 0 2px var(--v17-primary)}
+.v18 .v19-radio{flex:none;width:20px;height:20px;margin-top:1px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--v17-control-edge)}
+.v18 .v19-option[aria-checked="true"] .v19-radio{box-shadow:inset 0 0 0 6px var(--v17-primary)}
+.v18 .v19-reassure{margin-top:14px;font-size:.92rem;color:var(--v17-positive-ink,#244a24);font-weight:600}
+.v18 .v19-reassure li+li{margin-top:4px}
+.v18 .v19-agenda{margin-top:20px}
+
+/* ====================================================================================================================
+   V20 (docs/ios/V20_BASELINE.md): the illustration treatment and the preview's simulated phones. Nothing else changes.
+   ==================================================================================================================== */
+/* Hand-drawn icon, white interior, charcoal line, on a solid calendar-color circle (color set inline, by meaning). */
+.v18 .v20-badge{flex:none;display:inline-grid;place-items:center;border-radius:50%;overflow:hidden}
+.v18 .v20-badge img{display:block;width:78%;height:78%;object-fit:contain}
+.v18 .v20-badge--sm{width:32px;height:32px}
+.v18 .v20-badge--md{width:40px;height:40px}
+.v18 .v20-badge--lg{width:52px;height:52px}
+.v18 .v19-affected .v17-lead .v19-question{margin:0}
+.v18 .v20-switch{appearance:none;flex:none;width:46px;height:28px;border-radius:999px;background:var(--v17-fill-2);position:relative;transition:background-color .2s ease;cursor:pointer}
+.v18 .v20-switch::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s ease}
+.v18 .v20-switch:checked{background:var(--v17-positive)}
+.v18 .v20-switch:checked::after{transform:translateX(18px)}
+/* Preview only: two lock screens. */
+.v18 .v20-phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.v18 .v20-phone{border-radius:22px;padding:12px;background:linear-gradient(160deg,#3b3634,#5a514c);min-height:140px}
+.v18 .v20-phone-head{display:flex;justify-content:space-between;color:#fff;font-weight:700;font-size:.8rem;margin-bottom:8px;letter-spacing:.01em}
+.v18 .v20-phone-empty{color:rgba(255,255,255,.7);font-size:.82rem;text-align:center;padding:24px 0}
+.v18 .v20-push{background:rgba(255,255,255,.92);border-radius:16px;padding:10px 12px;margin-top:8px;color:#151515;letter-spacing:0;text-transform:none}
+.v18 .v20-push[data-push-status="held"],.v18 .v20-push[data-push-status="scheduled"]{opacity:.7}
+.v18 .v20-push-app{display:flex;align-items:center;gap:6px;font-size:.68rem;font-weight:650;color:#514843;text-transform:uppercase;letter-spacing:.03em}
+.v18 .v20-push-icon{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:4px;background:#493F3C;color:#fff;font-size:.55rem;text-transform:none}
+.v18 .v20-push-title{margin-top:4px;font-weight:750;font-size:.9rem;line-height:1.25}
+.v18 .v20-push-body{font-size:.84rem;line-height:1.3;color:#514843}
+.v18 .v20-push-status{margin-top:4px;font-size:.68rem;color:#75695E}
+.v18 .v20-push-actions{display:flex;gap:6px;margin-top:8px}
+.v18 .v20-push-actions button{flex:1;min-height:36px;border-radius:10px;background:#EDE5DA;color:#493F3C;font-weight:700;font-size:.8rem}

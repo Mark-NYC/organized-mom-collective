@@ -1,0 +1,146 @@
+/* V16 experiment (docs/ios/V16_EXPERIMENT.md). Layout and rhythm only, on the existing Organized Family tokens
+   (family-app-brand.css: --of-*, Georgia titles, Montserrat UI, member colors, month tints). No new palette. */
+.v16{min-height:100dvh;background:var(--of-bg);color:var(--of-ink);font-family:var(--font-sans)}
+.v16-main{max-width:42rem;margin-inline:auto;padding:4px 22px calc(6.5rem + env(safe-area-inset-bottom))}
+@media(min-width:1024px){.v16-main{padding:28px 32px 64px}}
+
+/* Demo-only controls: visibly not the product */
+.v16-demo{border-bottom:1px dashed var(--of-rule-strong);background:repeating-linear-gradient(135deg,#f6f1ea 0 10px,#f3ede5 10px 20px);font-size:.78rem}
+.v16-demo-inner{max-width:72rem;margin-inline:auto;padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.v16-demo-tag{font-size:.64rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--of-soft)}
+.v16-demo select,.v16-demo button{min-height:36px;border:1px solid var(--of-rule-strong);border-radius:8px;background:#fff;padding:0 10px;font-size:.78rem;color:var(--of-ink)}
+.v16-demo label{display:inline-flex;align-items:center;gap:6px}
+
+/* Header */
+.v16-header{background:var(--of-bg)}
+.v16-header-inner{max-width:72rem;margin-inline:auto;min-height:60px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 22px}
+.v16-wordmark{display:inline-flex;align-items:center;min-height:44px;font-family:var(--font-serif);font-size:1.15rem;font-weight:600;letter-spacing:-.01em;color:var(--of-ink);background:none;border:0;padding:0;cursor:pointer}
+.v16-wordmark em{color:#536b4e;font-style:italic;margin-left:.22em}
+.v16-iconbtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;border:1px solid var(--of-rule);background:var(--of-surface);color:var(--of-ink)}
+.v16-topnav{display:none}
+@media(min-width:1024px){.v16-topnav{display:flex;gap:4px}}
+.v16-topnav button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:9px;font-size:.82rem;font-weight:600;color:var(--of-soft)}
+.v16-topnav button[aria-current="page"]{background:var(--of-month-wash);color:var(--of-ink)}
+
+/* Bottom tabs (phones, tablets) */
+.v16-tabbar{position:fixed;inset:auto 0 0 0;z-index:40;border-top:1px solid var(--of-rule);background:color-mix(in srgb,var(--of-bg) 94%,transparent);backdrop-filter:blur(10px);padding:6px 16px calc(6px + env(safe-area-inset-bottom))}
+.v16-tabbar ul{max-width:32rem;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.v16-tabbar button{width:100%;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;font-size:.72rem;font-weight:600;color:var(--of-soft)}
+.v16-tabbar button[aria-current="page"]{background:var(--of-month-wash);color:var(--of-ink)}
+@media(min-width:1024px){.v16-tabbar{display:none}}
+
+/* Type */
+.v16-kicker{font-size:.82rem;color:var(--of-soft);margin-top:6px}
+.v16-eyebrow{font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--of-soft)}
+.v16-h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(1.9rem,7vw,2.35rem);line-height:1.1;letter-spacing:-.01em;margin-top:4px;text-wrap:balance}
+.v16-h2{font-family:var(--font-serif);font-weight:400;font-size:1.4rem;line-height:1.2}
+.v16-h3{font-family:var(--font-serif);font-weight:400;font-size:1.18rem;line-height:1.25}
+.v16-lede{margin-top:8px;font-size:.92rem;line-height:1.55;color:var(--of-soft)}
+.v16-meta{font-size:.8rem;color:var(--of-soft);line-height:1.45}
+.v16-section{margin-top:30px}
+.v16-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.v16-link{display:inline-flex;align-items:center;gap:4px;min-height:44px;font-size:.84rem;font-weight:600;color:var(--of-ink);text-decoration:none;background:none;border:0;padding:0}
+.v16-link:hover{text-decoration:underline;text-underline-offset:4px}
+.v16-pill{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-size:.68rem;font-weight:600;letter-spacing:.04em;line-height:1.7;background:#f1ebe3;color:#5f5754;white-space:nowrap}
+.v16-pill--agreed{background:var(--of-sage);color:var(--of-sage-ink)}
+.v16-pill--pending{background:#f6ecd9;color:#6b4f1d}
+.v16-pill--private{background:#ece7f3;color:#4b3a72}
+.v16-pill--ro{background:#e8eef0;color:#36545d}
+
+/* Soft surfaces: few and intentional */
+.v16-card{margin-top:18px;border-radius:16px;background:var(--of-sage);color:var(--of-sage-ink);padding:18px 18px 16px;display:block;width:100%;text-align:left}
+.v16-card--month{background:var(--of-month-wash);color:var(--of-ink)}
+.v16-card--quiet{background:#f3eee7;color:var(--of-ink)}
+button.v16-card:hover{filter:brightness(.985)}
+.v16-card-title{font-family:var(--font-serif);font-size:1.2rem;line-height:1.25}
+
+/* Rows */
+.v16-rows{margin-top:6px}
+.v16-rows > * + *{border-top:1px solid var(--of-rule)}
+.v16-row{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:12px 0;text-align:left;color:inherit;background:none;border:0}
+button.v16-row{cursor:pointer}
+.v16-row-main{flex:1;min-width:0}
+.v16-row-title{font-size:.98rem;font-weight:500;line-height:1.35}
+.v16-nested{margin-left:4px;padding-left:14px;border-left:2px solid var(--of-rule)}
+.v16-check{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;margin:-8px -8px -8px 0;border-radius:999px;background:none;border:0;cursor:pointer}
+.v16-check > span{width:24px;height:24px;border-radius:999px;border:1.6px solid var(--of-rule-strong);display:inline-flex;align-items:center;justify-content:center;background:#fff}
+.v16-check[aria-checked="true"] > span{background:var(--of-sage-bar);border-color:var(--of-sage-bar);color:#fff}
+
+/* Shortcuts */
+.v16-shortcuts{margin-top:22px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.v16-shortcut{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:84px;padding:14px;border-radius:14px;background:#f1ece5;color:var(--of-ink);font-size:.88rem;font-weight:600;text-align:left}
+.v16-shortcut small{font-weight:500;font-size:.74rem;color:var(--of-soft)}
+.v16-shortcut:hover{background:#ece6dd}
+
+/* Buttons: the app's own (.of-btn) with a calmer case for in-row choices */
+.v16-choice{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--of-rule-strong);background:var(--of-surface);font-size:.86rem;font-weight:600;color:var(--of-ink)}
+.v16-choice[aria-pressed="true"],.v16-choice--primary{background:var(--color-warm-button,#4a3f3e);border-color:var(--color-warm-button,#4a3f3e);color:#fff}
+.v16-choice--quiet{border-color:transparent;background:transparent}
+.v16-choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.v16-actions{margin-top:26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.8fr);gap:10px}
+.v16-actions .of-btn{width:100%}
+.v16-later{display:flex;justify-content:center;margin-top:6px}
+
+/* Inline editor */
+.v16-editor{margin:4px 0 14px;padding:16px;border-radius:14px;background:#f3eee7;display:grid;gap:12px}
+.v16-field{display:grid;gap:6px;font-size:.84rem;font-weight:600}
+.v16-input{width:100%;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--of-rule-strong);background:#fff;font-size:1rem;font-weight:400;color:var(--of-ink)}
+textarea.v16-input{padding:10px 14px;min-height:72px}
+.v16-input:focus{outline:2px solid var(--of-month-accent);outline-offset:1px}
+
+/* Highlight toggle (Our Focus) */
+.v16-toggle{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 12px;border-radius:999px;border:1px solid var(--of-rule-strong);background:var(--of-surface);font-size:.78rem;font-weight:600}
+.v16-toggle[aria-pressed="true"]{background:var(--of-month);border-color:var(--of-month-accent);color:var(--of-ink)}
+.v16-toggle:disabled{opacity:.45}
+
+/* Disclosure */
+.v16-details > summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;cursor:pointer;font-size:.9rem;font-weight:600}
+.v16-details > summary::-webkit-details-marker{display:none}
+.v16-details[open] > summary svg{transform:rotate(180deg)}
+
+/* Segmented control reuses .of-seg */
+.v16-seg{margin-top:16px;width:100%}
+
+/* Radios */
+.v16-radio{display:flex;align-items:center;gap:12px;min-height:46px;font-size:.95rem;cursor:pointer}
+.v16-radio input{width:22px;height:22px;accent-color:var(--color-warm-button,#4a3f3e)}
+
+/* Wall calendar previews: faithful to the printed layouts */
+.v16-paper{margin-top:12px;border-radius:6px;background:#fff;border:1px solid var(--of-rule);box-shadow:var(--of-shadow);padding:12px;font-size:.62rem;color:#4d4544;overflow:hidden}
+.v16-paper-title{font-family:var(--font-serif);font-size:.95rem;text-align:center;margin-bottom:6px}
+.v16-weekly{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid #d9d4ce}
+.v16-weekly > div{border-right:1px solid #d9d4ce;min-height:96px;padding:4px;display:flex;flex-direction:column;gap:2px}
+.v16-weekly > div:last-child{border-right:0}
+.v16-weekly-end{display:grid;grid-template-columns:1fr 1fr;border:1px solid #d9d4ce;border-top:0}
+.v16-weekly-end > div{min-height:56px;padding:4px;display:flex;flex-direction:column;gap:2px}
+.v16-weekly-end > div + div{border-left:1px solid #d9d4ce}
+.v16-zone{margin-top:auto;display:flex;align-items:flex-start;gap:3px;font-size:.46rem;letter-spacing:.02em;line-height:1.25;overflow-wrap:anywhere;min-width:0;text-transform:uppercase;color:#7b726e}
+.v16-zone::before{content:'';width:7px;height:7px;margin-top:1px;border:1px solid #9b928d;border-radius:1px;flex-shrink:0}
+.v16-hand{font-family:'Kalam',var(--font-sans);font-size:.66rem;line-height:1.2}
+.v16-monthly{display:grid;grid-template-columns:4.6rem repeat(7,minmax(0,1fr)) 1.6rem;border-top:1px solid #d9d4ce}
+.v16-monthly > div{border-bottom:1px solid #e6e1db;min-height:20px;padding:2px 3px;display:flex;align-items:center}
+.v16-monthly .v16-m-head{font-size:.55rem;color:#8a807b;justify-content:center;border-bottom-color:#d9d4ce}
+.v16-monthly .v16-m-todo{justify-content:center}
+.v16-monthly .v16-m-todo::after{content:'';width:9px;height:9px;border:1px solid #b9b1ab;border-radius:999px}
+
+/* Month grid (Plans → Month) */
+.v16-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;margin-top:12px;font-size:.75rem}
+.v16-month > *{min-height:52px;padding:4px;border-radius:6px;background:var(--of-surface)}
+.v16-month .v16-mh{min-height:0;background:none;text-align:center;font-weight:600;color:var(--of-soft)}
+.v16-month [data-today]{outline:2px solid var(--of-month-accent)}
+
+.v16-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.v16 :is(a,button,select,input,textarea,summary):focus-visible{outline:2px solid var(--of-month-accent);outline-offset:2px}
+.v16-demo > summary::-webkit-details-marker{display:none}
+.v16-demo > summary{min-height:44px}
+
+/* Our Focus: a quiet round toggle, filled with the month accent when highlighted */
+.v16-toggle{border:0;background:none;padding:0;min-width:44px;min-height:44px}
+.v16-toggle-dot{width:26px;height:26px;border-radius:999px;border:1.6px solid var(--of-rule-strong);display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#fff}
+.v16-toggle[aria-pressed="true"]{background:none;border:0}
+.v16-toggle[aria-pressed="true"] .v16-toggle-dot{background:var(--of-month-accent);border-color:var(--of-month-accent)}
+/* Two answers side by side, equal width (the readiness question) */
+.v16-choices--pair{display:grid;grid-template-columns:1fr 1fr}
+.v16-choices--pair > :only-child{grid-column:1/-1}
+.v16-inline-field{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;font-size:.95rem;font-weight:500}
+.v16-inline-field select{width:auto;min-width:10rem;border-radius:999px}

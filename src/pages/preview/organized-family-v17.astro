@@ -1,0 +1,18 @@
+---
+/**
+ * V17 visual exploration: the same V16 product (components, engines, data, workflows) with the V17 visual system
+ * (docs/ios/V17_VISUAL_SYSTEM.md). Unlinked, noindex, web-only preview; not in the sitemap or the iPhone bundle, no
+ * analytics, no service worker. /preview/organized-family-v16 stays as it was for side-by-side comparison.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import V16App from '../../components/v16/V16App';
+import '../../styles/family-app-brand.css';
+import '../../styles/v16.css';
+import '../../styles/v17.css';
+import '@fontsource-variable/figtree';
+import '@fontsource/kalam/latin-400.css';
+---
+<BaseLayout title="Organized Family · V17 preview" description="Unlisted visual exploration of Organized Family (V17)." robots="noindex" tracking={false}>
+  <meta slot="head" name="theme-color" content="#ffffff" />
+  <V16App client:only="react" look="v17" />
+</BaseLayout>
