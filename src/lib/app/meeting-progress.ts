@@ -4,9 +4,7 @@
  *
  *   - Progress is recorded when the meeting is actually used: the step reached when a part opens, and "finished" only
  *     when the family taps Finish meeting. Nothing is inferred from agreements or the calendar.
- *   - It is kept on THIS phone (localStorage, per household), like the meeting's own draft state. A meeting started on
- *     one phone isn't resumable on the other adult's phone; that would need a shared record (not built: no new
- *     database table for this redesign).
+ *   - This device keeps its place offline. The signed-in meeting synchronizes its checkpoint with the household.
  *   - Missing weeks are never counted or mentioned. An unfinished meeting older than three days simply starts fresh.
  */
 import { occurrences, timeLabel, type CalendarEvent } from '../calendar/recurrence';
@@ -31,9 +29,17 @@ export function readProgress(scope: string | null): MeetingProgress | null {
     return p && typeof p.step === 'number' && typeof p.startedAt === 'string' ? p : null;
   } catch { return null; }
 }
-const write = (scope: string | null, p: MeetingProgress | null) => {
+export const cacheProgress = (scope: string | null, p: MeetingProgress | null) => {
   try { if (p) localStorage.setItem(keyFor(scope), JSON.stringify(p)); else localStorage.removeItem(keyFor(scope)); } catch { /* this visit only */ }
 };
+
+export const MEETING_EDIT = 'omc:household:meeting-edit';
+function saveProgress(scope: string | null, progress: MeetingProgress) {
+  cacheProgress(scope, progress);
+  if (scope && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(MEETING_EDIT, { detail: { scope, progress } }));
+  }
+}
 
 /** A part was opened: start a meeting (if none is in progress) or move it along. */
 export function recordStep(scope: string | null, step: number, now = new Date()): MeetingProgress {
@@ -41,7 +47,7 @@ export function recordStep(scope: string | null, step: number, now = new Date())
   const at = now.toISOString();
   const open = cur && !cur.completedAt && now.getTime() - Date.parse(cur.updatedAt) < 3 * DAY;
   const next: MeetingProgress = open ? { ...cur!, step, updatedAt: at } : { step, startedAt: at, updatedAt: at, completedAt: null };
-  write(scope, next);
+  saveProgress(scope, next);
   return next;
 }
 
@@ -50,14 +56,14 @@ export function recordFinished(scope: string | null, now = new Date()): MeetingP
   const cur = readProgress(scope);
   const at = now.toISOString();
   const done: MeetingProgress = { step: 3, startedAt: cur?.startedAt ?? at, updatedAt: at, completedAt: at };
-  write(scope, done);
+  saveProgress(scope, done);
   return done;
 }
 
 /** Start over: forget an unfinished meeting (a finished one is kept, so "you met on Sunday" stays true). */
 export function startOver(scope: string | null) {
   const cur = readProgress(scope);
-  if (cur && !cur.completedAt) write(scope, null);
+  if (cur && !cur.completedAt) cacheProgress(scope, null);
 }
 
 /**
