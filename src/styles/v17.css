@@ -78,17 +78,17 @@
 .v17 .v16-wordmark em{font-style:normal;color:var(--v17-primary);margin-left:.18em}
 .v17 .v16-iconbtn{width:40px;height:40px;border:0;background:var(--v17-fill);color:var(--of-ink)}
 .v17 .v16-topnav{background:var(--v17-fill);padding:4px;border-radius:14px}
-.v17 .v16-topnav button{min-height:40px;border-radius:11px;font-weight:680;color:var(--of-ink)}
-.v17 .v16-topnav button[aria-current="page"]{background:var(--v17-surface);color:var(--v17-primary);box-shadow:0 1px 3px rgba(18,22,20,.14)}
+.v17 .v16-topnav :is(button,a){min-height:40px;border-radius:11px;font-weight:680;color:var(--of-ink)}
+.v17 .v16-topnav :is(button,a)[aria-current="page"]{background:var(--v17-surface);color:var(--v17-primary);box-shadow:0 1px 3px rgba(18,22,20,.14)}
 
 /* Tab bar: compact, bold icons, an unmistakable active state */
 .v17 .v16-tabbar{left:16px;right:16px;bottom:calc(6px + env(safe-area-inset-bottom));max-width:19.5rem;margin-inline:auto;border:0;border-radius:22px;padding:4px;
   background:color-mix(in srgb,var(--v17-surface) 90%,transparent);backdrop-filter:saturate(1.8) blur(22px);-webkit-backdrop-filter:saturate(1.8) blur(22px);
   box-shadow:0 8px 24px -10px rgba(18,22,20,.35),0 0 0 .5px rgba(18,22,20,.14)}
 .v17 .v16-tabbar ul{gap:4px}
-.v17 .v16-tabbar button{min-height:44px;gap:1px;border-radius:18px;font-size:.68rem;font-weight:700;color:var(--of-ink);transition:background-color .18s ease,color .18s ease}
-.v17 .v16-tabbar button[aria-current="page"]{background:var(--v17-fill-2);color:var(--v17-primary)}
-.v17 :is(.v16-tabbar,.v16-topnav) button .v17-icon{color:inherit}
+.v17 .v16-tabbar :is(button,a){min-height:44px;gap:1px;border-radius:18px;font-size:.68rem;font-weight:700;color:var(--of-ink);transition:background-color .18s ease,color .18s ease}
+.v17 .v16-tabbar :is(button,a)[aria-current="page"]{background:var(--v17-fill-2);color:var(--v17-primary)}
+.v17 :is(.v16-tabbar,.v16-topnav) :is(button,a) .v17-icon{color:inherit}
 .v17 .v16-main{padding-bottom:calc(6rem + env(safe-area-inset-bottom))}
 
 /* ---------------------------------------------------------------- icons */
@@ -160,7 +160,7 @@
 .v17 .v16-choices--pair .v16-choice{padding:0 10px;font-size:.94rem;line-height:1.2}
 .v17 .v16-link{color:var(--v17-primary);font-size:.96rem;font-weight:700}
 .v17 .v16-card .v16-link{color:inherit}
-.v17 :is(.of-btn,.v16-choice,.v16-shortcut,button.v16-card,.v16-toggle,.v16-check,.v17-sheet-done,.v16-tabbar button):active{transform:scale(.97)}
+.v17 :is(.of-btn,.v16-choice,.v16-shortcut,button.v16-card,.v16-toggle,.v16-check,.v17-sheet-done,.v16-tabbar :is(button,a)):active{transform:scale(.97)}
 
 /* Segmented control */
 .v17 .of-seg{border:0;background:var(--v17-fill-2);border-radius:12px;padding:3px;gap:2px}
@@ -265,10 +265,10 @@
 
 /* ---------------------------------------------------------------- tab bar: smaller, never covering anything */
 .v17 .v16-tabbar svg{width:22px;height:22px}
-.v17 .v16-tabbar,.v17 .v16-tabbar button{transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .2s ease,background-color .18s ease,color .18s ease}
+.v17 .v16-tabbar,.v17 .v16-tabbar :is(button,a){transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .2s ease,background-color .18s ease,color .18s ease}
 /* While typing, the keyboard owns the bottom of the screen: the bar steps aside instead of floating over fields. */
 .v17:has(:is(input:not([type="checkbox"]):not([type="radio"]),textarea,select):focus) .v16-tabbar{transform:translateY(calc(100% + 20px));opacity:0;pointer-events:none}
-.v17 .v16-tabbar button[aria-current="page"] svg{animation:v17-pop .28s cubic-bezier(.3,1.6,.5,1)}
+.v17 .v16-tabbar :is(button,a)[aria-current="page"] svg{animation:v17-pop .28s cubic-bezier(.3,1.6,.5,1)}
 
 /* ---------------------------------------------------------------- month calendar: clean grid, strong selection */
 .v17 .v16-month{gap:2px 0;margin-top:10px}
@@ -410,16 +410,16 @@
 /* Selection feedback */
 .v17 .v16-toggle-dot,.v17 .v16-check > span{border-color:var(--v17-control-edge)}
 .v17 .v16-toggle[aria-pressed="true"] .v16-toggle-dot{background:var(--v17-primary);border-color:var(--v17-primary)}
-.v17 .v16-tabbar button,.v17 .v16-topnav button{-webkit-tap-highlight-color:transparent}
+.v17 .v16-tabbar :is(button,a),.v17 .v16-topnav :is(button,a){-webkit-tap-highlight-color:transparent}
 
 /* ---------------------------------------------------------------- floating tab bar: real material, never covering */
 .v17 .v16-tabbar{background:var(--v17-material);border:0;box-shadow:var(--v17-shadow-float);
   backdrop-filter:blur(24px) saturate(1.8);-webkit-backdrop-filter:blur(24px) saturate(1.8)}
-.v17 .v16-tabbar button{color:var(--v17-label);font-weight:620}
-.v17 .v16-tabbar button[aria-current="page"]{background:var(--v17-primary-tint);color:var(--v17-primary)}
+.v17 .v16-tabbar :is(button,a){color:var(--v17-label);font-weight:620}
+.v17 .v16-tabbar :is(button,a)[aria-current="page"]{background:var(--v17-primary-tint);color:var(--v17-primary)}
 .v17 .v16-topnav{background:rgba(118,118,128,.12)}
-.v17 .v16-topnav button{color:var(--v17-label);font-weight:600}
-.v17 .v16-topnav button[aria-current="page"]{background:var(--v17-surface);color:var(--v17-primary);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+.v17 .v16-topnav :is(button,a){color:var(--v17-label);font-weight:600}
+.v17 .v16-topnav :is(button,a)[aria-current="page"]{background:var(--v17-surface);color:var(--v17-primary);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
 /* Room under the floating bar: every screen's last control clears it when scrolled to the end (no fade over content,
    which tinted buttons passing beneath it). */
 @media(max-width:1023px){.v17 .v16-main{padding-bottom:calc(7.25rem + env(safe-area-inset-bottom))}}

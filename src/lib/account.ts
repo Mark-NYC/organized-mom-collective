@@ -134,9 +134,11 @@ const write = (key: string, value: unknown) => {
 
 export const loadSession = () => read<AccountSession | null>(SESSION_KEY, null);
 const saveSession = (s: AccountSession | null) => {
+  const previousUser = loadSession()?.user_id;
   try {
     if (s) rawSet(SESSION_KEY, JSON.stringify(s));
     else rawRemove(SESSION_KEY);
+    if (previousUser !== s?.user_id) globalThis.dispatchEvent?.(new Event(SESSION_STORAGE_KEY));
   } catch {
     /* fine */
   }

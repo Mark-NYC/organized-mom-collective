@@ -15,26 +15,42 @@ import { CleaningIconStyle, TaskList } from '../TaskList';
 const ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 export default function Cleaning({ ctx }: { ctx: Ctx }) {
-  const [rhythm, setRhythm] = useState(false);
-  const [week, setWeek] = useState<0 | 1>(0);
-  const [wd, setWd] = useState(() => weekday(ctx.today));
-  const monday = addDays(ctx.monday, week * 7);
-  const date = addDays(monday, (wd + 6) % 7);
-  const c = ctx.s.cleaning;
-  const setC = (patch: Partial<typeof c>) => ctx.set((s) => ({ ...s, cleaning: { ...s.cleaning, ...patch } }));
-  const toggle = (key: string) => ctx.set((s) => {
+  const setC = (patch: Partial<CleaningState>) => ctx.set(s => ({ ...s, cleaning: { ...s.cleaning, ...patch } }));
+  const toggle = (key: string) => ctx.set(s => {
     const checks = { ...s.cleaning.checks };
     if (checks[key]) delete checks[key]; else checks[key] = true;
     return { ...s, cleaning: { ...s.cleaning, checks } };
   });
+  return <CleaningView today={ctx.today} weekOfToday={ctx.monday} ctx={ctx} c={ctx.s.cleaning} setC={setC}
+    toggle={toggle} back={() => ctx.go('today')} owners={id => agreedParts(ctx.s).filter(p => p.cleaningTask?.taskId === id)} />;
+}
+
+type CleaningState = Ctx['s']['cleaning'];
+type CleaningPeople = Pick<Ctx, 'look' | 'names' | 'colors'>;
+interface CleaningProps {
+  today: string;
+  weekOfToday: string;
+  ctx: CleaningPeople;
+  c: CleaningState;
+  setC(patch: Partial<CleaningState>): void;
+  toggle(key: string): void;
+  back(): void;
+  owners(task: string): Pick<Ctx['s']['parts'][number], 'id' | 'ownerId'>[];
+}
+export function CleaningView({ today, weekOfToday, ctx, c, setC, toggle, back, owners }: CleaningProps) {
+  const [rhythm, setRhythm] = useState(false);
+  const [week, setWeek] = useState<0 | 1>(0);
+  const [wd, setWd] = useState(() => weekday(today));
+  const monday = addDays(weekOfToday, week * 7);
+  const date = addDays(monday, (wd + 6) % 7);
+  const schedule = { cleaning: c };
   const usual = weeklySchedule.find((z) => z.day === wd);
-  const here = sessionsOn(ctx.s, monday, wd);
-  const movedAway = usual && c.mode === 'printed' && sessionDay(ctx.s, monday, usual.day) !== wd ? sessionDay(ctx.s, monday, usual.day) : null;
+  const here = sessionsOn(schedule, monday, wd);
+  const movedAway = usual && c.mode === 'printed' && sessionDay(schedule, monday, usual.day) !== wd ? sessionDay(schedule, monday, usual.day) : null;
   const end = weekend.days.find((d) => d.day === wd);
   const project = monthlyDeepClean.find((m) => m.month === Number(monday.slice(5, 7)) - 1);
   // The cleaning companion's own checklist (src/components/TaskList.tsx): its box, its pen tick, its strike-through.
   const doneIn = (tasks: { id: string }[], key: (id: string) => string) => new Set(tasks.filter((t) => c.checks[key(t.id)]).map((t) => t.id));
-  const owners = (taskId: string) => agreedParts(ctx.s).filter((p) => p.cleaningTask?.taskId === taskId);
   return (
     <CleaningIconStyle.Provider value="simple">
     <section data-screen="cleaning">
@@ -68,8 +84,8 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
             <div><p className="v16-card-title">{usual.zone}</p><p className="text-[0.82rem]">{DAY_NAMES[usual.day]}, our usual day</p></div>
           </div>
           <div className="mt-2 flex items-center gap-2" data-move-row>
-            <Check checked={sessionDay(ctx.s, monday, usual.day) === 6} label={`Move ${week === 0 ? 'this' : 'next'} week’s session to Saturday`}
-              onChange={() => setC({ moved: moveSession(ctx.s, monday, usual.day, sessionDay(ctx.s, monday, usual.day) === 6 ? null : 6) })} />
+            <Check checked={sessionDay(schedule, monday, usual.day) === 6} label={`Move ${week === 0 ? 'this' : 'next'} week’s session to Saturday`}
+              onChange={() => setC({ moved: moveSession(schedule, monday, usual.day, sessionDay(schedule, monday, usual.day) === 6 ? null : 6) })} />
             <span className="text-[0.95rem]" aria-hidden="true">Move {week === 0 ? 'this' : 'next'} week’s session to Saturday</span>
           </div>
           {movedAway !== null && <p className="text-[0.84rem]" role="status">Moved to {DAY_NAMES[movedAway]} for {week === 0 ? 'this' : 'that'} week only. The checklist moves with it; the week after, it’s back on {DAY_NAMES[usual.day]}.</p>}
@@ -126,13 +142,13 @@ export default function Cleaning({ ctx }: { ctx: Ctx }) {
       <details className="v16-details mt-6 border-t border-[color:var(--of-rule)]" data-full-week>
         <summary>The whole week</summary>
         <ul className="v16-rows">{ORDER.map((d) => {
-          const zones = sessionsOn(ctx.s, monday, d).map((z) => weeklySchedule.find((x) => x.day === z)!.zone);
+          const zones = sessionsOn(schedule, monday, d).map((z) => weeklySchedule.find((x) => x.day === z)!.zone);
           const we = c.mode === 'printed' ? weekend.days.find((x) => x.day === d)?.zone : undefined;
           return <li key={d} className="v16-row !min-h-[44px]"><span className="w-24 font-semibold">{DAY_NAMES[d]}</span><span className="v16-meta">{[...zones, ...(we ? [we] : [])].join(' · ') || '—'}</span></li>;
         })}</ul>
       </details>
       <p className="v16-meta mt-4 v16-explain">Completion shows on Today. It doesn’t change anyone’s independence by itself.</p>
-      <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')} data-cleaning-back>Back to Today</button>
+      <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={back} data-cleaning-back>Back to Today</button>
     </section>
     </CleaningIconStyle.Provider>
   );

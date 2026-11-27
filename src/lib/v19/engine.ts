@@ -590,7 +590,8 @@ export function buildTodayV19(inp: TodayInput): TodayV19 {
 function headlineV19(inp: TodayInput, card: SmartInsight | null, urgent: SmartInsight[]): { headline: string; sub?: string } {
   const { s, monday, today } = inp;
   const todays = sharedOccurrences(s, monday).filter((o) => o.date === today && !ROUTINE.test(o.event.title));
-  if (s.meeting.started) return { headline: 'Pick up where you left off.' };
+  // An unfinished meeting sets the headline only when nothing needs attention (its resume row is always below).
+  if (s.meeting.started && !card) return { headline: 'Pick up where you left off.' };
   if (urgent.length >= 2) return { headline: 'A few things need attention.' };
   if (card && (card.category === 'changed' || card.key.startsWith('simplify:'))) return { headline: 'A change of plans.' };
   if (card?.type === 'capacity') return { headline: card.title.startsWith('Tomorrow') || card.urgency >= 0.6 ? 'Tomorrow’s a busy one.' : 'A full few days ahead.' };

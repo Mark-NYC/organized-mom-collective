@@ -56,6 +56,7 @@ import { DevelopmentConversation, DevelopmentNextSteps, DevelopmentPractice, lea
 import { GettingReady, PlanSummary, WeekReview } from './MeetingPlan';
 import { currentPriorities, usePriorities, weekOf } from '../../lib/app/priorities';
 import { useEventTasks } from '../../lib/calendar/event-tasks';
+import { useSharedMeetingProgress } from "../../lib/app/shared-meeting-progress";
 import { dayWord, meetingState, nextScheduledMeeting, readProgress, recordFinished, recordStep, startOver, type MeetingProgress } from '../../lib/app/meeting-progress';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
@@ -122,6 +123,7 @@ export default function WeeklyMeeting() {
       if (n >= 1 && n <= MEETING_GUIDE.parts.length) setActiveStep(n - 1);
     } catch { /* the first part */ }
   }, []);
+  const syncNotice = useSharedMeetingProgress(cal.signedIn && !isDemo() ? scope : null, setProgress);
   const goStep = (index: number) => {
     if (index > 0) track('meeting_started');
     const i = Math.max(0, Math.min(MEETING_GUIDE.parts.length - 1, index));
@@ -191,6 +193,7 @@ export default function WeeklyMeeting() {
   if (planDone) {
     return (
       <div className="mx-auto max-w-3xl" data-weekly-meeting data-meeting-done>
+        {syncNotice && <p role="status" className="v16-meta">{syncNotice}</p>}
         <PlanSummary current={plan} agreed={agreed} newIds={newIds} external={shared.events} tasks={eventTasks} household={cal.household} colors={cal.colors} onAgain={() => { setPlanDone(false); }} />
       </div>
     );
@@ -199,6 +202,7 @@ export default function WeeklyMeeting() {
   if (!inMeeting) {
     return (
       <div className="mx-auto max-w-3xl space-y-5" data-weekly-meeting data-meeting-landing data-meeting-state={state} data-meeting-kind={meeting ? 'club' : 'free'}>
+        {syncNotice && <p role="status" className="v16-meta">{syncNotice}</p>}
         <header>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="of-page-title">Family Meeting</h1>
@@ -279,6 +283,7 @@ export default function WeeklyMeeting() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5" data-weekly-meeting data-meeting-kind={meeting ? 'club' : 'free'}>
+        {syncNotice && <p role="status" className="v16-meta">{syncNotice}</p>}
       {/* Compact while the family is meeting: the way back to the landing, and where they are. */}
       <header className="flex items-center justify-between gap-3">
         <button type="button" className="inline-flex min-h-11 items-center gap-1.5 text-[0.95rem] font-semibold text-warm-ink" onClick={() => { setInMeeting(false); window.scrollTo(0, 0); }} aria-label="Exit the meeting. Your place is saved." data-meeting-back-to-landing data-meeting-exit>

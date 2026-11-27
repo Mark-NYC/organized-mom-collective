@@ -45,8 +45,9 @@ function load(today: string, key: string, gen: 0 | 18 | 19 | 20): V16State {
 }
 
 /** The Club month's own suggestions, as proposals (never agreements), one per person who has nothing prepared. */
-function withMonthParts(s: V16State, club: ReturnType<typeof buildFamilyMeeting> | null): Part[] {
-  const kept = s.parts.filter((p) => p.origin !== 'month' || p.status === 'agreed');
+export function withMonthParts(s: V16State, club: ReturnType<typeof buildFamilyMeeting> | null): Part[] {
+  // A month suggestion the family acted on (kept, changed, skipped, agreed) stays as they left it.
+  const kept = s.parts.filter((p) => p.origin !== 'month' || p.status !== 'suggested');
   if (!club) return kept;
   const busy = new Set(kept.filter((p) => p.status !== 'skipped').map((p) => p.ownerId));
   const extra: Part[] = [];
@@ -310,7 +311,7 @@ function Account({ ctx }: { ctx: Ctx }) {
 }
 
 /** V18 household memory, always correctable: what the family told us, and what the app noticed (never assumed). */
-function Noticed({ ctx }: { ctx: Ctx }) {
+export function Noticed({ ctx }: { ctx: Ctx }) {
   const mem = allMemory(ctx.s.intel!.memory);
   return (
     <div className="v16-section" data-noticed>
@@ -327,7 +328,7 @@ function Noticed({ ctx }: { ctx: Ctx }) {
 }
 
 /** V19: how much Today brings up, in the family's own words. One simple choice; the rest is learned and correctable. */
-function Assistance({ ctx }: { ctx: Ctx }) {
+export function Assistance({ ctx }: { ctx: Ctx }) {
   const intel = ctx.s.intel!;
   const never = (intel.feedback ?? []).filter((f) => f.kind === 'never' || f.kind === 'not-relevant');
   return (
@@ -354,7 +355,7 @@ function Assistance({ ctx }: { ctx: Ctx }) {
  * V20: notification settings, per adult, in Account (no new screen). Three purposes on by default, the Family Meeting
  * reminder off by default, quiet hours. There is no setting for chore or cleaning reminders because there are none.
  */
-function Notifications({ ctx }: { ctx: Ctx }) {
+export function Notifications({ ctx }: { ctx: Ctx }) {
   const viewer = ctx.s.intel!.viewer;
   const p = prefsFor(ctx.s, viewer);
   const set = (patch: Partial<NotifyPrefs>) => ctx.set((s) => ({ ...s, intel: { ...s.intel!, notifyPrefs: { ...(s.intel!.notifyPrefs ?? {}), [viewer]: { ...(s.intel!.notifyPrefs?.[viewer] ?? {}), ...patch } } } }));

@@ -119,3 +119,29 @@ self.addEventListener('fetch', (event) => {
   event.waitUntil(network.catch(() => {}));
   event.respondWith(fromCache(req).then((hit) => hit || network.catch(() => Response.error())));
 });
+
+// Household notifications (V20, docs/ios/V20_LAUNCH.md). Sent by the push-delivery Edge Function only for the three
+// purposes (someone needs you, something important changed, something you were carrying is handled) and the opt-in
+// meeting reminder. The payload carries no private calendar text. "I've got it" opens Organized Family, which confirms
+// ownership in the shared plan as the signed-in adult (a service worker has no sign-in of its own).
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { title: 'Organized Family', body: event.data ? event.data.text() : '' }; }
+  const actions = (d.actions || []).map((a) => ({ action: a, title: a === 'got-it' ? 'I’ve got it' : a === 'not-tonight' ? 'Not this time' : 'Open' })).slice(0, 2);
+  event.waitUntil(self.registration.showNotification(d.title || 'Organized Family', {
+    body: d.body || '', tag: d.id || undefined, data: { id: d.id, url: d.url || '/app' }, actions,
+    icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const data = event.notification.data || {};
+  const action = event.action || 'open';
+  const url = new URL(data.url || '/app', self.location.origin);
+  if (data.id) { url.searchParams.set('notification', data.id); url.searchParams.set('action', action); }
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    for (const c of list) if (new URL(c.url).pathname.startsWith('/app') && 'navigate' in c) return c.navigate(url.href).then((w) => w && w.focus());
+    return self.clients.openWindow(url.href);
+  }));
+});

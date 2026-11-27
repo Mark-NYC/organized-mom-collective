@@ -1,25 +1,12 @@
 ---
 /**
- * Today (/app): we follow through together (two-tab redesign, docs/ios/TWO_TAB_REDESIGN.md), the same on the website
- * and in the iPhone app.
- * Everything date-based renders on the device (TodayDashboard), never at build time. The Inbox is planned
- * (src/data/app/features.ts) and not shown.
+ * Today (/app): Organized Family V20 (docs/ios/V20_BASELINE.md, docs/ios/V20_LAUNCH.md), the same on the website and in
+ * the iPhone app. The approved V20 Today on the signed-in household's real data (LiveFamily). Everything date-based
+ * renders on the device, never at build time.
  */
 import Layout from '../../layouts/AppLayout.astro';
-import { TodayDate } from '../../components/app/TodayOverview';
-import { Icon } from '../../components/app/ui';
-import TodayDashboard from '../../components/app/TodayDashboard';
+import LiveFamily from '../../components/v20/LiveFamily';
 ---
-<Layout title="Today" description="What we agreed together, who's doing what today, and the next Family Meeting.">
-  <div class="family-brand of-page max-w-2xl">
-    <header class="mb-5 flex items-start justify-between gap-3 sm:mb-6" data-today-header>
-      <div class="min-w-0">
-        <p class="of-eyebrow"><TodayDate client:only="react" /></p>
-        <h1 class="of-page-title mt-2">Today</h1>
-        <p class="mt-2 text-[1rem] text-warm-soft">Living out what we agreed together.</p>
-      </div>
-      <a href="/app/family-calendar" class="mt-1 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-[var(--of-sage)] px-3.5 text-[0.88rem] font-semibold text-warm-ink" data-this-week><Icon name="calendar" size={18} />This Week</a>
-    </header>
-    <TodayDashboard client:only="react"><div slot="fallback" class="of-tile h-40" aria-busy="true"></div></TodayDashboard>
-  </div>
+<Layout title="Today" description="What matters today, everyone's part, and your next Family Meeting.">
+  <LiveFamily client:only="react" page="today"><div slot="fallback" class="h-96" aria-busy="true"></div></LiveFamily>
 </Layout>

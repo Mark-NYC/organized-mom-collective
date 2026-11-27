@@ -6,6 +6,7 @@
 import Layout from '../../layouts/AppLayout.astro';
 import FamilySummary from '../../components/FamilySummary';
 import { Chevron, Icon } from '../../components/app/ui';
+import LiveFamily from '../../components/v20/LiveFamily';
 ---
 <Layout title="Account" description="Your family, who shares it, your membership and your sign-in.">
   <div class="family-brand of-page max-w-3xl">
@@ -15,6 +16,7 @@ import { Chevron, Icon } from '../../components/app/ui';
       <p class="of-page-lede">Your family, who shares it with you, and your sign-in.</p>
     </header>
     <FamilySummary client:only="react" />
+    <LiveFamily client:only="react" page="settings" />
     <p class="of-group-title">Settings</p>
     <nav class="of-list" aria-label="Settings">
       <a href="/app/settings" class="of-list-item"><span class="of-icon-box of-icon-box--sage"><Icon name="check" /></span><span class="min-w-0 flex-1"><span class="block font-semibold">Cleaning preferences</span><span class="block text-[0.8rem] text-warm-soft">Reset checklists, the welcome screen</span></span><Chevron /></a>
