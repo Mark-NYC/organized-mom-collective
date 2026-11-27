@@ -171,7 +171,7 @@ function Matter({ ctx, r, onOpen }: { ctx: Ctx; r: MatterRowV19; onOpen: (key: s
   return (
     <div className="py-3" data-matter={r.occ.event.title} data-group={r.group} data-priority={r.priority ? '' : undefined}>
       <div className="v17-lead">
-        {ctx.gen === 20 ? <Badge name={badgeFor(r.occ.event.title)} /> : <Art name={artFor(r.occ.event.title)} />}
+        {(ctx.gen ?? 0) >= 20 ? <Badge name={badgeFor(r.occ.event.title)} /> : <Art name={artFor(r.occ.event.title)} />}
         <div className="min-w-0">
           <p className="v16-meta">{fmtDate(r.occ.date, { weekday: 'long' })} · {timeLabel(r.occ.event)}</p>
           <p className="v16-h3">{r.occ.event.title}</p>
@@ -190,7 +190,7 @@ function MeetingRow({ ctx, agenda, occ }: { ctx: Ctx; agenda: number; occ: Retur
   if (m.started) {
     return (
       <button type="button" className="v18-meeting v18-meeting--resume" onClick={() => ctx.go('meeting')} data-meeting-row="resume">
-        {ctx.gen === 20 ? <Badge name="family-meeting-around-a-table" /> : <Art name="people" />}
+        {(ctx.gen ?? 0) >= 20 ? <Badge name="family-meeting-around-a-table" /> : <Art name="people" />}
         <span className="min-w-0 flex-1"><span className="v18-meeting-title">Continue your Family Meeting</span><span className="v16-meta block">You stopped at {STEP[m.step]}.</span></span>
         <span aria-hidden="true" className="v18-meeting-go">→</span>
       </button>
@@ -199,7 +199,7 @@ function MeetingRow({ ctx, agenda, occ }: { ctx: Ctx; agenda: number; occ: Retur
   const go = () => (ctx.s.scenario === 'week4' && !m.checkInDone ? ctx.go('check-in') : ctx.go('meeting'));
   return (
     <button type="button" className="v18-meeting" onClick={go} data-meeting-row={occ ? 'next' : 'plan'}>
-      {ctx.gen === 20 ? <Badge name="family-meeting-around-a-table" /> : <Art name="people" />}
+      {(ctx.gen ?? 0) >= 20 ? <Badge name="family-meeting-around-a-table" /> : <Art name="people" />}
       <span className="min-w-0 flex-1">
         <span className="v18-meeting-title">{occ ? `Next Family Meeting · ${dayName(occ.date)}, ${timeLabel(occ.event).split('–')[0].trim()}` : 'Plan this week together'}</span>
         {agenda > 0 && <span className="v16-meta block" data-meeting-topics={agenda}>{agenda === 1 ? '1 thing to talk about' : `${agenda} things to talk about`}</span>}
@@ -230,7 +230,7 @@ function DismissedNote({ ctx, i, onDone }: { ctx: Ctx; i: SmartInsight; onDone: 
 }
 
 /** Isolate what's affected; one grounded question per affected agreement; reassurance for what's already fine. */
-function ResolveSheet({ ctx, i, meetingDay, onClose }: { ctx: Ctx; i: SmartInsight; meetingDay: string | null; onClose: () => void }) {
+export function ResolveSheet({ ctx, i, meetingDay, onClose }: { ctx: Ctx; i: SmartInsight; meetingDay: string | null; onClose: () => void }) {
   const [choices, setChoices] = useState<Record<string, string>>({});
   const [openParts, setOpenParts] = useState<string[] | null>(null);
   const [openRow, setOpenRow] = useState<string | null>(null);
@@ -247,7 +247,7 @@ function ResolveSheet({ ctx, i, meetingDay, onClose }: { ctx: Ctx; i: SmartInsig
         {!openParts && <>
           {i.affected.map((a) => (
             <div key={a.id} className="v19-affected" data-affected={a.kind}>
-              {ctx.gen === 20 ? <div className="v17-lead"><Badge name={AFFECTED_BADGE[a.kind]} /><h3 className="v19-question">{a.question}</h3></div> : <h3 className="v19-question">{a.question}</h3>}
+              {(ctx.gen ?? 0) >= 20 ? <div className="v17-lead"><Badge name={AFFECTED_BADGE[a.kind]} /><h3 className="v19-question">{a.question}</h3></div> : <h3 className="v19-question">{a.question}</h3>}
               {a.facts.map((f) => <p key={f} className="v16-meta mt-1">{f}</p>)}
               {a.current && (
                 <div className="v19-current" data-current>
@@ -302,7 +302,7 @@ function PartSheet({ ctx, i, onClose }: { ctx: Ctx; i: SmartInsight; onClose: ()
 }
 
 /** "Something changed?": tell the plan what happened; the plan suggests how to simplify. Nothing changes by itself. */
-function ChangedSheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) {
+export function ChangedSheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) {
   const [kind, setKind] = useState<Report['kind'] | null>(null);
   const [who, setWho] = useState('');
   const [note, setNote] = useState('');

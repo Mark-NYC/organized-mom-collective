@@ -1,0 +1,21 @@
+---
+/**
+ * V21 preview (docs/ios/V21_PREVIEW.md): the V20 app refined for shared responsibility. Unlinked, noindex, web-only;
+ * no analytics, no service worker, its own fictional household and browser storage. Production /app is untouched until
+ * the owner approves this preview. The dark stage, the Meg/Mark switch, scenarios, "Reset demo" and the widget-state
+ * concept are reviewer tools, not product UI.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import V21App from '../../components/v21/V21App';
+import '../../styles/family-app-brand.css';
+import '../../styles/v16.css';
+import '../../styles/v17.css';
+import '../../styles/v18.css';
+import '../../styles/v21.css';
+import '@fontsource-variable/figtree';
+import '@fontsource/kalam/latin-400.css';
+---
+<BaseLayout title="Organized Family · V21 preview" description="Unlisted review build of Organized Family V21." robots="noindex" tracking={false}>
+  <meta slot="head" name="theme-color" content="#111111" />
+  <V21App client:only="react" />
+</BaseLayout>

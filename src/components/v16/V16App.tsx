@@ -257,7 +257,7 @@ function DemoBarV18({ ctx, theme }: { ctx: Ctx; theme: { value: Theme; set: (t: 
   );
 }
 
-function Resources({ ctx }: { ctx: Ctx }) {
+export function Resources({ ctx }: { ctx: Ctx }) {
   const month = ctx.today.slice(5, 7);
   return (
     <section data-screen="resources">
@@ -291,18 +291,18 @@ function Resources({ ctx }: { ctx: Ctx }) {
   );
 }
 
-function Account({ ctx }: { ctx: Ctx }) {
+export function Account({ ctx }: { ctx: Ctx }) {
   const adults = ctx.people.filter((m) => m.kind === 'adult');
   return (
     <section data-screen="account">
       <h1 className="v16-h1 pt-2">Account</h1>
-      <p className="v16-lede">Signed in as Ana (sample). {adults.length > 1 ? `${adults.map((a) => a.firstName).join(' and ')} share this family’s plan as equals.` : 'One adult runs this family’s plan; nothing waits on a second account.'}</p>
+      <p className="v16-lede">Signed in as {ctx.names[ctx.s.intel?.viewer ?? ''] ?? 'Ana'} (sample). {adults.length > 1 ? `${adults.map((a) => a.firstName).join(' and ')} share this family’s plan as equals.` : 'One adult runs this family’s plan; nothing waits on a second account.'}</p>
       <ul className="v16-rows mt-4">
         <li className="v16-row">{ctx.look === 'v17' && <Art name="people" tile="blue" />}<span className="v16-row-main">Family plan</span><span className="v16-meta">{ctx.s.club ? 'Family Meeting Club' : 'Free'}</span></li>
         <li className="v16-row">{ctx.look === 'v17' && <Art name="sync" tile="sage" />}<span className="v16-row-main">Sync</span><span className="v16-meta">{ctx.s.online ? 'Up to date' : 'Offline · changes wait on this phone'}</span></li>
       </ul>
-      {ctx.gen === 20 && <Notifications ctx={ctx} />}
-      {(ctx.gen === 19 || ctx.gen === 20) && <Assistance ctx={ctx} />}
+      {(ctx.gen ?? 0) >= 20 && <Notifications ctx={ctx} />}
+      {(ctx.gen ?? 0) >= 19 && <Assistance ctx={ctx} />}
       {ctx.s.intel && <Noticed ctx={ctx} />}
       <p className="v16-meta mt-4">Preview only. The real account, sharing, billing and sign-in are at <a className="underline" href="/app/account">/app/account</a>; nothing here changes them.</p>
       <button type="button" className="of-btn of-btn--soft of-btn--block mt-5" onClick={() => ctx.go('today')}>Back to Today</button>

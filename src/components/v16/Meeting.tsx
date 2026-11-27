@@ -17,6 +17,7 @@ import WallCalendar from './WallCalendar';
 import { enginePeople } from '../v18/TodayV18';
 import { buildTodayV19 } from '../../lib/v19/engine';
 import { talked } from '../../lib/v19/resolve';
+import CarryForward from '../v21/CarryForward';
 
 export const STEPS = ['Our Focus', 'Let’s Talk', 'Everyone’s Part', 'Let’s Practice'] as const;
 const FREE_QUESTIONS = [
@@ -177,8 +178,9 @@ function Talk({ ctx }: { ctx: Ctx }) {
         {club && <p className="v16-meta mt-1">From {club.resourceTitle}, this month’s Family Meeting Club kit.</p>}
       </div>
 
-      {(ctx.gen === 19 || ctx.gen === 20) && <AgendaV19 ctx={ctx} />}
-      {ctx.gen !== 19 && ctx.gen !== 20 && ctx.s.intel && ctx.s.intel.topics.length > 0 && (
+      {(ctx.gen === 19 || ctx.gen === 20 || ctx.gen === 21) && <AgendaV19 ctx={ctx} />}
+      {ctx.gen === 21 && <CarryForward ctx={ctx} />}
+      {ctx.gen !== 19 && ctx.gen !== 20 && ctx.gen !== 21 && ctx.s.intel && ctx.s.intel.topics.length > 0 && (
         <div className="v16-section" data-meeting-topics-list>
           <h2 className="v16-h3">Brought up from Today</h2>
           <ul className="v16-rows">{ctx.s.intel.topics.map((t) => (
