@@ -99,6 +99,9 @@ create temp table own_before as select id, revision from public.calendar_events;
 create temp table billing_before as select (select count(*) from public.club_subscriptions) + (select count(*) from public.club_entitlements) as n;
 
 -- ---------------------------------------------------------------- staged rollout
+-- The V20 launch (20261215000002) turned these on for everyone; check that, then test the gate itself from off.
+select pg_temp.expect((select event_tasks_everyone from public.calendar_feed_rollout where id), 'the V20 launch turned event responsibilities on for everyone');
+update public.calendar_feed_rollout set event_tasks_everyone = false where id;
 select pg_temp.as_user('authenticated', :ANA);
 select pg_temp.expect(pg_temp.fails($q$select public.calendar_event_tasks('2026-11-01', '2027-01-31')$q$, 'not_enabled'), 'off by default, even where calendar subscriptions are on');
 reset role;

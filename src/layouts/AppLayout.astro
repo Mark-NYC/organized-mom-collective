@@ -13,7 +13,6 @@ import { calendarPath } from '../lib/companion';
 const calendar = calendarPath(Astro.url.pathname);
 const cleaningOnly = !calendar && /^\/app\/(cleaning|week|reorder|settings)\/?$/.test(Astro.url.pathname);
 import { SITE_NAME } from '../config';
-import { ONBOARDED_KEY } from '../lib/storage';
 import { monthTints } from '../lib/club/month-tints';
 // This month's approved calendar color (src/theme.ts) as the app's accent, chosen on the device (the page is static).
 // Tiles use the month's lightest step (the same steps its Club printables use); the accent carries labels and progress.
@@ -54,15 +53,6 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
       try {
         const t = MONTH_THEME[new Date().getMonth()], r = document.documentElement.style;
         r.setProperty('--of-month', t[0]); r.setProperty('--of-month-wash', t[1]); r.setProperty('--of-month-accent', t[2]);
-      } catch (e) {}
-    </script>
-    <script is:inline define:vars={{ ONBOARDED_KEY }}>
-      // First visit to the printed calendar's companion page: hide app chrome until its walkthrough renders.
-      // (Organized Family's Cleaning tab, /app/cleaning, has no walkthrough.)
-      try {
-        if (/^\/app\/calendar\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
-          document.documentElement.classList.add('needs-onboarding');
-        }
       } catch (e) {}
     </script>
   </Fragment>
