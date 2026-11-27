@@ -45,6 +45,12 @@ const check = (step, ok, detail = '') => {
   if (!ok) failures++;
   console.log(`  ${ok ? '✓' : '✗'} ${step}${detail ? ` — ${detail}` : ''}`);
 };
+// V21: standing agreements live under Everyone's part, collapsed; open it the way a person would, then read it.
+const everyonesPart = async (page) => {
+  const t = page.locator('[data-agreements-toggle]');
+  if ((await t.count()) && (await t.getAttribute('aria-expanded')) !== 'true') { await t.click().catch(() => {}); await page.waitForTimeout(300); }
+  return page.locator('[data-everyones-part]').innerText().catch(() => '');
+};
 const note = (step, detail) => { results.push({ step, ok: null, detail }); console.log(`  • ${step} — ${detail}`); };
 const sql = async (q) => (await (await fetch(`${API}/__test/sql`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sql: q }) })).json()).out;
 const rpc = async (token, fn, body = {}) => {
@@ -158,7 +164,7 @@ await shot(jen, '04-meeting-we-agreed');
 const isCleaning = ['cleaning', 'laundry'].includes(saved?.category);
 async function everywhere(page, person, text, label) {
   await page.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(page, 1200);
-  const today = await page.locator('[data-everyones-part]').innerText().catch(() => '');
+  const today = await everyonesPart(page);
   check(`${label}: Today shows it for ${person}`, today.includes(text) && today.includes(person));
   await page.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(page, 1200);
   await page.click('[data-calendar-agreements] summary').catch(() => {});
@@ -192,7 +198,7 @@ await sam.click('[data-save-agreement]');
 await sam.waitForSelector(`[data-agreement-row="${edited}"]`, { timeout: 10000 }).catch(() => {});
 check('edit + reassign saved to the household', (await sql(`select (select first_name from public.club_family_members f where f.id = owner_ids[1]) || '|' || agreed_text || '|' || agreed_when from public.club_responsibilities where status = 'confirmed' and agreed_text like 'Take the trash%'`)) === `Leo|${edited}|Tuesday night`);
 await everywhere(jen, 'Leo', edited, 'on Jen\'s phone after Sam\'s edit');
-const todayText = await (async () => { await jen.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(jen, 1200); return jen.locator('[data-everyones-part]').innerText().catch(() => ''); })();
+const todayText = await (async () => { await jen.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(jen, 1200); return everyonesPart(jen); })();
 check('Maya no longer listed for it', !todayText.includes('Maya'));
 await jen.goto(`${base}/app/club/${MONTH}?view=meeting`, { waitUntil: 'networkidle' });
 await jen.waitForSelector('[data-fm-ready="true"]', { timeout: 20000 });
@@ -205,14 +211,14 @@ await jenCtx.close();
 const jen2Ctx = await newPhone(state);
 const jen2 = await jen2Ctx.newPage();
 await jen2.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(jen2, 1500);
-check('reopened: still signed in, agreement on Today', (await jen2.locator('[data-everyones-part]').innerText().catch(() => '')).includes(edited));
+check('reopened: still signed in, agreement on Today', (await everyonesPart(jen2)).includes(edited));
 await jen2.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(jen2, 1200);
 check('reopened: the event is still on the calendar', await jen2.locator('[data-calendar-event="Soccer practice"]').count());
 
 // ------------------------------------------------------------------ 9. Offline, reconnection, two phones
 await offline(jen2Ctx);
 await jen2.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(jen2, 1500);
-check('offline: Today still shows the agreement (kept on the phone)', (await jen2.locator('[data-everyones-part]').innerText().catch(() => '')).includes(edited));
+check('offline: Today still shows the agreement (kept on the phone)', (await everyonesPart(jen2)).includes(edited));
 await jen2.goto(`${base}/app/family-calendar`, { waitUntil: 'networkidle' }); await settle(jen2, 1500);
 check('offline: the calendar still shows the event', await jen2.locator('[data-calendar-event="Soccer practice"]').count());
 // Offline: Jen renames the event and adds another.

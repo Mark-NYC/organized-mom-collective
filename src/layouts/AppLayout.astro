@@ -7,12 +7,12 @@ import '../styles/family-app-brand.css';
 import '../styles/v16.css';
 import '../styles/v17.css';
 import '../styles/v18.css';
+import '../styles/v21.css';
 import '@fontsource-variable/figtree';
 import { calendarPath } from '../lib/companion';
 const calendar = calendarPath(Astro.url.pathname);
 const cleaningOnly = !calendar && /^\/app\/(cleaning|week|reorder|settings)\/?$/.test(Astro.url.pathname);
 import { SITE_NAME } from '../config';
-import { ONBOARDED_KEY } from '../lib/storage';
 import { monthTints } from '../lib/club/month-tints';
 // This month's approved calendar color (src/theme.ts) as the app's accent, chosen on the device (the page is static).
 // Tiles use the month's lightest step (the same steps its Club printables use); the accent carries labels and progress.
@@ -55,22 +55,13 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
         r.setProperty('--of-month', t[0]); r.setProperty('--of-month-wash', t[1]); r.setProperty('--of-month-accent', t[2]);
       } catch (e) {}
     </script>
-    <script is:inline define:vars={{ ONBOARDED_KEY }}>
-      // First visit to the printed calendar's companion page: hide app chrome until its walkthrough renders.
-      // (Organized Family's Cleaning tab, /app/cleaning, has no walkthrough.)
-      try {
-        if (/^\/app\/calendar\/?$/.test(location.pathname) && localStorage.getItem(ONBOARDED_KEY) !== '1') {
-          document.documentElement.classList.add('needs-onboarding');
-        }
-      } catch (e) {}
-    </script>
   </Fragment>
   <a
     href="#main"
     class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:border focus:border-ink focus:bg-paper focus:px-4 focus:py-2"
     >Skip to content</a
   >
-  <div class={calendar ? undefined : "v16 v17 v18 family-brand"} data-look={calendar ? undefined : "v20"} data-theme={calendar ? undefined : "brown"}>
+  <div class={calendar ? undefined : "v16 v17 v18 v21 family-brand"} data-look={calendar ? undefined : "v21"} data-theme={calendar ? undefined : "brown"}>
   {calendar ? <Nav /> : <FamilyNavigation />}
   <script>
     import { initCompanionAccess } from '../lib/companion-access';

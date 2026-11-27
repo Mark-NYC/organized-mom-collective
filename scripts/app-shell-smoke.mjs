@@ -214,28 +214,19 @@ await ipad.close();
   const row = page.locator('[data-calendar-event="Team photo"]');
   if (!(await row.locator('[data-change="new"]').isVisible())) fail('calendar: a plan added this week isn\'t marked New');
   else console.log('  ✓ calendar: a plan added this week is marked New for the meeting');
-  // Two-tab redesign: the week ahead is part of the meeting's Our Focus; Today counts today's plans (Plans shortcut).
-  await page.goto(base + '/app', { waitUntil: 'networkidle' });
-  if (!/[1-9][0-9]* events? today/.test(await page.locator('[data-today-shortcut="plans"]').innerText().catch(() => ''))) fail('Today: the Plans shortcut doesn\'t count today\'s plan');
+  // Today and the Family Meeting run on the signed-in household's real data (V20/V21; docs/ios/V21_LAUNCH.md). Signed out
+  // (as here), each is a calm sign-in with no sample family; the week ahead and everyone's part are covered with real
+  // accounts by scripts/e2e/v20-live-e2e.mjs and v21-live-e2e.mjs.
+  for (const path of ['/app', '/app/family/meeting']) {
+    await page.goto(base + path, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-signed-out], [data-live-v20]', { timeout: 15000 }).catch(() => {});
+    const text = await page.locator('main').innerText().catch(() => '');
+    if (!(await page.locator('[data-signed-out] [data-sign-in]').isVisible())) fail(`${path} signed out: no sign-in`);
+    else if (/Rivera|Sofia|Mateo|Luis/.test(text)) fail(`${path} signed out: shows a sample family`);
+    else console.log(`  ✓ ${path} signed out: a calm sign-in, no sample family`);
+  }
   if (await page.locator('[data-sunday-card]').count()) fail('Today: still shows Sunday Setup');
-  await page.goto(base + '/app/family/meeting', { waitUntil: 'networkidle' });
-  await page.click('[data-meeting-start]');
-  const week = page.locator('[data-meeting-week]');
-  if (!(await week.isVisible())) fail('meeting: no "this week on our calendar" in Our Focus');
-  else if (!/Team photo/.test(await week.innerText())) fail('meeting: the new plan isn\'t in the week');
-  else console.log('  ✓ Today counts today\'s plans; the Family Meeting looks at the week together');
-  await week.scrollIntoViewIfNeeded();
-  await page.screenshot({ path: join(OUT, '12-meeting-week.png'), fullPage: true });
-  // After the meeting, in the labeled demo family: everyone's part as the month's meeting lists it, in their colors.
-  await page.goto(base + '/app?demo=1', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(300);
-  if (!(await page.locator('[data-today-demo]').isVisible())) fail('Today demo: not labeled as a demo');
-  const parts = page.locator('[data-everyones-part]');
-  if (!(await parts.isVisible())) fail('Today: no Everyone\'s Part for a family with parts');
-  else if (/Suggested/i.test(await parts.innerText())) fail('Today: shows a suggestion as a part');
-  else if (/Takes care of|Helps with/.test(await parts.innerText())) fail('Today: shows what was already done as agreed');
-  else console.log('  ✓ Today: Everyone\'s Part before anything is agreed: no suggestions, nothing claimed');
-  await page.screenshot({ path: join(OUT, '13-today-everyones-part.png'), fullPage: true });
+  await page.screenshot({ path: join(OUT, '12-today-signed-out.png'), fullPage: true });
   await page.close();
 }
 
@@ -244,10 +235,10 @@ await ipad.close();
 {
   const page = await web.newPage();
   await page.goto(base + '/app', { waitUntil: 'networkidle' });
-  const tabs = await page.locator('[data-app-tabbar] a').evaluateAll((as) => as.map((a) => a.lastElementChild.textContent.trim()));
+  const tabs = await page.locator('[data-app-tabbar] a').evaluateAll((as) => as.map((a) => a.textContent.trim()));
   if (tabs.join() !== 'Today,Family Meeting') fail(`tabs: expected Today,Family Meeting, got ${tabs.join()}`);
   else console.log('  ✓ tabs: Today · Family Meeting');
-  for (const id of ['plans', 'cleaning', 'resources']) if (!(await page.locator(`[data-today-shortcut="${id}"]`).isVisible())) fail(`Today: no ${id} shortcut`);
+  if (!(await page.locator('[data-sign-in]').isVisible())) fail('Today: no sign-in for a signed-out visitor');
   if (!(await page.locator('[data-profile-link][href="/app/account"]').isVisible())) fail('no profile icon for Account');
   await page.goto(base + '/app/family', { waitUntil: 'networkidle' });
   const parts = await page.locator('[data-our-meeting]').innerText().catch(() => '');
@@ -296,15 +287,8 @@ await ipad.close();
   if (!(await edited.isVisible()) || !(await edited.innerText()).includes(other)) fail('Responsibilities: edit + reassign didn\'t stick');
   else console.log(`  ✓ responsibilities: edit the words and reassign ${who} → ${other}`);
 
-  // Today and the calendar show the agreement (agreements only).
-  await page.goto(base + '/app?demo=1', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(300);
-  const today = await page.locator('[data-everyones-part]').innerText().catch(() => '');
-  if (!today.includes('Pack my bag before bed, every school night.') || !today.includes(other) || !today.includes('Before bed') || today.includes('At ')) fail('Today: the agreement isn\'t in Everyone\'s Part');
-  else if (/Takes care of|Helps with/.test(today)) fail('Today: shows what was already done as agreed');
-  else console.log('  ✓ Today: Everyone\'s Part shows only the agreement');
-  await page.locator('[data-everyones-part]').scrollIntoViewIfNeeded();
-  await page.screenshot({ path: join(OUT, '17-today-agreed.png') });
+  // The calendar shows the agreement (agreements only). Today no longer has a sample family (V20/V21 run on the
+  // household's real data only); agreements on Today are covered with real accounts by the live e2e suites.
   await page.goto(base + '/app/family-calendar?demo=1', { waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
   await page.click('[data-calendar-agreements] summary');
@@ -355,7 +339,6 @@ await ipad.close();
 {
   const page = await visit(native, '/app', '02-today-native');
   if (await page.locator('[data-calendar-unlock-button]').isVisible()) fail('the app still asks for the wall calendar before Cleaning');
-  if (!(await page.locator('[data-today-shortcut="cleaning"]').isVisible())) fail('no Cleaning shortcut without a wall calendar');
   {
     await page.goto(base + '/app/cleaning', { waitUntil: 'networkidle' });
     // A new device sees the companion's short onboarding first: step through it, as she would.

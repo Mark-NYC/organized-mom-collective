@@ -1,4 +1,4 @@
--- Rolls back 20261212, 20261211, 20261210, 20261209, 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261215 (V20 launch: intelligence, push, push keys, calendar rollout), 20261214, 20261213, 20261212, 20261211, 20261210, 20261209, 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,40 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261215000002 V20 launch: calendar links and event responsibilities back to the staged rollout.
+update public.calendar_feed_rollout set everyone = false, event_tasks_everyone = false where id;
+
+-- ---- 20261215000001 Web Push key pair (the household push key).
+drop function if exists public.household_push_key();
+drop table if exists public.household_push_keys;
+
+-- ---- 20261215000000 V20/V21 household intelligence, push devices and the notification queue. Removes each family's
+-- learned state (and V21's requests, choices and remembered decisions), devices and queued notifications.
+do $$ begin
+  if to_regclass('cron.job') is not null then
+    execute $q$select cron.unschedule(jobid) from cron.job where jobname = 'omc-household-push-dispatch'$q$;
+  end if;
+end $$;
+drop function if exists public.household_notification(uuid);
+drop function if exists public.household_notify(uuid, jsonb);
+drop function if exists push_private.dispatch(uuid);
+drop function if exists public.household_push_devices();
+drop function if exists public.household_push_unsubscribe(text);
+drop function if exists public.household_push_subscribe(text, text, text);
+drop function if exists public.household_intelligence(uuid, bigint, jsonb);
+drop table if exists public.household_notifications;
+drop table if exists public.household_push_subscriptions;
+drop table if exists public.household_intelligence;
+drop schema if exists push_private;
+
+-- ---- 20261214 Shared cleaning rhythm (settings and one-week moves).
+drop function if exists public.family_cleaning_rhythm(uuid, text, text, text);
+drop table if exists public.household_cleaning_rhythm;
+
+-- ---- 20261213 Shared Family Meeting checkpoint.
+drop function if exists public.family_meeting_progress(uuid, uuid, bigint, integer, timestamptz, timestamptz, timestamptz);
+drop table if exists public.household_meeting_progress;
 
 -- ---- 20261212 This week's family priorities (alone: supabase/rollout/priorities/rollback.sql). Removes the priorities
 -- families chose; calendars, agreements and responsibilities stay.

@@ -56,6 +56,8 @@ reset role;
 create temp table own_before as select id, title, revision, deleted_at from public.calendar_events;
 
 -- Staged rollout: off until a tester is in the household (or it's turned on for everyone).
+-- The V20 launch (20261215000002) turns it on for everyone; this suite tests the gate itself, from off.
+update public.calendar_feed_rollout set everyone = false where id;
 select pg_temp.as_user('authenticated', :MOM);
 select pg_temp.expect(pg_temp.fails($q$select public.calendar_feed_add('{"url":"https://school.example.org/a.ics"}')$q$, 'not_enabled') and pg_temp.fails('select public.calendar_feeds()', 'not_enabled'), 'off by default: nobody can subscribe or list');
 reset role;

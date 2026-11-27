@@ -76,7 +76,7 @@ export function queueItems(notes: PushNote[]) {
   return notes.filter((n) => n.status === 'deliver' || n.status === 'quiet' || n.status === 'held' || n.status === 'scheduled').map((n) => ({
     key: n.key, to: n.to, purpose: n.purpose, kind: n.kind, title: n.title.slice(0, 120), body: n.body.slice(0, 240),
     deliver_after: n.status === 'held' || n.status === 'scheduled' ? instant(n.at.date, n.at.time) : null,
-    data: { actions: n.actions, partId: n.partId ?? null, insightKey: n.insightKey ?? null, insightFp: n.insightFp ?? null, urgent: n.urgent },
+    data: { actions: n.actions, partId: n.partId ?? null, requestId: n.requestId ?? null, insightKey: n.insightKey ?? null, insightFp: n.insightFp ?? null, urgent: n.urgent },
   }));
 }
 
@@ -87,7 +87,7 @@ export async function queueNotifications(household: string, notes: PushNote[]): 
   return r.added;
 }
 
-export interface TappedNotification { id: string; kind: PushNote['kind']; purpose: PushNote['purpose']; title: string; body: string; to: string; data: { partId?: string | null; insightKey?: string | null; insightFp?: string | null } }
+export interface TappedNotification { id: string; kind: PushNote['kind']; purpose: PushNote['purpose']; title: string; body: string; to: string; data: { partId?: string | null; requestId?: string | null; insightKey?: string | null; insightFp?: string | null } }
 export const readNotification = (id: string) => accountRpc<TappedNotification | null>('household_notification', { p_id: id });
 
 /** The notification this page was opened from (?notification=…&action=…), once. */

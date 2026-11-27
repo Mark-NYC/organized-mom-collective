@@ -1,6 +1,8 @@
 /**
- * Organized Family V20 in production (/app and /app/family/meeting; docs/ios/V20_LAUNCH.md): the approved V20 screens
- * (TodayV19 with the V20 treatment, the V16 Family Meeting) on the signed-in household's REAL data.
+ * Organized Family in production (/app and /app/family/meeting; docs/ios/V20_LAUNCH.md, docs/ios/V21_PREVIEW.md): the
+ * approved V21 Today (src/components/v21/TodayV21.tsx) and the Family Meeting with V21's "Since last time", on the
+ * signed-in household's REAL data. V21's requests, event choices, remembered decisions, per-date completion and routine
+ * cards live in the household intelligence document; agreements they create go through the agreements store.
  *
  * Reads: the household and its people (member colors), this adult's member id, agreements (offline-first outbox),
  * the family calendar and the connected calendars this adult may see, event responsibilities, priorities, development
@@ -35,7 +37,7 @@ import { useHouseholdIntel, type SharedIntel } from '../../lib/v20/intel-sync';
 import { liveState, preparedParts, writesFor, type Write } from '../../lib/v20/live';
 import { gotIt, markSent, notTonight, outbox, type PushNote } from '../../lib/v20/notify';
 import { queueNotifications, readNotification, tappedFromUrl } from '../../lib/v20/push';
-import TodayV19 from '../v19/TodayV19';
+import TodayV21 from '../v21/TodayV21';
 import Meeting, { CheckIn, PlanSummary } from '../v16/Meeting';
 import { Assistance, Noticed, Notifications, withMonthParts } from '../v16/V16App';
 import { disablePush, enablePush, pushEnabled, pushSupport } from '../../lib/v20/push';
@@ -206,7 +208,7 @@ export default function LiveFamily({ page }: { page: Page }) {
   }, [page]);
 
   const ctx: Ctx | null = useMemo(() => (derived && household ? {
-    look: 'v17', gen: 20, s: derived, set, today, monday, household, colors: cal.colors,
+    look: 'v17', gen: 21, s: derived, set, today, monday, household, colors: cal.colors,
     names: Object.fromEntries(people.map((m) => [m.id, m.firstName])), people, kids: new Set(people.filter((m) => m.kind === 'child').map((m) => m.id)), club: monthClub, go,
   } : null), [derived, household, set, today, monday, cal.colors, people, monthClub, go]);
 
@@ -220,7 +222,7 @@ export default function LiveFamily({ page }: { page: Page }) {
     setRoute(hash === 'check-in' || hash === 'plan' ? hash : m.started ? 'meeting' : derived.scenario === 'week4' && !m.checkInDone ? 'check-in' : m.finishedOn === today ? 'plan' : 'meeting');
   }, [page, derived, today]);
 
-  useNotifications(ctx, scope, intel.update);
+  useNotifications(ctx, scope, intel.update, intel.loaded && intel.status !== 'loading');
 
   if (signedIn === false) return page === 'settings' ? null : <SignedOut />;
   if (signedIn && cal.status === 'no-household') return page === 'settings' ? null : <NoFamily />;
@@ -228,7 +230,7 @@ export default function LiveFamily({ page }: { page: Page }) {
   if (page === 'settings') return <div data-live-v20 data-route="settings"><Notifications ctx={ctx} /><PushDevice /><Assistance ctx={ctx} /><Noticed ctx={ctx} /></div>;
   return (
     <div data-live-v20 data-route={route} data-intel={intel.status}>
-      {route === 'today' && <TodayV19 ctx={ctx} />}
+      {route === 'today' && <TodayV21 ctx={ctx} />}
       {route === 'meeting' && <Meeting ctx={ctx} />}
       {route === 'check-in' && <CheckIn ctx={ctx} />}
       {route === 'plan' && <PlanSummary ctx={ctx} />}
@@ -241,7 +243,7 @@ export default function LiveFamily({ page }: { page: Page }) {
  * per household and key, so both phones computing it send it once), then records what it queued. A notification
  * tapped on this phone ("I've got it", "Not this time") is applied here, as the signed-in adult.
  */
-function useNotifications(ctx: Ctx | null, scope: string | null, update: (f: (s: SharedIntel) => SharedIntel) => void) {
+function useNotifications(ctx: Ctx | null, scope: string | null, update: (f: (s: SharedIntel) => SharedIntel) => void, loaded: boolean) {
   const people = useMemo(() => (ctx ? enginePeople(ctx) : []), [ctx?.people, ctx?.today]); // eslint-disable-line react-hooks/exhaustive-deps
   const notes = useMemo((): PushNote[] => (ctx && scope && ctx.s.intel?.viewer ? outbox({ s: ctx.s, monday: ctx.monday, today: ctx.today, people, now: nowHHMM() }) : []), [ctx?.s, scope, people]); // eslint-disable-line react-hooks/exhaustive-deps
   const due = notes.filter((n) => n.status === 'deliver' || n.status === 'quiet' || n.status === 'held' || n.status === 'scheduled');
@@ -257,19 +259,23 @@ function useNotifications(ctx: Ctx | null, scope: string | null, update: (f: (s:
     return () => { on = false; };
   }, [keys, scope]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Read the tapped notification from the address once, and apply it only once the household's shared state has loaded
+  // (before that, the request it answers isn't known on this device yet).
+  const tappedRef = useRef<ReturnType<typeof tappedFromUrl> | undefined>(undefined);
+  if (tappedRef.current === undefined && typeof location !== 'undefined') tappedRef.current = tappedFromUrl();
   const handled = useRef(false);
   useEffect(() => {
-    if (!ctx || handled.current) return;
-    const tapped = tappedFromUrl();
-    if (!tapped) { handled.current = true; return; }
+    if (!ctx || !loaded || handled.current) return;
+    const tapped = tappedRef.current;
     handled.current = true;
+    if (!tapped) return;
     void readNotification(tapped.id).then((n) => {
       if (!n || (tapped.action !== 'got-it' && tapped.action !== 'not-tonight')) return;
       const note: PushNote = { key: tapped.id, to: n.to, purpose: n.purpose, kind: n.kind, title: n.title, body: n.body, actions: [], urgent: true,
-        partId: n.data.partId ?? undefined, insightKey: n.data.insightKey ?? undefined, insightFp: n.data.insightFp ?? undefined, status: 'sent', at: { date: ctx.today, time: nowHHMM() }, why: '' };
+        partId: n.data.partId ?? undefined, requestId: n.data.requestId ?? undefined, insightKey: n.data.insightKey ?? undefined, insightFp: n.data.insightFp ?? undefined, status: 'sent', at: { date: ctx.today, time: nowHHMM() }, why: '' };
       ctx.set((s) => (tapped.action === 'got-it' ? gotIt(s, note, { today: ctx.today, people }) : notTonight(s, note)));
     }).catch(() => undefined);
-  }, [ctx]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ctx, loaded]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 /** This device: Web Push on or off for the signed-in adult. Asked only when they choose it, never on launch. */

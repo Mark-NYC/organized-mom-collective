@@ -18,6 +18,7 @@ import { partReducer, type Part, type V16State } from '../v16/model';
 import { emptyIntel, nextMeeting, type TodayInput } from '../v18/engine';
 import { buildTodayV19 } from '../v19/engine';
 import { addFeedback } from '../v19/resolve';
+import { answer, type V21Intel } from '../v21/model';
 
 export type Purpose = 'needs-you' | 'changed' | 'handled' | 'meeting';
 export type PushAction = 'got-it' | 'not-tonight' | 'open';
@@ -36,6 +37,8 @@ export interface PushNote {
   actions: PushAction[];
   urgent: boolean;
   partId?: string;
+  /** V21: the handoff request this is about (src/lib/v21/model.ts). */
+  requestId?: string;
   insightKey?: string;
   /** The insight's fingerprint (conflicts), to find everyone it reached. */
   insightFp?: string;
@@ -49,6 +52,7 @@ export interface PushNote {
 export const DAILY_ALERTS = 4;
 
 const lower = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+const DAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const t12 = (t: string) => { const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}${m ? `:${String(m).padStart(2, '0')}` : ''} ${h >= 12 ? 'PM' : 'AM'}`; };
 const inQuiet = (now: string, p: NotifyPrefs) => (p.quietStart > p.quietEnd ? now >= p.quietStart || now < p.quietEnd : now >= p.quietStart && now < p.quietEnd);
 export const prefsFor = (s: V16State, id: string): NotifyPrefs => ({ ...DEFAULT_PREFS, ...(s.intel?.notifyPrefs?.[id] ?? {}) });
@@ -76,6 +80,25 @@ export function outbox(inp: NotifyInput): PushNote[] {
         notes.push({ key: `handoff:${p.id}:${a.id}`, to: a.id, purpose: 'needs-you', kind: 'handoff', urgent: (p.onDate ?? today) === today, partId: p.id, actions: ['got-it', 'open'],
           title: 'Someone’s needed', body: `Who can take “${p.title}”?` });
       }
+    }
+  }
+  // V21 requests (one explicit ask between adults): the person asked gets it with both answers; the asker hears the
+  // answer once (unless they've already seen it on Today).
+  const when = (date: string | null, time: string | null) => [date ? (date === today ? 'Today' : date === addDays(today, 1) ? 'Tomorrow' : DAY[new Date(`${date}T12:00:00Z`).getUTCDay()]) : null, time ? t12(time) : null].filter(Boolean).join(' · ');
+  const requestParts = new Set<string>();
+  for (const r of Object.values((intel as V21Intel).requests ?? {})) {
+    if (r.partId) requestParts.add(r.partId);
+    if ((r.date && r.date < today) || !isAdult(r.to) || !isAdult(r.from)) continue;
+    if (r.status === 'asked') {
+      notes.push({ key: `request:${r.id}:${r.to}`, to: r.to, purpose: 'needs-you', kind: 'help', urgent: (r.date ?? today) === today, requestId: r.id, actions: ['got-it', 'not-tonight'],
+        title: r.ask, body: [when(r.date, r.time), `From ${name(r.from)}`].filter(Boolean).join(' · ') });
+    } else if (r.status === 'accepted' && !r.acked) {
+      notes.push({ key: `request-handled:${r.id}:${r.from}`, to: r.from, purpose: 'handled', kind: 'handled', urgent: false, requestId: r.id, actions: [],
+        title: `${name(r.to)} has it ✓`, body: [r.title, when(r.date, r.time)].filter(Boolean).join(' · ') });
+    } else if (r.status === 'declined' && !r.acked) {
+      const stillYours = (r.subject.kind === 'occurrence' || r.subject.kind === 'part') && r.prevOwner === r.from;
+      notes.push({ key: `request-declined:${r.id}:${r.from}`, to: r.from, purpose: 'changed', kind: 'declined', urgent: (r.date ?? today) === today, requestId: r.id, actions: ['open'],
+        title: `${name(r.to)} can’t take it`, body: `${r.title}${stillYours ? ' stays with you.' : ' still needs a plan.'}` });
     }
   }
   // handled: only to the person who was carrying it (the one who asked).
@@ -107,7 +130,8 @@ export function outbox(inp: NotifyInput): PushNote[] {
     }
   }
   // changed: a shared agreement someone else updated today (never to the person who changed it).
-  for (const p of s.parts.filter((x) => x.status === 'agreed' && x.lastChangedBy && x.lastChangedOn === today)) {
+  // Standing agreements only: a one-time plan or an accepted request already has its own notice.
+  for (const p of s.parts.filter((x) => x.status === 'agreed' && x.lastChangedBy && x.lastChangedOn === today && !requestParts.has(x.id) && !(x.onDate && !x.askedBy))) {
     for (const a of adults.filter((x) => x.id !== p.lastChangedBy)) {
       notes.push({ key: `agreement:${p.id}:${p.agreedSignature}:${a.id}`, to: a.id, purpose: 'changed', kind: 'agreement', urgent: false, partId: p.id, actions: ['open'],
         title: `${name(p.lastChangedBy)} updated a shared plan`, body: `${p.ownerId ? `${name(p.ownerId)} · ` : ''}${p.title}${p.cue ? ` · ${p.cue}` : ''}` });
@@ -161,6 +185,7 @@ export function markSent(s: V16State, notes: PushNote[], today: string, now: str
  *   conflict → they're handling it: the insight is resolved for the household, and whoever else was carrying it hears so
  */
 export function gotIt(s: V16State, n: PushNote, ctx: { today: string; people: { id: string; kind: string }[] }): V16State {
+  if (n.requestId) return answer(s, n.requestId, n.to, 'accept', ctx.today).state;
   if (n.kind === 'help' || n.kind === 'handoff') {
     let parts = s.parts;
     if (n.kind === 'handoff') parts = partReducer(parts, { type: 'edit', id: n.partId!, patch: { ownerId: n.to } }, s.online);
@@ -179,5 +204,6 @@ export function gotIt(s: V16State, n: PushNote, ctx: { today: string; people: { 
 
 /** "Not tonight": the request is declined; the person who asked hears it still needs someone. */
 export function notTonight(s: V16State, n: PushNote): V16State {
+  if (n.requestId) return answer(s, n.requestId, n.to, 'decline', n.at.date).state;
   return { ...s, parts: partReducer(s.parts, { type: 'skip', id: n.partId! }, s.online) };
 }

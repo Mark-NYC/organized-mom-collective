@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Rehearses the App Store launch's two migrations (docs/ios/APP_STORE_LAUNCH.md → Migrations) on a THROWAWAY local
 # database built at production's migration set: every migration except the ones production doesn't have
-# (20261130, 20261202-04, 20261207, 20261208; checked read-only on 2026-11-21; and 20261209, the demo, which comes after). Never point it at a real project.
+# (20261130, 20261202-04, 20261207, 20261208; checked read-only on 2026-11-21; and 20261209 onward, which come after). Never point it at a real project.
 #
 #   PGHOST=localhost PGUSER=postgres bash scripts/rehearse-launch-migrations.sh
 #
@@ -17,7 +17,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 DB=launch_migrations_rehearsal
 export PGHOST=${PGHOST:-localhost} PGPORT=${PGPORT:-5432} PGUSER=${PGUSER:-postgres}
-PENDING='^20261130|^2026120[234]|^20261207|^20261208|^20261209|^20261210|^20261211|^20261212'
+PENDING='^20261130|^2026120[234]|^20261207|^20261208|^20261209|^20261210|^20261211|^20261212|^20261213|^20261214|^20261215'
 M1207=supabase/migrations/20261207000000_family_development_records.sql
 M1208=supabase/migrations/20261208000000_club_complimentary_access.sql
 FD=supabase/rollout/family-development
