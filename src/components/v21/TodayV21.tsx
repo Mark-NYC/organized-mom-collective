@@ -17,7 +17,8 @@ import { Badge, badgeFor } from '../v20/Badge';
 import { Check, type Ctx } from '../v16/shared';
 import { Chevron } from '../app/ui';
 import { enginePeople } from '../v18/TodayV18';
-import { ChangedSheet, ResolveSheet } from '../v19/TodayV19';
+import { ChangedSheet, PartSheet, ResolveSheet } from '../v19/TodayV19';
+import { giveFeedback } from '../../lib/v19/resolve';
 import { AgreementsPanel, AskSheet, IntentSheet, MakePlanSheet, UsualOffer } from './Sheets';
 import { Chip, othersOf, ownerName, viewerOf } from './ui';
 
@@ -42,7 +43,12 @@ export default function TodayV21({ ctx }: { ctx: Ctx }) {
   const meeting = nextMeeting(inp);
   // V20's change handling is kept for real changes only: a cascading calendar change, a reported day, backup.
   const v19 = useMemo(() => buildTodayV19(inp), [ctx.s, ctx.today]); // eslint-disable-line react-hooks/exhaustive-deps
-  const change = v19.card && (v19.card.category === 'changed' || v19.card.key.startsWith('simplify:')) ? v19.card : null;
+  // Kept from V20 (no new rules): a calendar change, "Something changed?" → simplify today / a little backup, and a
+  // request made with V20's "Share the load". A backup card that repeats a V21 conflict on the same commitment is skipped.
+  const conflictParts = new Set(model.matters.filter((m) => m.kind === 'conflict').map((m) => m.part?.id));
+  const stopped = new Set(v19.suppressed.map((x) => x.insight.key));
+  const change = v19.all.find((i) => i.destination === 'today' && !stopped.has(i.key)
+    && (i.category === 'changed' || /^(simplify|asked):/.test(i.key) || (i.key.startsWith('backup:') && !conflictParts.has(i.partLink)))) ?? null;
 
   const matters = model.matters;
   const requestsIn = matters.filter((m) => m.kind === 'request-in');
@@ -66,9 +72,12 @@ export default function TodayV21({ ctx }: { ctx: Ctx }) {
       <div className="v21-section" data-what-matters>
         <h2 className="v21-h2">What matters</h2>
         {change && (
-          <div className="v21-card" data-matter="change" data-insight={change.key}>
-            <div className="v21-card-head"><Badge name={badgeFor(change.title)} /><div className="min-w-0"><p className="v21-card-title">{change.title}</p>{change.body && <p className="v21-meta">{change.body}</p>}</div></div>
-            <div className="v21-actions"><button type="button" className="v21-btn" onClick={() => (change.flow === 'resolve' || change.flow === 'part' ? setOpen({ kind: 'resolve', key: change.key }) : ctx.go('plans'))} data-change-review>{change.actionLabel}</button></div>
+          <div className="v21-card" data-matter="change" data-heads-up={change.category} data-insight={change.key}>
+            <div className="v21-card-head"><Badge name={badgeFor(change.title)} /><div className="min-w-0"><p className="v21-card-title" data-heads-title>{change.title}</p>{change.body && <p className="v21-meta">{change.body}</p>}</div></div>
+            <div className="v21-actions v21-actions--two">
+              <button type="button" className="v21-btn" onClick={() => (change.flow === 'resolve' || change.flow === 'part' ? setOpen({ kind: 'resolve', key: change.key }) : ctx.go('plans'))} data-heads-action>{change.actionLabel}</button>
+              {!change.key.startsWith('asked:') && <button type="button" className="v21-btn v21-btn--outline" onClick={() => ctx.set((x) => giveFeedback(x, change, 'dismissed', ctx.today))} data-heads-dismiss>Dismiss</button>}
+            </div>
           </div>
         )}
         {requestsIn.map((m, i) => <RequestCard key={m.key} ctx={ctx} m={m} compact={i > 0} />)}
@@ -138,7 +147,8 @@ export default function TodayV21({ ctx }: { ctx: Ctx }) {
       {open?.kind === 'plan' && <MakePlanSheet ctx={ctx} m={open.m} meetingDate={meeting?.date ?? null} onClose={() => setOpen(null)} />}
       {open?.kind === 'intent' && <IntentSheet ctx={ctx} w={open.w} onClose={() => setOpen(null)} />}
       {open?.kind === 'changed' && <ChangedSheet ctx={ctx} onClose={() => setOpen(null)} />}
-      {resolve && <ResolveSheet ctx={ctx} i={resolve} meetingDay={meeting ? dayName(meeting.date) : null} onClose={() => setOpen(null)} />}
+      {resolve && resolve.flow === 'part' && <PartSheet ctx={ctx} i={resolve} onClose={() => setOpen(null)} />}
+      {resolve && resolve.flow !== 'part' && <ResolveSheet ctx={ctx} i={resolve} meetingDay={meeting ? dayName(meeting.date) : null} onClose={() => setOpen(null)} />}
     </section>
   );
 }

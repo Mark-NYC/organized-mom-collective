@@ -7,6 +7,7 @@ import '../styles/family-app-brand.css';
 import '../styles/v16.css';
 import '../styles/v17.css';
 import '../styles/v18.css';
+import '../styles/v21.css';
 import '@fontsource-variable/figtree';
 import { calendarPath } from '../lib/companion';
 const calendar = calendarPath(Astro.url.pathname);
@@ -70,7 +71,7 @@ const fullTitle = title ? `${title} · ${SITE_NAME}` : SITE_NAME;
     class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:border focus:border-ink focus:bg-paper focus:px-4 focus:py-2"
     >Skip to content</a
   >
-  <div class={calendar ? undefined : "v16 v17 v18 family-brand"} data-look={calendar ? undefined : "v20"} data-theme={calendar ? undefined : "brown"}>
+  <div class={calendar ? undefined : "v16 v17 v18 v21 family-brand"} data-look={calendar ? undefined : "v21"} data-theme={calendar ? undefined : "brown"}>
   {calendar ? <Nav /> : <FamilyNavigation />}
   <script>
     import { initCompanionAccess } from '../lib/companion-access';

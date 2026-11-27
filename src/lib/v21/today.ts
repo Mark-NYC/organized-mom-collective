@@ -207,7 +207,7 @@ function changedAgreements(inp: TodayInput, viewer: string, names: Record<string
   const { s, today } = inp;
   const acceptedParts = new Set(requestsOf(s).map((r) => r.partId).filter(Boolean));
   return agreedParts(s).filter((p) => p.lastChangedBy && p.lastChangedBy !== viewer && p.lastChangedOn && daysBetween(p.lastChangedOn, today) <= 2
-    && p.ownerId === viewer && !acceptedParts.has(p.id) && !p.id.startsWith('p-intent-') && !seen(s, viewer, `changed:${p.id}:${p.agreedSignature}`))
+    && p.ownerId === viewer && !acceptedParts.has(p.id) && !p.onDate && !seen(s, viewer, `changed:${p.id}:${p.agreedSignature}`))
     .map((p) => ({ key: `changed:${p.id}:${p.agreedSignature}`, kind: 'changed' as const, title: `${names[p.lastChangedBy!] ?? 'Someone'} updated ${lowerFirst(p.title)}`,
       meta: [p.weekday !== undefined ? `Every ${DAY_NAMES[p.weekday]}` : null, p.cue, p.finishLine ? `Done when: ${p.finishLine}` : null].filter(Boolean).join(' · '),
       icon: p.title, attention: true, weight: 60, part: p }));
@@ -251,12 +251,13 @@ export function buildTodayV21(inp: TodayInput): TodayV21 {
     .map((o) => {
       const link = linkOf(o.event);
       const intent = intelOf(s).intents?.[intentKey(link, o.date)] ?? null;
-      const plannedPart = intent?.partId ? s.parts.find((p) => p.id === intent.partId) ?? null : agreedParts(s).find((p) => p.eventLink === link && (p.need !== undefined || p.id.startsWith('p-usual-'))) ?? null;
+      const plannedPart = intent?.partId ? s.parts.find((p) => p.id === intent.partId) ?? null : agreedParts(s).find((p) => p.eventLink === link && partDate(s, mondayOf(o.date), p) === o.date) ?? null;
       return { occ: o, link, intent, plannedPart, preference: preferenceFor(s, link, o.event.title), today: o.date === today };
     });
-  const standing = agreedParts(s).filter((p) => !p.onDate && !p.id.startsWith('p-intent-') && !p.id.startsWith('p-rq-') && !p.id.startsWith('p-take-'));
+  // Standing = everything agreed that isn't for one date: habits, weekly responsibilities, preparation that recurs with its event.
+  const standing = agreedParts(s).filter((p) => !p.onDate);
   const routines = standing.filter((p) => rhythmOf(p) === 'routine');
-  const weekly = standing.filter((p) => rhythmOf(p) === 'weekly' || (rhythmOf(p) === 'event' && p.id.startsWith('p-usual-')) || (rhythmOf(p) === 'event' && !p.need));
+  const weekly = standing.filter((p) => rhythmOf(p) !== 'routine');
   const attention = matters.filter((m) => m.attention);
   const firstTime = !agreedParts(s).length && !s.meeting.finishedOn;
   const { headline, sub } = headlineFor(matters, attention, plan, names, viewer, firstTime);

@@ -6,9 +6,10 @@ import { describe, expect, it } from 'vitest';
 import { addDays } from '../src/lib/calendar/recurrence';
 import { agreedParts, mondayOf } from '../src/lib/v16/model';
 import { merge3 } from '../src/lib/v20/intel-sync';
+import { gotIt, notTonight, outbox } from '../src/lib/v20/notify';
 import {
   acknowledge, answer, askHelp, chooseIntent, clearIntent, decisionsOf, editDecision, editStanding, forgetDecision, intelOf, intentOptions, isDone, makeUsual,
-  remember, requestsOf, takeIt, toggleDone, toMeeting, withdraw, type Intel,
+  remember, requestsOf, takeIt, toggleDone, toMeeting, uuidFrom, pruneV21, withdraw, type Intel,
 } from '../src/lib/v21/model';
 import { buildTodayV21, carryForward, planFor, widgetFor } from '../src/lib/v21/today';
 import { ANDREW, MARK, MEG, PHILIP, demoTodayV21, householdV21, seedV21, type ScenarioV21 } from '../src/lib/v21/household';
@@ -141,7 +142,7 @@ describe('Handoffs: the signature interaction', () => {
     expect(meg.headline).toBe('Friday pickup needs a plan.');
     expect(meg.matters[0]).toMatchObject({ kind: 'needs-owner', title: 'Who’s picking up the boys?', meta: '2:30 PM · Needs an owner' });
     const asked = seed('handoff-ask');
-    expect(agreedParts(asked).some((p) => p.eventLink === 'e-pickup')).toBe(false);
+    expect(agreedParts(asked).some((p) => p.title === 'Pick up the boys')).toBe(false);
     expect(widgetFor(today(asked, MEG))).toMatchObject({ kind: 'waiting', title: 'Waiting for Mark', detail: 'Friday · 2:30 PM' });
   });
 
@@ -158,8 +159,11 @@ describe('Handoffs: the signature interaction', () => {
     const id = requestsOf(s0)[0].id;
     const { state: s, ok } = answer(s0, id, MARK, 'accept', FRI);
     expect(ok).toBe(true);
-    const part = agreedParts(s).find((p) => p.eventLink === 'e-pickup')!;
-    expect(part).toMatchObject({ ownerId: MARK, status: 'agreed', askedBy: MEG });
+    const part = agreedParts(s).find((p) => p.title === 'Pick up the boys')!;
+    expect(part).toMatchObject({ ownerId: MARK, status: 'agreed', onDate: FRI });
+    expect(part.eventLink).toBeUndefined(); // one Friday, never every Friday
+    expect(part.id).toBe(uuidFrom(`request:${id}`));
+    expect(planFor(s, monday, addDays(FRI, 7), MARK).some((p) => p.part.id === part.id)).toBe(false);
     const mark = today(s, MARK);
     expect(mark.matters.some((x) => x.kind === 'request-in' || x.kind === 'needs-owner')).toBe(false);
     expect(mark.plan.find((p) => p.part.id === part.id)).toMatchObject({ mine: true, done: false });
@@ -179,7 +183,7 @@ describe('Handoffs: the signature interaction', () => {
     const meg = today(s, MEG);
     expect(meg.matters[0]).toMatchObject({ kind: 'declined', title: 'Mark can’t pick up the boys.', meta: 'Friday · 2:30 PM · Still needs a plan' });
     expect(meg.headline).toBe('Friday pickup still needs a plan.');
-    expect(agreedParts(s).some((p) => p.eventLink === 'e-pickup')).toBe(false);
+    expect(agreedParts(s).some((p) => p.title === 'Pick up the boys')).toBe(false);
     expect(requestsOf(s)[0].status).toBe('declined');
     // Mark isn't asked again on Today.
     expect(today(s, MARK).matters.some((x) => x.kind === 'needs-owner' || x.kind === 'request-in')).toBe(false);
@@ -232,7 +236,7 @@ describe('Handoffs: the signature interaction', () => {
 
   it('9. acceptance and completion are separate actions', () => {
     const s = seed('accepted');
-    const part = agreedParts(s).find((p) => p.eventLink === 'e-pickup')!;
+    const part = agreedParts(s).find((p) => p.title === 'Pick up the boys')!;
     expect(part.done).toBeFalsy();
     const done = toggleDone(s, part.id, FRI, MARK);
     expect(today(done, MARK).plan.find((p) => p.part.id === part.id)!.done).toBe(true);
@@ -247,7 +251,7 @@ describe('Handoffs: the signature interaction', () => {
     expect(twice).toMatchObject({ ok: false, reason: 'already-answered' });
     expect(twice.state).toBe(once);
     expect(answer(once, id, MARK, 'decline', FRI).ok).toBe(false);
-    expect(agreedParts(once).filter((p) => p.eventLink === 'e-pickup')).toHaveLength(1);
+    expect(agreedParts(once).filter((p) => p.title === 'Pick up the boys')).toHaveLength(1);
   });
 
   it('asking again for the same thing while it’s open adds nothing; only the asker can withdraw or acknowledge', () => {
@@ -333,10 +337,10 @@ describe('Household memory', () => {
   it('"make it the usual" turns the each-time decision into Mark’s standing agreement, explicitly', () => {
     const s = makeUsual(seed('week'), { decisionId: 'd-pickup', ownerId: MARK, time: '14:30', today: FRI, by: MEG });
     expect(decisionsOf(s).some((d) => d.id === 'd-pickup')).toBe(false);
-    expect(agreedParts(s).find((p) => p.id === 'p-usual-d-pickup')).toMatchObject({ ownerId: MARK, eventLink: 'e-pickup' });
+    expect(agreedParts(s).find((p) => p.id === uuidFrom('usual:d-pickup'))).toMatchObject({ ownerId: MARK, eventLink: 'e-pickup' });
     expect(today(s, MEG).matters.some((x) => x.kind === 'needs-owner')).toBe(false);
     // Next Friday too, without asking.
-    expect(planFor(s, monday, addDays(FRI, 7), MARK).some((p) => p.part.id === 'p-usual-d-pickup')).toBe(true);
+    expect(planFor(s, monday, addDays(FRI, 7), MARK).some((p) => p.part.id === uuidFrom('usual:d-pickup'))).toBe(true);
   });
 
   it('editing a standing agreement outside the meeting keeps it agreed and tells the owner', () => {
@@ -364,6 +368,74 @@ describe('Family Meeting continuity', () => {
     const c = carryForward({ s, monday, today: FRI, people });
     const talked = { ...s, intel: { ...s.intel!, talked: Object.fromEntries(c.map((x) => [x.key, FRI])) } };
     expect(carryForward({ s: talked, monday, today: FRI, people })).toHaveLength(0);
+  });
+});
+
+describe('notifications for requests (production push rules)', () => {
+  const notes = (s: V16State, now = '14:00') => outbox({ s, monday, today: FRI, people, now }).filter((n) => n.status !== 'off');
+  it('a request reaches only the person asked, in the asker’s words, with both answers', () => {
+    const n = notes(seed('handoff-ask')).filter((x) => x.requestId);
+    expect(n).toHaveLength(1);
+    expect(n[0]).toMatchObject({ to: MARK, kind: 'help', purpose: 'needs-you', title: 'Can you pick up the boys?', body: 'Today · 2:30 PM · From Meg', actions: ['got-it', 'not-tonight'], status: 'deliver' });
+  });
+  it('"I’ve got it" from the notification is the same accept, once', () => {
+    const s0 = seed('handoff-ask');
+    const n = notes(s0).find((x) => x.requestId)!;
+    const s = gotIt(s0, n, { today: FRI, people });
+    expect(requestsOf(s)[0].status).toBe('accepted');
+    expect(gotIt(s, n, { today: FRI, people })).toBe(s);
+    const after = notes(s);
+    expect(after.filter((x) => x.requestId).map((x) => [x.to, x.kind, x.title])).toEqual([[MEG, 'handled', 'Mark has it ✓']]);
+    // No second "updated a shared plan" notice for the same accept.
+    expect(after.some((x) => x.kind === 'agreement')).toBe(false);
+    expect(notes(acknowledge(s, requestsOf(s)[0].id, MEG, FRI)).some((x) => x.requestId)).toBe(false);
+  });
+  it('"Not this time" tells the asker it still needs a plan', () => {
+    const s0 = seed('handoff-ask');
+    const n = notes(s0).find((x) => x.requestId)!;
+    const s = notTonight(s0, n);
+    expect(notes(s).filter((x) => x.requestId).map((x) => [x.to, x.kind, x.body])).toEqual([[MEG, 'declined', 'Pick up the boys still needs a plan.']]);
+  });
+});
+
+describe('ids and the household document', () => {
+  it('ids are valid UUIDs, stable per seed, different across seeds', () => {
+    const a = uuidFrom('request:rq-1');
+    expect(a).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    expect(uuidFrom('request:rq-1')).toBe(a);
+    expect(new Set(Array.from({ length: 2000 }, (_, i) => uuidFrom(`request:${i}`))).size).toBe(2000);
+  });
+
+  it('two phones accepting the same request (each from its own copy) make the same agreement once', () => {
+    const base = seed('handoff-ask');
+    const id = requestsOf(base)[0].id;
+    const one = answer(base, id, MARK, 'accept', FRI).state;
+    const two = answer(base, id, MARK, 'accept', FRI).state;
+    expect(agreedParts(one).find((p) => p.title === 'Pick up the boys')!.id).toBe(agreedParts(two).find((p) => p.title === 'Pick up the boys')!.id);
+  });
+
+  it('request ids from two phones never collide', () => {
+    const s = seed('quiet');
+    const a = askHelp(s, { from: MEG, to: MARK, subject: { kind: 'task', date: FRI }, title: 'One', date: FRI, time: null, today: FRI }).id;
+    const b = askHelp(s, { from: MARK, to: MEG, subject: { kind: 'task', date: FRI }, title: 'Two', date: FRI, time: null, today: FRI }).id;
+    expect(a).not.toBe(b);
+  });
+
+  it('a chosen preparation for a recurring event happens once, on its date', () => {
+    const opt = intentOptions('School pickup')[0];
+    const s = chooseIntent(seed('quiet'), { link: 'e-pickup', date: FRI, eventTitle: 'School pickup', option: opt, ownerId: MEG, by: MEG, today: FRI, adults: [MEG, MARK] });
+    const p = agreedParts(s).find((x) => x.title === opt.title)!;
+    expect(p.onDate).toBe(FRI);
+    expect(planFor(s, monday, addDays(FRI, 7), MEG).some((x) => x.part.id === p.id)).toBe(false);
+  });
+
+  it('pruning drops old answered requests and stale markers, keeps open ones and decisions', () => {
+    const s = intelOf(seed('handoff-declined'));
+    const later = addDays(FRI, 40);
+    const p = pruneV21(s, later);
+    expect(Object.keys(p.requests ?? {})).toHaveLength(0);
+    expect(Object.keys(p.decisions ?? {})).toHaveLength(1);
+    expect(Object.keys(pruneV21(s, FRI).requests ?? {})).toHaveLength(1);
   });
 });
 

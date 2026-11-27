@@ -23,7 +23,7 @@ export function AskSheet({ ctx, part, date, time, onClose }: { ctx: Ctx; part: P
   const viewer = viewerOf(ctx);
   const others = othersOf(ctx);
   const [to, setTo] = useState(others[0]?.id ?? '');
-  const standing = rhythmOf(part) === 'weekly' || (rhythmOf(part) === 'event' && part.id.startsWith('p-usual-'));
+  const standing = rhythmOf(part) === 'weekly' || rhythmOf(part) === 'event';
   const [scope, setScope] = useState<'once' | 'always'>('once');
   const [ask, setAsk] = useState(askFor(part.title));
   const subject: Subject = standing ? (scope === 'once' ? { kind: 'occurrence', partId: part.id, date } : { kind: 'part', partId: part.id }) : { kind: 'part', partId: part.id };

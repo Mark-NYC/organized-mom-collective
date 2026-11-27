@@ -13,6 +13,7 @@ import { accountRpc, loadSession } from '../account';
 import { addDays } from '../calendar/recurrence';
 import type { IntelState } from '../v18/engine';
 import type { Part } from '../v16/model';
+import { pruneV21, type V21Intel } from '../v21/model';
 
 /** V20 details an agreement row can't hold: its event, timing, need, one-time date, who asked, done for a date. */
 export interface PartMeta { eventLink?: string; offsetDays?: number; need?: string; onDate?: string; askedBy?: string; lastChangedBy?: string; lastChangedOn?: string; cue?: string; doneOn?: string[] }
@@ -67,7 +68,7 @@ export function prune(s: SharedIntel, today: string): SharedIntel {
   const recent = <V,>(o: Record<string, V> | undefined, field: (v: V) => string | undefined, days: number) =>
     o ? Object.fromEntries(Object.entries(o).filter(([, v]) => after(field(v), days))) : o;
   return {
-    ...s,
+    ...pruneV21(s as SharedIntel & V21Intel, today),
     feedback: s.feedback?.filter((f) => f.kind === 'never' || f.kind === 'not-relevant' || after(f.on, 90)),
     reports: s.reports?.filter((r) => after(r.date, 7)),
     history: s.history?.slice(-200),

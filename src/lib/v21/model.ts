@@ -16,7 +16,7 @@
  * Every map is keyed by a stable id, so the household document merges per key across two adults' devices
  * (src/lib/v20/intel-sync.ts merge3) instead of duplicating list items.
  */
-import { addDays, daysBetween, weekday as weekdayOf } from '../calendar/recurrence';
+import { addDays, weekday as weekdayOf } from '../calendar/recurrence';
 import { partReducer, signature, type Part, type V16State } from '../v16/model';
 import { emptyIntel, type IntelState } from '../v18/engine';
 
@@ -47,6 +47,8 @@ export interface HandRequest {
   time: string | null;
   status: 'asked' | 'accepted' | 'declined' | 'withdrawn';
   askedOn: string;
+  /** Order of asking on the asker's device (several requests on one day keep their order). */
+  seq?: number;
   answeredOn?: string;
   /** Who held it before (unchanged on decline). */
   prevOwner: string | null;
@@ -117,6 +119,24 @@ export type Intel = IntelState & V21Intel;
 export const intelOf = (s: V16State): Intel => (s.intel ?? emptyIntel('m-meg')) as Intel;
 const withIntel = (s: V16State, patch: Partial<Intel>): V16State => ({ ...s, intel: { ...intelOf(s), ...patch } as IntelState });
 
+// ------------------------------------------------------------------ ids
+
+/**
+ * A stable UUID from a seed: the same request accepted on two phones makes the same agreement id, so the agreements
+ * store (which takes the client's id) keeps one row. Not cryptographic; 128 bits from four independent string hashes.
+ */
+export function uuidFrom(seed: string): string {
+  const h = (salt: number) => { let x = 2166136261 ^ salt; for (let i = 0; i < seed.length; i++) { x ^= seed.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(16).padStart(8, '0'); };
+  const hex = h(1) + h(2) + h(3) + h(4);
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-${'89ab'[parseInt(hex[16], 16) % 4]}${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
+
+/** A request id two phones can't both produce (they may ask at the same moment). */
+export const newRequestId = () => {
+  try { if (typeof crypto !== 'undefined' && crypto.randomUUID) return `rq-${crypto.randomUUID()}`; } catch { /* fall through */ }
+  return `rq-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
 // ------------------------------------------------------------------ parts: rhythm and today's plan
 
 /**
@@ -157,7 +177,7 @@ export const askFor = (title: string) => `Can you ${lower(clean(title)).replace(
 
 const subjectKey = (x: Subject) => (x.kind === 'occurrence' ? `occ:${x.partId}@${x.date}` : x.kind === 'part' ? `part:${x.partId}` : x.kind === 'event' ? `event:${x.link}@${x.date}` : '');
 
-export const requestsOf = (s: V16State) => Object.values(intelOf(s).requests ?? {}).sort((a, b) => a.askedOn.localeCompare(b.askedOn) || a.id.localeCompare(b.id));
+export const requestsOf = (s: V16State) => Object.values(intelOf(s).requests ?? {}).sort((a, b) => a.askedOn.localeCompare(b.askedOn) || (a.seq ?? 0) - (b.seq ?? 0) || a.id.localeCompare(b.id));
 export const openRequestFor = (s: V16State, x: Subject) => {
   const k = subjectKey(x);
   return k ? requestsOf(s).find((r) => r.status === 'asked' && subjectKey(r.subject) === k) ?? null : null;
@@ -167,13 +187,14 @@ export interface AskInput { id?: string; from: string; to: string; subject: Subj
 
 /** Ask someone for a hand. Never moves responsibility. Asking again for the same thing while it's open does nothing. */
 export function askHelp(s: V16State, a: AskInput): { state: V16State; id: string | null } {
-  if (a.from === a.to || !clean(a.title)) return { state: s, id: null };
+  if (!a.from || !a.to || a.from === a.to || !clean(a.title)) return { state: s, id: null };
   const open = openRequestFor(s, a.subject);
   if (open) return { state: s, id: open.id };
   const prevOwner = a.subject.kind === 'occurrence' || a.subject.kind === 'part' ? s.parts.find((p) => p.id === (a.subject as { partId: string }).partId)?.ownerId ?? null : null;
-  const id = a.id ?? `rq-${a.today}-${Object.keys(intelOf(s).requests ?? {}).length + 1}`;
+  const id = a.id ?? newRequestId();
+  const seq = Math.max(0, ...Object.values(intelOf(s).requests ?? {}).filter((x) => x.askedOn === a.today).map((x) => x.seq ?? 0)) + 1;
   const r: HandRequest = { id, from: a.from, to: a.to, subject: a.subject, title: clean(a.title).slice(0, 80), ask: clean(a.ask ?? askFor(a.title)).slice(0, 120),
-    date: a.date, time: a.time, status: 'asked', askedOn: a.today, prevOwner };
+    date: a.date, time: a.time, status: 'asked', askedOn: a.today, seq, prevOwner };
   return { state: withIntel(s, { requests: { ...(intelOf(s).requests ?? {}), [id]: r } }), id };
 }
 
@@ -198,16 +219,17 @@ export function answer(s: V16State, id: string, by: string, choice: 'accept' | '
         partId = p.id;
         let parts = partReducer(s.parts, { type: 'edit', id: p.id, patch: { ownerId: by } }, s.online);
         parts = partReducer(parts, { type: 'agree', id: p.id, today }, s.online);
-        parts = parts.map((x) => (x.id === p.id ? { ...x, lastChangedBy: by, lastChangedOn: today, askedBy: r.from } : x));
+        parts = parts.map((x) => (x.id === p.id ? { ...x, lastChangedBy: by, lastChangedOn: today } : x));
         next = { ...s, parts };
       }
     } else {
       // One date: a one-time agreed part owned by the person who said yes. The standing part (if any) is covered.
-      partId = `p-${r.id}`;
+      // One date only: a one-time part, never linked to a recurring event (that would quietly repeat every week).
+      partId = uuidFrom(`request:${r.id}`);
       const base = sub.kind === 'occurrence' ? s.parts.find((x) => x.id === sub.partId) : undefined;
       const part: Part = {
-        id: partId, origin: 'prepared', title: r.title, ownerId: by, finishLine: base?.finishLine ?? '', status: 'suggested', askedBy: r.from,
-        ...(sub.kind === 'event' ? { eventLink: sub.link, offsetDays: 0, need: sub.need } : { onDate: r.date ?? today }),
+        id: partId, origin: 'prepared', title: r.title, ownerId: by, finishLine: base?.finishLine ?? '', status: 'suggested', onDate: r.date ?? today,
+        ...(sub.kind === 'event' && sub.need ? { need: sub.need } : base?.need ? { need: base.need } : {}),
         ...(r.time ? { cue: `At ${t12(r.time)}` } : base?.cue ? { cue: base.cue } : {}),
       };
       const agreed = partReducer([...s.parts.filter((x) => x.id !== partId), part], { type: 'agree', id: partId, today }, s.online)
@@ -240,7 +262,7 @@ export function withdraw(s: V16State, id: string, by: string, today: string): V1
   return withIntel(s, { requests: { ...intelOf(s).requests, [id]: { ...r, status: 'withdrawn', answeredOn: today, acked: today } } });
 }
 
-export const takeId = (sub: Subject, title: string) => `p-take-${subjectKey(sub) || title}`.replace(/[^a-z0-9@:-]+/gi, '-').slice(0, 80);
+export const takeId = (sub: Subject, title: string, date?: string | null) => uuidFrom(`take:${subjectKey(sub) || `${title}@${date ?? ''}`}`);
 
 /** After a decline, the asker takes it themselves: for a standing part nothing changes (it was theirs); otherwise a one-time part. */
 export function takeIt(s: V16State, a: { by: string; title: string; subject: Subject; date: string | null; time: string | null; today: string; cue?: string }): V16State {
@@ -249,10 +271,10 @@ export function takeIt(s: V16State, a: { by: string; title: string; subject: Sub
     const p = s.parts.find((x) => x.id === sub.partId);
     if (p?.ownerId === a.by) return s;
   }
-  const id = takeId(sub, a.title);
+  const id = takeId(sub, a.title, a.date);
   if (s.parts.some((x) => x.id === id)) return s;
-  const part: Part = { id, origin: 'prepared', title: clean(a.title), ownerId: a.by, finishLine: '', status: 'suggested',
-    ...(sub.kind === 'event' ? { eventLink: sub.link, offsetDays: 0, need: sub.need } : { onDate: a.date ?? a.today }),
+  const part: Part = { id, origin: 'prepared', title: clean(a.title), ownerId: a.by, finishLine: '', status: 'suggested', onDate: a.date ?? a.today,
+    ...(sub.kind === 'event' && sub.need ? { need: sub.need } : {}),
     ...(a.time ? { cue: `At ${t12(a.time)}` } : a.cue ? { cue: a.cue } : {}) };
   const parts = partReducer([...s.parts, part], { type: 'agree', id, today: a.today }, s.online).map((x) => (x.id === id ? { ...x, lastChangedBy: a.by, lastChangedOn: a.today } : x));
   return { ...s, parts };
@@ -283,7 +305,7 @@ export function forgetDecision(s: V16State, id: string): V16State {
 export function makeUsual(s: V16State, a: { decisionId: string; ownerId: string; time: string | null; today: string; by: string }): V16State {
   const d = intelOf(s).decisions?.[a.decisionId];
   if (!d || d.kind !== 'each-time' || !d.eventLink) return s;
-  const id = `p-usual-${d.id}`;
+  const id = uuidFrom(`usual:${d.id}`);
   const part: Part = { id, origin: 'prepared', title: d.title ?? d.text, ownerId: a.ownerId, finishLine: '', eventLink: d.eventLink, offsetDays: 0, need: d.need, status: 'suggested',
     ...(a.time ? { cue: `At ${t12(a.time)}` } : {}) };
   let parts = partReducer([...s.parts.filter((x) => x.id !== id), part], { type: 'agree', id, today: a.today }, s.online);
@@ -364,8 +386,9 @@ export function chooseIntent(s: V16State, a: { link: string; date: string; event
     const st = r.state;
     return withIntel(st, { intents: { ...(intelOf(st).intents ?? {}), [key]: { choice: opt.id, label: opt.label, by: a.by, on: a.today, requestId: r.id ?? undefined } } });
   }
-  const id = `p-intent-${a.link}-${a.date}-${opt.id}`.replace(/[^a-z0-9-]+/gi, '-');
-  const part: Part = { id, origin: 'prepared', title: opt.title, ownerId: a.ownerId ?? a.by, finishLine: '', eventLink: a.link, offsetDays: -daysBetween(due, a.date), need: opt.id, status: 'suggested' };
+  const id = uuidFrom(`intent:${a.link}@${a.date}:${opt.id}`);
+  // On its date only: preparing for this occurrence never repeats with a recurring event.
+  const part: Part = { id, origin: 'prepared', title: opt.title, ownerId: a.ownerId ?? a.by, finishLine: '', onDate: due, need: opt.id, status: 'suggested' };
   let parts = partReducer([...s.parts.filter((x) => x.id !== id), part], { type: 'agree', id, today: a.today }, s.online);
   parts = parts.map((x) => (x.id === id ? { ...x, lastChangedBy: a.by, lastChangedOn: a.today } : x));
   intents[key] = { choice: opt.id, label: opt.label, by: a.by, on: a.today, partId: id };
@@ -393,6 +416,16 @@ export const markSeen = (s: V16State, viewer: string, key: string, today: string
 
 export const cardOf = (s: V16State, partId: string) => intelOf(s).cards?.[partId] ?? null;
 export const saveCard = (s: V16State, partId: string, d: CardDraft) => withIntel(s, { cards: { ...(intelOf(s).cards ?? {}), [partId]: d } });
+
+// ------------------------------------------------------------------ keeping the household document small
+
+/** Old answered requests, past choices, completions and seen-markers leave the document; decisions and cards stay. */
+export function pruneV21<T extends V21Intel>(x: T, today: string): T {
+  const keep = (d: string | null | undefined, days: number) => !d || d >= addDays(today, -days);
+  const req = x.requests && Object.fromEntries(Object.entries(x.requests).filter(([, r]) => r.status === 'asked' ? keep(r.date ?? r.askedOn, 14) : keep(r.date ?? r.answeredOn ?? r.askedOn, 21)));
+  const dated = <V,>(o: Record<string, V> | undefined, days: number, field?: (v: V) => string) => o && Object.fromEntries(Object.entries(o).filter(([k, v]) => keep(field ? field(v) : k.split('@').pop(), days)));
+  return { ...x, requests: req, intents: dated(x.intents, 30), done: dated(x.done, 60), covers: dated(x.covers, 30), acked: dated(x.acked, 30, (v) => v as unknown as string) };
+}
 
 // ------------------------------------------------------------------ small helpers
 

@@ -74,7 +74,7 @@ await shot(p, '03-mark-request');
 await p.click('[data-matter="request-in"] [data-answer="accept"]');
 await settle(p);
 check('accepted: the request leaves Mark’s priorities', (await count(p, '[data-matter="request-in"]')) === 0);
-const pickup = p.locator('[data-plan-item^="p-rq"]');
+const pickup = p.locator('[data-plan-item]', { hasText: 'Pick up the boys' });
 check('accepted: Mark sees it as his commitment, not done', (await pickup.count()) === 1 && (await pickup.getAttribute('data-mine')) === '' && (await pickup.getAttribute('data-done')) === null);
 await shot(p, '04-mark-accepted');
 await as(p, 'meg');
@@ -83,13 +83,13 @@ check('Meg can make Mark the usual (optional)', (await count(p, '[data-matter="a
 await shot(p, '05-meg-confirmed');
 await p.click('[data-matter="accepted"] [data-ack]');
 await settle(p);
-check('the confirmation quietly leaves; the plan shows Mark', (await count(p, '[data-matter="accepted"]')) === 0 && (await p.locator('[data-plan-item^="p-rq"] [data-chip]').innerText()) === 'Mark');
+check('the confirmation quietly leaves; the plan shows Mark', (await count(p, '[data-matter="accepted"]')) === 0 && (await p.locator('[data-plan-item]', { hasText: 'Pick up the boys' }).locator('[data-chip]').innerText()) === 'Mark');
 check('Meg’s Today is quiet now', (await headline(p)) === 'Nothing needs you today.');
 // 9. completion is separate
 await as(p, 'mark');
-await p.locator('[data-plan-item^="p-rq"] [role="checkbox"]').click();
+await p.locator('[data-plan-item]', { hasText: 'Pick up the boys' }).locator('[role="checkbox"]').click();
 await settle(p);
-check('9. completion is its own action', (await p.locator('[data-plan-item^="p-rq"]').getAttribute('data-done')) === '');
+check('9. completion is its own action', (await p.locator('[data-plan-item]', { hasText: 'Pick up the boys' }).getAttribute('data-done')) === '');
 
 // ------------------------------------------------------------------ 8. declined
 await scenario(p, 'handoff-ask', 'mark');
@@ -265,7 +265,7 @@ check('solid black text in the light interface (Today)', nonBlack.length === 0, 
 const blackOn = async (route) => {
   await p.evaluate((r) => { location.hash = `/${r}`; }, route);
   await settle(p, 500);
-  return p.evaluate(() => [...document.querySelectorAll('.v21-phone :is(p,span,h1,h2,h3,button,label,a,li)')].filter((el) => el.textContent.trim() && !el.closest('.of-btn:not(.of-btn--soft),.v21-btn--dark,[data-chip],.v21-wordmark,[data-routine-card]'))
+  return p.evaluate(() => [...document.querySelectorAll('.v21-phone :is(p,span,h1,h2,h3,button,label,a,li)')].filter((el) => el.textContent.trim() && !el.closest('.of-btn:not(.of-btn--soft),.v21-btn--dark,[data-chip],.v21-wordmark,[data-routine-card],.of-avatar'))
     .map((el) => getComputedStyle(el).color).filter((c) => c !== 'rgb(0, 0, 0)'));
 };
 for (const r of ['meeting', 'account', 'plans', 'cleaning']) { const bad = await blackOn(r); check(`solid black text: ${r}`, bad.length === 0, bad.slice(0, 3).join(' | ')); }

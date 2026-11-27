@@ -288,7 +288,7 @@ export function ResolveSheet({ ctx, i, meetingDay, onClose }: { ctx: Ctx; i: Sma
   );
 }
 
-function PartSheet({ ctx, i, onClose }: { ctx: Ctx; i: SmartInsight; onClose: () => void }) {
+export function PartSheet({ ctx, i, onClose }: { ctx: Ctx; i: SmartInsight; onClose: () => void }) {
   const p = ctx.s.parts.find((x) => x.id === i.partIds[0]);
   const [open, setOpen] = useState(true);
   return (

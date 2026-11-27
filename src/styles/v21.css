@@ -9,10 +9,10 @@
   --v21-line:#e7e2dc;--v21-card:var(--v18-heads-bg,#EDE5DA);--v21-outline:#8c7d70;
   color:#000;background:#fff;
 }
-.v16.v21 :is(p,span,h1,h2,h3,h4,dt,dd,label,legend,small,button,a,li,strong,em,summary,div){color:#000!important}
+/* Person avatars keep their own calendar color: V17 fills the circle with currentColor (family-colors). */
+.v16.v21 :is(p,span,h1,h2,h3,h4,dt,dd,label,legend,small,button,a,li,strong,em,summary,div):not(.of-avatar){color:#000!important}
 .v16.v21 :is(.of-btn:not(.of-btn--soft),.v21-btn--dark),.v16.v21 :is(.of-btn:not(.of-btn--soft),.v21-btn--dark) *{color:#fff!important}
-.v16.v21 .v21-wordmark em{color:#8B6F5A!important}
-.v16.v21 .v21-tabbar [aria-current="page"] .v17-icon{color:#8B6F5A!important}
+.v16.v21 :is(.v21-wordmark,.v16-wordmark) em{color:#8B6F5A!important}
 .v16.v21 .v21-routine-card,.v16.v21 .v21-routine-card *{color:#3a3330!important}
 
 /* ---------------------------------------------------------------- the review stage (outside the product) */
@@ -37,24 +37,30 @@
 .v21-widget-actions button{min-height:36px;border-radius:10px;background:#fff;border:1px solid #fff;font-size:.72rem;font-weight:700;color:#000}
 .v21-widget-actions button.is-outline{background:none;border-color:var(--v21-outline,#8c7d70);font-weight:500}
 
-/* ---------------------------------------------------------------- the phone */
+/* ---------------------------------------------------------------- the preview's phone frame (preview only) */
 .v16.v21.v21-phone{max-width:430px;margin:0 auto;border-radius:0;min-height:auto;position:relative;overflow:clip}
 @media(min-width:520px){.v16.v21.v21-phone{border-radius:28px}}
-.v21 .v16-header-inner{padding:0 20px;min-height:64px;border-bottom:1px solid var(--v21-line);margin:0 20px;padding:0}
+.v21-phone .v16-header-inner{min-height:64px;border-bottom:1px solid var(--v21-line);margin:0 20px;padding:0}
+.v21-phone .v16-main{padding:18px 20px 24px;max-width:none}
+@media(min-width:1024px){.v21-phone .v16-main{padding:18px 20px 24px}}
+.v21-phone .v16-topnav{display:none!important}
+.v16.v21.v21-phone .v16-tabbar.v21-tabbar{position:sticky;inset:auto;bottom:0;left:auto;right:auto;max-width:none;margin:0 20px;display:block;border:0;border-top:1px solid var(--v21-line);
+  border-radius:0;box-shadow:none;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);padding:6px 0 calc(8px + env(safe-area-inset-bottom))}
 .v21-wordmark{background:none;border:0;padding:0;min-height:44px;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;color:#000;font-family:var(--font-sans)}
 .v21-wordmark em{font-style:normal;color:#8B6F5A}
 .v21-avatar{width:36px;height:36px;border-radius:50%;background:#EDE5DA;border:0;font-weight:600;color:#000;display:inline-grid;place-items:center}
-.v21 .v16-main{padding:18px 20px 24px;max-width:none}
-@media(min-width:1024px){.v21 .v16-main{padding:18px 20px 24px}}
-.v16.v21 .v16-tabbar.v21-tabbar{position:sticky;inset:auto;bottom:0;left:auto;right:auto;max-width:none;margin:0 20px;display:block;border:0;border-top:1px solid var(--v21-line);border-radius:0;box-shadow:none;
-  background:rgba(255,255,255,.97);backdrop-filter:blur(8px);padding:6px 0 calc(8px + env(safe-area-inset-bottom))}
-.v16.v21 .v21-tabbar ul{max-width:none;grid-template-columns:1fr 1fr;gap:0}
-.v16.v21 .v21-tabbar :is(button,a){min-height:52px;border-radius:12px;font-size:.78rem}
-.v21 .v21-tabbar :is(button,a){color:#000;font-weight:500;background:none}
-.v16.v21 .v21-tabbar :is(button,a)[aria-current="page"]{background:none;font-weight:700;color:#000}
-.v21 .v21-tabbar .v17-icon{color:#000}
-.v21 .v21-tabbar [aria-current="page"] .v17-icon{color:#8B6F5A}
-.v21 .v16-topnav{display:none!important}
+
+/* ---------------------------------------------------------------- /app (production): the same header and a docked two-tab bar */
+.v16.v21 .v16-wordmark{font-family:var(--font-sans);font-size:1.3rem;font-weight:700;letter-spacing:-.02em}
+.v16.v21 .v16-wordmark em{font-style:normal}
+.v16.v21:not(.v21-phone) .v16-header{border-bottom:1px solid var(--v21-line)}
+.v16.v21:not(.v21-phone) .v16-tabbar{left:0;right:0;bottom:0;max-width:none;margin:0;border:0;border-top:1px solid var(--v21-line);border-radius:0;box-shadow:none;
+  background:rgba(255,255,255,.97);backdrop-filter:blur(8px);padding:6px 16px calc(8px + env(safe-area-inset-bottom))}
+.v16.v21 .v16-tabbar ul{max-width:32rem;margin:0 auto;grid-template-columns:1fr 1fr;gap:0}
+.v16.v21 .v16-tabbar :is(button,a){min-height:52px;border-radius:12px;font-size:.78rem;color:#000;font-weight:500;background:none}
+.v16.v21 .v16-tabbar :is(button,a)[aria-current="page"]{background:none;font-weight:700;color:#000}
+.v16.v21 .v16-tabbar .v17-icon{color:#000}
+.v16.v21 .v16-tabbar [aria-current="page"] .v17-icon{color:#8B6F5A!important}
 
 /* ---------------------------------------------------------------- Today */
 .v21-date{font-size:.78rem;font-weight:500;letter-spacing:.02em}
