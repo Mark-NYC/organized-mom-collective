@@ -109,6 +109,9 @@ export interface V16State {
   };
   practice: { memberId?: string; skill?: string; outcome?: string; nothing?: boolean };
   wall: { format: 'weekly' | 'monthly'; plan: 'together' | 'later' | 'other' | null };
+  /** Production (/app): the household's real data. The calendar is only `extraEvents` (its own and connected
+   *  calendars), never the fictional demo week (src/lib/v20/live.ts). */
+  live?: boolean;
   /** V18 only: the intelligence layer's household memory, resolutions and meeting topics (src/lib/v18). */
   intel?: import('../v18/engine').IntelState;
   cleaning: {
@@ -213,20 +216,20 @@ export const isShared = (e: CalendarEvent) => !e.external || e.external.visibili
 /** The events as Ana's phone sees them this week, after her sharing choices and the source calendar's changes. */
 export function eventsFor(s: V16State, monday: string): CalendarEvent[] {
   const thursday = addDays(monday, 3);
-  const list = [...demoEvents(monday, s.scenario, s.adults), ...s.extraEvents].map((e) => {
+  const list = [...(s.live ? [] : demoEvents(monday, s.scenario, s.adults)), ...s.extraEvents].map((e) => {
     const v = e.external && s.feedVisibility[e.external.feed_id];
     let out = v && e.external ? { ...e, external: { ...e.external, visibility: v } } : e;
-    if (out.id === 'e-soccer' && s.soccer !== 'as-planned') out = { ...out, skip_dates: [...(out.skip_dates ?? []), thursday] };
+    if (!s.live && out.id === 'e-soccer' && s.soccer !== 'as-planned') out = { ...out, skip_dates: [...(out.skip_dates ?? []), thursday] };
     return out;
   });
-  if (s.soccer === 'earlier' || s.soccer === 'later') {
+  if (!s.live && (s.soccer === 'earlier' || s.soccer === 'later')) {
     // The source calendar moved this one occurrence the same day (4 PM → 3 PM, or → 5:30 PM).
     const soccer = list.find((e) => e.id === 'e-soccer')!;
     const [start, end] = s.soccer === 'earlier' ? ['15:00', '16:15'] : ['17:30', '18:45'];
     list.push({ ...soccer, id: 'e-soccer-moved', starts_on: thursday, start_time: start, end_time: end, recurrence: null, skip_dates: [],
       external: { ...soccer.external!, instance_key: thursday } });
   }
-  if (s.soccer === 'moved') {
+  if (!s.live && s.soccer === 'moved') {
     const soccer = list.find((e) => e.id === 'e-soccer')!;
     // The source calendar moved this one occurrence: same UID and original instance, a new day.
     list.push({ ...soccer, id: 'e-soccer-moved', starts_on: addDays(monday, 4), recurrence: null, skip_dates: [],
@@ -246,15 +249,15 @@ export const occurrenceOf = (s: V16State, monday: string, link: string) =>
 export function missingReason(s: V16State, monday: string, link: string): 'cancelled' | 'private' | 'not-this-week' {
   const mine = weekOccurrences(s, monday).find((o) => linkOf(o.event) === link);
   if (mine && !isShared(mine.event)) return 'private';
-  if (link === 'practice@riverside-fc' && s.soccer === 'cancelled') return 'cancelled';
-  const any = demoEvents(monday, s.scenario, s.adults).find((e) => linkOf(e) === link);
+  if (!s.live && link === 'practice@riverside-fc' && s.soccer === 'cancelled') return 'cancelled';
+  const any = (s.live ? s.extraEvents : demoEvents(monday, s.scenario, s.adults)).find((e) => linkOf(e) === link);
   if (any?.external && (s.feedVisibility[any.external.feed_id] ?? any.external.visibility) === 'private') return 'private';
   return 'not-this-week';
 }
 
 /** An event's title by its link, even when it isn't on this week's shared plan. */
 export const titleOf = (s: V16State, monday: string, link: string) =>
-  [...demoEvents(monday, s.scenario, s.adults), ...s.extraEvents].find((e) => linkOf(e) === link)?.title ?? 'An activity';
+  [...(s.live ? [] : demoEvents(monday, s.scenario, s.adults)), ...s.extraEvents].find((e) => linkOf(e) === link)?.title ?? 'An activity';
 
 /** The day a part happens this week: event prep follows its event (moved → follows; gone → null). */
 export function partDate(s: V16State, monday: string, p: Part): string | null {

@@ -58,3 +58,7 @@ verify_jwt = false
 [functions.calendar-google]
 # Google's OAuth redirect carries no Supabase session; every other action checks the adult's sign-in (docs/calendar/GOOGLE_CALENDAR.md).
 verify_jwt = false
+
+# V20 household notifications: called only by the database dispatcher with a one-time token (docs/ios/V20_LAUNCH.md).
+[functions.push-delivery]
+verify_jwt = false

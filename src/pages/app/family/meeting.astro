@@ -1,9 +1,12 @@
 ---
-/** /app/family/meeting: Our Week (WeeklyMeeting; the free family planning app, docs/ios/OMC_APP_ROADMAP.md). */
+/**
+ * /app/family/meeting: the Family Meeting tab, Organized Family V20 (docs/ios/V20_BASELINE.md). The approved V20 meeting
+ * (Our Focus · Let's Talk · Everyone's Part · Let's Practice, the week-four check-in and the plan) on the household's
+ * real agreements, priorities, development records and shared meeting checkpoint (LiveFamily).
+ */
 import Layout from '../../../layouts/AppLayout.astro';
-import '../../../styles/family-app-brand.css';
-import WeeklyMeeting from '../../../components/ourweek/WeeklyMeeting';
+import LiveFamily from '../../../components/v20/LiveFamily';
 ---
-<Layout title="Our Family Meeting" description="Ten minutes, once a week, so everyone knows the plan and plays a part.">
-  <WeeklyMeeting client:only="react"><div slot="fallback" class="h-96" aria-busy="true"></div></WeeklyMeeting>
+<Layout title="Family Meeting" description="Ten minutes, once a week, so everyone knows the plan and plays a part.">
+  <LiveFamily client:only="react" page="meeting"><div slot="fallback" class="h-96" aria-busy="true"></div></LiveFamily>
 </Layout>

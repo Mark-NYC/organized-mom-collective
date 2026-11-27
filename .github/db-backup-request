@@ -3,3 +3,4 @@
 # last request: before enabling event responsibilities for the production test household (after 20261211), 2026-11-22
 # 2026-11-26: restore-verify backup before V20 production migrations
 # 2026-11-26: after meeting checkpoint migration, before cleaning rhythm migration
+# 2026-11-27: before V20 launch migrations (20261214 cleaning rhythm, 20261215 intelligence + push)

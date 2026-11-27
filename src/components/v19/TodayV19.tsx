@@ -54,6 +54,8 @@ export default function TodayV19({ ctx }: { ctx: Ctx }) {
   const pending = pendingInterpretations(inp);
   const pendingIds = pending.map((p) => p.fingerprint).join(',');
   useEffect(() => {
+    // Production has no interpreter yet (docs/ios/V20_LAUNCH.md): the rules stand. The simulated one is preview-only.
+    if (ctx.s.live) return;
     let live = true;
     for (const { fingerprint, input } of pending) {
       interpreter.interpret(input).then((raw) => {
@@ -76,6 +78,8 @@ export default function TodayV19({ ctx }: { ctx: Ctx }) {
     open(i.key);
   };
   const { rows, earlier } = matterRowsV19(inp, model);
+  // The family's own words for the week ("Calmer mornings"), shown before activities.
+  const notes = (() => { const thisWeek = ctx.s.priorities.filter((p) => p.from === 'this-week'); return (thisWeek.length ? thisWeek : ctx.s.priorities).filter((p) => p.kind === 'note' && p.text); })();
   const parts = useMemo(() => {
     const shownEvents = new Set([...rows, ...earlier].map((r) => r.link));
     const order = (p: Part) => (p.ownerId === intel.viewer ? 0 : 1);
@@ -112,7 +116,8 @@ export default function TodayV19({ ctx }: { ctx: Ctx }) {
           <h2 className="v16-h2">What matters</h2>
           <button type="button" className="v16-link" onClick={() => ctx.go('plans')} data-our-week>Our week <Chevron /></button>
         </div>
-        {!rows.length && !earlier.length && <p className="v16-meta">Nothing chosen yet. Choose what matters together in your Family Meeting.</p>}
+        {notes.map((n) => <div key={n.id} className="py-3" data-matter-note><p className="v16-meta">{n.from === 'last-meeting' ? 'Still your focus from last time' : 'This week'}</p><p className="v16-h3">{n.text}</p></div>)}
+        {!rows.length && !earlier.length && !notes.length && <p className="v16-meta">Nothing chosen yet. Choose what matters together in your Family Meeting.</p>}
         <div className="v16-rows">{rows.map((r) => <Matter key={r.link} ctx={ctx} r={r} onOpen={open} />)}</div>
         {earlier.length > 0 && (
           <>

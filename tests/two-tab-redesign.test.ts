@@ -24,11 +24,15 @@ describe('navigation: Today | Family Meeting', () => {
     expect(src('src/components/Nav.astro')).toMatch(/const tabActive = \(href: string\) => tabFor\(club \? '\/app\/club' : path\) === href;/);
   });
   it('secondary screens stay reachable from Today: Plans, Cleaning, Resources (family, sharing, Club), This Week', () => {
-    const today = src('src/components/app/TodayDashboard.tsx');
-    expect(today).toMatch(/<Shortcut href=\{routes\.familyCalendar\} icon="calendar" title="Plans"/);
-    expect(today).toMatch(/<Shortcut href="\/app\/cleaning" icon="check" title="Cleaning"/);
-    expect(today).toMatch(/<Shortcut href="\/app\/family" icon="list" title="Resources"/);
-    expect(src('src/pages/app/index.astro')).toMatch(/href="\/app\/family-calendar"[^>]*data-this-week/);
+    // V20 (docs/ios/V20_LAUNCH.md): Today is the approved V20 Today on real data; its shortcuts and "Our week" lead to
+    // the real Plans, Cleaning and Resources pages.
+    const today = src('src/components/v19/TodayV19.tsx');
+    for (const s of ['data-shortcut="plans"', 'data-shortcut="cleaning"', 'data-shortcut="resources"', 'data-our-week']) expect(today).toContain(s);
+    const live = src('src/components/v20/LiveFamily.tsx');
+    expect(live).toMatch(/plans: '\/app\/family-calendar'/);
+    expect(live).toMatch(/cleaning: '\/app\/cleaning'/);
+    expect(live).toMatch(/resources: '\/app\/family'/);
+    expect(src('src/pages/app/index.astro')).toMatch(/<LiveFamily client:only="react" page="today"/);
     const hub = src('src/components/family/FamilyHub.tsx');
     for (const attr of ['data-family-members', 'data-family-responsibilities-card', 'data-family-sharing-card', 'data-family-club-card', 'data-family-club-kept', 'data-open-meeting']) expect(hub).toContain(attr);
   });
