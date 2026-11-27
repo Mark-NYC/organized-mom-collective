@@ -129,7 +129,7 @@ export default function TodayV19({ ctx }: { ctx: Ctx }) {
         )}
       </div>
 
-      <div className="v16-section">
+      <div className="v16-section" data-everyones-part>
         <h2 className="v16-h2">Everyone’s part</h2>
         {!parts.length && <p className="v16-meta mt-1">What everyone agrees to do shows up here.</p>}
         <div className="v16-rows">

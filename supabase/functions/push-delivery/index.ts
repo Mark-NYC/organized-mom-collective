@@ -6,16 +6,14 @@
  * payload (title, body, the notification id and its actions; never private calendar text) with VAPID, removes devices
  * the push service says are gone, and settles the row.
  *
- * Secrets: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (mailto:). SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are
- * provided by Supabase.
+ * VAPID keys: generated here on first use and kept in public.household_push_keys (service role only), so the private key
+ * never leaves Supabase. SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
  */
 import webpush from 'npm:web-push@3.6.7';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;
 const KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const VAPID_PUBLIC = Deno.env.get('VAPID_PUBLIC_KEY') ?? '';
-const VAPID_PRIVATE = Deno.env.get('VAPID_PRIVATE_KEY') ?? '';
-const SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:hello@organizedmomcollective.com';
+const SUBJECT = 'mailto:hello@organizedmomcollective.com';
 
 const rest = (path: string, init: RequestInit = {}) => fetch(`${URL_}/rest/v1/${path}`, {
   ...init, headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'return=representation', ...(init.headers ?? {}) },
@@ -25,11 +23,23 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 interface Row { id: string; household_id: string; to_member: string; kind: string; purpose: string; title: string; body: string; data: { actions?: string[] }; status: string }
 interface Sub { id: string; endpoint: string; p256dh: string; auth: string; failures: number }
 
+/** The household push key pair: made once, then read. Idempotent (two first calls keep one pair). */
+async function keys(): Promise<{ public_key: string; private_key: string }> {
+  const read = async () => ((await (await rest('household_push_keys?id=eq.true&select=public_key,private_key')).json()) as { public_key: string; private_key: string }[])[0];
+  const have = await read();
+  if (have) return have;
+  const k = webpush.generateVAPIDKeys();
+  await rest('household_push_keys', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates' }, body: JSON.stringify({ id: true, public_key: k.publicKey, private_key: k.privateKey }) });
+  return (await read())!;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
-  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return json({ error: 'not_configured' }, 503);
-  let token = '';
-  try { token = String((await req.json()).token ?? ''); } catch { /* invalid */ }
+  let body: { token?: unknown; init?: unknown } = {};
+  try { body = await req.json(); } catch { /* invalid */ }
+  // Make sure the key pair exists (returns only the public key, which is public by design).
+  if (body.init === true) return json({ public_key: (await keys()).public_key });
+  const token = String(body.token ?? '');
   if (!/^[0-9a-f]{64}$/.test(token)) return json({ error: 'invalid' }, 400);
 
   const rows = (await (await rest(`household_notifications?dispatch_token=eq.${token}&status=eq.queued&select=id,household_id,to_member,kind,purpose,title,body,data,status`)).json()) as Row[];
@@ -40,7 +50,8 @@ Deno.serve(async (req) => {
     await rest(`household_notifications?id=eq.${n.id}`, { method: 'PATCH', body: JSON.stringify({ status: 'no_device' }) });
     return json({ ok: true, sent: 0 });
   }
-  webpush.setVapidDetails(SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
+  const k = await keys();
+  webpush.setVapidDetails(SUBJECT, k.public_key, k.private_key);
   const payload = JSON.stringify({ id: n.id, title: n.title, body: n.body, actions: (n.data?.actions ?? []).filter((a) => a !== 'open'), url: '/app' });
   let sent = 0;
   for (const s of subs) {

@@ -9,8 +9,8 @@
 import { accountRpc } from '../account';
 import type { PushNote } from './notify';
 
-/** The VAPID public key (public by design; the private key is a Supabase Edge Function secret). */
-export const VAPID_PUBLIC_KEY = 'BPr0Nt4jZDDcBxPmDLesx-wxnma5JHm617yElP-qKKHeobgecyT2rhPZ-d8RWAmOzYu_eaVPXnzxSOe4ZjWCG1Q';
+/** The household push public key (the private half never leaves Supabase: household_push_keys). */
+const publicKey = () => accountRpc<string | null>('household_push_key');
 
 export type PushSupport = 'supported' | 'unsupported' | 'denied' | 'install-first';
 
@@ -50,7 +50,9 @@ export async function enablePush(): Promise<'on' | 'denied' | 'unsupported' | 'e
   if (permission !== 'granted') return 'denied';
   try {
     const reg = await registration();
-    const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key(VAPID_PUBLIC_KEY) }));
+    const vapid = await publicKey();
+    if (!vapid) return 'error';
+    const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key(vapid) }));
     await accountRpc('household_push_subscribe', { p_endpoint: sub.endpoint, p_p256dh: b64(sub.getKey('p256dh')), p_auth: b64(sub.getKey('auth')) });
     return 'on';
   } catch {

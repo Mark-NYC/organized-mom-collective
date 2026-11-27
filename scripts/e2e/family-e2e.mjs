@@ -364,10 +364,13 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   for (let i = 0; i < 6 && (await nora.locator('[role="dialog"] .btn-primary').isVisible().catch(() => false)); i++) { await nora.locator('[role="dialog"] .btn-primary').click(); await nora.waitForTimeout(150); }
   check('free: the complete cleaning companion opens, no wall calendar needed', (await nora.locator('input[type="checkbox"]').count()) > 0 && /\/app\/cleaning/.test(nora.url()));
   await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
-  // One part at a time since PR 513: walk the four step buttons and read each part as it shows.
+  // V20 meeting (docs/ios/V20_LAUNCH.md): one part at a time, Continue to the next.
   const parts = [];
-  for (let i = 0; i < 4; i++) { await nora.click(`[data-meeting-step="${i}"]`); parts.push(await nora.getAttribute('[data-meeting-part]', 'data-meeting-part')); }
-  check('free: the weekly Family Meeting has the four parts in order', parts.join() === 'Our Focus,Let’s Talk,Everyone’s Part,Let’s Practice', parts.join(' · '));
+  for (let i = 0; i < 4; i++) {
+    parts.push(await nora.getAttribute('[data-meeting-step]', 'data-meeting-step'));
+    if (i < 3) { await nora.click('[data-meeting-next]'); await settle(nora, 500); }
+  }
+  check('free: the weekly Family Meeting has the four parts in order', parts.join() === 'focus,talk,parts,practice', parts.join(' · '));
   await nora.goto(`${base}/app/family`, { waitUntil: 'networkidle' }); await settle(nora, 1500);
   // The website's Getting started list may name the Club once, as a step for a new family; never a card, never in the app.
   const famText = await nora.evaluate((web) => {
@@ -383,10 +386,19 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   check('free: no Family Meeting Club card on Today or Family for a family without the Club', (await nora.locator('[data-club-month], [data-family-club-card]').count()) === 0 && !/family meeting club|membership/i.test(famText) && !/family meeting club|membership/i.test(await nora.locator('body').innerText()));
   await nora.goto(`${base}/app/family/meeting`, { waitUntil: 'networkidle' }); await settle(nora, 1200);
   check('free: no Club card or upgrade on the free meeting', (await nora.locator('[data-club-month-meeting]').count()) === 0 && !/upgrade|subscribe|join the club/i.test(await nora.locator('body').innerText()));
-  await nora.click('[data-meeting-step="2"]'); // Everyone's Part, where "We agreed" is
-  await nora.fill('[data-agreement-new]', 'Feed the cat before school');
-  await nora.click('[data-owner-chip="Ada"]');
-  await nora.click('[data-save-new-agreement]');
+  // V20: a family member's own idea (Let's Talk) becomes a proposal in Everyone's Part; "We agree" makes it an agreement.
+  // The meeting resumes where the family left it (Let's Practice): back to Let's Talk.
+  for (let i = 0; i < 3 && (await nora.locator('[data-meeting-step="talk"]').count()) === 0; i++) {
+    await nora.click((await nora.locator('[data-meeting-step="focus"]').count()) ? '[data-meeting-next]' : '[data-meeting-back]'); await settle(nora, 500);
+  }
+  await nora.selectOption('[data-idea-by]', { label: 'Ada' });
+  await nora.fill('[data-idea-text]', 'Feed the cat before school');
+  await nora.click('[data-add-idea]');
+  await nora.click('[data-meeting-next]'); await settle(nora, 800); // Everyone's Part
+  const idea = nora.locator('[data-meeting-step="parts"] [data-part]', { hasText: 'Feed the cat before school' });
+  await idea.locator('> button').click();
+  await idea.locator('[data-keep]').click();
+  await idea.locator('[data-we-agree]').click();
   await settle(nora, 2500);
   check('free: "We agreed" in the free meeting saves to the household', (await sql(`select count(*) from public.club_responsibilities r join public.club_households h on h.id = r.household_id join auth.users u on u.id = h.owner_user_id where u.email = 'nora@e2e.test' and r.status = 'confirmed' and r.agreed_text = 'Feed the cat before school'`)) === '1');
   await shot(nora, '12-free-meeting', true);
@@ -426,7 +438,8 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   const clubCard = await page.locator('[data-family-club-card]').count();
   await page.goto(`${base}/app`, { waitUntil: 'networkidle' }); await settle(page, 1500);
   // Two-tab redesign: the Club lives under Resources (Family & resources); Today points there ("Guides & Club").
-  check('Club subscriber: her Club card is on Family & resources, and Today points to it', clubCard === 1 && /Guides & Club/.test(await page.locator('[data-today-shortcut="resources"]').innerText().catch(() => '')));
+  // V20: Today's Resources shortcut names this month's Club kit for a member.
+  check('Club subscriber: her Club card is on Family & resources, and Today points to it', clubCard === 1 && (await page.locator('[data-shortcut="resources"]').count()) === 1);
   // Account: Our Week, with the household's Club content and no billing; deleting is refused while the membership lasts.
   await page.goto(`${base}/app/account`, { waitUntil: 'networkidle' }); await settle(page, 1200);
   const panel = await page.locator('[data-account-signin]').innerText().catch(() => '');
@@ -632,7 +645,8 @@ note('Sam opening the Club\'s monthly meeting', samMeeting.body?.access ? 'has a
   for (const path of ['/app/sign-in', '/app/family/setup', '/app/account']) {
     await raj2b.goto(`${base}${path}`, { waitUntil: 'networkidle' }); await settle(raj2b, 800);
     const t = await raj2b.locator('body').innerText();
-    check(`name: ${path} never says "Our Week"`, !/\bOur Week\b(?!ly|-)/i.test(t), (t.match(/.{0,30}Our Week.{0,20}/i) ?? [''])[0]);
+    // The retired product name "Our Week" (capitalized), never the approved V20 link "Our week ›" (this week's plan).
+    check(`name: ${path} never says "Our Week"`, !/\bOur Week\b(?!ly|-)/.test(t), (t.match(/.{0,30}Our Week.{0,20}/) ?? [''])[0]);
   }
 
   // Without a household nothing leaves the phone.
