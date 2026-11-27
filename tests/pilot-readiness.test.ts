@@ -82,7 +82,10 @@ describe('first-session fixes', () => {
   it('Cleaning in the app goes straight to the checklist (the paper-calendar walkthrough stays on the QR pages)', () => {
     expect(src('src/components/TodayApp.tsx')).toMatch(/forceSetup \? false : skipsWalkthrough \|\| isOnboarded\(\)/);
     expect(src('src/components/TodayApp.tsx')).toMatch(/skipsWalkthrough = variant === 'app' && !\/\^\\\/app\\\/calendar/);
-    expect(src('src/layouts/AppLayout.astro')).toMatch(/\/\^\\\/app\\\/calendar\\\/\?\$\/\.test\(location\.pathname\)/);
+    // The QR page now opens the same Cleaning view as the app (no walkthrough), so the layout must never hide the
+    // navigation waiting for one: a calendar QR visitor always has the tabs.
+    expect(src('src/pages/app/calendar/index.astro')).toMatch(/import Page from '\.\.\/cleaning\.astro'/);
+    expect(src('src/layouts/AppLayout.astro')).not.toMatch(/needs-onboarding/);
   });
 });
 
