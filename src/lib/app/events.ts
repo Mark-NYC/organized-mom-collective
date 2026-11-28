@@ -1,32 +1,29 @@
 /**
- * Pilot measurement from the app (docs/pilot/ANALYTICS.md): one allowlisted event name, the platform and the day, for
- * a signed-in grown-up, at most once a day per event (app_event, supabase/migrations/20261210000000_app_events.sql).
- * Never a name, a child, a household or anything a family wrote. Not when signed out, not in the demo, never throws,
- * never waits: measurement must not get in a mom's way.
+ * Pilot measurement from the app (docs/pilot/ANALYTICS.md): one product moment (an allowlisted kind), the platform and
+ * the local day, for a signed-in grown-up, at most once a day per moment (app_open once per hour band). Sent through
+ * the household's behavioral log (household_signal_log, supabase/migrations/20261216000000_household_intelligence_engine.sql),
+ * which keeps product moments even with learning off and strips anything but the moment. Never a name, a child, a
+ * household or anything a family wrote. Not when signed out, not in the demo, never throws, never waits.
  */
-import { accountRpc, loadSession } from '../account';
-import { appShellBuild } from '../native/platform';
+import { loadSession } from '../account';
+import { signal } from '../intel/client';
+import type { ProductKind } from '../intel/signals';
 
-export type AppEvent =
-  | 'app_open' | 'onboarding_started' | 'onboarding_completed'
-  | 'cleaning_checked' | 'plan_added' | 'agreement_made'
-  | 'meeting_started' | 'meeting_completed' | 'club_preview_viewed' | 'feedback_sent';
+export type AppEvent = ProductKind;
 
-const SENT = 'omc:events:sent:v1';
-const today = () => new Date().toISOString().slice(0, 10);
+const SENT = 'omc:events:sent:v2';
+const slot = (event: AppEvent, d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}${event === 'app_open' ? `@${d.getHours()}` : ''}`;
 
 export function track(event: AppEvent): void {
   try {
-    if (typeof window === 'undefined' || !loadSession()) return;
-    if (new URLSearchParams(location.search).get('demo') === '1') return;
+    // Signed out or in the demo: nothing is sent, and nothing is marked as sent (signing in later still counts).
+    if (typeof window === 'undefined' || !loadSession() || new URLSearchParams(location.search).get('demo') === '1') return;
     const sent = JSON.parse(localStorage.getItem(SENT) ?? '{}') as Record<string, string>;
-    if (sent[event] === today()) return;
-    sent[event] = today();
+    const now = slot(event);
+    if (sent[event] === now) return;
+    sent[event] = now;
     localStorage.setItem(SENT, JSON.stringify(sent));
-    void accountRpc('app_event', { p_event: event, p_platform: appShellBuild() ? 'ios' : 'web' }).catch(() => {
-      // Not sent (offline, or the database doesn't have it yet): try again next time.
-      try { const s = JSON.parse(localStorage.getItem(SENT) ?? '{}'); delete s[event]; localStorage.setItem(SENT, JSON.stringify(s)); } catch { /* fine */ }
-    });
+    signal({ kind: event });
   } catch {
     // Measurement never blocks anything.
   }

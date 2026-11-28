@@ -26,6 +26,8 @@ import { readProgress, recordFinished, recordStep, type MeetingProgress } from '
 import { useSharedMeetingProgress } from '../../lib/app/shared-meeting-progress';
 import { useFamily } from '../../lib/family-meeting-client';
 import { newAgreementId, type AgreementRow } from '../../lib/agreements/store';
+import { signal, signalsFor } from '../../lib/intel/client';
+import HouseholdIntelligence from '../intel/HouseholdIntelligence';
 import { useDevelopment, useMeetingAccess } from '../../lib/family-development/client';
 import { recordScope } from '../../lib/family-development/meeting-plan';
 import { buildFamilyMeeting } from '../../lib/club/family-meeting';
@@ -148,6 +150,8 @@ export default function LiveFamily({ page }: { page: Page }) {
   const eventOf = useCallback((link: string): CalendarEvent | null => events.find((e) => linkOf(e) === link) ?? null, [events]);
 
   const run = useCallback((w: Write) => {
+    // What this teaches the engine (opaque ids only; the server drops it if learning is off).
+    signal(...signalsFor(w, { existingAgreements: new Set(agreements.map((a) => a.id)) }));
     switch (w.kind) {
       case 'agreement-save': {
         const id = w.id ?? newAgreementId();
@@ -185,7 +189,7 @@ export default function LiveFamily({ page }: { page: Page }) {
       case 'event-save': cal.save({ ...w.event, id: /^[0-9a-f-]{36}$/i.test(w.event.id) ? w.event.id : newEventId(), revision: 0 }); break;
       case 'intel': intel.update(w.update); break;
     }
-  }, [fam, intel, tasks, prios, dev, scope, cleaning, cal, monday]);
+  }, [fam, intel, tasks, prios, dev, scope, cleaning, cal, monday, agreements]);
 
   const set = useCallback((f: (s: V16State) => V16State) => {
     const prev = latest.current;
@@ -227,7 +231,7 @@ export default function LiveFamily({ page }: { page: Page }) {
   if (signedIn === false) return page === 'settings' ? null : <SignedOut />;
   if (signedIn && cal.status === 'no-household') return page === 'settings' ? null : <NoFamily />;
   if (!ctx) return <div aria-busy="true" className={page === 'settings' ? 'h-24' : 'h-96'} data-live-loading />;
-  if (page === 'settings') return <div data-live-v20 data-route="settings"><Notifications ctx={ctx} /><PushDevice /><Assistance ctx={ctx} /><Noticed ctx={ctx} /></div>;
+  if (page === 'settings') return <div data-live-v20 data-route="settings"><Notifications ctx={ctx} /><PushDevice /><Assistance ctx={ctx} /><Noticed ctx={ctx} />{access && <HouseholdIntelligence household={access.householdId} mode="account" names={ctx.names} />}</div>;
   return (
     <div data-live-v20 data-route={route} data-intel={intel.status}>
       {route === 'today' && <TodayV21 ctx={ctx} />}

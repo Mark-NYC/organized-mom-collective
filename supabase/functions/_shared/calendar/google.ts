@@ -11,6 +11,7 @@
  * All Google endpoints are fixed hosts (no user-supplied URLs here). Tokens are passed in and out only between the
  * functions and the database (Vault); nothing here logs them.
  */
+import { sanitizeDescription } from './sanitize.ts';
 import type { IcsInstance } from './ics.ts';
 
 export const GOOGLE_SCOPES = [
@@ -179,7 +180,7 @@ export function toInstances(items: Record<string, unknown>[]): IcsInstance[] {
     const orig = (e.originalStartTime ?? {}) as Record<string, string>;
     const uid = String(e.iCalUID ?? e.id ?? '').slice(0, 255);
     if (!uid) continue;
-    const base = { uid, title: String(e.summary ?? '').trim().slice(0, 120) || 'Busy', location: typeof e.location === 'string' ? e.location.slice(0, 160) : null,
+    const base = { uid, title: String(e.summary ?? '').trim().slice(0, 120) || 'Busy', location: typeof e.location === 'string' ? e.location.slice(0, 160) : null, description: typeof e.description === 'string' ? sanitizeDescription(e.description) : null,
       status: (e.status === 'tentative' ? 'tentative' : 'confirmed') as IcsInstance['status'] };
     let inst: IcsInstance | null = null;
     if (start.date) {
@@ -208,7 +209,7 @@ export async function listEvents(c: GoogleConfig, f: typeof fetch, accessToken: 
   for (let page = 0; page < 4; page++) {
     const j = await apiGet(c, f, accessToken, `/calendars/${encodeURIComponent(calendarId)}/events`, {
       singleEvents: 'true', showDeleted: 'false', maxResults: '2500', timeMin: new Date(fromMs).toISOString(), timeMax: new Date(toMs).toISOString(),
-      fields: 'items(id,iCalUID,status,summary,location,start,end,originalStartTime,recurringEventId),nextPageToken',
+      fields: 'items(id,iCalUID,status,summary,location,description,start,end,originalStartTime,recurringEventId),nextPageToken',
       ...(pageToken ? { pageToken } : {}),
     });
     items.push(...((j.items as Record<string, unknown>[] | undefined) ?? []));

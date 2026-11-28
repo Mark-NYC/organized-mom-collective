@@ -1,4 +1,4 @@
--- Rolls back 20261215 (V20 launch: intelligence, push, push keys, calendar rollout), 20261214, 20261213, 20261212, 20261211, 20261210, 20261209, 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
+-- Rolls back 20261216 (intelligence engine: signals, memory, consent, budget), 20261215 (V20 launch: intelligence, push, push keys, calendar rollout), 20261214, 20261213, 20261212, 20261211, 20261210, 20261209, 20261208, 20261207, 20261206, 20261205, 20261204, 20261203, 20261201, 20261130, 20261129, 20261128, 20261127, 20261126, 20261125 and 20261124, newest first, in one
 -- transaction (docs/ios/MIGRATION_DEPLOYMENT_PLAN.md → Rollback). Rehearsed by scripts/rehearse-household-rollback.sh.
 --
 -- NEVER run without the owner's go. It REMOVES what families made with these features: partner access and
@@ -10,6 +10,27 @@
 -- (each section says what it needs). After the "24" section, run restore-functions.sql (captured with capture.sql
 -- BEFORE applying) in the same session, then fingerprint.sql must equal the fingerprint taken before applying.
 begin;
+
+-- ---- 20261216 Household Intelligence Engine, Stage B. Removes every behavioral signal, learned memory, interpretation,
+-- pseudonym, consent choice and usage record; the stored calendar descriptions go too. Agreements and families stay.
+do $$ begin
+  if to_regclass('cron.job') is not null then
+    execute $q$select cron.unschedule(jobid) from cron.job where jobname = 'omc-intel-prune'$q$;
+  end if;
+end $$;
+drop function if exists public.calendar_feed_descriptions_store(uuid, jsonb);
+drop function if exists public.pilot_funnel(date);
+drop function if exists public.household_intel_erase(uuid);
+drop function if exists public.household_memory_forget(uuid, uuid);
+drop function if exists public.household_memory_correct(uuid, uuid, jsonb);
+drop function if exists public.household_memory_confirm(uuid, jsonb);
+drop function if exists public.household_memory(uuid);
+drop function if exists public.household_intel_settings(uuid, jsonb);
+drop function if exists public.household_signal_log(jsonb);
+drop schema if exists intel_private cascade;
+drop table if exists public.intel_usage, public.intel_budget_scopes, public.intel_pseudonyms, public.intel_interpretations,
+  public.household_memory_evidence, public.household_memory, public.household_signals, public.intel_member_consent, public.intel_settings;
+drop table if exists public.calendar_feed_descriptions;
 
 -- ---- 20261215000002 V20 launch: calendar links and event responsibilities back to the staged rollout.
 update public.calendar_feed_rollout set everyone = false, event_tasks_everyone = false where id;
@@ -70,8 +91,8 @@ drop function if exists public.calendar_event_tasks_enabled(uuid);
 alter table if exists public.calendar_feed_rollout drop column if exists event_tasks_everyone;
 alter table if exists public.calendar_feed_testers drop column if exists event_tasks;
 
--- ---- 20261210 Pilot measurement and feedback (alone: supabase/rollout/app-events/rollback.sql). Feedback already sent
--- stays in support_requests (an ordinary support request); the events go.
+-- ---- 20261210 Pilot feedback (alone: supabase/rollout/app-feedback/rollback.sql). Feedback already sent stays in
+-- support_requests (an ordinary support request). (Its retired app_events table is dropped if an old copy has it.)
 drop function if exists public.pilot_feedback(date);
 drop function if exists public.app_feedback(text, text, text, text, int);
 drop function if exists public.pilot_funnel(date);

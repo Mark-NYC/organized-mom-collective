@@ -1,8 +1,9 @@
 /**
  * /app/feedback: pilot feedback from inside the app (website and iPhone app). Three kinds, a sentence or two, sent as a
- * support request through app_feedback (supabase/migrations/20261210000000_app_events.sql) with only where it came
+ * support request through app_feedback (supabase/migrations/20261210000000_app_feedback.sql) with only where it came
  * from (the screen's path, platform, screen width). Nothing about the family is attached. docs/pilot/PILOT_TESTING.md.
  */
+import { track } from '../../lib/app/events';
 import { useEffect, useState } from 'react';
 import { accountRpc, loadSession } from '../../lib/account';
 import { appShellBuild } from '../../lib/native/platform';
@@ -41,6 +42,7 @@ export default function AppFeedback() {
     try {
       await accountRpc('app_feedback', { p_kind: kind, p_message: text.trim(), p_screen: screen, p_platform: appShellBuild() ? 'ios' : 'web', p_width: Math.round(window.innerWidth) });
       setState('sent');
+      track('feedback_sent'); // the moment only, never the message
     } catch (e) {
       setState('error');
       setErr((e as Error).message === 'rate_limited' ? 'That’s a lot of messages today. Try again tomorrow.' : 'We couldn’t send it just now. Check your connection and try again.');

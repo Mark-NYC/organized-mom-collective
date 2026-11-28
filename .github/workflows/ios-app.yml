@@ -128,7 +128,7 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
           SKIP_MIGRATIONS: '^20261130|^2026120[234]|^20261209'
-          ONLY_TESTS: app-events
+          ONLY_TESTS: app-feedback household-intelligence-engine
         run: bash scripts/test-household-sql.sh
       - name: Responsibilities on imported calendar events, on production's migration set (without 20261130, 20261202-04 and 20261210)
         env:
@@ -378,6 +378,10 @@ jobs:
         run: |
           bash scripts/e2e/family-db.sh
           node scripts/e2e/first-session-e2e.mjs dist app-www e2e-first-session
+      - name: Household intelligence (AI-help consent, learning on/off, personal calendars, noticed rhythms, AI withdrawal, erase), website and app bundle, on a fresh test database
+        run: |
+          bash scripts/e2e/family-db.sh
+          node scripts/e2e/intel-e2e.mjs dist app-www e2e-intel
       - name: Responsibilities on imported calendar events (Rivera demo, soccer/field trip/game night, refresh, reschedule, cancel, reconnect, two phones), on a fresh test database
         run: |
           bash scripts/e2e/family-db.sh
@@ -398,6 +402,7 @@ jobs:
             e2e-club-access/
             e2e-rivera/
             e2e-first-session/
+            e2e-intel/
             e2e-event-tasks/
             e2e-family-plan/
           if-no-files-found: ignore

@@ -217,7 +217,12 @@ export async function syncGoogleFeed(feed: ClaimedFeed, deps: CalendarFeedsDeps,
 async function refreshOne(f: ClaimedFeed, deps: CalendarFeedsDeps, tokens: TokenCache = new Map()) {
   const r = f.kind === 'google' ? await syncGoogleFeed(f, deps, tokens) : await syncFeed(f, deps);
   const { parse_ms: parseMs = 0, ...stored } = r;
+  // Descriptions are kept apart (one per series, sanitized, engine-only); the event rows never carry them.
+  const descriptions = new Map<string, string>();
+  if (stored.result === 'ok') for (const e of (stored.events ?? []) as { uid: string; description?: string | null }[]) if (e.description && !descriptions.has(e.uid)) descriptions.set(e.uid, e.description);
+  if (stored.events) stored.events = (stored.events as { description?: unknown }[]).map(({ description: _d, ...rest }) => rest);
   const count = await deps.db.rpc<number>('calendar_feed_store', { p_feed: f.id, p: stored });
+  if (stored.result === 'ok') await deps.db.rpc('calendar_feed_descriptions_store', { p_feed: f.id, p: [...descriptions].map(([uid, description]) => ({ uid, description })) }).catch(() => {});
   return { id: f.id, result: r.result, count, parseMs, ...(r.error ? { error: r.error } : {}) };
 }
 

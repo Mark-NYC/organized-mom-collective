@@ -101,7 +101,7 @@ after screenshots in the PR).
 
 ## 5. Before inviting anyone (owner)
 
-1. Merge and deploy, then apply `20261210000000_app_events.sql` (preflight, apply by itself, verify: `supabase/rollout/app-events/`). Without it, the app still works, and feedback and measurement simply don't save.
+1. Merge and deploy, then apply `20261210000000_app_feedback.sql` (preflight, apply by itself, verify: `supabase/rollout/app-feedback/`) and `20261216000000_household_intelligence_engine.sql` (the behavioral log the pilot funnel now reads; docs/intelligence/STAGE_B_REPORT.md). Without them, the app still works, and feedback and measurement simply don't save.
 2. **Google Calendar moms:** on production, calendar subscriptions and Google are off for everyone (`calendar_feed_rollout`: `everyone = false`, `google_everyone = false`, 1 tester). Add each Google family as a tester (`insert into calendar_feed_testers (user_id, google) values (…, true)`), or turn the rollout on.
 3. TestFlight build for iPhone testers ([../ios/TESTFLIGHT.md](../ios/TESTFLIGHT.md)).
 4. Open Admin → Club → Pilot once to see that it loads.

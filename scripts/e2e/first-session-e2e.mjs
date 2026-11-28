@@ -118,7 +118,6 @@ for (const p of PERSONAS) {
   check(`${p.id} setup done: the invitation only when there's another grown-up`, (await page.locator('[data-setup-step="partner"]').count()) === (p.adults.length ? 1 : 0));
   check(`${p.id} setup done: page is short (no long form)`, (await page.evaluate(() => document.documentElement.scrollHeight)) < 2600);
   await shot('03-setup-done');
-
   // 4. Today: the next step
   await page.click('[data-setup-next]');
   await page.waitForURL(/\/app$/, { timeout: 15000 }); await settle(page, 1800);
@@ -199,7 +198,7 @@ for (const p of PERSONAS) {
   await shot('07-feedback');
 
   // Measured, without family content
-  const ev = await sql(`select string_agg(distinct e.event, ',' order by e.event) from public.app_events e join auth.users u on u.id = e.user_id where u.email = '${email}'`);
+  const ev = await sql(`select string_agg(distinct e.kind, ',' order by e.kind) from public.household_signals e join auth.users u on u.id = e.user_id where u.email = '${email}'`);
   check(`${p.id} measured: setup, a first action, the meeting, feedback`, ['onboarding_started', 'onboarding_completed', 'cleaning_checked', 'meeting_started', 'meeting_completed', 'feedback_sent', 'app_open'].every((e) => ev.split(',').includes(e)), ev);
   await ctx.close();
 }

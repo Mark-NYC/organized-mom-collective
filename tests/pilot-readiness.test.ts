@@ -10,7 +10,8 @@ import { FUNNEL_ROWS } from '../src/components/admin/PilotAdmin';
 import type { Household } from '../src/lib/club/profile';
 
 const src = (p: string) => readFileSync(p, 'utf8');
-const MIGRATION = src('supabase/migrations/20261210000000_app_events.sql');
+const MIGRATION = src('supabase/migrations/20261216000000_household_intelligence_engine.sql'); // the funnel and the behavioral log
+const FEEDBACK_MIGRATION = src('supabase/migrations/20261210000000_app_feedback.sql');
 const fam = (adults: number): Household => ({
   id: 'h', displayName: 'X', preferences: {}, profileVersion: 1,
   members: [
@@ -118,36 +119,49 @@ describe('privacy-safe events', () => {
     vi.stubGlobal('fetch', async (url: string, init: RequestInit) => { calls.push({ url, body: JSON.parse(String(init.body)) }); return new Response('null', { status: 200 }); });
     return calls;
   };
-  it('sends one event name and the platform, once a day', async () => {
+  it('sends one product moment and the platform, once a day, through the behavioral log', async () => {
     const calls = stub(true);
     const { track } = await import('../src/lib/app/events');
-    track('app_open'); track('app_open');
-    await new Promise((r) => setTimeout(r, 0));
+    track('meeting_started'); track('meeting_started');
+    await new Promise((r) => setTimeout(r, 5));
     expect(calls).toHaveLength(1);
-    expect(calls[0]).toMatchObject({ body: { p_event: 'app_open', p_platform: 'web' } });
-    expect(String((calls[0] as { url: string }).url)).toMatch(/\/rpc\/app_event$/);
+    expect(String((calls[0] as { url: string }).url)).toMatch(/\/rpc\/household_signal_log$/);
+    const sent = (calls[0] as { body: { p_signals: Record<string, unknown>[] } }).body.p_signals;
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({ kind: 'meeting_started', platform: 'web' });
+    expect(Object.keys(sent[0]).sort()).toEqual(['at', 'kind', 'local_day', 'local_dow', 'local_hour', 'platform']); // nothing but the moment
   });
   it('sends nothing when signed out or in the demo', async () => {
     let calls = stub(false);
     let { track } = await import('../src/lib/app/events');
-    track('app_open'); await new Promise((r) => setTimeout(r, 0));
+    track('app_open'); await new Promise((r) => setTimeout(r, 5));
     expect(calls).toHaveLength(0);
     vi.resetModules();
     calls = stub(true, '?demo=1');
     ({ track } = await import('../src/lib/app/events'));
-    track('app_open'); await new Promise((r) => setTimeout(r, 0));
+    track('app_open'); await new Promise((r) => setTimeout(r, 5));
     expect(calls).toHaveLength(0);
   });
-  it('the app\'s event names are exactly the database\'s allowlist', () => {
-    const sqlNames = [...MIGRATION.slice(MIGRATION.indexOf('event text not null check'), MIGRATION.indexOf('platform text not null')).matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort();
-    const tsNames = [...src('src/lib/app/events.ts').slice(0, 1200).matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).filter((n) => sqlNames.includes(n)).sort();
-    expect(tsNames).toEqual(sqlNames);
+  it('a moment seen while signed out still counts after signing in', async () => {
+    const calls = stub(false);
+    const { track } = await import('../src/lib/app/events');
+    track('app_open'); await new Promise((r) => setTimeout(r, 5));
+    expect(calls).toHaveLength(0);
+    localStorage.setItem('omc:account:session', JSON.stringify({ access_token: 'a', refresh_token: 'r', expires_at: Date.now() + 3600e3, user_id: 'u', email: 'a@b.co' }));
+    track('app_open'); await new Promise((r) => setTimeout(r, 5));
+    expect(calls).toHaveLength(1);
+  });
+  it('the app\'s product moments are exactly the database\'s allowlist', async () => {
+    const fn = MIGRATION.slice(MIGRATION.indexOf('create function intel_private.product_kind'), MIGRATION.indexOf('$$;', MIGRATION.indexOf('create function intel_private.product_kind')));
+    const sqlNames = [...fn.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort();
+    const { PRODUCT_KINDS } = await import('../src/lib/intel/signals');
+    expect([...PRODUCT_KINDS].sort()).toEqual(sqlNames);
   });
   it('the owner\'s Pilot tab shows every funnel number, and the funnel is owner-only', () => {
     const keys = [...MIGRATION.slice(MIGRATION.indexOf("'accounts_created'"), MIGRATION.indexOf("'platforms'")).matchAll(/'([a-z_0-9]+)', \(/g)].map((m) => m[1]);
     expect(FUNNEL_ROWS.map(([k]) => k).sort()).toEqual(keys.sort());
-    for (const fn of ['pilot_funnel', 'pilot_feedback']) {
-      const body = MIGRATION.slice(MIGRATION.indexOf(`create function public.${fn}(`));
+    for (const [fn, file] of [['pilot_funnel', MIGRATION], ['pilot_feedback', FEEDBACK_MIGRATION]] as const) {
+      const body = file.slice(file.indexOf(`create function public.${fn}(`));
       expect(body.slice(0, 400), fn).toMatch(/if not public\.is_admin\('owner'\) then raise exception 'forbidden'/);
     }
   });

@@ -5,6 +5,7 @@
  *   2. Right after the first save: "You're set up" with ONE next step (Today), the invitation for the other grown-up
  *      if there is one (src/components/household/HouseholdSharing.tsx), and the form folded away. A new mom isn't left
  *      on a long edit page wondering what to do next (docs/pilot/PILOT_TESTING.md → first session).
+ *      Then one explicit choice about AI help (off unless she says yes; src/components/intel/HouseholdIntelligence.tsx).
  *   3. Later visits: the form open for edits, sharing, and the three places to start.
  * An existing Club member's household is the same household: this edits it, nothing is copied or replaced.
  */
@@ -18,6 +19,7 @@ import { accountStore, ColorsNotSavedError, StaleProfileError } from '../../lib/
 import { householdAccess, type HouseholdAccess } from '../../lib/household/api';
 import type { Household } from '../../lib/club/profile';
 import { track } from '../../lib/app/events';
+import HouseholdIntelligence from '../intel/HouseholdIntelligence';
 
 export default function OurWeekFamilySetup() {
   const [state, setState] = useState<'loading' | 'signed-out' | 'ready' | 'error'>('loading');
@@ -104,6 +106,7 @@ export default function OurWeekFamilySetup() {
             <HouseholdSharing household={household} access={access} />
           </section>
         )}
+        {access && <HouseholdIntelligence household={access.householdId} mode="onboarding" />}
         <section aria-labelledby="setup-start-h" data-setup-step="start">
           <h2 id="setup-start-h" className="label text-[#71866c]">OR START WITH</h2>
           {start}

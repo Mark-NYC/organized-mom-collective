@@ -266,7 +266,7 @@ describe('refresher: Google calendars', () => {
     const g = fakeGoogle({ 'https://oauth.test/token': () => jsonRes({ access_token: 'A' }), 'https://api.test': () => jsonRes(events),
       'https://school.example.org': () => new Response('BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:s@x\r\nSUMMARY:Picture day\r\nDTSTART;VALUE=DATE:20261120\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n') });
     const stored: string[] = [];
-    const h = createCalendarFeedsHandler({ db: { rpc: async <T,>(name: string, args: Record<string, unknown> = {}) => (name === 'calendar_feed_claim' ? queue.splice(0, 1) : (stored.push(`${args.p_feed}:${(args.p as { result: string }).result}`), 1)) as T },
+    const h = createCalendarFeedsHandler({ db: { rpc: async <T,>(name: string, args: Record<string, unknown> = {}) => (name === 'calendar_feed_claim' ? queue.splice(0, 1) : name === 'calendar_feed_store' ? (stored.push(`${args.p_feed}:${(args.p as { result: string }).result}`), 1) : 1) as T },
       getUser: async () => null, fetch: g.f, resolve: async () => ['93.184.216.34'], now: () => Date.UTC(2026, 10, 19), cronSecret: 's', google: G });
     const res = await h(new Request('https://x/', { method: 'POST', headers: { 'x-calendar-cron': 's' }, body: JSON.stringify({ mode: 'due' }) }));
     expect(await res.json()).toEqual({ refreshed: 2 });

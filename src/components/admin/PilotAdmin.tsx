@@ -1,7 +1,7 @@
 /**
  * /admin/club → Pilot (owner admins): the pilot funnel as numbers (pilot_funnel) and what testers told us from inside
  * the app, with the screen they were on (pilot_feedback). Both are owner-checked database functions
- * (supabase/migrations/20261210000000_app_events.sql); nothing here shows a family's data. docs/pilot/ANALYTICS.md.
+ * (supabase/migrations/20261216000000_household_intelligence_engine.sql, 20261210000000_app_feedback.sql); nothing here shows a family's data. docs/pilot/ANALYTICS.md.
  */
 import { useEffect, useState } from 'react';
 import { adminInput, type AdminContext } from './AdminGate';

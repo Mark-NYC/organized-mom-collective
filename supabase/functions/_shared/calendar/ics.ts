@@ -16,6 +16,7 @@
  * Out: one instance per occurrence inside the window, keyed by UID + the occurrence's original start, so a refresh
  * replaces instead of duplicating.
  */
+import { sanitizeDescription } from './sanitize.ts';
 
 export interface IcsInstance {
   uid: string;
@@ -31,6 +32,8 @@ export interface IcsInstance {
   start_date: string | null;
   end_date: string | null;
   status: 'confirmed' | 'tentative';
+  /** Sanitized DESCRIPTION (≤280, untrusted; stored per series in calendar_feed_descriptions, never sent anywhere). */
+  description?: string | null;
 }
 
 export interface IcsResult {
@@ -362,6 +365,8 @@ export function parseIcs(text: string, opts: { fromMs: number; toMs: number; hou
     const locRaw = first(e, 'LOCATION')?.value;
     const location = locRaw ? clip(unescapeText(locRaw), MAX_TEXT.location) || null : null;
     const status = (first(e, 'STATUS')?.value ?? '').toUpperCase() === 'TENTATIVE' ? 'tentative' : 'confirmed';
+    const descRaw = first(e, 'DESCRIPTION')?.value;
+    const description = descRaw ? sanitizeDescription(unescapeText(descRaw)) : null;
     const endProp = first(e, 'DTEND');
     const durProp = first(e, 'DURATION');
     const masterDtStart = parseDate(first(e, 'DTSTART')!, tz)!;
@@ -378,7 +383,7 @@ export function parseIcs(text: string, opts: { fromMs: number; toMs: number; hou
       const k = `${uid}|${key}`;
       if (seen.has(k)) return;
       seen.add(k);
-      instances.push({ uid, instance_key: key, title, location, all_day: true, starts_at: null, ends_at: null, start_date: s, end_date: dateStr(addDaysWall(startWall, days - 1)), status });
+      instances.push({ uid, instance_key: key, title, location, description, all_day: true, starts_at: null, ends_at: null, start_date: s, end_date: dateStr(addDaysWall(startWall, days - 1)), status });
       return;
     }
     const startMs = startDv.utc ? wallMs(startWall) : zonedToUtc(startWall, startDv.tz ?? tz);
@@ -390,7 +395,7 @@ export function parseIcs(text: string, opts: { fromMs: number; toMs: number; hou
     const k = `${uid}|${key}`;
     if (seen.has(k)) return;
     seen.add(k);
-    instances.push({ uid, instance_key: key, title, location, all_day: false, starts_at: new Date(startMs).toISOString(), ends_at: new Date(startMs + len).toISOString(), start_date: null, end_date: null, status });
+    instances.push({ uid, instance_key: key, title, location, description, all_day: false, starts_at: new Date(startMs).toISOString(), ends_at: new Date(startMs + len).toISOString(), start_date: null, end_date: null, status });
   };
 
   for (const e of masters) {
