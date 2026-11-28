@@ -303,10 +303,14 @@ select pg_temp.expect((select (intel_private.budget_reserve((select hid from ids
   'after settling at actual cost, the freed budget can be used');
 select pg_temp.expect(not exists (select 1 from information_schema.columns where table_name = 'intel_usage' and column_name in ('prompt', 'output', 'input', 'response')),
   'usage keeps no prompt or output');
--- Expired reservations stop counting.
+-- A reservation never settled expires after 10 minutes but keeps counting (the call may have been sent).
 update public.intel_usage set created_at = now() - interval '11 minutes' where request_key = 'request-c';
+select pg_temp.expect((select (intel_private.budget_reserve((select hid from ids), 'household', 'request-d', 1, 200000, 'meeting-brief', 'terra')) ->> 'reason' = 'household_budget'),
+  'an expired, unsettled reservation still counts against the household cap');
+select pg_temp.expect((select status = 'expired' from public.intel_usage where request_key = 'request-c'), 'it is marked expired');
+select pg_temp.expect(intel_private.budget_settle((select id from public.intel_usage where request_key = 'request-c'), null, '{"outcome":"not-sent"}'), 'released: it never left');
 select pg_temp.expect((select (intel_private.budget_reserve((select hid from ids), 'household', 'request-d', 1, 200000, 'meeting-brief', 'terra')) ->> 'ok')::boolean,
-  'a reservation never settled expires after 10 minutes and stops counting');
+  'only a released reservation frees the budget');
 -- Global cap.
 update public.intel_budget_scopes set monthly_cap_micro_usd = 600000 where scope = 'global';
 select pg_temp.as_user('authenticated', :OTHER);
@@ -318,8 +322,44 @@ update public.intel_budget_scopes set monthly_cap_micro_usd = 50000000 where sco
 -- Synthetic scope is separate and only for synthetic households.
 select pg_temp.expect((select (intel_private.budget_reserve((select hid from ids), 'synthetic', 'request-s', 1, 100, 'eval', 'luna')) ->> 'reason' = 'wrong_scope'), 'a real household cannot spend the synthetic budget');
 select pg_temp.expect((select (intel_private.budget_reserve(null, 'synthetic', 'request-s', 1, 100, 'eval', 'luna')) ->> 'ok')::boolean, 'synthetic evaluation spends its own budget');
-update public.intel_budget_scopes set monthly_cap_micro_usd = 150 where scope = 'synthetic';
-select pg_temp.expect((select (intel_private.budget_reserve(null, 'synthetic', 'request-s2', 1, 100, 'eval', 'luna')) ->> 'reason' = 'scope_budget'), 'the synthetic cap holds');
+-- The evaluation budget: $5.00 in total (cumulative, never resets), at most $0.05 a call.
+select pg_temp.expect((select lifetime_cap_micro_usd = 5000000 and monthly_cap_micro_usd is null and per_call_max_micro_usd = 50000 from public.intel_budget_scopes where scope = 'synthetic'),
+  'evaluation budget: $5.00 total, no monthly reset, $0.05 per call');
+select pg_temp.expect((select (intel_private.budget_reserve(null, 'synthetic', 'request-big', 1, 60000, 'eval', 'luna')) ->> 'reason' = 'per_call_max'), 'one call cannot reserve more than $0.05');
+-- Spending from earlier months still counts against the total.
+insert into public.intel_usage (scope, month, request_key, attempt, status, reserved_micro_usd, actual_micro_usd, job, model)
+  select 'synthetic', (date_trunc('month', now()) - make_interval(months => m))::date, 'request-old-' || m, 1, 'settled', 50000, 46000, 'eval', 'luna'
+    from generate_series(1, 108) m;  -- 108 calls in past months = $4.968
+select pg_temp.expect((select (intel_private.budget_reserve(null, 'synthetic', 'request-s2', 1, 40000, 'eval', 'luna')) ->> 'reason' = 'lifetime_budget'),
+  'the $5 total holds across months (a new month does not reset it): $4.968 spent earlier + $0.04 is refused');
+select pg_temp.expect((select (intel_private.budget_reserve(null, 'synthetic', 'request-s2', 1, 20000, 'eval', 'luna')) ->> 'ok')::boolean,
+  'what still fits under the total is allowed');
+delete from public.intel_usage where request_key = 'request-s2';
+delete from public.intel_usage where request_key like 'request-old-%';
+-- A reservation that expired without being settled still counts at its estimate (a sent call may have cost it).
+insert into public.intel_usage (scope, month, request_key, attempt, status, reserved_micro_usd, job, model, created_at)
+  select 'synthetic', date_trunc('month', now())::date, 'request-lost-' || n, 1, 'reserved', 50000, 'eval', 'luna', now() - interval '20 minutes' from generate_series(1, 99) n;
+select pg_temp.expect((select (intel_private.budget_reserve(null, 'synthetic', 'request-s3', 1, 50000, 'eval', 'luna')) ->> 'reason' = 'lifetime_budget'),
+  'expired, unsettled reservations still count (99 × $0.05 + the $0.0001 already spent leaves no room for $0.05)');
+select pg_temp.expect((select count(*) = 99 from public.intel_usage where request_key like 'request-lost-%' and status = 'expired'), 'they are marked expired, not dropped');
+select pg_temp.expect(intel_private.budget_settle((select id from public.intel_usage where request_key = 'request-lost-1'), 1000, '{"outcome":"late"}'),
+  'a late report settles an expired reservation at its real cost');
+select pg_temp.expect((select (intel_private.budget_reserve(null, 'synthetic', 'request-s4', 1, 40000, 'eval', 'luna')) ->> 'ok')::boolean,
+  'and only then is the difference available again');
+select pg_temp.expect((select (s ->> 'spent_micro_usd')::bigint = 98 * 50000 + 1000 + 100 + 40000 and (s ->> 'lifetime_cap_micro_usd')::bigint = 5000000
+  from (select intel_private.budget_status('synthetic') s) x), 'budget_status reports settled + held against the $5 total');
+-- A call that never left (provider not reached) is released and stops counting.
+select pg_temp.expect(intel_private.budget_settle((select id from public.intel_usage where request_key = 'request-s4'), null, '{"outcome":"not-sent"}'), 'release');
+select pg_temp.expect((select status = 'released' from public.intel_usage where request_key = 'request-s4'), 'released');
+delete from public.intel_usage where request_key like 'request-lost-%';
+-- Only the service role reaches the budget and the evaluation cache.
+select pg_temp.expect((select bool_and(not has_function_privilege('authenticated', p.oid, 'execute') and not has_function_privilege('anon', p.oid, 'execute') and has_function_privilege('service_role', p.oid, 'execute'))
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname in ('intel_budget_reserve', 'intel_budget_settle', 'intel_budget_status', 'intel_cache_get', 'intel_cache_put')),
+  'budget and cache functions: service role only');
+select pg_temp.expect((select not has_table_privilege('authenticated', 'public.intel_inference_cache', 'select')), 'the evaluation cache is not readable by families');
+select pg_temp.expect(public.intel_cache_put('ab12cd34ef56ab78', '{"task":"interpret-event","model":"luna","prompt_version":"ie-1","output":{"kind":"other"},"cost_micro_usd":12}'), 'cache put');
+select pg_temp.expect((select public.intel_cache_put('ab12cd34ef56ab78', '{"task":"interpret-event","model":"luna","prompt_version":"ie-1","output":{"kind":"party"}}') is null), 'cache entries are immutable (first answer kept)');
+select pg_temp.expect((select public.intel_cache_get('ab12cd34ef56ab78') -> 'output' ->> 'kind' = 'other'), 'cache get');
 select pg_temp.expect((select (intel_private.budget_reserve(null, 'household', 'request-x', 1, 100, 'eval', 'luna')) ->> 'reason' = 'invalid'), 'household scope needs a household');
 -- Serialization: reservations take the scope lock (concurrent callers wait instead of both passing the check).
 select pg_temp.expect((select prosrc like '%pg_advisory_xact_lock(hashtextextended(''intel-budget:''%' from pg_proc where proname = 'budget_reserve'),

@@ -3,13 +3,18 @@
  * by day, apply the family's own actions (confirm, forget, settings), run the real learner on a schedule, and keep the
  * memory exactly as the database would (intel_private.memory_apply's rules, mirrored here and kept in step by tests).
  *
- * Synthetic or exported histories only. Nothing here talks to a network or an AI provider.
+ * Synthetic or exported histories only. Nothing here talks to a network or an AI provider: model answers are only
+ * ever REPLAYED from the evaluation cache (interpretWithReplay). Live inference is a separate, explicit command
+ * (scripts/intel-eval.mjs run <phase> --live).
  */
 import { addDays } from './cadence';
 import { learn } from './learn';
 import { identity, type MemoryRecord, type MemoryUpsert } from './memory';
 import { isLearning, type Signal } from './signals';
 import type { Expectation, FamilyAction, SyntheticHousehold } from './synthetic';
+import { answersOf, eventsFor, interpretRequests, replay, route, type CacheEntry } from './eval/evaluate';
+import { fingerprint } from '../../../supabase/functions/_shared/intel/tasks';
+
 
 export interface LabSnapshot { day: string; counts: Record<string, number>; applied: number; skipped: number }
 export interface LabResult { memories: MemoryRecord[]; recorded: Signal[]; dropped: number; timeline: LabSnapshot[] }
@@ -116,4 +121,31 @@ export function evaluate(h: SyntheticHousehold, memories: MemoryRecord[]): Verdi
       got: m ? `${m.status} ${m.cadence ?? ''} ${JSON.stringify(m.content)} conf=${m.confidence}` : 'absent' });
   }
   return out;
+}
+
+// ---------------------------------------------------------------- interpreter replay (no cost, no network)
+
+
+export interface LabEvent { id: string; title: string; source: 'rules' | 'replay' | 'fallback'; kind: string; needs: string[] }
+
+/**
+ * A household's calendar titles as the engine would read them, using only previously generated model answers
+ * (the evaluation cache). Rules decide what they can; a routed title takes its saved answer if there is one, and
+ * otherwise falls back to the rules. Never calls anything: there is no provider here, so a replay costs nothing.
+ */
+export async function interpretWithReplay(h: Pick<SyntheticHousehold, 'id'>, cache: Map<string, CacheEntry>, model = 'gpt-6-luna'): Promise<{ events: LabEvent[]; replayed: number; misses: number }> {
+  const answers = new Map<string, { kind: string; needs: string[] }>();
+  let replayed = 0, misses = 0;
+  for (const r of interpretRequests(h)) {
+    const out = replay(cache, await fingerprint('interpret-event', model, r.input));
+    if (out) replayed++; else misses++;
+    for (const [id, a] of answersOf(out)) answers.set(id, a);
+  }
+  const events = eventsFor(h).map((p): LabEvent => {
+    const r = route(p.event.title);
+    const a = answers.get(p.id);
+    if (r.route === 'rules') return { id: p.id, title: p.event.title, source: 'rules', kind: r.kind, needs: [] };
+    return a ? { id: p.id, title: p.event.title, source: 'replay', kind: a.kind, needs: a.needs } : { id: p.id, title: p.event.title, source: 'fallback', kind: r.kind, needs: [] };
+  });
+  return { events, replayed, misses };
 }

@@ -29,5 +29,20 @@ a=$(cat /tmp/race-a.$$); b=$(cat /tmp/race-b.$$); rm -f /tmp/race-a.$$ /tmp/race
 rows=$(psql_ -At -c "select count(*) from public.intel_usage where status = 'reserved'")
 echo "worker a: $a · worker b: $b · reservations kept: $rows"
 oks=0; [[ "$a" == "true" ]] && oks=$((oks + 1)) || true; [[ "$b" == "true" ]] && oks=$((oks + 1)) || true
-if [[ "$rows" == "1" && "$oks" == "1" ]]; then echo "budget concurrency test passed"; else echo "FAILED: concurrent reservations overspent the cap"; exit 1; fi
+if [[ "$rows" == "1" && "$oks" == "1" ]]; then echo "household cap: passed"; else echo "FAILED: concurrent reservations overspent the cap"; exit 1; fi
+
+# The evaluation budget ($5 total): $4.95 already spent in earlier months, ten workers each try to reserve $0.01 at
+# once (first attempts and retries mixed). Exactly five fit; the total never goes over $5.00.
+psql_ >/dev/null <<'SQL'
+insert into public.intel_usage (scope, month, request_key, attempt, status, reserved_micro_usd, actual_micro_usd, job, model)
+  select 'synthetic', (date_trunc('month', now()) - interval '2 months')::date, 'earlier-eval-' || n, 1, 'settled', 49500, 49500, 'eval', 'luna' from generate_series(1, 100) n;
+insert into public.intel_usage (scope, month, request_key, attempt, status, reserved_micro_usd, actual_micro_usd, job, model)
+  select 'synthetic', date_trunc('month', now())::date, 'eval-race-' || n || '-request', 1, 'settled', 1, 0, 'eval', 'luna' from generate_series(6, 10) n;
+SQL
+worker() { psql_ -At -c "begin; select (intel_private.budget_reserve(null, 'synthetic', 'eval-race-$1-request', $2, 10000, 'eval', 'luna')) ->> 'ok'; select pg_sleep(0.8); commit;" | head -1; }
+for n in 1 2 3 4 5 6 7 8 9 10; do attempt=1; [[ $n -gt 5 ]] && attempt=2; worker $n $attempt > /tmp/eval-race-$n.$$ & done; wait
+won=0; for n in 1 2 3 4 5 6 7 8 9 10; do [[ "$(cat /tmp/eval-race-$n.$$)" == "true" ]] && won=$((won + 1)) || true; rm -f /tmp/eval-race-$n.$$; done
+total=$(psql_ -At -c "select (intel_private.budget_status('synthetic') ->> 'spent_micro_usd')")
+echo "evaluation budget: $won of 10 concurrent \$0.01 reservations fit · total held and spent: $total micro-USD (cap 5000000)"
+if [[ "$won" == "5" && "$total" -le 5000000 ]]; then echo "budget concurrency test passed"; else echo "FAILED: the evaluation total went over \$5 or the wrong number fit"; exit 1; fi
 psql -X -q -d postgres -c "drop database $DB with (force)" >/dev/null

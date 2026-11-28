@@ -18,6 +18,11 @@ do $$ begin
     execute $q$select cron.unschedule(jobid) from cron.job where jobname = 'omc-intel-prune'$q$;
   end if;
 end $$;
+drop function if exists public.intel_cache_put(text, jsonb);
+drop function if exists public.intel_cache_get(text);
+drop function if exists public.intel_budget_status(text);
+drop function if exists public.intel_budget_settle(bigint, bigint, jsonb);
+drop function if exists public.intel_budget_reserve(uuid, text, text, int, bigint, text, text);
 drop function if exists public.calendar_feed_descriptions_store(uuid, jsonb);
 drop function if exists public.pilot_funnel(date);
 drop function if exists public.household_intel_erase(uuid);
@@ -28,6 +33,7 @@ drop function if exists public.household_memory(uuid);
 drop function if exists public.household_intel_settings(uuid, jsonb);
 drop function if exists public.household_signal_log(jsonb);
 drop schema if exists intel_private cascade;
+drop table if exists public.intel_inference_cache;
 drop table if exists public.intel_usage, public.intel_budget_scopes, public.intel_pseudonyms, public.intel_interpretations,
   public.household_memory_evidence, public.household_memory, public.household_signals, public.intel_member_consent, public.intel_settings;
 drop table if exists public.calendar_feed_descriptions;

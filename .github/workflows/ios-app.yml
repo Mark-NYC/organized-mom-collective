@@ -11,10 +11,10 @@
 name: iPhone app
 on:
   pull_request:
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'scripts/rehearse-calendar-google-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/test-intel-*', 'scripts/intel-eval.mjs', 'scripts/lib/**', 'supabase/functions/**', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'scripts/rehearse-calendar-google-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
   push:
     branches: ['claude/**']
-    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'scripts/rehearse-calendar-google-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
+    paths: ['src/**', 'ios/**', 'supabase/migrations/**', 'supabase/tests/**', 'scripts/test-household-sql.sh', 'scripts/test-intel-*', 'scripts/intel-eval.mjs', 'scripts/lib/**', 'supabase/functions/**', '.github/simulator-repeat', 'scripts/rehearse-household-rollback.sh', 'scripts/rehearse-calendar-rollout.sh', 'scripts/rehearse-calendar-google-rollout.sh', 'supabase/rollout/**', 'scripts/build-app*.mjs', 'scripts/app-shell-smoke.mjs', 'scripts/compare-test-failures.mjs', 'scripts/e2e/**', 'capacitor.config.ts', 'astro.app.config.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/ios-app.yml']
     tags: ['release-*']
   workflow_dispatch:
     inputs:
@@ -82,6 +82,20 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: ci-only
         run: bash scripts/test-household-sql.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: AI evaluation budget ($5.00 total, serialized, retries counted), the inference function on the real budget rules, and the progressive evaluation rehearsed end to end (scripted model, no network, no spending)
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: ci-only
+        run: |
+          bash scripts/test-intel-budget-concurrency.sh
+          node scripts/test-intel-infer-db.mjs
+          node scripts/test-intel-eval-pipeline.mjs
       - name: 20261124-27 on production's current schema (without 20261121-23, and 28, 29, 20261203 and 20261208, which need them)
         env:
           PGHOST: localhost

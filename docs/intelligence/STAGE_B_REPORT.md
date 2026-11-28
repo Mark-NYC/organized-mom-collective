@@ -12,6 +12,10 @@ the Household Intelligence Lab. It follows the 12 approved decisions (§2) and t
 setup (§9), including the Zero Data Retention request, before any real household data is sent. Three product decisions
 are listed in §10.
 
+**Revised 2026-11-28 (owner):** the AI evaluation budget is **$5.00 in total**, spent progressively, cheapest model
+first. Full plan: [EVALUATION_PLAN.md](EVALUATION_PLAN.md). It supersedes the $40/month synthetic budget and the Luna
+vs Terra benchmark below (§4.6, §7).
+
 ---
 
 ## 1. Summary
@@ -24,7 +28,8 @@ are listed in §10.
 | 50 synthetic households | 6–12 months each, 18,257 signals, 18 scripted scenarios with ground truth |
 | Engine vs ground truth | **574/574** on the default seed; **2,884/2,885 (99.97%)** across five seeds |
 | Consent and controls | Explicit AI-help choice in onboarding; Account controls for learning, AI, my calendars, noticed rhythms, erase |
-| Budget | $0.40/household/month cap, server-side, serialized, retries counted; separate global ($50) and synthetic ($40) scopes |
+| Budget | $0.40/household/month cap (aim: under $0.05), server-side, serialized, retries counted; global $50/month; AI evaluation **$5.00 in total** (cumulative, $0.05 per call, unsettled reservations keep counting) |
+| AI evaluation | `intel-infer` function (the only place a model is called), cache-first replay, progressive runner A → B → C → escalate with gates and approval requests; rehearsed end to end with a scripted model |
 | Tests | SQL 92 + 20 checks; unit 71 new tests; 41 end-to-end checks on the website and the app bundle; full regression green |
 
 Engine bugs the synthetic ground truth caught and that are now fixed (§5.3): stale owner beliefs, statistical beliefs that
@@ -39,11 +44,11 @@ routine lost after a skipped week, and a day-of-month anchor flipping to an nth 
 | --- | --- | --- |
 | 1 | 50 diverse synthetic households, 6–12 months, from the 8 samples and scripted scenarios | `src/lib/intel/synthetic.ts`: seeded from the 7 non-empty sample families; 20 two-parent, 23 single-parent, 7 multigenerational; children aged 1–17; engagement high 20 / medium 16 / low 14; 18 scenario kinds (§5) |
 | 2 | OpenAI first, provider-independent; ZDR before real data | No provider code in Stage B. Setup steps and the ZDR request: §9. Synthetic evaluation needs no key |
-| 3 | Benchmark Luna and Terra; cheap model by default, escalate only when warranted | Benchmark plan in §7 (runs in Stage C on synthetic data after you approve the spend) |
+| 3 | Benchmark Luna and Terra; cheap model by default, escalate only when warranted | Revised: luna by default; terra only on title groups where luna falls short, each distinct title once ([EVALUATION_PLAN.md](EVALUATION_PLAN.md) §5) |
 | 4 | Retire the unused pilot activity table; consolidate observation into the new log | `app_events` removed from `20261210` (it was never applied in production) and renamed `20261210000000_app_feedback.sql`; product moments now go to `household_signals`; `pilot_funnel` rewritten on it; `track()` sends through the new log. Dependencies checked: §4.4 |
 | 5 | Explicit AI consent in onboarding, Account controls, individual consent for personal calendars, full function without AI | §4.3. AI is off by default; "Not now" stores nothing; personal-calendar consent is per adult; everything deterministic works with all of it off |
 | 6 | Sanitized descriptions ≤280 characters; minimize; respect visibility; untrusted; never sent automatically | `calendar_feed_descriptions` (service role only), `sanitize.ts` (§4.5). Nothing reads them for a provider |
-| 7 | $0.40/month cap, server-side, retries and concurrency; separate global and synthetic budgets | `intel_private.budget_reserve / budget_settle`, `intel_usage`, `intel_budget_scopes` (§4.6) |
+| 7 | $0.40/month cap, server-side, retries and concurrency; separate global and synthetic budgets | `intel_private.budget_reserve / budget_settle`, `intel_usage`, `intel_budget_scopes` (§4.6); evaluation revised to a $5.00 cumulative cap |
 | 8 | Recurrence-aware memory; agreements persist; contradictions weaken inferences | `cadence.ts`, `memory.ts`: daily / weekly / biweekly / monthly / seasonal / annual windows; confirmed memory never decays; contradiction lowers confidence and can move an anchor |
 | 9 | Consistent household-scoped pseudonymous identifiers | `intel_private.pseudonym` (HMAC with a per-household salt, `M/P/S/L/C` tokens), `pseudonyms.ts`; erase rotates the salt |
 | 10 | Preserve V21, MAWL, agreements, restraint, design, deterministic fallback | No V21 behavior changed. Signals are a side effect of existing writes. Account uses the existing switch and row styles |
@@ -181,10 +186,16 @@ an event, so `AppFeedback` tracks `feedback_sent` itself after a successful send
   - up to 3 attempts per request, each counted;
   - the same (request, attempt) is idempotent.
 - `budget_settle` records actual cost.
-- **Scopes:** household cap $0.40/month (`intel_settings.monthly_budget_micro_usd`), global $50/month, synthetic
-  evaluation $40/month, kept separately.
-- `scripts/test-intel-budget-concurrency.sh`: two concurrent $0.20 reservations under a $0.30 cap → exactly one
-  succeeds.
+- **Scopes:** household cap $0.40/month (`intel_settings.monthly_budget_micro_usd`), global $50/month, and synthetic
+  evaluation **$5.00 in total** (`lifetime_cap_micro_usd`, never resets) with at most $0.05 per call.
+- **Unsettled reservations:** a reservation that expires without being settled keeps counting at its estimate (a sent
+  call may have cost it). Only a call that never left is released. `intel_private.budget_status` reports where a scope
+  stands.
+- **Who can call it:** the inference function reaches the budget and the evaluation cache through service-role-only
+  wrappers (`public.intel_budget_*`, `public.intel_cache_*`).
+- `scripts/test-intel-budget-concurrency.sh`:
+  - two concurrent $0.20 reservations under a $0.30 household cap → exactly one;
+  - ten concurrent $0.01 evaluation reservations with $0.05 left of the $5 → exactly five, total exactly $5.00.
 
 ---
 
@@ -285,27 +296,16 @@ Private, owner-only, synthetic or exported histories only.
 
 ---
 
-## 7. Luna vs Terra benchmark plan (Stage C, synthetic only, after you approve the spend)
+## 7. Model evaluation (revised: $5 total, progressive)
 
-- **Arms:**
-  1. rules only;
-  2. rules + `gpt-6-luna` everywhere;
-  3. rules + luna, with `gpt-6.1-terra` for the meeting brief;
-  4. terra everywhere (ceiling).
-- **Tasks:** `interpret-event`, `interpret-change`, `pattern-review` and `meeting-brief` on the 50 households, replayed
-  weekly through the Lab.
-- **Measures:**
-  - interpretation accuracy against scripted ground truth;
-  - agreement with code-established facts (any contradiction is a fail);
-  - meeting-brief usefulness (rubric: grounded in evidence ids, ≤5 items, no blame, respects confirmed agreements);
-  - restraint (how often it correctly says nothing);
-  - invalid-output rate after schema validation;
-  - tokens and cost per household-month;
-  - latency.
-- **Default to luna.** Escalate a task to terra only if terra beats luna by a meaningful margin on that task (proposed:
-  ≥10 points on the rubric, or luna under 90% valid) and the household's month stays under $0.40. Re-check whenever
-  prices or models change.
-- **Estimated spend:** about $10–$40 from the synthetic budget scope ($40/month cap enforced server-side).
+Superseded by [EVALUATION_PLAN.md](EVALUATION_PLAN.md):
+- API validation first, then five representative households, then the rest only if the gate passes;
+- the cheap model everywhere by default; the strong model only on groups where the cheap one falls short;
+- cache-first replay;
+- the database-enforced $5.00 total.
+
+The whole sequence is rehearsed in CI with a scripted model. At the recorded prices, phases A–C cost about $0.02 worst
+case.
 
 ---
 
@@ -335,7 +335,7 @@ I can't see OpenAI's dashboard, so menu names may differ slightly. Tell me if a 
    - `organized-family-prod` for real households, later.
 
    Keeping them separate keeps keys, limits and retention settings apart.
-3. **Limits per project.** Set a monthly budget, for example eval $40 and prod $50 to match the server-side caps. Turn
+3. **Limits per project.** Set budgets that match the server-side caps: eval $5 (total), prod $50 a month. Turn
    on email alerts at 50% and 80%. Restrict each project to the models we use (luna and terra) if the dashboard
    offers model restrictions.
 4. **API key.** In `organized-family-eval`, create a key owned by a service account (not your personal user) with the
@@ -351,16 +351,21 @@ I can't see OpenAI's dashboard, so menu names may differ slightly. Tell me if a 
    It is used only in Edge Functions, never in the app or the website.
 5. **Data controls.** In the prod project's data controls, confirm that API data is not used for training (the
    default), and turn off any optional sharing.
-6. **Zero Data Retention: request it before any real household data.**
+6. **Evaluation spending ($5 total):** set the `organized-family-eval` project's budget to $5 with alerts, as a
+   backstop only. The cap that actually holds is ours, in the database
+   ([EVALUATION_PLAN.md](EVALUATION_PLAN.md) §1).
+7. **Zero Data Retention: request it before any real household data.**
    - Contact OpenAI (sales, or the ZDR / data-retention request form linked from the data-controls page).
    - Ask for ZDR for `organized-family-prod`; mention we use the Responses API with `store: false` and no Batch API.
    - If ZDR isn't granted, ask for Modified Abuse Monitoring as the fallback.
    - Also ask for their Data Processing Addendum (DPA) and sign it.
    - Keep the confirmation email; I'll record it in `docs/intelligence/`.
    - Until it's confirmed in writing, the prod key stays unused and only synthetic data is processed.
-7. **Tell me when (1)–(4) are done for the eval project.** Then I build the provider adapter (Responses API,
-   `store: false`, strict JSON schemas, budget reservation before each call), run the §7 benchmark on synthetic
-   households, and report cost and quality before anything touches real data.
+8. **Tell me when (1)–(4) and (6) are done for the eval project.** The provider adapter is already built and tested
+   (`supabase/functions/intel-infer`: Responses API, `store: false`, strict JSON schemas, reservation before every
+   call). Running it also needs the engine migration in a Supabase project and the function deployed with its two
+   secrets ([EVALUATION_PLAN.md](EVALUATION_PLAN.md) §7). Then I run phase A (well under a cent) and report before
+   going further.
 
 ---
 

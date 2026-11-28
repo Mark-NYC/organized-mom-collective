@@ -9,7 +9,7 @@
 --   household_memory_evidence why a memory exists (capped)
 --   intel_interpretations     cached event interpretations (rules or model)
 --   intel_pseudonyms          stable household-scoped tokens for people, series and places (no names stored)
---   intel_budget_scopes       global and synthetic-testing monthly caps
+--   intel_budget_scopes       caps: global monthly (real households), synthetic evaluation cumulative ($5 total)
 --   intel_usage               every model reservation and its settled cost (no prompts, no outputs)
 --   calendar_feed_descriptions a sanitized description (≤280) per connected-calendar series; untrusted; never auto-sent
 -- Families reach all of it through SECURITY DEFINER functions that check membership; the engine (service role)
@@ -162,11 +162,21 @@ create table public.intel_pseudonyms (
 
 create table public.intel_budget_scopes (
   scope text primary key check (scope in ('global', 'synthetic')),
-  monthly_cap_micro_usd bigint not null check (monthly_cap_micro_usd >= 0),
-  updated_at timestamptz not null default now()
+  -- A cap per calendar month, and/or a cap for all time (cumulative, never resets). At least one.
+  monthly_cap_micro_usd bigint check (monthly_cap_micro_usd >= 0),
+  lifetime_cap_micro_usd bigint check (lifetime_cap_micro_usd >= 0),
+  -- The most one call may reserve in this scope (a runaway prompt can't take the budget in one go).
+  per_call_max_micro_usd bigint not null default 2000000 check (per_call_max_micro_usd between 1 and 2000000),
+  -- Who approved the current caps and why (raising a cap is an owner decision, recorded here).
+  approved_note text check (char_length(approved_note) <= 300),
+  updated_at timestamptz not null default now(),
+  check (monthly_cap_micro_usd is not null or lifetime_cap_micro_usd is not null)
 );
--- Defaults: $50/month across all real households, $40/month for synthetic evaluation. The owner changes them.
-insert into public.intel_budget_scopes (scope, monthly_cap_micro_usd) values ('global', 50000000), ('synthetic', 40000000);
+-- Defaults: $50/month across all real households (each also capped at $0.40/month in intel_settings), and $5.00 IN TOTAL
+-- for synthetic evaluation, at most $0.05 per call. Raising either is an owner decision (docs/intelligence/EVALUATION_PLAN.md).
+insert into public.intel_budget_scopes (scope, monthly_cap_micro_usd, lifetime_cap_micro_usd, per_call_max_micro_usd, approved_note) values
+  ('global', 50000000, null, 2000000, 'Stage B default'),
+  ('synthetic', null, 5000000, 50000, 'Owner, 2026-11-28: $5 total for AI evaluation; more needs a results report and approval');
 
 create table public.intel_usage (
   id bigint generated always as identity primary key,
@@ -182,12 +192,26 @@ create table public.intel_usage (
   model text check (char_length(model) <= 64),
   prompt_version text check (char_length(prompt_version) <= 32),
   input_tokens int, cached_tokens int, output_tokens int, reasoning_tokens int, latency_ms int,
-  outcome text check (outcome ~ '^[a-z-]{2,32}$'),
+  outcome text check (outcome ~ '^[a-z0-9-]{2,32}$'), -- ok, http-503, timeout, status-incomplete, not-sent…
   created_at timestamptz not null default now(),
   settled_at timestamptz,
   unique (request_key, attempt)
 );
 create index intel_usage_month on public.intel_usage (month, scope, household_id);
+
+-- Synthetic evaluation only: every model answer, keyed by a fingerprint of (task, prompt version, model, the exact
+-- minimized input). The same request is answered from here at no cost, even if a developer's local cache is lost.
+-- Real households never use this table (their interpretations live in intel_interpretations, per household).
+create table public.intel_inference_cache (
+  fingerprint text primary key check (fingerprint ~ '^[a-z0-9:_.-]{16,96}$'),
+  task text not null check (task ~ '^[a-z-]{3,32}$'),
+  model text not null check (char_length(model) <= 64),
+  prompt_version text not null check (char_length(prompt_version) <= 32),
+  output jsonb not null check (jsonb_typeof(output) = 'object' and pg_column_size(output) <= 8192),
+  usage jsonb not null default '{}'::jsonb check (pg_column_size(usage) <= 1024),
+  cost_micro_usd bigint not null default 0 check (cost_micro_usd >= 0),
+  created_at timestamptz not null default now()
+);
 
 -- ---------------------------------------------------------------- calendar descriptions (sanitized, untrusted)
 
@@ -216,15 +240,16 @@ alter table public.intel_interpretations enable row level security;
 alter table public.intel_pseudonyms enable row level security;
 alter table public.intel_budget_scopes enable row level security;
 alter table public.intel_usage enable row level security;
+alter table public.intel_inference_cache enable row level security;
 alter table public.calendar_feed_descriptions enable row level security;
 revoke all on public.calendar_feed_descriptions from public, anon, authenticated;
 grant all on public.calendar_feed_descriptions to service_role;
 revoke all on public.intel_settings, public.intel_member_consent, public.household_signals, public.household_memory,
   public.household_memory_evidence, public.intel_interpretations, public.intel_pseudonyms, public.intel_budget_scopes,
-  public.intel_usage from public, anon, authenticated;
+  public.intel_usage, public.intel_inference_cache from public, anon, authenticated;
 grant all on public.intel_settings, public.intel_member_consent, public.household_signals, public.household_memory,
   public.household_memory_evidence, public.intel_interpretations, public.intel_pseudonyms, public.intel_budget_scopes,
-  public.intel_usage to service_role;
+  public.intel_usage, public.intel_inference_cache to service_role;
 
 -- ---------------------------------------------------------------- helpers
 
@@ -544,9 +569,12 @@ begin
   return t;
 end $$;
 
--- Reserve inference budget before a model call (server-side, the only way to spend). Serialized per household and
--- globally, so concurrent calls can't overspend. Each retry is its own attempt (max 3) and is counted. The same
--- (request_key, attempt) returns the same reservation (idempotent). Reservations older than 10 minutes expire.
+-- Reserve inference budget before a model call (server-side, the only way to spend). Serialized per scope, so
+-- concurrent calls can't overspend. Each retry is its own attempt (max 3) and is counted. The same (request_key,
+-- attempt) returns the same reservation (idempotent). A reservation older than 10 minutes is marked expired but STILL
+-- COUNTS at its reserved amount until it is settled: a call that was sent and never reported back is assumed to have
+-- cost its estimate, so a crash can't hide spending. Only a call that never left ('released') stops counting.
+-- Caps: the household's monthly cap; the scope's monthly cap; the scope's lifetime cap (all months); the per-call max.
 create function intel_private.budget_reserve(p_household uuid, p_scope text, p_request_key text, p_attempt int,
   p_estimate_micro_usd bigint, p_job text, p_model text) returns jsonb
 language plpgsql security definer set search_path = '' as $$
@@ -554,7 +582,7 @@ declare
   mo date := date_trunc('month', now())::date;
   st public.intel_settings;
   existing public.intel_usage;
-  spent_h bigint; spent_scope bigint; cap_h bigint; cap_scope bigint; id_ bigint;
+  spent_h bigint; spent_scope bigint; spent_all bigint; cap_h bigint; caps public.intel_budget_scopes; id_ bigint;
 begin
   if p_scope not in ('household', 'synthetic') or p_attempt not between 1 and 3 or p_estimate_micro_usd not between 1 and 2000000 then
     return jsonb_build_object('ok', false, 'reason', 'invalid');
@@ -571,13 +599,21 @@ begin
   end if;
   perform pg_advisory_xact_lock(hashtextextended('intel-budget:' || p_scope, 0));
   update public.intel_usage set status = 'expired' where status = 'reserved' and created_at < now() - interval '10 minutes';
-  select coalesce(sum(coalesce(actual_micro_usd, reserved_micro_usd)), 0) into spent_scope from public.intel_usage
-   where month = mo and scope = p_scope and status in ('reserved', 'settled');
-  select monthly_cap_micro_usd into cap_scope from public.intel_budget_scopes where scope = case p_scope when 'household' then 'global' else 'synthetic' end;
-  if spent_scope + p_estimate_micro_usd > cap_scope then return jsonb_build_object('ok', false, 'reason', 'scope_budget'); end if;
+  select * into caps from public.intel_budget_scopes where scope = case p_scope when 'household' then 'global' else 'synthetic' end;
+  if caps.scope is null then return jsonb_build_object('ok', false, 'reason', 'scope_budget'); end if;
+  if p_estimate_micro_usd > caps.per_call_max_micro_usd then return jsonb_build_object('ok', false, 'reason', 'per_call_max'); end if;
+  select coalesce(sum(coalesce(actual_micro_usd, reserved_micro_usd)) filter (where month = mo), 0),
+         coalesce(sum(coalesce(actual_micro_usd, reserved_micro_usd)), 0)
+    into spent_scope, spent_all from public.intel_usage where scope = p_scope and status in ('reserved', 'settled', 'expired');
+  if caps.monthly_cap_micro_usd is not null and spent_scope + p_estimate_micro_usd > caps.monthly_cap_micro_usd then
+    return jsonb_build_object('ok', false, 'reason', 'scope_budget');
+  end if;
+  if caps.lifetime_cap_micro_usd is not null and spent_all + p_estimate_micro_usd > caps.lifetime_cap_micro_usd then
+    return jsonb_build_object('ok', false, 'reason', 'lifetime_budget', 'spent_micro_usd', spent_all, 'cap_micro_usd', caps.lifetime_cap_micro_usd);
+  end if;
   if p_household is not null and p_scope = 'household' then
     select coalesce(sum(coalesce(actual_micro_usd, reserved_micro_usd)), 0) into spent_h from public.intel_usage
-     where month = mo and household_id = p_household and status in ('reserved', 'settled');
+     where month = mo and household_id = p_household and status in ('reserved', 'settled', 'expired');
     cap_h := st.monthly_budget_micro_usd;
     if spent_h + p_estimate_micro_usd > cap_h then return jsonb_build_object('ok', false, 'reason', 'household_budget'); end if;
   end if;
@@ -601,6 +637,21 @@ begin
    where id = p_id and status in ('reserved', 'expired');
   return found;
 end $$;
+
+-- Where a scope stands (the evaluation runner shows this before and after every phase).
+create function intel_private.budget_status(p_scope text) returns jsonb
+language sql stable security definer set search_path = '' as $$
+  select jsonb_build_object('scope', p_scope,
+    'lifetime_cap_micro_usd', (select lifetime_cap_micro_usd from public.intel_budget_scopes where scope = case p_scope when 'household' then 'global' else p_scope end),
+    'monthly_cap_micro_usd', (select monthly_cap_micro_usd from public.intel_budget_scopes where scope = case p_scope when 'household' then 'global' else p_scope end),
+    'settled_micro_usd', coalesce(sum(actual_micro_usd) filter (where status = 'settled'), 0),
+    'held_micro_usd', coalesce(sum(reserved_micro_usd) filter (where status in ('reserved', 'expired')), 0),
+    'spent_micro_usd', coalesce(sum(coalesce(actual_micro_usd, reserved_micro_usd)) filter (where status in ('reserved', 'settled', 'expired')), 0),
+    'this_month_micro_usd', coalesce(sum(coalesce(actual_micro_usd, reserved_micro_usd)) filter (where status in ('reserved', 'settled', 'expired') and month = date_trunc('month', now())::date), 0),
+    'calls', count(*) filter (where status in ('settled', 'expired', 'reserved')),
+    'retries', count(*) filter (where attempt > 1))
+  from public.intel_usage where scope = p_scope
+$$;
 
 -- The importer's descriptions for one calendar after a successful refresh (replaces them). p: [{uid, description}].
 -- Server-side length cap and a second, coarse scrub (links, emails) in case an importer forgot.
@@ -643,6 +694,35 @@ end $$;
 
 revoke all on all functions in schema intel_private from public, anon, authenticated;
 grant execute on all functions in schema intel_private to service_role;
+
+
+-- The inference function's door to the budget and the evaluation cache (supabase/functions/intel-infer). PostgREST
+-- can't reach intel_private, so these thin wrappers are public but executable by the service role ONLY.
+create function public.intel_budget_reserve(p_household uuid, p_scope text, p_request_key text, p_attempt int,
+  p_estimate_micro_usd bigint, p_job text, p_model text) returns jsonb
+language sql security definer set search_path = '' as $$
+  select intel_private.budget_reserve(p_household, p_scope, p_request_key, p_attempt, p_estimate_micro_usd, p_job, p_model)
+$$;
+create function public.intel_budget_settle(p_id bigint, p_actual_micro_usd bigint, p_usage jsonb default '{}'::jsonb) returns boolean
+language sql security definer set search_path = '' as $$ select intel_private.budget_settle(p_id, p_actual_micro_usd, p_usage) $$;
+create function public.intel_budget_status(p_scope text) returns jsonb
+language sql stable security definer set search_path = '' as $$ select intel_private.budget_status(p_scope) $$;
+create function public.intel_cache_get(p_fingerprint text) returns jsonb
+language sql stable security definer set search_path = '' as $$
+  select jsonb_build_object('output', output, 'usage', usage, 'model', model, 'prompt_version', prompt_version, 'cost_micro_usd', cost_micro_usd, 'created_at', created_at)
+    from public.intel_inference_cache where fingerprint = p_fingerprint
+$$;
+create function public.intel_cache_put(p_fingerprint text, p jsonb) returns boolean
+language sql security definer set search_path = '' as $$
+  insert into public.intel_inference_cache (fingerprint, task, model, prompt_version, output, usage, cost_micro_usd)
+    values (p_fingerprint, p ->> 'task', p ->> 'model', p ->> 'prompt_version', p -> 'output', coalesce(p -> 'usage', '{}'::jsonb), coalesce((p ->> 'cost_micro_usd')::bigint, 0))
+    on conflict (fingerprint) do nothing
+  returning true
+$$;
+revoke all on function public.intel_budget_reserve(uuid, text, text, int, bigint, text, text), public.intel_budget_settle(bigint, bigint, jsonb),
+  public.intel_budget_status(text), public.intel_cache_get(text), public.intel_cache_put(text, jsonb) from public, anon, authenticated;
+grant execute on function public.intel_budget_reserve(uuid, text, text, int, bigint, text, text), public.intel_budget_settle(bigint, bigint, jsonb),
+  public.intel_budget_status(text), public.intel_cache_get(text), public.intel_cache_put(text, jsonb) to service_role;
 
 -- ---------------------------------------------------------------- the pilot funnel, now from the behavioral log
 
@@ -693,10 +773,12 @@ commit;
 
 -- Rollback (app first; then, only if required):
 --   select cron.unschedule(jobid) from cron.job where jobname = 'omc-intel-prune';
+--   drop function public.intel_budget_reserve(uuid, text, text, int, bigint, text, text), public.intel_budget_settle(bigint, bigint, jsonb), public.intel_budget_status(text), public.intel_cache_get(text), public.intel_cache_put(text, jsonb);
 --   drop function public.calendar_feed_descriptions_store(uuid, jsonb), public.pilot_funnel(date), public.household_intel_erase(uuid), public.household_memory_forget(uuid, uuid),
 --     public.household_memory_correct(uuid, uuid, jsonb), public.household_memory_confirm(uuid, jsonb), public.household_memory(uuid),
 --     public.household_intel_settings(uuid, jsonb), public.household_signal_log(jsonb);
 --   drop schema intel_private cascade;
+--   drop table public.intel_inference_cache;
 --   drop table public.intel_usage, public.intel_budget_scopes, public.intel_pseudonyms, public.intel_interpretations,
 --     public.household_memory_evidence, public.household_memory, public.household_signals, public.intel_member_consent,
 --     public.intel_settings;
